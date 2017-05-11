@@ -24,11 +24,10 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   ///
   /// The [key] argument cannot be null because it identifies the unique
   /// inflated instance of this widget.
-  UniqueWidget({
-    @required GlobalKey<T> key
-  }) : super(key: key) {
-    assert(key != null);
-  }
+  const UniqueWidget({
+    @required GlobalKey<T> key,
+  }) : assert(key != null),
+       super(key: key);
 
   @override
   T createState();
@@ -37,7 +36,7 @@ abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWid
   ///
   /// Might be null if the widget is not currently in the tree.
   T get currentState {
-    GlobalKey<T> globalKey = key;
+    final GlobalKey<T> globalKey = key;
     return globalKey.currentState;
   }
 }

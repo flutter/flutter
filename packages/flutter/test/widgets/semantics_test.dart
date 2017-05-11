@@ -12,7 +12,7 @@ void main() {
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
     SemanticsTester semantics = new SemanticsTester(tester);
 
-    TestSemantics expectedSemantics = new TestSemantics(
+    final TestSemantics expectedSemantics = new TestSemantics(
       id: 0,
       label: 'test1',
     );
@@ -41,8 +41,8 @@ void main() {
   });
 
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
-    GlobalKey key = new GlobalKey();
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(
       new Container(

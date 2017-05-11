@@ -16,15 +16,15 @@ void main() {
             index = i;
           },
           steps: <Step>[
-            new Step(
-              title: new Text('Step 1'),
+            const Step(
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
             ),
-            new Step(
-              title: new Text('Step 2'),
+            const Step(
+              title: const Text('Step 2'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
@@ -44,15 +44,15 @@ void main() {
         child: new Material(
           child: new Stepper(
             steps: <Step>[
-              new Step(
-                title: new Text('Step 1'),
+              const Step(
+                title: const Text('Step 1'),
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
               ),
-              new Step(
-                title: new Text('Step 2'),
+              const Step(
+                title: const Text('Step 2'),
                 content: const SizedBox(
                   width: 200.0,
                   height: 200.0
@@ -73,15 +73,15 @@ void main() {
           child: new Stepper(
             currentStep: 1,
             steps: <Step>[
-              new Step(
-                title: new Text('Step 1'),
+              const Step(
+                title: const Text('Step 1'),
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
               ),
-              new Step(
-                title: new Text('Step 2'),
+              const Step(
+                title: const Text('Step 2'),
                 content: const SizedBox(
                   width: 200.0,
                   height: 200.0
@@ -108,8 +108,8 @@ void main() {
           child: new Stepper(
             type: StepperType.horizontal,
             steps: <Step>[
-              new Step(
-                title: new Text('Step 1'),
+              const Step(
+                title: const Text('Step 1'),
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
@@ -121,7 +121,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(Stepper));
+    final RenderBox box = tester.renderObject(find.byType(Stepper));
     expect(box.size.height, 600.0);
   });
 
@@ -131,13 +131,13 @@ void main() {
         child: new Stepper(
           type: StepperType.horizontal,
           steps: <Step>[
-            new Step(
-              title: new Text('Step 1'),
-              content: new Text('A')
+            const Step(
+              title: const Text('Step 1'),
+              content: const Text('A')
             ),
-            new Step(
-              title: new Text('Step 2'),
-              content: new Text('B')
+            const Step(
+              title: const Text('Step 2'),
+              content: const Text('B')
             )
           ]
         )
@@ -153,13 +153,13 @@ void main() {
           currentStep: 1,
           type: StepperType.horizontal,
           steps: <Step>[
-            new Step(
-              title: new Text('Step 1'),
-              content: new Text('A')
+            const Step(
+              title: const Text('Step 1'),
+              content: const Text('A')
             ),
-            new Step(
-              title: new Text('Step 2'),
-              content: new Text('B')
+            const Step(
+              title: const Text('Step 2'),
+              content: const Text('B')
             )
           ]
         )
@@ -185,15 +185,15 @@ void main() {
             cancelPressed = true;
           },
           steps: <Step>[
-            new Step(
-              title: new Text('Step 1'),
+            const Step(
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
             ),
-            new Step(
-              title: new Text('Step 2'),
+            const Step(
+              title: const Text('Step 2'),
               content: const SizedBox(
                 width: 200.0,
                 height: 200.0
@@ -221,15 +221,15 @@ void main() {
             index = i;
           },
           steps: <Step>[
-            new Step(
-              title: new Text('Step 1'),
+            const Step(
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
             ),
-            new Step(
-              title: new Text('Step 2'),
+            const Step(
+              title: const Text('Step 2'),
               state: StepState.disabled,
               content: const SizedBox(
                 width: 100.0,
@@ -250,22 +250,22 @@ void main() {
       new Material(
         child: new Stepper(
           steps: <Step>[
-            new Step(
-              title: new Text('Step 1'),
+            const Step(
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
-            new Step(
-              title: new Text('Step 2'),
+            const Step(
+              title: const Text('Step 2'),
               content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
-            new Step(
-              title: new Text('Step 3'),
+            const Step(
+              title: const Text('Step 3'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
@@ -276,7 +276,7 @@ void main() {
       )
     );
 
-    Scrollable2State scrollableState = tester.firstState(find.byType(Scrollable2));
+    final ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
     expect(scrollableState.position.pixels, 0.0);
 
     await tester.tap(find.text('Step 3'));
@@ -285,22 +285,22 @@ void main() {
         child: new Stepper(
           currentStep: 2,
           steps: <Step>[
-            new Step(
-              title: new Text('Step 1'),
+            const Step(
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
-            new Step(
-              title: new Text('Step 2'),
+            const Step(
+              title: const Text('Step 2'),
               content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
-            new Step(
-              title: new Text('Step 3'),
+            const Step(
+              title: const Text('Step 3'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
@@ -313,7 +313,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
     expect(scrollableState.position.pixels, greaterThan(0.0));
-  }, skip: Scrollable != Scrollable2); // TODO(abarth): re-enable when ensureVisible is implemented
+  });
 
   testWidgets('Stepper index test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -321,16 +321,16 @@ void main() {
         child: new Material(
           child: new Stepper(
             steps: <Step>[
-              new Step(
-                title: new Text('A'),
+              const Step(
+                title: const Text('A'),
                 state: StepState.complete,
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
               ),
-              new Step(
-                title: new Text('B'),
+              const Step(
+                title: const Text('B'),
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
@@ -352,8 +352,8 @@ void main() {
         child: new Material(
           child: new Stepper(
             steps: <Step>[
-              new Step(
-                title: new Text('A'),
+              const Step(
+                title: const Text('A'),
                 state: StepState.error,
                 content: const SizedBox(
                   width: 100.0,

@@ -10,7 +10,7 @@ void main() {
     const HSVColor color = const HSVColor.fromAHSV(0.7, 28.0, 0.3, 0.6);
 
     expect(color, hasOneLineDescription);
-    expect(color.hashCode, equals(new HSVColor.fromAHSV(0.7, 28.0, 0.3, 0.6).hashCode));
+    expect(color.hashCode, equals(const HSVColor.fromAHSV(0.7, 28.0, 0.3, 0.6).hashCode));
 
     expect(color.withAlpha(0.8), const HSVColor.fromAHSV(0.8, 28.0, 0.3, 0.6));
     expect(color.withHue(123.0), const HSVColor.fromAHSV(0.7, 123.0, 0.3, 0.6));
@@ -19,7 +19,7 @@ void main() {
 
     expect(color.toColor(), const Color(0xb399816b));
 
-    HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25);
+    final HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25);
     expect(result.alpha, 0.6);
     expect(result.hue, 53.0);
     expect(result.saturation, greaterThan(0.3999));

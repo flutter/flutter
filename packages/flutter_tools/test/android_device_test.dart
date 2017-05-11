@@ -10,15 +10,15 @@ import 'src/context.dart';
 void main() {
   group('android_device', () {
     testUsingContext('stores the requested id', () {
-      String deviceId = '1234';
-      AndroidDevice device = new AndroidDevice(deviceId);
+      final String deviceId = '1234';
+      final AndroidDevice device = new AndroidDevice(deviceId);
       expect(device.id, deviceId);
     });
   });
 
   group('getAdbDevices', () {
     testUsingContext('physical devices', () {
-      List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+      final List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
 List of devices attached
 05a02bac               device usb:336592896X product:razor model:Nexus_7 device:flo
 
@@ -28,7 +28,7 @@ List of devices attached
     });
 
     testUsingContext('emulators and short listings', () {
-      List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+      final List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
 List of devices attached
 localhost:36790        device
 0149947A0D01500C       device usb:340787200X
@@ -40,7 +40,7 @@ emulator-5612          host features:shell_2
     });
 
     testUsingContext('android n', () {
-      List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+      final List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
 List of devices attached
 ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu features:cmd,shell_v2
 ''');
@@ -49,7 +49,7 @@ ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu f
     });
 
     testUsingContext('adb error message', () {
-      List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
+      final List<AndroidDevice> devices = getAdbDevices(mockAdbOutput: '''
 It appears you do not have 'Android SDK Platform-tools' installed.
 Use the 'android' tool to install them:
     android update sdk --no-ui --filter 'platform-tools'
@@ -61,7 +61,7 @@ Use the 'android' tool to install them:
 
   group('parseAdbDeviceProperties', () {
     test('parse adb shell output', () {
-      Map<String, String> properties = parseAdbDeviceProperties(kAdbShellGetprop);
+      final Map<String, String> properties = parseAdbDeviceProperties(kAdbShellGetprop);
       expect(properties, isNotNull);
       expect(properties['ro.build.characteristics'], 'emulator');
       expect(properties['ro.product.cpu.abi'], 'x86_64');

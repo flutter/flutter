@@ -4,23 +4,22 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
-import '../base/os.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/flutter_platform.dart' as loader;
-import '../toolchain.dart';
 
 class TestCommand extends FlutterCommand {
   TestCommand() {
@@ -43,6 +42,11 @@ class TestCommand extends FlutterCommand {
       negatable: false,
       help: 'Whether to merge converage data with "coverage/lcov.base.info".\n'
             'Implies collecting coverage data. (Requires lcov)'
+    );
+    argParser.addFlag('ipv6',
+        negatable: false,
+        hide: true,
+        help: 'Whether to use IPv6 for the test harness server socket.'
     );
     argParser.addOption('coverage-path',
       defaultsTo: 'coverage/lcov.info',
@@ -69,7 +73,7 @@ class TestCommand extends FlutterCommand {
     return directory.listSync(recursive: true, followLinks: false)
                     .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
                       fs.isFileSync(entity.path))
-                    .map((FileSystemEntity entity) => path.absolute(entity.path));
+                    .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
   }
 
   Directory get _currentPackageTestDir {
@@ -79,11 +83,11 @@ class TestCommand extends FlutterCommand {
   }
 
   Future<int> _runTests(List<String> testArgs, Directory testDirectory) async {
-    Directory currentDirectory = fs.currentDirectory;
+    final Directory currentDirectory = fs.currentDirectory;
     try {
       if (testDirectory != null) {
         printTrace('switching to directory $testDirectory to run tests');
-        PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
+        PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
         fs.currentDirectory = testDirectory;
       }
       printTrace('running test package with arguments: $testArgs');
@@ -97,24 +101,24 @@ class TestCommand extends FlutterCommand {
   }
 
   Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
-    Status status = logger.startProgress('Collecting coverage information...');
-    String coverageData = await collector.finalizeCoverage(
-      timeout: new Duration(seconds: 30),
+    final Status status = logger.startProgress('Collecting coverage information...');
+    final String coverageData = await collector.finalizeCoverage(
+      timeout: const Duration(seconds: 30),
     );
     status.stop();
     printTrace('coverage information collection complete');
     if (coverageData == null)
       return false;
 
-    String coveragePath = argResults['coverage-path'];
-    File coverageFile = fs.file(coveragePath)
+    final String coveragePath = argResults['coverage-path'];
+    final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
     printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
-    String baseCoverageData = 'coverage/lcov.base.info';
+    final String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
-      if (!os.isLinux) {
+      if (!platform.isLinux) {
         printError(
           'Merging coverage data is supported only on Linux because it '
           'requires the "lcov" tool.'
@@ -129,18 +133,18 @@ class TestCommand extends FlutterCommand {
 
       if (os.which('lcov') == null) {
         String installMessage = 'Please install lcov.';
-        if (os.isLinux)
+        if (platform.isLinux)
           installMessage = 'Consider running "sudo apt-get install lcov".';
-        else if (os.isMacOS)
+        else if (platform.isMacOS)
           installMessage = 'Consider running "brew install lcov".';
         printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
         return false;
       }
 
-      Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
       try {
-        File sourceFile = coverageFile.copySync(path.join(tempDir.path, 'lcov.source.info'));
-        ProcessResult result = processManager.runSync(<String>[
+        final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
+        final ProcessResult result = processManager.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
@@ -157,7 +161,14 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    List<String> testArgs = <String>[];
+    if (platform.isWindows) {
+      throwToolExit(
+          'The test command is currently not supported on Windows: '
+          'https://github.com/flutter/flutter/issues/8516'
+      );
+    }
+
+    final List<String> testArgs = <String>[];
 
     commandValidator();
 
@@ -173,7 +184,7 @@ class TestCommand extends FlutterCommand {
     testArgs.add('--');
 
     Directory testDir;
-    Iterable<String> files = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
+    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
     if (argResults['start-paused']) {
       if (files.length != 1)
         throwToolExit('When using --start-paused, you must specify a single test file to run.', exitCode: 1);
@@ -191,14 +202,23 @@ class TestCommand extends FlutterCommand {
     }
     testArgs.addAll(files);
 
-    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? platform.environment['SKY_SHELL'];
+    final InternetAddressType serverType = argResults['ipv6']
+        ? InternetAddressType.IP_V6
+        : InternetAddressType.IP_V4;
+
+    final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
-    loader.installHook(shellPath: shellPath, collector: collector, debuggerMode: argResults['start-paused']);
+    loader.installHook(
+      shellPath: shellPath,
+      collector: collector,
+      debuggerMode: argResults['start-paused'],
+      serverType: serverType,
+    );
 
     Cache.releaseLockEarly();
 
-    int result = await _runTests(testArgs, testDir);
+    final int result = await _runTests(testArgs, testDir);
 
     if (collector != null) {
       if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))

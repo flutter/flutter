@@ -7,15 +7,15 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 final BoxDecoration kBoxDecorationA = const BoxDecoration(
-  backgroundColor: const Color(0xFFFF0000)
+  color: const Color(0xFFFF0000),
 );
 
 final BoxDecoration kBoxDecorationB = const BoxDecoration(
-  backgroundColor: const Color(0xFF00FF00)
+  color: const Color(0xFF00FF00),
 );
 
 final BoxDecoration kBoxDecorationC = const BoxDecoration(
-  backgroundColor: const Color(0xFF0000FF)
+  color: const Color(0xFF0000FF),
 );
 
 class TestBuildCounter extends StatelessWidget {
@@ -30,7 +30,7 @@ class TestBuildCounter extends StatelessWidget {
 
 
 class FlipWidget extends StatefulWidget {
-  FlipWidget({ Key key, this.left, this.right }) : super(key: key);
+  const FlipWidget({ Key key, this.left, this.right }) : super(key: key);
 
   final Widget left;
   final Widget right;
@@ -50,52 +50,10 @@ class FlipWidgetState extends State<FlipWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _showLeft ? config.left : config.right;
+    return _showLeft ? widget.left : widget.right;
   }
 }
 
-void flipStatefulWidget(WidgetTester tester) {
-  tester.state<FlipWidgetState>(find.byType(FlipWidget)).flip();
-}
-
-class TestScrollable extends StatelessWidget {
-  TestScrollable({
-    Key key,
-    this.axisDirection: AxisDirection.down,
-    this.physics,
-    this.anchor: 0.0,
-    this.center,
-    this.slivers: const <Widget>[],
-  }) {
-    assert(slivers != null);
-  }
-
-  final AxisDirection axisDirection;
-
-  final ScrollPhysics physics;
-
-  final double anchor;
-
-  final Key center;
-
-  final List<Widget> slivers;
-
-  Axis get axis => axisDirectionToAxis(axisDirection);
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scrollable2(
-      axisDirection: axisDirection,
-      physics: physics,
-      viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        return new Viewport2(
-          axisDirection: axisDirection,
-          anchor: anchor,
-          offset: offset,
-          center: center,
-          slivers: slivers,
-        );
-      }
-    );
-  }
+void flipStatefulWidget(WidgetTester tester, { bool skipOffstage: true }) {
+  tester.state<FlipWidgetState>(find.byType(FlipWidget, skipOffstage: skipOffstage)).flip();
 }

@@ -4,11 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'box.dart';
 import 'binding.dart';
+import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
 
@@ -53,7 +52,8 @@ abstract class RenderSliverBoxChildManager {
   ///
   /// The index of the given child can be obtained using the
   /// [RenderSliverMultiBoxAdaptor.indexOf] method, which reads it from the
-  /// [SliverMultiBoxAdaptorParentData.index] field of the child's [parentData].
+  /// [SliverMultiBoxAdaptorParentData.index] field of the child's
+  /// [RenderObject.parentData].
   void removeChild(RenderBox child);
 
   /// Called to estimate the total scrollable extents of this object.
@@ -71,9 +71,29 @@ abstract class RenderSliverBoxChildManager {
   /// Called during [RenderSliverMultiBoxAdaptor.adoptChild].
   ///
   /// Subclasses must ensure that the [SliverMultiBoxAdaptorParentData.index]
-  /// field of the child's [parentData] accurately reflects the child's index in
-  /// the child list after this function returns.
+  /// field of the child's [RenderObject.parentData] accurately reflects the
+  /// child's index in the child list after this function returns.
   void didAdoptChild(RenderBox child);
+
+  /// Called during layout to indicate whether this object provided insufficient
+  /// children for the [RenderSliverMultiBoxAdaptor] to fill the
+  /// [SliverConstraints.remainingPaintExtent].
+  ///
+  /// Typically called unconditionally at the start of layout with false and
+  /// then later called with true when the [RenderSliverMultiBoxAdaptor]
+  /// fails to create a child required to fill the
+  /// [SliverConstraints.remainingPaintExtent].
+  ///
+  /// Useful for subclasses to determine whether newly added children could
+  /// affect the visible contents of the [RenderSliverMultiBoxAdaptor].
+  void setDidUnderflow(bool value);
+
+  /// Called at the beginning of layout to indicate that layout is about to
+  /// occur.
+  void didStartLayout() { }
+
+  /// Called at the end of layout to indicate that layout is now complete.
+  void didFinishLayout() { }
 
   /// In debug mode, asserts that this manager is not expecting any
   /// modifications to the [RenderSliverMultiBoxAdaptor]'s child list.
@@ -86,25 +106,47 @@ abstract class RenderSliverBoxChildManager {
   bool debugAssertChildListLocked() => true;
 }
 
+/// Parent data structure used by [RenderSliverMultiBoxAdaptor].
 class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderBox> {
+  /// The index of this child according to the [RenderSliverBoxChildManager].
   int index;
 
   @override
   String toString() => 'index=$index; ${super.toString()}';
 }
 
-// /// The contract for adding and removing children from this render object is
-// /// more strict than for normal render objects:
-// ///
-// /// - Children can be removed except during a layout pass if they have already
-// ///   been laid out during that layout pass.
-// /// - Children cannot be added except during a call to [childManager], and
-// ///   then only if there is no child correspending to that index (or the child
-// ///   child corresponding to that index was first removed).
+/// A sliver with multiple box children.
+///
+/// [RenderSliverMultiBoxAdaptor] is a base class for slivers that have multiple
+/// box children. The children are managed by a [RenderSliverBoxChildManager],
+/// which lets subclasses create children lazily during layout. Typically
+/// subclasses will create only those children that are actually needed to fill
+/// the [SliverConstraints.remainingPaintExtent].
+///
+/// The contract for adding and removing children from this render object is
+/// more strict than for normal render objects:
+///
+/// * Children can be removed except during a layout pass if they have already
+///   been laid out during that layout pass.
+/// * Children cannot be added except during a call to [childManager], and
+///   then only if there is no child correspending to that index (or the child
+///   child corresponding to that index was first removed).
+///
+/// See also:
+///
+///  * [RenderSliverToBoxAdapter], which has a single box child.
+///  * [RenderSliverList], which places its children in a linear
+///    array.
+///  * [RenderSliverFixedExtentList], which places its children in a linear
+///    array with a fixed extent in the main axis.
+///  * [RenderSliverGrid], which places its children in arbitrary positions.
 abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   with ContainerRenderObjectMixin<RenderBox, SliverMultiBoxAdaptorParentData>,
        RenderSliverHelpers {
 
+  /// Creates a sliver with multiple box children.
+  ///
+  /// The [childManager] argument must not be null.
   RenderSliverMultiBoxAdaptor({
     @required RenderSliverBoxChildManager childManager
   }) : _childManager = childManager {
@@ -117,6 +159,12 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       child.parentData = new SliverMultiBoxAdaptorParentData();
   }
 
+  /// The delegate that manages the children of this object.
+  ///
+  /// Rather than having a concrete list of children, a
+  /// [RenderSliverMultiBoxAdaptor] uses a [RenderSliverBoxChildManager] to
+  /// create children during layout in order to fill the
+  /// [SliverConstraints.remainingPaintExtent].
   @protected
   RenderSliverBoxChildManager get childManager => _childManager;
   final RenderSliverBoxChildManager _childManager;
@@ -160,7 +208,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// during the call to createChild. No child should be added during that call
   /// either, except for the one that is created and returned by createChild.
   @protected
-  bool addInitialChild({ int index: 0, double scrollOffset: 0.0 }) {
+  bool addInitialChild({ int index: 0, double layoutOffset: 0.0 }) {
     assert(_debugAssertChildListLocked());
     assert(firstChild == null);
     bool result;
@@ -171,9 +219,10 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         assert(firstChild == lastChild);
         assert(indexOf(firstChild) == index);
         final SliverMultiBoxAdaptorParentData firstChildParentData = firstChild.parentData;
-        firstChildParentData.layoutOffset = scrollOffset;
+        firstChildParentData.layoutOffset = layoutOffset;
         result = true;
       } else {
+        childManager.setDidUnderflow(true);
         result = false;
       }
     });
@@ -206,6 +255,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       firstChild.layout(childConstraints, parentUsesSize: parentUsesSize);
       return firstChild;
     }
+    childManager.setDidUnderflow(true);
     return null;
   }
 
@@ -238,6 +288,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       child.layout(childConstraints, parentUsesSize: parentUsesSize);
       return child;
     }
+    childManager.setDidUnderflow(true);
     return null;
   }
 
@@ -374,6 +425,10 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     }
   }
 
+  /// Asserts that the reified child list is not empty and has a contiguous
+  /// sequence of indices.
+  ///
+  /// Always returns true.
   bool debugAssertChildListIsNonEmptyAndContiguous() {
     assert(() {
       assert(firstChild != null);

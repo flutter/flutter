@@ -7,25 +7,26 @@ import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
-    binding.allowAllFrames = true;
+    binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   testWidgets('Flutter gallery button example code displays', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/6147
 
-    await tester.pumpWidget(new GalleryApp());
+    await tester.pumpWidget(const GalleryApp());
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
 
     // Scroll the Buttons demo into view so that a tap will succeed
-    final Point allDemosOrigin = tester.getTopRight(find.text('Demos'));
-    final Point buttonsDemoOrigin = tester.getTopRight(find.text('Buttons'));
-    final double scrollDelta  = buttonsDemoOrigin.y - allDemosOrigin.y;
-    await tester.scrollAt(allDemosOrigin, new Offset(0.0, -scrollDelta));
-    await tester.pump(); // start the scroll
-    await tester.pump(const Duration(seconds: 1));
+    final Offset allDemosOrigin = tester.getTopRight(find.text('Demos'));
+    final Finder button = find.text('Buttons');
+    while (button.evaluate().isEmpty) {
+      await tester.dragFrom(allDemosOrigin, const Offset(0.0, -100.0));
+      await tester.pump(); // start the scroll
+      await tester.pump(const Duration(seconds: 1));
+    }
 
     // Launch the buttons demo and then prove that showing the example
     // code dialog does not crash.

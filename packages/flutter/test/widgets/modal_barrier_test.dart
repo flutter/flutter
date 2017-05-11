@@ -16,19 +16,19 @@ void main() {
       onTap: () {
         tapped = true;
       },
-      child: new SizedBox(
+      child: const SizedBox(
         width: 10.0,
         height: 10.0,
-        child: new Text('target')
+        child: const Text('target')
       )
     );
   });
 
   testWidgets('ModalBarrier prevents interactions with widgets behind it', (WidgetTester tester) async {
-    Widget subject = new Stack(
+    final Widget subject = new Stack(
       children: <Widget>[
         tapTarget,
-        new ModalBarrier(dismissable: false),
+        const ModalBarrier(dismissible: false),
       ]
     );
 
@@ -40,9 +40,9 @@ void main() {
   });
 
   testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
-    Widget subject = new Stack(
+    final Widget subject = new Stack(
       children: <Widget>[
-        new ModalBarrier(dismissable: false),
+        const ModalBarrier(dismissible: false),
         tapTarget,
       ]
     );
@@ -76,7 +76,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));  // end transition
 
     expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
-      reason: 'because the barrier was dismissed');
+      reason: 'The route should have been dismissed by tapping the barrier.');
   });
 }
 
@@ -88,7 +88,7 @@ class FirstWidget extends StatelessWidget {
       Navigator.pushNamed(context, '/modal');
     },
     child: new Container(
-      child: new Text('X')
+      child: const Text('X')
     )
   );
   }
@@ -97,9 +97,9 @@ class FirstWidget extends StatelessWidget {
 class SecondWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  return new ModalBarrier(
+  return const ModalBarrier(
     key: const ValueKey<String>('barrier'),
-    dismissable: true
+    dismissible: true
   );
   }
 }

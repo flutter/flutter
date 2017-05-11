@@ -8,7 +8,7 @@ import 'box.dart';
 import 'object.dart';
 
 export 'package:flutter/painting.dart' show
-  ImageFit,
+  BoxFit,
   ImageRepeat;
 
 /// An image in the render tree.
@@ -26,7 +26,8 @@ class RenderImage extends RenderBox {
     double height,
     double scale: 1.0,
     Color color,
-    ImageFit fit,
+    BlendMode colorBlendMode,
+    BoxFit fit,
     FractionalOffset alignment,
     ImageRepeat repeat: ImageRepeat.noRepeat,
     Rect centerSlice
@@ -35,6 +36,7 @@ class RenderImage extends RenderBox {
       _height = height,
       _scale = scale,
       _color = color,
+      _colorBlendMode = colorBlendMode,
       _fit = fit,
       _alignment = alignment,
       _repeat = repeat,
@@ -45,7 +47,7 @@ class RenderImage extends RenderBox {
   /// The image to display.
   ui.Image get image => _image;
   ui.Image _image;
-  set image (ui.Image value) {
+  set image(ui.Image value) {
     if (value == _image)
       return;
     _image = value;
@@ -60,7 +62,7 @@ class RenderImage extends RenderBox {
   /// aspect ratio.
   double get width => _width;
   double _width;
-  set width (double value) {
+  set width(double value) {
     if (value == _width)
       return;
     _width = value;
@@ -73,7 +75,7 @@ class RenderImage extends RenderBox {
   /// aspect ratio.
   double get height => _height;
   double _height;
-  set height (double value) {
+  set height(double value) {
     if (value == _height)
       return;
     _height = value;
@@ -85,7 +87,7 @@ class RenderImage extends RenderBox {
   /// Used when determining the best display size for the image.
   double get scale => _scale;
   double _scale;
-  set scale (double value) {
+  set scale(double value) {
     assert(value != null);
     if (value == _scale)
       return;
@@ -95,21 +97,38 @@ class RenderImage extends RenderBox {
 
   ColorFilter _colorFilter;
 
-  // Should we make the blend mode configurable?
   void _updateColorFilter() {
     if (_color == null)
       _colorFilter = null;
     else
-      _colorFilter = new ColorFilter.mode(_color, BlendMode.srcIn);
+      _colorFilter = new ColorFilter.mode(_color, _colorBlendMode ?? BlendMode.srcIn);
   }
 
-  /// If non-null, apply this color filter to the image before painting.
+  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   Color get color => _color;
   Color _color;
-  set color (Color value) {
+  set color(Color value) {
     if (value == _color)
       return;
     _color = value;
+    _updateColorFilter();
+    markNeedsPaint();
+  }
+
+  /// Used to combine [color] with this image.
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
+  /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  BlendMode get colorBlendMode => _colorBlendMode;
+  BlendMode _colorBlendMode;
+  set colorBlendMode(BlendMode value) {
+    if (value == _colorBlendMode)
+      return;
+    _colorBlendMode;
     _updateColorFilter();
     markNeedsPaint();
   }
@@ -118,9 +137,9 @@ class RenderImage extends RenderBox {
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  ImageFit get fit => _fit;
-  ImageFit _fit;
-  set fit (ImageFit value) {
+  BoxFit get fit => _fit;
+  BoxFit _fit;
+  set fit(BoxFit value) {
     if (value == _fit)
       return;
     _fit = value;
@@ -130,7 +149,7 @@ class RenderImage extends RenderBox {
   /// How to align the image within its bounds.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
-  set alignment (FractionalOffset value) {
+  set alignment(FractionalOffset value) {
     if (value == _alignment)
       return;
     _alignment = value;
@@ -140,7 +159,7 @@ class RenderImage extends RenderBox {
   /// How to repeat this image if it doesn't fill its layout bounds.
   ImageRepeat get repeat => _repeat;
   ImageRepeat _repeat;
-  set repeat (ImageRepeat value) {
+  set repeat(ImageRepeat value) {
     if (value == _repeat)
       return;
     _repeat = value;
@@ -156,7 +175,7 @@ class RenderImage extends RenderBox {
   /// the center slice will be stretched only vertically.
   Rect get centerSlice => _centerSlice;
   Rect _centerSlice;
-  set centerSlice (Rect value) {
+  set centerSlice(Rect value) {
     if (value == _centerSlice)
       return;
     _centerSlice = value;
@@ -216,7 +235,7 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void performLayout() {
@@ -251,6 +270,8 @@ class RenderImage extends RenderBox {
       description.add('scale: $scale');
     if (color != null)
       description.add('color: $color');
+    if (colorBlendMode != null)
+      description.add('colorBlendMode: $colorBlendMode');
     if (fit != null)
       description.add('fit: $fit');
     if (alignment != null)

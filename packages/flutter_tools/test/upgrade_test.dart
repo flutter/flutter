@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -18,6 +13,10 @@ import 'src/context.dart';
 
 void main() {
   group('upgrade', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     bool _match(String line) => UpgradeCommand.matchesGitLine(line);
 
     test('regex match', () {
@@ -47,27 +46,20 @@ void main() {
         temp.deleteSync(recursive: true);
       });
 
-      Future<Null> createProject() async {
-        CreateCommand command = new CreateCommand();
-        CommandRunner<Null> runner = createTestCommandRunner(command);
-        await runner.run(<String>['create', '--no-pub', temp.path]);
-      }
 
       testUsingContext('in project', () async {
-        await createProject();
+        final String projectPath = await createProject(temp);
+        expect(findProjectRoot(projectPath), projectPath);
+        expect(findProjectRoot(fs.path.join(projectPath, 'lib')), projectPath);
 
-        String proj = temp.path;
-        expect(findProjectRoot(proj), proj);
-        expect(findProjectRoot(path.join(proj, 'lib')), proj);
-
-        String hello = path.join(Cache.flutterRoot, 'examples', 'hello_world');
+        final String hello = fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
         expect(findProjectRoot(hello), hello);
-        expect(findProjectRoot(path.join(hello, 'lib')), hello);
+        expect(findProjectRoot(fs.path.join(hello, 'lib')), hello);
       });
 
       testUsingContext('outside project', () async {
-        await createProject();
-        expect(findProjectRoot(temp.parent.path), null);
+        final String projectPath = await createProject(temp);
+        expect(findProjectRoot(fs.directory(projectPath).parent.path), null);
         expect(findProjectRoot(Cache.flutterRoot), null);
       });
     });

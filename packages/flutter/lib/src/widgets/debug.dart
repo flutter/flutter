@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:developer' show Timeline; // to disambiguate reference in dartdocs below
 
 import 'package:flutter/foundation.dart';
+
 import 'framework.dart';
+import 'media_query.dart';
 import 'table.dart';
 
 // Any changes to this file should be reflected in the debugAssertAllWidgetVarsUnset()
@@ -16,10 +19,12 @@ import 'table.dart';
 /// Combined with [debugPrintBuildScope] or [debugPrintBeginFrameBanner], this
 /// allows you to distinguish builds triggered by the initial mounting of a
 /// widget tree (e.g. in a call to [runApp]) from the regular builds triggered
-/// by the pipeline (see [WidgetsBinding.beginFrame].
+/// by the pipeline.
 ///
 /// Combined with [debugPrintScheduleBuildForStacks], this lets you watch a
 /// widget's dirty/clean lifecycle.
+///
+/// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintRebuildDirtyWidgets = false;
 
 /// Log all calls to [BuildOwner.buildScope].
@@ -30,8 +35,9 @@ bool debugPrintRebuildDirtyWidgets = false;
 /// Combined with [debugPrintRebuildDirtyWidgets] or
 /// [debugPrintBeginFrameBanner], this allows you to distinguish builds
 /// triggered by the initial mounting of a widget tree (e.g. in a call to
-/// [runApp]) from the regular builds triggered by the pipeline (see
-/// [WidgetsBinding.beginFrame].
+/// [runApp]) from the regular builds triggered by the pipeline.
+///
+/// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintBuildScope = false;
 
 /// Log the call stacks that mark widgets as needing to be rebuilt.
@@ -42,7 +48,9 @@ bool debugPrintBuildScope = false;
 ///
 /// To see when a widget is rebuilt, see [debugPrintRebuildDirtyWidgets].
 ///
-/// To see when the dirty list is flushed, see [debugPrintBuildDirtyElements].
+/// To see when the dirty list is flushed, see [debugPrintBuildScope].
+///
+/// To see when a frame is scheduled, see [debugPrintScheduleFrameStacks].
 bool debugPrintScheduleBuildForStacks = false;
 
 /// Log when widgets with global keys are deactivated and log when they are
@@ -61,7 +69,7 @@ bool debugProfileBuildsEnabled = false;
 bool debugHighlightDeprecatedWidgets = false;
 
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
-  Set<Key> keySet = new HashSet<Key>();
+  final Set<Key> keySet = new HashSet<Key>();
   for (Widget widget in widgets) {
     assert(widget != null);
     if (widget.key == null)
@@ -128,7 +136,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// Used by [TableRowInkWell] to make sure that it is only used in an appropriate context.
 ///
 /// To invoke this function, use the following pattern, typically in the
-/// relevant Widget's [build] method:
+/// relevant Widget's build method:
 ///
 /// ```dart
 /// assert(debugCheckHasTable(context));
@@ -138,7 +146,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 bool debugCheckHasTable(BuildContext context) {
   assert(() {
     if (context.widget is! Table && context.ancestorWidgetOfExactType(Table) == null) {
-      Element element = context;
+      final Element element = context;
       throw new FlutterError(
         'No Table widget found.\n'
         '${context.widget.runtimeType} widgets require a Table widget ancestor.\n'
@@ -146,6 +154,39 @@ bool debugCheckHasTable(BuildContext context) {
         '  ${context.widget}\n'
         'The ownership chain for the affected widget is:\n'
         '  ${element.debugGetCreatorChain(10)}'
+      );
+    }
+    return true;
+  });
+  return true;
+}
+
+/// Asserts that the given context has a [MediaQuery] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasMediaQuery(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasMediaQuery(BuildContext context) {
+  assert(() {
+    if (context.widget is! MediaQuery && context.ancestorWidgetOfExactType(MediaQuery) == null) {
+      final Element element = context;
+      throw new FlutterError(
+        'No MediaQuery widget found.\n'
+        '${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.\n'
+        'The specific widget that could not find a MediaQuery ancestor was:\n'
+        '  ${context.widget}\n'
+        'The ownership chain for the affected widget is:\n'
+        '  ${element.debugGetCreatorChain(10)}\n'
+        'Typically, the MediaQuery widget is introduced by the MaterialApp or '
+        'WidgetsApp widget at the top of your application widget tree.'
       );
     }
     return true;

@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'icon_theme_data.dart';
 import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -48,8 +48,8 @@ class FloatingActionButton extends StatefulWidget {
     this.tooltip,
     this.backgroundColor,
     this.heroTag,
-    this.elevation: 6,
-    this.highlightElevation: 12,
+    this.elevation: 6.0,
+    this.highlightElevation: 12.0,
     @required this.onPressed,
     this.mini: false
   }) : super(key: key);
@@ -80,18 +80,14 @@ class FloatingActionButton extends StatefulWidget {
 
   /// The z-coordinate at which to place this button.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 6, the appropriate elevation for floating action buttons.
-  final int elevation;
+  final double elevation;
 
   /// The z-coordinate at which to place this button when the user is touching the button.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 12, the appropriate elevation for floating action buttons
   /// while they are being touched.
-  final int highlightElevation;
+  final double highlightElevation;
 
   /// Controls the size of this button.
   ///
@@ -116,7 +112,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   @override
   Widget build(BuildContext context) {
     Color iconColor = Colors.white;
-    Color materialColor = config.backgroundColor;
+    Color materialColor = widget.backgroundColor;
     if (materialColor == null) {
       final ThemeData themeData = Theme.of(context);
       materialColor = themeData.accentColor;
@@ -124,31 +120,30 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     Widget result = new Center(
-      child: new IconTheme.merge(
-        context: context,
+      child: IconTheme.merge(
         data: new IconThemeData(color: iconColor),
-        child: config.child
+        child: widget.child
       )
     );
 
-    if (config.tooltip != null) {
+    if (widget.tooltip != null) {
       result = new Tooltip(
-        message: config.tooltip,
+        message: widget.tooltip,
         child: result
       );
     }
 
     return new Hero(
-      tag: config.heroTag ?? _kDefaultHeroTag,
+      tag: widget.heroTag ?? _kDefaultHeroTag,
       child: new Material(
         color: materialColor,
         type: MaterialType.circle,
-        elevation: _highlight ? config.highlightElevation : config.elevation,
+        elevation: _highlight ? widget.highlightElevation : widget.elevation,
         child: new Container(
-          width: config.mini ? _kSizeMini : _kSize,
-          height: config.mini ? _kSizeMini : _kSize,
+          width: widget.mini ? _kSizeMini : _kSize,
+          height: widget.mini ? _kSizeMini : _kSize,
           child: new InkWell(
-            onTap: config.onPressed,
+            onTap: widget.onPressed,
             onHighlightChanged: _handleHighlightChanged,
             child: result
           )

@@ -179,11 +179,11 @@ void main() {
 
   testWidgets('AnimatedSize resync', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedSize(
+      const Center(
+        child: const AnimatedSize(
           duration: const Duration(milliseconds: 200),
           vsync: const TestVSync(),
-          child: new SizedBox(
+          child: const SizedBox(
             width: 100.0,
             height: 100.0,
           ),
@@ -196,7 +196,7 @@ void main() {
         child: new AnimatedSize(
           duration: const Duration(milliseconds: 200),
           vsync: tester,
-          child: new SizedBox(
+          child: const SizedBox(
             width: 200.0,
             height: 100.0,
           ),
@@ -206,7 +206,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
 
-    RenderBox box = tester.renderObject(find.byType(AnimatedSize));
+    final RenderBox box = tester.renderObject(find.byType(AnimatedSize));
     expect(box.size.width, equals(150.0));
   });
 }

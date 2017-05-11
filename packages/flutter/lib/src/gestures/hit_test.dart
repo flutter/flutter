@@ -10,7 +10,7 @@ abstract class HitTestable { // ignore: one_member_abstracts
   ///
   /// If this given position hits this object, consider adding a [HitTestEntry]
   /// to the given hit test result.
-  void hitTest(HitTestResult result, Point position);
+  void hitTest(HitTestResult result, Offset position);
 }
 
 /// An object that can dispatch events.

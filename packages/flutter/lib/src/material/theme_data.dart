@@ -47,6 +47,7 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 /// Use this class to configure a [Theme] widget.
 ///
 /// To obtain the current theme, use [Theme.of].
+@immutable
 class ThemeData {
   /// Create a ThemeData given a set of preferred values.
   ///
@@ -70,7 +71,7 @@ class ThemeData {
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
-    Map<int, Color> primarySwatch,
+    MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color accentColor,
@@ -93,6 +94,7 @@ class ThemeData {
     Color indicatorColor,
     Color hintColor,
     Color errorColor,
+    String fontFamily,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
@@ -137,6 +139,11 @@ class ThemeData {
     textTheme ??= isDark ? typography.white : typography.black;
     primaryTextTheme ??= primaryIsDark ? typography.white : typography.black;
     accentTextTheme ??= accentIsDark ? typography.white : typography.black;
+    if (fontFamily != null) {
+      textTheme = textTheme.apply(fontFamily: fontFamily);
+      primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
+      accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
+    }
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -177,69 +184,67 @@ class ThemeData {
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the
   /// [new ThemeData] constructor.
-  ThemeData.raw({
-    this.brightness,
-    this.primaryColor,
-    this.primaryColorBrightness,
-    this.accentColor,
-    this.accentColorBrightness,
-    this.canvasColor,
-    this.scaffoldBackgroundColor,
-    this.cardColor,
-    this.dividerColor,
-    this.highlightColor,
-    this.splashColor,
-    this.selectedRowColor,
-    this.unselectedWidgetColor,
-    this.disabledColor,
-    this.buttonColor,
-    this.secondaryHeaderColor,
-    this.textSelectionColor,
-    this.textSelectionHandleColor,
-    this.backgroundColor,
-    this.dialogBackgroundColor,
-    this.indicatorColor,
-    this.hintColor,
-    this.errorColor,
-    this.textTheme,
-    this.primaryTextTheme,
-    this.accentTextTheme,
-    this.iconTheme,
-    this.primaryIconTheme,
-    this.accentIconTheme,
-    this.platform
-  }) {
-    assert(brightness != null);
-    assert(primaryColor != null);
-    assert(primaryColorBrightness != null);
-    assert(accentColor != null);
-    assert(accentColorBrightness != null);
-    assert(canvasColor != null);
-    assert(scaffoldBackgroundColor != null);
-    assert(dialogBackgroundColor != null);
-    assert(cardColor != null);
-    assert(dividerColor != null);
-    assert(highlightColor != null);
-    assert(splashColor != null);
-    assert(selectedRowColor != null);
-    assert(unselectedWidgetColor != null);
-    assert(disabledColor != null);
-    assert(buttonColor != null);
-    assert(secondaryHeaderColor != null);
-    assert(textSelectionColor != null);
-    assert(textSelectionHandleColor != null);
-    assert(disabledColor != null);
-    assert(indicatorColor != null);
-    assert(hintColor != null);
-    assert(errorColor != null);
-    assert(textTheme != null);
-    assert(primaryTextTheme != null);
-    assert(accentTextTheme != null);
-    assert(iconTheme != null);
-    assert(primaryIconTheme != null);
-    assert(accentIconTheme != null);
-    assert(platform != null);
-  }
+  const ThemeData.raw({
+    @required this.brightness,
+    @required this.primaryColor,
+    @required this.primaryColorBrightness,
+    @required this.accentColor,
+    @required this.accentColorBrightness,
+    @required this.canvasColor,
+    @required this.scaffoldBackgroundColor,
+    @required this.cardColor,
+    @required this.dividerColor,
+    @required this.highlightColor,
+    @required this.splashColor,
+    @required this.selectedRowColor,
+    @required this.unselectedWidgetColor,
+    @required this.disabledColor,
+    @required this.buttonColor,
+    @required this.secondaryHeaderColor,
+    @required this.textSelectionColor,
+    @required this.textSelectionHandleColor,
+    @required this.backgroundColor,
+    @required this.dialogBackgroundColor,
+    @required this.indicatorColor,
+    @required this.hintColor,
+    @required this.errorColor,
+    @required this.textTheme,
+    @required this.primaryTextTheme,
+    @required this.accentTextTheme,
+    @required this.iconTheme,
+    @required this.primaryIconTheme,
+    @required this.accentIconTheme,
+    @required this.platform
+  }) : assert(brightness != null),
+       assert(primaryColor != null),
+       assert(primaryColorBrightness != null),
+       assert(accentColor != null),
+       assert(accentColorBrightness != null),
+       assert(canvasColor != null),
+       assert(scaffoldBackgroundColor != null),
+       assert(cardColor != null),
+       assert(dividerColor != null),
+       assert(highlightColor != null),
+       assert(splashColor != null),
+       assert(selectedRowColor != null),
+       assert(unselectedWidgetColor != null),
+       assert(disabledColor != null),
+       assert(buttonColor != null),
+       assert(secondaryHeaderColor != null),
+       assert(textSelectionColor != null),
+       assert(textSelectionHandleColor != null),
+       assert(backgroundColor != null),
+       assert(dialogBackgroundColor != null),
+       assert(indicatorColor != null),
+       assert(hintColor != null),
+       assert(errorColor != null),
+       assert(textTheme != null),
+       assert(primaryTextTheme != null),
+       assert(accentTextTheme != null),
+       assert(iconTheme != null),
+       assert(primaryIconTheme != null),
+       assert(accentIconTheme != null),
+       assert(platform != null);
 
   /// A default light blue theme.
   factory ThemeData.light() => new ThemeData(brightness: Brightness.light);
@@ -290,7 +295,7 @@ class ThemeData {
   final Color cardColor;
 
   /// The color of [Divider]s and [PopupMenuDivider]s, also used
-  /// between [ListItem]s, between rows in [DataTable]s, and so forth.
+  /// between [ListTile]s, between rows in [DataTable]s, and so forth.
   final Color dividerColor;
 
   /// The highlight color used during ink splash animations or to
@@ -322,7 +327,7 @@ class ThemeData {
   // ...this should be the "50-value of secondary app color".
   final Color secondaryHeaderColor;
 
-  /// The color of text selections in text fields, such as [Input].
+  /// The color of text selections in text fields, such as [TextField].
   final Color textSelectionColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
@@ -334,15 +339,15 @@ class ThemeData {
 
   /// The background color of [Dialog] elements.
   final Color dialogBackgroundColor;
-  
+
   /// The color of the selected tab indicator in a tab bar.
   final Color indicatorColor;
 
   /// The color to use for hint text or placeholder text, e.g. in
-  /// [Input] fields.
+  /// [TextField] fields.
   final Color hintColor;
 
-  /// The color to use for input validation errors, e.g. in [Input] fields.
+  /// The color to use for input validation errors, e.g. in [TextField] fields.
   final Color errorColor;
 
   /// Text with a color that contrasts with the card and canvas colors.
@@ -436,7 +441,11 @@ class ThemeData {
   }
 
   /// Linearly interpolate between two themes.
+  ///
+  /// The arguments must not be null.
   static ThemeData lerp(ThemeData begin, ThemeData end, double t) {
+    assert(begin != null);
+    assert(end != null);
     return new ThemeData.raw(
       brightness: t < 0.5 ? begin.brightness : end.brightness,
       primaryColor: Color.lerp(begin.primaryColor, end.primaryColor, t),
@@ -475,7 +484,7 @@ class ThemeData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    ThemeData otherData = other;
+    final ThemeData otherData = other;
     return (otherData.brightness == brightness) &&
            (otherData.primaryColor == primaryColor) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&

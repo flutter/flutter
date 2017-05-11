@@ -132,7 +132,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     int currentLineIndent = 0;
     int currentParagraphIndentation;
     _LicenseEntryWithLineBreaksParserState state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-    List<String> lines = <String>[];
+    final List<String> lines = <String>[];
 
     void addLine() {
       assert(lineStart < currentPosition);
@@ -157,6 +157,11 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
             case ' ':
               lineStart = currentPosition + 1;
               currentLineIndent += 1;
+              state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
+              break;
+            case '\t':
+              lineStart = currentPosition + 1;
+              currentLineIndent += 8;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
               break;
             case '\n':
@@ -257,8 +262,8 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 ///  * [showAboutDialog], which shows a Material-style dialog with information
 ///    about the application, including a button that shows a [LicensePage] that
 ///    uses this API to select licenses to show.
-///  * [AboutDrawerItem], which is a widget to put in a [Drawer] which
-///    automatically calls [showAboutDialog].
+///  * [AboutListTile], which is a widget that can be added to a [Drawer]. When
+///    tapped it calls [showAboutDialog].
 class LicenseRegistry {
   LicenseRegistry._();
 

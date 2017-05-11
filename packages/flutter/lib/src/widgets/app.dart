@@ -38,7 +38,7 @@ typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
-  WidgetsApp({
+  const WidgetsApp({
     Key key,
     @required this.onGenerateRoute,
     this.title,
@@ -51,13 +51,12 @@ class WidgetsApp extends StatefulWidget {
     this.checkerboardRasterCacheImages: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
-  }) : super(key: key) {
-    assert(color != null);
-    assert(onGenerateRoute != null);
-    assert(showPerformanceOverlay != null);
-    assert(checkerboardRasterCacheImages != null);
-    assert(showSemanticsDebugger != null);
-  }
+  }) : assert(color != null),
+       assert(onGenerateRoute != null),
+       assert(showPerformanceOverlay != null),
+       assert(checkerboardRasterCacheImages != null),
+       assert(showSemanticsDebugger != null),
+       super(key: key);
 
   /// A one-line description of this app for use in the window manager.
   final String title;
@@ -153,11 +152,9 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   @override
   Future<bool> didPopRoute() async {
     assert(mounted);
-    NavigatorState navigator = _navigator.currentState;
+    final NavigatorState navigator = _navigator.currentState;
     assert(navigator != null);
-    if (!await navigator.willPop())
-      return true;
-    return mounted && navigator.pop();
+    return await navigator.maybePop();
   }
 
   @override
@@ -170,8 +167,8 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   void didChangeLocale(Locale locale) {
-    if (config.onLocaleChanged != null) {
-      config.onLocaleChanged(locale).then<Null>((LocaleQueryData data) {
+    if (widget.onLocaleChanged != null) {
+      widget.onLocaleChanged(locale).then<Null>((LocaleQueryData data) {
         if (mounted)
           setState(() { _localeData = data; });
       });
@@ -182,8 +179,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   @override
+  void didHaveMemoryPressure() { }
+
+  @override
   Widget build(BuildContext context) {
-    if (config.onLocaleChanged != null && _localeData == null) {
+    if (widget.onLocaleChanged != null && _localeData == null) {
       // If the app expects a locale but we don't yet know the locale, then
       // don't build the widgets now.
       // TODO(ianh): Make this unnecessary. See https://github.com/flutter/flutter/issues/1865
@@ -197,20 +197,20 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       child: new LocaleQuery(
         data: _localeData,
         child: new Title(
-          title: config.title,
-          color: config.color,
+          title: widget.title,
+          color: widget.color,
           child: new Navigator(
             key: _navigator,
-            initialRoute: config.initialRoute ?? ui.window.defaultRouteName,
-            onGenerateRoute: config.onGenerateRoute,
-            observers: config.navigatorObservers
+            initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
+            onGenerateRoute: widget.onGenerateRoute,
+            observers: widget.navigatorObservers
           )
         )
       )
     );
-    if (config.textStyle != null) {
+    if (widget.textStyle != null) {
       result = new DefaultTextStyle(
-        style: config.textStyle,
+        style: widget.textStyle,
         child: result
       );
     }
@@ -218,11 +218,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     PerformanceOverlay performanceOverlay;
     // We need to push a performance overlay if any of the display or checkerboarding
     // options are set.
-    if (config.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
+    if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
       performanceOverlay = new PerformanceOverlay.allEnabled(
-                  checkerboardRasterCacheImages: config.checkerboardRasterCacheImages);
-    } else if (config.checkerboardRasterCacheImages) {
-      performanceOverlay = new PerformanceOverlay(checkerboardRasterCacheImages: true);
+                  checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages);
+    } else if (widget.checkerboardRasterCacheImages) {
+      performanceOverlay = const PerformanceOverlay(checkerboardRasterCacheImages: true);
     }
 
     if (performanceOverlay != null) {
@@ -233,13 +233,13 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         ]
       );
     }
-    if (config.showSemanticsDebugger) {
+    if (widget.showSemanticsDebugger) {
       result = new SemanticsDebugger(
         child: result
       );
     }
     assert(() {
-      if (config.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
+      if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = new CheckedModeBanner(
           child: result
         );

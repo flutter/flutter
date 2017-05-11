@@ -12,13 +12,14 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 7 - Merging', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
     String label;
 
     label = '1';
     await tester.pumpWidget(
       new Stack(
+        fit: StackFit.expand,
         children: <Widget>[
           new MergeSemantics(
             child: new Semantics(
@@ -26,19 +27,20 @@ void main() {
               container: true,
               child: new Semantics(
                 container: true,
-                label: label
+                label: label,
               )
             )
           ),
           new MergeSemantics(
             child: new Stack(
+              fit: StackFit.expand,
               children: <Widget>[
-                new Semantics(
-                  checked: true
+                const Semantics(
+                  checked: true,
                 ),
                 new Semantics(
-                  label: label
-                )
+                  label: label,
+                ),
               ]
             )
           ),
@@ -69,6 +71,7 @@ void main() {
     label = '2';
     await tester.pumpWidget(
       new Stack(
+        fit: StackFit.expand,
         children: <Widget>[
           new MergeSemantics(
             child: new Semantics(
@@ -76,18 +79,19 @@ void main() {
               container: true,
               child: new Semantics(
                 container: true,
-                label: label
+                label: label,
               )
             )
           ),
           new MergeSemantics(
             child: new Stack(
+              fit: StackFit.expand,
               children: <Widget>[
-                new Semantics(
-                  checked: true
+                const Semantics(
+                  checked: true,
                 ),
                 new Semantics(
-                  label: label
+                  label: label,
                 )
               ]
             )

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 import 'package:flutter/widgets.dart';
 
 class SizeChanger extends StatefulWidget {
-  SizeChanger({
+  const SizeChanger({
     Key key,
     this.child,
   }) : super(key: key);
@@ -33,7 +33,7 @@ class SizeChangerState extends State<SizeChanger> {
         new SizedBox(
           height: _flag ? 50.0 : 100.0,
           width: 100.0,
-          child: config.child
+          child: widget.child
         )
       ],
     );
@@ -41,7 +41,7 @@ class SizeChangerState extends State<SizeChanger> {
 }
 
 class Wrapper extends StatelessWidget {
-  Wrapper({
+  const Wrapper({
     Key key,
     this.child,
   }) : super(key: key);

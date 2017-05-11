@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'test_widgets.dart';
 
 class StatefulWrapper extends StatefulWidget {
-  StatefulWrapper({
+  const StatefulWrapper({
     Key key,
     this.child,
   }) : super(key: key);
@@ -29,12 +29,12 @@ class StatefulWrapperState extends State<StatefulWrapper> {
   @override
   Widget build(BuildContext context) {
     built = true;
-    return config.child;
+    return widget.child;
   }
 }
 
 class Wrapper extends StatelessWidget {
-  Wrapper({
+  const Wrapper({
     Key key,
     this.child,
   }) : super(key: key);

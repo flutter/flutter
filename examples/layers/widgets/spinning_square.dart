@@ -37,9 +37,7 @@ class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProvid
       child: new Container(
         width: 200.0,
         height: 200.0,
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00)
-        )
+        color: const Color(0xFF00FF00),
       )
     );
   }

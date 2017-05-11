@@ -324,8 +324,8 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   ///
   /// The parent and curve arguments must not be null.
   CurvedAnimation({
-    this.parent,
-    this.curve,
+    @required this.parent,
+    @required this.curve,
     this.reverseCurve
   }) {
     assert(parent != null);
@@ -384,9 +384,9 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 
   @override
   double get value {
-    Curve activeCurve = _useForwardCurve ? curve : reverseCurve;
+    final Curve activeCurve = _useForwardCurve ? curve : reverseCurve;
 
-    double t = parent.value;
+    final double t = parent.value;
     if (activeCurve == null)
       return t;
     if (t == 0.0 || t == 1.0) {
@@ -501,7 +501,7 @@ class TrainHoppingAnimation extends Animation<double>
         _statusChangeHandler(_currentTrain.status);
       }
     }
-    double newValue = value;
+    final double newValue = value;
     if (newValue != _lastValue) {
       notifyListeners();
       _lastValue = newValue;
@@ -546,8 +546,8 @@ abstract class CompoundAnimation<T> extends Animation<T>
   /// Creates a CompoundAnimation. Both arguments must be non-null. Either can
   /// be a CompoundAnimation itself to combine multiple animations.
   CompoundAnimation({
-    this.first,
-    this.next,
+    @required this.first,
+    @required this.next,
   }) {
     assert(first != null);
     assert(next != null);
@@ -592,16 +592,16 @@ abstract class CompoundAnimation<T> extends Animation<T>
 
   AnimationStatus _lastStatus;
   void _maybeNotifyStatusListeners(AnimationStatus _) {
-    if (this.status != _lastStatus) {
-      _lastStatus = this.status;
-      notifyStatusListeners(this.status);
+    if (status != _lastStatus) {
+      _lastStatus = status;
+      notifyStatusListeners(status);
     }
   }
 
   T _lastValue;
   void _maybeNotifyListeners() {
-    if (this.value != _lastValue) {
-      _lastValue = this.value;
+    if (value != _lastValue) {
+      _lastValue = value;
       notifyListeners();
     }
   }

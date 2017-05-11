@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Point, Offset, PointerDeviceKind;
+import 'dart:ui' show Offset, PointerDeviceKind;
 
 import 'package:flutter/foundation.dart';
 
-export 'dart:ui' show Point, Offset, PointerDeviceKind;
+export 'dart:ui' show Offset, PointerDeviceKind;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
 ///
@@ -69,6 +69,7 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
 /// Base class for touch, stylus, or mouse events.
+@immutable
 abstract class PointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -77,7 +78,7 @@ abstract class PointerEvent {
     this.pointer: 0,
     this.kind: PointerDeviceKind.touch,
     this.device: 0,
-    this.position: Point.origin,
+    this.position: Offset.zero,
     this.delta: Offset.zero,
     this.buttons: 0,
     this.down: false,
@@ -109,7 +110,7 @@ abstract class PointerEvent {
 
   /// Coordinate of the position of the pointer, in logical pixels in the global
   /// coordinate space.
-  final Point position;
+  final Offset position;
 
   /// Distance in logical pixels that the pointer moved since the last
   /// PointerMoveEvent. Always 0.0 for down, up, and cancel events.
@@ -257,7 +258,7 @@ class PointerAddedEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     PointerDeviceKind kind: PointerDeviceKind.touch,
     int device: 0,
-    Point position: Point.origin,
+    Offset position: Offset.zero,
     bool obscured: false,
     double pressureMin: 1.0,
     double pressureMax: 1.0,
@@ -331,7 +332,7 @@ class PointerHoverEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     PointerDeviceKind kind: PointerDeviceKind.touch,
     int device: 0,
-    Point position: Point.origin,
+    Offset position: Offset.zero,
     Offset delta: Offset.zero,
     int buttons: 0,
     bool obscured: false,
@@ -377,7 +378,7 @@ class PointerDownEvent extends PointerEvent {
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
     int device: 0,
-    Point position: Point.origin,
+    Offset position: Offset.zero,
     int buttons: 0,
     bool obscured: false,
     double pressure: 1.0,
@@ -429,7 +430,7 @@ class PointerMoveEvent extends PointerEvent {
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
     int device: 0,
-    Point position: Point.origin,
+    Offset position: Offset.zero,
     Offset delta: Offset.zero,
     int buttons: 0,
     bool obscured: false,
@@ -477,7 +478,7 @@ class PointerUpEvent extends PointerEvent {
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
     int device: 0,
-    Point position: Point.origin,
+    Offset position: Offset.zero,
     int buttons: 0,
     bool obscured: false,
     double pressureMin: 1.0,
@@ -518,7 +519,7 @@ class PointerCancelEvent extends PointerEvent {
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
     int device: 0,
-    Point position: Point.origin,
+    Offset position: Offset.zero,
     int buttons: 0,
     bool obscured: false,
     double pressureMin: 1.0,

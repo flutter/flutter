@@ -9,23 +9,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AboutDrawerItem control test', (WidgetTester tester) async {
+  testWidgets('AboutListTile control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         title: 'Pirate app',
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('Home'),
+            title: const Text('Home'),
           ),
           drawer: new Drawer(
             child: new ListView(
               children: <Widget>[
-                new AboutDrawerItem(
+                new AboutListTile(
                   applicationVersion: '0.1.2',
-                  applicationIcon: new FlutterLogo(),
+                  applicationIcon: const FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
-                    new Text('About box'),
+                    const Text('About box'),
                   ]
                 ),
               ],
@@ -40,14 +40,14 @@ void main() {
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.byType(IconButton));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsNothing);
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.text('About Pirate app'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
@@ -60,20 +60,20 @@ void main() {
     });
 
     await tester.tap(find.text('VIEW LICENSES'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(child: new AboutDrawerItem()),
+      const Material(child: const AboutListTile()),
     );
-    expect(find.text('About sky_shell'), findsOneWidget);
+    expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
-  testWidgets('AboutDrawerItem control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+  testWidgets('AboutListTile control test', (WidgetTester tester) async {
+    final List<String> log = <String>[];
 
     Future<Null> licenseFuture;
     LicenseRegistry.addLicense(() {
@@ -89,9 +89,13 @@ void main() {
       ]);
     });
 
-    await tester.pumpWidget(new Center(
-      child: new LicensePage()
-    ));
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Center(
+          child: const LicensePage()
+        ),
+      ),
+    );
 
     expect(licenseFuture, isNotNull);
     await licenseFuture;

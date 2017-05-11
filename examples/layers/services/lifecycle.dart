@@ -35,7 +35,7 @@ class _LifecycleWatcherState extends State<LifecycleWatcher>
   @override
   Widget build(BuildContext context) {
     if (_lastLifecyleState == null)
-      return new Text('This widget has not observed any lifecycle changes.');
+      return const Text('This widget has not observed any lifecycle changes.');
     return new Text('The most recent lifecycle state this widget observed was: $_lastLifecyleState.');
   }
 }

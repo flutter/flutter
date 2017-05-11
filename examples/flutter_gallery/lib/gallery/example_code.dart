@@ -16,7 +16,7 @@ class ButtonsDemo {
 // START buttons_raised
 // Create a raised button.
 new RaisedButton(
-  child: new Text('BUTTON TITLE'),
+  child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
   }
@@ -25,8 +25,8 @@ new RaisedButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-new RaisedButton(
-  child: new Text('BUTTON TITLE'),
+const RaisedButton(
+  child: const Text('BUTTON TITLE'),
   onPressed: null
 );
 // END
@@ -35,7 +35,7 @@ new RaisedButton(
 // START buttons_flat
 // Create a flat button.
 new FlatButton(
-  child: new Text('BUTTON TITLE'),
+  child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
   }
@@ -44,8 +44,8 @@ new FlatButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-new FlatButton(
-  child: new Text('BUTTON TITLE'),
+const FlatButton(
+  child: const Text('BUTTON TITLE'),
   onPressed: null
 );
 // END
@@ -55,7 +55,7 @@ new FlatButton(
 // Member variable holding value.
 String dropdownValue;
 
-// Drop down button with string values.
+// Dropdown button with string values.
 new DropdownButton<String>(
   value: dropdownValue,
   onChanged: (String newValue) {
@@ -83,7 +83,7 @@ bool value;
 
 // Toggleable icon button.
 new IconButton(
-  icon: new Icon(Icons.thumb_up),
+  icon: const Icon(Icons.thumb_up),
   onPressed: () {
     setState(() => value = !value);
   },
@@ -96,10 +96,10 @@ new IconButton(
 // Floating action button in Scaffold.
 new Scaffold(
   appBar: new AppBar(
-    title: new Text('Demo')
+    title: const Text('Demo')
   ),
-  floatingActionButton: new FloatingActionButton(
-    child: new Icon(Icons.add),
+  floatingActionButton: const FloatingActionButton(
+    child: const Icon(Icons.add),
     onPressed: null
   )
 );
@@ -130,7 +130,7 @@ new Checkbox(
 // Create a disabled checkbox.
 // Checkboxes are disabled when onChanged isn't
 // specified or null.
-new Checkbox(value: false, onChanged: null);
+const Checkbox(value: false, onChanged: null);
 // END
 
 
@@ -167,7 +167,7 @@ new Row(
 );
 
 // Creates a disabled radio button.
-new Radio<int>(
+const Radio<int>(
   value: 0,
   groupValue: 0,
   onChanged: null
@@ -192,7 +192,7 @@ new Switch(
 // Create a disabled switch.
 // Switches are disabled when onChanged isn't
 // specified or null.
-new Switch(value: false, onChanged: null);
+const Switch(value: false, onChanged: null);
 // END
   }
 }
@@ -220,7 +220,7 @@ new GridView.count(
       footer: new GridTileBar(
         title: new Text(url)
       ),
-      child: new Image.network(url, fit: ImageFit.cover)
+      child: new Image.network(url, fit: BoxFit.cover)
     );
   }).toList(),
 );

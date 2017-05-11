@@ -6,10 +6,12 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
+import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
@@ -21,6 +23,38 @@ import '../usage.dart';
 import 'flutter_command_runner.dart';
 
 typedef void Validator();
+
+enum ExitStatus {
+  success,
+  warning,
+  fail,
+}
+
+/// [FlutterCommand]s' subclasses' [FlutterCommand.runCommand] can optionally
+/// provide a [FlutterCommandResult] to furnish additional information for
+/// analytics.
+class FlutterCommandResult {
+  const FlutterCommandResult(
+    this.exitStatus, {
+    this.analyticsParameters,
+    this.endTimeOverride,
+  });
+
+  final ExitStatus exitStatus;
+
+  /// Optional dimension data that can be appended to the timing event.
+  /// https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#timingLabel
+  /// Do not add PII.
+  final List<String> analyticsParameters;
+
+  /// Optional epoch time when the command's non-interactive wait time is
+  /// complete during the command's execution. Use to measure user perceivable
+  /// latency without measuring user interaction time.
+  ///
+  /// [FlutterCommand] will automatically measure and report the command's
+  /// complete time if not overriden.
+  final DateTime endTimeOverride;
+}
 
 abstract class FlutterCommand extends Command<Null> {
   FlutterCommand() {
@@ -36,6 +70,8 @@ abstract class FlutterCommand extends Command<Null> {
   bool _usesPubOption = false;
 
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
+
+  bool get shouldUpdateCache => true;
 
   BuildMode _defaultBuildMode;
 
@@ -77,12 +113,12 @@ abstract class FlutterCommand extends Command<Null> {
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
-  set defaultBuildMode(BuildMode buildMode) {
-    _defaultBuildMode = buildMode;
+  set defaultBuildMode(BuildMode value) {
+    _defaultBuildMode = value;
   }
 
   BuildMode getBuildMode() {
-    List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
+    final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw new UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     if (argResults['debug'])
@@ -100,7 +136,7 @@ abstract class FlutterCommand extends Command<Null> {
 
   /// The path to send to Google Analytics. Return `null` here to disable
   /// tracking of the command.
-  String get usagePath => name;
+  Future<String> get usagePath async => name;
 
   /// Runs this command.
   ///
@@ -109,18 +145,44 @@ abstract class FlutterCommand extends Command<Null> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<Null> run() {
-    Stopwatch stopwatch = new Stopwatch()..start();
-    UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
+  Future<Null> run() async {
+    final DateTime startTime = clock.now();
 
     if (flutterUsage.isFirstRun)
-      flutterUsage.printUsage();
+      flutterUsage.printWelcome();
 
-    return verifyThenRunCommand().whenComplete(() {
-      int ms = stopwatch.elapsedMilliseconds;
-      printTrace("'flutter $name' took ${ms}ms.");
-      analyticsTimer?.finish();
-    });
+    FlutterCommandResult commandResult;
+    try {
+      commandResult = await verifyThenRunCommand();
+    } on ToolExit {
+      commandResult = const FlutterCommandResult(ExitStatus.fail);
+      rethrow;
+    } finally {
+      final DateTime endTime = clock.now();
+      printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+      if (usagePath != null) {
+        final List<String> labels = <String>[];
+        if (commandResult?.exitStatus != null)
+          labels.add(getEnumName(commandResult.exitStatus));
+        if (commandResult?.analyticsParameters?.isNotEmpty ?? false)
+          labels.addAll(commandResult.analyticsParameters);
+
+        final String label = labels
+            .where((String label) => !isBlank(label))
+            .join('-');
+        flutterUsage.sendTiming(
+          'flutter',
+          name,
+          // If the command provides its own end time, use it. Otherwise report
+          // the duration of the entire execution.
+          (commandResult?.endTimeOverride ?? endTime).difference(startTime),
+          // Report in the form of `success-[parameter1-parameter2]`, all of which
+          // can be null if the command doesn't provide a FlutterCommandResult.
+          label: label == '' ? null : label,
+        );
+      }
+    }
+
   }
 
   /// Perform validation then call [runCommand] to execute the command.
@@ -131,42 +193,47 @@ abstract class FlutterCommand extends Command<Null> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<Null> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    await cache.updateAll();
+    if (shouldUpdateCache)
+      await cache.updateAll();
 
     if (shouldRunPub)
       await pubGet();
 
     setupApplicationPackages();
 
-    String commandPath = usagePath;
+    final String commandPath = await usagePath;
     if (commandPath != null)
-      flutterUsage.sendCommand(usagePath);
-
-    await runCommand();
+      flutterUsage.sendCommand(commandPath);
+    return await runCommand();
   }
 
   /// Subclasses must implement this to execute the command.
-  Future<Null> runCommand();
+  /// Optionally provide a [FlutterCommandResult] to send more details about the
+  /// execution for analytics.
+  Future<FlutterCommandResult> runCommand();
 
-  /// Find and return the target [Device] based upon currently connected
+  /// Find and return all target [Device]s based upon currently connected
   /// devices and criteria entered by the user on the command line.
-  /// If a device cannot be found that meets specified criteria,
+  /// If no device can be found that meets specified criteria,
   /// then print an error message and return `null`.
-  Future<Device> findTargetDevice({bool androidOnly: false}) async {
+  Future<List<Device>> findAllTargetDevices() async {
     if (!doctor.canLaunchAnything) {
       printError("Unable to locate a development device; please run 'flutter doctor' "
           "for information about installing additional components.");
       return null;
     }
 
-    List<Device> devices = await deviceManager.getDevices();
+    List<Device> devices = await deviceManager.getDevices().toList();
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       printStatus("No devices found with name or id "
           "matching '${deviceManager.specifiedDeviceId}'");
+      return null;
+    } else if (devices.isEmpty && deviceManager.hasSpecifiedAllDevices) {
+      printStatus("No devices found");
       return null;
     } else if (devices.isEmpty) {
       printNoConnectedDevices();
@@ -175,26 +242,42 @@ abstract class FlutterCommand extends Command<Null> {
 
     devices = devices.where((Device device) => device.isSupported()).toList();
 
-    if (androidOnly)
-      devices = devices.where((Device device) => device.platform == TargetPlatform.android_arm).toList();
-
     if (devices.isEmpty) {
       printStatus('No supported devices connected.');
       return null;
-    } else if (devices.length > 1) {
+    } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {
         printStatus("Found ${devices.length} devices with name or id matching "
             "'${deviceManager.specifiedDeviceId}':");
       } else {
         printStatus("More than one device connected; please specify a device with "
-            "the '-d <deviceId>' flag.");
-        devices = await deviceManager.getAllConnectedDevices();
+            "the '-d <deviceId>' flag, or use '-d all' to act on all devices.");
+        devices = await deviceManager.getAllConnectedDevices().toList();
       }
       printStatus('');
-      Device.printDevices(devices);
+      await Device.printDevices(devices);
       return null;
     }
-    return devices.single;
+    return devices;
+  }
+
+  /// Find and return the target [Device] based upon currently connected
+  /// devices and criteria entered by the user on the command line.
+  /// If a device cannot be found that meets specified criteria,
+  /// then print an error message and return `null`.
+  Future<Device> findTargetDevice() async {
+    List<Device> deviceList = await findAllTargetDevices();
+    if (deviceList == null)
+      return null;
+    if (deviceList.length > 1) {
+      printStatus("More than one device connected; please specify a device with "
+        "the '-d <deviceId>' flag.");
+      deviceList = await deviceManager.getAllConnectedDevices().toList();
+      printStatus('');
+      await Device.printDevices(deviceList);
+      return null;
+    }
+    return deviceList.single;
   }
 
   void printNoConnectedDevices() {
@@ -234,14 +317,14 @@ abstract class FlutterCommand extends Command<Null> {
     }
 
     if (_usesTargetOption) {
-      String targetPath = targetFile;
+      final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
     }
 
     // Validate the current package map only if we will not be running "pub get" later.
     if (!(_usesPubOption && argResults['pub'])) {
-      String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
+      final String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
       if (error != null)
         throw new ToolExit(error);
     }

@@ -8,10 +8,10 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedContainer.debugFillDescription', (WidgetTester tester) async {
-    AnimatedContainer container = new AnimatedContainer(
+    final AnimatedContainer container = new AnimatedContainer(
       constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),
-      decoration: const BoxDecoration(backgroundColor: const Color(0xFF00FF00)),
-      foregroundDecoration: const BoxDecoration(backgroundColor: const Color(0x7F0000FF)),
+      decoration: const BoxDecoration(color: const Color(0xFF00FF00)),
+      foregroundDecoration: const BoxDecoration(color: const Color(0x7F0000FF)),
       margin: const EdgeInsets.all(10.0),
       padding: const EdgeInsets.all(7.0),
       transform: new Matrix4.translationValues(4.0, 3.0, 0.0),
@@ -25,14 +25,14 @@ void main() {
   });
 
   testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
-    BoxDecoration decorationA = const BoxDecoration(
-      backgroundColor: const Color(0xFF00FF00)
+    final BoxDecoration decorationA = const BoxDecoration(
+      color: const Color(0xFF00FF00),
     );
 
-    BoxDecoration decorationB = const BoxDecoration(
-      backgroundColor: const Color(0xFF0000FF)
+    final BoxDecoration decorationB = const BoxDecoration(
+      color: const Color(0xFF0000FF),
     );
 
     BoxDecoration actualDecoration;
@@ -45,9 +45,9 @@ void main() {
       )
     );
 
-    RenderDecoratedBox box = key.currentContext.findRenderObject();
+    final RenderDecoratedBox box = key.currentContext.findRenderObject();
     actualDecoration = box.decoration;
-    expect(actualDecoration.backgroundColor, equals(decorationA.backgroundColor));
+    expect(actualDecoration.color, equals(decorationA.color));
 
     await tester.pumpWidget(
       new AnimatedContainer(
@@ -59,21 +59,19 @@ void main() {
 
     expect(key.currentContext.findRenderObject(), equals(box));
     actualDecoration = box.decoration;
-    expect(actualDecoration.backgroundColor, equals(decorationA.backgroundColor));
+    expect(actualDecoration.color, equals(decorationA.color));
 
     await tester.pump(const Duration(seconds: 1));
 
     actualDecoration = box.decoration;
-    expect(actualDecoration.backgroundColor, equals(decorationB.backgroundColor));
+    expect(actualDecoration.color, equals(decorationB.color));
   });
 
   testWidgets('AnimatedContainer overanimate test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00)
-        )
+        color: const Color(0xFF00FF00),
       )
     );
     expect(tester.binding.transientCallbackCount, 0);
@@ -82,9 +80,7 @@ void main() {
     await tester.pumpWidget(
       new AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00)
-        )
+        color: const Color(0xFF00FF00),
       )
     );
     expect(tester.binding.transientCallbackCount, 0);
@@ -93,9 +89,7 @@ void main() {
     await tester.pumpWidget(
       new AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF0000FF)
-        )
+        color: const Color(0xFF0000FF),
       )
     );
     expect(tester.binding.transientCallbackCount, 1); // this is the only time an animation should have started!
@@ -104,9 +98,7 @@ void main() {
     await tester.pumpWidget(
       new AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF0000FF)
-        )
+        color: const Color(0xFF0000FF),
       )
     );
     expect(tester.binding.transientCallbackCount, 0);
@@ -119,7 +111,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 100.0,
           height: 100.0,
-          child: new Text('X')
+          child: const Text('X')
         )
       )
     );
@@ -139,7 +131,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 200.0,
           height: 200.0,
-          child: new Text('X')
+          child: const Text('X')
         )
       )
     );
@@ -163,7 +155,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 200.0,
           height: 100.0,
-          child: new Text('X')
+          child: const Text('X')
         )
       )
     );

@@ -4,8 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:file/file.dart' as f;
 import 'dart:io';
+
+import 'package:file/file.dart' as f;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
@@ -18,7 +19,6 @@ import 'find.dart';
 import 'frame_sync.dart';
 import 'gesture.dart';
 import 'health.dart';
-import 'input.dart';
 import 'message.dart';
 import 'render_tree.dart';
 import 'timeline.dart';
@@ -54,6 +54,20 @@ enum TimelineStream {
 }
 
 const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStream.all];
+
+/// Default timeout for short-running RPCs.
+const Duration _kShortTimeout = const Duration(seconds: 5);
+
+/// Default timeout for long-running RPCs.
+final Duration _kLongTimeout = _kShortTimeout * 6;
+
+/// Additional amount of time we give the command to finish or timeout remotely
+/// before timing out locally.
+final Duration _kRpcGraceTime = _kShortTimeout ~/ 2;
+
+/// The amount of time we wait prior to making the next attempt to connect to
+/// the VM service.
+final Duration _kPauseBetweenReconnectAttempts = _kShortTimeout ~/ 5;
 
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
 String _timelineStreamsToString(List<TimelineStream> streams) {
@@ -106,7 +120,6 @@ class FlutterDriver {
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
   static const String _kGetVMTimelineMethod = '_getVMTimeline';
-  static const Duration _kRpcGraceTime = const Duration(seconds: 2);
 
   static int _nextDriverId = 0;
 
@@ -138,9 +151,9 @@ class FlutterDriver {
 
     // Connect to Dart VM servcies
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
-    VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
-    VMServiceClient client = connection.client;
-    VM vm = await client.getVM();
+    final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
+    final VMServiceClient client = connection.client;
+    final VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
     VMIsolate isolate = await vm.isolates.first.loadRunnable();
 
@@ -157,11 +170,11 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      await new Future<Null>.delayed(new Duration(milliseconds: 300));
+      await new Future<Null>.delayed(_kShortTimeout ~/ 10);
       isolate = await vm.isolates.first.loadRunnable();
     }
 
-    FlutterDriver driver = new FlutterDriver.connectedTo(
+    final FlutterDriver driver = new FlutterDriver.connectedTo(
         client, connection.peer, isolate,
         printCommunication: printCommunication,
         logCommunicationToFile: logCommunicationToFile
@@ -199,20 +212,33 @@ class FlutterDriver {
         });
       }
 
+      /// Tells the Dart VM Service to notify us about "Isolate" events.
+      ///
+      /// This is a workaround for an issue in package:vm_service_client, which
+      /// subscribes to the "Isolate" stream lazily upon subscription, which
+      /// results in lost events.
+      ///
+      /// Details: https://github.com/dart-lang/vm_service_client/issues/17
+      Future<Null> enableIsolateStreams() async {
+        await connection.peer.sendRequest('streamListen', <String, String>{
+          'streamId': 'Isolate',
+        });
+      }
+
       // If the isolate is paused at the start, e.g. via the --start-paused
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
-      Future<dynamic> whenResumed = resumeLeniently();
-      Future<dynamic> whenServiceExtensionReady = Future.any<dynamic>(<Future<dynamic>>[
-        waitForServiceExtension(),
+      await enableIsolateStreams();
+      final Future<dynamic> whenServiceExtensionReady = waitForServiceExtension();
+      final Future<dynamic> whenResumed = resumeLeniently();
+      await whenResumed;
+
+      try {
+        _log.trace('Waiting for service extension');
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
-        new Future<String>.delayed(const Duration(seconds: 10), () => 'timeout')
-      ]);
-      await whenResumed;
-      _log.trace('Waiting for service extension');
-      dynamic signal = await whenServiceExtensionReady;
-      if (signal == 'timeout') {
+        await whenServiceExtensionReady.timeout(_kLongTimeout * 2);
+      } on TimeoutException catch (_) {
         throw new DriverError(
           'Timed out waiting for Flutter Driver extension to become available. '
           'Ensure your test app (often: lib/main.dart) imports '
@@ -238,7 +264,7 @@ class FlutterDriver {
     }
 
     // At this point the service extension must be installed. Verify it.
-    Health health = await driver.checkHealth();
+    final Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {
       await client.close();
       throw new DriverError('Flutter application health check failed.');
@@ -264,7 +290,7 @@ class FlutterDriver {
   Future<Map<String, dynamic>> _sendCommand(Command command) async {
     Map<String, dynamic> response;
     try {
-      Map<String, String> serialized = command.serialize();
+      final Map<String, String> serialized = command.serialize();
       _logCommunication('>>> $serialized');
       response = await _appIsolate
           .invokeExtension(_kFlutterExtensionMethod, serialized)
@@ -292,49 +318,40 @@ class FlutterDriver {
     if (_printCommunication)
       _log.info(message);
     if (_logCommunicationToFile) {
-      f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
+      final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.APPEND, flush: true);
     }
   }
 
   /// Checks the status of the Flutter Driver extension.
-  Future<Health> checkHealth() async {
-    return Health.fromJson(await _sendCommand(new GetHealth()));
+  Future<Health> checkHealth({Duration timeout}) async {
+    return Health.fromJson(await _sendCommand(new GetHealth(timeout: timeout)));
   }
 
   /// Returns a dump of the render tree.
-  Future<RenderTree> getRenderTree() async {
-    return RenderTree.fromJson(await _sendCommand(new GetRenderTree()));
+  Future<RenderTree> getRenderTree({Duration timeout}) async {
+    return RenderTree.fromJson(await _sendCommand(new GetRenderTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].
-  Future<Null> tap(SerializableFinder finder) async {
-    await _sendCommand(new Tap(finder));
+  Future<Null> tap(SerializableFinder finder, {Duration timeout}) async {
+    await _sendCommand(new Tap(finder, timeout: timeout));
     return null;
-  }
-
-  /// Sets the text value of the `Input` widget located by [finder].
-  ///
-  /// This command invokes the `onChanged` handler of the `Input` widget with
-  /// the provided [text].
-  Future<Null> setInputText(SerializableFinder finder, String text) async {
-    await _sendCommand(new SetInputText(finder, text));
-    return null;
-  }
-
-  /// Submits the current text value of the `Input` widget located by [finder].
-  ///
-  /// This command invokes the `onSubmitted` handler of the `Input` widget and
-  /// the returns the submitted text value.
-  Future<String> submitInputText(SerializableFinder finder) async {
-    Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder));
-    return json['text'];
   }
 
   /// Waits until [finder] locates the target.
   Future<Null> waitFor(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(new WaitFor(finder, timeout: timeout));
+    return null;
+  }
+
+  /// Waits until there are no more transient callbacks in the queue.
+  ///
+  /// Use this method when you need to wait for the moment when the application
+  /// becomes "stable", for example, prior to taking a [screenshot].
+  Future<Null> waitUntilNoTransientCallbacks({Duration timeout}) async {
+    await _sendCommand(new WaitUntilNoTransientCallbacks(timeout: timeout));
     return null;
   }
 
@@ -351,24 +368,25 @@ class FlutterDriver {
   ///
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
-  Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, {int frequency: 60}) async {
-    return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency)).then((Map<String, dynamic> _) => null);
+  Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency: 60, Duration timeout }) async {
+    return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
   /// Scrolls the Scrollable ancestor of the widget located by [finder]
   /// until the widget is completely visible.
-  Future<Null> scrollIntoView(SerializableFinder finder) async {
-    return await _sendCommand(new ScrollIntoView(finder)).then((Map<String, dynamic> _) => null);
+  Future<Null> scrollIntoView(SerializableFinder finder, { double alignment: 0.0, Duration timeout }) async {
+    return await _sendCommand(new ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
   /// Returns the text in the `Text` widget located by [finder].
-  Future<String> getText(SerializableFinder finder) async {
-    return GetTextResult.fromJson(await _sendCommand(new GetText(finder))).text;
+  Future<String> getText(SerializableFinder finder, { Duration timeout }) async {
+    return GetTextResult.fromJson(await _sendCommand(new GetText(finder, timeout: timeout))).text;
   }
 
   /// Take a screenshot.  The image will be returned as a PNG.
-  Future<List<int>> screenshot() async {
-    Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
+  Future<List<int>> screenshot({ Duration timeout }) async {
+    timeout ??= _kLongTimeout;
+    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
     return BASE64.decode(result['screenshot']);
   }
 
@@ -391,18 +409,18 @@ class FlutterDriver {
   ///     ]
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
-  Future<List<Map<String, dynamic>>> getVmFlags() async {
-    Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
+  Future<List<Map<String, dynamic>>> getVmFlags({ Duration timeout: _kShortTimeout }) async {
+    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList').timeout(timeout);
     return result['flags'];
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing({List<TimelineStream> streams: _defaultStreams}) async {
-    assert(streams != null && streams.length > 0);
+  Future<Null> startTracing({ List<TimelineStream> streams: _defaultStreams, Duration timeout: _kShortTimeout }) async {
+    assert(streams != null && streams.isNotEmpty);
     try {
       await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
         'recordedStreams': _timelineStreamsToString(streams)
-      });
+      }).timeout(timeout);
       return null;
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -414,9 +432,11 @@ class FlutterDriver {
   }
 
   /// Stops recording performance traces and downloads the timeline.
-  Future<Timeline> stopTracingAndDownloadTimeline() async {
+  Future<Timeline> stopTracingAndDownloadTimeline({ Duration timeout: _kShortTimeout }) async {
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{'recordedStreams': '[]'});
+      await _peer
+          .sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{'recordedStreams': '[]'})
+          .timeout(timeout);
       return new Timeline.fromJson(await _peer.sendRequest(_kGetVMTimelineMethod));
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -459,13 +479,13 @@ class FlutterDriver {
   /// With frame sync disabled, its the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
-  Future<T> runUnsynchronized<T>(Future<T> action()) async {
-    await _sendCommand(new SetFrameSync(false));
+  Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
+    await _sendCommand(new SetFrameSync(false, timeout: timeout));
     T result;
     try {
       result = await action();
     } finally {
-      await _sendCommand(new SetFrameSync(true));
+      await _sendCommand(new SetFrameSync(true, timeout: timeout));
     }
     return result;
   }
@@ -473,7 +493,6 @@ class FlutterDriver {
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
-  // TODO(yjbanov): cleanup object references
   Future<Null> close() async {
     // Don't leak vm_service_client-specific objects, if any
     await _serviceClient.close();
@@ -516,11 +535,12 @@ void restoreVmServiceConnectFunction() {
 ///
 /// Times out after 30 seconds.
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
-  Stopwatch timer = new Stopwatch()..start();
+  final Stopwatch timer = new Stopwatch()..start();
 
   Future<VMServiceClientConnection> attemptConnection() async {
     Uri uri = Uri.parse(url);
-    if (uri.scheme == 'http') uri = uri.replace(scheme: 'ws', path: '/ws');
+    if (uri.scheme == 'http')
+      uri = uri.replace(scheme: 'ws', path: '/ws');
 
     WebSocket ws1;
     WebSocket ws2;
@@ -535,16 +555,16 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       await ws1?.close();
       await ws2?.close();
 
-      if (timer.elapsed < const Duration(seconds: 30)) {
+      if (timer.elapsed < _kLongTimeout * 2) {
         _log.info('Waiting for application to start');
-        await new Future<Null>.delayed(const Duration(seconds: 1));
+        await new Future<Null>.delayed(_kPauseBetweenReconnectAttempts);
         return attemptConnection();
       } else {
         _log.critical(
           'Application has not started in 30 seconds. '
           'Giving up.'
         );
-        throw e;
+        rethrow;
       }
     }
   }

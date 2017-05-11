@@ -4,36 +4,67 @@
 
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
-import 'package:meta/meta.dart';
 
 import 'finders.dart';
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save'), findsNothing);
+/// ```dart
+/// expect(find.text('Save'), findsNothing);
+/// ```
+///
+/// See also:
+///
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
 const Matcher findsNothing = const _FindsWidgetMatcher(null, 0);
 
 /// Asserts that the [Finder] locates at least one widget in the widget tree.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save'), findsWidgets);
+/// ```dart
+/// expect(find.text('Save'), findsWidgets);
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
 const Matcher findsWidgets = const _FindsWidgetMatcher(1, null);
 
 /// Asserts that the [Finder] locates at exactly one widget in the widget tree.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save'), findsOneWidget);
+/// ```dart
+/// expect(find.text('Save'), findsOneWidget);
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
 const Matcher findsOneWidget = const _FindsWidgetMatcher(1, 1);
 
 /// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save'), findsNWidgets(2));
+/// ```dart
+/// expect(find.text('Save'), findsNWidgets(2));
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
 Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 
 /// Asserts that the [Finder] locates the a single widget that has at
@@ -42,21 +73,41 @@ Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 /// It's important to use a full finder, since by default finders exclude
 /// offstage widgets.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save', skipOffstage: false), isOffstage);
+/// ```dart
+/// expect(find.text('Save', skipOffstage: false), isOffstage);
+/// ```
+///
+/// See also:
+///
+///  * [isOnstage], the opposite.
 const Matcher isOffstage = const _IsOffstage();
 
 /// Asserts that the [Finder] locates the a single widget that has no
 /// [Offstage] widget ancestors.
+///
+/// See also:
+///
+///  * [isOffstage], the opposite.
 const Matcher isOnstage = const _IsOnstage();
 
 /// Asserts that the [Finder] locates the a single widget that has at
 /// least one [Card] widget ancestor.
+///
+/// See also:
+///
+///  * [isNotInCard], the opposite.
 const Matcher isInCard = const _IsInCard();
 
 /// Asserts that the [Finder] locates the a single widget that has no
 /// [Card] widget ancestors.
+///
+/// This is equivalent to `isNot(isInCard)`.
+///
+/// See also:
+///
+///  * [isInCard], the opposite.
 const Matcher isNotInCard = const _IsNotInCard();
 
 /// Asserts that an object's toString() is a plausible one-line description.
@@ -67,10 +118,48 @@ const Matcher isNotInCard = const _IsNotInCard();
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
 /// A matcher for functions that throw [FlutterError].
-const Matcher throwsFlutterError = const Throws(isFlutterError);
+///
+/// This is equivalent to `throwsA(const isInstanceOf<FlutterError>())`.
+///
+/// See also:
+///
+///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [isFlutterError], to test if any object is a [FlutterError].
+///  * [isAssertionError], to test if any object is any kind of [AssertionError].
+Matcher throwsFlutterError = throwsA(isFlutterError);
+
+/// A matcher for functions that throw [AssertionError].
+///
+/// This is equivalent to `throwsA(const isInstanceOf<AssertionError>())`.
+///
+/// See also:
+///
+///  * [throwsFlutterError], to test if a function throws a [FlutterError].
+///  * [isFlutterError], to test if any object is a [FlutterError].
+///  * [isAssertionError], to test if any object is any kind of [AssertionError].
+Matcher throwsAssertionError = throwsA(isAssertionError);
 
 /// A matcher for [FlutterError].
+///
+/// This is equivalent to `const isInstanceOf<FlutterError>()`.
+///
+/// See also:
+///
+///  * [throwsFlutterError], to test if a function throws a [FlutterError].
+///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 const Matcher isFlutterError = const isInstanceOf<FlutterError>();
+
+/// A matcher for [AssertionError].
+///
+/// This is equivalent to `const isInstanceOf<AssertionError>()`.
+///
+/// See also:
+///
+///  * [throwsFlutterError], to test if a function throws a [FlutterError].
+///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [isFlutterError], to test if any object is a [FlutterError].
+const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -79,6 +168,13 @@ const Matcher isFlutterError = const isInstanceOf<FlutterError>();
 /// using the `epsilon` argument. This matcher is intended to compare floating
 /// point numbers that are the result of different sequences of operations, such
 /// that they may have accumulated slightly different errors.
+///
+/// See also:
+///
+///  * [closeTo], which is identical except that the epsilon argument is
+///    required and not named.
+///  * [inInclusiveRange], which matches if the argument is in a specified
+///    range.
 Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
   return new _MoreOrLessEquals(value, epsilon);
 }
@@ -90,12 +186,12 @@ class _FindsWidgetMatcher extends Matcher {
   final int max;
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
     assert(min != null || max != null);
     assert(min == null || max == null || min <= max);
     matchState[Finder] = finder;
     int count = 0;
-    Iterator<Element> iterator = finder.evaluate().iterator;
+    final Iterator<Element> iterator = finder.evaluate().iterator;
     if (min != null) {
       while (count < min && iterator.moveNext())
         count += 1;
@@ -141,8 +237,8 @@ class _FindsWidgetMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose
   ) {
-    Finder finder = matchState[Finder];
-    int count = finder.evaluate().length;
+    final Finder finder = matchState[Finder];
+    final int count = finder.evaluate().length;
     if (count == 0) {
       assert(min != null && min > 0);
       if (min == 1 && max == 1)
@@ -162,7 +258,7 @@ class _FindsWidgetMatcher extends Matcher {
 }
 
 bool _hasAncestorMatching(Finder finder, bool predicate(Widget widget)) {
-  Iterable<Element> nodes = finder.evaluate();
+  final Iterable<Element> nodes = finder.evaluate();
   if (nodes.length != 1)
     return false;
   bool result = false;
@@ -184,7 +280,7 @@ class _IsOffstage extends Matcher {
   const _IsOffstage();
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
     return _hasAncestorMatching(finder, (Widget widget) {
       if (widget is Offstage)
         return widget.offstage;
@@ -200,13 +296,13 @@ class _IsOnstage extends Matcher {
   const _IsOnstage();
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) {
-    Iterable<Element> nodes = finder.evaluate();
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+    final Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1)
       return false;
     bool result = true;
     nodes.single.visitAncestorElements((Element ancestor) {
-      Widget widget = ancestor.widget;
+      final Widget widget = ancestor.widget;
       if (widget is Offstage) {
         result = !widget.offstage;
         return false;
@@ -224,7 +320,7 @@ class _IsInCard extends Matcher {
   const _IsInCard();
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(finder, Card);
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(finder, Card);
 
   @override
   Description describe(Description description) => description.add('in card');
@@ -234,7 +330,7 @@ class _IsNotInCard extends Matcher {
   const _IsNotInCard();
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(finder, Card);
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(finder, Card);
 
   @override
   Description describe(Description description) => description.add('not in card');
@@ -245,7 +341,7 @@ class _HasOneLineDescription extends Matcher {
 
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
-    String description = object.toString();
+    final String description = object.toString();
     return description.isNotEmpty
         && !description.contains('\n')
         && !description.contains('Instance of ')

@@ -16,20 +16,47 @@ import 'image.dart';
 /// not.
 ///
 /// Commonly used with [BoxDecoration].
+///
+/// ## Sample code
+///
+/// This sample shows a radial gradient that draws a moon on a night sky:
+///
+/// ```dart
+/// new DecoratedBox(
+///   decoration: new BoxDecoration(
+///     gradient: new RadialGradient(
+///       center: const FractionalOffset(0.25, 0.3),
+///       radius: 0.15,
+///       colors: <Color>[
+///         const Color(0xFFEEEEEE),
+///         const Color(0xFF111133),
+///       ],
+///       stops: <double>[0.9, 1.0],
+///     ),
+///   ),
+/// ),
+/// ```
+///
+/// See also:
+///
+///  * [DecoratedBoxTransition], the version of this class that animates on the
+///    [decoration] property.
+///  * [Decoration], which you can extend to provide other effects with
+///    [DecoratedBox].
+///  * [CustomPaint], another way to draw custom effects from the widget layer.
 class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
   /// The [decoration] and [position] arguments must not be null. By default the
   /// decoration paints behind the child.
-  DecoratedBox({
+  const DecoratedBox({
     Key key,
     @required this.decoration,
     this.position: DecorationPosition.background,
     Widget child
-  }) : super(key: key, child: child) {
-    assert(decoration != null);
-    assert(position != null);
-  }
+  }) : assert(decoration != null),
+       assert(position != null),
+       super(key: key, child: child);
 
   /// What decoration to paint.
   ///
@@ -55,6 +82,26 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
       ..configuration = createLocalImageConfiguration(context)
       ..position = position;
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    String label;
+    if (position != null) {
+      switch (position) {
+        case DecorationPosition.background:
+          label = 'bg';
+          break;
+        case DecorationPosition.foreground:
+          label = 'fg';
+          break;
+      }
+    } else {
+      description.add('position: NULL');
+      label = 'decoration';
+    }
+    description.add(decoration != null ? '$label: $decoration' : 'no decoration');
+  }
 }
 
 /// A convenience widget that combines common painting, positioning, and sizing
@@ -62,7 +109,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 /// A container first surrounds the child with [padding] (inflated by any
 /// borders present in the [decoration]) and then applies additional
-/// [constraints] to the padded extent (incorporating the [width] and [height]
+/// [constraints] to the padded extent (incorporating the `width` and `height`
 /// as constraints, if either is non-null). The container is then surrounded by
 /// additional empty space described from the [margin].
 ///
@@ -80,11 +127,18 @@ class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///
   /// The `height` and `width` values include the padding.
+  ///
+  /// The `color` argument is a shorthand for
+  /// `decoration: new BoxDecoration(backgroundColor: color)`, which means you
+  /// cannot supply both a `color` and a `decoration` argument. If you want to
+  /// have both a `color` and a `decoration`, you can pass the color as the
+  /// `backgroundColor` argument to the `BoxDecoration`.
   Container({
     Key key,
     this.alignment,
     this.padding,
-    this.decoration,
+    Color color,
+    Decoration decoration,
     this.foregroundDecoration,
     double width,
     double height,
@@ -92,7 +146,8 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-  }) : constraints =
+  }) : decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+       constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
@@ -102,6 +157,10 @@ class Container extends StatelessWidget {
     assert(padding == null || padding.isNonNegative);
     assert(decoration == null || decoration.debugAssertIsValid());
     assert(constraints == null || constraints.debugAssertIsValid());
+    assert(color == null || decoration == null,
+      'Cannot provide both a color and a decoration\n'
+      'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
+    );
   }
 
   /// The [child] contained by the container.
@@ -126,6 +185,10 @@ class Container extends StatelessWidget {
   final EdgeInsets padding;
 
   /// The decoration to paint behind the [child].
+  ///
+  /// A shorthand for specifying just a solid color is available in the
+  /// constructor: set the `color` argument instead of the `decoration`
+  /// argument.
   final Decoration decoration;
 
   /// The decoration to paint in front of the [child].
@@ -148,7 +211,7 @@ class Container extends StatelessWidget {
   EdgeInsets get _paddingIncludingDecoration {
     if (decoration == null || decoration.padding == null)
       return padding;
-    EdgeInsets decorationPadding = decoration.padding;
+    final EdgeInsets decorationPadding = decoration.padding;
     if (padding == null)
       return decorationPadding;
     return padding + decorationPadding;
@@ -169,7 +232,7 @@ class Container extends StatelessWidget {
     if (alignment != null)
       current = new Align(alignment: alignment, child: current);
 
-    EdgeInsets effectivePadding = _paddingIncludingDecoration;
+    final EdgeInsets effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
       current = new Padding(padding: effectivePadding, child: current);
 
@@ -199,18 +262,18 @@ class Container extends StatelessWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (constraints != null)
-      description.add('$constraints');
     if (alignment != null)
       description.add('$alignment');
+    if (padding != null)
+      description.add('padding: $padding');
     if (decoration != null)
       description.add('bg: $decoration');
     if (foregroundDecoration != null)
       description.add('fg: $foregroundDecoration');
+    if (constraints != null)
+      description.add('$constraints');
     if (margin != null)
       description.add('margin: $margin');
-    if (padding != null)
-      description.add('padding: $padding');
     if (transform != null)
       description.add('has transform');
   }

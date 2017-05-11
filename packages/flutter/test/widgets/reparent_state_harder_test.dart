@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 // This is a regression test for https://github.com/flutter/flutter/issues/5588.
 
 class OrderSwitcher extends StatefulWidget {
-  OrderSwitcher({ Key key, this.a, this.b }) : super(key: key);
+  const OrderSwitcher({ Key key, this.a, this.b }) : super(key: key);
 
   final Widget a;
   final Widget b;
@@ -29,13 +29,13 @@ class OrderSwitcherState extends State<OrderSwitcher> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[];
     if (_aFirst) {
-      children.add(new KeyedSubtree(child: config.a));
-      children.add(config.b);
+      children.add(new KeyedSubtree(child: widget.a));
+      children.add(widget.b);
     } else {
-      children.add(new KeyedSubtree(child: config.b));
-      children.add(config.a);
+      children.add(new KeyedSubtree(child: widget.b));
+      children.add(widget.a);
     }
     return new Stack(
       children: children
@@ -44,7 +44,7 @@ class OrderSwitcherState extends State<OrderSwitcher> {
 }
 
 class DummyStatefulWidget extends StatefulWidget {
-  DummyStatefulWidget(Key key) : super(key: key);
+  const DummyStatefulWidget(Key key) : super(key: key);
 
   @override
   DummyStatefulWidgetState createState() => new DummyStatefulWidgetState();
@@ -52,11 +52,11 @@ class DummyStatefulWidget extends StatefulWidget {
 
 class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
   @override
-  Widget build(BuildContext context) => new Text('LEAF');
+  Widget build(BuildContext context) => const Text('LEAF');
 }
 
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
-  RekeyableDummyStatefulWidgetWrapper({ this.child, this.initialKey });
+  const RekeyableDummyStatefulWidgetWrapper({ this.child, this.initialKey });
   final Widget child;
   final GlobalKey initialKey;
   @override
@@ -69,7 +69,7 @@ class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyState
   @override
   void initState() {
     super.initState();
-    _key = config.initialKey;
+    _key = widget.initialKey;
   }
 
   void _setChild(GlobalKey value) {
@@ -154,9 +154,9 @@ void main() {
     expect(find.byType(DummyStatefulWidget), findsNWidgets(2));
 
     keyRoot.currentState.switchChildren();
-    List<State> states = tester.stateList(find.byType(RekeyableDummyStatefulWidgetWrapper)).toList();
-    RekeyableDummyStatefulWidgetWrapperState a = states[0]; a._setChild(null);
-    RekeyableDummyStatefulWidgetWrapperState b = states[1]; b._setChild(keyC);
+    final List<State> states = tester.stateList(find.byType(RekeyableDummyStatefulWidgetWrapper)).toList();
+    final RekeyableDummyStatefulWidgetWrapperState a = states[0]; a._setChild(null);
+    final RekeyableDummyStatefulWidgetWrapperState b = states[1]; b._setChild(keyC);
     await tester.pump();
 
     expect(find.byKey(keyA), findsOneWidget);

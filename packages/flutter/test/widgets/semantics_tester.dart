@@ -44,6 +44,8 @@ class TestSemantics {
   final String label;
 
   /// The bounding box for this node in its coordinate system.
+  ///
+  /// Defaults to filling the screen.
   final Rect rect;
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
@@ -62,7 +64,7 @@ class TestSemantics {
       actions: actions,
       label: label,
       rect: rect,
-      transform: transform
+      transform: transform,
     );
   }
 
@@ -77,7 +79,7 @@ class TestSemantics {
     if (children.isEmpty)
       return true;
     bool result = true;
-    Iterator<TestSemantics> it = children.iterator;
+    final Iterator<TestSemantics> it = children.iterator;
     node.visitChildren((SemanticsNode node) {
       it.moveNext();
       if (!it.current._matches(node, matchState)) {
@@ -125,7 +127,7 @@ class _HasSemantics extends Matcher {
   final TestSemantics _semantics;
 
   @override
-  bool matches(@checked SemanticsTester item, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
     return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState);
   }
 
@@ -136,8 +138,8 @@ class _HasSemantics extends Matcher {
 
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    TestSemantics testNode = matchState[TestSemantics];
-    SemanticsNode node = matchState[SemanticsNode];
+    final TestSemantics testNode = matchState[TestSemantics];
+    final SemanticsNode node = matchState[SemanticsNode];
     if (node == null)
       return mismatchDescription.add('could not find node with id ${testNode.id}');
     if (testNode.id != node.id)

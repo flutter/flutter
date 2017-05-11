@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -13,6 +13,10 @@ import 'src/mocks.dart';
 
 void main() {
   Directory tempDir;
+
+  setUpAll(() {
+    Cache.disableLocking();
+  });
 
   setUp(() {
     tempDir = fs.systemTempDirectory.createTempSync('analysis_duplicate_names_test');
@@ -24,18 +28,19 @@ void main() {
 
   group('analyze', () {
     testUsingContext('flutter analyze with two files with the same name', () async {
-      File dartFileA = fs.file(path.join(tempDir.path, 'a.dart'));
+      final File dartFileA = fs.file(fs.path.join(tempDir.path, 'a.dart'));
       dartFileA.parent.createSync();
       dartFileA.writeAsStringSync('library test;');
-      File dartFileB = fs.file(path.join(tempDir.path, 'b.dart'));
+      final File dartFileB = fs.file(fs.path.join(tempDir.path, 'b.dart'));
       dartFileB.writeAsStringSync('library test;');
 
-      AnalyzeCommand command = new AnalyzeCommand();
+      final AnalyzeCommand command = new AnalyzeCommand();
       applyMocksToCommand(command);
       return createTestCommandRunner(command).run(
-        <String>['analyze', '--no-current-package', '--no-current-directory', dartFileA.path, dartFileB.path]
+        <String>['analyze', '--no-current-package', dartFileA.path, dartFileB.path]
       ).then<Null>((Null value) {
-        expect(testLogger.statusText, startsWith('Analyzing 2 files...\nNo analyzer warnings!'));
+        expect(testLogger.statusText, contains('Analyzing'));
+        expect(testLogger.statusText, contains('No issues found!'));
       });
 
     });

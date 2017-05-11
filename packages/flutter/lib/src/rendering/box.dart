@@ -13,16 +13,16 @@ import 'package:vector_math/vector_math_64.dart';
 import 'debug.dart';
 import 'object.dart';
 
-// This class should only be used in debug builds
+// This class should only be used in debug builds.
 class _DebugSize extends Size {
   _DebugSize(Size source, this._owner, this._canBeUsedByParent): super.copy(source);
   final RenderBox _owner;
   final bool _canBeUsedByParent;
 }
 
-/// Immutable layout constraints for box layout.
+/// Immutable layout constraints for [RenderBox] layout.
 ///
-/// A size respects a BoxConstraints if, and only if, all of the following
+/// A size respects a [BoxConstraints] if, and only if, all of the following
 /// relations hold:
 ///
 /// * `minWidth <= size.width <= maxWidth`
@@ -245,7 +245,7 @@ class BoxConstraints extends Constraints {
     double height = size.height;
     assert(width > 0.0);
     assert(height > 0.0);
-    double aspectRatio = width / height;
+    final double aspectRatio = width / height;
 
     if (width > maxWidth) {
       width = maxWidth;
@@ -343,7 +343,8 @@ class BoxConstraints extends Constraints {
 
   /// Linearly interpolate between two BoxConstraints.
   ///
-  /// If either is null, this function interpolates from [BoxConstraints.zero].
+  /// If either is null, this function interpolates from a [BoxConstraints]
+  /// object whose fields are all set to 0.0.
   static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
     if (a == null && b == null)
       return null;
@@ -383,17 +384,17 @@ class BoxConstraints extends Constraints {
   @override
   bool debugAssertIsValid({
     bool isAppliedConstraint: false,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) {
     assert(() {
       void throwError(String message) {
-        StringBuffer information = new StringBuffer();
+        final StringBuffer information = new StringBuffer();
         if (informationCollector != null)
           informationCollector(information);
         throw new FlutterError('$message\n${information}The offending constraints were:\n  $this');
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
-        List<String> affectedFieldsList = <String>[];
+        final List<String> affectedFieldsList = <String>[];
         if (minWidth.isNaN)
           affectedFieldsList.add('minWidth');
         if (maxWidth.isNaN)
@@ -481,7 +482,7 @@ class BoxConstraints extends Constraints {
 
   @override
   String toString() {
-    String annotation = isNormalized ? '' : '; NOT NORMALIZED';
+    final String annotation = isNormalized ? '' : '; NOT NORMALIZED';
     if (minWidth == double.INFINITY && minHeight == double.INFINITY)
       return 'BoxConstraints(biggest$annotation)';
     if (minWidth == 0 && maxWidth == double.INFINITY &&
@@ -503,16 +504,18 @@ class BoxHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
-  const BoxHitTestEntry(RenderBox target, this.localPosition) : super(target);
+  const BoxHitTestEntry(RenderBox target, this.localPosition)
+      : assert(localPosition != null),
+        super(target);
 
   @override
   RenderBox get target => super.target;
 
   /// The position of the hit test in the local coordinates of [target].
-  final Point localPosition;
+  final Offset localPosition;
 
   @override
-  String toString() => '${target.runtimeType}@$localPosition';
+  String toString() => '${target.runtimeType}#${target.hashCode}@$localPosition';
 }
 
 /// Parent data used by [RenderBox] and its subclasses.
@@ -529,8 +532,10 @@ class BoxParentData extends ParentData {
 abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
 enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
+
+@immutable
 class _IntrinsicDimensionsCacheEntry {
-  _IntrinsicDimensionsCacheEntry(this.dimension, this.argument);
+  const _IntrinsicDimensionsCacheEntry(this.dimension, this.argument);
 
   final _IntrinsicDimension dimension;
   final double argument;
@@ -899,7 +904,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// [hitTestChildren]. When implementing hit testing, you can either override
 /// these latter two methods, or ignore them and just override [hitTest].
 ///
-/// The [hitTest] method itself is given a [Point], and must return true if the
+/// The [hitTest] method itself is given an [Offset], and must return true if the
 /// object or one of its children has absorbed the hit (preventing objects below
 /// this one from being hit), or false if the hit can continue to other objects
 /// below this one.
@@ -932,7 +937,7 @@ class _IntrinsicDimensionsCacheEntry {
 ///
 /// For a render box to be accessible, implement the
 /// [describeApproximatePaintClip] and [visitChildrenForSemantics] methods, and
-/// the [semanticAnnotator] getter. The default implementations are sufficient
+/// the [semanticsAnnotator] getter. The default implementations are sufficient
 /// for objects that only affect layout, but nodes that represent interactive
 /// components or information (diagrams, text, images, etc) should provide more
 /// complete implementations. For more information, see the documentation for
@@ -958,7 +963,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// these classes, however, you must implement the algorithm yourself.
 abstract class RenderBox extends RenderObject {
   @override
-  void setupParentData(@checked RenderObject child) {
+  void setupParentData(covariant RenderObject child) {
     if (child.parentData is! BoxParentData)
       child.parentData = new BoxParentData();
   }
@@ -1086,11 +1091,23 @@ abstract class RenderBox extends RenderObject {
   /// children. It is the size that is needed to paint the box's contents (in
   /// this case, the children) _without clipping_ that matters.
   ///
-  /// In many cases, viewports do not have efficient access to all the children,
-  /// and therefore cannot actually return a valid answer. In this case, when
-  /// [RenderObject.debugCheckingIntrinsics] is false and asserts are enabled,
-  /// the intrinsic functions should throw; in other cases, they should return
-  /// 0.0. See [RenderVirtualViewport.debugThrowIfNotCheckingIntrinsics].
+  /// ### When the intrinsic dimensions cannot be known
+  ///
+  /// There are cases where render objects do not have an efficient way to
+  /// compute their intrinsic dimensions. For example, it may be prohibitively
+  /// expensive to reify and measure every child of a lazy viewport (viewports
+  /// generally only instantiate the actually visible children), or the
+  /// dimensions may be computed by a callback about which the render object
+  /// cannot reason.
+  ///
+  /// In such cases, it may be impossible (or at least impractical) to actually
+  /// return a valid answer. In such cases, the intrinsic functions should throw
+  /// when [RenderObject.debugCheckingIntrinsics] is false and asserts are
+  /// enabled, and return 0.0 otherwise.
+  ///
+  /// See the implementations of [LayoutBuilder] or [RenderViewportBase] for
+  /// examples (in particular,
+  /// [RenderViewportBase.debugThrowIfNotCheckingIntrinsics]).
   ///
   /// ### Aspect-ratio-driven boxes
   ///
@@ -1255,7 +1272,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// See also examples in the definition of [computeMinIntrinsicWidth].
   @protected
-  double computeMinIntrinsicHeight(double height) {
+  double computeMinIntrinsicHeight(double width) {
     return 0.0;
   }
 
@@ -1332,7 +1349,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// See also examples in the definition of [computeMinIntrinsicWidth].
   @protected
-  double computeMaxIntrinsicHeight(double height) {
+  double computeMaxIntrinsicHeight(double width) {
     return 0.0;
   }
 
@@ -1424,7 +1441,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   @override
-  Rect get semanticBounds => Point.origin & size;
+  Rect get semanticBounds => Offset.zero & size;
 
   @override
   void debugResetSize() {
@@ -1466,7 +1483,7 @@ abstract class RenderBox extends RenderObject {
       return false;
     });
     assert(_debugSetDoingBaseline(true));
-    double result = getDistanceToActualBaseline(baseline);
+    final double result = getDistanceToActualBaseline(baseline);
     assert(_debugSetDoingBaseline(false));
     if (result == null && !onlyReal)
       return size.height;
@@ -1482,8 +1499,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
-    if (_cachedBaselines == null)
-      _cachedBaselines = new Map<TextBaseline, double>();
+    _cachedBaselines ??= <TextBaseline, double>{};
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
     return _cachedBaselines[baseline];
   }
@@ -1533,15 +1549,15 @@ abstract class RenderBox extends RenderObject {
         );
       }
       // verify that the size is not infinite
-      if (_size.isInfinite) {
-        StringBuffer information = new StringBuffer();
+      if (!_size.isFinite) {
+        final StringBuffer information = new StringBuffer();
         if (!constraints.hasBoundedWidth) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
             node = node.parent;
           information.writeln('The nearest ancestor providing an unbounded width constraint is:');
           information.writeln('  $node');
-          List<String> description = <String>[];
+          final List<String> description = <String>[];
           node.debugFillDescription(description);
           for (String line in description)
             information.writeln('  $line');
@@ -1552,7 +1568,7 @@ abstract class RenderBox extends RenderObject {
             node = node.parent;
           information.writeln('The nearest ancestor providing an unbounded height constraint is:');
           information.writeln('  $node');
-          List<String> description = <String>[];
+          final List<String> description = <String>[];
           node.debugFillDescription(description);
           for (String line in description)
             information.writeln('  $line');
@@ -1584,7 +1600,7 @@ abstract class RenderBox extends RenderObject {
         // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
-        StringBuffer failures = new StringBuffer();
+        final StringBuffer failures = new StringBuffer();
         int failureCount = 0;
 
         double testIntrinsic(double function(double extent), String name, double constraint) {
@@ -1658,7 +1674,7 @@ abstract class RenderBox extends RenderObject {
   void performResize() {
     // default behavior for subclasses that have sizedByParent = true
     size = constraints.smallest;
-    assert(!size.isInfinite);
+    assert(size.isFinite);
   }
 
   @override
@@ -1692,33 +1708,35 @@ abstract class RenderBox extends RenderObject {
   /// called. For example, a render object might be a child of a [RenderOpacity]
   /// object, which calls [hitTest] on its children when its opacity is zero
   /// even through it does not [paint] its children.
-  bool hitTest(HitTestResult result, { @required Point position }) {
+  bool hitTest(HitTestResult result, { @required Offset position }) {
     assert(() {
-      if (debugNeedsLayout) {
-        throw new FlutterError(
-          'Cannot hit test a dirty render box.\n'
-          'The hitTest() method was called on this RenderBox:\n'
-          '  $this\n'
-          'Unfortunately, since this object has been marked as needing layout, its geometry is not known at this time. '
-          'This means it cannot be accurately hit-tested. Make sure to only mark nodes as needing layout during a pipeline '
-          'flush, so that it is marked clean before any event handling occurs. If you are trying to perform a hit test '
-          'during the layout phase itself, make sure you only hit test nodes that have completed layout (e.g. the node\'s '
-          'children, after their layout() method has been called).'
-        );
-      }
       if (!hasSize) {
+        if (debugNeedsLayout) {
+          throw new FlutterError(
+            'Cannot hit test a render box that has never been laid out.\n'
+            'The hitTest() method was called on this RenderBox:\n'
+            '  $this\n'
+            'Unfortunately, this object\'s geometry is not known at this time, '
+            'probably because it has never been laid out. '
+            'This means it cannot be accurately hit-tested. If you are trying '
+            'to perform a hit test during the layout phase itself, make sure '
+            'you only hit test nodes that have completed layout (e.g. the node\'s '
+            'children, after their layout() method has been called).'
+          );
+        }
         throw new FlutterError(
           'Cannot hit test a render box with no size.\n'
           'The hitTest() method was called on this RenderBox:\n'
           '  $this\n'
-          'Although this node is not marked as needing layout, its size is not set. A RenderBox object must have an '
-          'explicit size before it can be hit-tested. Make sure that the RenderBox in question sets its size during layout.'
+          'Although this node is not marked as needing layout, '
+          'its size is not set. A RenderBox object must have an '
+          'explicit size before it can be hit-tested. Make sure '
+          'that the RenderBox in question sets its size during layout.'
         );
       }
       return true;
     });
-    if (position.x >= 0.0 && position.x < _size.width &&
-        position.y >= 0.0 && position.y < _size.height) {
+    if (_size.contains(position)) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
         result.add(new BoxHitTestEntry(this, position));
         return true;
@@ -1733,7 +1751,7 @@ abstract class RenderBox extends RenderObject {
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
-  bool hitTestSelf(Point position) => false;
+  bool hitTestSelf(Offset position) => false;
 
   /// Override this method to check whether any children are located at the
   /// given position.
@@ -1745,7 +1763,7 @@ abstract class RenderBox extends RenderObject {
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
-  bool hitTestChildren(HitTestResult result, { Point position }) => false;
+  bool hitTestChildren(HitTestResult result, { Offset position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform.
@@ -1766,7 +1784,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           '$runtimeType does not implement applyPaintTransform.\n'
           'The following $runtimeType object:\n'
-          '  ${this.toStringShallow()}\n'
+          '  ${toStringShallow()}\n'
           '...did not use a BoxParentData class for the parentData field of the following child:\n'
           '  ${child.toStringShallow()}\n'
           'The $runtimeType class inherits from RenderBox. '
@@ -1806,16 +1824,16 @@ abstract class RenderBox extends RenderObject {
   /// coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is
-  /// degenerate, this function returns [Point.origin].
+  /// degenerate, this function returns [Offset.zero].
   ///
   /// If `ancestor` is non-null, this function converts the given point from the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of from the global coordinate system.
-  Point globalToLocal(Point point, { RenderObject ancestor }) {
+  Offset globalToLocal(Offset point, { RenderObject ancestor }) {
     final Matrix4 transform = getTransformTo(ancestor);
-    double det = transform.invert();
+    final double det = transform.invert();
     if (det == 0.0)
-      return Point.origin;
+      return Offset.zero;
     return MatrixUtils.transformPoint(transform, point);
   }
 
@@ -1825,7 +1843,7 @@ abstract class RenderBox extends RenderObject {
   /// If `ancestor` is non-null, this function converts the given point to the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of to the global coordinate system.
-  Point localToGlobal(Point point, { RenderObject ancestor }) {
+  Offset localToGlobal(Offset point, { RenderObject ancestor }) {
     return MatrixUtils.transformPoint(getTransformTo(ancestor), point);
   }
 
@@ -1843,7 +1861,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// The returned paint bounds are in the local coordinate system of this box.
   @override
-  Rect get paintBounds => Point.origin & size;
+  Rect get paintBounds => Offset.zero & size;
 
   /// Override this method to handle pointer events that hit this render object.
   ///
@@ -1863,7 +1881,7 @@ abstract class RenderBox extends RenderObject {
   /// ```
   // TODO(ianh): Fix the type of the argument here once https://github.com/dart-lang/sdk/issues/25232 is fixed
   @override
-  void handleEvent(PointerEvent event, @checked HitTestEntry entry) {
+  void handleEvent(PointerEvent event, covariant HitTestEntry entry) {
     super.handleEvent(event, entry);
   }
 
@@ -1918,7 +1936,7 @@ abstract class RenderBox extends RenderObject {
   @protected
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-      Paint paint = new Paint()
+      final Paint paint = new Paint()
        ..style = PaintingStyle.stroke
        ..strokeWidth = 1.0
        ..color = debugPaintSizeColor;
@@ -1933,12 +1951,12 @@ abstract class RenderBox extends RenderObject {
   @protected
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     assert(() {
-      Paint paint = new Paint()
+      final Paint paint = new Paint()
        ..style = PaintingStyle.stroke
        ..strokeWidth = 0.25;
       Path path;
       // ideographic baseline
-      double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
+      final double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
       if (baselineI != null) {
         paint.color = debugPaintIdeographicBaselineColor;
         path = new Path();
@@ -1947,7 +1965,7 @@ abstract class RenderBox extends RenderObject {
         context.canvas.drawPath(path, paint);
       }
       // alphabetic baseline
-      double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+      final double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
       if (baselineA != null) {
         paint.color = debugPaintAlphabeticBaselineColor;
         path = new Path();
@@ -1970,7 +1988,7 @@ abstract class RenderBox extends RenderObject {
   void debugPaintPointers(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugActivePointers > 0) {
-        Paint paint = new Paint()
+        final Paint paint = new Paint()
          ..color = new Color(debugPaintPointersColorValue | ((0x04000000 * depth) & 0xFF000000));
         context.canvas.drawRect(offset & size, paint);
       }
@@ -2002,7 +2020,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     ChildType child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      double result = child.getDistanceToActualBaseline(baseline);
+      final double result = child.getDistanceToActualBaseline(baseline);
       if (result != null)
         return result + childParentData.offset.dy;
       child = childParentData.nextSibling;
@@ -2037,14 +2055,12 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   ///
   /// Stops walking once after the first child reports that it contains the
   /// given point. Returns whether any children contain the given point.
-  bool defaultHitTestChildren(HitTestResult result, { Point position }) {
+  bool defaultHitTestChildren(HitTestResult result, { Offset position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      Point transformed = new Point(position.x - childParentData.offset.dx,
-                                    position.y - childParentData.offset.dy);
-      if (child.hitTest(result, position: transformed))
+      if (child.hitTest(result, position: position - childParentData.offset))
         return true;
       child = childParentData.previousSibling;
     }

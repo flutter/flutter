@@ -9,19 +9,19 @@ import 'gesture_tester.dart';
 
 const PointerDownEvent down = const PointerDownEvent(
   pointer: 5,
-  position: const Point(10.0, 10.0)
+  position: const Offset(10.0, 10.0)
 );
 
 const PointerUpEvent up = const PointerUpEvent(
   pointer: 5,
-  position: const Point(11.0, 9.0)
+  position: const Offset(11.0, 9.0)
 );
 
 void main() {
   setUp(ensureGestureBinding);
 
   testGesture('Should recognize long press', (GestureTester tester) {
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -42,7 +42,7 @@ void main() {
   });
 
   testGesture('Up cancels long press', (GestureTester tester) {
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
 
     bool longPressRecognized = false;
     longPress.onLongPress = () {
@@ -65,8 +65,8 @@ void main() {
   });
 
   testGesture('Should recognize both tap down and long press', (GestureTester tester) {
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapDownRecognized = false;
     tap.onTapDown = (_) {
@@ -98,8 +98,8 @@ void main() {
   });
 
   testGesture('Drag start delayed by microtask', (GestureTester tester) {
-    LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
-    HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+    final LongPressGestureRecognizer longPress = new LongPressGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
 
     bool isDangerousStack = false;
 

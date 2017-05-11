@@ -12,12 +12,12 @@ void main() {
   testWidgets('Stateful widget smoke test', (WidgetTester tester) async {
 
     void checkTree(BoxDecoration expectedDecoration) {
-      SingleChildRenderObjectElement element = tester.element(
+      final SingleChildRenderObjectElement element = tester.element(
         find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement)
       );
       expect(element, isNotNull);
       expect(element.renderObject is RenderDecoratedBox, isTrue);
-      RenderDecoratedBox renderObject = element.renderObject;
+      final RenderDecoratedBox renderObject = element.renderObject;
       expect(renderObject.decoration, equals(expectedDecoration));
     }
 
@@ -58,7 +58,7 @@ void main() {
   testWidgets('Don\'t rebuild subwidgets', (WidgetTester tester) async {
     await tester.pumpWidget(
       new FlipWidget(
-        key: new Key('rebuild test'),
+        key: const Key('rebuild test'),
         left: new TestBuildCounter(),
         right: new DecoratedBox(decoration: kBoxDecorationB)
       )

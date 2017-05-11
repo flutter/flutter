@@ -8,37 +8,41 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
-    final Key avatarA = new Key('A');
-    final Key avatarC = new Key('C');
-    final Key avatarD = new Key('D');
+    final Key avatarA = const Key('A');
+    final Key avatarC = const Key('C');
+    final Key avatarD = const Key('D');
 
     await tester.pumpWidget(
-      new Material(
-        child: new UserAccountsDrawerHeader(
-          currentAccountPicture: new CircleAvatar(
-            key: avatarA,
-            child: new Text('A')
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new UserAccountsDrawerHeader(
+              currentAccountPicture: new CircleAvatar(
+                key: avatarA,
+                child: const Text('A'),
+              ),
+              otherAccountsPictures: <Widget>[
+                const CircleAvatar(
+                  child: const Text('B'),
+                ),
+                new CircleAvatar(
+                  key: avatarC,
+                  child: const Text('C'),
+                ),
+                new CircleAvatar(
+                  key: avatarD,
+                  child: const Text('D'),
+                ),
+                const CircleAvatar(
+                  child: const Text('E'),
+                )
+              ],
+              accountName: const Text("name"),
+              accountEmail: const Text("email"),
+            ),
           ),
-          otherAccountsPictures: <Widget>[
-            new CircleAvatar(
-              child: new Text('B')
-            ),
-            new CircleAvatar(
-              key: avatarC,
-              child: new Text('C')
-            ),
-            new CircleAvatar(
-              key: avatarD,
-              child: new Text('D')
-            ),
-            new CircleAvatar(
-              child: new Text('E')
-            )
-          ],
-          accountName: new Text("name"),
-          accountEmail: new Text("email")
-        )
-      )
+        ),
+      ),
     );
 
     expect(find.text('A'), findsOneWidget);
@@ -58,18 +62,21 @@ void main() {
     expect(box.size.width, equals(40.0));
     expect(box.size.height, equals(40.0));
 
-    Point topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
-    Point topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
+    box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
+    expect(box.size.height, equals(160.0 + 8.0 + 1.0)); // height + bottom margin + bottom edge)
 
-    Point avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
-    Point avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
-    Point avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
+    final Offset topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
+    final Offset topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
 
-    expect(avatarATopLeft.x - topLeft.x, equals(16.0));
-    expect(avatarATopLeft.y - topLeft.y, equals(16.0));
-    expect(topRight.x - avatarDTopRight.x, equals(16.0));
-    expect(avatarDTopRight.y - topRight.y, equals(16.0));
-    expect(avatarDTopRight.x - avatarCTopRight.x, equals(40.0 + 16.0)); // size + space between
+    final Offset avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
+    final Offset avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
+    final Offset avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
+
+    expect(avatarATopLeft.dx - topLeft.dx, equals(16.0));
+    expect(avatarATopLeft.dy - topLeft.dy, equals(16.0));
+    expect(topRight.dx - avatarDTopRight.dx, equals(16.0));
+    expect(avatarDTopRight.dy - topRight.dy, equals(16.0));
+    expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
 
@@ -80,19 +87,27 @@ void main() {
       Widget accountName,
       Widget accountEmail,
       VoidCallback onDetailsPressed,
+      EdgeInsets margin,
     }) {
-      return new Material(
-        child: new UserAccountsDrawerHeader(
-          currentAccountPicture: currentAccountPicture,
-          otherAccountsPictures: otherAccountsPictures,
-          accountName: accountName,
-          accountEmail: accountEmail,
-          onDetailsPressed: onDetailsPressed,
+      return new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new UserAccountsDrawerHeader(
+              currentAccountPicture: currentAccountPicture,
+              otherAccountsPictures: otherAccountsPictures,
+              accountName: accountName,
+              accountEmail: accountEmail,
+              onDetailsPressed: onDetailsPressed,
+              margin: margin,
+            ),
+          ),
         ),
       );
     }
 
     await tester.pumpWidget(buildFrame());
+    final RenderBox box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
+    expect(box.size.height, equals(160.0 + 1.0)); // height + bottom edge)
     expect(find.byType(Icon), findsNothing);
 
     await tester.pumpWidget(buildFrame(
@@ -101,63 +116,63 @@ void main() {
     expect(find.byType(Icon), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      accountName: new Text('accountName'),
+      accountName: const Text('accountName'),
       onDetailsPressed: () { },
     ));
     expect(
-      tester.getCenter(find.text('accountName')).y,
-      tester.getCenter(find.byType(Icon)).y
+      tester.getCenter(find.text('accountName')).dy,
+      tester.getCenter(find.byType(Icon)).dy
     );
 
     await tester.pumpWidget(buildFrame(
-      accountEmail: new Text('accountEmail'),
+      accountEmail: const Text('accountEmail'),
       onDetailsPressed: () { },
     ));
     expect(
-      tester.getCenter(find.text('accountEmail')).y,
-      tester.getCenter(find.byType(Icon)).y
+      tester.getCenter(find.text('accountEmail')).dy,
+      tester.getCenter(find.byType(Icon)).dy
     );
 
     await tester.pumpWidget(buildFrame(
-      accountName: new Text('accountName'),
-      accountEmail: new Text('accountEmail'),
+      accountName: const Text('accountName'),
+      accountEmail: const Text('accountEmail'),
       onDetailsPressed: () { },
     ));
     expect(
-      tester.getCenter(find.text('accountEmail')).y,
-      tester.getCenter(find.byType(Icon)).y
+      tester.getCenter(find.text('accountEmail')).dy,
+      tester.getCenter(find.byType(Icon)).dy
     );
     expect(
-      tester.getBottomLeft(find.text('accountEmail')).y,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).y)
+      tester.getBottomLeft(find.text('accountEmail')).dy,
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
     );
     expect(
-      tester.getBottomLeft(find.text('accountEmail')).x,
-      tester.getBottomLeft(find.text('accountName')).x
+      tester.getBottomLeft(find.text('accountEmail')).dx,
+      tester.getBottomLeft(find.text('accountName')).dx
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: new CircleAvatar(child: new Text('A')),
+      currentAccountPicture: const CircleAvatar(child: const Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[new CircleAvatar(child: new Text('A'))],
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 
-    final Key avatarA = new Key('A');
+    final Key avatarA = const Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: new CircleAvatar(key: avatarA, child: new Text('A')),
-      accountName: new Text('accountName'),
+      currentAccountPicture: new CircleAvatar(key: avatarA, child: const Text('A')),
+      accountName: const Text('accountName'),
     ));
     expect(
-      tester.getBottomLeft(find.byKey(avatarA)).x,
-      tester.getBottomLeft(find.text('accountName')).x
+      tester.getBottomLeft(find.byKey(avatarA)).dx,
+      tester.getBottomLeft(find.text('accountName')).dx
     );
     expect(
-      tester.getBottomLeft(find.text('accountName')).y,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).y)
+      tester.getBottomLeft(find.text('accountName')).dy,
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
     );
   });
 }

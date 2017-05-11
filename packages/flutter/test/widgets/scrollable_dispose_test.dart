@@ -9,7 +9,7 @@ import 'test_widgets.dart';
 
 void main() {
   testWidgets('simultaneously dispose a widget and end the scroll animation', (WidgetTester tester) async {
-    List<Widget> textWidgets = <Widget>[];
+    final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i++)
       textWidgets.add(new Text('$i'));
     await tester.pumpWidget(new FlipWidget(

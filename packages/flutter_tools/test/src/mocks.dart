@@ -29,9 +29,41 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   );
 }
 
+class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  List<Device> _devices = <Device>[];
+  StreamController<Device> _onAddedController = new StreamController<Device>.broadcast();
+  StreamController<Device> _onRemovedController = new StreamController<Device>.broadcast();
+
+  MockPollingDeviceDiscovery() : super('mock');
+
+  @override
+  List<Device> pollingGetDevices() => _devices;
+
+  @override
+  bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => true;
+
+  void addDevice(MockAndroidDevice device) {
+    _devices.add(device);
+
+    _onAddedController.add(device);
+  }
+
+  @override
+  List<Device> get devices => _devices;
+
+  @override
+  Stream<Device> get onAdded => _onAddedController.stream;
+
+  @override
+  Stream<Device> get onRemoved => _onRemovedController.stream;
+}
+
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
-  TargetPlatform get platform => TargetPlatform.android_arm;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
   bool isSupported() => true;
@@ -39,7 +71,7 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
 
 class MockIOSDevice extends Mock implements IOSDevice {
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;
@@ -47,7 +79,7 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;
@@ -77,10 +109,10 @@ void applyMocksToCommand(FlutterCommand command) {
 
 /// Common functionality for tracking mock interaction
 class BasicMock {
-  final List<String> messages = new List<String>();
+  final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
-    List<String> actualMessages = new List<String>.from(messages);
+    final List<String> actualMessages = new List<String>.from(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
@@ -88,13 +120,15 @@ class BasicMock {
   bool contains(String match) {
     print('Checking for `$match` in:');
     print(messages);
-    bool result = messages.contains(match);
+    final bool result = messages.contains(match);
     messages.clear();
     return result;
   }
 }
 
 class MockDevFSOperations extends BasicMock implements DevFSOperations {
+  Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
+
   @override
   Future<Uri> create(String fsName) async {
     messages.add('create $fsName');
@@ -107,12 +141,14 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content) async {
-    messages.add('writeFile $fsName $devicePath');
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
+    messages.add('writeFile $fsName $deviceUri');
+    devicePathToContent[deviceUri] = content;
   }
 
   @override
-  Future<dynamic> deleteFile(String fsName, String devicePath) async {
-    messages.add('deleteFile $fsName $devicePath');
+  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
+    messages.add('deleteFile $fsName $deviceUri');
+    devicePathToContent.remove(deviceUri);
   }
 }

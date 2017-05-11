@@ -27,7 +27,7 @@ class ButtonBar extends StatelessWidget {
   /// Creates a button bar.
   ///
   /// The alignment argument defaults to [MainAxisAlignment.end].
-  ButtonBar({
+  const ButtonBar({
     Key key,
     this.alignment: MainAxisAlignment.end,
     this.mainAxisSize: MainAxisSize.max,

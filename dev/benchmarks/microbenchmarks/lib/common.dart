@@ -54,7 +54,7 @@ class BenchmarkResultPrinter {
   }
 
   String _printPlainText() {
-    StringBuffer buf = new StringBuffer();
+    final StringBuffer buf = new StringBuffer();
     for (_BenchmarkResult result in _results) {
       buf.writeln('${result.description}: ${result.value.toStringAsFixed(1)} ${result.unit}');
     }

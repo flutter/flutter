@@ -10,20 +10,21 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 5', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
       new Stack(
+        fit: StackFit.expand,
         children: <Widget>[
-          new Semantics(
+          const Semantics(
             // this tests that empty nodes disappear
           ),
-          new Semantics(
+          const Semantics(
             // this tests whether you can have a container with no other semantics
-            container: true
+            container: true,
           ),
-          new Semantics(
-            label: 'label' // (force a fork)
+          const Semantics(
+            label: 'label', // (force a fork)
           ),
         ]
       )

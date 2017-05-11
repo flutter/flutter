@@ -7,6 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('ButtonBar default control', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new ButtonBar()));
+    await tester.pumpWidget(const Center(child: const ButtonBar()));
   });
 }

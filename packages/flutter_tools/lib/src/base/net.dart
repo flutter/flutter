@@ -14,9 +14,9 @@ const int kNetworkProblemExitCode = 50;
 Future<List<int>> fetchUrl(Uri url) async {
   printTrace('Downloading $url.');
 
-  HttpClient httpClient = new HttpClient();
-  HttpClientRequest request = await httpClient.getUrl(url);
-  HttpClientResponse response = await request.close();
+  final HttpClient httpClient = new HttpClient();
+  final HttpClientRequest request = await httpClient.getUrl(url);
+  final HttpClientResponse response = await request.close();
 
   printTrace('Received response statusCode=${response.statusCode}');
   if (response.statusCode != 200) {
@@ -28,7 +28,7 @@ Future<List<int>> fetchUrl(Uri url) async {
   }
 
   try {
-    BytesBuilder responseBody = new BytesBuilder(copy: false);
+    final BytesBuilder responseBody = new BytesBuilder(copy: false);
     await for (List<int> chunk in response)
         responseBody.add(chunk);
 

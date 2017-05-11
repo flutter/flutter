@@ -30,10 +30,10 @@ function follow_links() {
 # Convert a filesystem path to a format usable by Dart's URI parser.
 function path_uri() {
   # Reduce multiple leading slashes to a single slash.
-  echo $1 | sed -E -e "s,^/+,/,"
+  echo "$1" | sed -E -e "s,^/+,/,"
 }
 
-PROG_NAME="$(path_uri $(follow_links "$BASH_SOURCE"))"
+PROG_NAME="$(path_uri "$(follow_links "$BASH_SOURCE")")"
 BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
 
@@ -45,6 +45,15 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 
 DART="$DART_SDK_PATH/bin/dart"
 PUB="$DART_SDK_PATH/bin/pub"
+
+# Test if running as superuser
+if [[ "$EUID" == "0" ]]; then
+  echo "   Woah! You appear to be trying to run flutter as root."
+  echo "   We strongly recommend running the flutter tool without superuser privileges."
+  echo "  /"
+  echo "📎"
+  exit 1
+fi
 
 # Test if Git is available on the Host
 if ! hash git 2>/dev/null; then
@@ -72,7 +81,12 @@ fi
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
     echo Building flutter tool...
-    (cd "$FLUTTER_TOOLS_DIR"; rm -f pubspec.lock; "$PUB" get --verbosity=error --no-packages-dir)
+    LOCAL_PUB_ENV="$PUB_ENVIRONMENT"
+    if [ "$TRAVIS" == "true" ] || [ "$BOT" == "true" ] || [ "$CONTINUOUS_INTEGRATION" == "true" ] || [ "$CHROME_HEADLESS" == "1" ] || [ "$APPVEYOR" == "true" ] || [ "$CI" == "true" ]; then
+      LOCAL_PUB_ENV="$LOCAL_PUB_ENV:flutter_bot"
+    fi
+    LOCAL_PUB_ENV="$LOCAL_PUB_ENV:flutter_install"
+    (cd "$FLUTTER_TOOLS_DIR"; PUB_ENVIRONMENT=$LOCAL_PUB_ENV "$PUB" upgrade --verbosity=error --no-packages-dir)
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo $REVISION > "$STAMP_PATH"
   fi

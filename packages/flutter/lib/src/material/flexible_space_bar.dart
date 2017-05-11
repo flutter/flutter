@@ -4,34 +4,33 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'app_bar.dart';
 import 'constants.dart';
-import 'scaffold.dart';
 import 'theme.dart';
 
 /// The part of a material design [AppBar] that expands and collapses.
 ///
-/// Most commonly used in in the [AppBar.flexibleSpace] field, a flexible space
-/// bar expands and contracts as the app scrolls so that the [AppBar] reaches
-/// from the top of the app to the top of the scrolling contents of the app.
+/// Most commonly used in in the [SliverAppBar.flexibleSpace] field, a flexible
+/// space bar expands and contracts as the app scrolls so that the [AppBar]
+/// reaches from the top of the app to the top of the scrolling contents of the
+/// app.
 ///
-/// Requires one of its ancestors to be a [Scaffold] widget because the
-/// [Scaffold] coordinates the scrolling effect between the flexible space and
-/// its body.
+/// The widget that sizes the [AppBar] must wrap it in the widget returned by
+/// [FlexibleSpaceBar.createSettings], to convey sizing information down to the
+/// [FlexibleSpaceBar].
 ///
 /// See also:
 ///
-///  * [AppBar]
-///  * [Scaffold]
+///  * [SliverAppBar], which implements the expanding and contracting.
+///  * [AppBar], which is used by [SliverAppBar].
 ///  * <https://material.google.com/patterns/scrolling-techniques.html>
 class FlexibleSpaceBar extends StatefulWidget {
   /// Creates a flexible space bar.
   ///
-  /// Most commonly used in the [AppBar.flexibleSpace] field. Requires one of
-  /// its ancestors to be a [Scaffold] widget.
-  FlexibleSpaceBar({
+  /// Most commonly used in the [AppBar.flexibleSpace] field.
+  const FlexibleSpaceBar({
     Key key,
     this.title,
     this.background,
@@ -45,7 +44,7 @@ class FlexibleSpaceBar extends StatefulWidget {
 
   /// Shown behind the [title] when expanded.
   ///
-  /// Typically an [AssetImage] widget with [AssetImage.fit] set to [ImageFit.cover].
+  /// Typically an [Image] widget with [Image.fit] set to [BoxFit.cover].
   final Widget background;
 
   /// Whether the title should be centered.
@@ -53,14 +52,35 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
+  /// Wraps a widget that contains an [AppBar] to convey sizing information down
+  /// to the [FlexibleSpaceBar].
+  ///
+  /// Used by [Scaffold] and [SliverAppBar].
+  static Widget createSettings({
+    double toolbarOpacity,
+    double minExtent,
+    double maxExtent,
+    @required double currentExtent,
+    @required Widget child,
+  }) {
+    assert(currentExtent != null);
+    return new _FlexibleSpaceBarSettings(
+      toolbarOpacity: toolbarOpacity ?? 1.0,
+      minExtent: minExtent ?? currentExtent,
+      maxExtent: maxExtent ?? currentExtent,
+      currentExtent: currentExtent,
+      child: child,
+    );
+  }
+
   @override
   _FlexibleSpaceBarState createState() => new _FlexibleSpaceBarState();
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (config.centerTitle != null)
-      return config.centerTitle;
+    if (widget.centerTitle != null)
+      return widget.centerTitle;
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -72,45 +92,43 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return null;
   }
 
-  Widget _buildContent(BuildContext context, BoxConstraints constraints) {
-    final Size size = constraints.biggest;
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
-
-    final double currentHeight = size.height;
-    final double maxHeight = statusBarHeight + AppBar.getExpandedHeightFor(context);
-    final double minHeight = statusBarHeight + kToolbarHeight;
-    final double deltaHeight = maxHeight - minHeight;
-
-    // 0.0 -> Expanded
-    // 1.0 -> Collapsed to toolbar
-    final double t = (1.0 - (currentHeight - minHeight) / deltaHeight).clamp(0.0, 1.0);
+  @override
+  Widget build(BuildContext context) {
+    final _FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(_FlexibleSpaceBarSettings);
+    assert(settings != null, 'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().');
 
     final List<Widget> children = <Widget>[];
 
+    final double deltaExtent = settings.maxExtent - settings.minExtent;
+
+    // 0.0 -> Expanded
+    // 1.0 -> Collapsed to toolbar
+    final double t = (1.0 - (settings.currentExtent - settings.minExtent) / (deltaExtent)).clamp(0.0, 1.0);
+
     // background image
-    if (config.background != null) {
-      final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaHeight);
+    if (widget.background != null) {
+      final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
       final double fadeEnd = 1.0;
       assert(fadeStart <= fadeEnd);
       final double opacity = 1.0 - new Interval(fadeStart, fadeEnd).transform(t);
-      final double parallax = new Tween<double>(begin: 0.0, end: deltaHeight / 4.0).lerp(t);
+      final double parallax = new Tween<double>(begin: 0.0, end: deltaExtent / 4.0).lerp(t);
       if (opacity > 0.0) {
         children.add(new Positioned(
           top: -parallax,
           left: 0.0,
           right: 0.0,
-          height: maxHeight,
+          height: settings.maxExtent,
           child: new Opacity(
             opacity: opacity,
-            child: config.background
+            child: widget.background
           )
         ));
       }
     }
 
-    if (config.title != null) {
+    if (widget.title != null) {
       final ThemeData theme = Theme.of(context);
-      final double opacity = (1.0 - (minHeight - currentHeight) / (kToolbarHeight - statusBarHeight)).clamp(0.0, 1.0);
+      final double opacity = settings.toolbarOpacity;
       if (opacity > 0.0) {
         TextStyle titleStyle = theme.primaryTextTheme.title;
         titleStyle = titleStyle.copyWith(
@@ -131,7 +149,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             transform: scaleTransform,
             child: new Align(
               alignment: titleAlignment,
-              child: new DefaultTextStyle(style: titleStyle, child: config.title)
+              child: new DefaultTextStyle(style: titleStyle, child: widget.title)
             )
           )
         ));
@@ -140,9 +158,28 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
     return new ClipRect(child: new Stack(children: children));
   }
+}
+
+class _FlexibleSpaceBarSettings extends InheritedWidget {
+  const _FlexibleSpaceBarSettings({
+    Key key,
+    this.toolbarOpacity,
+    this.minExtent,
+    this.maxExtent,
+    this.currentExtent,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  final double toolbarOpacity;
+  final double minExtent;
+  final double maxExtent;
+  final double currentExtent;
 
   @override
-  Widget build(BuildContext context) {
-    return new LayoutBuilder(builder: _buildContent);
+  bool updateShouldNotify(_FlexibleSpaceBarSettings oldWidget) {
+    return toolbarOpacity != oldWidget.toolbarOpacity
+        || minExtent != oldWidget.minExtent
+        || maxExtent != oldWidget.maxExtent
+        || currentExtent != oldWidget.currentExtent;
   }
 }

@@ -33,20 +33,23 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<Null> _listChannels() async {
-    String currentBranch = runSync(
+    final String currentBranch = runSync(
         <String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
         workingDirectory: Cache.flutterRoot);
 
     printStatus('Flutter channels:');
-    int result = await runCommandAndStreamOutput(
+    final int result = await runCommandAndStreamOutput(
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
-        List<String> split = line.split('/');
-        if (split.length < 2) return null;
-        String branchName = split[1];
-        if (branchName.startsWith('HEAD')) return null;
-        if (branchName == currentBranch) return '* $branchName';
+        final List<String> split = line.split('/');
+        if (split.length < 2)
+          return null;
+        final String branchName = split[1];
+        if (branchName.startsWith('HEAD'))
+          return null;
+        if (branchName == currentBranch)
+          return '* $branchName';
         return '  $branchName';
       },
     );
@@ -56,7 +59,7 @@ class ChannelCommand extends FlutterCommand {
 
   Future<Null> _switchChannel(String branchName) async {
     printStatus('Switching to flutter channel named $branchName');
-    int result = await runCommandAndStreamOutput(
+    final int result = await runCommandAndStreamOutput(
       <String>['git', 'checkout', branchName],
       workingDirectory: Cache.flutterRoot,
     );

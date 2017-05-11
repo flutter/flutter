@@ -13,10 +13,10 @@ void main() {
           color: Colors.green[500],
           opacity: 0.5
         ),
-        child: new Icon(Icons.add)
+        child: const Icon(Icons.add)
       )
     );
-    RichText text = tester.widget(find.byType(RichText));
+    final RichText text = tester.widget(find.byType(RichText));
     expect(text.text.style.color, equals(Colors.green[500].withOpacity(0.5)));
   });
 }

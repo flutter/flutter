@@ -2,10 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class TextStyleItem extends StatelessWidget {
-  TextStyleItem({ Key key, this.name, this.style, this.text }) : super(key: key) {
+  TextStyleItem({
+    Key key,
+    @required this.name,
+    @required this.style,
+    @required this.text,
+  }) : super(key: key) {
     assert(name != null);
     assert(style != null);
     assert(text != null);
@@ -65,7 +71,7 @@ class TypographyDemo extends StatelessWidget {
     }
 
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Typography')),
+      appBar: new AppBar(title: const Text('Typography')),
       body: new ListView(children: styleItems)
     );
   }

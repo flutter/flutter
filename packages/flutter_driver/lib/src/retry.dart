@@ -23,7 +23,7 @@ Future<dynamic> retry(Action action, Duration timeout,
   assert(timeout != null);
   assert(pauseBetweenRetries != null);
 
-  Stopwatch sw = stopwatchFactory()..start();
+  final Stopwatch sw = stopwatchFactory()..start();
   dynamic result;
   dynamic lastError;
   dynamic lastStackTrace;

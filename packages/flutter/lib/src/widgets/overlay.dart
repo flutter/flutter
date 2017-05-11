@@ -44,7 +44,7 @@ import 'ticker_provider.dart';
 /// overlay entry is still built even if it is not visible, set [maintainState]
 /// to true. This is more expensive, so should be done with care. In particular,
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
-/// call [setState], the user's battery will be drained unnecessarily.
+/// call [State.setState], the user's battery will be drained unnecessarily.
 ///
 /// See also:
 ///
@@ -82,7 +82,7 @@ class OverlayEntry {
   /// set.
   bool get opaque => _opaque;
   bool _opaque;
-  set opaque (bool value) {
+  set opaque(bool value) {
     if (_opaque == value)
       return;
     _opaque = value;
@@ -99,14 +99,14 @@ class OverlayEntry {
   /// overlay entry is still built even if it is not visible, set [maintainState]
   /// to true. This is more expensive, so should be done with care. In particular,
   /// if widgets in an overlay entry with [maintainState] set to true repeatedly
-  /// call [setState], the user's battery will be drained unnecessarily.
+  /// call [State.setState], the user's battery will be drained unnecessarily.
   ///
   /// This is used by the [Navigator] and [Route] objects to ensure that routes
   /// are kept around even when in the background, so that [Future]s promised
   /// from subsequent routes will be handled properly when they complete.
   bool get maintainState => _maintainState;
   bool _maintainState;
-  set maintainState (bool value) {
+  set maintainState(bool value) {
     assert(_maintainState != null);
     if (_maintainState == value)
       return;
@@ -123,15 +123,15 @@ class OverlayEntry {
   /// This should only be called once.
   ///
   /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerBinding.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.beginFrame]), then the removal is
+  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
+  /// paint phases (see [WidgetsBinding.drawFrame]), then the removal is
   /// delayed until the post-frame callbacks phase. Otherwise the removal is
   /// done synchronously. This means that it is safe to call during builds, but
   /// also that if you do call this during a build, the UI will not update until
   /// the next frame (i.e. many milliseconds later).
   void remove() {
     assert(_overlay != null);
-    OverlayState overlay = _overlay;
+    final OverlayState overlay = _overlay;
     _overlay = null;
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
@@ -150,11 +150,11 @@ class OverlayEntry {
   }
 
   @override
-  String toString() => '$runtimeType@$hashCode(opaque: $opaque; maintainState: $maintainState)';
+  String toString() => '$runtimeType#$hashCode(opaque: $opaque; maintainState: $maintainState)';
 }
 
 class _OverlayEntry extends StatefulWidget {
-  _OverlayEntry(OverlayEntry entry) : entry = entry, super(key: entry._key) {
+  _OverlayEntry(this.entry) : super(key: entry._key) {
     assert(entry != null);
   }
 
@@ -167,7 +167,7 @@ class _OverlayEntry extends StatefulWidget {
 class _OverlayEntryState extends State<_OverlayEntry> {
   @override
   Widget build(BuildContext context) {
-    return config.entry.builder(context);
+    return widget.entry.builder(context);
   }
 
   void _markNeedsBuild() {
@@ -198,15 +198,13 @@ class Overlay extends StatefulWidget {
   /// The initial entries will be inserted into the overlay when its associated
   /// [OverlayState] is initialized.
   ///
-  /// Rather than creating an overlay, consider using the overlay that has
-  /// already been created by the [WidgetsApp] or the [MaterialApp] for this
-  /// application.
-  Overlay({
+  /// Rather than creating an overlay, consider using the overlay that is
+  /// created by the [WidgetsApp] or the [MaterialApp] for the application.
+  const Overlay({
     Key key,
     this.initialEntries: const <OverlayEntry>[]
-  }) : super(key: key) {
-    assert(initialEntries != null);
-  }
+  }) : assert(initialEntries != null),
+       super(key: key);
 
   /// The entries to include in the overlay initially.
   ///
@@ -217,8 +215,8 @@ class Overlay extends StatefulWidget {
   /// To add entries to an [Overlay] that is already in the tree, use
   /// [Overlay.of] to obtain the [OverlayState] (or assign a [GlobalKey] to the
   /// [Overlay] widget and obtain the [OverlayState] via
-  /// [GlobalKey.currentState]), and then use [OverlayState.add] or
-  /// [OverlayState.addAll].
+  /// [GlobalKey.currentState]), and then use [OverlayState.insert] or
+  /// [OverlayState.insertAll].
   ///
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
@@ -237,10 +235,10 @@ class Overlay extends StatefulWidget {
   /// OverlayState overlay = Overlay.of(context);
   /// ```
   static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
-    OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
+    final OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
     assert(() {
       if (debugRequiredFor != null && result == null) {
-        String additional = context.widget != debugRequiredFor
+        final String additional = context.widget != debugRequiredFor
           ? '\nThe context from which that widget was searching for an overlay was:\n  $context'
           : '';
         throw new FlutterError(
@@ -266,12 +264,12 @@ class Overlay extends StatefulWidget {
 /// Used to insert [OverlayEntry]s into the overlay using the [insert] and
 /// [insertAll] functions.
 class OverlayState extends State<Overlay> with TickerProviderStateMixin {
-  final List<OverlayEntry> _entries = new List<OverlayEntry>();
+  final List<OverlayEntry> _entries = <OverlayEntry>[];
 
   @override
   void initState() {
     super.initState();
-    insertAll(config.initialEntries);
+    insertAll(widget.initialEntries);
   }
 
   /// Insert the given entry into the overlay.
@@ -283,7 +281,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     assert(above == null || (above._overlay == this && _entries.contains(above)));
     entry._overlay = this;
     setState(() {
-      int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
+      final int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
       _entries.insert(index, entry);
     });
   }
@@ -301,7 +299,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       entry._overlay = this;
     }
     setState(() {
-      int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
+      final int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
       _entries.insertAll(index, entries);
     });
   }
@@ -324,7 +322,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     assert(_entries.contains(entry));
     assert(() {
       for (int i = _entries.length - 1; i > 0; i -= 1) {
-        OverlayEntry candidate = _entries[i];
+        final OverlayEntry candidate = _entries[i];
         if (candidate == entry) {
           result = true;
           break;
@@ -353,7 +351,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     final List<Widget> offstageChildren = <Widget>[];
     bool onstage = true;
     for (int i = _entries.length - 1; i >= 0; i -= 1) {
-      OverlayEntry entry = _entries[i];
+      final OverlayEntry entry = _entries[i];
       if (onstage) {
         onstageChildren.add(new _OverlayEntry(entry));
         if (entry.opaque)
@@ -363,7 +361,10 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       }
     }
     return new _Theatre(
-      onstage: new Stack(children: onstageChildren.reversed.toList(growable: false)),
+      onstage: new Stack(
+        fit: StackFit.expand,
+        children: onstageChildren.reversed.toList(growable: false),
+      ),
       offstage: offstageChildren,
     );
   }
@@ -386,7 +387,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 class _Theatre extends RenderObjectWidget {
   _Theatre({
     this.onstage,
-    this.offstage,
+    @required this.offstage,
   }) {
     assert(offstage != null);
     assert(!offstage.any((Widget child) => child == null));
@@ -422,6 +423,7 @@ class _TheatreElement extends RenderObjectElement {
 
   @override
   void insertChildRenderObject(RenderBox child, dynamic slot) {
+    assert(renderObject.debugValidateChild(child));
     if (slot == _onstageSlot) {
       assert(child is RenderStack);
       renderObject.child = child;

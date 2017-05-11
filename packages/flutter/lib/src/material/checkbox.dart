@@ -25,9 +25,9 @@ import 'toggleable.dart';
 ///
 /// See also:
 ///
-///  * [Radio]
-///  * [Switch]
-///  * [Slider]
+///  * [Switch], another widget with similar semantics.
+///  * [Radio], for selecting among a set of explicit values.
+///  * [Slider], for selecting a value in a range.
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-checkbox>
 ///  * <https://material.google.com/components/lists-controls.html#lists-controls-types-of-list-controls>
 class Checkbox extends StatefulWidget {
@@ -41,7 +41,7 @@ class Checkbox extends StatefulWidget {
   ///
   /// * [value] determines whether the checkbox is checked.
   /// * [onChanged] is called when the value of the checkbox should change.
-  Checkbox({
+  const Checkbox({
     Key key,
     @required this.value,
     @required this.onChanged,
@@ -91,31 +91,30 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     return new _CheckboxRenderObjectWidget(
-      value: config.value,
-      activeColor: config.activeColor ?? themeData.accentColor,
-      inactiveColor: config.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
-      onChanged: config.onChanged,
+      value: widget.value,
+      activeColor: widget.activeColor ?? themeData.accentColor,
+      inactiveColor: widget.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
+      onChanged: widget.onChanged,
       vsync: this,
     );
   }
 }
 
 class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
-  _CheckboxRenderObjectWidget({
+  const _CheckboxRenderObjectWidget({
     Key key,
     @required this.value,
     @required this.activeColor,
     @required this.inactiveColor,
     @required this.onChanged,
     @required this.vsync,
-  }) : super(key: key) {
-    assert(value != null);
-    assert(activeColor != null);
-    assert(inactiveColor != null);
-    assert(vsync != null);
-  }
+  }) : assert(value != null),
+       assert(activeColor != null),
+       assert(inactiveColor != null),
+       assert(vsync != null),
+       super(key: key);
 
   final bool value;
   final Color activeColor;
@@ -172,45 +171,45 @@ class _RenderCheckbox extends RenderToggleable {
     final double offsetX = offset.dx + (size.width - _kEdgeSize) / 2.0;
     final double offsetY = offset.dy + (size.height - _kEdgeSize) / 2.0;
 
-    paintRadialReaction(canvas, offset, size.center(Point.origin));
+    paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
-    double t = position.value;
+    final double t = position.value;
 
     Color borderColor = inactiveColor;
     if (onChanged != null)
       borderColor = t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0);
 
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = borderColor;
 
-    double inset = 1.0 - (t - 0.5).abs() * 2.0;
-    double rectSize = _kEdgeSize - inset * _kStrokeWidth;
-    Rect rect = new Rect.fromLTWH(offsetX + inset, offsetY + inset, rectSize, rectSize);
+    final double inset = 1.0 - (t - 0.5).abs() * 2.0;
+    final double rectSize = _kEdgeSize - inset * _kStrokeWidth;
+    final Rect rect = new Rect.fromLTWH(offsetX + inset, offsetY + inset, rectSize, rectSize);
 
-    RRect outer = new RRect.fromRectAndRadius(rect, _kEdgeRadius);
+    final RRect outer = new RRect.fromRectAndRadius(rect, _kEdgeRadius);
     if (t <= 0.5) {
       // Outline
-      RRect inner = outer.deflate(math.min(rectSize / 2.0, _kStrokeWidth + rectSize * t));
+      final RRect inner = outer.deflate(math.min(rectSize / 2.0, _kStrokeWidth + rectSize * t));
       canvas.drawDRRect(outer, inner, paint);
     } else {
       // Background
       canvas.drawRRect(outer, paint);
 
       // White inner check
-      double value = (t - 0.5) * 2.0;
+      final double value = (t - 0.5) * 2.0;
       paint
         ..color = const Color(0xFFFFFFFF)
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kStrokeWidth;
-      Path path = new Path();
-      Point start = const Point(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-      Point mid = const Point(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-      Point end = const Point(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
-      Point drawStart = Point.lerp(start, mid, 1.0 - value);
-      Point drawEnd = Point.lerp(mid, end, value);
-      path.moveTo(offsetX + drawStart.x, offsetY + drawStart.y);
-      path.lineTo(offsetX + mid.x, offsetY + mid.y);
-      path.lineTo(offsetX + drawEnd.x, offsetY + drawEnd.y);
+      final Path path = new Path();
+      final Offset start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+      final Offset mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+      final Offset end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+      final Offset drawStart = Offset.lerp(start, mid, 1.0 - value);
+      final Offset drawEnd = Offset.lerp(mid, end, value);
+      path.moveTo(offsetX + drawStart.dx, offsetY + drawStart.dy);
+      path.lineTo(offsetX + mid.dx, offsetY + mid.dy);
+      path.lineTo(offsetX + drawEnd.dx, offsetY + drawEnd.dy);
       canvas.drawPath(path, paint);
     }
   }

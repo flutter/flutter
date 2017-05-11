@@ -45,7 +45,7 @@ class RealRoot extends AbstractNode {
 void main() {
   test("non-RenderObject roots", () {
     RenderPositionedBox child;
-    RealRoot root = new RealRoot(
+    final RealRoot root = new RealRoot(
       child = new RenderPositionedBox(
         alignment: FractionalOffset.center,
         child: new RenderSizedBox(const Size(100.0, 100.0))

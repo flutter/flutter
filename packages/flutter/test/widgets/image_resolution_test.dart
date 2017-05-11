@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 
 class TestImage extends ui.Image {
   TestImage(this.scale);
@@ -78,7 +77,7 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  String toString() => '$runtimeType@$hashCode()';
+  String toString() => '$runtimeType#$hashCode()';
 }
 
 class TestAssetImage extends AssetImage {
@@ -97,7 +96,7 @@ class TestAssetImage extends AssetImage {
   }
 
   @override
-  Future<ui.Image> decodeImage(@checked TestByteData data) {
+  Future<ui.Image> decodeImage(covariant TestByteData data) {
     return new SynchronousFuture<ui.Image>(new TestImage(data.scale));
   }
 }
@@ -125,7 +124,7 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
             image: new TestAssetImage(image),
             height: imageSize,
             width: imageSize,
-            fit: ImageFit.fill
+            fit: BoxFit.fill
           )
       )
     )
@@ -140,13 +139,13 @@ TestImage getTestImage(WidgetTester tester, Key key) {
 }
 
 Future<Null> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  Duration pumpDuration = const Duration(milliseconds: 0);
-  EnginePhase pumpPhase = EnginePhase.layout;
+  final Duration pumpDuration = const Duration(milliseconds: 0);
+  final EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
 }
 
 void main() {
-  String image = 'assets/image.png';
+  final String image = 'assets/image.png';
 
   testWidgets('Image for device pixel ratio 1.0', (WidgetTester tester) async {
     const double ratio = 1.0;

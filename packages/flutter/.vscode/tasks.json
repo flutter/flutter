@@ -1,0 +1,17 @@
+{
+  "version": "0.1.0",
+  "command": "flutter",
+  "args": [],
+  "showOutput": "always",
+  "echoCommand": true,
+  "tasks": [
+    {
+      // Assign key binding to workbench.action.tasks.test to quickly run 
+      // the currently open test. 
+      "taskName": "test",
+      "isTestCommand": true,
+      "isShellCommand": true,
+      "args": ["${file}"]
+    }
+  ]
+}

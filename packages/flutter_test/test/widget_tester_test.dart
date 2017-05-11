@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
       expect(find.text('foo'), findsOneWidget);
     });
 
@@ -21,7 +21,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
       expect(message, contains('Expected: exactly one matching node in the widget tree\n'));
       expect(message, contains('Actual: ?:<zero widgets with text "foo">\n'));
       expect(message, contains('Which: means none were found but one was expected\n'));
@@ -34,7 +34,7 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
 
       TestFailure failure;
       try {
@@ -44,7 +44,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: ?:<exactly one widget with text "foo": Text("foo")>\n'));
@@ -52,7 +52,7 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message when skipping', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
 
       TestFailure failure;
       try {
@@ -62,7 +62,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: ?:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo")>\n'));
@@ -70,18 +70,18 @@ void main() {
     });
 
     testWidgets('pumping', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
       int count;
 
-      AnimationController test = new AnimationController(
+      final AnimationController test = new AnimationController(
         duration: const Duration(milliseconds: 5100),
         vsync: tester,
       );
-      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
-      expect(count, 0);
+      count = await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(count, 1); // it always pumps at least one frame
 
       test.forward(from: 0.0);
-      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      count = await tester.pumpAndSettle(const Duration(seconds: 1));
       // 1 frame at t=0, starting the animation
       // 1 frame at t=1
       // 1 frame at t=2
@@ -93,22 +93,22 @@ void main() {
 
       test.forward(from: 0.0);
       await tester.pump(); // starts the animation
-      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 6);
 
       test.forward(from: 0.0);
       await tester.pump(); // starts the animation
       await tester.pump(); // has no effect
-      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 6);
     });
   });
 
   group('find.byElementPredicate', () {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
 
-      String customDescription = 'custom description';
+      final String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
@@ -123,9 +123,9 @@ void main() {
 
   group('find.byWidgetPredicate', () {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
 
-      String customDescription = 'custom description';
+      final String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
@@ -136,5 +136,113 @@ void main() {
       expect(failure, isNotNull);
       expect(failure.message, contains('Actual: ?:<zero widgets with $customDescription'));
     });
+  });
+
+  group('find.descendant', () {
+    testWidgets('finds one descendant', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[const Text('foo'), const Text('bar')])
+      ]));
+
+      expect(find.descendant(
+        of: find.widgetWithText(Row, 'foo'),
+        matching: find.text('bar')
+      ), findsOneWidget);
+    });
+
+    testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+        new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+      ]));
+
+      expect(find.descendant(
+        of: find.widgetWithText(Column, 'foo'),
+        matching: find.text('bar')
+      ), findsNWidgets(2));
+    });
+
+    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[const Text('foo')]),
+        const Text('bar')
+      ]));
+
+      TestFailure failure;
+      try {
+        expect(find.descendant(
+          of: find.widgetWithText(Column, 'foo'),
+          matching: find.text('bar')
+        ), findsOneWidget);
+      } catch (e) {
+        failure = e;
+      }
+
+      expect(failure, isNotNull);
+      expect(
+        failure.message,
+        contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
+      );
+    });
+
+    testWidgets('Root not matched by default', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[const Text('foo'), const Text('bar')])
+      ]));
+
+      expect(find.descendant(
+        of: find.widgetWithText(Row, 'foo'),
+        matching: find.byType(Row),
+      ), findsNothing);
+    });
+
+    testWidgets('Match the root', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[const Text('foo'), const Text('bar')])
+      ]));
+
+      expect(find.descendant(
+        of: find.widgetWithText(Row, 'foo'),
+        matching: find.byType(Row),
+        matchRoot: true,
+      ), findsOneWidget);
+    });
+
+  });
+
+  testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: const TestVSync()
+    );
+    expect(tester.hasRunningAnimations, isFalse);
+    controller.forward();
+    expect(tester.hasRunningAnimations, isTrue);
+    controller.stop();
+    expect(tester.hasRunningAnimations, isFalse);
+    controller.forward();
+    expect(tester.hasRunningAnimations, isTrue);
+    await tester.pumpAndSettle();
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(minutes: 525600),
+      vsync: const TestVSync()
+    );
+    expect(await tester.pumpAndSettle(), 1);
+    controller.forward();
+    try {
+      await tester.pumpAndSettle();
+      expect(true, isFalse);
+    } catch (e) {
+      expect(e, isFlutterError);
+    }
+    controller.stop();
+    expect(await tester.pumpAndSettle(), 1);
+    controller.duration = const Duration(seconds: 1);
+    controller.forward();
+    expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
   });
 }

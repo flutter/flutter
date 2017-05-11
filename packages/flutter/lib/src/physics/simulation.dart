@@ -30,6 +30,7 @@ import 'tolerance.dart';
 /// should establish a convention and use that convention consistently with all
 /// related objects.
 abstract class Simulation {
+  /// Initializes the [tolerance] field for subclasses.
   Simulation({ this.tolerance: Tolerance.defaultTolerance });
 
   /// The position of the object in the simulation at the given time.

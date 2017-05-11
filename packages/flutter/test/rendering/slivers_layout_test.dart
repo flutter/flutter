@@ -19,12 +19,12 @@ class RenderLayoutWatcher extends RenderProxyBox {
 }
 
 void main() {
-  test('RenderViewport2 basic test - impact of layout', () {
+  test('RenderViewport basic test - impact of layout', () {
     RenderSliverToBoxAdapter sliver;
-    RenderViewport2 viewport;
+    RenderViewport viewport;
     RenderBox box;
-    RenderObject root = new RenderLayoutWatcher(
-      viewport = new RenderViewport2(
+    final RenderObject root = new RenderLayoutWatcher(
+      viewport = new RenderViewport(
         offset: new ViewportOffset.zero(),
         children: <RenderSliver>[
           sliver = new RenderSliverToBoxAdapter(child: box = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -34,37 +34,37 @@ void main() {
     expect(layouts, 0);
     layout(root);
     expect(layouts, 1);
-    expect(box.localToGlobal(box.size.center(Point.origin)), const Point(400.0, 200.0));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 200.0));
 
     sliver.child = box = new RenderSizedBox(const Size(100.0, 300.0));
     expect(layouts, 1);
     pumpFrame();
     expect(layouts, 1);
-    expect(box.localToGlobal(box.size.center(Point.origin)), const Point(400.0, 150.0));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 150.0));
 
     viewport.offset = new ViewportOffset.fixed(20.0);
     expect(layouts, 1);
     pumpFrame();
     expect(layouts, 1);
-    expect(box.localToGlobal(box.size.center(Point.origin)), const Point(400.0, 130.0));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 130.0));
 
     viewport.offset = new ViewportOffset.fixed(-20.0);
     expect(layouts, 1);
     pumpFrame();
     expect(layouts, 1);
-    expect(box.localToGlobal(box.size.center(Point.origin)), const Point(400.0, 170.0));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 170.0));
 
     viewport.anchor = 20.0 / 600.0;
     expect(layouts, 1);
     pumpFrame();
     expect(layouts, 1);
-    expect(box.localToGlobal(box.size.center(Point.origin)), const Point(400.0, 190.0));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 190.0));
 
     viewport.axisDirection = AxisDirection.up;
     expect(layouts, 1);
     pumpFrame();
     expect(layouts, 1);
-    expect(box.localToGlobal(box.size.center(Point.origin)), const Point(400.0, 600.0 - 190.0));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), const Offset(400.0, 600.0 - 190.0));
   });
 
 }

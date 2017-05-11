@@ -3,17 +3,19 @@
 # found in the LICENSE file.
 
 import("//build/dart/dart_package.gni")
+import("//build/dart/dart_tool.gni")
 
 dart_package("flutter_tools") {
   package_name = "flutter_tools"
 
-  source_dir = "lib"
+  analysis_options = "//lib/flutter/.analysis_options"
 
   deps = [
     "//dart/pkg/analyzer",
     "//dart/third_party/pkg/linter",
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
+    "//third_party/dart-pkg/pub/collection",
     "//third_party/dart-pkg/pub/coverage",
     "//third_party/dart-pkg/pub/crypto",
     "//third_party/dart-pkg/pub/file",
@@ -27,12 +29,36 @@ dart_package("flutter_tools") {
     "//third_party/dart-pkg/pub/path",
     "//third_party/dart-pkg/pub/platform",
     "//third_party/dart-pkg/pub/process",
-    "//third_party/dart-pkg/pub/pub_semver",
+    "//third_party/dart-pkg/pub/quiver",
     "//third_party/dart-pkg/pub/stack_trace",
     "//third_party/dart-pkg/pub/test",
     "//third_party/dart-pkg/pub/usage",
     "//third_party/dart-pkg/pub/web_socket_channel",
     "//third_party/dart-pkg/pub/xml",
     "//third_party/dart-pkg/pub/yaml",
+  ]
+}
+
+dart_tool("fuchsia_builder") {
+  main_dart = "bin/fuchsia_builder.dart"
+
+  analysis_options = "//lib/flutter/.analysis_options"
+
+  deps = [
+    ":flutter_tools",
+  ]
+}
+
+dart_tool("fuchsia_tester") {
+  main_dart = "bin/fuchsia_tester.dart"
+
+  analysis_options = "//lib/flutter/.analysis_options"
+
+  deps = [
+    ":flutter_tools",
+  ]
+
+  non_dart_deps = [
+    "//flutter/shell",
   ]
 }

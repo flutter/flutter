@@ -8,21 +8,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('MediaQuery has a default', (WidgetTester tester) async {
-    Size size;
-
+  testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
+    bool tested = false;
     await tester.pumpWidget(
       new Builder(
         builder: (BuildContext context) {
-          final MediaQueryData data = MediaQuery.of(context);
-          expect(data, hasOneLineDescription);
-          expect(data.hashCode, equals(data.copyWith().hashCode));
-          size = data.size;
+          tested = true;
+          MediaQuery.of(context); // should throw
           return new Container();
         }
       )
     );
+    expect(tested, isTrue);
+    expect(tester.takeException(), isFlutterError);
+  });
 
-    expect(size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
+  testWidgets('MediaQuery defaults to null', (WidgetTester tester) async {
+    bool tested = false;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          final MediaQueryData data = MediaQuery.of(context, nullOk: true);
+          expect(data, isNull);
+          tested = true;
+          return new Container();
+        }
+      )
+    );
+    expect(tested, isTrue);
+  });
+
+  testWidgets('MediaQueryData is sane', (WidgetTester tester) async {
+    final MediaQueryData data = new MediaQueryData.fromWindow(ui.window);
+    expect(data, hasOneLineDescription);
+    expect(data.hashCode, equals(data.copyWith().hashCode));
+    expect(data.size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
   });
 }

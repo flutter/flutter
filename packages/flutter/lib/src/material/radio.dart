@@ -31,9 +31,8 @@ const double _kInnerRadius = 5.0;
 ///
 /// See also:
 ///
-///  * [CheckBox]
-///  * [Slider]
-///  * [Switch]
+///  * [Slider], for selecting a value in a range.
+///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-radio-button>
 class Radio<T> extends StatefulWidget {
   /// Creates a material design radio button.
@@ -46,7 +45,7 @@ class Radio<T> extends StatefulWidget {
   ///
   /// * [value] and [groupValue] together determines whether the radio button is selected.
   /// * [onChanged] is when the user selects this radio button.
-  Radio({
+  const Radio({
     Key key,
     @required this.value,
     @required this.groupValue,
@@ -98,7 +97,7 @@ class Radio<T> extends StatefulWidget {
 }
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
-  bool get _enabled => config.onChanged != null;
+  bool get _enabled => widget.onChanged != null;
 
   Color _getInactiveColor(ThemeData themeData) {
     return _enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
@@ -106,18 +105,18 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
 
   void _handleChanged(bool selected) {
     if (selected)
-      config.onChanged(config.value);
+      widget.onChanged(widget.value);
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     return new Semantics(
-      checked: config.value == config.groupValue,
+      checked: widget.value == widget.groupValue,
       child: new _RadioRenderObjectWidget(
-        selected: config.value == config.groupValue,
-        activeColor: config.activeColor ?? themeData.accentColor,
+        selected: widget.value == widget.groupValue,
+        activeColor: widget.activeColor ?? themeData.accentColor,
         inactiveColor: _getInactiveColor(themeData),
         onChanged: _enabled ? _handleChanged : null,
         vsync: this,
@@ -127,19 +126,18 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
 }
 
 class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
-  _RadioRenderObjectWidget({
+  const _RadioRenderObjectWidget({
     Key key,
     @required this.selected,
     @required this.activeColor,
     @required this.inactiveColor,
     this.onChanged,
     @required this.vsync,
-  }) : super(key: key) {
-    assert(selected != null);
-    assert(activeColor != null);
-    assert(inactiveColor != null);
-    assert(vsync != null);
-  }
+  }) : assert(selected != null),
+       assert(activeColor != null),
+       assert(inactiveColor != null),
+       assert(vsync != null),
+       super(key: key);
 
   final bool selected;
   final Color inactiveColor;
@@ -190,13 +188,13 @@ class _RenderRadio extends RenderToggleable {
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
-    paintRadialReaction(canvas, offset, const Point(kRadialReactionRadius, kRadialReactionRadius));
+    paintRadialReaction(canvas, offset, const Offset(kRadialReactionRadius, kRadialReactionRadius));
 
-    Point center = (offset & size).center;
-    Color radioColor = onChanged != null ? activeColor : inactiveColor;
+    final Offset center = (offset & size).center;
+    final Color radioColor = onChanged != null ? activeColor : inactiveColor;
 
     // Outer circle
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = Color.lerp(inactiveColor, radioColor, position.value)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;

@@ -52,7 +52,11 @@ typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer)
 /// them to the callbacks. To ignore accessibility events, set
 /// [excludeFromSemantics] to true.
 ///
-/// See http://flutter.io/gestures/ for additional information.
+/// See <http://flutter.io/gestures/> for additional information.
+///
+/// Material design applications typically react to touches with ink splash
+/// effects. The [InkWell] class implements this effect and can be used in place
+/// of a [GestureDetector] for handling taps.
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
@@ -97,10 +101,10 @@ class GestureDetector extends StatelessWidget {
   }) : super(key: key) {
     assert(excludeFromSemantics != null);
     assert(() {
-      bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
-      bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
-      bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
-      bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
+      final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
+      final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
+      final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
+      final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
       if (havePan || haveScale) {
         if (havePan && haveScale) {
           throw new FlutterError(
@@ -108,7 +112,7 @@ class GestureDetector extends StatelessWidget {
             'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.'
           );
         }
-        String recognizer = havePan ? 'pan' : 'scale';
+        final String recognizer = havePan ? 'pan' : 'scale';
         if (haveVerticalDrag && haveHorizontalDrag) {
           throw new FlutterError(
             'Incorrect GestureDetector arguments.\n'
@@ -225,7 +229,7 @@ class GestureDetector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
     if (onTapDown != null || onTapUp != null || onTap != null || onTapCancel != null) {
       gestures[TapGestureRecognizer] = (TapGestureRecognizer recognizer) { // ignore: invalid_assignment, https://github.com/flutter/flutter/issues/5771
@@ -325,16 +329,15 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
-  RawGestureDetector({
+  const RawGestureDetector({
     Key key,
     this.child,
     this.gestures: const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics: false
-  }) : super(key: key) {
-    assert(gestures != null);
-    assert(excludeFromSemantics != null);
-  }
+  }) : assert(gestures != null),
+       assert(excludeFromSemantics != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -363,12 +366,13 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   @override
   void initState() {
     super.initState();
-    _syncAll(config.gestures);
+    _syncAll(widget.gestures);
   }
 
   @override
-  void didUpdateConfig(RawGestureDetector oldConfig) {
-    _syncAll(config.gestures);
+  void didUpdateWidget(RawGestureDetector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncAll(widget.gestures);
   }
 
   /// This method can be called after the build phase, during the
@@ -394,10 +398,10 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       return true;
     });
     _syncAll(gestures);
-    if (!config.excludeFromSemantics) {
-      RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
+    if (!widget.excludeFromSemantics) {
+      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
       context.visitChildElements((Element element) {
-        _GestureSemantics widget = element.widget;
+        final _GestureSemantics widget = element.widget;
         widget._updateHandlers(semanticsGestureHandler, _recognizers);
       });
     }
@@ -413,7 +417,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   void _syncAll(Map<Type, GestureRecognizerFactory> gestures) {
     assert(_recognizers != null);
-    Map<Type, GestureRecognizer> oldRecognizers = _recognizers;
+    final Map<Type, GestureRecognizer> oldRecognizers = _recognizers;
     _recognizers = <Type, GestureRecognizer>{};
     for (Type type in gestures.keys) {
       assert(!_recognizers.containsKey(type));
@@ -433,17 +437,17 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   }
 
   HitTestBehavior get _defaultBehavior {
-    return config.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
+    return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
   @override
   Widget build(BuildContext context) {
     Widget result = new Listener(
       onPointerDown: _handlePointerDown,
-      behavior: config.behavior ?? _defaultBehavior,
-      child: config.child
+      behavior: widget.behavior ?? _defaultBehavior,
+      child: widget.child
     );
-    if (!config.excludeFromSemantics)
+    if (!widget.excludeFromSemantics)
       result = new _GestureSemantics(owner: this, child: result);
     return result;
   }
@@ -454,12 +458,12 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (_recognizers == null) {
       description.add('DISPOSED');
     } else {
-      List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.toStringShort()).toList();
+      final List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.toStringShort()).toList();
       if (gestures.isEmpty)
         gestures.add('<none>');
       description.add('gestures: ${gestures.join(", ")}');
     }
-    switch (config.behavior) {
+    switch (widget.behavior) {
       case HitTestBehavior.translucent:
         description.add('behavior: translucent');
         break;
@@ -474,7 +478,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 }
 
 class _GestureSemantics extends SingleChildRenderObjectWidget {
-  _GestureSemantics({
+  const _GestureSemantics({
     Key key,
     Widget child,
     this.owner
@@ -483,7 +487,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   final RawGestureDetectorState owner;
 
   void _handleTap() {
-    TapGestureRecognizer recognizer = owner._recognizers[TapGestureRecognizer];
+    final TapGestureRecognizer recognizer = owner._recognizers[TapGestureRecognizer];
     assert(recognizer != null);
     if (recognizer.onTapDown != null)
       recognizer.onTapDown(new TapDownDetails());
@@ -494,7 +498,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   }
 
   void _handleLongPress() {
-    LongPressGestureRecognizer recognizer = owner._recognizers[LongPressGestureRecognizer];
+    final LongPressGestureRecognizer recognizer = owner._recognizers[LongPressGestureRecognizer];
     assert(recognizer != null);
     if (recognizer.onLongPress != null)
       recognizer.onLongPress();
@@ -502,8 +506,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   void _handleHorizontalDragUpdate(DragUpdateDetails updateDetails) {
     {
-      HorizontalDragGestureRecognizer recognizer = owner._recognizers[HorizontalDragGestureRecognizer];
+      final HorizontalDragGestureRecognizer recognizer = owner._recognizers[HorizontalDragGestureRecognizer];
       if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
         if (recognizer.onStart != null)
           recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
@@ -514,8 +520,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
       }
     }
     {
-      PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
+      final PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
       if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
         if (recognizer.onStart != null)
           recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
@@ -529,8 +537,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   void _handleVerticalDragUpdate(DragUpdateDetails updateDetails) {
     {
-      VerticalDragGestureRecognizer recognizer = owner._recognizers[VerticalDragGestureRecognizer];
+      final VerticalDragGestureRecognizer recognizer = owner._recognizers[VerticalDragGestureRecognizer];
       if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
         if (recognizer.onStart != null)
           recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
@@ -541,8 +551,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
       }
     }
     {
-      PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
+      final PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
       if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
         if (recognizer.onStart != null)
           recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
@@ -556,7 +568,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    RenderSemanticsGestureHandler result = new RenderSemanticsGestureHandler();
+    final RenderSemanticsGestureHandler result = new RenderSemanticsGestureHandler();
     updateRenderObject(context, result);
     return result;
   }

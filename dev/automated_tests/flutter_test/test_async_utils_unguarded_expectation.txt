@@ -14,7 +14,8 @@ When the exception was thrown, this was the stack:
 <<skip until matching line>>
 (elided [0-9]+ frames from .+)
 
-
+The test description was:
+TestAsyncUtils - handling unguarded async helper functions
 ════════════════════════════════════════════════════════════════════════════════════════════════════
 .*..:.. \+0 -1: - TestAsyncUtils - handling unguarded async helper functions *
   Test failed. See exception logs above.

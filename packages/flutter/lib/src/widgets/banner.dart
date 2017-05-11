@@ -60,8 +60,14 @@ class BannerPainter extends CustomPainter {
   /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
 
+  /// The color to paint behind the [message].
+  ///
+  /// Defaults to a dark red.
   final Color color;
 
+  /// The text style to use for the [message].
+  ///
+  /// Defaults to bold, white text.
   final TextStyle textStyle;
 
   bool _prepared = false;
@@ -93,7 +99,7 @@ class BannerPainter extends CustomPainter {
       ..drawRect(_kRect, _paintBanner);
     final double width = _kOffset * 2.0;
     _textPainter.layout(minWidth: width, maxWidth: width);
-    _textPainter.paint(canvas, _kRect.topLeft.toOffset() + new Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
+    _textPainter.paint(canvas, _kRect.topLeft + new Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
   }
 
   @override
@@ -105,7 +111,7 @@ class BannerPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Point position) => false;
+  bool hitTest(Offset position) => false;
 
   double _translationX(double width) {
     assert(location != null);
@@ -161,19 +167,18 @@ class Banner extends StatelessWidget {
   /// Creates a banner.
   ///
   /// The [message] and [location] arguments must not be null.
-  Banner({
+  const Banner({
     Key key,
     this.child,
     @required this.message,
     @required this.location,
     this.color: _kColor,
     this.textStyle: _kTextStyle,
-  }) : super(key: key) {
-    assert(message != null);
-    assert(location != null);
-    assert(color != null);
-    assert(textStyle != null);
-  }
+  }) : assert(message != null),
+       assert(location != null),
+       assert(color != null),
+       assert(textStyle != null),
+       super(key: key);
 
   /// The widget to show behind the banner.
   final Widget child;
@@ -202,6 +207,15 @@ class Banner extends StatelessWidget {
       child: child,
     );
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('"$message"');
+    description.add('$location');
+    description.add('$color');
+    '$textStyle'.split('\n').map((String value) => 'text $value').forEach(description.add);
+  }
 }
 
 /// Displays a [Banner] saying "SLOW MODE" when running in checked mode.
@@ -209,7 +223,7 @@ class Banner extends StatelessWidget {
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
   /// Creates a checked mode banner.
-  CheckedModeBanner({
+  const CheckedModeBanner({
     Key key,
     @required this.child
   }) : super(key: key);
@@ -228,5 +242,16 @@ class CheckedModeBanner extends StatelessWidget {
       return true;
     });
     return result;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    String message = 'disabled';
+    assert(() {
+      message = '"SLOW MODE"';
+      return true;
+    });
+    description.add(message);
   }
 }

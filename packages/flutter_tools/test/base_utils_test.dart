@@ -10,19 +10,19 @@ import 'package:test/test.dart';
 void main() {
   group('ItemListNotifier', () {
     test('sends notifications', () async {
-      ItemListNotifier<String> list = new ItemListNotifier<String>();
+      final ItemListNotifier<String> list = new ItemListNotifier<String>();
       expect(list.items, isEmpty);
 
-      Future<List<String>> addedStreamItems = list.onAdded.toList();
-      Future<List<String>> removedStreamItems = list.onRemoved.toList();
+      final Future<List<String>> addedStreamItems = list.onAdded.toList();
+      final Future<List<String>> removedStreamItems = list.onRemoved.toList();
 
       list.updateWithNewList(<String>['aaa']);
       list.updateWithNewList(<String>['aaa', 'bbb']);
       list.updateWithNewList(<String>['bbb']);
       list.dispose();
 
-      List<String> addedItems = await addedStreamItems;
-      List<String> removedItems = await removedStreamItems;
+      final List<String> addedItems = await addedStreamItems;
+      final List<String> removedItems = await removedStreamItems;
 
       expect(addedItems.length, 2);
       expect(addedItems.first, 'aaa');

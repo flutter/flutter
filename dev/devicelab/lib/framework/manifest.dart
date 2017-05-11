@@ -9,7 +9,7 @@ import 'utils.dart';
 
 /// Loads manifest data from `manifest.yaml` file or from [yaml], if present.
 Manifest loadTaskManifest([ String yaml ]) {
-  dynamic manifestYaml = yaml == null
+  final dynamic manifestYaml = yaml == null
     ? loadYaml(file('manifest.yaml').readAsStringSync())
     : loadYamlNode(yaml);
 
@@ -32,8 +32,10 @@ class ManifestTask {
     @required this.description,
     @required this.stage,
     @required this.requiredAgentCapabilities,
+    @required this.isFlaky,
+    @required this.timeoutInMinutes,
   }) {
-    String taskName = 'task "$name"';
+    final String taskName = 'task "$name"';
     _checkIsNotBlank(name, 'Task name', taskName);
     _checkIsNotBlank(description, 'Task description', taskName);
     _checkIsNotBlank(stage, 'Task stage', taskName);
@@ -51,6 +53,14 @@ class ManifestTask {
 
   /// Capabilities required of the build agent to be able to perform this task.
   final List<String> requiredAgentCapabilities;
+
+  /// Whether this test is flaky.
+  ///
+  /// Flaky tests are not considered when deciding if the build is broken.
+  final bool isFlaky;
+
+  /// An optional custom timeout specified in minutes.
+  final int timeoutInMinutes;
 }
 
 /// Thrown when the manifest YAML is not valid.
@@ -72,7 +82,8 @@ Manifest _validateAndParseManifest(Map<String, dynamic> manifestYaml) {
 
 List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
   _checkType(tasksYaml is Map, tasksYaml, 'Value of "tasks"', 'dictionary');
-  return tasksYaml.keys.map((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
+  final List<String> sortedKeys = tasksYaml.keys.toList()..sort();
+  return sortedKeys.map((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
 }
 
 ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
@@ -82,21 +93,35 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     'description',
     'stage',
     'required_agent_capabilities',
+    'flaky',
+    'timeout_in_minutes',
   ]);
 
-  List<String> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
+  final dynamic isFlaky = taskYaml['flaky'];
+  if (isFlaky != null) {
+    _checkType(isFlaky is bool, isFlaky, 'flaky', 'boolean');
+  }
+
+  final dynamic timeoutInMinutes = taskYaml['timeout_in_minutes'];
+  if (timeoutInMinutes != null) {
+    _checkType(timeoutInMinutes is int, timeoutInMinutes, 'timeout_in_minutes', 'integer');
+  }
+
+  final List<String> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
   return new ManifestTask._(
     name: taskName,
     description: taskYaml['description'],
     stage: taskYaml['stage'],
     requiredAgentCapabilities: capabilities,
+    isFlaky: isFlaky ?? false,
+    timeoutInMinutes: timeoutInMinutes,
   );
 }
 
 List<String> _validateAndParseCapabilities(String taskName, dynamic capabilitiesYaml) {
   _checkType(capabilitiesYaml is List, capabilitiesYaml, 'required_agent_capabilities', 'list');
   for (int i = 0; i < capabilitiesYaml.length; i++) {
-    dynamic capability = capabilitiesYaml[i];
+    final dynamic capability = capabilitiesYaml[i];
     _checkType(capability is String, capability, 'required_agent_capabilities[$i]', 'string');
   }
   return capabilitiesYaml;

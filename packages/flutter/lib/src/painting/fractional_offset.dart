@@ -2,18 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'basic_types.dart';
 import 'dart:ui' as ui show lerpDouble;
+
+import 'package:flutter/foundation.dart';
+
+import 'basic_types.dart';
 
 /// An offset that's expressed as a fraction of a Size.
 ///
 /// FractionalOffset(1.0, 0.0) represents the top right of the Size,
 /// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
+@immutable
 class FractionalOffset {
   /// Creates a fractional offset.
   ///
   /// The [dx] and [dy] arguments must not be null.
-  const FractionalOffset(this.dx, this.dy);
+  const FractionalOffset(this.dx, this.dy)
+    : assert(dx != null),
+      assert(dy != null);
 
   /// The distance fraction in the horizontal direction.
   ///
@@ -100,8 +106,8 @@ class FractionalOffset {
   }
 
   /// Returns the point that is this fraction within the given rect.
-  Point withinRect(Rect rect) {
-    return new Point(rect.left + dx * rect.width, rect.top + dy * rect.height);
+  Offset withinRect(Rect rect) {
+    return new Offset(rect.left + dx * rect.width, rect.top + dy * rect.height);
   }
 
   /// Returns a rect of the given size, centered at this fraction of the given rect.

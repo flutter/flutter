@@ -60,11 +60,7 @@ class AssetImage extends AssetBundleImageProvider {
   ///
   /// The [name] argument must not be null. It should name the main asset from
   /// the set of images to chose from.
-  AssetImage(this.name, {
-    this.bundle
-  }) {
-    assert(name != null);
-  }
+  const AssetImage(this.name, { this.bundle }) : assert(name != null);
 
   /// The name of the main asset from the set of images to chose from. See the
   /// documentation for the [AssetImage] class itself for details.
@@ -163,8 +159,8 @@ class AssetImage extends AssetBundleImageProvider {
   String _findNearest(SplayTreeMap<double, String> candidates, double value) {
     if (candidates.containsKey(value))
       return candidates[value];
-    double lower = candidates.lastKeyBefore(value);
-    double upper = candidates.firstKeyAfter(value);
+    final double lower = candidates.lastKeyBefore(value);
+    final double upper = candidates.firstKeyAfter(value);
     if (lower == null)
       return candidates[upper];
     if (upper == null)
@@ -178,7 +174,7 @@ class AssetImage extends AssetBundleImageProvider {
   static final RegExp _extractRatioRegExp = new RegExp(r"/?(\d+(\.\d*)?)x/");
 
   double _parseScale(String key) {
-    Match match = _extractRatioRegExp.firstMatch(key);
+    final Match match = _extractRatioRegExp.firstMatch(key);
     if (match != null && match.groupCount > 0)
       return double.parse(match.group(1));
     return _naturalResolution;

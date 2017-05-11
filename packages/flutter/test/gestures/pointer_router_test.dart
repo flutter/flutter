@@ -13,14 +13,14 @@ void main() {
       callbackRan = true;
     }
 
-    TestPointer pointer2 = new TestPointer(2);
-    TestPointer pointer3 = new TestPointer(3);
+    final TestPointer pointer2 = new TestPointer(2);
+    final TestPointer pointer3 = new TestPointer(3);
 
-    PointerRouter router = new PointerRouter();
+    final PointerRouter router = new PointerRouter();
     router.addRoute(3, callback);
-    router.route(pointer2.down(Point.origin));
+    router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
-    router.route(pointer3.down(Point.origin));
+    router.route(pointer3.down(Offset.zero));
     expect(callbackRan, isTrue);
     callbackRan = false;
     router.removeRoute(3, callback);
@@ -33,13 +33,13 @@ void main() {
     void callback(PointerEvent event) {
       callbackRan = true;
     }
-    PointerRouter router = new PointerRouter();
+    final PointerRouter router = new PointerRouter();
     router.addRoute(2, (PointerEvent event) {
       router.removeRoute(2, callback);
     });
     router.addRoute(2, callback);
-    TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    final TestPointer pointer2 = new TestPointer(2);
+    router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
   });
 
@@ -50,14 +50,14 @@ void main() {
     }
 
     bool firstCallbackRan = false;
-    PointerRouter router = new PointerRouter();
+    final PointerRouter router = new PointerRouter();
     router.addGlobalRoute((PointerEvent event) {
       firstCallbackRan = true;
       router.addGlobalRoute(secondCallback);
     });
 
-    TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    final TestPointer pointer2 = new TestPointer(2);
+    router.route(pointer2.down(Offset.zero));
     expect(firstCallbackRan, isTrue);
     expect(secondCallbackRan, isFalse);
   });
@@ -67,13 +67,13 @@ void main() {
     void callback(PointerEvent event) {
       callbackRan = true;
     }
-    PointerRouter router = new PointerRouter();
+    final PointerRouter router = new PointerRouter();
     router.addGlobalRoute((PointerEvent event) {
       router.removeGlobalRoute(callback);
     });
     router.addGlobalRoute(callback);
-    TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    final TestPointer pointer2 = new TestPointer(2);
+    router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
   });
 
@@ -82,21 +82,21 @@ void main() {
     void callback(PointerEvent event) {
       callbackRan = true;
     }
-    PointerRouter router = new PointerRouter();
+    final PointerRouter router = new PointerRouter();
     bool perPointerCallbackRan = false;
     router.addRoute(2, (PointerEvent event) {
       perPointerCallbackRan = true;
       router.addGlobalRoute(callback);
     });
-    TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    final TestPointer pointer2 = new TestPointer(2);
+    router.route(pointer2.down(Offset.zero));
     expect(perPointerCallbackRan, isTrue);
     expect(callbackRan, isFalse);
   });
 
   test('Per-pointer callbacks happen before global callbacks', () {
-    List<String> log = <String>[];
-    PointerRouter router = new PointerRouter();
+    final List<String> log = <String>[];
+    final PointerRouter router = new PointerRouter();
     router.addGlobalRoute((PointerEvent event) {
       log.add('global 1');
     });
@@ -109,8 +109,8 @@ void main() {
     router.addRoute(2, (PointerEvent event) {
       log.add('per-pointer 2');
     });
-    TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    final TestPointer pointer2 = new TestPointer(2);
+    router.route(pointer2.down(Offset.zero));
     expect(log, equals(<String>[
       'per-pointer 1',
       'per-pointer 2',
@@ -120,8 +120,8 @@ void main() {
   });
 
   test('Exceptions do not stop pointer routing', () {
-    List<String> log = <String>[];
-    PointerRouter router = new PointerRouter();
+    final List<String> log = <String>[];
+    final PointerRouter router = new PointerRouter();
     router.addRoute(2, (PointerEvent event) {
       log.add('per-pointer 1');
     });
@@ -133,13 +133,13 @@ void main() {
       log.add('per-pointer 3');
     });
 
-    FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       log.add('error report');
     };
 
-    TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    final TestPointer pointer2 = new TestPointer(2);
+    router.route(pointer2.down(Offset.zero));
     expect(log, equals(<String>[
       'per-pointer 1',
       'per-pointer 2',

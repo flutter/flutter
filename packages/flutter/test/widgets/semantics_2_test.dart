@@ -11,7 +11,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 2', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
     // this test is the same as the test in Semantics 1, but
     // starting with the second branch being ignored and then
@@ -23,13 +23,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: new Semantics(label: 'child1')
+            child: const Semantics(label: 'child1')
           ),
           new Container(
             height: 10.0,
-            child: new IgnorePointer(
+            child: const IgnorePointer(
               ignoring: false,
-              child: new Semantics(label: 'child2')
+              child: const Semantics(label: 'child2')
             )
           ),
         ],
@@ -62,13 +62,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: new Semantics(label: 'child1')
+            child: const Semantics(label: 'child1')
           ),
           new Container(
             height: 10.0,
-            child: new IgnorePointer(
+            child: const IgnorePointer(
               ignoring: true,
-              child: new Semantics(label: 'child2')
+              child: const Semantics(label: 'child2')
             )
           ),
         ],
@@ -84,13 +84,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: new Semantics(label: 'child1')
+            child: const Semantics(label: 'child1')
           ),
           new Container(
             height: 10.0,
-            child: new IgnorePointer(
+            child: const IgnorePointer(
               ignoring: false,
-              child: new Semantics(label: 'child2')
+              child: const Semantics(label: 'child2')
             )
           ),
         ],

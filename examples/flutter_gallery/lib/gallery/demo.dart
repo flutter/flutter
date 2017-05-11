@@ -9,13 +9,13 @@ import 'syntax_highlighter.dart';
 
 class ComponentDemoTabData {
   ComponentDemoTabData({
-    this.widget,
+    this.demoWidget,
     this.exampleCodeTag,
     this.description,
     this.tabName
   });
 
-  final Widget widget;
+  final Widget demoWidget;
   final String exampleCodeTag;
   final String description;
   final String tabName;
@@ -24,7 +24,7 @@ class ComponentDemoTabData {
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    ComponentDemoTabData typedOther = other;
+    final ComponentDemoTabData typedOther = other;
     return typedOther.tabName == tabName && typedOther.description == description;
   }
 
@@ -33,7 +33,7 @@ class ComponentDemoTabData {
 }
 
 class TabbedComponentDemoScaffold extends StatelessWidget {
-  TabbedComponentDemoScaffold({
+  const TabbedComponentDemoScaffold({
     this.title,
     this.demos
   });
@@ -42,7 +42,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
   final String title;
 
   void _showExampleCode(BuildContext context) {
-    String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
+    final String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
     if (tag != null) {
       Navigator.push(context, new MaterialPageRoute<FullScreenCodeDialog>(
         builder: (BuildContext context) => new FullScreenCodeDialog(exampleCodeTag: tag)
@@ -61,7 +61,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
             new Builder(
               builder: (BuildContext context) {
                 return new IconButton(
-                  icon: new Icon(Icons.description),
+                  icon: const Icon(Icons.description),
                   tooltip: 'Show example code',
                   onPressed: () {
                     _showExampleCode(context);
@@ -85,7 +85,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                     style: Theme.of(context).textTheme.subhead
                   )
                 ),
-                new Expanded(child: demo.widget)
+                new Expanded(child: demo.demoWidget)
               ],
             );
           }).toList(),
@@ -96,7 +96,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
 }
 
 class FullScreenCodeDialog extends StatefulWidget {
-  FullScreenCodeDialog({ this.exampleCodeTag });
+  const FullScreenCodeDialog({ this.exampleCodeTag });
 
   final String exampleCodeTag;
 
@@ -109,15 +109,15 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
   String _exampleCode;
 
   @override
-  void dependenciesChanged() {
-    getExampleCode(config.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
+  void didChangeDependencies() {
+    getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
       if (mounted) {
         setState(() {
           _exampleCode = code;
         });
       }
     });
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override
@@ -128,16 +128,16 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
     Widget body;
     if (_exampleCode == null) {
-      body = new Center(
-        child: new CircularProgressIndicator()
+      body = const Center(
+        child: const CircularProgressIndicator()
       );
     } else {
       body = new SingleChildScrollView(
         child: new Padding(
-          padding: new EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: new RichText(
             text: new TextSpan(
-              style: new TextStyle(fontFamily: 'monospace', fontSize: 10.0),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 10.0),
               children: <TextSpan>[
                 new DartSyntaxHighlighter(style).format(_exampleCode)
               ]
@@ -150,10 +150,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: new Icon(Icons.clear),
+          icon: const Icon(Icons.clear),
           onPressed: () { Navigator.pop(context); }
         ),
-        title: new Text('Example code')
+        title: const Text('Example code')
       ),
       body: body
     );

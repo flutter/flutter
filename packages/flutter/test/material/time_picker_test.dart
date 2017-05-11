@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _TimePickerLauncher extends StatelessWidget {
-  _TimePickerLauncher({ Key key, this.onChanged }) : super(key: key);
+  const _TimePickerLauncher({ Key key, this.onChanged }) : super(key: key);
 
   final ValueChanged<TimeOfDay> onChanged;
 
@@ -18,7 +19,7 @@ class _TimePickerLauncher extends StatelessWidget {
           child: new Builder(
             builder: (BuildContext context) {
               return new RaisedButton(
-                child: new Text('X'),
+                child: const Text('X'),
                 onPressed: () async {
                   onChanged(await showTimePicker(
                     context: context,
@@ -34,40 +35,40 @@ class _TimePickerLauncher extends StatelessWidget {
   }
 }
 
-Future<Point> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged) async {
+Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged) async {
   await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged));
   await tester.tap(find.text('X'));
-  await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
-  return tester.getCenter(find.byKey(new Key('time-picker-dial')));
+  await tester.pumpAndSettle(const Duration(seconds: 1));
+  return tester.getCenter(find.byKey(const Key('time-picker-dial')));
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
   await tester.tap(find.text('OK'));
-  await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+  await tester.pumpAndSettle(const Duration(seconds: 1));
 }
 
 void main() {
   testWidgets('tap-select an hour', (WidgetTester tester) async {
     TimeOfDay result;
 
-    Point center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Point(center.x, center.y - 50.0)); // 12:00 AM
+    Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    await tester.tapAt(new Offset(center.dx, center.dy - 50.0)); // 12:00 AM
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Point(center.x + 50.0, center.y));
+    await tester.tapAt(new Offset(center.dx + 50.0, center.dy));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 3, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Point(center.x, center.y + 50.0));
+    await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Point(center.x, center.y + 50.0));
-    await tester.tapAt(new Point(center.x - 50, center.y));
+    await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
+    await tester.tapAt(new Offset(center.dx - 50, center.dy));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 9, minute: 0)));
   });
@@ -75,11 +76,11 @@ void main() {
   testWidgets('drag-select an hour', (WidgetTester tester) async {
     TimeOfDay result;
 
-    Point center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    Point hour0 = new Point(center.x, center.y - 50.0); // 12:00 AM
-    Point hour3 = new Point(center.x + 50.0, center.y);
-    Point hour6 = new Point(center.x, center.y + 50.0);
-    Point hour9 = new Point(center.x - 50.0, center.y);
+    final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    final Offset hour0 = new Offset(center.dx, center.dy - 50.0); // 12:00 AM
+    final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
+    final Offset hour6 = new Offset(center.dx, center.dy + 50.0);
+    final Offset hour9 = new Offset(center.dx - 50.0, center.dy);
 
     TestGesture gesture;
 
@@ -109,5 +110,93 @@ void main() {
     await gesture.up();
     await finishPicker(tester);
     expect(result.hour, equals(9));
+  });
+
+  group('haptic feedback', () {
+    const Duration kFastFeedbackInterval = const Duration(milliseconds: 10);
+    const Duration kSlowFeedbackInterval = const Duration(milliseconds: 200);
+    int hapticFeedbackCount;
+
+    setUpAll(() {
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) {
+        if (methodCall.method == "HapticFeedback.vibrate")
+          hapticFeedbackCount++;
+      });
+    });
+
+    setUp(() {
+      hapticFeedbackCount = 0;
+    });
+
+    testWidgets('tap-select vibrates once', (WidgetTester tester) async {
+      final Offset center = await startPicker(tester, (TimeOfDay time) { });
+      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await finishPicker(tester);
+      expect(hapticFeedbackCount, 1);
+    });
+
+    testWidgets('quick successive tap-selects vibrate once', (WidgetTester tester) async {
+      final Offset center = await startPicker(tester, (TimeOfDay time) { });
+      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await tester.pump(kFastFeedbackInterval);
+      await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
+      await finishPicker(tester);
+      expect(hapticFeedbackCount, 1);
+    });
+
+    testWidgets('slow successive tap-selects vibrate once per tap', (WidgetTester tester) async {
+      final Offset center = await startPicker(tester, (TimeOfDay time) { });
+      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await tester.pump(kSlowFeedbackInterval);
+      await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
+      await tester.pump(kSlowFeedbackInterval);
+      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
+      await finishPicker(tester);
+      expect(hapticFeedbackCount, 3);
+    });
+
+    testWidgets('drag-select vibrates once', (WidgetTester tester) async {
+      final Offset center = await startPicker(tester, (TimeOfDay time) { });
+      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
+
+      final TestGesture gesture = await tester.startGesture(hour3);
+      await gesture.moveBy(hour0 - hour3);
+      await gesture.up();
+      await finishPicker(tester);
+      expect(hapticFeedbackCount, 1);
+    });
+
+    testWidgets('quick drag-select vibrates once', (WidgetTester tester) async {
+      final Offset center = await startPicker(tester, (TimeOfDay time) { });
+      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
+
+      final TestGesture gesture = await tester.startGesture(hour3);
+      await gesture.moveBy(hour0 - hour3);
+      await tester.pump(kFastFeedbackInterval);
+      await gesture.moveBy(hour3 - hour0);
+      await tester.pump(kFastFeedbackInterval);
+      await gesture.moveBy(hour0 - hour3);
+      await gesture.up();
+      await finishPicker(tester);
+      expect(hapticFeedbackCount, 1);
+    });
+
+    testWidgets('slow drag-select vibrates once', (WidgetTester tester) async {
+      final Offset center = await startPicker(tester, (TimeOfDay time) { });
+      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
+
+      final TestGesture gesture = await tester.startGesture(hour3);
+      await gesture.moveBy(hour0 - hour3);
+      await tester.pump(kSlowFeedbackInterval);
+      await gesture.moveBy(hour3 - hour0);
+      await tester.pump(kSlowFeedbackInterval);
+      await gesture.moveBy(hour0 - hour3);
+      await gesture.up();
+      await finishPicker(tester);
+      expect(hapticFeedbackCount, 3);
+    });
   });
 }

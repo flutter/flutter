@@ -19,9 +19,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: const BoxDecoration(
-                backgroundColor: const Color(0xFF0000FF),
-              ),
+              color: const Color(0xFF0000FF),
             ),
           ),
           new Positioned(
@@ -38,9 +36,7 @@ void main() {
                     didReceiveTap = true;
                   },
                   child: new Container(
-                    decoration: const BoxDecoration(
-                      backgroundColor: const Color(0xFF00FFFF),
-                    ),
+                    color: const Color(0xFF00FFFF),
                   ),
                 ),
               ),
@@ -51,9 +47,9 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(110.0, 110.0));
+    await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(190.0, 150.0));
+    await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -68,9 +64,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: const BoxDecoration(
-                backgroundColor: const Color(0xFF0000FF),
-              ),
+              color: const Color(0xFF0000FF),
             ),
           ),
           new Positioned(
@@ -87,9 +81,7 @@ void main() {
                     didReceiveTap = true;
                   },
                   child: new Container(
-                    decoration: const BoxDecoration(
-                      backgroundColor: const Color(0xFF00FFFF),
-                    ),
+                    color: const Color(0xFF00FFFF),
                   ),
                 ),
               ),
@@ -100,9 +92,9 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(110.0, 110.0));
+    await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(190.0, 150.0));
+    await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -116,9 +108,7 @@ void main() {
           child: new Container(
             width: 100.0,
             height: 100.0,
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF),
-            ),
+            color: const Color(0xFF0000FF),
           ),
         ),
         new Positioned(
@@ -136,9 +126,7 @@ void main() {
                   didReceiveTap = true;
                 },
                 child: new Container(
-                  decoration: const BoxDecoration(
-                    backgroundColor: const Color(0xFF00FFFF),
-                  ),
+                  color: const Color(0xFF00FFFF),
                 ),
               ),
             ),
@@ -148,9 +136,9 @@ void main() {
     ));
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(110.0, 110.0));
+    await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(190.0, 150.0));
+    await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -166,9 +154,7 @@ void main() {
               child: new Opacity(
                 opacity: 0.9,
                 child: new Container(
-                  decoration: const BoxDecoration(
-                    backgroundColor: const Color(0xFF00FF00),
-                  ),
+                  color: const Color(0xFF00FF00),
                 ),
               ),
             ),
@@ -177,12 +163,12 @@ void main() {
       ),
     );
 
-    List<Layer> layers = tester.layers
+    final List<Layer> layers = tester.layers
       ..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
-    TransformLayer layer = layers[1];
-    Matrix4 transform = layer.transform;
+    final TransformLayer layer = layers[1];
+    final Matrix4 transform = layer.transform;
     expect(transform.getTranslation(), equals(new Vector3(100.0, 75.0, 0.0)));
   });
 }

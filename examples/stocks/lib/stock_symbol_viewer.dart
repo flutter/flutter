@@ -4,25 +4,25 @@
 
 import 'package:flutter/material.dart';
 
-import 'stock_data.dart';
 import 'stock_arrow.dart';
+import 'stock_data.dart';
 
 class _StockSymbolView extends StatelessWidget {
-  _StockSymbolView({ this.stock, this.arrow });
+  const _StockSymbolView({ this.stock, this.arrow });
 
   final Stock stock;
   final Widget arrow;
 
   @override
   Widget build(BuildContext context) {
-    String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
+    final String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0)
       changeInPrice = "+" + changeInPrice;
 
-    TextStyle headings = Theme.of(context).textTheme.body2;
+    final TextStyle headings = Theme.of(context).textTheme.body2;
     return new Container(
-      padding: new EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(20.0),
       child: new Column(
         children: <Widget>[
           new Row(
@@ -47,11 +47,11 @@ class _StockSymbolView extends StatelessWidget {
           ),
           new RichText(
             text: new TextSpan(
-              style: DefaultTextStyle.of(context).style.merge(new TextStyle(fontSize: 8.0)),
+              style: DefaultTextStyle.of(context).style.merge(const TextStyle(fontSize: 8.0)),
               text: 'Prices may be delayed by ',
               children: <TextSpan>[
-                new TextSpan(text: 'several', style: new TextStyle(fontStyle: FontStyle.italic)),
-                new TextSpan(text: ' years.'),
+                const TextSpan(text: 'several', style: const TextStyle(fontStyle: FontStyle.italic)),
+                const TextSpan(text: ' years.'),
               ]
             )
           ),
@@ -63,7 +63,7 @@ class _StockSymbolView extends StatelessWidget {
 }
 
 class StockSymbolPage extends StatelessWidget {
-  StockSymbolPage({ this.stock });
+  const StockSymbolPage({ this.stock });
 
   final Stock stock;
 
@@ -75,13 +75,12 @@ class StockSymbolPage extends StatelessWidget {
       ),
       body: new SingleChildScrollView(
         child: new Container(
-          margin: new EdgeInsets.all(20.0),
+          margin: const EdgeInsets.all(20.0),
           child: new Card(
             child: new _StockSymbolView(
               stock: stock,
               arrow: new Hero(
                 tag: stock,
-                turns: 2,
                 child: new StockArrow(percentChange: stock.percentChange)
               )
             )
@@ -93,16 +92,16 @@ class StockSymbolPage extends StatelessWidget {
 }
 
 class StockSymbolBottomSheet extends StatelessWidget {
-  StockSymbolBottomSheet({ this.stock });
+  const StockSymbolBottomSheet({ this.stock });
 
   final Stock stock;
 
   @override
   Widget build(BuildContext context) {
     return new Container(
-      padding: new EdgeInsets.all(10.0),
-      decoration: new BoxDecoration(
-        border: new Border(top: new BorderSide(color: Colors.black26))
+      padding: const EdgeInsets.all(10.0),
+      decoration: const BoxDecoration(
+        border: const Border(top: const BorderSide(color: Colors.black26))
       ),
       child: new _StockSymbolView(
         stock: stock,

@@ -31,15 +31,14 @@ class Theme extends InheritedWidget {
   /// Applies the given theme [data] to [child].
   ///
   /// The [data] and [child] arguments must not be null.
-  Theme({
+  const Theme({
     Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
-    Widget child
-  }) : super(key: key, child: child) {
-    assert(child != null);
-    assert(data != null);
-  }
+    @required Widget child
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -130,9 +129,18 @@ class Theme extends InheritedWidget {
   }
 }
 
-/// An animated value that interpolates [ThemeData]s.
+/// An interpolation between two [ThemeData]s.
+///
+/// This class specializes the interpolation of [Tween<ThemeData>] to call the
+/// [ThemeData.lerp] method.
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class ThemeDataTween extends Tween<ThemeData> {
-  /// Creates an interpolation between [begin] and [end].
+  /// Creates a [ThemeData] tween.
+  ///
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   ThemeDataTween({ ThemeData begin, ThemeData end }) : super(begin: begin, end: end);
 
   @override
@@ -154,17 +162,16 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   ///
   /// By default, the theme transition uses a linear curve. The [data] and
   /// [child] arguments must not be null.
-  AnimatedTheme({
+  const AnimatedTheme({
     Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
     Curve curve: Curves.linear,
     Duration duration: kThemeAnimationDuration,
     @required this.child,
-  }) : super(key: key, curve: curve, duration: duration) {
-    assert(child != null);
-    assert(data != null);
-  }
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, curve: curve, duration: duration);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -185,15 +192,15 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _data = visitor(_data, config.data, (dynamic value) => new ThemeDataTween(begin: value));
+    _data = visitor(_data, widget.data, (dynamic value) => new ThemeDataTween(begin: value));
     assert(_data != null);
   }
 
   @override
   Widget build(BuildContext context) {
     return new Theme(
-      isMaterialAppTheme: config.isMaterialAppTheme,
-      child: config.child,
+      isMaterialAppTheme: widget.isMaterialAppTheme,
+      child: widget.child,
       data: _data.evaluate(animation)
     );
   }

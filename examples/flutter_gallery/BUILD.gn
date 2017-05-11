@@ -9,8 +9,11 @@ assert(is_fuchsia)
 flutter_app("flutter_gallery") {
   main_dart = "lib/main.dart"
 
+  analysis_options = "//lib/flutter/.analysis_options"
+
   deps = [
     "//lib/flutter/packages/flutter",
+    "//third_party/dart-pkg/pub/url_launcher",
   ]
 
   # TODO(chinmaygarde): Assets must be packaged in the FLX.

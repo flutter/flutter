@@ -19,13 +19,12 @@ class TickerMode extends InheritedWidget {
   /// Creates a widget that enables or disables tickers.
   ///
   /// The [enabled] argument must not be null.
-  TickerMode({
+  const TickerMode({
     Key key,
     @required this.enabled,
     Widget child
-  }) : super(key: key, child: child) {
-    assert(enabled != null);
-  }
+  }) : assert(enabled != null),
+       super(key: key, child: child);
 
   /// The current ticker mode of this subtree.
   ///
@@ -50,7 +49,7 @@ class TickerMode extends InheritedWidget {
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
   static bool of(BuildContext context) {
-    TickerMode widget = context.inheritFromWidgetOfExactType(TickerMode);
+    final TickerMode widget = context.inheritFromWidgetOfExactType(TickerMode);
     return widget?.enabled ?? true;
   }
 
@@ -118,10 +117,10 @@ abstract class SingleTickerProviderStateMixin implements State<dynamic>, TickerP
   }
 
   @override
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     if (_ticker != null)
       _ticker.muted = !TickerMode.of(context);
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override
@@ -193,13 +192,13 @@ abstract class TickerProviderStateMixin implements State<dynamic>, TickerProvide
   }
 
   @override
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     final bool muted = !TickerMode.of(context);
     if (_tickers != null) {
       for (Ticker ticker in _tickers)
         ticker.muted = muted;
     }
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override

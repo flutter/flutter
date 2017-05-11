@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({ this.log, this.name });
 
-  List<String> log;
-  String name;
+  final List<String> log;
+  final String name;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -22,7 +22,7 @@ class TestCustomPainter extends CustomPainter {
 
 void main() {
   testWidgets('Control test for custom painting', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
     await tester.pumpWidget(new CustomPaint(
       painter: new TestCustomPainter(
         log: log,
@@ -44,7 +44,7 @@ void main() {
   });
 
   testWidgets('CustomPaint sizing', (WidgetTester tester) async {
-    GlobalKey target = new GlobalKey();
+    final GlobalKey target = new GlobalKey();
 
     await tester.pumpWidget(new Center(
       child: new CustomPaint(key: target)

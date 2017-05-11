@@ -7,19 +7,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class TestTransition extends AnimatedWidget {
-  TestTransition({
+  const TestTransition({
     Key key,
     this.childFirstHalf,
     this.childSecondHalf,
     Animation<double> animation
-  }) : super(key: key, animation: animation);
+  }) : super(key: key, listenable: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = this.animation;
+    final Animation<double> animation = listenable;
     if (animation.value >= 0.5)
       return childSecondHalf;
     return childFirstHalf;
@@ -41,7 +41,7 @@ class TestRoute<T> extends PageRoute<T> {
   bool get maintainState => false;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return child;
   }
 }
@@ -52,7 +52,7 @@ void main() {
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
 
-    GlobalKey insideKey = new GlobalKey();
+    final GlobalKey insideKey = new GlobalKey();
 
     String state({ bool skipOffstage: true }) {
       String result = '';
@@ -83,33 +83,33 @@ void main() {
                 child: new Builder(
                   key: insideKey,
                   builder: (BuildContext context) {
-                    PageRoute<Null> route = ModalRoute.of(context);
+                    final PageRoute<Null> route = ModalRoute.of(context);
                     return new Column(
                       children: <Widget>[
                         new TestTransition(
-                          childFirstHalf: new Text('A'),
-                          childSecondHalf: new Text('B'),
+                          childFirstHalf: const Text('A'),
+                          childSecondHalf: const Text('B'),
                           animation: route.animation
                         ),
                         new TestTransition(
-                          childFirstHalf: new Text('C'),
-                          childSecondHalf: new Text('D'),
-                          animation: route.forwardAnimation
+                          childFirstHalf: const Text('C'),
+                          childSecondHalf: const Text('D'),
+                          animation: route.secondaryAnimation
                         ),
                       ]
                     );
                   }
                 )
               );
-            case '/2': return new TestRoute<Null>(settings: settings, child: new Text('E'));
-            case '/3': return new TestRoute<Null>(settings: settings, child: new Text('F'));
-            case '/4': return new TestRoute<Null>(settings: settings, child: new Text('G'));
+            case '/2': return new TestRoute<Null>(settings: settings, child: const Text('E'));
+            case '/3': return new TestRoute<Null>(settings: settings, child: const Text('F'));
+            case '/4': return new TestRoute<Null>(settings: settings, child: const Text('G'));
           }
         }
       )
     );
 
-    NavigatorState navigator = insideKey.currentContext.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+    final NavigatorState navigator = insideKey.currentContext.ancestorStateOfType(const TypeMatcher<NavigatorState>());
 
     expect(state(), equals('BC')); // transition ->1 is at 1.0
 
@@ -132,6 +132,8 @@ void main() {
     navigator.pop();
     expect(state(), equals('E')); // transition 1<-2 is at 1.0, just reversed
     await tester.pump();
+    await tester.pump();
+
     expect(state(), equals('BDE')); // transition 1<-2 is at 1.0
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);

@@ -18,24 +18,24 @@ class TestParentData {
 }
 
 void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
-  MultiChildRenderObjectElement element = tester.element(
+  final MultiChildRenderObjectElement element = tester.element(
     find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement)
   );
   expect(element, isNotNull);
   expect(element.renderObject is RenderStack, isTrue);
-  RenderStack renderObject = element.renderObject;
+  final RenderStack renderObject = element.renderObject;
   try {
     RenderObject child = renderObject.firstChild;
     for (TestParentData expected in expectedParentData) {
       expect(child is RenderDecoratedBox, isTrue);
-      RenderDecoratedBox decoratedBox = child;
+      final RenderDecoratedBox decoratedBox = child;
       expect(decoratedBox.parentData is StackParentData, isTrue);
-      StackParentData parentData = decoratedBox.parentData;
+      final StackParentData parentData = decoratedBox.parentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      StackParentData decoratedBoxParentData = decoratedBox.parentData;
+      final StackParentData decoratedBoxParentData = decoratedBox.parentData;
       child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);
@@ -94,9 +94,9 @@ void main() {
       kNonPositioned,
     ]);
 
-    DecoratedBox kDecoratedBoxA = new DecoratedBox(decoration: kBoxDecorationA);
-    DecoratedBox kDecoratedBoxB = new DecoratedBox(decoration: kBoxDecorationB);
-    DecoratedBox kDecoratedBoxC = new DecoratedBox(decoration: kBoxDecorationC);
+    final DecoratedBox kDecoratedBoxA = new DecoratedBox(decoration: kBoxDecorationA);
+    final DecoratedBox kDecoratedBoxB = new DecoratedBox(decoration: kBoxDecorationB);
+    final DecoratedBox kDecoratedBoxC = new DecoratedBox(decoration: kBoxDecorationC);
 
     await tester.pumpWidget(
       new Stack(
@@ -286,7 +286,7 @@ void main() {
   });
 
   testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(
       new Stack(

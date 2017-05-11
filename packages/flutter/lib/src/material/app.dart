@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 
 import 'arc.dart';
 import 'colors.dart';
-import 'overscroll_indicator.dart';
 import 'page.dart';
 import 'theme.dart';
 
@@ -168,65 +167,28 @@ class MaterialApp extends StatefulWidget {
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
-class _ScrollLikeCupertinoDelegate extends ScrollConfigurationDelegate {
-  const _ScrollLikeCupertinoDelegate();
-
-  @override
-  TargetPlatform get platform => TargetPlatform.iOS;
-
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: TargetPlatform.iOS);
-
-  @override
-  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
-}
-
-class _ScrollLikeMountainViewDelegate extends ScrollConfigurationDelegate {
-  const _ScrollLikeMountainViewDelegate(this.platform);
-
-  @override
-  final TargetPlatform platform;
-
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: TargetPlatform.android);
-
-  ScrollableEdge _overscrollIndicatorEdge(ScrollableEdge edge) {
-    switch (edge) {
-      case ScrollableEdge.leading:
-        return ScrollableEdge.trailing;
-      case ScrollableEdge.trailing:
-        return ScrollableEdge.leading;
-      case ScrollableEdge.both:
-        return ScrollableEdge.none;
-      case ScrollableEdge.none:
-        return ScrollableEdge.both;
-    }
-    return ScrollableEdge.both;
-  }
-
-  @override
-  Widget wrapScrollWidget(BuildContext context, Widget scrollWidget) {
-    // Only introduce an overscroll indicator for the edges of the scrollable
-    // that aren't already clamped.
-    return new OverscrollIndicator(
-      edge: _overscrollIndicatorEdge(ClampOverscrolls.of(context)?.edge),
-      child: scrollWidget
-    );
-  }
-
-  @override
-  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
-}
-
-class _MaterialScrollBehavior extends ScrollBehavior2 {
+class _MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {
     return Theme.of(context).platform;
   }
 
   @override
-  Color getGlowColor(BuildContext context) {
-    return Theme.of(context).accentColor;
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+        return child;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return new GlowingOverscrollIndicator(
+          child: child,
+          axisDirection: axisDirection,
+          color: Theme.of(context).accentColor,
+        );
+    }
+    return null;
   }
 }
 
@@ -244,59 +206,47 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
-    WidgetBuilder builder = config.routes[settings.name];
-    if (builder == null && config.home != null && settings.name == Navigator.defaultRouteName)
-      builder = (BuildContext context) => config.home;
+    WidgetBuilder builder = widget.routes[settings.name];
+    if (builder == null && widget.home != null && settings.name == Navigator.defaultRouteName)
+      builder = (BuildContext context) => widget.home;
     if (builder != null) {
       return new MaterialPageRoute<Null>(
         builder: builder,
         settings: settings
       );
     }
-    if (config.onGenerateRoute != null)
-      return config.onGenerateRoute(settings);
-    return null;
-  }
-
-  ScrollConfigurationDelegate _getScrollDelegate(TargetPlatform platform) {
-    switch (platform) {
-      case TargetPlatform.android:
-        return const _ScrollLikeMountainViewDelegate(TargetPlatform.android);
-      case TargetPlatform.fuchsia:
-        return const _ScrollLikeMountainViewDelegate(TargetPlatform.fuchsia);
-      case TargetPlatform.iOS:
-        return const _ScrollLikeCupertinoDelegate();
-    }
+    if (widget.onGenerateRoute != null)
+      return widget.onGenerateRoute(settings);
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = config.theme ?? new ThemeData.fallback();
+    final ThemeData theme = widget.theme ?? new ThemeData.fallback();
     Widget result = new AnimatedTheme(
       data: theme,
       isMaterialAppTheme: true,
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
-        title: config.title,
+        title: widget.title,
         textStyle: _errorTextStyle,
-        // blue[500] is the primary color of the default theme
-        color: config.color ?? theme?.primaryColor ?? Colors.blue[500],
+        // blue is the primary color of the default theme
+        color: widget.color ?? theme?.primaryColor ?? Colors.blue,
         navigatorObservers:
-            new List<NavigatorObserver>.from(config.navigatorObservers)
+            new List<NavigatorObserver>.from(widget.navigatorObservers)
               ..add(_heroController),
-        initialRoute: config.initialRoute,
+        initialRoute: widget.initialRoute,
         onGenerateRoute: _onGenerateRoute,
-        onLocaleChanged: config.onLocaleChanged,
-        showPerformanceOverlay: config.showPerformanceOverlay,
-        checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
-        showSemanticsDebugger: config.showSemanticsDebugger,
-        debugShowCheckedModeBanner: config.debugShowCheckedModeBanner
+        onLocaleChanged: widget.onLocaleChanged,
+        showPerformanceOverlay: widget.showPerformanceOverlay,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        showSemanticsDebugger: widget.showSemanticsDebugger,
+        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner
       )
     );
 
     assert(() {
-      if (config.debugShowMaterialGrid) {
+      if (widget.debugShowMaterialGrid) {
         result = new GridPaper(
           color: const Color(0xE0F9BBE0),
           interval: 8.0,
@@ -308,12 +258,7 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     });
 
-    result = new ScrollConfiguration(
-      delegate: _getScrollDelegate(theme.platform),
-      child: result
-    );
-
-    return new ScrollConfiguration2(
+    return new ScrollConfiguration(
       behavior: new _MaterialScrollBehavior(),
       child: result
     );

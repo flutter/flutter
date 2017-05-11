@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
+import 'file_system.dart';
 import 'platform.dart';
 
 const int kDefaultObservatoryPort = 8100;
@@ -16,7 +15,7 @@ String get homeDirPath {
         ? platform.environment['USERPROFILE']
         : platform.environment['HOME'];
     if (_homeDirPath != null)
-      _homeDirPath = path.absolute(_homeDirPath);
+      _homeDirPath = fs.path.absolute(_homeDirPath);
   }
   return _homeDirPath;
 }

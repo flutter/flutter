@@ -17,7 +17,7 @@ void main() {
   });
 
   test('SliverConstraints', () {
-    SliverConstraints a = new SliverConstraints(
+    final SliverConstraints a = const SliverConstraints(
       axisDirection: AxisDirection.down,
       growthDirection: GrowthDirection.forward,
       userScrollDirection: ScrollDirection.idle,
@@ -27,14 +27,14 @@ void main() {
       crossAxisExtent: 0.0,
       viewportMainAxisExtent: 0.0,
     );
-    SliverConstraints b = a.copyWith();
+    final SliverConstraints b = a.copyWith();
     expect(a, equals(b));
     expect(a.hashCode, equals(b.hashCode));
     expect(a.toString(), equals(b.toString()));
     expect(a, hasOneLineDescription);
     expect(a.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
-    SliverConstraints c = a.copyWith(
+    final SliverConstraints c = a.copyWith(
       axisDirection: AxisDirection.up,
       growthDirection: GrowthDirection.reverse,
       userScrollDirection: ScrollDirection.forward,
@@ -44,7 +44,7 @@ void main() {
       crossAxisExtent: 40.0,
       viewportMainAxisExtent: 30.0,
     );
-    SliverConstraints d = new SliverConstraints(
+    final SliverConstraints d = const SliverConstraints(
       axisDirection: AxisDirection.up,
       growthDirection: GrowthDirection.reverse,
       userScrollDirection: ScrollDirection.forward,
@@ -58,23 +58,23 @@ void main() {
     expect(c.normalizedGrowthDirection, equals(GrowthDirection.forward));
     expect(d.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
-    SliverConstraints e = d.copyWith(axisDirection: AxisDirection.right);
+    final SliverConstraints e = d.copyWith(axisDirection: AxisDirection.right);
     expect(e.normalizedGrowthDirection, equals(GrowthDirection.reverse));
 
-    SliverConstraints f = d.copyWith(axisDirection: AxisDirection.left);
+    final SliverConstraints f = d.copyWith(axisDirection: AxisDirection.left);
     expect(f.normalizedGrowthDirection, equals(GrowthDirection.forward));
 
-    SliverConstraints g = d.copyWith(growthDirection: GrowthDirection.forward);
+    final SliverConstraints g = d.copyWith(growthDirection: GrowthDirection.forward);
     expect(g.normalizedGrowthDirection, equals(GrowthDirection.reverse));
   });
 
   test('SliverGeometry', () {
-    expect(new SliverGeometry().debugAssertIsValid, isTrue);
+    expect(const SliverGeometry().debugAssertIsValid(), isTrue);
     expect(() {
-      new SliverGeometry(layoutExtent: 10.0, paintExtent: 9.0).debugAssertIsValid;
+      const SliverGeometry(layoutExtent: 10.0, paintExtent: 9.0).debugAssertIsValid();
     }, throwsFlutterError);
     expect(() {
-      new SliverGeometry(paintExtent: 9.0, maxPaintExtent: 8.0).debugAssertIsValid;
+      const SliverGeometry(paintExtent: 9.0, maxPaintExtent: 8.0).debugAssertIsValid();
     }, throwsFlutterError);
   });
 }

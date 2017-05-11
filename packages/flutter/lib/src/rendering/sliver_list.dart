@@ -3,26 +3,56 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import 'box.dart';
 import 'sliver.dart';
 import 'sliver_multi_box_adaptor.dart';
 
+/// A sliver that places multiple box children in a linear array along the main
+/// axis.
+///
+/// Each child is forced to have the [SliverConstraints.crossAxisExtent] in the
+/// cross axis but determines its own main axis extent.
+///
+/// [RenderSliverList] determines its scroll offset by "dead reckoning" because
+/// children outside the visible part of the sliver are not materialized, which
+/// means [RenderSliverList] cannot learn their main axis extent. Instead, newly
+/// materialized children are placed adjacent to existing children. If this dead
+/// reckoning results in a logical inconsistency (e.g., attempting to place the
+/// zeroth child at a scroll offset other than zero), the [RenderSliverList]
+/// generates a [SliverGeometry.scrollOffsetCorrection] to restore consistency.
+///
+/// If the children have a fixed extent in the main axis, consider using
+/// [RenderSliverFixedExtentList] rather than [RenderSliverList] because
+/// [RenderSliverFixedExtentList] does not need to perform layout on its
+/// children to obtain their extent in the main axis and is therefore more
+/// efficient.
+///
+/// See also:
+///
+///  * [RenderSliverFixedExtentList], which is more efficient for children with
+///    the same extent in the main axis.
+///  * [RenderSliverGrid], which places its children in arbitrary positions.
 class RenderSliverList extends RenderSliverMultiBoxAdaptor {
+  /// Creates a sliver that places multiple box children in a linear array along
+  /// the main axis.
+  ///
+  /// The [childManager] argument must not be null.
   RenderSliverList({
-    @required RenderSliverBoxChildManager childManager
+    @required RenderSliverBoxChildManager childManager,
   }) : super(childManager: childManager);
 
   @override
   void performLayout() {
-    assert(childManager.debugAssertChildListLocked());
-    double scrollOffset = constraints.scrollOffset;
+    childManager.didStartLayout();
+    childManager.setDidUnderflow(false);
+
+    final double scrollOffset = constraints.scrollOffset;
     assert(scrollOffset >= 0.0);
-    double remainingPaintExtent = constraints.remainingPaintExtent;
+    final double remainingPaintExtent = constraints.remainingPaintExtent;
     assert(remainingPaintExtent >= 0.0);
-    double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
-    BoxConstraints childConstraints = constraints.asBoxConstraints();
+    final double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
+    final BoxConstraints childConstraints = constraints.asBoxConstraints();
     int leadingGarbage = 0;
     int trailingGarbage = 0;
     bool reachedEnd = false;
@@ -48,6 +78,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       if (!addInitialChild()) {
         // There are no children.
         geometry = SliverGeometry.zero;
+        childManager.didFinishLayout();
         return;
       }
     }
@@ -66,17 +97,45 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
          earliestScrollOffset = childScrollOffset(earliestUsefulChild)) {
       // We have to add children before the earliestUsefulChild.
       earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+
       if (earliestUsefulChild == null) {
         // We ran out of children before reaching the scroll offset.
         // We must inform our parent that this sliver cannot fulfill
         // its contract and that we need a scroll offset correction.
         geometry = new SliverGeometry(
-          scrollOffsetCorrection: -childScrollOffset(firstChild),
+          scrollOffsetCorrection: -scrollOffset,
         );
+        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
+        childParentData.layoutOffset = 0.0;
         return;
       }
+
+      final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
+      if (firstChildScrollOffset < 0.0) {
+        // The first child doesn't fit within the viewport (underflow) and
+        // there may be additional children above it. Find the real first child
+        // and then correct the scroll position so that there's room for all and
+        // so that the trailing edge of the original firstChild appears where it
+        // was before the scroll offset correction.
+        // TODO(hansmuller): do this work incrementally, instead of all at once,
+        // i.e. find a way to avoid visiting ALL of the children whose offset
+        // is < 0 before returning for the scroll correction.
+        double correction = 0.0;
+        while (earliestUsefulChild != null) {
+          assert(firstChild == earliestUsefulChild);
+          correction += paintExtentOf(firstChild);
+          earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+        }
+        geometry = new SliverGeometry(
+          scrollOffsetCorrection: correction - earliestScrollOffset,
+        );
+        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
+        childParentData.layoutOffset = 0.0;
+        return;
+      }
+
       final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData;
-      childParentData.layoutOffset = earliestScrollOffset - paintExtentOf(firstChild);
+      childParentData.layoutOffset = firstChildScrollOffset;
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout = earliestUsefulChild;
       trailingChildWithLayout ??= earliestUsefulChild;
@@ -210,6 +269,10 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
     );
 
-    assert(childManager.debugAssertChildListLocked());
+    // We may have started the layout while scrolled to the end, which would not
+    // expose a new child.
+    if (estimatedMaxScrollOffset == endScrollOffset)
+      childManager.setDidUnderflow(true);
+    childManager.didFinishLayout();
   }
 }

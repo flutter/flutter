@@ -16,7 +16,7 @@ import 'utils.dart';
 /// Maximum amount of time a single task is allowed to take to run.
 ///
 /// If exceeded the task is considered to have failed.
-const Duration taskTimeout = const Duration(minutes: 10);
+const Duration _kDefaultTaskTimeout = const Duration(minutes: 15);
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -43,7 +43,7 @@ Future<TaskResult> task(TaskFunction task) {
     print('${rec.level.name}: ${rec.time}: ${rec.message}');
   });
 
-  _TaskRunner runner = new _TaskRunner(task);
+  final _TaskRunner runner = new _TaskRunner(task);
   runner.keepVmAliveUntilTaskRunRequested();
   return runner.whenDone;
 }
@@ -63,7 +63,10 @@ class _TaskRunner {
   _TaskRunner(this.task) {
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
-      TaskResult result = await run();
+      final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
+        ? new Duration(minutes: int.parse(parameters['timeoutInMinutes']))
+        : _kDefaultTaskTimeout;
+      final TaskResult result = await run(taskTimeout);
       return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
@@ -75,10 +78,10 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run() async {
+  Future<TaskResult> run(Duration taskTimeout) async {
     try {
       _taskStarted = true;
-      TaskResult result = await _performTask().timeout(taskTimeout);
+      final TaskResult result = await _performTask().timeout(taskTimeout);
       _completer.complete(result);
       return result;
     } on TimeoutException catch (_) {
@@ -117,11 +120,11 @@ class _TaskRunner {
   }
 
   Future<TaskResult> _performTask() {
-    Completer<TaskResult> completer = new Completer<TaskResult>();
+    final Completer<TaskResult> completer = new Completer<TaskResult>();
     Chain.capture(() async {
       completer.complete(await task());
     }, onError: (dynamic taskError, Chain taskErrorStack) {
-      String message = 'Task failed: $taskError';
+      final String message = 'Task failed: $taskError';
       stderr
         ..writeln(message)
         ..writeln('\nStack trace:')
@@ -210,7 +213,7 @@ class TaskResult {
   ///       "reason": failure reason string valid only for unsuccessful results
   ///     }
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = <String, dynamic>{
+    final Map<String, dynamic> json = <String, dynamic>{
       'success': succeeded,
     };
 

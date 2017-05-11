@@ -5,6 +5,8 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -32,6 +34,7 @@ class TableCellParentData extends BoxParentData {
 /// distributes the space equally among the flexible columns,
 /// [FractionColumnWidth], which sizes a column based on the size of the
 /// table's container.
+@immutable
 abstract class TableColumnWidth {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -118,7 +121,7 @@ class FixedColumnWidth extends TableColumnWidth {
   /// Creates a column width based on a fixed number of logical pixels.
   ///
   /// The [value] argument must not be null.
-  const FixedColumnWidth(this.value);
+  const FixedColumnWidth(this.value) : assert(value != null);
 
   /// The width the column should occupy in logical pixels.
   final double value;
@@ -145,7 +148,7 @@ class FractionColumnWidth extends TableColumnWidth {
   /// maxWidth.
   ///
   /// The [value] argument must not be null.
-  const FractionColumnWidth(this.value);
+  const FractionColumnWidth(this.value) : assert(value != null);
 
   /// The fraction of the table's constraints' maxWidth that this column should
   /// occupy.
@@ -181,7 +184,7 @@ class FlexColumnWidth extends TableColumnWidth {
   /// the other columns have been laid out.
   ///
   /// The [value] argument must not be null.
-  const FlexColumnWidth([this.value = 1.0]);
+  const FlexColumnWidth([this.value = 1.0]) : assert(value != null);
 
   /// The reaction of the of the remaining space once all the other columns have
   /// been laid out that this column should occupy.
@@ -295,10 +298,10 @@ class MinColumnWidth extends TableColumnWidth {
 
   @override
   double flex(Iterable<RenderBox> cells) {
-    double aFlex = a.flex(cells);
+    final double aFlex = a.flex(cells);
     if (aFlex == null)
       return b.flex(cells);
-    double bFlex = b.flex(cells);
+    final double bFlex = b.flex(cells);
     if (bFlex == null)
       return null;
     return math.min(aFlex, bFlex);
@@ -448,8 +451,8 @@ enum TableCellVerticalAlignment {
 
   /// Cells with this alignment are aligned such that they all share the same
   /// baseline. Cells with no baseline are top-aligned instead. The baseline
-  /// used is specified by [RenderTable.baseline]. It is not valid to use the
-  /// baseline value if [RenderTable.baseline] is not specified.
+  /// used is specified by [RenderTable.textBaseline]. It is not valid to use
+  /// the baseline value if [RenderTable.textBaseline] is not specified.
   ///
   /// This vertial alignment is relatively expensive because it causes the table
   /// to compute the baseline for each cell in the row.
@@ -494,7 +497,7 @@ class RenderTable extends RenderBox {
     assert(configuration != null);
     _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0);
     _rows = rows ?? 0;
-    _children = new List<RenderBox>()..length = _columns * _rows;
+    _children = <RenderBox>[]..length = _columns * _rows;
     _columnWidths = columnWidths ?? new HashMap<int, TableColumnWidth>();
     _defaultColumnWidth = defaultColumnWidth;
     _border = border;
@@ -526,11 +529,11 @@ class RenderTable extends RenderBox {
     assert(value >= 0);
     if (value == columns)
       return;
-    int oldColumns = columns;
-    List<RenderBox> oldChildren = _children;
+    final int oldColumns = columns;
+    final List<RenderBox> oldChildren = _children;
     _columns = value;
-    _children = new List<RenderBox>()..length = columns * rows;
-    int columnsToCopy = math.min(columns, oldColumns);
+    _children = <RenderBox>[]..length = columns * rows;
+    final int columnsToCopy = math.min(columns, oldColumns);
     for (int y = 0; y < rows; y += 1) {
       for (int x = 0; x < columnsToCopy; x += 1)
         _children[x + y * columns] = oldChildren[x + y * oldColumns];
@@ -538,7 +541,7 @@ class RenderTable extends RenderBox {
     if (oldColumns > columns) {
       for (int y = 0; y < rows; y += 1) {
         for (int x = columns; x < oldColumns; x += 1) {
-          int xy = x + y * oldColumns;
+          final int xy = x + y * oldColumns;
           if (oldChildren[xy] != null)
             dropChild(oldChildren[xy]);
         }
@@ -644,7 +647,7 @@ class RenderTable extends RenderBox {
   /// [BoxPainter.paint].
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
-  set configuration (ImageConfiguration value) {
+  set configuration(ImageConfiguration value) {
     assert(value != null);
     if (value == _configuration)
       return;
@@ -655,7 +658,7 @@ class RenderTable extends RenderBox {
   /// How cells that do not explicitly specify a vertical alignment are aligned vertically.
   TableCellVerticalAlignment get defaultVerticalAlignment => _defaultVerticalAlignment;
   TableCellVerticalAlignment _defaultVerticalAlignment;
-  set defaultVerticalAlignment (TableCellVerticalAlignment value) {
+  set defaultVerticalAlignment(TableCellVerticalAlignment value) {
     if (_defaultVerticalAlignment == value)
       return;
     _defaultVerticalAlignment = value;
@@ -665,7 +668,7 @@ class RenderTable extends RenderBox {
   /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
-  set textBaseline (TextBaseline value) {
+  set textBaseline(TextBaseline value) {
     if (_textBaseline == value)
       return;
     _textBaseline = value;
@@ -715,8 +718,8 @@ class RenderTable extends RenderBox {
     final Set<RenderBox> lostChildren = new HashSet<RenderBox>();
     for (int y = 0; y < _rows; y += 1) {
       for (int x = 0; x < _columns; x += 1) {
-        int xyOld = x + y * _columns;
-        int xyNew = x + y * columns;
+        final int xyOld = x + y * _columns;
+        final int xyNew = x + y * columns;
         if (_children[xyOld] != null && (x >= columns || xyNew >= cells.length || _children[xyOld] != cells[xyNew]))
           lostChildren.add(_children[xyOld]);
       }
@@ -725,8 +728,8 @@ class RenderTable extends RenderBox {
     int y = 0;
     while (y * columns < cells.length) {
       for (int x = 0; x < columns; x += 1) {
-        int xyNew = x + y * columns;
-        int xyOld = x + y * _columns;
+        final int xyNew = x + y * columns;
+        final int xyOld = x + y * _columns;
         if (cells[xyNew] != null && (x >= _columns || y >= _rows || _children[xyOld] != cells[xyNew])) {
           if (!lostChildren.remove(cells[xyNew]))
             adoptChild(cells[xyNew]);
@@ -790,7 +793,7 @@ class RenderTable extends RenderBox {
     assert(x >= 0 && x < columns && y >= 0 && y < rows);
     assert(_children.length == rows * columns);
     final int xy = x + y * columns;
-    RenderBox oldChild = _children[xy];
+    final RenderBox oldChild = _children[xy];
     if (oldChild == value)
       return;
     if (oldChild != null)
@@ -809,6 +812,7 @@ class RenderTable extends RenderBox {
 
   @override
   void detach() {
+    super.detach();
     if (_rowDecorationPainters != null) {
       for (BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
@@ -816,7 +820,6 @@ class RenderTable extends RenderBox {
     }
     for (RenderBox child in _children)
       child?.detach();
-    super.detach();
   }
 
   @override
@@ -833,8 +836,8 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     double totalMinWidth = 0.0;
     for (int x = 0; x < columns; x += 1) {
-      TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
-      Iterable<RenderBox> columnCells = column(x);
+      final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
+      final Iterable<RenderBox> columnCells = column(x);
       totalMinWidth += columnWidth.minIntrinsicWidth(columnCells, double.INFINITY);
     }
     return totalMinWidth;
@@ -845,8 +848,8 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     double totalMaxWidth = 0.0;
     for (int x = 0; x < columns; x += 1) {
-      TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
-      Iterable<RenderBox> columnCells = column(x);
+      final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
+      final Iterable<RenderBox> columnCells = column(x);
       totalMaxWidth += columnWidth.maxIntrinsicWidth(columnCells, double.INFINITY);
     }
     return totalMaxWidth;
@@ -863,7 +866,7 @@ class RenderTable extends RenderBox {
       double rowHeight = 0.0;
       for (int x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
-        RenderBox child = _children[xy];
+        final RenderBox child = _children[xy];
         if (child != null)
           rowHeight = math.max(rowHeight, child.getMaxIntrinsicHeight(widths[x]));
       }
@@ -892,7 +895,7 @@ class RenderTable extends RenderBox {
   Iterable<RenderBox> column(int x) sync* {
     for (int y = 0; y < rows; y += 1) {
       final int xy = x + y * columns;
-      RenderBox child = _children[xy];
+      final RenderBox child = _children[xy];
       if (child != null)
         yield child;
     }
@@ -906,7 +909,7 @@ class RenderTable extends RenderBox {
     final int start = y * columns;
     final int end = (y + 1) * columns;
     for (int xy = start; xy < end; xy += 1) {
-      RenderBox child = _children[xy];
+      final RenderBox child = _children[xy];
       if (child != null)
         yield child;
     }
@@ -933,8 +936,8 @@ class RenderTable extends RenderBox {
     double unflexedTableWidth = 0.0; // sum of the maxIntrinsicWidths of any column that has null flex
     double totalFlex = 0.0;
     for (int x = 0; x < columns; x += 1) {
-      TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
-      Iterable<RenderBox> columnCells = column(x);
+      final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
+      final Iterable<RenderBox> columnCells = column(x);
       // apply ideal width (maxIntrinsicWidth)
       final double maxIntrinsicWidth = columnWidth.maxIntrinsicWidth(columnCells, constraints.maxWidth);
       assert(maxIntrinsicWidth.isFinite);
@@ -948,7 +951,7 @@ class RenderTable extends RenderBox {
       minWidths[x] = minIntrinsicWidth;
       assert(maxIntrinsicWidth >= minIntrinsicWidth);
       // collect flex information while we're at it
-      double flex = columnWidth.flex(columnCells);
+      final double flex = columnWidth.flex(columnCells);
       if (flex != null) {
         assert(flex.isFinite);
         assert(flex > 0.0);
@@ -1058,7 +1061,7 @@ class RenderTable extends RenderBox {
           final double delta = deficit / availableColumns;
           int newAvailableColumns = 0;
           for (int x = 0; x < columns; x += 1) {
-            double availableDelta = widths[x] - minWidths[x];
+            final double availableDelta = widths[x] - minWidths[x];
             if (availableDelta > 0.0) {
               if (availableDelta <= delta) {
                 // shrank to minimum
@@ -1079,7 +1082,7 @@ class RenderTable extends RenderBox {
   }
 
   // cache the table geometry for painting purposes
-  List<double> _rowTops = <double>[];
+  final List<double> _rowTops = <double>[];
   List<double> _columnLefts;
 
   /// Returns the position and dimensions of the box that the given
@@ -1122,12 +1125,12 @@ class RenderTable extends RenderBox {
       bool haveBaseline = false;
       double beforeBaselineDistance = 0.0;
       double afterBaselineDistance = 0.0;
-      List<double> baselines = new List<double>(columns);
+      final List<double> baselines = new List<double>(columns);
       for (int x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
-        RenderBox child = _children[xy];
+        final RenderBox child = _children[xy];
         if (child != null) {
-          TableCellParentData childParentData = child.parentData;
+          final TableCellParentData childParentData = child.parentData;
           assert(childParentData != null);
           childParentData.x = x;
           childParentData.y = y;
@@ -1135,7 +1138,7 @@ class RenderTable extends RenderBox {
             case TableCellVerticalAlignment.baseline:
               assert(textBaseline != null);
               child.layout(new BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
-              double childBaseline = child.getDistanceToBaseline(textBaseline, onlyReal: true);
+              final double childBaseline = child.getDistanceToBaseline(textBaseline, onlyReal: true);
               if (childBaseline != null) {
                 beforeBaselineDistance = math.max(beforeBaselineDistance, childBaseline);
                 afterBaselineDistance = math.max(afterBaselineDistance, child.size.height - childBaseline);
@@ -1164,7 +1167,7 @@ class RenderTable extends RenderBox {
       }
       for (int x = 0; x < columns; x += 1) {
         final int xy = x + y * columns;
-        RenderBox child = _children[xy];
+        final RenderBox child = _children[xy];
         if (child != null) {
           final TableCellParentData childParentData = child.parentData;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
@@ -1196,15 +1199,13 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
-      RenderBox child = _children[index];
+      final RenderBox child = _children[index];
       if (child != null) {
         final BoxParentData childParentData = child.parentData;
-        Point transformed = new Point(position.x - childParentData.offset.dx,
-                                      position.y - childParentData.offset.dy);
-        if (child.hitTest(result, position: transformed))
+        if (child.hitTest(result, position: position - childParentData.offset))
           return true;
       }
     }
@@ -1234,22 +1235,22 @@ class RenderTable extends RenderBox {
       }
     }
     for (int index = 0; index < _children.length; index += 1) {
-      RenderBox child = _children[index];
+      final RenderBox child = _children[index];
       if (child != null) {
         final BoxParentData childParentData = child.parentData;
         context.paintChild(child, childParentData.offset + offset);
       }
     }
     canvas = context.canvas;
-    Rect bounds = offset & size;
+    final Rect bounds = offset & size;
     if (border != null) {
       switch (border.verticalInside.style) {
         case BorderStyle.solid:
-          Paint paint = new Paint()
+          final Paint paint = new Paint()
             ..color = border.verticalInside.color
             ..strokeWidth = border.verticalInside.width
             ..style = PaintingStyle.stroke;
-          Path path = new Path();
+          final Path path = new Path();
           for (int x = 1; x < columns; x += 1) {
             path.moveTo(bounds.left + _columnLefts[x], bounds.top);
             path.lineTo(bounds.left + _columnLefts[x], bounds.bottom);
@@ -1260,11 +1261,11 @@ class RenderTable extends RenderBox {
       }
       switch (border.horizontalInside.style) {
         case BorderStyle.solid:
-          Paint paint = new Paint()
+          final Paint paint = new Paint()
             ..color = border.horizontalInside.color
             ..strokeWidth = border.horizontalInside.width
             ..style = PaintingStyle.stroke;
-          Path path = new Path();
+          final Path path = new Path();
           for (int y = 1; y < rows; y += 1) {
             path.moveTo(bounds.left, bounds.top + _rowTops[y]);
             path.lineTo(bounds.right, bounds.top + _rowTops[y]);
@@ -1292,16 +1293,16 @@ class RenderTable extends RenderBox {
 
   @override
   String debugDescribeChildren(String prefix) {
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.writeln('$prefix \u2502');
-    int lastIndex = _children.length - 1;
+    final int lastIndex = _children.length - 1;
     if (lastIndex < 0) {
       result.writeln('$prefix \u2514\u2500table is empty');
     } else {
       for (int y = 0; y < rows; y += 1) {
         for (int x = 0; x < columns; x += 1) {
           final int xy = x + y * columns;
-          RenderBox child = _children[xy];
+          final RenderBox child = _children[xy];
           if (child != null) {
             if (xy < lastIndex) {
               result.write('${child.toStringDeep("$prefix \u251C\u2500child ($x, $y): ", "$prefix \u2502")}');

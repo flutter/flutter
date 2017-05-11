@@ -13,25 +13,27 @@ class DefaultTextStyle extends InheritedWidget {
   /// Creates a default text style for the given subtree.
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
-  /// from a the current default text style for a given [BuildContext].
-  DefaultTextStyle({
+  /// from the current default text style for a given [BuildContext].
+  const DefaultTextStyle({
     Key key,
     @required this.style,
     this.textAlign,
     this.softWrap: true,
     this.overflow: TextOverflow.clip,
     this.maxLines,
-    Widget child
-  }) : super(key: key, child: child) {
-    assert(style != null);
-    assert(softWrap != null);
-    assert(overflow != null);
-    assert(child != null);
-  }
+    @required Widget child,
+  }) : assert(style != null),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(child != null),
+       super(key: key, child: child);
 
   /// A const-constructible default text style that provides fallback values.
   ///
   /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default text style.
+  ///
+  /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
+  /// means the constructed value cannot be incorporated into the tree.
   const DefaultTextStyle.fallback()
     : style = const TextStyle(),
       textAlign = null,
@@ -39,33 +41,36 @@ class DefaultTextStyle extends InheritedWidget {
       maxLines = null,
       overflow = TextOverflow.clip;
 
-  /// Creates a default text style that inherits from the given [BuildContext].
+  /// Creates a default text style that overrides the text styles in scope at
+  /// this point in the widget tree.
   ///
   /// The given [style] is merged with the [style] from the default text style
-  /// for the given [BuildContext] and, if non-null, the given [textAlign]
-  /// replaces the [textAlign] from the default text style for the given
-  /// [BuildContext].
-  factory DefaultTextStyle.merge({
+  /// for the [BuildContext] where the widget is inserted, and any of the other
+  /// arguments that are not null replace the corresponding properties on that
+  /// same default text style.
+  static Widget merge({
     Key key,
-    @required BuildContext context,
     TextStyle style,
     TextAlign textAlign,
     bool softWrap,
     TextOverflow overflow,
     int maxLines,
-    Widget child
+    @required Widget child,
   }) {
-    assert(context != null);
     assert(child != null);
-    DefaultTextStyle parent = DefaultTextStyle.of(context);
-    return new DefaultTextStyle(
-      key: key,
-      style: parent.style.merge(style),
-      textAlign: textAlign ?? parent.textAlign,
-      softWrap: softWrap ?? parent.softWrap,
-      overflow: overflow ?? parent.overflow,
-      maxLines: maxLines ?? parent.maxLines,
-      child: child
+    return new Builder(
+      builder: (BuildContext context) {
+        final DefaultTextStyle parent = DefaultTextStyle.of(context);
+        return new DefaultTextStyle(
+          key: key,
+          style: parent.style.merge(style),
+          textAlign: textAlign ?? parent.textAlign,
+          softWrap: softWrap ?? parent.softWrap,
+          overflow: overflow ?? parent.overflow,
+          maxLines: maxLines ?? parent.maxLines,
+          child: child
+        );
+      },
     );
   }
 
@@ -103,7 +108,13 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(DefaultTextStyle old) => style != old.style;
+  bool updateShouldNotify(DefaultTextStyle old) {
+    return style != old.style ||
+        textAlign != old.textAlign ||
+        softWrap != old.softWrap ||
+        overflow != old.overflow ||
+        maxLines != old.maxLines;
+  }
 
   @override
   void debugFillDescription(List<String> description) {
@@ -137,7 +148,7 @@ class Text extends StatelessWidget {
   ///
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
-  Text(this.data, {
+  const Text(this.data, {
     Key key,
     this.style,
     this.textAlign,
@@ -145,9 +156,8 @@ class Text extends StatelessWidget {
     this.overflow,
     this.textScaleFactor,
     this.maxLines,
-  }) : super(key: key) {
-    assert(data != null);
-  }
+  }) : assert(data != null),
+       super(key: key);
 
   /// The text to display.
   final String data;
@@ -175,7 +185,8 @@ class Text extends StatelessWidget {
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   ///
-  /// Defaults to [MediaQuery.textScaleFactor].
+  /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
+  /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   final double textScaleFactor;
 
   /// An optional maximum number of lines the text is allowed to take up.
@@ -185,7 +196,7 @@ class Text extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle effectiveTextStyle = style;
     if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
@@ -193,7 +204,7 @@ class Text extends StatelessWidget {
       textAlign: textAlign ?? defaultTextStyle.textAlign,
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? defaultTextStyle.overflow,
-      textScaleFactor: textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
+      textScaleFactor: textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       text: new TextSpan(
         style: effectiveTextStyle,

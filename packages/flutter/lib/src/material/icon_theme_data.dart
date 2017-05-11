@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show lerpDouble;
 import 'dart:ui' show Color, hashValues;
+import 'dart:ui' as ui show lerpDouble;
 
 /// Defines the color, opacity, and size of icons.
 ///
@@ -11,7 +11,8 @@ import 'dart:ui' show Color, hashValues;
 /// widget subtree.
 ///
 /// To obtain the current icon theme, use [IconTheme.of]. To convert an icon
-/// theme to a version with all the fields filled in, use [fallback].
+/// theme to a version with all the fields filled in, use [new
+/// IconThemeData.fallback].
 class IconThemeData {
   /// Creates an icon theme data.
   ///
@@ -87,7 +88,7 @@ class IconThemeData {
 
   @override
   String toString() {
-    List<String> result = <String>[];
+    final List<String> result = <String>[];
     if (color != null)
       result.add('color: $color');
     if (_opacity != null)

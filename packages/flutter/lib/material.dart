@@ -6,15 +6,19 @@
 ///
 /// To use, import `package:flutter/material.dart`.
 ///
-/// See
-/// [material.google.com](https://material.google.com/)
-/// for an introduction to Material Design.
+/// See also:
+///
+///  * [flutter.io/widgets](https://flutter.io/widgets/)
+///    for a catalog of commonly-used Flutter widgets.
+///  * [material.google.com](https://material.google.com/)
+///    for an introduction to Material Design.
 library material;
 
 export 'src/material/about.dart';
 export 'src/material/app.dart';
 export 'src/material/app_bar.dart';
 export 'src/material/arc.dart';
+export 'src/material/back_button.dart';
 export 'src/material/bottom_navigation_bar.dart';
 export 'src/material/bottom_sheet.dart';
 export 'src/material/button.dart';
@@ -33,10 +37,10 @@ export 'src/material/dialog.dart';
 export 'src/material/divider.dart';
 export 'src/material/drawer.dart';
 export 'src/material/drawer_header.dart';
-export 'src/material/drawer_item.dart';
-export 'src/material/drop_down.dart';
+export 'src/material/dropdown.dart';
 export 'src/material/expand_icon.dart';
 export 'src/material/expansion_panel.dart';
+export 'src/material/expansion_tile.dart';
 export 'src/material/flat_button.dart';
 export 'src/material/flexible_space_bar.dart';
 export 'src/material/floating_action_button.dart';
@@ -52,12 +56,10 @@ export 'src/material/image_icon.dart';
 export 'src/material/ink_highlight.dart';
 export 'src/material/ink_splash.dart';
 export 'src/material/ink_well.dart';
-export 'src/material/input.dart';
-export 'src/material/list.dart';
-export 'src/material/list_item.dart';
+export 'src/material/input_decorator.dart';
+export 'src/material/list_tile.dart';
 export 'src/material/material.dart';
 export 'src/material/mergeable_material.dart';
-export 'src/material/overscroll_indicator.dart';
 export 'src/material/page.dart';
 export 'src/material/paginated_data_table.dart';
 export 'src/material/popup_menu.dart';
@@ -72,8 +74,11 @@ export 'src/material/slider.dart';
 export 'src/material/snack_bar.dart';
 export 'src/material/stepper.dart';
 export 'src/material/switch.dart';
-export 'src/material/tabs.dart';
 export 'src/material/tab_controller.dart';
+export 'src/material/tabs.dart';
+export 'src/material/text_field.dart';
+export 'src/material/text_form_field.dart';
+export 'src/material/text_selection.dart';
 export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
 export 'src/material/time_picker.dart';
@@ -82,5 +87,4 @@ export 'src/material/tooltip.dart';
 export 'src/material/two_level_list.dart';
 export 'src/material/typography.dart';
 export 'src/material/user_accounts_drawer_header.dart';
-
 export 'widgets.dart';

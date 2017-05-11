@@ -1,3 +1,5 @@
+*.pyc
 .recipe_deps
 android_tools
-*.pyc
+.packages
+pubspec.lock

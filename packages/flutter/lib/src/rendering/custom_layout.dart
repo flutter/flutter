@@ -38,7 +38,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
 /// Override [shouldRelayout] to determine when the layout of the children needs
 /// to be recomputed when the delegate changes.
 ///
-/// Used with [MultiChildCustomLayout], the widget for the
+/// Used with [CustomMultiChildLayout], the widget for the
 /// [RenderCustomMultiChildLayoutBox] render object.
 ///
 /// ## Example
@@ -170,7 +170,7 @@ abstract class MultiChildLayoutDelegate {
     });
 
     try {
-      _idToChild = new Map<Object, RenderBox>();
+      _idToChild = <Object, RenderBox>{};
       RenderBox child = firstChild;
       while (child != null) {
         final MultiChildLayoutParentData childParentData = child.parentData;
@@ -243,7 +243,7 @@ abstract class MultiChildLayoutDelegate {
   /// This should compare the fields of the current delegate and the given
   /// `oldDelegate` and return true if the fields are such that the layout would
   /// be different.
-  bool shouldRelayout(@checked MultiChildLayoutDelegate oldDelegate);
+  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate);
 
   /// Override this method to include additional information in the
   /// debugging data printed by [debugDumpRenderTree] and friends.
@@ -267,7 +267,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   /// The [delegate] argument must not be null.
   RenderCustomMultiChildLayoutBox({
     List<RenderBox> children,
-    MultiChildLayoutDelegate delegate
+    @required MultiChildLayoutDelegate delegate
   }) : _delegate = delegate {
     assert(delegate != null);
     addAll(children);
@@ -282,13 +282,13 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   /// The delegate that controls the layout of the children.
   MultiChildLayoutDelegate get delegate => _delegate;
   MultiChildLayoutDelegate _delegate;
-  set delegate (MultiChildLayoutDelegate newDelegate) {
-    assert(newDelegate != null);
-    if (_delegate == newDelegate)
+  set delegate(MultiChildLayoutDelegate value) {
+    assert(value != null);
+    if (_delegate == value)
       return;
-    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate))
+    if (value.runtimeType != _delegate.runtimeType || value.shouldRelayout(_delegate))
       markNeedsLayout();
-    _delegate = newDelegate;
+    _delegate = value;
   }
 
   Size _getSize(BoxConstraints constraints) {
@@ -344,7 +344,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 }

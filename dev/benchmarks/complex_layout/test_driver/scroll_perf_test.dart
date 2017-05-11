@@ -19,28 +19,38 @@ void main() {
         driver.close();
     });
 
-    test('measure', () async {
-      Timeline timeline = await driver.traceAction(() async {
+    Future<Null> testScrollPerf(String listKey, String summaryName) async {
+      final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
-        SerializableFinder stockList = find.byValueKey('main-scroll');
-        expect(stockList, isNotNull);
+        final SerializableFinder list = find.byValueKey(listKey);
+        expect(list, isNotNull);
 
         // Scroll down
         for (int i = 0; i < 5; i++) {
-          await driver.scroll(stockList, 0.0, -300.0, new Duration(milliseconds: 300));
-          await new Future<Null>.delayed(new Duration(milliseconds: 500));
+          await driver.scroll(list, 0.0, -300.0, const Duration(milliseconds: 300));
+          await new Future<Null>.delayed(const Duration(milliseconds: 500));
         }
 
         // Scroll up
         for (int i = 0; i < 5; i++) {
-          await driver.scroll(stockList, 0.0, 300.0, new Duration(milliseconds: 300));
-          await new Future<Null>.delayed(new Duration(milliseconds: 500));
+          await driver.scroll(list, 0.0, 300.0, const Duration(milliseconds: 300));
+          await new Future<Null>.delayed(const Duration(milliseconds: 500));
         }
       });
 
-      TimelineSummary summary = new TimelineSummary.summarize(timeline);
-      summary.writeSummaryToFile('complex_layout_scroll_perf', pretty: true);
-      summary.writeTimelineToFile('complex_layout_scroll_perf', pretty: true);
+      final TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      summary.writeSummaryToFile(summaryName, pretty: true);
+      summary.writeTimelineToFile(summaryName, pretty: true);
+    }
+
+    test('complex_layout_scroll_perf', () async {
+      await testScrollPerf('complex-scroll', 'complex_layout_scroll_perf');
+    });
+
+    test('tiles_scroll_perf', () async {
+      await driver.tap(find.byTooltip('Open navigation menu'));
+      await driver.tap(find.byValueKey('scroll-switcher'));
+      await testScrollPerf('tiles-scroll', 'tiles_scroll_perf');
     });
   });
 }

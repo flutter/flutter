@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
-    Key switchKey = new UniqueKey();
+    final Key switchKey = new UniqueKey();
     bool value = false;
 
     await tester.pumpWidget(
@@ -60,21 +60,21 @@ void main() {
 
     expect(value, isFalse);
 
-    await tester.scroll(find.byType(Switch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
 
     expect(value, isFalse);
 
-    await tester.scroll(find.byType(Switch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.scroll(find.byType(Switch), const Offset(30.0, 0.0));
+    await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
 
     expect(value, isTrue);
 
     await tester.pump();
-    await tester.scroll(find.byType(Switch), const Offset(-30.0, 0.0));
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
 
     expect(value, isFalse);
   });

@@ -11,21 +11,21 @@ import 'package:flutter/foundation.dart';
 import 'app_bar.dart';
 import 'debug.dart';
 import 'dialog.dart';
-import 'drawer_item.dart';
 import 'flat_button.dart';
 import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'list_tile.dart';
 import 'page.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'scrollbar.dart';
 import 'theme.dart';
 
-/// A [DrawerItem] to show an about box.
+/// A [ListTile] that shows an about box.
 ///
-/// Place this in a [Drawer], specifying your preferred application name,
-/// version, icon, and copyright in the appropriate fields.
+/// This widget is often added to an app's [Drawer]. When tapped it shows
+/// an about box dialog with [showAboutDialog].
 ///
 /// The about box will include a button that shows licenses for software used by
 /// the application. The licenses shown are those returned by the
@@ -33,13 +33,13 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
-class AboutDrawerItem extends StatelessWidget {
-  /// Creates a drawer item for showing an about box.
+class AboutListTile extends StatelessWidget {
+  /// Creates a list tile for showing an about box.
   ///
   /// The arguments are all optional. The application name, if omitted, will be
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
-  AboutDrawerItem({
+  const AboutListTile({
     Key key,
     this.icon: const Icon(null),
     this.child,
@@ -109,10 +109,10 @@ class AboutDrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    return new DrawerItem(
-      icon: icon,
-      child: child ?? new Text('About ${applicationName ?? _defaultApplicationName(context)}'),
-      onPressed: () {
+    return new ListTile(
+      leading: icon,
+      title: child ?? new Text('About ${applicationName ?? _defaultApplicationName(context)}'),
+      onTap: () {
         showAboutDialog(
           context: context,
           applicationName: applicationName,
@@ -131,7 +131,7 @@ class AboutDrawerItem extends StatelessWidget {
 ///
 /// The arguments correspond to the properties on [AboutDialog].
 ///
-/// If the application has a [Drawer], consider using [AboutDrawerItem] instead
+/// If the application has a [Drawer], consider using [AboutListTile] instead
 /// of calling this directly.
 ///
 /// If you do not need an about box in your application, you should at least
@@ -164,7 +164,7 @@ void showAboutDialog({
 ///
 /// The arguments correspond to the properties on [LicensePage].
 ///
-/// If the application has a [Drawer], consider using [AboutDrawerItem] instead
+/// If the application has a [Drawer], consider using [AboutListTile] instead
 /// of calling this directly.
 ///
 /// The [AboutDialog] shown by [showAboutDialog] includes a button that calls
@@ -196,7 +196,7 @@ void showLicensePage({
 ///
 /// To show an [AboutDialog], use [showAboutDialog].
 ///
-/// If the application has a [Drawer], the [AboutDrawerItem] widget can make the
+/// If the application has a [Drawer], the [AboutListTile] widget can make the
 /// process of showing an about dialog simpler.
 ///
 /// The [AboutDialog] shown by [showAboutDialog] includes a button that calls
@@ -210,7 +210,7 @@ class AboutDialog extends StatelessWidget {
   /// The arguments are all optional. The application name, if omitted, will be
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
-  AboutDialog({
+  const AboutDialog({
     Key key,
     this.applicationName,
     this.applicationVersion,
@@ -266,7 +266,7 @@ class AboutDialog extends StatelessWidget {
     body.add(new Expanded(
       child: new Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: new BlockBody(
+        child: new ListBody(
           children: <Widget>[
             new Text(name, style: Theme.of(context).textTheme.headline),
             new Text(version, style: Theme.of(context).textTheme.body1),
@@ -286,11 +286,11 @@ class AboutDialog extends StatelessWidget {
       body.addAll(children);
     return new AlertDialog(
       content: new SingleChildScrollView(
-        child: new BlockBody(children: body),
+        child: new ListBody(children: body),
       ),
       actions: <Widget>[
         new FlatButton(
-          child: new Text('VIEW LICENSES'),
+          child: const Text('VIEW LICENSES'),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -302,7 +302,7 @@ class AboutDialog extends StatelessWidget {
           }
         ),
         new FlatButton(
-          child: new Text('CLOSE'),
+          child: const Text('CLOSE'),
           onPressed: () {
             Navigator.pop(context);
           }
@@ -316,7 +316,7 @@ class AboutDialog extends StatelessWidget {
 ///
 /// To show a [LicensePage], use [showLicensePage].
 ///
-/// The [AboutDialog] shown by [showAboutDialog] and [AboutDrawerItem] includes
+/// The [AboutDialog] shown by [showAboutDialog] and [AboutListTile] includes
 /// a button that calls [showLicensePage].
 ///
 /// The licenses shown on the [LicensePage] are those returned by the
@@ -369,7 +369,7 @@ class _LicensePageState extends State<LicensePage> {
     _initLicenses();
   }
 
-  List<Widget> _licenses = <Widget>[];
+  final List<Widget> _licenses = <Widget>[];
   bool _loaded = false;
 
   Future<Null> _initLicenses() async {
@@ -377,9 +377,9 @@ class _LicensePageState extends State<LicensePage> {
       if (!mounted)
         return;
       setState(() {
-        _licenses.add(new Padding(
+        _licenses.add(const Padding(
           padding: const EdgeInsets.symmetric(vertical: 18.0),
-          child: new Text(
+          child: const Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
             textAlign: TextAlign.center
           )
@@ -421,47 +421,46 @@ class _LicensePageState extends State<LicensePage> {
 
   @override
   Widget build(BuildContext context) {
-    final String name = config.applicationName ?? _defaultApplicationName(context);
-    final String version = config.applicationVersion ?? _defaultApplicationVersion(context);
+    final String name = widget.applicationName ?? _defaultApplicationName(context);
+    final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
     final List<Widget> contents = <Widget>[
       new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
       new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 18.0),
-      new Text(config.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
+      new Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
       new Container(height: 18.0),
       new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 24.0),
     ];
     contents.addAll(_licenses);
     if (!_loaded) {
-      contents.add(new Padding(
+      contents.add(const Padding(
         padding: const EdgeInsets.symmetric(vertical: 24.0),
-        child: new Center(
-          child: new CircularProgressIndicator()
+        child: const Center(
+          child: const CircularProgressIndicator()
         )
       ));
     }
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Licenses')
+        title: const Text('Licenses')
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.caption,
         child: new Scrollbar(
-          child: new LazyBlock(
+          child: new ListView(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-            delegate: new LazyBlockChildren(
-              children: contents
-            )
-          )
-        )
-      )
+            shrinkWrap: true,
+            children: contents,
+          ),
+        ),
+      ),
     );
   }
 }
 
 String _defaultApplicationName(BuildContext context) {
-  Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
+  final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
   return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 

@@ -5,116 +5,95 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart' show RenderEditable, SelectionChangedHandler, RenderEditablePaintOffsetNeededCallback;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'basic.dart';
-import 'focus.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'media_query.dart';
-import 'scroll_behavior.dart';
+import 'scroll_controller.dart';
+import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text_selection.dart';
 
-export 'package:flutter/painting.dart' show TextSelection;
-export 'package:flutter/services.dart' show TextInputType;
+export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
-TextSelection _getTextSelectionFromEditingState(TextEditingState state) {
-  return new TextSelection(
-    baseOffset: state.selectionBase,
-    extentOffset: state.selectionExtent,
-    affinity: state.selectionAffinity,
-    isDirectional: state.selectionIsDirectional,
-  );
-}
-
-InputValue _getInputValueFromEditingState(TextEditingState state) {
-  return new InputValue(
-    text: state.text,
-    selection: _getTextSelectionFromEditingState(state),
-    composing: new TextRange(start: state.composingBase, end: state.composingExtent),
-  );
-}
-
-TextEditingState _getTextEditingStateFromInputValue(InputValue value) {
-  return new TextEditingState(
-    text: value.text,
-    selectionBase: value.selection.baseOffset,
-    selectionExtent: value.selection.extentOffset,
-    selectionAffinity: value.selection.affinity,
-    selectionIsDirectional: value.selection.isDirectional,
-    composingBase: value.composing.start,
-    composingExtent: value.composing.end,
-  );
-}
-
-/// Configuration information for a text input field.
+/// A controller for an editable text field.
 ///
-/// An [InputValue] contains the text for the input field as well as the
-/// selection extent and the composing range.
-class InputValue {
-  // TODO(abarth): This class is really the same as TextEditingState.
-  // We should merge them into one object.
-
-  /// Creates configuration information for an input field
+/// Whenever the user modifies a text field with an associated
+/// [TextEditingController], the text field updates [value] and the controller
+/// notifies its listeners. Listeners can then read the [text] and [selection]
+/// properties to learn what the user has typed or how the selection has been
+/// updated.
+///
+/// Similarly, if you modify the [text] or [selection] properties, the text
+/// field will be notified and will update itself appropriately.
+///
+/// A [TextEditingController] can also be used to provide an initial value for a
+/// text field. If you build a text field with a controller that already has
+/// [text], the text field will use that text as its initial value.
+///
+/// See also:
+///
+///  * [TextField], which is a Material Design text field that can be controlled
+///    with a [TextEditingController].
+///  * [EditableText], which is a raw region of editable text that can be
+///    controlled with a [TextEditingController].
+class TextEditingController extends ValueNotifier<TextEditingValue> {
+  /// Creates a controller for an editable text field.
   ///
-  /// The selection and composing range must be within the text.
+  /// This constructor treats a null [text] argument as if it were the empty
+  /// string.
+  TextEditingController({ String text })
+    : super(text == null ? TextEditingValue.empty : new TextEditingValue(text: text));
+
+  /// Creates a controller for an editiable text field from an initial [TextEditingValue].
   ///
-  /// The [text], [selection], and [composing] arguments must not be null but
-  /// each have default values.
-  const InputValue({
-    this.text: '',
-    this.selection: const TextSelection.collapsed(offset: -1),
-    this.composing: TextRange.empty
-  });
+  /// This constructor treats a null [value] argument as if it were
+  /// [TextEditingValue.empty].
+  TextEditingController.fromValue(TextEditingValue value)
+    : super(value ?? TextEditingValue.empty);
 
-  /// The current text being edited.
-  final String text;
+  /// The current string the user is editing.
+  String get text => value.text;
+  set text(String newText) {
+    value = value.copyWith(text: newText, composing: TextRange.empty);
+  }
 
-  /// The range of text that is currently selected.
-  final TextSelection selection;
+  /// The currently selected [text].
+  ///
+  /// If the selection is collapsed, then this property gives the offset of the
+  /// cursor within the text.
+  TextSelection get selection => value.selection;
+  set selection(TextSelection newSelection) {
+    value = value.copyWith(selection: newSelection, composing: TextRange.empty);
+  }
 
-  /// The range of text that is still being composed.
-  final TextRange composing;
+  /// Set the [value] to empty.
+  ///
+  /// After calling this function, [text] will be the empty string and the
+  /// selection will be invalid.
+  void clear() {
+    value = TextEditingValue.empty;
+  }
 
-  /// An input value that corresponds to the empty string with no selection and no composing range.
-  static const InputValue empty = const InputValue();
-
-  @override
-  String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! InputValue)
-      return false;
-    InputValue typedOther = other;
-    return typedOther.text == text
-        && typedOther.selection == selection
-        && typedOther.composing == composing;
+  /// Set the composing region to an empty range.
+  ///
+  /// The composing region is the range of text that is still being composed.
+  /// Calling this function indicates that the user is done composing that
+  /// region.
+  void clearComposing() {
+    value = value.copyWith(composing: TextRange.empty);
   }
 
   @override
-  int get hashCode => hashValues(
-    text.hashCode,
-    selection.hashCode,
-    composing.hashCode
-  );
-
-  /// Creates a copy of this input value but with the given fields replaced with the new values.
-  InputValue copyWith({
-    String text,
-    TextSelection selection,
-    TextRange composing
-  }) {
-    return new InputValue (
-      text: text ?? this.text,
-      selection: selection ?? this.selection,
-      composing: composing ?? this.composing
-    );
+  String toString() {
+    return '$runtimeType#$hashCode($value)';
   }
 }
 
@@ -125,49 +104,56 @@ class InputValue {
 /// movement. This widget does not provide any focus management (e.g.,
 /// tap-to-focus).
 ///
-/// Rather than using this widget directly, consider using [InputField], which
-/// adds tap-to-focus and cut, copy, and paste commands, or [TextField], which
+/// Rather than using this widget directly, consider using [TextField], which
 /// is a full-featured, material-design text input field with placeholder text,
 /// labels, and [Form] integration.
 ///
 /// See also:
 ///
-///  * [InputField], which adds tap-to-focus and cut, copy, and paste commands.
 ///  * [TextField], which is a full-featured, material-design text input field
 ///    with placeholder text, labels, and [Form] integration.
-class EditableText extends Scrollable {
+class EditableText extends StatefulWidget {
   /// Creates a basic text input control.
   ///
-  /// The [value] argument must not be null.
+  /// The [controller], [focusNode], [style], and [cursorColor] arguments must
+  /// not be null.
   EditableText({
     Key key,
-    @required this.value,
-    this.focusKey,
+    @required this.controller,
+    @required this.focusNode,
     this.obscureText: false,
-    this.style,
-    this.cursorColor,
+    @required this.style,
+    @required this.cursorColor,
+    this.textAlign,
     this.textScaleFactor,
-    int maxLines: 1,
+    this.maxLines: 1,
     this.autofocus: false,
     this.selectionColor,
     this.selectionControls,
-    @required this.platform,
     this.keyboardType,
     this.onChanged,
-    this.onSubmitted
-  }) : maxLines = maxLines, super(
-    key: key,
-    initialScrollOffset: 0.0,
-    scrollDirection: maxLines > 1 ? Axis.vertical : Axis.horizontal
-  ) {
-    assert(value != null);
-  }
+    this.onSubmitted,
+    List<TextInputFormatter> inputFormatters,
+  }) : assert(controller != null),
+       assert(focusNode != null),
+       assert(obscureText != null),
+       assert(style != null),
+       assert(cursorColor != null),
+       assert(maxLines != null),
+       assert(autofocus != null),
+       inputFormatters = maxLines == 1 
+           ? (
+               <TextInputFormatter>[BlacklistingTextInputFormatter.singleLineFormatter]
+                 ..addAll(inputFormatters ?? const Iterable<TextInputFormatter>.empty())
+             )
+           : inputFormatters,
+       super(key: key);
 
-  /// The string being displayed in this widget.
-  final InputValue value;
+  /// Controls the text being edited.
+  final TextEditingController controller;
 
-  /// Key of the enclosing widget that holds the focus.
-  final GlobalKey focusKey;
+  /// Controls whether this widget has keyboard focus.
+  final FocusNode focusNode;
 
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -177,12 +163,16 @@ class EditableText extends Scrollable {
   /// The text style to use for the editable text.
   final TextStyle style;
 
+  /// How the text should be aligned horizontally.
+  final TextAlign textAlign;
+
   /// The number of font pixels for each logical pixel.
   ///
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   ///
-  /// Defaults to [MediaQuery.textScaleFactor].
+  /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
+  /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   final double textScaleFactor;
 
   /// The color to use when painting the cursor.
@@ -206,120 +196,179 @@ class EditableText extends Scrollable {
   /// Optional delegate for building the text selection handles and toolbar.
   final TextSelectionControls selectionControls;
 
-  /// The platform whose behavior should be approximated, in particular
-  /// for scroll physics. (See [ScrollBehavior.platform].)
-  ///
-  /// Must not be null.
-  final TargetPlatform platform;
-
   /// The type of keyboard to use for editing the text.
   final TextInputType keyboardType;
 
   /// Called when the text being edited changes.
-  final ValueChanged<InputValue> onChanged;
+  final ValueChanged<String> onChanged;
 
   /// Called when the user indicates that they are done editing the text in the field.
-  final ValueChanged<InputValue> onSubmitted;
+  final ValueChanged<String> onSubmitted;
+
+  /// Optional input validation and formatting overrides. Formatters are run 
+  /// in the provided order when the text input changes.
+  final List<TextInputFormatter> inputFormatters;
 
   @override
   EditableTextState createState() => new EditableTextState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('controller: $controller');
+    description.add('focusNode: $focusNode');
+    if (obscureText != false)
+      description.add('obscureText: $obscureText');
+    description.add('$style');
+    if (textAlign != null)
+      description.add('$textAlign');
+    if (textScaleFactor != null)
+      description.add('textScaleFactor: $textScaleFactor');
+    if (maxLines != 1)
+      description.add('maxLines: $maxLines');
+    if (autofocus != false)
+      description.add('autofocus: $autofocus');
+    if (keyboardType != null)
+      description.add('keyboardType: $keyboardType');
+  }
 }
 
 /// State for a [EditableText].
-class EditableTextState extends ScrollableState<EditableText> implements TextInputClient {
+class EditableTextState extends State<EditableText> implements TextInputClient {
   Timer _cursorTimer;
-  bool _showCursor = false;
+  final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
 
-  InputValue _currentValue;
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
 
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new BoundedBehavior(platform: config.platform);
+  final ScrollController _scrollController = new ScrollController();
+  bool _didAutoFocus = false;
 
-  @override
-  BoundedBehavior get scrollBehavior => super.scrollBehavior;
+  // State lifecycle:
 
   @override
   void initState() {
     super.initState();
-    _currentValue = config.value;
+    widget.controller.addListener(_didChangeTextEditingValue);
+    widget.focusNode.addListener(_handleFocusChanged);
   }
 
   @override
-  void didUpdateConfig(EditableText oldConfig) {
-    if (_currentValue != config.value) {
-      _currentValue = config.value;
-      if (_isAttachedToKeyboard)
-        _textInputConnection.setEditingState(_getTextEditingStateFromInputValue(_currentValue));
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didAutoFocus && widget.autofocus) {
+      FocusScope.of(context).autofocus(widget.focusNode);
+      _didAutoFocus = true;
     }
   }
 
-  bool get _isAttachedToKeyboard => _textInputConnection != null && _textInputConnection.attached;
-
-  bool get _isMultiline => config.maxLines > 1;
-
-  double _contentExtent = 0.0;
-  double _containerExtent = 0.0;
-
-  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions, Rect caretRect) {
-    // We make various state changes here but don't have to do so in a
-    // setState() callback because we are called during layout and all
-    // we're updating is the new offset, which we are providing to the
-    // render object via our return value.
-    _contentExtent = _isMultiline ?
-      dimensions.contentSize.height :
-      dimensions.contentSize.width;
-    _containerExtent = _isMultiline ?
-      dimensions.containerSize.height :
-      dimensions.containerSize.width;
-    didUpdateScrollBehavior(scrollBehavior.updateExtents(
-      contentExtent: _contentExtent,
-      containerExtent: _containerExtent,
-      // TODO(ianh): We should really only do this when text is added,
-      // not generally any time the size changes.
-      scrollOffset: _getScrollOffsetForCaret(caretRect, _containerExtent)
-    ));
-    updateGestureDetector();
-    return scrollOffsetToPixelDelta(scrollOffset);
+  @override
+  void didUpdateWidget(EditableText oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_didChangeTextEditingValue);
+      widget.controller.addListener(_didChangeTextEditingValue);
+      _updateRemoteEditingValueIfNeeded();
+    }
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode.removeListener(_handleFocusChanged);
+      widget.focusNode.addListener(_handleFocusChanged);
+    }
   }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_didChangeTextEditingValue);
+    _closeInputConnectionIfNeeded();
+    assert(!_hasInputConnection);
+    _stopCursorTimer();
+    assert(_cursorTimer == null);
+    _selectionOverlay?.dispose();
+    _selectionOverlay = null;
+    widget.focusNode.removeListener(_handleFocusChanged);
+    super.dispose();
+  }
+
+  // TextInputClient implementation:
+
+  TextEditingValue _lastKnownRemoteTextEditingValue;
+
+  @override
+  void updateEditingValue(TextEditingValue value) {
+    if (value.text != _value.text)
+      _hideSelectionOverlayIfNeeded();
+    _lastKnownRemoteTextEditingValue = value;
+    _formatAndSetValue(value);
+    if (widget.onChanged != null)
+      widget.onChanged(value.text);
+  }
+
+  @override
+  void performAction(TextInputAction action) {
+    widget.controller.clearComposing();
+    widget.focusNode.unfocus();
+    if (widget.onSubmitted != null)
+      widget.onSubmitted(_value.text);
+  }
+
+  void _updateRemoteEditingValueIfNeeded() {
+    if (!_hasInputConnection)
+      return;
+    final TextEditingValue localValue = _value;
+    if (localValue == _lastKnownRemoteTextEditingValue)
+      return;
+    _lastKnownRemoteTextEditingValue = localValue;
+    _textInputConnection.setEditingState(localValue);
+  }
+
+  TextEditingValue get _value => widget.controller.value;
+  set _value(TextEditingValue value) {
+    widget.controller.value = value;
+  }
+
+  bool get _hasFocus => widget.focusNode.hasFocus;
+  bool get _isMultiline => widget.maxLines > 1;
 
   // Calculate the new scroll offset so the cursor remains visible.
-  double _getScrollOffsetForCaret(Rect caretRect, double containerExtent) {
-    double caretStart = _isMultiline ? caretRect.top : caretRect.left;
-    double caretEnd = _isMultiline ? caretRect.bottom : caretRect.right;
-    double newScrollOffset = scrollOffset;
+  double _getScrollOffsetForCaret(Rect caretRect) {
+    final double caretStart = _isMultiline ? caretRect.top : caretRect.left;
+    final double caretEnd = _isMultiline ? caretRect.bottom : caretRect.right;
+    double scrollOffset = _scrollController.offset;
+    final double viewportExtent = _scrollController.position.viewportDimension;
     if (caretStart < 0.0)  // cursor before start of bounds
-      newScrollOffset += pixelOffsetToScrollOffset(-caretStart);
-    else if (caretEnd >= containerExtent)  // cursor after end of bounds
-      newScrollOffset += pixelOffsetToScrollOffset(-(caretEnd - containerExtent));
-    return newScrollOffset;
+      scrollOffset += caretStart;
+    else if (caretEnd >= viewportExtent)  // cursor after end of bounds
+      scrollOffset += caretEnd - viewportExtent;
+    return scrollOffset;
   }
 
-  // True if the focus was explicitly requested last frame. This ensures we
-  // don't show the keyboard when focus defaults back to the EditableText.
-  bool _requestingFocus = false;
+  bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
 
-  void _attachOrDetachKeyboard(bool focused) {
-    if (focused && !_isAttachedToKeyboard && (_requestingFocus || config.autofocus)) {
-      _textInputConnection = TextInput.attach(
-          this, new TextInputConfiguration(inputType: config.keyboardType))
-        ..setEditingState(_getTextEditingStateFromInputValue(_currentValue))
-        ..show();
-    } else if (!focused) {
-      if (_isAttachedToKeyboard) {
-        _textInputConnection.close();
-        _textInputConnection = null;
-      }
-      _clearComposing();
+  void _openInputConnection() {
+    if (!_hasInputConnection) {
+      final TextEditingValue localValue = _value;
+      _lastKnownRemoteTextEditingValue = localValue;
+      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: widget.keyboardType, obscureText: widget.obscureText))
+        ..setEditingState(localValue);
     }
-    _requestingFocus = false;
+    _textInputConnection.show();
   }
 
-  void _clearComposing() {
-    // TODO(abarth): We should call config.onChanged to notify our parent of
-    // this change in our composing range.
-    _currentValue = _currentValue.copyWith(composing: TextRange.empty);
+  void _closeInputConnectionIfNeeded() {
+    if (_hasInputConnection) {
+      _textInputConnection.close();
+      _textInputConnection = null;
+      _lastKnownRemoteTextEditingValue = null;
+    }
+  }
+
+  void _openOrCloseInputConnectionIfNeeded() {
+    if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
+      _openInputConnection();
+    } else if (!_hasFocus) {
+      _closeInputConnectionIfNeeded();
+      widget.controller.clearComposing();
+    }
   }
 
   /// Express interest in interacting with the keyboard.
@@ -330,160 +379,146 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
   /// focus, the control will then attach to the keyboard and request that the
   /// keyboard become visible.
   void requestKeyboard() {
-    if (_isAttachedToKeyboard) {
-      _textInputConnection.show();
-    } else {
-      Focus.moveTo(config.focusKey);
-      setState(() {
-        _requestingFocus = true;
-      });
-    }
+    if (_hasFocus)
+      _openInputConnection();
+    else
+      FocusScope.of(context).requestFocus(widget.focusNode);
   }
 
-  @override
-  void updateEditingState(TextEditingState state) {
-    _currentValue = _getInputValueFromEditingState(state);
-    if (config.onChanged != null)
-      config.onChanged(_currentValue);
-    if (_currentValue.text != config.value.text) {
-      _selectionOverlay?.hide();
-      _selectionOverlay = null;
-    }
+  void _hideSelectionOverlayIfNeeded() {
+    _selectionOverlay?.hide();
+    _selectionOverlay = null;
   }
 
-  @override
-  void performAction(TextInputAction action) {
-    _clearComposing();
-    Focus.clear(context);
-    if (config.onSubmitted != null)
-      config.onSubmitted(_currentValue);
+  void _updateOrDisposeSelectionOverlayIfNeeded() {
+    if (_selectionOverlay != null) {
+      if (_hasFocus) {
+        _selectionOverlay.update(_value);
+      } else {
+        _selectionOverlay.dispose();
+        _selectionOverlay = null;
+      }
+    }
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, bool longPress) {
+    widget.controller.selection = selection;
+
     // Note that this will show the keyboard for all selection changes on the
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
-    InputValue newInput = _currentValue.copyWith(selection: selection, composing: TextRange.empty);
-    if (config.onChanged != null)
-      config.onChanged(newInput);
+    _hideSelectionOverlayIfNeeded();
 
-    if (_selectionOverlay != null) {
-      _selectionOverlay.hide();
-      _selectionOverlay = null;
-    }
-
-    if (config.selectionControls != null) {
+    if (widget.selectionControls != null) {
       _selectionOverlay = new TextSelectionOverlay(
-        input: newInput,
         context: context,
-        debugRequiredFor: config,
+        value: _value,
+        debugRequiredFor: widget,
         renderObject: renderObject,
         onSelectionOverlayChanged: _handleSelectionOverlayChanged,
-        selectionControls: config.selectionControls,
+        selectionControls: widget.selectionControls,
       );
-      if (newInput.text.isNotEmpty || longPress)
+      if (_value.text.isNotEmpty || longPress)
         _selectionOverlay.showHandles();
       if (longPress)
         _selectionOverlay.showToolbar();
     }
   }
 
-  void _handleSelectionOverlayChanged(InputValue newInput, Rect caretRect) {
-    assert(!newInput.composing.isValid);  // composing range must be empty while selecting
-    if (config.onChanged != null)
-      config.onChanged(newInput);
+  void _handleSelectionOverlayChanged(TextEditingValue value, Rect caretRect) {
+    assert(!value.composing.isValid);  // composing range must be empty while selecting.
+    _formatAndSetValue(value);
+    _scrollController.jumpTo(_getScrollOffsetForCaret(caretRect));
+  }
 
-    didUpdateScrollBehavior(scrollBehavior.updateExtents(
-      // TODO(mpcomplete): should just be able to pass
-      // scrollBehavior.containerExtent here (and remove the member var), but
-      // scrollBehavior gets re-created too often, and is sometimes
-      // uninitialized here. Investigate if this is a bug.
-      scrollOffset: _getScrollOffsetForCaret(caretRect, _containerExtent)
-    ));
+  void _formatAndSetValue(TextEditingValue value) {
+    if (widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+      for (TextInputFormatter formatter in widget.inputFormatters)
+        value = formatter.formatEditUpdate(_value, value);
+      _value = value;
+      _updateRemoteEditingValueIfNeeded();
+    } else {
+      _value = value;
+    }
   }
 
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
-  bool get cursorCurrentlyVisible => _showCursor;
+  @visibleForTesting
+  bool get cursorCurrentlyVisible => _showCursor.value;
 
   /// The cursor blink interval (the amount of time the cursor is in the "on"
   /// state or the "off" state). A complete cursor blink period is twice this
   /// value (half on, half off).
+  @visibleForTesting
   Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
 
   void _cursorTick(Timer timer) {
-    setState(() {
-      _showCursor = !_showCursor;
-    });
+    _showCursor.value = !_showCursor.value;
   }
 
   void _startCursorTimer() {
-    _showCursor = true;
+    _showCursor.value = true;
     _cursorTimer = new Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
-  @override
-  void dispose() {
-    if (_isAttachedToKeyboard) {
-      _textInputConnection.close();
-      _textInputConnection = null;
-    }
-    if (_cursorTimer != null)
-      _stopCursorTimer();
-    _selectionOverlay?.dispose();
-    super.dispose();
-  }
-
   void _stopCursorTimer() {
-    _cursorTimer.cancel();
+    _cursorTimer?.cancel();
     _cursorTimer = null;
-    _showCursor = false;
+    _showCursor.value = false;
+  }
+
+  void _startOrStopCursorTimerIfNeeded() {
+    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed)
+      _startCursorTimer();
+    else if (_cursorTimer != null && (!_hasFocus || !_value.selection.isCollapsed))
+      _stopCursorTimer();
+  }
+
+  void _didChangeTextEditingValue() {
+    _updateRemoteEditingValueIfNeeded();
+    _startOrStopCursorTimerIfNeeded();
+    _updateOrDisposeSelectionOverlayIfNeeded();
+    // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
+    // to avoid this setState().
+    setState(() { /* We use widget.controller.value in build(). */ });
+  }
+
+  void _handleFocusChanged() {
+    _openOrCloseInputConnectionIfNeeded();
+    _startOrStopCursorTimerIfNeeded();
+    _updateOrDisposeSelectionOverlayIfNeeded();
   }
 
   @override
-  Widget buildContent(BuildContext context) {
-    assert(config.style != null);
-    assert(config.focusKey != null);
-    assert(config.cursorColor != null);
-
-    bool focused = Focus.at(config.focusKey.currentContext);
-    _attachOrDetachKeyboard(focused);
-
-    if (_cursorTimer == null && focused && config.value.selection.isCollapsed)
-      _startCursorTimer();
-    else if (_cursorTimer != null && (!focused || !config.value.selection.isCollapsed))
-      _stopCursorTimer();
-
-    if (_selectionOverlay != null) {
-      if (focused) {
-        _selectionOverlay.update(config.value);
-      } else {
-        _selectionOverlay?.dispose();
-        _selectionOverlay = null;
-      }
-    }
-
-    return new ClipRect(
-      child: new _Editable(
-        value: _currentValue,
-        style: config.style,
-        cursorColor: config.cursorColor,
-        showCursor: _showCursor,
-        maxLines: config.maxLines,
-        selectionColor: config.selectionColor,
-        textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
-        obscureText: config.obscureText,
-        onSelectionChanged: _handleSelectionChanged,
-        paintOffset: scrollOffsetToPixelDelta(scrollOffset),
-        onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
-      )
+  Widget build(BuildContext context) {
+    FocusScope.of(context).reparentIfNeeded(widget.focusNode);
+    return new Scrollable(
+      axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+      controller: _scrollController,
+      physics: const ClampingScrollPhysics(),
+      viewportBuilder: (BuildContext context, ViewportOffset offset) {
+        return new _Editable(
+          value: _value,
+          style: widget.style,
+          cursorColor: widget.cursorColor,
+          showCursor: _showCursor,
+          maxLines: widget.maxLines,
+          selectionColor: widget.selectionColor,
+          textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+          textAlign: widget.textAlign,
+          obscureText: widget.obscureText,
+          offset: offset,
+          onSelectionChanged: _handleSelectionChanged,
+        );
+      },
     );
   }
 }
 
 class _Editable extends LeafRenderObjectWidget {
-  _Editable({
+  const _Editable({
     Key key,
     this.value,
     this.style,
@@ -492,23 +527,23 @@ class _Editable extends LeafRenderObjectWidget {
     this.maxLines,
     this.selectionColor,
     this.textScaleFactor,
+    this.textAlign,
     this.obscureText,
+    this.offset,
     this.onSelectionChanged,
-    this.paintOffset,
-    this.onPaintOffsetUpdateNeeded
   }) : super(key: key);
 
-  final InputValue value;
+  final TextEditingValue value;
   final TextStyle style;
   final Color cursorColor;
-  final bool showCursor;
+  final ValueNotifier<bool> showCursor;
   final int maxLines;
   final Color selectionColor;
   final double textScaleFactor;
+  final TextAlign textAlign;
   final bool obscureText;
+  final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
-  final Offset paintOffset;
-  final RenderEditablePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -519,10 +554,10 @@ class _Editable extends LeafRenderObjectWidget {
       maxLines: maxLines,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
+      textAlign: textAlign,
       selection: value.selection,
+      offset: offset,
       onSelectionChanged: onSelectionChanged,
-      paintOffset: paintOffset,
-      onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded
     );
   }
 
@@ -535,15 +570,15 @@ class _Editable extends LeafRenderObjectWidget {
       ..maxLines = maxLines
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
+      ..textAlign = textAlign
       ..selection = value.selection
-      ..onSelectionChanged = onSelectionChanged
-      ..paintOffset = paintOffset
-      ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded;
+      ..offset = offset
+      ..onSelectionChanged = onSelectionChanged;
   }
 
   TextSpan get _styledTextSpan {
     if (!obscureText && value.composing.isValid) {
-      TextStyle composingStyle = style.merge(
+      final TextStyle composingStyle = style.merge(
         const TextStyle(decoration: TextDecoration.underline)
       );
 

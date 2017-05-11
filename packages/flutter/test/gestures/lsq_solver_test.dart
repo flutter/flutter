@@ -13,12 +13,12 @@ void main() {
   }
 
   test('Least-squares fit: linear polynomial to line', () {
-    List<double> x = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
-    List<double> y = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
-    List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    final List<double> x = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+    final List<double> y = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
-    LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
-    PolynomialFit fit = solver.solve(1);
+    final LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
+    final PolynomialFit fit = solver.solve(1);
 
     expect(fit.coefficients.length, 2);
     expect(approx(fit.coefficients[0], 1.0), isTrue);
@@ -27,12 +27,12 @@ void main() {
   });
 
   test('Least-squares fit: linear polynomial to sloped line', () {
-    List<double> x = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
-    List<double> y = <double>[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-    List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    final List<double> x = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+    final List<double> y = <double>[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+    final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
-    LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
-    PolynomialFit fit = solver.solve(1);
+    final LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
+    final PolynomialFit fit = solver.solve(1);
 
     expect(fit.coefficients.length, 2);
     expect(approx(fit.coefficients[0], 1.0), isTrue);
@@ -41,12 +41,12 @@ void main() {
   });
 
   test('Least-squares fit: quadratic polynomial to line', () {
-    List<double> x = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
-    List<double> y = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
-    List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    final List<double> x = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+    final List<double> y = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
-    LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
-    PolynomialFit fit = solver.solve(2);
+    final LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
+    final PolynomialFit fit = solver.solve(2);
 
     expect(fit.coefficients.length, 3);
     expect(approx(fit.coefficients[0], 1.0), isTrue);
@@ -56,12 +56,12 @@ void main() {
   });
 
   test('Least-squares fit: quadratic polynomial to sloped line', () {
-    List<double> x = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
-    List<double> y = <double>[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-    List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    final List<double> x = <double>[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+    final List<double> y = <double>[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+    final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
-    LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
-    PolynomialFit fit = solver.solve(2);
+    final LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
+    final PolynomialFit fit = solver.solve(2);
 
     expect(fit.coefficients.length, 3);
     expect(approx(fit.coefficients[0], 1.0), isTrue);

@@ -17,31 +17,31 @@ const double _kToolbarScreenPadding = 8.0; // pixels
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
-  _TextSelectionToolbar(this.delegate, {Key key}) : super(key: key);
+  const _TextSelectionToolbar(this.delegate, {Key key}) : super(key: key);
 
   final TextSelectionDelegate delegate;
-  InputValue get value => delegate.inputValue;
+  TextEditingValue get value => delegate.textEditingValue;
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> items = <Widget>[];
+    final List<Widget> items = <Widget>[];
 
     if (!value.selection.isCollapsed) {
-      items.add(new FlatButton(child: new Text('CUT'), onPressed: _handleCut));
-      items.add(new FlatButton(child: new Text('COPY'), onPressed: _handleCopy));
+      items.add(new FlatButton(child: const Text('CUT'), onPressed: _handleCut));
+      items.add(new FlatButton(child: const Text('COPY'), onPressed: _handleCopy));
     }
     items.add(new FlatButton(
-      child: new Text('PASTE'),
+      child: const Text('PASTE'),
       // TODO(mpcomplete): This should probably be grayed-out if there is nothing to paste.
       onPressed: _handlePaste
     ));
     if (value.text.isNotEmpty) {
       if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: new Text('SELECT ALL'), onPressed: _handleSelectAll));
+        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: _handleSelectAll));
     }
 
     return new Material(
-      elevation: 1,
+      elevation: 1.0,
       child: new Container(
         height: 44.0,
         child: new Row(mainAxisSize: MainAxisSize.min, children: items)
@@ -51,7 +51,7 @@ class _TextSelectionToolbar extends StatelessWidget {
 
   void _handleCut() {
     Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
-    delegate.inputValue = new InputValue(
+    delegate.textEditingValue = new TextEditingValue(
       text: value.selection.textBefore(value.text) + value.selection.textAfter(value.text),
       selection: new TextSelection.collapsed(offset: value.selection.start)
     );
@@ -60,7 +60,7 @@ class _TextSelectionToolbar extends StatelessWidget {
 
   void _handleCopy() {
     Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
-    delegate.inputValue = new InputValue(
+    delegate.textEditingValue = new TextEditingValue(
       text: value.text,
       selection: new TextSelection.collapsed(offset: value.selection.end)
     );
@@ -68,10 +68,10 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   Future<Null> _handlePaste() async {
-    InputValue value = this.value;  // Snapshot the input before using `await`.
-    ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+    final TextEditingValue value = this.value;  // Snapshot the input before using `await`.
+    final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data != null) {
-      delegate.inputValue = new InputValue(
+      delegate.textEditingValue = new TextEditingValue(
         text: value.selection.textBefore(value.text) + data.text + value.selection.textAfter(value.text),
         selection: new TextSelection.collapsed(offset: value.selection.start + data.text.length)
       );
@@ -80,7 +80,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   void _handleSelectAll() {
-    delegate.inputValue = new InputValue(
+    delegate.textEditingValue = new TextEditingValue(
       text: value.text,
       selection: new TextSelection(baseOffset: 0, extentOffset: value.text.length)
     );
@@ -92,7 +92,7 @@ class _TextSelectionToolbar extends StatelessWidget {
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   _TextSelectionToolbarLayout(this.position);
 
-  final Point position;
+  final Offset position;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -101,8 +101,8 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double x = position.x - childSize.width/2.0;
-    double y = position.y - childSize.height;
+    double x = position.dx - childSize.width / 2.0;
+    double y = position.dy - childSize.height;
 
     if (x < _kToolbarScreenPadding)
       x = _kToolbarScreenPadding;
@@ -131,9 +131,9 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = new Paint()..color = color;
-    double radius = size.width/2.0;
-    canvas.drawCircle(new Point(radius, radius), radius, paint);
+    final Paint paint = new Paint()..color = color;
+    final double radius = size.width/2.0;
+    canvas.drawCircle(new Offset(radius, radius), radius, paint);
     canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
   }
 
@@ -150,7 +150,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(
-      BuildContext context, Point position, TextSelectionDelegate delegate) {
+      BuildContext context, Offset position, TextSelectionDelegate delegate) {
+    assert(debugCheckHasMediaQuery(context));
     final Size screenSize = MediaQuery.of(context).size;
     return new ConstrainedBox(
       constraints: new BoxConstraints.loose(screenSize),
@@ -164,7 +165,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type) {
-    Widget handle = new SizedBox(
+    final Widget handle = new SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
       child: new CustomPaint(
@@ -196,4 +197,5 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   }
 }
 
-final _MaterialTextSelectionControls materialTextSelectionControls = new _MaterialTextSelectionControls();
+/// Text selection controls that follow the Material Design specification.
+final TextSelectionControls materialTextSelectionControls = new _MaterialTextSelectionControls();

@@ -10,9 +10,9 @@ class RenderDots extends RenderConstrainedBox {
 
   // Makes this render box hittable so that we'll get pointer events.
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
-  final Map<int, Point> _dots = <int, Point>{};
+  final Map<int, Offset> _dots = <int, Offset>{};
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -28,10 +28,10 @@ class RenderDots extends RenderConstrainedBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
-    canvas.drawRect(offset & size, new Paint()..color = new Color(0xFF0000FF));
+    canvas.drawRect(offset & size, new Paint()..color = const Color(0xFF0000FF));
 
-    Paint paint = new Paint()..color = new Color(0xFF00FF00);
-    for (Point point in _dots.values)
+    final Paint paint = new Paint()..color = const Color(0xFF00FF00);
+    for (Offset point in _dots.values)
       canvas.drawCircle(point, 50.0, paint);
 
     super.paint(context, offset);
@@ -39,12 +39,12 @@ class RenderDots extends RenderConstrainedBox {
 }
 
 class Dots extends SingleChildRenderObjectWidget {
-  Dots({ Key key, Widget child }) : super(key: key, child: child);
+  const Dots({ Key key, Widget child }) : super(key: key, child: child);
 
   @override
   RenderDots createRenderObject(BuildContext context) => new RenderDots();
 }
 
 void main() {
-  runApp(new Dots(child: new Center(child: new Text('Touch me!'))));
+  runApp(const Dots(child: const Center(child: const Text('Touch me!'))));
 }

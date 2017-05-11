@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
-import 'shadows.dart';
 import 'theme.dart';
 
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
@@ -87,6 +86,10 @@ abstract class MaterialInkController {
 /// [InkSplash] and [InkHighlight] effects. To trigger a reaction on the
 /// material, use a [MaterialInkController] obtained via [Material.of].
 ///
+/// If a material has a non-zero [elevation], then the material will clip its
+/// contents because content that is conceptually printing on a separate piece
+/// of material cannot be printed beyond the bounds of the material.
+///
 /// If the layout changes (e.g. because there's a list on the paper, and it's
 /// been scrolled), a LayoutChangedNotification must be dispatched at the
 /// relevant subtree. (This in particular means that Transitions should not be
@@ -106,19 +109,18 @@ class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
   /// The [type] and the [elevation] arguments must not be null.
-  Material({
+  const Material({
     Key key,
     this.type: MaterialType.canvas,
-    this.elevation: 0,
+    this.elevation: 0.0,
     this.color,
     this.textStyle,
     this.borderRadius,
-    this.child
-  }) : super(key: key) {
-    assert(type != null);
-    assert(elevation != null);
-    assert(type != MaterialType.circle || borderRadius == null);
-  }
+    this.child,
+  }) : assert(type != null),
+       assert(elevation != null),
+       assert(!(identical(type, MaterialType.circle) && borderRadius != null)),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -130,10 +132,8 @@ class Material extends StatefulWidget {
 
   /// The z-coordinate at which to place this material.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 0.
-  final int elevation;
+  final double elevation;
 
   /// The color to paint the material.
   ///
@@ -173,11 +173,13 @@ class Material extends StatefulWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$type');
-    description.add('elevation: $elevation');
+    description.add('elevation: ${elevation.toStringAsFixed(1)}');
     if (color != null)
       description.add('color: $color');
-    if (textStyle != null)
-      description.add('textStyle: $textStyle');
+    if (textStyle != null) {
+      for (String entry in '$textStyle'.split('\n'))
+        description.add('textStyle.$entry');
+    }
     if (borderRadius != null)
       description.add('borderRadius: $borderRadius');
   }
@@ -190,9 +192,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = new GlobalKey(debugLabel: 'ink renderer');
 
   Color _getBackgroundColor(BuildContext context) {
-    if (config.color != null)
-      return config.color;
-    switch (config.type) {
+    if (widget.color != null)
+      return widget.color;
+    switch (widget.type) {
       case MaterialType.canvas:
         return Theme.of(context).canvasColor;
       case MaterialType.card:
@@ -204,19 +206,21 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = _getBackgroundColor(context);
-    Widget contents = config.child;
-    BorderRadius radius = config.borderRadius ?? kMaterialEdges[config.type];
+    final Color backgroundColor = _getBackgroundColor(context);
+    assert(backgroundColor != null || widget.type == MaterialType.transparency);
+    Widget contents = widget.child;
+    final BorderRadius radius = widget.borderRadius ?? kMaterialEdges[widget.type];
     if (contents != null) {
       contents = new AnimatedDefaultTextStyle(
-        style: config.textStyle ?? Theme.of(context).textTheme.body1,
+        style: widget.textStyle ?? Theme.of(context).textTheme.body1,
         duration: kThemeChangeDuration,
         child: contents
       );
     }
     contents = new NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        _inkFeatureRenderer.currentContext.findRenderObject().markNeedsPaint();
+        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
+        renderer._didChangeLayout();
         return true;
       },
       child: new _InkFeatures(
@@ -226,33 +230,39 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         vsync: this,
       )
     );
-    if (config.type == MaterialType.circle) {
-      contents = new ClipOval(child: contents);
-    } else if (kMaterialEdges[config.type] != null) {
-      contents = new ClipRRect(
-        borderRadius: radius,
-        child: contents
-      );
-    }
-    if (config.type != MaterialType.transparency) {
-      contents = new AnimatedContainer(
+
+    if (widget.type == MaterialType.circle) {
+      contents = new AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
         duration: kThemeChangeDuration,
-        decoration: new BoxDecoration(
+        shape: BoxShape.circle,
+        elevation: widget.elevation,
+        color: backgroundColor,
+        animateColor: false,
+        child: contents,
+      );
+    } else if (widget.type == MaterialType.transparency) {
+      if (radius == null) {
+        contents = new ClipRect(child: contents);
+      } else {
+        contents = new ClipRRect(
           borderRadius: radius,
-          boxShadow: config.elevation == 0 ? null : kElevationToShadow[config.elevation],
-          shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
-        ),
-        child: new Container(
-          decoration: new BoxDecoration(
-            borderRadius: radius,
-            backgroundColor: backgroundColor,
-            shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
-          ),
           child: contents
-        )
+        );
+      }
+    } else {
+      contents = new AnimatedPhysicalModel(
+        curve: Curves.fastOutSlowIn,
+        duration: kThemeChangeDuration,
+        shape: BoxShape.rectangle,
+        borderRadius: radius ?? BorderRadius.zero,
+        elevation: widget.elevation,
+        color: backgroundColor,
+        animateColor: false,
+        child: contents,
       );
     }
+
     return contents;
   }
 }
@@ -292,8 +302,13 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     markNeedsPaint();
   }
 
+  void _didChangeLayout() {
+    if (_inkFeatures.isNotEmpty)
+      markNeedsPaint();
+  }
+
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -301,7 +316,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       final Canvas canvas = context.canvas;
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
-      canvas.clipRect(Point.origin & size);
+      canvas.clipRect(Offset.zero & size);
       for (InkFeature inkFeature in _inkFeatures)
         inkFeature._paint(canvas);
       canvas.restore();
@@ -311,7 +326,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 }
 
 class _InkFeatures extends SingleChildRenderObjectWidget {
-  _InkFeatures({ Key key, this.color, Widget child, @required this.vsync }) : super(key: key, child: child);
+  const _InkFeatures({ Key key, this.color, Widget child, @required this.vsync }) : super(key: key, child: child);
 
   // This widget must be owned by a MaterialState, which must be provided as the vsync.
   // This relationship must be 1:1 and cannot change for the lifetime of the MaterialState.
@@ -351,6 +366,10 @@ abstract class InkFeature {
     assert(referenceBox != null);
   }
 
+  /// The [MaterialInkController] associated with this [InkFeature].
+  ///
+  /// Typically used by subclasses to call
+  /// [MaterialInkController.markNeedsPaint] when they need to repaint.
   MaterialInkController get controller => _controller;
   _RenderInkFeatures _controller;
 
@@ -399,5 +418,5 @@ abstract class InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform);
 
   @override
-  String toString() => '$runtimeType@$hashCode';
+  String toString() => '$runtimeType#$hashCode';
 }

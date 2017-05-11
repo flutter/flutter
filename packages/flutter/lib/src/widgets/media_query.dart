@@ -26,11 +26,16 @@ enum Orientation {
 /// To obtain the current [MediaQueryData] for a given [BuildContext], use the
 /// [MediaQuery.of] function. For example, to obtain the size of the current
 /// window, use `MediaQuery.of(context).size`.
+///
+/// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
+/// exception, unless the `nullOk` argument is set to true, in which case it
+/// returns null.
+@immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
-  /// [ui.Window].
+  /// [Window].
   const MediaQueryData({
     this.size: Size.zero,
     this.devicePixelRatio: 1.0,
@@ -39,6 +44,11 @@ class MediaQueryData {
   });
 
   /// Creates data for a media query based on the given window.
+  ///
+  /// If you use this, you should ensure that you also register for
+  /// notifications so that you can update your [MediaQueryData] when the
+  /// window's metrics change. For example, see
+  /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
   MediaQueryData.fromWindow(ui.Window window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
@@ -72,6 +82,8 @@ class MediaQueryData {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
 
+  /// Creates a copy of this media query data but with the given fields replaced
+  /// with the new values.
   MediaQueryData copyWith({
     Size size,
     double devicePixelRatio,
@@ -90,7 +102,7 @@ class MediaQueryData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    MediaQueryData typedOther = other;
+    final MediaQueryData typedOther = other;
     return typedOther.size == size
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
@@ -114,18 +126,27 @@ class MediaQueryData {
 /// Querying the current media using [MediaQuery.of] will cause your widget to
 /// rebuild automatically whenever the [MediaQueryData] changes (e.g., if the
 /// user rotates their device).
+///
+/// If no [MediaQuery] is in scope then the [MediaQuery.of] method will throw an
+/// exception, unless the `nullOk` argument is set to true, in which case it
+/// returns null.
+///
+/// See also:
+///
+///  * [WidgetsApp] and [MaterialApp], which introduce a [MediaQuery] and keep
+///    it up to date with the current screen metrics as they change.
+///  * [MediaQueryData], the data structure that represents the metrics.
 class MediaQuery extends InheritedWidget {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   ///
   /// The [data] and [child] arguments must not be null.
-  MediaQuery({
+  const MediaQuery({
     Key key,
     @required this.data,
     @required Widget child,
-  }) : super(key: key, child: child) {
-    assert(child != null);
-    assert(data != null);
-  }
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Contains information about the current media.
   ///
@@ -133,7 +154,8 @@ class MediaQuery extends InheritedWidget {
   /// height of the current window.
   final MediaQueryData data;
 
-  /// The data from the closest instance of this class that encloses the given context.
+  /// The data from the closest instance of this class that encloses the given
+  /// context.
   ///
   /// You can use this function to query the size an orientation of the screen.
   /// When that information changes, your widget will be scheduled to be rebuilt,
@@ -144,9 +166,27 @@ class MediaQuery extends InheritedWidget {
   /// ```dart
   /// MediaQueryData media = MediaQuery.of(context);
   /// ```
-  static MediaQueryData of(BuildContext context) {
-    MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
-    return query?.data ?? new MediaQueryData.fromWindow(ui.window);
+  ///
+  /// If there is no [MediaQuery] in scope, then this will throw an exception.
+  /// To return null if there is no [MediaQuery], then pass `nullOk: true`.
+  ///
+  /// If you use this from a widget (e.g. in its build function), consider
+  /// calling [debugCheckHasMediaQuery].
+  static MediaQueryData of(BuildContext context, { bool nullOk: false }) {
+    final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
+    if (query != null)
+      return query.data;
+    if (nullOk)
+      return null;
+    throw new FlutterError(
+      'MediaQuery.of() called with a context that does not contain a MediaQuery.\n'
+      'No MediaQuery ancestor could be found starting from the context that was passed '
+      'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
+      'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
+      'if the context you use comes from a widget above those widgets.\n'
+      'The context used was:\n'
+      '  $context'
+    );
   }
 
   @override

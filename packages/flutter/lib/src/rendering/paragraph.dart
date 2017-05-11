@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'object.dart';
 import 'semantics.dart';
 
@@ -95,7 +98,7 @@ class RenderParagraph extends RenderBox {
       return;
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   /// The number of font pixels for each logical pixel.
@@ -125,7 +128,7 @@ class RenderParagraph extends RenderBox {
   }
 
   void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
-    bool wrap = _softWrap || (_overflow == TextOverflow.ellipsis && maxLines == null);
+    final bool wrap = _softWrap || (_overflow == TextOverflow.ellipsis && maxLines == null);
     _textPainter.layout(minWidth: minWidth, maxWidth: wrap ? maxWidth : double.INFINITY);
   }
 
@@ -170,7 +173,7 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -178,14 +181,21 @@ class RenderParagraph extends RenderBox {
     if (event is! PointerDownEvent)
       return;
     _layoutTextWithConstraints(constraints);
-    Offset offset = entry.localPosition.toOffset();
-    TextPosition position = _textPainter.getPositionForOffset(offset);
-    TextSpan span = _textPainter.text.getSpanForPosition(position);
+    final Offset offset = entry.localPosition;
+    final TextPosition position = _textPainter.getPositionForOffset(offset);
+    final TextSpan span = _textPainter.text.getSpanForPosition(position);
     span?.recognizer?.addPointer(event);
   }
 
   bool _hasVisualOverflow = false;
   ui.Shader _overflowShader;
+
+  /// Whether this paragraph currently has a [ui.Shader] for its overflow
+  /// effect.
+  ///
+  /// Used to test this object. Not for use in production.
+  @visibleForTesting
+  bool get debugHasOverflowShader => _overflowShader != null;
 
   @override
   void performLayout() {
@@ -193,11 +203,12 @@ class RenderParagraph extends RenderBox {
     // We grab _textPainter.size here because assigning to `size` will trigger
     // us to validate our intrinsic sizes, which will change _textPainter's
     // layout because the intrinsic size calculations are destructive.
+    // Other _textPainter state like didExceedMaxLines will also be affected.
     final Size textSize = _textPainter.size;
+    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
 
     final bool didOverflowWidth = size.width < textSize.width;
-    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
@@ -211,7 +222,7 @@ class RenderParagraph extends RenderBox {
           _overflowShader = null;
           break;
         case TextOverflow.fade:
-          TextPainter fadeSizePainter = new TextPainter(
+          final TextPainter fadeSizePainter = new TextPainter(
             text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textScaleFactor: textScaleFactor
           )..layout();
@@ -220,15 +231,17 @@ class RenderParagraph extends RenderBox {
             final double fadeStart = fadeEnd - fadeSizePainter.width;
             // TODO(abarth): This shader has an LTR bias.
             _overflowShader = new ui.Gradient.linear(
-              <Point>[new Point(fadeStart, 0.0), new Point(fadeEnd, 0.0)],
-              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+              new Offset(fadeStart, 0.0),
+              new Offset(fadeEnd, 0.0),
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           } else {
             final double fadeEnd = size.height;
             final double fadeStart = fadeEnd - fadeSizePainter.height / 2.0;
             _overflowShader = new ui.Gradient.linear(
-              <Point>[new Point(0.0, fadeStart), new Point(0.0, fadeEnd)],
-              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+              new Offset(0.0, fadeStart),
+              new Offset(0.0, fadeEnd),
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           }
           break;
@@ -252,6 +265,16 @@ class RenderParagraph extends RenderBox {
     // works properly.
     _layoutTextWithConstraints(constraints);
     final Canvas canvas = context.canvas;
+
+    assert(() {
+      if (debugRepaintTextRainbowEnabled) {
+        final Paint paint = new Paint()
+          ..color = debugCurrentRepaintColor.toColor();
+        canvas.drawRect(offset & size, paint);
+      }
+      return true;
+    });
+
     if (_hasVisualOverflow) {
       final Rect bounds = offset & size;
       if (_overflowShader != null)
@@ -264,10 +287,10 @@ class RenderParagraph extends RenderBox {
     if (_hasVisualOverflow) {
       if (_overflowShader != null) {
         canvas.translate(offset.dx, offset.dy);
-        Paint paint = new Paint()
+        final Paint paint = new Paint()
           ..blendMode = BlendMode.modulate
           ..shader = _overflowShader;
-        canvas.drawRect(Point.origin & size, paint);
+        canvas.drawRect(Offset.zero & size, paint);
       }
       canvas.restore();
     }
@@ -331,6 +354,6 @@ class RenderParagraph extends RenderBox {
     return '$prefix \u2558\u2550\u2566\u2550\u2550 text \u2550\u2550\u2550\n'
            '${text.toString("$prefix   \u2551 ")}' // TextSpan includes a newline
            '$prefix   \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n'
-           '$prefix\n';
+           '${prefix.trimRight()}\n';
   }
 }

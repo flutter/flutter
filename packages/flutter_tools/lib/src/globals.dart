@@ -2,20 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'artifacts.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
 import 'cache.dart';
-import 'toolchain.dart';
 
 Logger get logger => context[Logger];
 Cache get cache => Cache.instance;
 Config get config => Config.instance;
-ToolConfiguration get tools => ToolConfiguration.instance;
+Artifacts get artifacts => Artifacts.instance;
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
-void printError(String message, [StackTrace stackTrace]) => logger.printError(message, stackTrace);
+///
+/// Set `emphasis` to true to make the output bold if it's supported.
+void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  logger.printError(message, stackTrace: stackTrace, emphasis: emphasis);
+}
 
 /// Display normal output of the command. This should be used for things like
 /// progress messages, success messages, or just normal command output.
@@ -26,8 +30,19 @@ void printError(String message, [StackTrace stackTrace]) => logger.printError(me
 ///
 /// If `ansiAlternative` is provided, and the terminal supports color, that
 /// string will be printed instead of the message.
-void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
-  logger.printStatus(message, emphasis: emphasis, newline: newline, ansiAlternative: ansiAlternative);
+///
+/// If `indent` is provided, each line of the message will be prepended by the specified number of
+/// whitespaces.
+void printStatus(
+  String message,
+  { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }) {
+  logger.printStatus(
+    message,
+    emphasis: emphasis,
+    newline: newline,
+    ansiAlternative: ansiAlternative,
+    indent: indent
+  );
 }
 
 /// Use this for verbose tracing output. Users can turn this output on in order

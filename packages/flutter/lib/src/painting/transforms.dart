@@ -19,7 +19,7 @@ class MatrixUtils {
   /// Otherwise, returns null.
   static Offset getAsTranslation(Matrix4 transform) {
     assert(transform != null);
-    Float64List values = transform.storage;
+    final Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[0] == 1.0 && // col 1
         values[1] == 0.0 &&
@@ -94,10 +94,10 @@ class MatrixUtils {
   ///
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
-  static Point transformPoint(Matrix4 transform, Point point) {
-    Vector3 position3 = new Vector3(point.x, point.y, 0.0);
-    Vector3 transformed3 = transform.perspectiveTransform(position3);
-    return new Point(transformed3.x, transformed3.y);
+  static Offset transformPoint(Matrix4 transform, Offset point) {
+    final Vector3 position3 = new Vector3(point.dx, point.dy, 0.0);
+    final Vector3 transformed3 = transform.perspectiveTransform(position3);
+    return new Offset(transformed3.x, transformed3.y);
   }
 
   /// Returns a rect that bounds the result of applying the given matrix as a
@@ -107,15 +107,15 @@ class MatrixUtils {
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
   static Rect transformRect(Matrix4 transform, Rect rect) {
-    Point point1 = transformPoint(transform, rect.topLeft);
-    Point point2 = transformPoint(transform, rect.topRight);
-    Point point3 = transformPoint(transform, rect.bottomLeft);
-    Point point4 = transformPoint(transform, rect.bottomRight);
+    final Offset point1 = transformPoint(transform, rect.topLeft);
+    final Offset point2 = transformPoint(transform, rect.topRight);
+    final Offset point3 = transformPoint(transform, rect.bottomLeft);
+    final Offset point4 = transformPoint(transform, rect.bottomRight);
     return new Rect.fromLTRB(
-        _min4(point1.x, point2.x, point3.x, point4.x),
-        _min4(point1.y, point2.y, point3.y, point4.y),
-        _max4(point1.x, point2.x, point3.x, point4.x),
-        _max4(point1.y, point2.y, point3.y, point4.y)
+        _min4(point1.dx, point2.dx, point3.dx, point4.dx),
+        _min4(point1.dy, point2.dy, point3.dy, point4.dy),
+        _max4(point1.dx, point2.dx, point3.dx, point4.dx),
+        _max4(point1.dy, point2.dy, point3.dy, point4.dy)
     );
   }
 

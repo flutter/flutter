@@ -13,10 +13,53 @@ import 'constants.dart';
 /// represents the current scroll positions of the tab bar and the tar bar view.
 /// The selected tab's index can be changed with [animateTo].
 ///
-/// See also:
+/// A stateful widget that builds a [TabBar] or a [TabBarView] can create
+/// a TabController and share it directly.
 ///
-/// * [DefaultTabController], which simplifies sharing a TabController with
-///   its [TabBar] and a [TabBarView] descendants.
+/// ```dart
+/// class _MyDemoState extends State<MyDemo> with SingleTickerProviderStateMixin {
+///   final List<Tab> myTabs = <Tab>[
+///     new Tab(text: 'LEFT'),
+///     new Tab(text: 'RIGHT'),
+///   ];
+///
+///   TabController _tabController;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _tabController = new TabController(vsync: this, length: myTabs.length);
+///   }
+///
+///  @override
+///  void dispose() {
+///    _tabController.dispose();
+///    super.dispose();
+///  }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Scaffold(
+///       appBar: new AppBar(
+///         bottom: new TabBar(
+///           controller: _tabController,
+///           tabs: myTabs,
+///         ),
+///       ),
+///       body: new TabBarView(
+///         controller: _tabController,
+///         children: myTabs.map((Tab tab) {
+///           return new Center(child: new Text(tab.text));
+///         }).toList(),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// When the [TabBar] and [TabBarView] don't have a convenient stateful
+/// ancestor, a TabController can be shared with the [DefaultTabController]
+/// inherited widget.
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
@@ -39,8 +82,8 @@ class TabController extends ChangeNotifier {
   /// selected tab is changed, the animation's value equals [index]. The
   /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
   /// drag scrolling.
-  final AnimationController _animationController;
   Animation<double> get animation => _animationController.view;
+  final AnimationController _animationController;
 
   /// The total number of tabs. Must be greater than one.
   final int length;
@@ -56,17 +99,22 @@ class TabController extends ChangeNotifier {
     _index = value;
     if (duration != null) {
       _indexIsChangingCount += 1;
+      notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController
-        ..animateTo(_index.toDouble(), duration: duration, curve: curve).whenComplete(() {
-          _indexIsChangingCount -= 1;
-          notifyListeners();
-        });
+        .animateTo(_index.toDouble(), duration: duration, curve: curve)
+        .orCancel.then<Null>(_indexChanged, onError: _indexChanged);
     } else {
       _indexIsChangingCount += 1;
       _animationController.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       notifyListeners();
     }
+  }
+
+  Null _indexChanged(dynamic value) {
+    _indexIsChangingCount -= 1;
+    notifyListeners();
+    return null;
   }
 
   /// The index of the currently selected tab. Changing the index also updates
@@ -105,13 +153,13 @@ class TabController extends ChangeNotifier {
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
   double get offset => _animationController.value - _index.toDouble();
-  set offset(double newOffset) {
-    assert(newOffset != null);
-    assert(newOffset >= -1.0 && newOffset <= 1.0);
+  set offset(double value) {
+    assert(value != null);
+    assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
-    if (newOffset == offset)
+    if (value == offset)
       return;
-    _animationController.value = newOffset + _index.toDouble();
+    _animationController.value = value + _index.toDouble();
   }
 
   @override
@@ -122,7 +170,7 @@ class TabController extends ChangeNotifier {
 }
 
 class _TabControllerScope extends InheritedWidget {
-  _TabControllerScope({
+  const _TabControllerScope({
     Key key,
     this.controller,
     this.enabled,
@@ -139,18 +187,60 @@ class _TabControllerScope extends InheritedWidget {
 }
 
 /// The [TabController] for descendant widgets that don't specify one explicitly.
+///
+/// DefaultTabController is an inherited widget that is used to share a
+/// TabController with a [TabBar] or a [TabBarView]. It's used when
+/// sharing an explicitly created TabController isn't convenient because
+/// the tab bar widgets are created by a stateless parent widget or by
+/// different parent widgets.
+///
+/// ```dart
+/// class MyDemo extends StatelessWidget {
+///   final List<Tab> myTabs = <Tab>[
+///     new Tab(text: 'LEFT'),
+///     new Tab(text: 'RIGHT'),
+///   ];
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new DefaultTabController(
+///       length: myTabs.length,
+///       child: new Scaffold(
+///         appBar: new AppBar(
+///           bottom: new TabBar(
+///             tabs: myTabs,
+///           ),
+///         ),
+///         body: new TabBarView(
+///           children: myTabs.map((Tab tab) {
+///             return new Center(child: new Text(tab.text));
+///           }).toList(),
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
 class DefaultTabController extends StatefulWidget {
-  DefaultTabController({
+  /// Creates a default tab controller for the given [child] widget.
+  ///
+  /// The [length] argument must be great than one.
+  ///
+  /// The [initialIndex] argument must not be null.
+  const DefaultTabController({
     Key key,
     @required this.length,
     this.initialIndex: 0,
     @required this.child,
-  }) : super(key: key);
+  }) : assert(initialIndex != null),
+       super(key: key);
 
   /// The total number of tabs. Must be greater than one.
   final int length;
 
   /// The initial index of the selected tab.
+  ///
+  /// Defaults to zero.
   final int initialIndex;
 
   /// This widget's child. Often a [Scaffold] whose [AppBar] includes a [TabBar].
@@ -164,7 +254,7 @@ class DefaultTabController extends StatefulWidget {
   /// TabController controller = DefaultTabBarController.of(context);
   /// ```
   static TabController of(BuildContext context) {
-    _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
+    final _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
     return scope?.controller;
   }
 
@@ -180,8 +270,8 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     super.initState();
     _controller = new TabController(
       vsync: this,
-      length: config.length,
-      initialIndex: config.initialIndex,
+      length: widget.length,
+      initialIndex: widget.initialIndex,
     );
   }
 
@@ -196,7 +286,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     return new _TabControllerScope(
       controller: _controller,
       enabled: TickerMode.of(context),
-      child: config.child,
+      child: widget.child,
     );
   }
 }

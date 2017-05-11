@@ -29,7 +29,7 @@ const String tooltipText = 'TIP';
 
 void main() {
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
@@ -72,17 +72,17 @@ void main() {
      *                   *
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
 
-    Point tipInGlobal = tip.localToGlobal(tip.size.topCenter(Point.origin));
+    final Offset tipInGlobal = tip.localToGlobal(tip.size.topCenter(Offset.zero));
     // The exact position of the left side depends on the font the test framework
     // happens to pick, so we don't test that.
-    expect(tipInGlobal.x, 300.0);
-    expect(tipInGlobal.y, 20.0);
+    expect(tipInGlobal.dx, 300.0);
+    expect(tipInGlobal.dy, 20.0);
   });
 
   testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
@@ -125,13 +125,13 @@ void main() {
      *                   *
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
     expect(tip.size.height, equals(20.0)); // 10.0 height + 5.0 padding * 2 (top, bottom)
-    expect(tip.localToGlobal(tip.size.topLeft(Point.origin)), equals(const Point(10.0, 20.0)));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
@@ -175,14 +175,14 @@ void main() {
      *                   *
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(100.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(100.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(200.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(100.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
@@ -237,14 +237,14 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(190.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(399.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(589.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(399.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
@@ -287,14 +287,14 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(190.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(400.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(590.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(400.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
   testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
@@ -338,15 +338,15 @@ void main() {
      *                   * }-10.0 margin
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(10.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(310.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).x, equals(790.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(320.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(320.0));
   });
 
   testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
@@ -390,11 +390,11 @@ void main() {
      *                   * }-10.0 margin
      *********************/
 
-    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(10.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Point.origin)).y, equals(310.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).x, equals(790.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Point.origin)).y, equals(320.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(320.0));
   });
 
   testWidgets('Tooltip stays around', (WidgetTester tester) async {
@@ -406,16 +406,14 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: Colors.green[500]
-              )
+              color: Colors.green[500],
             )
           )
         )
       )
     );
 
-    Finder tooltip = find.byType(Tooltip);
+    final Finder tooltip = find.byType(Tooltip);
     TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
     await tester.pump(kLongPressTimeout);
     await tester.pump(const Duration(milliseconds: 10));
@@ -435,9 +433,9 @@ void main() {
   });
 
   testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
       new Overlay(
         initialEntries: <OverlayEntry>[
@@ -483,9 +481,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: Colors.green[500]
-              )
+              color: Colors.green[500],
             )
           )
         )
@@ -497,7 +493,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget);
     await tester.pumpWidget(buildApp('NEW'));
     expect(find.text(tooltipText), findsOneWidget);
-    await tester.tapAt(const Point(5.0, 5.0));
+    await tester.tapAt(const Offset(5.0, 5.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(find.text(tooltipText), findsNothing);

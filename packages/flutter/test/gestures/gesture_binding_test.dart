@@ -24,8 +24,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
 TestGestureFlutterBinding _binding = new TestGestureFlutterBinding();
 
 void ensureTestGestureBinding() {
-  if (_binding == null)
-    _binding = new TestGestureFlutterBinding();
+  _binding ??= new TestGestureFlutterBinding();
   assert(GestureBinding.instance != null);
 }
 
@@ -33,15 +32,15 @@ void main() {
   setUp(ensureTestGestureBinding);
 
   test('Pointer tap events', () {
-    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.down),
         const ui.PointerData(change: ui.PointerChange.up),
       ]
     );
 
-    List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) => events.add(event);
+    final List<PointerEvent> events = <PointerEvent>[];
+    _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
@@ -50,7 +49,7 @@ void main() {
   });
 
   test('Pointer move events', () {
-    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.down),
         const ui.PointerData(change: ui.PointerChange.move),
@@ -58,8 +57,8 @@ void main() {
       ]
     );
 
-    List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) => events.add(event);
+    final List<PointerEvent> events = <PointerEvent>[];
+    _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
@@ -69,7 +68,7 @@ void main() {
   });
 
   test('Synthetic move events', () {
-    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(
           change: ui.PointerChange.down,
@@ -84,8 +83,8 @@ void main() {
       ]
     );
 
-    List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) => events.add(event);
+    final List<PointerEvent> events = <PointerEvent>[];
+    _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
@@ -96,15 +95,15 @@ void main() {
   });
 
   test('Pointer cancel events', () {
-    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.down),
         const ui.PointerData(change: ui.PointerChange.cancel),
       ]
     );
 
-    List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) => events.add(event);
+    final List<PointerEvent> events = <PointerEvent>[];
+    _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
@@ -113,14 +112,14 @@ void main() {
   });
 
   test('Can cancel pointers', () {
-    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.down),
         const ui.PointerData(change: ui.PointerChange.up),
       ]
     );
 
-    List<PointerEvent> events = <PointerEvent>[];
+    final List<PointerEvent> events = <PointerEvent>[];
     _binding.callback = (PointerEvent event) {
       events.add(event);
       if (event is PointerDownEvent)
@@ -134,7 +133,7 @@ void main() {
   });
 
   test('Can expand add and hover pointers', () {
-    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.add, device: 24),
         const ui.PointerData(change: ui.PointerChange.hover, device: 24),
@@ -143,7 +142,7 @@ void main() {
       ]
     );
 
-    List<PointerEvent> events = PointerEventConverter.expand(
+    final List<PointerEvent> events = PointerEventConverter.expand(
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);
@@ -155,7 +154,7 @@ void main() {
   });
 
   test('Synthetic hover and cancel for misplaced down and remove', () {
-    ui.PointerDataPacket packet = const ui.PointerDataPacket(
+    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
       data: const <ui.PointerData>[
         const ui.PointerData(change: ui.PointerChange.add, device: 25, physicalX: 10.0, physicalY: 10.0),
         const ui.PointerData(change: ui.PointerChange.down, device: 25, physicalX: 15.0, physicalY: 17.0),
@@ -163,7 +162,7 @@ void main() {
       ]
     );
 
-    List<PointerEvent> events = PointerEventConverter.expand(
+    final List<PointerEvent> events = PointerEventConverter.expand(
       packet.data, ui.window.devicePixelRatio).toList();
 
     expect(events.length, 5);

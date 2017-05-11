@@ -1,0 +1,58 @@
+[^═]*(this line contains the test framework's output with the clock and so forth)?
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown running a test:
+Who lives, who dies, who tells your story\?
+
+When the exception was thrown, this was the stack:
+#0      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:10:5\)
+<asynchronous suspension>
+#1      .+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
+<<skip until matching line>>
+^\(elided [0-9]+ .+[^)]$
+^.+\)$
+
+The test description was:
+Exception handling in test harness - string
+════════════════════════════════════════════════════════════════════════════════════════════════════
+.*(this line has more of the test framework's output)?
+  Test failed\. See exception logs above\.
+ *
+[^═]*(this line contains the test framework's output with the clock and so forth)?
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following assertion was thrown running a test:
+Who lives, who dies, who tells your story\?
+
+When the exception was thrown, this was the stack:
+#0      main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:13:5\)
+<asynchronous suspension>
+#1      .+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
+<<skip until matching line>>
+^\(elided [0-9]+ .+[^)]$
+^.+\)$
+
+The test description was:
+Exception handling in test harness - FlutterError
+════════════════════════════════════════════════════════════════════════════════════════════════════
+.*(this line has more of the test framework's output)?
+  Test failed\. See exception logs above\.
+ *
+[^═]*(this line contains the test framework's output with the clock and so forth)?
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following message was thrown running a test:
+Who lives, who dies, who tells your story\?
+
+When the exception was thrown, this was the stack:
+#[0-9]+ +main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:16:9\)
+#[0-9]+ +main.<anonymous closure> \(.+[/\\]dev[/\\]automated_tests[/\\]flutter_test[/\\]exception_handling_test\.dart:15:105\)
+#[0-9]+ +.+ \(package:flutter_test[/\\]src[/\\]widget_tester\.dart:[0-9]+:[0-9]+\)
+<<skip until matching line>>
+^\(elided [0-9]+ .+[^)]$
+^.+\)$
+
+The test description was:
+Exception handling in test harness - uncaught Future error
+════════════════════════════════════════════════════════════════════════════════════════════════════
+.*(this line has more of the test framework's output)?
+  Test failed\. See exception logs above\.
+ *
+.*..:.. \+0 -3: Some tests failed\. *

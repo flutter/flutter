@@ -4,12 +4,13 @@
 
 import 'dart:async';
 
-import 'package:pub_semver/pub_semver.dart' show Version;
-
+import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../doctor.dart';
 import 'mac.dart';
 
@@ -32,6 +33,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
 
+  bool get hasIDeviceInstaller => exitsHappy(<String>['ideviceinstaller', '-h']);
+
   bool get hasIosDeploy => exitsHappy(<String>['ios-deploy', '--version']);
 
   String get iosDeployMinimumVersion => '1.9.0';
@@ -40,22 +43,46 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasHomebrew => os.which('brew') != null;
 
-  bool get hasPythonSixModule => exitsHappy(<String>['python', '-c', 'import six']);
+  bool get hasPythonSixModule => kPythonSix.isInstalled;
+
+  bool get hasCocoaPods => exitsHappy(<String>['pod', '--version']);
+
+  String get cocoaPodsMinimumVersion => '1.0.0';
+
+  String get cocoaPodsVersionText => runSync(<String>['pod', '--version']).trim();
 
   bool get _iosDeployIsInstalledAndMeetsVersionCheck {
     if (!hasIosDeploy)
       return false;
     try {
-      Version version = new Version.parse(iosDeployVersionText);
+      final Version version = new Version.parse(iosDeployVersionText);
       return version >= new Version.parse(iosDeployMinimumVersion);
     } on FormatException catch (_) {
       return false;
     }
   }
 
+  bool get isCocoaPodsInstalledAndMeetsVersionCheck {
+    if (!hasCocoaPods)
+      return false;
+    try {
+      final Version installedVersion = new Version.parse(cocoaPodsVersionText);
+      return installedVersion >= new Version.parse(cocoaPodsMinimumVersion);
+    } on FormatException {
+      return false;
+    }
+  }
+
+  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
+  bool get isCocoaPodsInitialized {
+    return fs.isDirectorySync(
+      fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')
+    );
+  }
+
   @override
   Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
     ValidationType pythonStatus = ValidationType.missing;
     ValidationType brewStatus = ValidationType.missing;
@@ -87,10 +114,18 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       }
     } else {
       xcodeStatus = ValidationType.missing;
-      messages.add(new ValidationMessage.error(
-        'Xcode not installed; this is necessary for iOS development.\n'
-        'Download at https://developer.apple.com/xcode/download/.'
-      ));
+      if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
+        messages.add(new ValidationMessage.error(
+            'Xcode not installed; this is necessary for iOS development.\n'
+            'Download at https://developer.apple.com/xcode/download/.'
+        ));
+      } else {
+        messages.add(new ValidationMessage.error(
+            'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
+            'Download at: https://developer.apple.com/xcode/download/\n'
+            'Once installed, run \'sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\'.'
+        ));
+      }
     }
 
     // Python dependencies installed
@@ -98,21 +133,21 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       pythonStatus = ValidationType.installed;
     } else {
       pythonStatus = ValidationType.missing;
-      messages.add(new ValidationMessage.error(
-        'Python installation missing module "six".\n'
-        'Install via \'pip install six\' or \'sudo easy_install six\'.'
-      ));
+      messages.add(new ValidationMessage.error(kPythonSix.errorMessage));
     }
 
     // brew installed
     if (hasHomebrew) {
       brewStatus = ValidationType.installed;
 
-      if (!exitsHappy(<String>['ideviceinstaller', '-h'])) {
+      if (!hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
-          'Install via \'brew install ideviceinstaller\'.'
+          'To install, run:\n'
+          '  brew update\n'
+          '  brew install --HEAD libimobiledevice\n'
+          '  brew install ideviceinstaller'
         ));
       }
 
@@ -122,20 +157,61 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       }
       if (!hasIDeviceId || !_iosDeployIsInstalledAndMeetsVersionCheck) {
         brewStatus = ValidationType.partial;
-        messages.add(new ValidationMessage.error(
-          'ios-deploy version >= $iosDeployMinimumVersion not available; this is used to deploy to connected iOS devices.\n'
-          'Install via \'brew install ios-deploy\'.'
-        ));
+        if (hasIosDeploy) {
+          messages.add(new ValidationMessage.error(
+            'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
+            '  brew update\n'
+            '  brew upgrade ios-deploy'
+          ));
+        } else {
+          messages.add(new ValidationMessage.error(
+            'ios-deploy not installed. To install:\n'
+            '  brew update\n'
+            '  brew install ios-deploy'
+          ));
+        }
       } else {
         // Check for compatibility between libimobiledevice and Xcode.
         // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
-        ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-        if (result.exitCode == 0 && result.stdout.isNotEmpty && !exitsHappy(<String>['ideviceName'])) {
+        final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+        if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['ideviceName'])) {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
             'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
-            'brew uninstall libimobiledevice\n'
-            'brew install --HEAD libimobiledevice'
+            '  brew update\n'
+            '  brew uninstall --ignore-dependencies libimobiledevice\n'
+            '  brew install --HEAD libimobiledevice'
+          ));
+        }
+      }
+      if (isCocoaPodsInstalledAndMeetsVersionCheck) {
+        if (isCocoaPodsInitialized) {
+          messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
+        } else {
+          brewStatus = ValidationType.partial;
+          messages.add(new ValidationMessage.error(
+            'CocoaPods installed but not initialized.\n'
+            '$noCocoaPodsConsequence\n'
+            'To initialize CocoaPods, run:\n'
+            '  pod setup\n'
+            'once to finalize CocoaPods\' installation.'
+          ));
+        }
+      } else {
+        brewStatus = ValidationType.partial;
+        if (!hasCocoaPods) {
+          messages.add(new ValidationMessage.error(
+            'CocoaPods not installed.\n'
+            '$noCocoaPodsConsequence\n'
+            'To install:\n'
+            '$cocoaPodsInstallInstructions'
+          ));
+        } else {
+          messages.add(new ValidationMessage.error(
+            'CocoaPods out of date ($cocoaPodsMinimumVersion is required).\n'
+            '$noCocoaPodsConsequence\n'
+            'To upgrade:\n'
+            '$cocoaPodsUpgradeInstructions'
           ));
         }
       }

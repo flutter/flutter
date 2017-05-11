@@ -10,12 +10,12 @@ import 'package:flutter/widgets.dart';
 import 'constants.dart';
 import 'divider.dart';
 import 'icon.dart';
-import 'icons.dart';
 import 'icon_button.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'icons.dart';
 import 'ink_well.dart';
-import 'list_item.dart';
+import 'list_tile.dart';
 import 'material.dart';
 import 'theme.dart';
 
@@ -76,7 +76,7 @@ class PopupMenuDivider extends PopupMenuEntry<dynamic> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16.0 logical pixels.
-  PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key: key);
+  const PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key: key);
 
   @override
   final double height;
@@ -90,7 +90,7 @@ class PopupMenuDivider extends PopupMenuEntry<dynamic> {
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
   @override
-  Widget build(BuildContext context) => new Divider(height: config.height);
+  Widget build(BuildContext context) => new Divider(height: widget.height);
 }
 
 /// An item in a material design popup menu.
@@ -111,7 +111,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// Creates an item for a popup menu.
   ///
   /// By default, the item is enabled.
-  PopupMenuItem({
+  const PopupMenuItem({
     Key key,
     this.value,
     this.enabled: true,
@@ -136,42 +136,41 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
 class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
   // Override this to put something else in the menu entry.
-  Widget buildChild() => config.child;
+  Widget buildChild() => widget.child;
 
   void onTap() {
-    Navigator.pop(context, config.value);
+    Navigator.pop(context, widget.value);
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     TextStyle style = theme.textTheme.subhead;
-    if (!config.enabled)
+    if (!widget.enabled)
       style = style.copyWith(color: theme.disabledColor);
 
     Widget item = new AnimatedDefaultTextStyle(
       style: style,
       duration: kThemeChangeDuration,
       child: new Baseline(
-        baseline: config.height - _kBaselineOffsetFromBottom,
+        baseline: widget.height - _kBaselineOffsetFromBottom,
         baselineType: TextBaseline.alphabetic,
         child: buildChild()
       )
     );
-    if (!config.enabled) {
+    if (!widget.enabled) {
       final bool isDark = theme.brightness == Brightness.dark;
-      item = new IconTheme.merge(
-        context: context,
+      item = IconTheme.merge(
         data: new IconThemeData(opacity: isDark ? 0.5 : 0.38),
         child: item
       );
     }
 
     return new InkWell(
-      onTap: config.enabled ? onTap : null,
+      onTap: widget.enabled ? onTap : null,
       child: new MergeSemantics(
         child: new Container(
-          height: config.height,
+          height: widget.height,
           padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
           child: item
         )
@@ -196,7 +195,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   /// Creates a popup menu item with a checkmark.
   ///
   /// By default, the menu item is enabled but unchecked.
-  CheckedPopupMenuItem({
+  const CheckedPopupMenuItem({
     Key key,
     T value,
     this.checked: false,
@@ -225,14 +224,14 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
   void initState() {
     super.initState();
     _controller = new AnimationController(duration: _kFadeDuration, vsync: this)
-      ..value = config.checked ? 1.0 : 0.0
+      ..value = widget.checked ? 1.0 : 0.0
       ..addListener(() => setState(() { /* animation changed */ }));
   }
 
   @override
   void onTap() {
     // This fades the checkmark in or out when tapped.
-    if (config.checked)
+    if (widget.checked)
       _controller.reverse();
     else
       _controller.forward();
@@ -241,19 +240,19 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
 
   @override
   Widget buildChild() {
-    return new ListItem(
-      enabled: config.enabled,
+    return new ListTile(
+      enabled: widget.enabled,
       leading: new FadeTransition(
         opacity: _opacity,
         child: new Icon(_controller.isDismissed ? null : Icons.done)
       ),
-      title: config.child
+      title: widget.child
     );
   }
 }
 
 class _PopupMenu<T> extends StatelessWidget {
-  _PopupMenu({
+  const _PopupMenu({
     Key key,
     this.route
   }) : super(key: key);
@@ -262,20 +261,20 @@ class _PopupMenu<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    List<Widget> children = <Widget>[];
+    final double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+    final List<Widget> children = <Widget>[];
 
     for (int i = 0; i < route.items.length; ++i) {
       final double start = (i + 1) * unit;
       final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-      CurvedAnimation opacity = new CurvedAnimation(
+      final CurvedAnimation opacity = new CurvedAnimation(
         parent: route.animation,
         curve: new Interval(start, end)
       );
       Widget item = route.items[i];
       if (route.initialValue != null && route.initialValue == route.items[i].value) {
         item = new Container(
-          decoration: new BoxDecoration(backgroundColor: Theme.of(context).highlightColor),
+          color: Theme.of(context).highlightColor,
           child: item
         );
       }
@@ -289,7 +288,7 @@ class _PopupMenu<T> extends StatelessWidget {
     final CurveTween width = new CurveTween(curve: new Interval(0.0, unit));
     final CurveTween height = new CurveTween(curve: new Interval(0.0, unit * route.items.length));
 
-    Widget child = new ConstrainedBox(
+    final Widget child = new ConstrainedBox(
       constraints: const BoxConstraints(
         minWidth: _kMenuMinWidth,
         maxWidth: _kMenuMaxWidth,
@@ -300,7 +299,7 @@ class _PopupMenu<T> extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             vertical: _kMenuVerticalPadding
           ),
-          child: new BlockBody(children: children),
+          child: new ListBody(children: children),
         )
       )
     );
@@ -380,7 +379,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
   final dynamic initialValue;
-  final int elevation;
+  final double elevation;
   final ThemeData theme;
 
   @override
@@ -396,13 +395,13 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kMenuDuration;
 
   @override
-  bool get barrierDismissable => true;
+  bool get barrierDismissible => true;
 
   @override
   Color get barrierColor => null;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     double selectedItemOffset;
     if (initialValue != null) {
       selectedItemOffset = 0.0;
@@ -434,15 +433,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// a [Theme] to use for the menu.
 ///
 /// The `elevation` argument specifies the z-coordinate at which to place the
-/// menu. The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9,
-/// 12, 16, 24. The elevation defaults to 8, the appropriate elevation for popup
+/// menu. The elevation defaults to 8, the appropriate elevation for popup
 /// menus.
 Future<T> showMenu<T>({
-  BuildContext context,
+  @required BuildContext context,
   RelativeRect position,
-  List<PopupMenuEntry<T>> items,
+  @required List<PopupMenuEntry<T>> items,
   T initialValue,
-  int elevation: 8
+  double elevation: 8.0
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
@@ -476,18 +474,17 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Creates a button that shows a popup menu.
   ///
   /// The [itemBuilder] argument must not be null.
-  PopupMenuButton({
+  const PopupMenuButton({
     Key key,
     @required this.itemBuilder,
     this.initialValue,
     this.onSelected,
     this.tooltip: 'Show menu',
-    this.elevation: 8,
+    this.elevation: 8.0,
     this.padding: const EdgeInsets.all(8.0),
     this.child
-  }) : super(key: key) {
-    assert(itemBuilder != null);
-  }
+  }) : assert(itemBuilder != null),
+       super(key: key);
 
   /// Called when the button is pressed to create the items to show in the menu.
   final PopupMenuItemBuilder<T> itemBuilder;
@@ -505,9 +502,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   final String tooltip;
 
   /// The z-coordinate at which to place the menu when open.
-  ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  final int elevation;
+  final double elevation;
 
   /// Matches IconButton's 8 dps padding by default. In some cases, notably where
   /// this button appears as the trailing element of a list item, it's useful to be able
@@ -524,38 +519,52 @@ class PopupMenuButton<T> extends StatefulWidget {
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final RenderBox renderBox = context.findRenderObject();
-    final Point topLeft = renderBox.localToGlobal(Point.origin);
+    final Offset topLeft = renderBox.localToGlobal(Offset.zero);
     showMenu<T>(
       context: context,
-      elevation: config.elevation,
-      items: config.itemBuilder(context),
-      initialValue: config.initialValue,
+      elevation: widget.elevation,
+      items: widget.itemBuilder(context),
+      initialValue: widget.initialValue,
       position: new RelativeRect.fromLTRB(
-        topLeft.x, topLeft.y + (config.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
-        0.0, 0.0
+        topLeft.dx,
+        topLeft.dy + (widget.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
+        0.0,
+        0.0,
       )
     )
     .then<Null>((T newValue) {
       if (!mounted || newValue == null)
         return null;
-      if (config.onSelected != null)
-        config.onSelected(newValue);
+      if (widget.onSelected != null)
+        widget.onSelected(newValue);
     });
+  }
+
+  Icon _getIcon(TargetPlatform platform) {
+    assert(platform != null);
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return const Icon(Icons.more_vert);
+      case TargetPlatform.iOS:
+        return const Icon(Icons.more_horiz);
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (config.child == null) {
+    if (widget.child == null) {
       return new IconButton(
-        icon: new Icon(Icons.more_vert),
-        padding: config.padding,
-        tooltip: config.tooltip,
+        icon: _getIcon(Theme.of(context).platform),
+        padding: widget.padding,
+        tooltip: widget.tooltip,
         onPressed: showButtonMenu,
       );
     }
     return new InkWell(
       onTap: showButtonMenu,
-      child: config.child,
+      child: widget.child,
     );
   }
 }

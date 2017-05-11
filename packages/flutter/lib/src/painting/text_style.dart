@@ -4,9 +4,12 @@
 
 import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 
 /// An immutable style in which paint text.
+@immutable
 class TextStyle {
   /// Creates a text style.
   const TextStyle({
@@ -23,7 +26,7 @@ class TextStyle {
     this.decoration,
     this.decorationColor,
     this.decorationStyle
-  });
+  }) : assert(inherit != null);
 
   /// Whether null values are replaced with their value in an ancestor text style (e.g., in a [TextSpan] tree).
   final bool inherit;
@@ -290,7 +293,7 @@ class TextStyle {
 
   @override
   String toString([String prefix = '']) {
-    List<String> result = <String>[];
+    final List<String> result = <String>[];
     result.add('${prefix}inherit: $inherit');
     if (color != null)
       result.add('${prefix}color: $color');

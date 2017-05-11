@@ -62,7 +62,7 @@ class Trigger {
 }
 
 class TriggerableWidget extends StatefulWidget {
-  TriggerableWidget({ this.trigger, this.counter });
+  const TriggerableWidget({ this.trigger, this.counter });
   final Trigger trigger;
   final Counter counter;
   @override
@@ -73,12 +73,13 @@ class TriggerableState extends State<TriggerableWidget> {
   @override
   void initState() {
     super.initState();
-    config.trigger.callback = this.fire;
+    widget.trigger.callback = fire;
   }
 
   @override
-  void didUpdateConfig(TriggerableWidget oldConfig) {
-    config.trigger.callback = this.fire;
+  void didUpdateWidget(TriggerableWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    widget.trigger.callback = fire;
   }
 
   int _count = 0;
@@ -90,18 +91,18 @@ class TriggerableState extends State<TriggerableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    config.counter.count++;
+    widget.counter.count++;
     return new Text("Bang $_count!");
   }
 }
 
 void main() {
   testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
-    Trigger trigger1 = new Trigger();
-    Counter counter1 = new Counter();
-    Trigger trigger2 = new Trigger();
-    Counter counter2 = new Counter();
-    OffscreenWidgetTree tree = new OffscreenWidgetTree();
+    final Trigger trigger1 = new Trigger();
+    final Counter counter1 = new Counter();
+    final Trigger trigger2 = new Trigger();
+    final Counter counter2 = new Counter();
+    final OffscreenWidgetTree tree = new OffscreenWidgetTree();
     // Both counts should start at zero
     expect(counter1.count, equals(0));
     expect(counter2.count, equals(0));

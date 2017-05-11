@@ -13,7 +13,8 @@ import 'package:path/path.dart' as path;
 // the numbers below are odd, so that the totals don't seem round. :-)
 const double todoCost = 1009.0; // about two average SWE days, in dollars
 const double ignoreCost = 2003.0; // four average SWE days, in dollars
-const double pythonCost = 3001.0; //  six average SWE days, in dollars
+const double pythonCost = 3001.0; // six average SWE days, in dollars
+const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
 
 final RegExp todoPattern = new RegExp(r'(?://|#) *TODO');
 final RegExp ignorePattern = new RegExp(r'// *ignore:');
@@ -25,12 +26,15 @@ Future<double> findCostsForFile(File file) async {
       path.extension(file.path) != '.yaml' &&
       path.extension(file.path) != '.sh')
     return 0.0;
+  final bool isTest = file.path.endsWith('_test.dart');
   double total = 0.0;
   for (String line in await file.readAsLines()) {
     if (line.contains(todoPattern))
       total += todoCost;
     if (line.contains(ignorePattern))
       total += ignoreCost;
+    if (isTest && line.contains('skip:'))
+      total += skipCost;
   }
   return total;
 }
@@ -39,7 +43,7 @@ const String _kBenchmarkKey = 'technical_debt_in_dollars';
 
 Future<Null> main() async {
   await task(() async {
-    Process git = await startProcess(
+    final Process git = await startProcess(
       'git',
       <String>['ls-files', '--full-name', flutterDirectory.path],
       workingDirectory: flutterDirectory.path,
@@ -47,7 +51,7 @@ Future<Null> main() async {
     double total = 0.0;
     await for (String entry in git.stdout.transform(UTF8.decoder).transform(const LineSplitter()))
       total += await findCostsForFile(new File(path.join(flutterDirectory.path, entry)));
-    int gitExitCode = await git.exitCode;
+    final int gitExitCode = await git.exitCode;
     if (gitExitCode != 0)
       throw new Exception('git exit with unexpected error code $gitExitCode');
     return new TaskResult.success(

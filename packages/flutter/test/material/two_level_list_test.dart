@@ -7,24 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('TwoLevelList default control', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new TwoLevelList()));
-
-    await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new TwoLevelList(
-            children: <Widget>[
-              new TwoLevelSublist(
-                title: new Text('Title'),
-              )
-            ]
-          )
-        )
-      )
-    );
-  });
-
   testWidgets('TwoLevelList basics', (WidgetTester tester) async {
     final Key topKey = new UniqueKey();
     final Key sublistKey = new UniqueKey();
@@ -33,19 +15,19 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
         return new Material(
-          child: new Viewport(
-            child: new TwoLevelList(
+          child: new SingleChildScrollView(
+            child: new Column(
               children: <Widget>[
-                new TwoLevelListItem(title: new Text('Top'), key: topKey),
-                new TwoLevelSublist(
+                new ListTile(title: const Text('Top'), key: topKey),
+                new ExpansionTile(
                   key: sublistKey,
-                  title: new Text('Sublist'),
+                  title: const Text('Sublist'),
                   children: <Widget>[
-                    new TwoLevelListItem(title: new Text('0')),
-                    new TwoLevelListItem(title: new Text('1'))
+                    const ListTile(title: const Text('0')),
+                    const ListTile(title: const Text('1'))
                   ]
                 ),
-                new TwoLevelListItem(title: new Text('Bottom'), key: bottomKey)
+                new ListTile(title: const Text('Bottom'), key: bottomKey)
               ]
             )
           )
@@ -59,7 +41,7 @@ void main() {
     expect(find.text('Sublist'), findsOneWidget);
     expect(find.text('Bottom'), findsOneWidget);
 
-    double getY(Key key) => tester.getTopLeft(find.byKey(key)).y;
+    double getY(Key key) => tester.getTopLeft(find.byKey(key)).dy;
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
 
     expect(getY(topKey), lessThan(getY(sublistKey)));
@@ -85,23 +67,23 @@ void main() {
     expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(bottomKey)));
   });
 
-  testWidgets('onOpenChanged callback', (WidgetTester tester) async {
+  testWidgets('onExpansionChanged callback', (WidgetTester tester) async {
     bool didChangeOpen;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
         return new Material(
-          child: new Viewport(
-            child: new TwoLevelList(
+          child: new SingleChildScrollView(
+            child: new Column(
               children: <Widget>[
-                new TwoLevelSublist(
-                  title: new Text('Sublist'),
-                  onOpenChanged: (bool opened) {
+                new ExpansionTile(
+                  title: const Text('Sublist'),
+                  onExpansionChanged: (bool opened) {
                     didChangeOpen = opened;
                   },
                   children: <Widget>[
-                    new TwoLevelListItem(title: new Text('0')),
-                    new TwoLevelListItem(title: new Text('1'))
+                    const ListTile(title: const Text('0')),
+                    const ListTile(title: const Text('1'))
                   ]
                 ),
               ]

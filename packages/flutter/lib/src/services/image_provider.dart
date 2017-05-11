@@ -4,20 +4,22 @@
 
 import 'dart:async';
 import 'dart:io' show File;
-import 'dart:ui' show Size, Locale, hashValues;
-import 'dart:ui' as ui show Image;
 import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
+import 'dart:ui' show Size, Locale, hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/http.dart' as http;
+import 'package:http/http.dart' as http;
 
 import 'asset_bundle.dart';
+import 'http_client.dart';
 import 'image_cache.dart';
 import 'image_decoder.dart';
 import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
+@immutable
 class ImageConfiguration {
   /// Creates an object holding the configuration information for an [ImageProvider].
   ///
@@ -92,7 +94,7 @@ class ImageConfiguration {
 
   @override
   String toString() {
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.write('ImageConfiguration(');
     bool hasArguments = false;
     if (bundle != null) {
@@ -141,8 +143,9 @@ class ImageConfiguration {
 ///
 /// The type argument `T` is the type of the object used to represent a resolved
 /// configuration. This is also the type used for the key in the image cache. It
-/// should be immutable and implement [operator ==] and [hashCode]. Subclasses should
-/// subclass a variant of [ImageProvider] with an explicit `T` type argument.
+/// should be immutable and implement the [==] operator and the [hashCode]
+/// getter. Subclasses should subclass a variant of [ImageProvider] with an
+/// explicit `T` type argument.
 ///
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
@@ -195,7 +198,7 @@ abstract class ImageProvider<T> {
   /// method will fetch. Different [ImageProvider]s given the same constructor
   /// arguments and [ImageConfiguration] objects should return keys that are
   /// '==' to each other (possibly by using a class for the key that itself
-  /// implements [operator ==]).
+  /// implements [==]).
   @protected
   Future<T> obtainKey(ImageConfiguration configuration);
 
@@ -211,6 +214,7 @@ abstract class ImageProvider<T> {
 /// Key for the image obtained by an [AssetImage] or [ExactAssetImage].
 ///
 /// This is used to identify the precise resource in the [imageCache].
+@immutable
 class AssetBundleImageKey {
   /// Creates the key for an [AssetImage] or [AssetBundleImageProvider].
   ///
@@ -219,7 +223,9 @@ class AssetBundleImageKey {
     @required this.bundle,
     @required this.name,
     @required this.scale
-  });
+  }) : assert(bundle != null),
+       assert(name != null),
+       assert(scale != null);
 
   /// The bundle from which the image will be obtained.
   ///
@@ -308,7 +314,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 });
+  const NetworkImage(this.url, { this.scale: 1.0 })
+      : assert(url != null),
+        assert(scale != null);
 
   /// The URL from which the image will be fetched.
   final String url;
@@ -332,15 +340,17 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     );
   }
 
+  static final http.Client _httpClient = createHttpClient();
+
   Future<ImageInfo> _loadAsync(NetworkImage key) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    final http.Response response = await http.get(resolved);
+    final http.Response response = await _httpClient.get(resolved);
     if (response == null || response.statusCode != 200)
       return null;
 
-    Uint8List bytes = response.bodyBytes;
+    final Uint8List bytes = response.bodyBytes;
     if (bytes.lengthInBytes == 0)
       return null;
 
@@ -376,7 +386,9 @@ class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
   /// The arguments must not be null.
-  const FileImage(this.file, { this.scale: 1.0 });
+  const FileImage(this.file, { this.scale: 1.0 })
+      : assert(file != null),
+        assert(scale != null);
 
   /// The file to decode into an image.
   final File file;
@@ -402,7 +414,7 @@ class FileImage extends ImageProvider<FileImage> {
   Future<ImageInfo> _loadAsync(FileImage key) async {
     assert(key == this);
 
-    Uint8List bytes = await file.readAsBytes();
+    final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
       return null;
 
@@ -421,7 +433,7 @@ class FileImage extends ImageProvider<FileImage> {
     if (other.runtimeType != runtimeType)
       return false;
     final FileImage typedOther = other;
-    return file?.path == file?.path
+    return file?.path == typedOther.file?.path
         && scale == typedOther.scale;
   }
 
@@ -432,6 +444,60 @@ class FileImage extends ImageProvider<FileImage> {
   String toString() => '$runtimeType("${file?.path}", scale: $scale)';
 }
 
+/// Decodes the given [Uint8List] buffer as an image, associating it with the
+/// given scale.
+class MemoryImage extends ImageProvider<MemoryImage> {
+  /// Creates an object that decodes a [Uint8List] buffer as an image.
+  ///
+  /// The arguments must not be null.
+  const MemoryImage(this.bytes, { this.scale: 1.0 })
+      : assert(bytes != null),
+        assert(scale != null);
+
+  /// The bytes to decode into an image.
+  final Uint8List bytes;
+
+  /// The scale to place in the [ImageInfo] object of the image.
+  final double scale;
+
+  @override
+  Future<MemoryImage> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<MemoryImage>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(MemoryImage key) {
+    return new OneFrameImageStreamCompleter(_loadAsync(key));
+  }
+
+  Future<ImageInfo> _loadAsync(MemoryImage key) async {
+    assert(key == this);
+
+    final ui.Image image = await decodeImageFromList(bytes);
+    if (image == null)
+      return null;
+
+    return new ImageInfo(
+      image: image,
+      scale: key.scale,
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final MemoryImage typedOther = other;
+    return bytes == typedOther.bytes
+        && scale == typedOther.scale;
+  }
+
+  @override
+  int get hashCode => hashValues(bytes.hashCode, scale);
+
+  @override
+  String toString() => '$runtimeType(${bytes.runtimeType}#${bytes.hashCode}, scale: $scale)';
+}
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
 ///
 /// This implementation requires an explicit final [name] and [scale] on
@@ -446,13 +512,11 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// defaults to 1.0. The [bundle] argument may be null, in which case the
   /// bundle provided in the [ImageConfiguration] passed to the [resolve] call
   /// will be used instead.
-  ExactAssetImage(this.name, {
+  const ExactAssetImage(this.name, {
     this.scale: 1.0,
     this.bundle
-  }) {
-    assert(name != null);
-    assert(scale != null);
-  }
+  }) : assert(name != null),
+       assert(scale != null);
 
   /// The key to use to obtain the resource from the [bundle]. This is the
   /// argument passed to [AssetBundle.load].

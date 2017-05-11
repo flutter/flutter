@@ -24,9 +24,9 @@ enum AnimationStatus {
 /// Signature for listeners attached using [Animation.addStatusListener].
 typedef void AnimationStatusListener(AnimationStatus status);
 
-/// An animation with a value of type T
+/// An animation with a value of type `T`.
 ///
-/// An animation consists of a value (of type T) together with a status. The
+/// An animation consists of a value (of type `T`) together with a status. The
 /// status indicates whether the animation is conceptually running from
 /// beginning to end or from the end back to the beginning, although the actual
 /// value of the animation might not change monotonically (e.g., if the
@@ -81,7 +81,7 @@ abstract class Animation<T> extends Listenable {
 
   @override
   String toString() {
-    return '$runtimeType(${toStringDetails()})';
+    return '$runtimeType#$hashCode(${toStringDetails()})';
   }
 
   /// Provides a string describing the status of this object, but not including

@@ -94,14 +94,14 @@ class LeastSquaresSolver {
     if (degree > x.length) // Not enough data to fit a curve.
       return null;
 
-    PolynomialFit result = new PolynomialFit(degree);
+    final PolynomialFit result = new PolynomialFit(degree);
 
     // Shorthands for the purpose of notation equivalence to original C++ code.
     final int m = x.length;
     final int n = degree + 1;
 
     // Expand the X vector to a matrix A, pre-multiplied by the weights.
-    _Matrix a = new _Matrix(n, m);
+    final _Matrix a = new _Matrix(n, m);
     for (int h = 0; h < m; h += 1) {
       a.set(0, h, w[h]);
       for (int i = 1; i < n; i += 1)
@@ -111,25 +111,25 @@ class LeastSquaresSolver {
     // Apply the Gram-Schmidt process to A to obtain its QR decomposition.
 
     // Orthonormal basis, column-major ordVectorer.
-    _Matrix q = new _Matrix(n, m);
+    final _Matrix q = new _Matrix(n, m);
     // Upper triangular matrix, row-major order.
-    _Matrix r = new _Matrix(n, n);
+    final _Matrix r = new _Matrix(n, n);
     for (int j = 0; j < n; j += 1) {
       for (int h = 0; h < m; h += 1)
         q.set(j, h, a.get(j, h));
       for (int i = 0; i < j; i += 1) {
-        double dot = q.getRow(j) * q.getRow(i);
+        final double dot = q.getRow(j) * q.getRow(i);
         for (int h = 0; h < m; h += 1)
           q.set(j, h, q.get(j, h) - dot * q.get(i, h));
       }
 
-      double norm = q.getRow(j).norm();
+      final double norm = q.getRow(j).norm();
       if (norm < 0.000001) {
         // Vectors are linearly dependent or zero so no solution.
         return null;
       }
 
-      double inverseNorm = 1.0 / norm;
+      final double inverseNorm = 1.0 / norm;
       for (int h = 0; h < m; h += 1)
         q.set(j, h, q.get(j, h) * inverseNorm);
       for (int i = 0; i < n; i += 1)
@@ -138,7 +138,7 @@ class LeastSquaresSolver {
 
     // Solve R B = Qt W Y to find B.  This is easy because R is upper triangular.
     // We just work from bottom-right to top-left calculating B's coefficients.
-    _Vector wy = new _Vector(m);
+    final _Vector wy = new _Vector(m);
     for (int h = 0; h < m; h += 1)
       wy[h] = y[h] * w[h];
     for (int i = n - 1; i >= 0; i -= 1) {

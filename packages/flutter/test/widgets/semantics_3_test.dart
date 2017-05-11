@@ -12,7 +12,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 3', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
     // implicit annotators
     await tester.pumpWidget(
@@ -20,7 +20,7 @@ void main() {
         child: new Semantics(
           label: 'test',
           child: new Container(
-            child: new Semantics(
+            child: const Semantics(
               checked: true
             )
           )
@@ -40,7 +40,7 @@ void main() {
     await tester.pumpWidget(
       new Container(
         child: new Container(
-          child: new Semantics(
+          child: const Semantics(
             checked: true
           )
         )
@@ -58,7 +58,7 @@ void main() {
     await tester.pumpWidget(
       new Container(
         child: new Container(
-          child: new Semantics(
+          child: const Semantics(
             label: 'test'
           )
         )
@@ -78,7 +78,7 @@ void main() {
         child: new Semantics(
           checked: true,
           child: new Container(
-            child: new Semantics(
+            child: const Semantics(
               label: 'test'
             )
           )
@@ -105,7 +105,7 @@ void main() {
         child: new Semantics(
           checked: true,
           child: new Container(
-            child: new Semantics(
+            child: const Semantics(
               label: 'test'
             )
           )

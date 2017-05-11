@@ -4,10 +4,10 @@
 
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'ink_highlight.dart';
@@ -24,14 +24,22 @@ import 'theme.dart';
 /// Must have an ancestor [Material] widget in which to cause ink reactions.
 ///
 /// If a Widget uses this class directly, it should include the following line
-/// at the top of its [build] function to call [debugCheckHasMaterial]:
+/// at the top of its build function to call [debugCheckHasMaterial]:
 ///
-///     assert(debugCheckHasMaterial(context));
+/// ```dart
+/// assert(debugCheckHasMaterial(context));
+/// ```
+///
+/// See also:
+///
+///  * [GestureDetector], for listening for gestures without ink splashes.
+///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
+///  * [IconButton], which combines [InkResponse] with an [Icon].
 class InkResponse extends StatefulWidget {
   /// Creates an area of a [Material] that responds to touch.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
-  InkResponse({
+  const InkResponse({
     Key key,
     this.child,
     this.onTap,
@@ -41,6 +49,9 @@ class InkResponse extends StatefulWidget {
     this.containedInkWell: false,
     this.highlightShape: BoxShape.circle,
     this.radius,
+    this.borderRadius: BorderRadius.zero,
+    this.highlightColor,
+    this.splashColor,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -70,6 +81,17 @@ class InkResponse extends StatefulWidget {
 
   /// The radius of the ink splash.
   final double radius;
+
+  /// The clipping radius of the containing rect.
+  final BorderRadius borderRadius;
+
+  /// The highlight color of the ink response. If this property is null then the
+  /// highlight color of the theme will be used.
+  final Color highlightColor;
+
+  /// The splash color of the ink response. If this property is null then the
+  /// splash color of the theme will be used.
+  final Color splashColor;
 
   /// The rectangle to use for the highlight effect and for clipping
   /// the splash effects if [containedInkWell] is true.
@@ -116,9 +138,10 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
         _lastHighlight = new InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
-          color: Theme.of(context).highlightColor,
-          shape: config.highlightShape,
-          rectCallback: config.getRectCallback(referenceBox),
+          color: widget.highlightColor ?? Theme.of(context).highlightColor,
+          shape: widget.highlightShape,
+          borderRadius: widget.borderRadius,
+          rectCallback: widget.getRectCallback(referenceBox),
           onRemoved: () {
             assert(_lastHighlight != null);
             _lastHighlight = null;
@@ -131,22 +154,23 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       _lastHighlight.deactivate();
     }
     assert(value == (_lastHighlight != null && _lastHighlight.active));
-    if (config.onHighlightChanged != null)
-      config.onHighlightChanged(value);
+    if (widget.onHighlightChanged != null)
+      widget.onHighlightChanged(value);
   }
 
   void _handleTapDown(TapDownDetails details) {
     final RenderBox referenceBox = context.findRenderObject();
-    final RectCallback rectCallback = config.getRectCallback(referenceBox);
+    final RectCallback rectCallback = widget.getRectCallback(referenceBox);
     InkSplash splash;
     splash = new InkSplash(
       controller: Material.of(context),
       referenceBox: referenceBox,
       position: referenceBox.globalToLocal(details.globalPosition),
-      color: Theme.of(context).splashColor,
-      containedInkWell: config.containedInkWell,
-      rectCallback: config.containedInkWell ? rectCallback : null,
-      radius: config.radius,
+      color: widget.splashColor ?? Theme.of(context).splashColor,
+      containedInkWell: widget.containedInkWell,
+      rectCallback: widget.containedInkWell ? rectCallback : null,
+      radius: widget.radius,
+      borderRadius: widget.borderRadius ?? BorderRadius.zero,
       onRemoved: () {
         if (_splashes != null) {
           assert(_splashes.contains(splash));
@@ -166,8 +190,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(false);
-    if (config.onTap != null)
-      config.onTap();
+    if (widget.onTap != null)
+      widget.onTap();
   }
 
   void _handleTapCancel() {
@@ -179,15 +203,15 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   void _handleDoubleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
-    if (config.onDoubleTap != null)
-      config.onDoubleTap();
+    if (widget.onDoubleTap != null)
+      widget.onDoubleTap();
   }
 
   void _handleLongPress() {
     _currentSplash?.confirm();
     _currentSplash = null;
-    if (config.onLongPress != null)
-      config.onLongPress();
+    if (widget.onLongPress != null)
+      widget.onLongPress();
   }
 
   @override
@@ -207,17 +231,19 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 
   @override
   Widget build(BuildContext context) {
-    assert(config.debugCheckContext(context));
-    _lastHighlight?.color = Theme.of(context).highlightColor;
-    final bool enabled = config.onTap != null || config.onDoubleTap != null || config.onLongPress != null;
+    assert(widget.debugCheckContext(context));
+    final ThemeData themeData = Theme.of(context);
+    _lastHighlight?.color = widget.highlightColor ?? themeData.highlightColor;
+    _currentSplash?.color = widget.splashColor ?? themeData.splashColor;
+    final bool enabled = widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
     return new GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,
       onTap: enabled ? _handleTap : null,
       onTapCancel: enabled ? _handleTapCancel : null,
-      onDoubleTap: config.onDoubleTap != null ? _handleDoubleTap : null,
-      onLongPress: config.onLongPress != null ? _handleLongPress : null,
+      onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
+      onLongPress: widget.onLongPress != null ? _handleLongPress : null,
       behavior: HitTestBehavior.opaque,
-      child: config.child
+      child: widget.child
     );
   }
 
@@ -228,20 +254,32 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 /// Must have an ancestor [Material] widget in which to cause ink reactions.
 ///
 /// If a Widget uses this class directly, it should include the following line
-/// at the top of its [build] function to call [debugCheckHasMaterial]:
+/// at the top of its build function to call [debugCheckHasMaterial]:
 ///
-///     assert(debugCheckHasMaterial(context));
+/// ```dart
+/// assert(debugCheckHasMaterial(context));
+/// ```
+///
+/// See also:
+///
+///  * [GestureDetector], for listening for gestures without ink splashes.
+///  * [RaisedButton] and [FlatButton], two kinds of buttons in material design.
+///  * [InkResponse], a variant of [InkWell] that doesn't force a rectangular
+///    shape on the ink reaction.
 class InkWell extends InkResponse {
   /// Creates an ink well.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
-  InkWell({
+  const InkWell({
     Key key,
     Widget child,
     GestureTapCallback onTap,
     GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
-    ValueChanged<bool> onHighlightChanged
+    ValueChanged<bool> onHighlightChanged,
+    Color highlightColor,
+    Color splashColor,
+    BorderRadius borderRadius,
   }) : super(
     key: key,
     child: child,
@@ -250,6 +288,9 @@ class InkWell extends InkResponse {
     onLongPress: onLongPress,
     onHighlightChanged: onHighlightChanged,
     containedInkWell: true,
-    highlightShape: BoxShape.rectangle
+    highlightShape: BoxShape.rectangle,
+    highlightColor: highlightColor,
+    splashColor: splashColor,
+    borderRadius: borderRadius,
   );
 }

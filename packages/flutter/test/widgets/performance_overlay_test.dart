@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Performance overlay smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(new PerformanceOverlay());
+    await tester.pumpWidget(const PerformanceOverlay());
     await tester.pumpWidget(new PerformanceOverlay.allEnabled());
   });
 }

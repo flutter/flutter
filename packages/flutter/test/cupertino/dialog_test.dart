@@ -20,25 +20,25 @@ void main() {
                   showDialog<Null>(
                     context: context,
                     child: new CupertinoAlertDialog(
-                      title: new Text('The title'),
-                      content: new Text('The content'),
+                      title: const Text('The title'),
+                      content: const Text('The content'),
                       actions: <Widget>[
-                        new CupertinoDialogAction(
-                          child: new Text('Cancel'),
+                        const CupertinoDialogAction(
+                          child: const Text('Cancel'),
                         ),
                         new CupertinoDialogAction(
-                          isDestructive: true,
+                          isDestructiveAction: true,
                           onPressed: () {
                             didDelete = true;
                             Navigator.pop(context);
                           },
-                          child: new Text('Delete'),
+                          child: const Text('Delete'),
                         ),
                       ],
                     ),
                   );
                 },
-                child: new Text('Go'),
+                child: const Text('Go'),
               );
             },
           ),
@@ -63,15 +63,39 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
-  testWidgets('Dialog action styles', (WidgetTester tester) async {
-    await tester.pumpWidget(new CupertinoDialogAction(
-      isDestructive: true,
-      child: new Text('Ok'),
+  testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
+    await tester.pumpWidget(const CupertinoDialogAction(
+      isDestructiveAction: true,
+      child: const Text('Ok'),
     ));
 
-    DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
     expect(widget.style.color.alpha, lessThan(255));
+  });
+
+  testWidgets('Dialog default action styles', (WidgetTester tester) async {
+    await tester.pumpWidget(const CupertinoDialogAction(
+      isDefaultAction: true,
+      child: const Text('Ok'),
+    ));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
+  });
+
+  testWidgets('Default and destructive style', (WidgetTester tester) async {
+    await tester.pumpWidget(const CupertinoDialogAction(
+      isDefaultAction: true,
+      isDestructiveAction: true,
+      child: const Text('Ok'),
+    ));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
+    expect(widget.style.color.red, greaterThan(widget.style.color.blue));
   });
 }

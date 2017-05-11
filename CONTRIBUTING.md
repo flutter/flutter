@@ -10,7 +10,7 @@ Things you will need
 
  * Linux or Mac OS X. (Windows is not yet supported.)
  * git (used for source version control).
- * An IDE. We recommend [Atom](http://dart-atom.github.io/dartlang/).
+ * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/).
  * An ssh client (used to authenticate with GitHub).
  * Python (used by some of our tools).
  * The Android platform tools (see [Issue #55](https://github.com/flutter/flutter/issues/55)
@@ -101,9 +101,9 @@ Individual tests can also be run directly, e.g. `flutter test lib/my_app_test.da
 
 Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree/master/packages/flutter_test) which provides flutter-specific extensions on top of [package:test](https://pub.dartlang.org/packages/test).
 
-`flutter test` runs tests inside the flutter shell.
+`flutter test` runs tests inside the flutter shell. To debug tests in Observatory, use the `--start-paused` option to start the test in a paused state and wait for connection from a debugger. This option lets you set breakpoints before the test runs.
 
-To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dev/bots/test.sh`.
+To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dart dev/bots/test.dart`.
 
 If you've built [your own flutter engine](#working-on-the-engine-and-the-framework-at-the-same-time), you can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
 if you built an engine in the `out/host_debug_unopt` directory, you can pass
@@ -190,6 +190,7 @@ Coveralls to [track our test coverage](https://coveralls.io/github/flutter/flutt
 You can download our current coverage data from cloud storage and visualize it
 in Atom as follows:
 
+ * Install [Atom](https://atom.io/).
  * Install the [lcov-info](https://atom.io/packages/lcov-info) package for Atom.
  * Open the `packages/flutter` folder in Atom.
  * Open a Dart file in the `lib` directory an type `Ctrl+Alt+C` to bring up the

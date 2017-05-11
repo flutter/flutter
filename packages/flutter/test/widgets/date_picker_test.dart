@@ -9,7 +9,7 @@ void main() {
   testWidgets('Can select a day', (WidgetTester tester) async {
     DateTime currentValue;
 
-    Widget widget = new Material(
+    final Widget widget = new Material(
       child: new ListView(
         children: <Widget>[
           new MonthPicker(

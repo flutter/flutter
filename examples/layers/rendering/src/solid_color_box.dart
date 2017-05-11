@@ -9,9 +9,8 @@ class RenderSolidColorBox extends RenderDecoratedBox {
   final Size desiredSize;
   final Color backgroundColor;
 
-  RenderSolidColorBox(Color backgroundColor, { this.desiredSize: Size.infinite })
-      : backgroundColor = backgroundColor,
-        super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
+  RenderSolidColorBox(this.backgroundColor, { this.desiredSize: Size.infinite })
+      : super(decoration: new BoxDecoration(color: backgroundColor));
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -41,9 +40,9 @@ class RenderSolidColorBox extends RenderDecoratedBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
-      decoration = new BoxDecoration(backgroundColor: const Color(0xFFFF0000));
+      decoration = const BoxDecoration(color: const Color(0xFFFF0000));
     } else if (event is PointerUpEvent) {
-      decoration = new BoxDecoration(backgroundColor: backgroundColor);
+      decoration = new BoxDecoration(color: backgroundColor);
     }
   }
 }

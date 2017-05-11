@@ -28,9 +28,9 @@ import 'toggleable.dart';
 ///
 /// See also:
 ///
-///  * [CheckBox]
-///  * [Radio]
-///  * [Slider]
+///  * [Checkbox], another widget with similar semantics.
+///  * [Radio], for selecting among a set of explicit values.
+///  * [Slider], for selecting a value in a range.
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
 class Switch extends StatefulWidget {
   /// Creates a material design switch.
@@ -42,7 +42,7 @@ class Switch extends StatefulWidget {
   ///
   /// * [value] determines this switch is on or off.
   /// * [onChanged] is called when the user toggles with switch on or off.
-  Switch({
+  const Switch({
     Key key,
     @required this.value,
     @required this.onChanged,
@@ -108,36 +108,36 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final bool isDark = themeData.brightness == Brightness.dark;
 
-    final Color activeThumbColor = config.activeColor ?? themeData.accentColor;
+    final Color activeThumbColor = widget.activeColor ?? themeData.accentColor;
     final Color activeTrackColor = activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
     Color inactiveTrackColor;
-    if (config.onChanged != null) {
-      inactiveThumbColor = isDark ? Colors.grey[400] : Colors.grey[50];
+    if (widget.onChanged != null) {
+      inactiveThumbColor = isDark ? Colors.grey.shade400 : Colors.grey.shade50;
       inactiveTrackColor = isDark ? Colors.white30 : Colors.black26;
     } else {
-      inactiveThumbColor = isDark ? Colors.grey[800] : Colors.grey[400];
+      inactiveThumbColor = isDark ? Colors.grey.shade800 : Colors.grey.shade400;
       inactiveTrackColor = isDark ? Colors.white10 : Colors.black12;
     }
 
     return new _SwitchRenderObjectWidget(
-      value: config.value,
+      value: widget.value,
       activeColor: activeThumbColor,
       inactiveColor: inactiveThumbColor,
-      activeThumbImage: config.activeThumbImage,
-      inactiveThumbImage: config.inactiveThumbImage,
+      activeThumbImage: widget.activeThumbImage,
+      inactiveThumbImage: widget.inactiveThumbImage,
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
       configuration: createLocalImageConfiguration(context),
-      onChanged: config.onChanged,
+      onChanged: widget.onChanged,
       vsync: this,
     );
   }
 }
 
 class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
-  _SwitchRenderObjectWidget({
+  const _SwitchRenderObjectWidget({
     Key key,
     this.value,
     this.activeColor,
@@ -270,7 +270,7 @@ class _RenderSwitch extends RenderToggleable {
 
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
-  set configuration (ImageConfiguration value) {
+  set configuration(ImageConfiguration value) {
     assert(value != null);
     if (value == _configuration)
       return;
@@ -325,8 +325,8 @@ class _RenderSwitch extends RenderToggleable {
 
   BoxDecoration _createDefaultThumbDecoration(Color color, ImageProvider image) {
     return new BoxDecoration(
-      backgroundColor: color,
-      backgroundImage: image == null ? null : new BackgroundImage(image: image),
+      color: color,
+      image: image == null ? null : new DecorationImage(image: image),
       shape: BoxShape.circle,
       boxShadow: kElevationToShadow[1]
     );
@@ -365,7 +365,7 @@ class _RenderSwitch extends RenderToggleable {
     final RRect trackRRect = new RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
-    final Point thumbPosition = new Point(
+    final Offset thumbPosition = new Offset(
       kRadialReactionRadius + currentPosition * _trackInnerLength,
       size.height / 2.0
     );
@@ -389,7 +389,7 @@ class _RenderSwitch extends RenderToggleable {
       final double radius = _kThumbRadius - inset;
       thumbPainter.paint(
         canvas,
-        thumbPosition.toOffset() + offset - new Offset(radius, radius),
+        thumbPosition + offset - new Offset(radius, radius),
         configuration.copyWith(size: new Size.fromRadius(radius))
       );
     } finally {

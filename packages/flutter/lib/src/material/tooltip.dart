@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
@@ -40,22 +41,21 @@ class Tooltip extends StatefulWidget {
   /// user long presses on the widget.
   ///
   /// The [message] argument cannot be null.
-  Tooltip({
+  const Tooltip({
     Key key,
-    this.message,
+    @required this.message,
     this.height: 32.0,
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
     this.verticalOffset: 24.0,
     this.preferBelow: true,
-    this.child,
-  }) : super(key: key) {
-    assert(message != null);
-    assert(height != null);
-    assert(padding != null);
-    assert(verticalOffset != null);
-    assert(preferBelow != null);
-    assert(child != null);
-  }
+    @required this.child,
+  }) : assert(message != null),
+       assert(height != null),
+       assert(padding != null),
+       assert(verticalOffset != null),
+       assert(preferBelow != null),
+       assert(child != null),
+       super(key: key);
 
   /// The text to display in the tooltip.
   final String message;
@@ -118,24 +118,24 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       return;  // Already visible.
     }
     final RenderBox box = context.findRenderObject();
-    final Point target = box.localToGlobal(box.size.center(Point.origin));
+    final Offset target = box.localToGlobal(box.size.center(Offset.zero));
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
     final Widget overlay = new _TooltipOverlay(
-      message: config.message,
-      height: config.height,
-      padding: config.padding,
+      message: widget.message,
+      height: widget.height,
+      padding: widget.padding,
       animation: new CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn
       ),
       target: target,
-      verticalOffset: config.verticalOffset,
-      preferBelow: config.preferBelow
+      verticalOffset: widget.verticalOffset,
+      preferBelow: widget.preferBelow
     );
     _entry = new OverlayEntry(builder: (BuildContext context) => overlay);
-    Overlay.of(context, debugRequiredFor: config).insert(_entry);
+    Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
     _controller.forward();
   }
@@ -174,14 +174,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: config) != null);
+    assert(Overlay.of(context, debugRequiredFor: widget) != null);
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: ensureTooltipVisible,
       excludeFromSemantics: true,
       child: new Semantics(
-        label: config.message,
-        child: config.child,
+        label: widget.message,
+        child: widget.child,
       )
     );
   }
@@ -194,7 +194,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     this.preferBelow
   });
 
-  final Point target;
+  final Offset target;
   final double verticalOffset;
   final bool preferBelow;
 
@@ -204,16 +204,16 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     // VERTICAL DIRECTION
-    final bool fitsBelow = target.y + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
-    final bool fitsAbove = target.y - verticalOffset - childSize.height >= _kScreenEdgeMargin;
+    final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
+    final bool fitsAbove = target.dy - verticalOffset - childSize.height >= _kScreenEdgeMargin;
     final bool tooltipBelow = preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
     double y;
     if (tooltipBelow)
-      y = math.min(target.y + verticalOffset, size.height - _kScreenEdgeMargin);
+      y = math.min(target.dy + verticalOffset, size.height - _kScreenEdgeMargin);
     else
-      y = math.max(target.y - verticalOffset - childSize.height, _kScreenEdgeMargin);
+      y = math.max(target.dy - verticalOffset - childSize.height, _kScreenEdgeMargin);
     // HORIZONTAL DIRECTION
-    double normalizedTargetX = target.x.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
+    final double normalizedTargetX = target.dx.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
     double x;
     if (normalizedTargetX < _kScreenEdgeMargin + childSize.width / 2.0) {
       x = _kScreenEdgeMargin;
@@ -234,7 +234,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 }
 
 class _TooltipOverlay extends StatelessWidget {
-  _TooltipOverlay({
+  const _TooltipOverlay({
     Key key,
     this.message,
     this.height,
@@ -249,14 +249,14 @@ class _TooltipOverlay extends StatelessWidget {
   final double height;
   final EdgeInsets padding;
   final Animation<double> animation;
-  final Point target;
+  final Offset target;
   final double verticalOffset;
   final bool preferBelow;
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    ThemeData darkTheme = new ThemeData(
+    final ThemeData theme = Theme.of(context);
+    final ThemeData darkTheme = new ThemeData(
       brightness: Brightness.dark,
       textTheme: theme.brightness == Brightness.dark ? theme.textTheme : theme.primaryTextTheme,
       platform: theme.platform,
@@ -275,7 +275,7 @@ class _TooltipOverlay extends StatelessWidget {
               opacity: 0.9,
               child: new Container(
                 decoration: new BoxDecoration(
-                  backgroundColor: darkTheme.backgroundColor,
+                  color: darkTheme.backgroundColor,
                   borderRadius: new BorderRadius.circular(2.0)
                 ),
                 height: height,

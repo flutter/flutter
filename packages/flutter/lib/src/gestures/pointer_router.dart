@@ -13,7 +13,7 @@ typedef void PointerRoute(PointerEvent event);
 
 /// A routing table for [PointerEvent] events.
 class PointerRouter {
-  final Map<int, LinkedHashSet<PointerRoute>> _routeMap = new Map<int, LinkedHashSet<PointerRoute>>();
+  final Map<int, LinkedHashSet<PointerRoute>> _routeMap = <int, LinkedHashSet<PointerRoute>>{};
   final LinkedHashSet<PointerRoute> _globalRoutes = new LinkedHashSet<PointerRoute>();
 
   /// Adds a route to the routing table.
@@ -24,7 +24,7 @@ class PointerRouter {
   /// Routes added reentrantly within [PointerRouter.route] will take effect when
   /// routing the next event.
   void addRoute(int pointer, PointerRoute route) {
-    LinkedHashSet<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => new LinkedHashSet<PointerRoute>());
+    final LinkedHashSet<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => new LinkedHashSet<PointerRoute>());
     assert(!routes.contains(route));
     routes.add(route);
   }
@@ -38,7 +38,7 @@ class PointerRouter {
   /// immediately.
   void removeRoute(int pointer, PointerRoute route) {
     assert(_routeMap.containsKey(pointer));
-    LinkedHashSet<PointerRoute> routes = _routeMap[pointer];
+    final LinkedHashSet<PointerRoute> routes = _routeMap[pointer];
     assert(routes.contains(route));
     routes.remove(route);
     if (routes.isEmpty)
@@ -93,8 +93,8 @@ class PointerRouter {
   /// Routes are called in the order in which they were added to the
   /// PointerRouter object.
   void route(PointerEvent event) {
-    LinkedHashSet<PointerRoute> routes = _routeMap[event.pointer];
-    List<PointerRoute> globalRoutes = new List<PointerRoute>.from(_globalRoutes);
+    final LinkedHashSet<PointerRoute> routes = _routeMap[event.pointer];
+    final List<PointerRoute> globalRoutes = new List<PointerRoute>.from(_globalRoutes);
     if (routes != null) {
       for (PointerRoute route in new List<PointerRoute>.from(routes)) {
         if (routes.contains(route))

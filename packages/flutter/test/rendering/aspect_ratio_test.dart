@@ -9,7 +9,7 @@ import 'rendering_tester.dart';
 
 void main() {
   test('RenderAspectRatio: Intrinsic sizing 2.0', () {
-    RenderAspectRatio box = new RenderAspectRatio(aspectRatio: 2.0);
+    final RenderAspectRatio box = new RenderAspectRatio(aspectRatio: 2.0);
 
     expect(box.getMinIntrinsicWidth(200.0), 400.0);
     expect(box.getMinIntrinsicWidth(400.0), 800.0);
@@ -30,7 +30,7 @@ void main() {
   });
 
   test('RenderAspectRatio: Intrinsic sizing 0.5', () {
-    RenderAspectRatio box = new RenderAspectRatio(aspectRatio: 0.5);
+    final RenderAspectRatio box = new RenderAspectRatio(aspectRatio: 0.5);
 
     expect(box.getMinIntrinsicWidth(200.0), 100.0);
     expect(box.getMinIntrinsicWidth(400.0), 200.0);
@@ -51,7 +51,7 @@ void main() {
   });
 
   test('RenderAspectRatio: Intrinsic sizing 2.0', () {
-    RenderAspectRatio box = new RenderAspectRatio(
+    final RenderAspectRatio box = new RenderAspectRatio(
       aspectRatio: 2.0,
       child: new RenderSizedBox(const Size(90.0, 70.0))
     );
@@ -75,7 +75,7 @@ void main() {
   });
 
   test('RenderAspectRatio: Intrinsic sizing 0.5', () {
-    RenderAspectRatio box = new RenderAspectRatio(
+    final RenderAspectRatio box = new RenderAspectRatio(
       aspectRatio: 0.5,
       child: new RenderSizedBox(const Size(90.0, 70.0))
     );
@@ -100,11 +100,11 @@ void main() {
 
   test('RenderAspectRatio: Unbounded', () {
     bool hadError = false;
-    FlutterExceptionHandler oldHandler = FlutterError.onError;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       hadError = true;
     };
-    RenderBox box = new RenderConstrainedOverflowBox(
+    final RenderBox box = new RenderConstrainedOverflowBox(
       maxWidth: double.INFINITY,
       maxHeight: double.INFINITY,
       child: new RenderAspectRatio(

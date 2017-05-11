@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ThemeDataTween control test', () {
-    ThemeData light = new ThemeData.light();
-    ThemeData dark = new ThemeData.light();
-    ThemeDataTween tween = new ThemeDataTween(begin: light, end: dark);
+    final ThemeData light = new ThemeData.light();
+    final ThemeData dark = new ThemeData.light();
+    final ThemeDataTween tween = new ThemeDataTween(begin: light, end: dark);
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
   });
 
@@ -25,7 +25,7 @@ void main() {
                 key: popupMenuButtonKey,
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuItem<String>>[
-                    new PopupMenuItem<String>(child: new Text('menuItem'))
+                    const PopupMenuItem<String>(child: const Text('menuItem'))
                   ];
                 }
               ),
@@ -71,7 +71,7 @@ void main() {
                   key: popupMenuButtonKey,
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<String>>[
-                      new PopupMenuItem<String>(child: new Text('menuItem'))
+                      const PopupMenuItem<String>(child: const Text('menuItem'))
                     ];
                   }
                 ),
@@ -103,9 +103,9 @@ void main() {
                   onChanged: (String newValue) { },
                   value: 'menuItem',
                   items: <DropdownMenuItem<String>>[
-                    new DropdownMenuItem<String>(
+                    const DropdownMenuItem<String>(
                       value: 'menuItem',
-                      child: new Text('menuItem'),
+                      child: const Text('menuItem'),
                     ),
                   ],
                 )
@@ -137,10 +137,10 @@ void main() {
                     onPressed: () {
                       showModalBottomSheet<Null>(
                         context: context,
-                        builder: (BuildContext context) => new Text('bottomSheet'),
+                        builder: (BuildContext context) => const Text('bottomSheet'),
                       );
                     },
-                    child: new Text('SHOW'),
+                    child: const Text('SHOW'),
                   );
                 }
               )
@@ -174,10 +174,10 @@ void main() {
                     onPressed: () {
                       showDialog<Null>(
                         context: context,
-                        child: new Text('dialog'),
+                        child: const Text('dialog'),
                       );
                     },
-                    child: new Text('SHOW'),
+                    child: const Text('SHOW'),
                   );
                 }
               )
@@ -206,7 +206,7 @@ void main() {
                   onTap: () {
                     showDialog<Null>(
                       context: context,
-                      child: new Scaffold(
+                      child: const Scaffold(
                         body: const SizedBox(
                           width: 200.0,
                           height: 200.0,
@@ -214,7 +214,7 @@ void main() {
                       )
                     );
                   },
-                  child: new Text('SHOW'),
+                  child: const Text('SHOW'),
                 );
               },
             ),
@@ -226,7 +226,7 @@ void main() {
     await tester.tap(find.text('SHOW'));
     await tester.pump(const Duration(seconds: 1));
 
-    List<Material> materials = tester.widgetList(find.byType(Material)).toList();
+    final List<Material> materials = tester.widgetList(find.byType(Material)).toList();
     expect(materials.length, equals(2));
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold

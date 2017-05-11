@@ -11,89 +11,89 @@ void main() {
 
     await tester.pumpWidget(new NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
-        notification = value;
+        if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification)
+          notification = value;
         return false;
       },
-      child: new ScrollableViewport(
+      child: new SingleChildScrollView(
         child: const SizedBox(height: 1200.0)
       )
     ));
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
-    expect(notification.kind, equals(ScrollNotificationKind.started));
+    expect(notification, const isInstanceOf<ScrollStartNotification>());
     expect(notification.depth, equals(0));
-    expect(notification.dragStartDetails, isNotNull);
-    expect(notification.dragStartDetails.globalPosition, equals(const Point(100.0, 100.0)));
-    expect(notification.dragUpdateDetails, isNull);
-    expect(notification.dragEndDetails, isNull);
+    final ScrollStartNotification start = notification;
+    expect(start.dragDetails, isNotNull);
+    expect(start.dragDetails.globalPosition, equals(const Offset(100.0, 100.0)));
 
     await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
-    expect(notification.kind, equals(ScrollNotificationKind.updated));
+    expect(notification, const isInstanceOf<ScrollUpdateNotification>());
     expect(notification.depth, equals(0));
-    expect(notification.dragStartDetails, isNull);
-    expect(notification.dragUpdateDetails, isNotNull);
-    expect(notification.dragUpdateDetails.globalPosition, equals(const Point(90.0, 90.0)));
-    expect(notification.dragUpdateDetails.delta, equals(const Offset(0.0, -10.0)));
-    expect(notification.dragEndDetails, isNull);
+    final ScrollUpdateNotification update = notification;
+    expect(update.dragDetails, isNotNull);
+    expect(update.dragDetails.globalPosition, equals(const Offset(90.0, 90.0)));
+    expect(update.dragDetails.delta, equals(const Offset(0.0, -10.0)));
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
-    expect(notification.kind, equals(ScrollNotificationKind.ended));
+    expect(notification, const isInstanceOf<ScrollEndNotification>());
     expect(notification.depth, equals(0));
-    expect(notification.dragStartDetails, isNull);
-    expect(notification.dragUpdateDetails, isNull);
-    expect(notification.dragEndDetails, isNotNull);
-    expect(notification.dragEndDetails.velocity, equals(Velocity.zero));
+    final ScrollEndNotification end = notification;
+    expect(end.dragDetails, isNotNull);
+    expect(end.dragDetails.velocity, equals(Velocity.zero));
   });
 
   testWidgets('Scroll notification depth', (WidgetTester tester) async {
-    final List<ScrollNotificationKind> depth0Kinds = <ScrollNotificationKind>[];
-    final List<ScrollNotificationKind> depth1Kinds = <ScrollNotificationKind>[];
+    final List<Type> depth0Types = <Type>[];
+    final List<Type> depth1Types = <Type>[];
     final List<int> depth0Values = <int>[];
     final List<int> depth1Values = <int>[];
 
     await tester.pumpWidget(new NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification value) {
-        depth1Kinds.add(value.kind);
+        depth1Types.add(value.runtimeType);
         depth1Values.add(value.depth);
         return false;
       },
-      child: new ScrollableViewport(
+      child: new SingleChildScrollView(
         child: new SizedBox(
           height: 1200.0,
           child: new NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification value) {
-              depth0Kinds.add(value.kind);
+              depth0Types.add(value.runtimeType);
               depth0Values.add(value.depth);
               return false;
             },
             child: new Container(
               padding: const EdgeInsets.all(50.0),
-              child: new ScrollableViewport(child: const SizedBox(height: 1200.0))
+              child: new SingleChildScrollView(child: const SizedBox(height: 1200.0))
             )
           )
         )
       )
     ));
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
     await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
 
-    final List<ScrollNotificationKind> kinds = <ScrollNotificationKind>[
-      ScrollNotificationKind.started,
-      ScrollNotificationKind.updated,
-      ScrollNotificationKind.ended
+    final List<Type> types = <Type>[
+      ScrollStartNotification,
+      UserScrollNotification,
+      ScrollUpdateNotification,
+      ScrollEndNotification,
+      UserScrollNotification,
     ];
-    expect(depth0Kinds, equals(kinds));
-    expect(depth1Kinds, equals(kinds));
+    expect(depth0Types, equals(types));
+    expect(depth1Types, equals(types));
 
-    expect(depth0Values, equals(<int>[0, 0, 0]));
-    expect(depth1Values, equals(<int>[1, 1, 1]));
+    expect(depth0Values, equals(<int>[0, 0, 0, 0, 0]));
+    expect(depth1Values, equals(<int>[1, 1, 1, 1, 1]));
   });
 }

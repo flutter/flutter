@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 
 /// A widget that calls a callback whenever the user presses or releases a key
@@ -27,20 +28,17 @@ class RawKeyboardListener extends StatefulWidget {
   ///
   /// For text entry, consider using a [EditableText], which integrates with
   /// on-screen keyboards and input method editors (IMEs).
-  RawKeyboardListener({
+  const RawKeyboardListener({
     Key key,
-    this.focused: false,
-    this.onKey,
+    @required this.focusNode,
+    @required this.onKey,
     @required this.child,
-  }) : super(key: key) {
-    assert(child != null);
-  }
+  }) : assert(focusNode != null),
+       assert(child != null),
+       super(key: key);
 
-  /// Whether this widget should actually listen for raw keyboard events.
-  ///
-  /// Typically set to the value returned by [Focus.at] for the [GlobalKey] of
-  /// the widget that builds the raw keyboard listener.
-  final bool focused;
+  /// Controls whether this widget has keyboard focus.
+  final FocusNode focusNode;
 
   /// Called whenever this widget receives a raw keyboard event.
   final ValueChanged<RawKeyEvent> onKey;
@@ -50,28 +48,39 @@ class RawKeyboardListener extends StatefulWidget {
 
   @override
   _RawKeyboardListenerState createState() => new _RawKeyboardListenerState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('focusNode: $focusNode');
+  }
 }
 
 class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   @override
   void initState() {
     super.initState();
-    _attachOrDetachKeyboard();
+    widget.focusNode.addListener(_handleFocusChanged);
   }
 
   @override
-  void didUpdateConfig(RawKeyboardListener oldConfig) {
-    _attachOrDetachKeyboard();
+  void didUpdateWidget(RawKeyboardListener oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode.removeListener(_handleFocusChanged);
+      widget.focusNode.addListener(_handleFocusChanged);
+    }
   }
 
   @override
   void dispose() {
+    widget.focusNode.removeListener(_handleFocusChanged);
     _detachKeyboardIfAttached();
     super.dispose();
   }
 
-  void _attachOrDetachKeyboard() {
-    if (config.focused)
+  void _handleFocusChanged() {
+    if (widget.focusNode.hasFocus)
       _attachKeyboardIfDetached();
     else
       _detachKeyboardIfAttached();
@@ -94,10 +103,10 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   void _handleRawKeyEvent(RawKeyEvent event) {
-    if (config.onKey != null)
-      config.onKey(event);
+    if (widget.onKey != null)
+      widget.onKey(event);
   }
 
   @override
-  Widget build(BuildContext context) => config.child;
+  Widget build(BuildContext context) => widget.child;
 }

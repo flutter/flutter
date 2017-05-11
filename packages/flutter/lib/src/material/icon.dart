@@ -4,10 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'icons.dart';
 import 'icon_button.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'icons.dart';
 import 'theme.dart';
 
 /// A material design icon.
@@ -62,7 +62,7 @@ class Icon extends StatelessWidget {
   /// 24.0.
   ///
   /// If this [Icon] is being placed inside an [IconButton], then use
-  /// [IconButton.size] instead, so that the [IconButton] can make the splash
+  /// [IconButton.iconSize] instead, so that the [IconButton] can make the splash
   /// area the appropriate size as well. The [IconButton] uses an [IconTheme] to
   /// pass down the size to the [Icon].
   final double size;
@@ -83,7 +83,7 @@ class Icon extends StatelessWidget {
   /// ```dart
   ///  new Icon(
   ///    icon: Icons.widgets,
-  ///    color: Colors.blue[400],
+  ///    color: Colors.blue.shade400,
   ///  ),
   /// ```
   final Color color;
@@ -114,7 +114,7 @@ class Icon extends StatelessWidget {
                 inherit: false,
                 color: iconColor,
                 fontSize: iconSize,
-                fontFamily: 'MaterialIcons'
+                fontFamily: icon.fontFamily
               )
             )
           )

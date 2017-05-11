@@ -6,13 +6,13 @@ import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'rendering_tester.dart';
 import 'mock_canvas.dart';
+import 'rendering_tester.dart';
 
 void main() {
   test('Describe transform control test', () {
-    Matrix4 identity = new Matrix4.identity();
-    List<String> description = debugDescribeTransform(identity);
+    final Matrix4 identity = new Matrix4.identity();
+    final List<String> description = debugDescribeTransform(identity);
     expect(description, equals(<String>[
       '  [0] 1.0,0.0,0.0,0.0',
       '  [1] 0.0,1.0,0.0,0.0',
@@ -37,14 +37,14 @@ void main() {
     debugPaintSizeEnabled = true;
     RenderSliver s;
     RenderBox b;
-    RenderViewport2 root = new RenderViewport2(
+    final RenderViewport root = new RenderViewport(
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         s = new RenderSliverPadding(
-          padding: new EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(10.0),
           child: new RenderSliverToBoxAdapter(
             child: b = new RenderPadding(
-              padding: new EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10.0),
             ),
           ),
         ),
@@ -62,13 +62,13 @@ void main() {
   test('debugPaintPadding from render objects', () {
     debugPaintSizeEnabled = true;
     RenderSliver s;
-    RenderBox b = new RenderPadding(
-      padding: new EdgeInsets.all(10.0),
-      child: new RenderViewport2(
+    final RenderBox b = new RenderPadding(
+      padding: const EdgeInsets.all(10.0),
+      child: new RenderViewport(
         offset: new ViewportOffset.zero(),
         children: <RenderSliver>[
           s = new RenderSliverPadding(
-            padding: new EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(10.0),
           ),
         ],
       ),

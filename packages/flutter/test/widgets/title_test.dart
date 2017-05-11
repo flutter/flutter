@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
-    Widget widget = new Title(
+    final Widget widget = new Title(
       color: const Color(0xFF00FF00),
       title: 'Awesome app',
       child: new Container(),

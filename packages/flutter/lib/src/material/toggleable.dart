@@ -24,10 +24,10 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// The [value], [activeColor], and [inactiveColor] arguments must not be
   /// null.
   RenderToggleable({
-    bool value,
+    @required bool value,
     Size size,
-    Color activeColor,
-    Color inactiveColor,
+    @required Color activeColor,
+    @required Color inactiveColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
   }) : _value = value,
@@ -79,7 +79,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// The visual value of the control.
   ///
   /// When the control is inactive, the [value] is false and this animation has
-  /// the value 0.0. When the control is active, the value is [true] and this
+  /// the value 0.0. When the control is active, the value is true and this
   /// animation has the value 1.0. When the control is changing from inactive
   /// to active (or vice versa), [value] is the target value and this animation
   /// gradually updates from 0.0 to 1.0 (or vice versa).
@@ -191,7 +191,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   bool get isInteractive => onChanged != null;
 
   TapGestureRecognizer _tap;
-  Point _downPosition;
+  Offset _downPosition;
 
   @override
   void attach(PipelineOwner owner) {
@@ -257,7 +257,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -272,12 +272,12 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// origin is the center point of the reaction (usually distinct from the
   /// point at which the user interacted with the control, which is handled
   /// automatically).
-  void paintRadialReaction(Canvas canvas, Offset offset, Point origin) {
+  void paintRadialReaction(Canvas canvas, Offset offset, Offset origin) {
     if (!_reaction.isDismissed) {
       // TODO(abarth): We should have a different reaction color when position is zero.
-      Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
-      Point center = Point.lerp(_downPosition ?? origin, origin, _reaction.value);
-      double radius = _kRadialReactionRadiusTween.evaluate(_reaction);
+      final Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
+      final Offset center = Offset.lerp(_downPosition ?? origin, origin, _reaction.value);
+      final double radius = _kRadialReactionRadiusTween.evaluate(_reaction);
       canvas.drawCircle(center + offset, radius, reactionPaint);
     }
   }

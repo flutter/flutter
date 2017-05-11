@@ -2,44 +2,50 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/dependency_checker.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
 void main()  {
   group('DependencyChecker', () {
-    final String basePath = path.dirname(path.fromUri(platform.script));
-    final String dataPath = path.join(basePath, 'data', 'dart_dependencies_test');
-    MemoryFileSystem testFileSystem;
+    final String dataPath = fs.path.join(
+        getFlutterRoot(),
+        'packages',
+        'flutter_tools',
+        'test',
+        'data',
+        'dart_dependencies_test',
+    );
+
+    FileSystem testFileSystem;
+
+    setUpAll(() {
+      Cache.disableLocking();
+    });
 
     setUp(() {
-      Cache.disableLocking();
       testFileSystem = new MemoryFileSystem();
     });
 
     testUsingContext('good', () {
-      final String testPath = path.join(dataPath, 'good');
-      final String mainPath = path.join(testPath, 'main.dart');
-      final String fooPath = path.join(testPath, 'foo.dart');
-      final String barPath = path.join(testPath, 'lib', 'bar.dart');
-      final String packagesPath = path.join(testPath, '.packages');
-      DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, testPath, packagesPath);
-      DependencyChecker dependencyChecker =
+      final String testPath = fs.path.join(dataPath, 'good');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String fooPath = fs.path.join(testPath, 'foo.dart');
+      final String barPath = fs.path.join(testPath, 'lib', 'bar.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
+      final DartDependencySetBuilder builder =
+          new DartDependencySetBuilder(mainPath, packagesPath);
+      final DependencyChecker dependencyChecker =
           new DependencyChecker(builder, null);
 
       // Set file modification time on all dependencies to be in the past.
-      DateTime baseTime = new DateTime.now();
+      final DateTime baseTime = new DateTime.now();
       updateFileModificationTime(packagesPath, baseTime, -10);
       updateFileModificationTime(mainPath, baseTime, -10);
       updateFileModificationTime(fooPath, baseTime, -10);
@@ -58,18 +64,19 @@ void main()  {
       updateFileModificationTime(barPath, baseTime, 10);
       expect(dependencyChecker.check(baseTime), isTrue);
     });
-    testUsingContext('syntax error', () {
-      final String testPath = path.join(dataPath, 'syntax_error');
-      final String mainPath = path.join(testPath, 'main.dart');
-      final String fooPath = path.join(testPath, 'foo.dart');
-      final String packagesPath = path.join(testPath, '.packages');
 
-      DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, testPath, packagesPath);
-      DependencyChecker dependencyChecker =
+    testUsingContext('syntax error', () {
+      final String testPath = fs.path.join(dataPath, 'syntax_error');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String fooPath = fs.path.join(testPath, 'foo.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
+
+      final DartDependencySetBuilder builder =
+          new DartDependencySetBuilder(mainPath, packagesPath);
+      final DependencyChecker dependencyChecker =
           new DependencyChecker(builder, null);
 
-      DateTime baseTime = new DateTime.now();
+      final DateTime baseTime = new DateTime.now();
 
       // Set file modification time on all dependencies to be in the past.
       updateFileModificationTime(packagesPath, baseTime, -10);
@@ -86,11 +93,11 @@ void main()  {
     /// Tests that the flutter tool doesn't crash and displays a warning when its own location
     /// changed since it was last referenced to in a package's .packages file.
     testUsingContext('moved flutter sdk', () async {
-      String destinationPath = '/some/test/location';
+      final Directory destinationPath = fs.systemTempDirectory.createTempSync('dependency_checker_test_');
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
-      copyDirectorySync(
-        new LocalFileSystem().directory(path.join(dataPath, 'changed_sdk_location')),
-        fs.directory(destinationPath));
+      final LocalFileSystem localFileSystem = const LocalFileSystem();
+      final Directory sourcePath =  localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
+      copyDirectorySync(sourcePath, destinationPath);
       fs.currentDirectory = destinationPath;
 
       // Doesn't matter what commands we run. Arbitrarily list devices here.
@@ -99,5 +106,5 @@ void main()  {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });
-  }, skip: io.Platform.isWindows); // TODO(goderbauer): Migrate test away from 'touch' bash command.
+  });
 }

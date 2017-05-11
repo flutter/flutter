@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedPositioned.fromRect control test', (WidgetTester tester) async {
-    AnimatedPositioned positioned = new AnimatedPositioned.fromRect(
+    final AnimatedPositioned positioned = new AnimatedPositioned.fromRect(
       rect: new Rect.fromLTWH(7.0, 5.0, 12.0, 16.0),
       duration: const Duration(milliseconds: 200),
     );
@@ -21,7 +21,7 @@ void main() {
   });
 
   testWidgets('AnimatedPositioned - basics', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     RenderBox box;
 
@@ -41,12 +41,12 @@ void main() {
     );
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pumpWidget(
       new Stack(
@@ -64,22 +64,22 @@ void main() {
     );
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0 - (50.0 - 37.0) / 2.0 + (70.0 - (70.0 - 59.0) / 2.0) / 2.0,
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 - (50.0 - 37.0) / 2.0 + (70.0 - (70.0 - 59.0) / 2.0) / 2.0,
                                                                                 30.0 + (31.0 - 30.0) / 2.0 + (110.0 - (110.0 - 71.0) / 2.0) / 2.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0)));
   });
 
   testWidgets('AnimatedPositioned - interrupted animation', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     RenderBox box;
 
@@ -99,12 +99,12 @@ void main() {
     );
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
       new Stack(
@@ -122,12 +122,12 @@ void main() {
     );
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(100.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
 
     await tester.pumpWidget(
       new Stack(
@@ -145,21 +145,21 @@ void main() {
     );
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(100.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(150.0, 150.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(150.0, 150.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(200.0, 200.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
   });
 
   testWidgets('AnimatedPositioned - switching variables', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     RenderBox box;
 
@@ -179,12 +179,12 @@ void main() {
     );
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(50.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
 
     await tester.pumpWidget(
       new Stack(
@@ -202,17 +202,17 @@ void main() {
     );
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(350.0, 50.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 50.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(350.0, 100.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 100.0)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Point.origin)), equals(const Point(350.0, 150.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
   });
 
 }

@@ -8,13 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'test_widgets.dart';
-
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
-  RenderObject target = key.currentContext.findRenderObject();
-  expect(target.parent, new isInstanceOf<RenderViewport2>());
-  SliverPhysicalParentData parentData = target.parentData;
-  Offset actual = parentData.paintOffset;
+  final RenderObject target = key.currentContext.findRenderObject();
+  expect(target.parent, const isInstanceOf<RenderViewport>());
+  final SliverPhysicalParentData parentData = target.parentData;
+  final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
 }
 
@@ -22,8 +20,7 @@ void main() {
   testWidgets('Sliver protocol', (WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new TestScrollable(
-        axisDirection: AxisDirection.down,
+      new CustomScrollView(
         slivers: <Widget>[
           new BigSliver(key: key1 = new GlobalKey()),
           new OverlappingSliver(key: key2 = new GlobalKey()),
@@ -33,23 +30,23 @@ void main() {
         ],
       ),
     );
-    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     final double max = RenderBigSliver.height * 3.0 + (RenderOverlappingSliver.totalHeight) * 2.0 - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);
     expect(position.pixels, 0.0);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
-    position.animate(to: 10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 10));
+    position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
+    await tester.pumpAndSettle(const Duration(milliseconds: 10));
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
-    verifyPaintPosition(key1, new Offset(0.0, 0.0));
-    verifyPaintPosition(key2, new Offset(0.0, 0.0));
-    verifyPaintPosition(key3, new Offset(0.0, 0.0));
-    verifyPaintPosition(key4, new Offset(0.0, 0.0));
-    verifyPaintPosition(key5, new Offset(0.0, 50.0));
+    verifyPaintPosition(key1, const Offset(0.0, 0.0));
+    verifyPaintPosition(key2, const Offset(0.0, 0.0));
+    verifyPaintPosition(key3, const Offset(0.0, 0.0));
+    verifyPaintPosition(key4, const Offset(0.0, 0.0));
+    verifyPaintPosition(key5, const Offset(0.0, 50.0));
   });
 }
 
@@ -68,7 +65,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  BigSliver({ Key key }) : super(key: key);
+  const BigSliver({ Key key }) : super(key: key);
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
     return new RenderBigSliver();
@@ -105,7 +102,7 @@ class RenderOverlappingSliver extends RenderSliver {
 }
 
 class OverlappingSliver extends LeafRenderObjectWidget {
-  OverlappingSliver({ Key key }) : super(key: key);
+  const OverlappingSliver({ Key key }) : super(key: key);
   @override
   RenderOverlappingSliver createRenderObject(BuildContext context) {
     return new RenderOverlappingSliver();

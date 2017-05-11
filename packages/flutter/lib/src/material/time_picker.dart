@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_bar.dart';
 import 'button.dart';
+import 'button_bar.dart';
 import 'colors.dart';
 import 'dialog.dart';
 import 'flat_button.dart';
@@ -22,6 +22,7 @@ const double _kTwoPi = 2 * math.PI;
 const int _kHoursPerDay = 24;
 const int _kHoursPerPeriod = 12;
 const int _kMinutesPerHour = 60;
+const Duration _kVibrateCommitDelay = const Duration(milliseconds: 100);
 
 /// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
@@ -33,6 +34,7 @@ enum DayPeriod {
 }
 
 /// A value representing a time during the day
+@immutable
 class TimeOfDay {
   /// Creates a time of day.
   ///
@@ -205,17 +207,15 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
 
 // TODO(ianh): Localize!
 class _TimePickerHeader extends StatelessWidget {
-  _TimePickerHeader({
+  const _TimePickerHeader({
     @required this.selectedTime,
     @required this.mode,
     @required this.orientation,
     @required this.onModeChanged,
     @required this.onChanged,
-  }) {
-    assert(selectedTime != null);
-    assert(mode != null);
-    assert(orientation != null);
-  }
+  }) : assert(selectedTime != null),
+       assert(mode != null),
+       assert(orientation != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -229,7 +229,7 @@ class _TimePickerHeader extends StatelessWidget {
   }
 
   void _handleChangeDayPeriod() {
-    int newHour = (selectedTime.hour + _kHoursPerPeriod) % _kHoursPerDay;
+    final int newHour = (selectedTime.hour + _kHoursPerPeriod) % _kHoursPerDay;
     onChanged(selectedTime.replacing(hour: newHour));
   }
 
@@ -249,9 +249,9 @@ class _TimePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
-    TextTheme headerTextTheme = themeData.primaryTextTheme;
-    TextStyle baseHeaderStyle = _getBaseHeaderStyle(headerTextTheme);
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme headerTextTheme = themeData.primaryTextTheme;
+    final TextStyle baseHeaderStyle = _getBaseHeaderStyle(headerTextTheme);
     Color activeColor;
     Color inactiveColor;
     switch(themeData.primaryColorBrightness) {
@@ -275,20 +275,20 @@ class _TimePickerHeader extends StatelessWidget {
         break;
     }
 
-    TextStyle activeStyle = baseHeaderStyle.copyWith(color: activeColor);
-    TextStyle inactiveStyle = baseHeaderStyle.copyWith(color: inactiveColor);
+    final TextStyle activeStyle = baseHeaderStyle.copyWith(color: activeColor);
+    final TextStyle inactiveStyle = baseHeaderStyle.copyWith(color: inactiveColor);
 
-    TextStyle hourStyle = mode == _TimePickerMode.hour ? activeStyle : inactiveStyle;
-    TextStyle minuteStyle = mode == _TimePickerMode.minute ? activeStyle : inactiveStyle;
+    final TextStyle hourStyle = mode == _TimePickerMode.hour ? activeStyle : inactiveStyle;
+    final TextStyle minuteStyle = mode == _TimePickerMode.minute ? activeStyle : inactiveStyle;
 
-    TextStyle amStyle = headerTextTheme.subhead.copyWith(
+    final TextStyle amStyle = headerTextTheme.subhead.copyWith(
       color: selectedTime.period == DayPeriod.am ? activeColor: inactiveColor
     );
-    TextStyle pmStyle = headerTextTheme.subhead.copyWith(
+    final TextStyle pmStyle = headerTextTheme.subhead.copyWith(
       color: selectedTime.period == DayPeriod.pm ? activeColor: inactiveColor
     );
 
-    Widget dayPeriodPicker = new GestureDetector(
+    final Widget dayPeriodPicker = new GestureDetector(
       onTap: _handleChangeDayPeriod,
       behavior: HitTestBehavior.opaque,
       child: new Column(
@@ -301,17 +301,17 @@ class _TimePickerHeader extends StatelessWidget {
       )
     );
 
-    Widget hour = new GestureDetector(
+    final Widget hour = new GestureDetector(
       onTap: () => _handleChangeMode(_TimePickerMode.hour),
       child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle),
     );
 
-    Widget minute = new GestureDetector(
+    final Widget minute = new GestureDetector(
       onTap: () => _handleChangeMode(_TimePickerMode.minute),
       child: new Text(selectedTime.minuteLabel, style: minuteStyle),
     );
 
-    Widget colon = new Text(':', style: inactiveStyle);
+    final Widget colon = new Text(':', style: inactiveStyle);
 
     EdgeInsets padding;
     double height;
@@ -333,7 +333,7 @@ class _TimePickerHeader extends StatelessWidget {
       width: width,
       height: height,
       padding: padding,
-      decoration: new BoxDecoration(backgroundColor: backgroundColor),
+      color: backgroundColor,
       child: new CustomMultiChildLayout(
         delegate: new _TimePickerHeaderLayout(orientation),
         children: <Widget>[
@@ -348,10 +348,10 @@ class _TimePickerHeader extends StatelessWidget {
 }
 
 List<TextPainter> _initPainters(TextTheme textTheme, List<String> labels) {
-  TextStyle style = textTheme.subhead;
-  List<TextPainter> painters = new List<TextPainter>(labels.length);
+  final TextStyle style = textTheme.subhead;
+  final List<TextPainter> painters = new List<TextPainter>(labels.length);
   for (int i = 0; i < painters.length; ++i) {
-    String label = labels[i];
+    final String label = labels[i];
     // TODO(abarth): Handle textScaleFactor.
     // https://github.com/flutter/flutter/issues/5939
     painters[i] = new TextPainter(
@@ -390,24 +390,24 @@ class _DialPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    double radius = size.shortestSide / 2.0;
-    Offset center = new Offset(size.width / 2.0, size.height / 2.0);
-    Point centerPoint = center.toPoint();
+    final double radius = size.shortestSide / 2.0;
+    final Offset center = new Offset(size.width / 2.0, size.height / 2.0);
+    final Offset centerPoint = center;
     canvas.drawCircle(centerPoint, radius, new Paint()..color = backgroundColor);
 
     const double labelPadding = 24.0;
-    double labelRadius = radius - labelPadding;
+    final double labelRadius = radius - labelPadding;
     Offset getOffsetForTheta(double theta) {
       return center + new Offset(labelRadius * math.cos(theta),
                                  -labelRadius * math.sin(theta));
     }
 
     void paintLabels(List<TextPainter> labels) {
-      double labelThetaIncrement = -_kTwoPi / labels.length;
+      final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.PI / 2.0;
 
       for (TextPainter label in labels) {
-        Offset labelOffset = new Offset(-label.width / 2.0, -label.height / 2.0);
+        final Offset labelOffset = new Offset(-label.width / 2.0, -label.height / 2.0);
         label.paint(canvas, getOffsetForTheta(labelTheta) + labelOffset);
         labelTheta += labelThetaIncrement;
       }
@@ -417,7 +417,7 @@ class _DialPainter extends CustomPainter {
 
     final Paint selectorPaint = new Paint()
       ..color = accentColor;
-    final Point focusedPoint = getOffsetForTheta(theta).toPoint();
+    final Offset focusedPoint = getOffsetForTheta(theta);
     final double focusedRadius = labelPadding - 4.0;
     canvas.drawCircle(centerPoint, 4.0, selectorPaint);
     canvas.drawCircle(focusedPoint, focusedRadius, selectorPaint);
@@ -445,13 +445,11 @@ class _DialPainter extends CustomPainter {
 }
 
 class _Dial extends StatefulWidget {
-  _Dial({
+  const _Dial({
     @required this.selectedTime,
     @required this.mode,
     @required this.onChanged
-  }) {
-    assert(selectedTime != null);
-  }
+  }) : assert(selectedTime != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -469,7 +467,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       duration: _kDialAnimateDuration,
       vsync: this,
     );
-    _thetaTween = new Tween<double>(begin: _getThetaForTime(config.selectedTime));
+    _thetaTween = new Tween<double>(begin: _getThetaForTime(widget.selectedTime));
     _theta = _thetaTween.animate(new CurvedAnimation(
       parent: _thetaController,
       curve: Curves.fastOutSlowIn
@@ -477,9 +475,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void didUpdateConfig(_Dial oldConfig) {
-    if (config.mode != oldConfig.mode && !_dragging)
-      _animateTo(_getThetaForTime(config.selectedTime));
+  void didUpdateWidget(_Dial oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.mode != oldWidget.mode && !_dragging)
+      _animateTo(_getThetaForTime(widget.selectedTime));
   }
 
   @override
@@ -498,7 +497,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _animateTo(double targetTheta) {
-    double currentTheta = _theta.value;
+    final double currentTheta = _theta.value;
     double beginTheta = _nearest(targetTheta, currentTheta, currentTheta + _kTwoPi);
     beginTheta = _nearest(targetTheta, beginTheta, currentTheta - _kTwoPi);
     _thetaTween
@@ -510,32 +509,32 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   double _getThetaForTime(TimeOfDay time) {
-    double fraction = (config.mode == _TimePickerMode.hour) ?
+    final double fraction = (widget.mode == _TimePickerMode.hour) ?
         (time.hour / _kHoursPerPeriod) % _kHoursPerPeriod :
         (time.minute / _kMinutesPerHour) % _kMinutesPerHour;
     return (math.PI / 2.0 - fraction * _kTwoPi) % _kTwoPi;
   }
 
   TimeOfDay _getTimeForTheta(double theta) {
-    double fraction = (0.25 - (theta % _kTwoPi) / _kTwoPi) % 1.0;
-    if (config.mode == _TimePickerMode.hour) {
-      int hourOfPeriod = (fraction * _kHoursPerPeriod).round() % _kHoursPerPeriod;
-      return config.selectedTime.replacing(
-        hour: hourOfPeriod + config.selectedTime.periodOffset
+    final double fraction = (0.25 - (theta % _kTwoPi) / _kTwoPi) % 1.0;
+    if (widget.mode == _TimePickerMode.hour) {
+      final int hourOfPeriod = (fraction * _kHoursPerPeriod).round() % _kHoursPerPeriod;
+      return widget.selectedTime.replacing(
+        hour: hourOfPeriod + widget.selectedTime.periodOffset
       );
     } else {
-      return config.selectedTime.replacing(
+      return widget.selectedTime.replacing(
         minute: (fraction * _kMinutesPerHour).round() % _kMinutesPerHour
       );
     }
   }
 
   void _notifyOnChangedIfNeeded() {
-    if (config.onChanged == null)
+    if (widget.onChanged == null)
       return;
-    TimeOfDay current = _getTimeForTheta(_theta.value);
-    if (current != config.selectedTime)
-      config.onChanged(current);
+    final TimeOfDay current = _getTimeForTheta(_theta.value);
+    if (current != widget.selectedTime)
+      widget.onChanged(current);
   }
 
   void _updateThetaForPan() {
@@ -548,15 +547,15 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     });
   }
 
-  Point _position;
-  Point _center;
+  Offset _position;
+  Offset _center;
 
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
     final RenderBox box = context.findRenderObject();
     _position = box.globalToLocal(details.globalPosition);
-    _center = box.size.center(Point.origin);
+    _center = box.size.center(Offset.zero);
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
   }
@@ -572,12 +571,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _dragging = false;
     _position = null;
     _center = null;
-    _animateTo(_getThetaForTime(config.selectedTime));
+    _animateTo(_getThetaForTime(widget.selectedTime));
   }
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
 
     Color backgroundColor;
     switch (themeData.brightness) {
@@ -589,10 +588,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         break;
     }
 
-    ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     List<TextPainter> primaryLabels;
     List<TextPainter> secondaryLabels;
-    switch (config.mode) {
+    switch (widget.mode) {
       case _TimePickerMode.hour:
         primaryLabels = _initHours(theme.textTheme);
         secondaryLabels = _initHours(theme.accentTextTheme);
@@ -622,12 +621,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 }
 
 class _TimePickerDialog extends StatefulWidget {
-  _TimePickerDialog({
+  const _TimePickerDialog({
     Key key,
-    this.initialTime
-  }) : super(key: key) {
-    assert(initialTime != null);
-  }
+    @required this.initialTime
+  }) : assert(initialTime != null),
+       super(key: key);
 
   final TimeOfDay initialTime;
 
@@ -639,20 +637,37 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedTime = config.initialTime;
+    _selectedTime = widget.initialTime;
   }
 
   _TimePickerMode _mode = _TimePickerMode.hour;
   TimeOfDay _selectedTime;
+  Timer _vibrateTimer;
+
+  void _vibrate() {
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        _vibrateTimer?.cancel();
+        _vibrateTimer = new Timer(_kVibrateCommitDelay, () {
+          HapticFeedback.vibrate();
+          _vibrateTimer = null;
+        });
+        break;
+      case TargetPlatform.iOS:
+        break;
+    }
+  }
 
   void _handleModeChanged(_TimePickerMode mode) {
-    HapticFeedback.vibrate();
+    _vibrate();
     setState(() {
       _mode = mode;
     });
   }
 
   void _handleTimeChanged(TimeOfDay value) {
+    _vibrate();
     setState(() {
       _selectedTime = value;
     });
@@ -668,7 +683,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    Widget picker = new Padding(
+    final Widget picker = new Padding(
       padding: const EdgeInsets.all(16.0),
       child: new AspectRatio(
         aspectRatio: 1.0,
@@ -680,15 +695,15 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       )
     );
 
-    Widget actions = new ButtonTheme.bar(
+    final Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
         children: <Widget>[
           new FlatButton(
-            child: new Text('CANCEL'),
+            child: const Text('CANCEL'),
             onPressed: _handleCancel
           ),
           new FlatButton(
-            child: new Text('OK'),
+            child: const Text('OK'),
             onPressed: _handleOk
           ),
         ]
@@ -698,7 +713,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     return new Dialog(
       child: new OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
-          Widget header = new _TimePickerHeader(
+          final Widget header = new _TimePickerHeader(
             selectedTime: _selectedTime,
             mode: _mode,
             orientation: orientation,
@@ -748,6 +763,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       )
     );
   }
+
+  @override
+  void dispose() {
+    _vibrateTimer?.cancel();
+    _vibrateTimer = null;
+    super.dispose();
+  }
 }
 
 /// Shows a dialog containing a material design time picker.
@@ -768,9 +790,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///  * [showDatePicker]
 ///  * <https://material.google.com/components/pickers.html#pickers-time-pickers>
 Future<TimeOfDay> showTimePicker({
-  BuildContext context,
-  TimeOfDay initialTime
+  @required BuildContext context,
+  @required TimeOfDay initialTime
 }) async {
+  assert(context != null);
   assert(initialTime != null);
   return await showDialog(
     context: context,

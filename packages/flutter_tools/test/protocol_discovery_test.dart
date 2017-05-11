@@ -14,8 +14,8 @@ import 'src/mocks.dart';
 void main() {
   group('service_protocol discovery', () {
     testUsingContext('no port forwarding', () async {
-      MockDeviceLogReader logReader = new MockDeviceLogReader();
-      ProtocolDiscovery discoverer =
+      final MockDeviceLogReader logReader = new MockDeviceLogReader();
+      final ProtocolDiscovery discoverer =
           new ProtocolDiscovery(logReader, ProtocolDiscovery.kObservatoryService);
 
       // Get next port future.
@@ -41,8 +41,8 @@ void main() {
       nextUri = discoverer.nextUri();
       // Inject a bad line.
       logReader.addLine('Observatory listening on http://127.0.0.1:apple');
-      Uri timeoutUri = Uri.parse('http://timeout');
-      Uri actualUri = await nextUri.timeout(
+      final Uri timeoutUri = Uri.parse('http://timeout');
+      final Uri actualUri = await nextUri.timeout(
           const Duration(milliseconds: 100), onTimeout: () => timeoutUri);
       expect(actualUri, timeoutUri);
 
@@ -72,17 +72,17 @@ void main() {
     });
 
     testUsingContext('port forwarding - default port', () async {
-      MockDeviceLogReader logReader = new MockDeviceLogReader();
-      ProtocolDiscovery discoverer = new ProtocolDiscovery(
+      final MockDeviceLogReader logReader = new MockDeviceLogReader();
+      final ProtocolDiscovery discoverer = new ProtocolDiscovery(
           logReader,
           ProtocolDiscovery.kObservatoryService,
           portForwarder: new MockPortForwarder(99),
           defaultHostPort: 54777);
 
       // Get next port future.
-      Future<Uri> nextUri = discoverer.nextUri();
+      final Future<Uri> nextUri = discoverer.nextUri();
       logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
-      Uri uri = await nextUri;
+      final Uri uri = await nextUri;
       expect(uri.port, 54777);
       expect('$uri', 'http://somehost:54777/PTwjm8Ii8qg=/');
 
@@ -91,8 +91,8 @@ void main() {
     });
 
     testUsingContext('port forwarding - specified port', () async {
-      MockDeviceLogReader logReader = new MockDeviceLogReader();
-      ProtocolDiscovery discoverer = new ProtocolDiscovery(
+      final MockDeviceLogReader logReader = new MockDeviceLogReader();
+      final ProtocolDiscovery discoverer = new ProtocolDiscovery(
           logReader,
           ProtocolDiscovery.kObservatoryService,
           portForwarder: new MockPortForwarder(99),
@@ -100,9 +100,9 @@ void main() {
           defaultHostPort: 192);
 
       // Get next port future.
-      Future<Uri> nextUri = discoverer.nextUri();
+      final Future<Uri> nextUri = discoverer.nextUri();
       logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
-      Uri uri = await nextUri;
+      final Uri uri = await nextUri;
       expect(uri.port, 1243);
       expect('$uri', 'http://somehost:1243/PTwjm8Ii8qg=/');
 

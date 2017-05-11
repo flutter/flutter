@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'icon_theme_data.dart';
-import 'package:flutter/foundation.dart';
 import 'theme.dart';
 
 /// Controls the default color, opacity, and size of icons in a widget subtree.
@@ -16,29 +16,31 @@ class IconTheme extends InheritedWidget {
   /// descendant widgets.
   ///
   /// Both [data] and [child] arguments must not be null.
-  IconTheme({
+  const IconTheme({
     Key key,
     @required this.data,
     @required Widget child
-  }) : super(key: key, child: child) {
-    assert(data != null);
-    assert(child != null);
-  }
+  }) : assert(data != null),
+       assert(child != null),
+       super(key: key, child: child);
 
   /// Creates an icon theme that controls the color, opacity, and size of
   /// descendant widgets, and merges in the current icon theme, if any.
   ///
-  /// The [context], [data], and [child] arguments must not be null.
-  factory IconTheme.merge({
+  /// The [data] and [child] arguments must not be null.
+  static Widget merge({
     Key key,
-    @required BuildContext context,
     @required IconThemeData data,
     @required Widget child
   }) {
-    return new IconTheme(
-      key: key,
-      data: _getInheritedIconThemData(context).merge(data),
-      child: child
+    return new Builder(
+      builder: (BuildContext context) {
+        return new IconTheme(
+          key: key,
+          data: _getInheritedIconThemeData(context).merge(data),
+          child: child,
+        );
+      },
     );
   }
 
@@ -56,12 +58,12 @@ class IconTheme extends InheritedWidget {
   /// IconThemeData theme = IconTheme.of(context);
   /// ```
   static IconThemeData of(BuildContext context) {
-    IconThemeData iconThemeData = _getInheritedIconThemData(context);
+    final IconThemeData iconThemeData = _getInheritedIconThemeData(context);
     return iconThemeData.isConcrete ? iconThemeData : const IconThemeData.fallback().merge(iconThemeData);
   }
 
-  static IconThemeData _getInheritedIconThemData(BuildContext context) {
-    IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
+  static IconThemeData _getInheritedIconThemeData(BuildContext context) {
+    final IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
     return iconTheme?.data ?? Theme.of(context).iconTheme;
   }
 

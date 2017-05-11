@@ -28,7 +28,7 @@ void main() {
     expect(curvedAnimation, hasOneLineDescription);
     curvedAnimation.reverseCurve = Curves.elasticOut;
     expect(curvedAnimation, hasOneLineDescription);
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: const TestVSync(),
     );
@@ -45,7 +45,7 @@ void main() {
   });
 
   test('ProxyAnimation.toString control test', () {
-    ProxyAnimation animation = new ProxyAnimation();
+    final ProxyAnimation animation = new ProxyAnimation();
     expect(animation.value, 0.0);
     expect(animation.status, AnimationStatus.dismissed);
     expect(animation, hasOneLineDescription);
@@ -54,12 +54,12 @@ void main() {
   });
 
   test('ProxyAnimation set parent generates value changed', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),
     );
     controller.value = 0.5;
     bool didReceiveCallback = false;
-    ProxyAnimation animation = new ProxyAnimation()
+    final ProxyAnimation animation = new ProxyAnimation()
       ..addListener(() {
         didReceiveCallback = true;
       });
@@ -73,7 +73,7 @@ void main() {
   });
 
   test('ReverseAnimation calls listeners', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),
     );
     controller.value = 0.5;
@@ -81,7 +81,7 @@ void main() {
     void listener() {
       didReceiveCallback = true;
     }
-    ReverseAnimation animation = new ReverseAnimation(controller)
+    final ReverseAnimation animation = new ReverseAnimation(controller)
       ..addListener(listener);
     expect(didReceiveCallback, isFalse);
     controller.value = 0.6;
@@ -95,16 +95,16 @@ void main() {
   });
 
   test('TrainHoppingAnimation', () {
-    AnimationController currentTrain = new AnimationController(
+    final AnimationController currentTrain = new AnimationController(
       vsync: const TestVSync(),
     );
-    AnimationController nextTrain = new AnimationController(
+    final AnimationController nextTrain = new AnimationController(
       vsync: const TestVSync(),
     );
     currentTrain.value = 0.5;
     nextTrain.value = 0.75;
     bool didSwitchTrains = false;
-    TrainHoppingAnimation animation = new TrainHoppingAnimation(
+    final TrainHoppingAnimation animation = new TrainHoppingAnimation(
       currentTrain, nextTrain, onSwitchedTrain: () {
         didSwitchTrains = true;
       });
@@ -119,20 +119,20 @@ void main() {
   });
 
   test('AnimationMean control test', () {
-    AnimationController left = new AnimationController(
+    final AnimationController left = new AnimationController(
       value: 0.5,
       vsync: const TestVSync(),
     );
-    AnimationController right = new AnimationController(
+    final AnimationController right = new AnimationController(
       vsync: const TestVSync(),
     );
 
-    AnimationMean mean = new AnimationMean(left: left, right: right);
+    final AnimationMean mean = new AnimationMean(left: left, right: right);
 
     expect(mean, hasOneLineDescription);
     expect(mean.value, equals(0.25));
 
-    List<double> log = <double>[];
+    final List<double> log = <double>[];
     void logValue() {
       log.add(mean.value);
     }
@@ -154,10 +154,10 @@ void main() {
   });
 
   test('CurvedAnimation with bogus curve', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),
     );
-    CurvedAnimation curved = new CurvedAnimation(parent: controller, curve: new BogusCurve());
+    final CurvedAnimation curved = new CurvedAnimation(parent: controller, curve: new BogusCurve());
 
     expect(() { curved.value; }, throwsFlutterError);
   });

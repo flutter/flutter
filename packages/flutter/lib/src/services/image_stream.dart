@@ -11,14 +11,14 @@ import 'package:flutter/foundation.dart';
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
+@immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given image and scale.
   ///
   /// Both the image and the scale must not be null.
-  ImageInfo({ this.image, this.scale: 1.0 }) {
-    assert(image != null);
-    assert(scale != null);
-  }
+  const ImageInfo({ @required this.image, this.scale: 1.0 })
+      : assert(image != null),
+        assert(scale != null);
 
   /// The raw image pixels.
   ///
@@ -122,7 +122,7 @@ class ImageStream {
 
   @override
   String toString() {
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.write('$runtimeType(');
     if (_completer == null) {
       result.write('unresolved; ');
@@ -181,7 +181,7 @@ class ImageStreamCompleter {
     _current = image;
     if (_listeners.isEmpty)
       return;
-    List<ImageListener> localListeners = new List<ImageListener>.from(_listeners);
+    final List<ImageListener> localListeners = new List<ImageListener>.from(_listeners);
     for (ImageListener listener in localListeners) {
       try {
         listener(image, false);

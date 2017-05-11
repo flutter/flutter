@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState, Locale;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'app.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -48,6 +49,9 @@ abstract class WidgetsBindingObserver {
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  /// Called when the system is running low on memory.
+  void didHaveMemoryPressure() { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -58,8 +62,9 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     _instance = this;
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
-    PlatformMessages.setJSONMessageHandler('flutter/navigation', _handleNavigationMessage);
-    PlatformMessages.setStringMessageHandler('flutter/lifecycle', _handleLifecycleMessage);
+    SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
+    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    SystemChannels.system.setMessageHandler(_handleSystemMessage);
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -115,6 +120,14 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   BuildOwner get buildOwner => _buildOwner;
   final BuildOwner _buildOwner = new BuildOwner();
 
+  /// The object in charge of the focus tree.
+  ///
+  /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
+  /// the [FocusScopeNode] for a given [BuildContext].
+  ///
+  /// See [FocusManager] for more details.
+  final FocusManager focusManager = new FocusManager();
+
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
 
   /// Registers the given object as a binding observer. Binding
@@ -141,7 +154,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeMetrics].
   ///
-  /// See [ui.window.onMetricsChanged].
+  /// See [Window.onMetricsChanged].
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
@@ -153,7 +166,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   ///
   /// Calls [dispatchLocaleChanged] to notify the binding observers.
   ///
-  /// See [ui.window.onLocaleChanged].
+  /// See [Window.onLocaleChanged].
   void handleLocaleChanged() {
     dispatchLocaleChanged(ui.window.locale);
   }
@@ -185,9 +198,8 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     SystemNavigator.pop();
   }
 
-  Future<dynamic> _handleNavigationMessage(Map<String, dynamic> message) async {
-    final String method = message['method'];
-    if (method == 'popRoute')
+  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) async {
+    if (methodCall.method == 'popRoute')
       handlePopRoute();
     // TODO(abarth): Handle 'pushRoute'.
   }
@@ -209,6 +221,15 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       case 'AppLifecycleState.resumed':
         handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         break;
+    }
+    return null;
+  }
+
+  Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {
+    final String type = message['type'];
+    if (type == 'memoryPressure') {
+      for (WidgetsBindingObserver observer in _observers)
+        observer.didHaveMemoryPressure();
     }
     return null;
   }
@@ -251,7 +272,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       }
       return true;
     });
-    scheduleFrame();
+    ensureVisualUpdate();
   }
 
   /// Whether we are currently in a frame. This is used to verify
@@ -265,63 +286,70 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 
   /// Pump the build and rendering pipeline to generate a frame.
   ///
-  /// This method is called by [handleBeginFrame], which itself is called
+  /// This method is called by [handleDrawFrame], which itself is called
   /// automatically by the engine when when it is time to lay out and paint a
   /// frame.
   ///
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [ui.window.onBeginFrame], invokes all the transient frame callbacks
-  /// registered with [scheduleFrameCallback] and [addFrameCallback], in
+  /// with [Window.onBeginFrame], invokes all the transient frame callbacks
+  /// registered with [scheduleFrameCallback], in
   /// registration order. This includes all the [Ticker] instances that are
   /// driving [AnimationController] objects, which means all of the active
   /// [Animation] objects tick at this point.
   ///
-  /// [handleBeginFrame] then invokes all the persistent frame callbacks, of which
-  /// the most notable is this method, [beginFrame], which proceeds as follows:
+  /// 2. Microtasks: After [handleBeginFrame] returns, any microtasks that got
+  /// scheduled by transient frame callbacks get to run. This typically includes
+  /// callbacks for futures from [Ticker]s and [AnimationController]s that
+  /// completed this frame.
   ///
-  /// 2. The build phase: All the dirty [Element]s in the widget tree are
+  /// After [handleBeginFrame], [handleDrawFrame], which is registered with
+  /// [Window.onDrawFrame], is called, which invokes all the persistent frame
+  /// callbacks, of which the most notable is this method, [drawFrame], which
+  /// proceeds as follows:
+  ///
+  /// 3. The build phase: All the dirty [Element]s in the widget tree are
   /// rebuilt (see [State.build]). See [State.setState] for further details on
   /// marking a widget dirty for building. See [BuildOwner] for more information
   /// on this step.
   ///
-  /// 3. The layout phase: All the dirty [RenderObject]s in the system are laid
+  /// 4. The layout phase: All the dirty [RenderObject]s in the system are laid
   /// out (see [RenderObject.performLayout]). See [RenderObject.markNeedsLayout]
   /// for further details on marking an object dirty for layout.
   ///
-  /// 4. The compositing bits phase: The compositing bits on any dirty
+  /// 5. The compositing bits phase: The compositing bits on any dirty
   /// [RenderObject] objects are updated. See
   /// [RenderObject.markNeedsCompositingBitsUpdate].
   ///
-  /// 5. The paint phase: All the dirty [RenderObject]s in the system are
+  /// 6. The paint phase: All the dirty [RenderObject]s in the system are
   /// repainted (see [RenderObject.paint]). This generates the [Layer] tree. See
   /// [RenderObject.markNeedsPaint] for further details on marking an object
   /// dirty for paint.
   ///
-  /// 6. The compositing phase: The layer tree is turned into a [ui.Scene] and
+  /// 7. The compositing phase: The layer tree is turned into a [Scene] and
   /// sent to the GPU.
   ///
-  /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.SemanticsAnnotator]). This
+  /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
+  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
   ///
-  /// For more details on steps 3-7, see [PipelineOwner].
+  /// For more details on steps 4-8, see [PipelineOwner].
   ///
-  /// 8. The finalization phase in the widgets layer: The widgets tree is
+  /// 9. The finalization phase in the widgets layer: The widgets tree is
   /// finalized. This causes [State.dispose] to be invoked on any objects that
   /// were removed from the widgets tree this frame. See
   /// [BuildOwner.finalizeTree] for more details.
   ///
-  /// 9. The finalization phase in the scheduler layer: After [beginFrame]
-  /// returns, [handleBeginFrame] then invokes post-frame callbacks (registered
-  /// with [addPostFrameCallback].
+  /// 10. The finalization phase in the scheduler layer: After [drawFrame]
+  /// returns, [handleDrawFrame] then invokes post-frame callbacks (registered
+  /// with [addPostFrameCallback]).
   //
   // When editing the above, also update rendering/binding.dart's copy.
   @override
-  void beginFrame() {
+  void drawFrame() {
     assert(!debugBuildingDirtyElements);
     assert(() {
       debugBuildingDirtyElements = true;
@@ -330,7 +358,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     try {
       if (renderViewElement != null)
         buildOwner.buildScope(renderViewElement);
-      super.beginFrame();
+      super.drawFrame();
       buildOwner.finalizeTree();
     } finally {
       assert(() {
@@ -389,6 +417,12 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 /// (e.g., the top), consider using the [Align] widget. If you wish to center
 /// your widget, you can also use the [Center] widget
 ///
+/// Calling [runApp] again will detach the previous root widget from the screen
+/// and attach the given widget in its place. The new widget tree is compared
+/// against the previous widget tree and any differences are applied to the
+/// underlying render tree, similar to what happens when a [StatefulWidget]
+/// rebuilds after calling [State.setState].
+///
 /// Initializes the binding using [WidgetsFlutterBinding] if necessary.
 ///
 /// See also:
@@ -402,7 +436,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
-    ..handleBeginFrame(null);
+    ..scheduleWarmUpFrame();
 }
 
 /// Print a string representation of the currently running app.
@@ -432,9 +466,9 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// Used by [WidgetsBinding] to attach the root widget to the [RenderView].
   RenderObjectToWidgetAdapter({
     this.child,
-    RenderObjectWithChildMixin<T> container,
+    this.container,
     this.debugShortDescription
-  }) : container = container, super(key: new GlobalObjectKey(container));
+  }) : super(key: new GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -561,7 +595,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
         library: 'widgets library',
         context: 'attaching to the render tree'
       ));
-      Widget error = new ErrorWidget(exception);
+      final Widget error = new ErrorWidget(exception);
       _child = updateChild(null, error, _rootChildSlot);
     }
   }
@@ -572,6 +606,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(slot == _rootChildSlot);
+    assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }
 

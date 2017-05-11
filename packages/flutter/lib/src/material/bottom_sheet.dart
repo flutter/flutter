@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -24,7 +25,7 @@ const Color _kBarrierColor = Colors.black54;
 ///    supplements the primary content of the app. A persistent bottom sheet
 ///    remains visible even when the user interacts with other parts of the app.
 ///    Persistent bottom sheets can be created and displayed with the
-///    [Scaffold.showBottomSheet] function.
+///    [ScaffoldState.showBottomSheet] function.
 ///
 ///  * _Modal_. A modal bottom sheet is an alternative to a menu or a dialog and
 ///    prevents the user from interacting with the rest of the app. Modal bottom
@@ -32,29 +33,28 @@ const Color _kBarrierColor = Colors.black54;
 ///    function.
 ///
 /// The [BottomSheet] widget itself is rarely used directly. Instead, prefer to
-/// create a persistent bottom sheet with [Scaffold.showBottomSheet] and a modal
+/// create a persistent bottom sheet with [ScaffoldState.showBottomSheet] and a modal
 /// bottom sheet with [showModalBottomSheet].
 ///
 /// See also:
 ///
-///  * [Scaffold.showBottomSheet]
+///  * [ScaffoldState.showBottomSheet]
 ///  * [showModalBottomSheet]
 ///  * <https://material.google.com/components/bottom-sheets.html>
 class BottomSheet extends StatefulWidget {
   /// Creates a bottom sheet.
   ///
   /// Typically, bottom sheets are created implicitly by
-  /// [Scaffold.showBottomSheet], for persistent bottom sheets, or by
+  /// [ScaffoldState.showBottomSheet], for persistent bottom sheets, or by
   /// [showModalBottomSheet], for modal bottom sheets.
-  BottomSheet({
+  const BottomSheet({
     Key key,
     this.animationController,
-    this.onClosing,
-    this.builder
-  }) : super(key: key) {
-    assert(onClosing != null);
-    assert(builder != null);
-  }
+    @required this.onClosing,
+    @required this.builder
+  }) : assert(onClosing != null),
+       assert(builder != null),
+       super(key: key);
 
   /// The animation that controls the bottom sheet's position.
   ///
@@ -97,29 +97,29 @@ class _BottomSheetState extends State<BottomSheet> {
     return renderBox.size.height;
   }
 
-  bool get _dismissUnderway => config.animationController.status == AnimationStatus.reverse;
+  bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (_dismissUnderway)
       return;
-    config.animationController.value -= details.primaryDelta / (_childHeight ?? details.primaryDelta);
+    widget.animationController.value -= details.primaryDelta / (_childHeight ?? details.primaryDelta);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     if (_dismissUnderway)
       return;
     if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
-      double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
-      if (config.animationController.value > 0.0)
-        config.animationController.fling(velocity: flingVelocity);
+      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
+      if (widget.animationController.value > 0.0)
+        widget.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
-        config.onClosing();
-    } else if (config.animationController.value < _kCloseProgressThreshold) {
-      if (config.animationController.value > 0.0)
-        config.animationController.fling(velocity: -1.0);
-      config.onClosing();
+        widget.onClosing();
+    } else if (widget.animationController.value < _kCloseProgressThreshold) {
+      if (widget.animationController.value > 0.0)
+        widget.animationController.fling(velocity: -1.0);
+      widget.onClosing();
     } else {
-      config.animationController.forward();
+      widget.animationController.forward();
     }
   }
 
@@ -130,7 +130,7 @@ class _BottomSheetState extends State<BottomSheet> {
       onVerticalDragEnd: _handleDragEnd,
       child: new Material(
         key: _childKey,
-        child: config.builder(context)
+        child: widget.builder(context)
       )
     );
   }
@@ -170,7 +170,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 }
 
 class _ModalBottomSheet<T> extends StatefulWidget {
-  _ModalBottomSheet({ Key key, this.route }) : super(key: key);
+  const _ModalBottomSheet({ Key key, this.route }) : super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
 
@@ -184,15 +184,15 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
       child: new AnimatedBuilder(
-        animation: config.route.animation,
+        animation: widget.route.animation,
         builder: (BuildContext context, Widget child) {
           return new ClipRect(
             child: new CustomSingleChildLayout(
-              delegate: new _ModalBottomSheetLayout(config.route.animation.value),
+              delegate: new _ModalBottomSheetLayout(widget.route.animation.value),
               child: new BottomSheet(
-                animationController: config.route._animationController,
+                animationController: widget.route._animationController,
                 onClosing: () => Navigator.pop(context),
-                builder: config.route.builder
+                builder: widget.route.builder
               )
             )
           );
@@ -215,7 +215,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kBottomSheetDuration;
 
   @override
-  bool get barrierDismissable => true;
+  bool get barrierDismissible => true;
 
   @override
   Color get barrierColor => Colors.black54;
@@ -230,7 +230,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     Widget bottomSheet = new _ModalBottomSheet<T>(route: this);
     if (theme != null)
       bottomSheet = new Theme(data: theme, child: bottomSheet);
@@ -246,17 +246,21 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// A closely related widget is a persistent bottom sheet, which shows
 /// information that supplements the primary content of the app without
 /// preventing the use from interacting with the app. Persistent bottom sheets
-/// can be created and displayed with the [Scaffold.showBottomSheet] function.
+/// can be created and displayed with the [ScaffoldState.showBottomSheet] function.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
 /// See also:
 ///
-///  * [BottomSheet]
-///  * [Scaffold.showBottomSheet]
+///  * [BottomSheet], which is the widget normally returned by the function
+///    passed as the `builder` argument to [showModalBottomSheet].
+///  * [ScaffoldState.showBottomSheet], for showing non-modal bottom sheets.
 ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-modal-bottom-sheets>
-Future<T> showModalBottomSheet<T>({ BuildContext context, WidgetBuilder builder }) {
+Future<T> showModalBottomSheet<T>({
+  @required BuildContext context,
+  @required WidgetBuilder builder,
+}) {
   assert(context != null);
   assert(builder != null);
   return Navigator.push(context, new _ModalBottomSheetRoute<T>(

@@ -16,17 +16,17 @@ void main() {
           ),
           height: 200.0,
           width: 300.0,
-          child: new Scrollbar2(
+          child: new Scrollbar(
             child: new ListView(
               children: <Widget>[
-                new Container(height: 40.0, child: new Text('0')),
-                new Container(height: 40.0, child: new Text('1')),
-                new Container(height: 40.0, child: new Text('2')),
-                new Container(height: 40.0, child: new Text('3')),
-                new Container(height: 40.0, child: new Text('4')),
-                new Container(height: 40.0, child: new Text('5')),
-                new Container(height: 40.0, child: new Text('6')),
-                new Container(height: 40.0, child: new Text('7')),
+                new Container(height: 40.0, child: const Text('0')),
+                new Container(height: 40.0, child: const Text('1')),
+                new Container(height: 40.0, child: const Text('2')),
+                new Container(height: 40.0, child: const Text('3')),
+                new Container(height: 40.0, child: const Text('4')),
+                new Container(height: 40.0, child: const Text('5')),
+                new Container(height: 40.0, child: const Text('6')),
+                new Container(height: 40.0, child: const Text('7')),
               ]
             )
           )
@@ -41,7 +41,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.scroll(find.byType(ListView), const Offset(0.0, -10.0));
+    await tester.drag(find.byType(ListView), const Offset(0.0, -10.0));
     expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));

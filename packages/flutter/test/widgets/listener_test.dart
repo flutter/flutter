@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Events bubble up the tree', (WidgetTester tester) async {
-    List<String> log = new List<String>();
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(
       new Listener(
@@ -24,7 +24,7 @@ void main() {
               onPointerDown: (_) {
                 log.add('bottom');
               },
-              child: new Text('X')
+              child: const Text('X')
             )
           )
         )

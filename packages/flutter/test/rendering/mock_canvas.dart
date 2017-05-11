@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'recording_canvas.dart';
+
 /// Matches objects or functions that paint a display list that matches the
 /// canvas calls described by the pattern.
 ///
@@ -109,7 +111,7 @@ abstract class PaintPattern {
   /// See also: [save], [restore].
   void saveRestore();
 
-  /// Indicates that a rectangular clip.
+  /// Indicates that a rectangular clip is expected next.
   ///
   /// The next rectangular clip is examined. Any arguments that are passed to
   /// this method are compared to the actual [Canvas.clipRect] call's argument
@@ -132,6 +134,18 @@ abstract class PaintPattern {
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.drawRect] call are ignored.
   void rect({ Rect rect, Color color });
+
+  /// Indicates that a rounded rectangle clip is expected next.
+  ///
+  /// The next rounded rectangle clip is examined. Any arguments that are passed
+  /// to this method are compared to the actual [Canvas.clipRRect] call's
+  /// argument and any mismatches result in failure.
+  ///
+  /// If no call to [Canvas.clipRRect] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.clipRRect] call are ignored.
+  void clipRRect({ RRect rrect });
 
   /// Indicates that a rounded rectangle is expected next.
   ///
@@ -261,6 +275,11 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   }
 
   @override
+  void clipRRect({ RRect rrect }) {
+    _predicates.add(new _FunctionPaintPredicate(#clipRRect, <dynamic>[rrect]));
+  }
+
+  @override
   void rrect({ RRect rrect, Color color, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _RRectPaintPredicate(rrect: rrect, color: color, hasMaskFilter: hasMaskFilter, style: style));
   }
@@ -292,8 +311,8 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
 
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
-    final _TestRecordingCanvas canvas = new _TestRecordingCanvas();
-    final _TestRecordingPaintingContext context = new _TestRecordingPaintingContext(canvas);
+    final TestRecordingCanvas canvas = new TestRecordingCanvas();
+    final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
     if (object is _ContextPainterFunction) {
       final _ContextPainterFunction function = object;
       function(context, Offset.zero);
@@ -315,12 +334,12 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
       }
     }
     final StringBuffer description = new StringBuffer();
-    final bool result = _evaluatePredicates(canvas._invocations, description);
+    final bool result = _evaluatePredicates(canvas.invocations, description);
     if (!result) {
       const String indent = '\n            '; // the length of '   Which: ' in spaces, plus two more
-      if (canvas._invocations.isNotEmpty)
+      if (canvas.invocations.isNotEmpty)
         description.write(' The complete display list was:');
-        for (Invocation call in canvas._invocations)
+        for (Invocation call in canvas.invocations)
           description.write('$indent${_describeInvocation(call)}');
     }
     matchState[this] = description.toString();
@@ -329,10 +348,12 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
 
   @override
   Description describe(Description description) {
+    if (_predicates.isEmpty)
+      return description.add('An object or closure and a paint pattern.');
     description.add('Object or closure painting: ');
     return description.addAll(
       '', ', ', '',
-      _predicates.map((_PaintPredicate predicate) => predicate.toString()),
+      _predicates.map<String>((_PaintPredicate predicate) => predicate.toString()),
     );
   }
 
@@ -349,14 +370,19 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   bool _evaluatePredicates(Iterable<Invocation> calls, StringBuffer description) {
     // If we ever want to have a matcher for painting nothing, create a separate
     // paintsNothing matcher.
-    if (_predicates.isEmpty)
-      throw new Exception('You must add a pattern to the paints matcher.');
+    if (_predicates.isEmpty) {
+      description.write(
+        'painted something, but you must now add a pattern to the paints matcher '
+        'in the test to verify that it matches the important parts of the following.'
+      );
+      return false;
+    }
     if (calls.isEmpty) {
       description.write('painted nothing.');
       return false;
     }
-    Iterator<_PaintPredicate> predicate = _predicates.iterator;
-    Iterator<Invocation> call = calls.iterator..moveNext();
+    final Iterator<_PaintPredicate> predicate = _predicates.iterator;
+    final Iterator<Invocation> call = calls.iterator..moveNext();
     try {
       while (predicate.moveNext()) {
         if (call.current == null) {
@@ -372,76 +398,6 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
       return false;
     }
     return true;
-  }
-}
-
-class _TestRecordingCanvas implements Canvas {
-  final List<Invocation> _invocations = <Invocation>[];
-
-  int _saveCount = 0;
-
-  @override
-  int getSaveCount() => _saveCount;
-
-  @override
-  void save() {
-    _saveCount += 1;
-    _invocations.add(new _MethodCall(#save));
-  }
-
-  @override
-  void restore() {
-    _saveCount -= 1;
-    assert(_saveCount >= 0);
-    _invocations.add(new _MethodCall(#restore));
-  }
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    _invocations.add(invocation);
-  }
-}
-
-class _MethodCall implements Invocation {
-  _MethodCall(this._name);
-  final Symbol _name;
-  @override
-  bool get isAccessor => false;
-  @override
-  bool get isGetter => false;
-  @override
-  bool get isMethod => true;
-  @override
-  bool get isSetter => false;
-  @override
-  Symbol get memberName => _name;
-  @override
-  Map<Symbol, dynamic> get namedArguments => <Symbol, dynamic>{};
-  @override
-  List<dynamic> get positionalArguments => <dynamic>[];
-}
-
-class _TestRecordingPaintingContext implements PaintingContext {
-  _TestRecordingPaintingContext(this.canvas);
-
-  @override
-  final Canvas canvas;
-
-  @override
-  void paintChild(RenderObject child, Offset offset) {
-    child.paint(this, offset);
-  }
-
-  @override
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
-    canvas.save();
-    canvas.clipRect(clipRect.shift(offset));
-    painter(this, offset);
-    canvas.restore();
-  }
-
-  @override
-  void noSuchMethod(Invocation invocation) {
   }
 }
 
@@ -473,7 +429,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != symbol) {
       others += 1;
       if (!call.moveNext())
@@ -506,7 +462,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     String result = name;
     if (description.isNotEmpty)
@@ -593,15 +549,15 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final Point pointArgument = arguments[0];
+    final Offset pointArgument = arguments[0];
     if (x != null && y != null) {
-      final Point point = new Point(x, y);
+      final Offset point = new Offset(x, y);
       if (point != pointArgument)
         throw 'called $methodName with a center coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
     } else {
-      if (x != null && pointArgument.x != x)
+      if (x != null && pointArgument.dx != x)
         throw 'called $methodName with a center coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
-      if (y != null && pointArgument.y != y)
+      if (y != null && pointArgument.dy != y)
         throw 'called $methodName with a center coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
     }
     final double radiusArgument = arguments[1];
@@ -613,7 +569,7 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (x != null && y != null) {
-      description.add('point ${new Point(x, y)}');
+      description.add('point ${new Offset(x, y)}');
     } else {
       if (x != null)
         description.add('x-coordinate ${x.toStringAsFixed(1)}');
@@ -680,7 +636,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != symbol) {
       others += 1;
       if (!call.moveNext())
@@ -701,7 +657,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    List<String> adjectives = <String>[];
+    final List<String> adjectives = <String>[];
     for (int index = 0; index < arguments.length; index += 1)
       adjectives.add(arguments[index] != null ? _valueName(arguments[index]) : '...');
     return '${_symbolName(symbol)}(${adjectives.join(", ")})';
@@ -712,7 +668,7 @@ class _SaveRestorePairPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != #save) {
       others += 1;
       if (!call.moveNext())
@@ -760,7 +716,7 @@ String _describeInvocation(Invocation call) {
     buffer.write(call.positionalArguments[0].toString());
   } else if (call.isMethod) {
     buffer.write('(');
-    buffer.writeAll(call.positionalArguments.map(_valueName), ', ');
+    buffer.writeAll(call.positionalArguments.map<String>(_valueName), ', ');
     String separator = call.positionalArguments.isEmpty ? '' : ', ';
     call.namedArguments.forEach((Symbol name, Object value) {
       buffer.write(separator);

@@ -21,7 +21,7 @@ import 'package:flutter/foundation.dart';
 /// intra-frame output from inter-frame output, set [debugPrintEndFrameBanner]
 /// to true as well.
 ///
-/// See [SchedulerBinding.beginFrame].
+/// See [SchedulerBinding.handleBeginFrame].
 bool debugPrintBeginFrameBanner = false;
 
 /// Print a banner at the end of each frame.
@@ -29,6 +29,17 @@ bool debugPrintBeginFrameBanner = false;
 /// Combined with [debugPrintBeginFrameBanner], this can be helpful for
 /// determining if code is running during a frame or between frames.
 bool debugPrintEndFrameBanner = false;
+
+/// Log the call stacks that cause a frame to be scheduled.
+///
+/// This is called whenever [SchedulerBinding.scheduleFrame] schedules a frame. This
+/// can happen for various reasons, e.g. when a [Ticker] or
+/// [AnimationController] is started, or when [RenderObject.markNeedsLayout] is
+/// called, or when [State.setState] is called.
+///
+/// To get a stack specifically when widgets are scheduled to be built, see
+/// [debugPrintScheduleBuildForStacks].
+bool debugPrintScheduleFrameStacks = false;
 
 /// Returns true if none of the scheduler library debug variables have been changed.
 ///

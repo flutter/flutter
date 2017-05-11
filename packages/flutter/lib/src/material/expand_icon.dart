@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
-import 'icons.dart';
 import 'icon_button.dart';
+import 'icons.dart';
 import 'theme.dart';
 
 /// A widget representing a rotating expand/collapse button. The icon rotates
@@ -21,17 +21,16 @@ import 'theme.dart';
 class ExpandIcon extends StatefulWidget {
   /// Creates an [ExpandIcon] with the given padding, and a callback that is
   /// triggered when the icon is pressed.
-  ExpandIcon({
+  const ExpandIcon({
     Key key,
     this.isExpanded: false,
     this.size: 24.0,
     @required this.onPressed,
     this.padding: const EdgeInsets.all(8.0)
-  }) : super(key: key) {
-    assert(this.isExpanded != null);
-    assert(this.size != null);
-    assert(this.padding != null);
-  }
+  }) : assert(isExpanded != null),
+       assert(size != null),
+       assert(padding != null),
+       super(key: key);
 
   /// Whether the icon is in an expanded state.
   ///
@@ -83,9 +82,10 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   @override
-  void didUpdateConfig(ExpandIcon oldConfig) {
-    if (config.isExpanded != oldConfig.isExpanded) {
-      if (config.isExpanded) {
+  void didUpdateWidget(ExpandIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isExpanded != oldWidget.isExpanded) {
+      if (widget.isExpanded) {
         _controller.forward();
       } else {
         _controller.reverse();
@@ -94,20 +94,20 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   void _handlePressed() {
-    if (config.onPressed != null)
-      config.onPressed(config.isExpanded);
+    if (widget.onPressed != null)
+      widget.onPressed(widget.isExpanded);
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new IconButton(
-      padding: config.padding,
+      padding: widget.padding,
       color: Colors.black38,
-      onPressed: config.onPressed == null ? null : _handlePressed,
+      onPressed: widget.onPressed == null ? null : _handlePressed,
       icon: new RotationTransition(
         turns: _iconTurns,
-        child: new Icon(Icons.expand_more)
+        child: const Icon(Icons.expand_more)
       )
     );
   }

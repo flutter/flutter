@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../cache.dart';
@@ -24,22 +23,19 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
+  bool get shouldUpdateCache => false;
+
+  @override
   Future<Null> runCommand() async {
     try {
-      runCheckedSync(<String>[
+      await runCheckedAsync(<String>[
         'git', 'rev-parse', '@{u}'
       ], workingDirectory: Cache.flutterRoot);
     } catch (e) {
       throwToolExit('Unable to upgrade Flutter: no upstream repository configured.');
     }
 
-    FlutterVersion version = new FlutterVersion(Cache.flutterRoot);
-    if (version.channel == 'alpha') {
-      // The alpha branch is deprecated. Rather than trying to pull the alpha
-      // branch, we should switch upstream to master.
-      printStatus('Switching to from alpha to master...');
-      runSync(<String>['git', 'branch', '--set-upstream-to=origin/master']);
-    }
+    final FlutterVersion flutterVersion = FlutterVersion.instance;
 
     printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
 
@@ -58,19 +54,18 @@ class UpgradeCommand extends FlutterCommand {
     // if necessary.
     printStatus('');
     printStatus('Upgrading engine...');
-    String flutter = os.getExecutableName('flutter', winExtension: 'bat');
     code = await runCommandAndStreamOutput(
       <String>[
-        path.join(Cache.flutterRoot, 'bin', flutter), '--no-color', 'precache'
+        fs.path.join(Cache.flutterRoot, 'bin', 'flutter'), '--no-color', 'precache'
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true
     );
 
     printStatus('');
-    printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
+    printStatus(flutterVersion.toString());
 
-    String projRoot = findProjectRoot();
+    final String projRoot = findProjectRoot();
     if (projRoot != null) {
       printStatus('');
       await pubGet(directory: projRoot, upgrade: true, checkLastModified: false);

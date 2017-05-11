@@ -19,27 +19,27 @@ class SyntaxHighlighterStyle {
 
   static SyntaxHighlighterStyle lightThemeStyle() {
     return new SyntaxHighlighterStyle(
-      baseStyle: new TextStyle(color: const Color(0xFF000000)),
-      numberStyle: new TextStyle(color: const Color(0xFF1565C0)),
-      commentStyle: new TextStyle(color: const Color(0xFF9E9E9E)),
-      keywordStyle: new TextStyle(color: const Color(0xFF9C27B0)),
-      stringStyle: new TextStyle(color: const Color(0xFF43A047)),
-      punctuationStyle: new TextStyle(color: const Color(0xFF000000)),
-      classStyle: new TextStyle(color: const Color(0xFF512DA8)),
-      constantStyle: new TextStyle(color: const Color(0xFF795548))
+      baseStyle: const TextStyle(color: const Color(0xFF000000)),
+      numberStyle: const TextStyle(color: const Color(0xFF1565C0)),
+      commentStyle: const TextStyle(color: const Color(0xFF9E9E9E)),
+      keywordStyle: const TextStyle(color: const Color(0xFF9C27B0)),
+      stringStyle: const TextStyle(color: const Color(0xFF43A047)),
+      punctuationStyle: const TextStyle(color: const Color(0xFF000000)),
+      classStyle: const TextStyle(color: const Color(0xFF512DA8)),
+      constantStyle: const TextStyle(color: const Color(0xFF795548))
     );
   }
 
   static SyntaxHighlighterStyle darkThemeStyle() {
     return new SyntaxHighlighterStyle(
-      baseStyle: new TextStyle(color: const Color(0xFFFFFFFF)),
-      numberStyle: new TextStyle(color: const Color(0xFF1565C0)),
-      commentStyle: new TextStyle(color: const Color(0xFF9E9E9E)),
-      keywordStyle: new TextStyle(color: const Color(0xFF80CBC4)),
-      stringStyle: new TextStyle(color: const Color(0xFF009688)),
-      punctuationStyle: new TextStyle(color: const Color(0xFFFFFFFF)),
-      classStyle: new TextStyle(color: const Color(0xFF009688)),
-      constantStyle: new TextStyle(color: const Color(0xFF795548))
+      baseStyle: const TextStyle(color: const Color(0xFFFFFFFF)),
+      numberStyle: const TextStyle(color: const Color(0xFF1565C0)),
+      commentStyle: const TextStyle(color: const Color(0xFF9E9E9E)),
+      keywordStyle: const TextStyle(color: const Color(0xFF80CBC4)),
+      stringStyle: const TextStyle(color: const Color(0xFF009688)),
+      punctuationStyle: const TextStyle(color: const Color(0xFFFFFFFF)),
+      classStyle: const TextStyle(color: const Color(0xFF009688)),
+      constantStyle: const TextStyle(color: const Color(0xFF795548))
     );
   }
 
@@ -60,9 +60,7 @@ abstract class SyntaxHighlighter { // ignore: one_member_abstracts
 class DartSyntaxHighlighter extends SyntaxHighlighter {
   DartSyntaxHighlighter([this._style]) {
     _spans = <_HighlightSpan>[];
-
-    if (_style == null)
-      _style = SyntaxHighlighterStyle.darkThemeStyle();
+    _style ??= SyntaxHighlighterStyle.darkThemeStyle();
   }
 
   SyntaxHighlighterStyle _style;
@@ -93,7 +91,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
     if (_generateSpans()) {
       // Successfully parsed the code
-      List<TextSpan> formattedText = <TextSpan>[];
+      final List<TextSpan> formattedText = <TextSpan>[];
       int currentPosition = 0;
 
       for (_HighlightSpan span in _spans) {
@@ -134,7 +132,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
       // Line comments
       if (_scanner.scan("//")) {
-        int startComment = _scanner.lastMatch.start;
+        final int startComment = _scanner.lastMatch.start;
 
         bool eof = false;
         int endComment;
@@ -309,8 +307,8 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   }
 
   bool _firstLetterIsUpperCase(String str) {
-    if (str.length > 0) {
-      String first = str.substring(0, 1);
+    if (str.isNotEmpty) {
+      final String first = str.substring(0, 1);
       return first == first.toUpperCase();
     }
     return false;

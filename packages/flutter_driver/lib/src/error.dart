@@ -39,7 +39,7 @@ final StreamController<LogRecord> _logger =
     });
 
 void _log(LogLevel level, String loggerName, Object message) {
-  LogRecord record = new LogRecord._(level, loggerName, '$message');
+  final LogRecord record = new LogRecord._(level, loggerName, '$message');
   // If nobody expressed interest in rerouting log messages somewhere specific,
   // print them to stderr.
   if (_noLogSubscribers)

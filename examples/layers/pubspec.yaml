@@ -10,3 +10,4 @@ dev_dependencies:
 flutter:
   assets:
     - services/data.json
+  uses-material-design: true

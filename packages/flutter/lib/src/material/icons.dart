@@ -2,18 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 /// A description of a material design icon.
 ///
 /// See [Icons] for a number of predefined icons.
+@immutable
 class IconData {
   /// Creates icon data.
   ///
   /// Rarely used directly. Instead, consider using one of the predefined icons
   /// from the [Icons] collection.
-  const IconData(this.codePoint);
+  const IconData(this.codePoint, {
+    this.fontFamily: 'MaterialIcons'
+  });
 
   /// The unicode code point at which this icon is stored in the icon font.
   final int codePoint;
+
+  /// The font family from which the glyph for the [codePoint] will be selected.
+  final String fontFamily;
 
   @override
   bool operator ==(dynamic other) {

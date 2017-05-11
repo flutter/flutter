@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -17,10 +17,9 @@ export 'dart:ui' show SemanticsAction;
 /// Interface for [RenderObject]s to implement when they want to support
 /// being tapped, etc.
 ///
-/// These handlers will only be called if the relevant flag is set
-/// (e.g. [handleSemanticTap]() will only be called if
-/// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown]() will only
-/// be called if [SemanticsNode.canBeScrolledVertically] is true, etc).
+/// The handler will only be called for a particular flag if that flag is set
+/// (e.g. [performAction] will only be called with [SemanticsAction.tap] if
+/// [SemanticsNode.addAction] was called for [SemanticsAction.tap].)
 abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   /// Called when the object implementing this interface receives a
   /// [SemanticsAction]. For example, if the user of an accessibility tool
@@ -30,13 +29,13 @@ abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   void performAction(SemanticsAction action);
 }
 
-/// The type of function returned by [RenderObject.getSemanticsAnnotators()].
+/// Signature for functions returned by [RenderObject.semanticsAnnotator].
 ///
 /// These callbacks are called with the [SemanticsNode] object that
 /// corresponds to the [RenderObject]. (One [SemanticsNode] can
 /// correspond to multiple [RenderObject] objects.)
 ///
-/// See [RenderObject.getSemanticsAnnotators()] for details on the
+/// See [RenderObject.semanticsAnnotator] for details on the
 /// contract that semantic annotators must follow.
 typedef void SemanticsAnnotator(SemanticsNode semantics);
 
@@ -55,27 +54,26 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 /// for the node.
 ///
 /// Typically obtained from [SemanticsNode.getSemanticsData].
+@immutable
 class SemanticsData {
   /// Creates a semantics data object.
   ///
   /// The [flags], [actions], [label], and [Rect] arguments must not be null.
-  SemanticsData({
+  const SemanticsData({
     @required this.flags,
     @required this.actions,
     @required this.label,
     @required this.rect,
     this.transform
-  }) {
-    assert(flags != null);
-    assert(actions != null);
-    assert(label != null);
-    assert(rect != null);
-  }
+  }) : assert(flags != null),
+       assert(actions != null),
+       assert(label != null),
+       assert(rect != null);
 
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;
 
-  /// A bit field of [SemanticsActions] that apply to this node.
+  /// A bit field of [SemanticsAction]s that apply to this node.
   final int actions;
 
   /// A textual description of this node.
@@ -99,7 +97,7 @@ class SemanticsData {
 
   @override
   String toString() {
-    StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
     buffer.write('$runtimeType($rect');
     if (transform != null)
       buffer.write('; $transform');
@@ -184,7 +182,7 @@ class SemanticsNode extends AbstractNode {
   /// parent).
   Matrix4 get transform => _transform;
   Matrix4 _transform;
-  set transform (Matrix4 value) {
+  set transform(Matrix4 value) {
     if (!MatrixUtils.matrixEquals(_transform, value)) {
       _transform = value;
       _markDirty();
@@ -194,7 +192,7 @@ class SemanticsNode extends AbstractNode {
   /// The bounding box for this node in its coordinate system.
   Rect get rect => _rect;
   Rect _rect = Rect.zero;
-  set rect (Rect value) {
+  set rect(Rect value) {
     assert(value != null);
     if (_rect != value) {
       _rect = value;
@@ -307,7 +305,7 @@ class SemanticsNode extends AbstractNode {
 
   /// Restore this node to its default state.
   void reset() {
-    bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
+    final bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
     _actions = 0;
     _flags = 0;
     if (hadInheritedMergeAllDescendantsIntoThisNode)
@@ -336,7 +334,7 @@ class SemanticsNode extends AbstractNode {
       return true;
     });
     assert(() {
-      Set<SemanticsNode> seenChildren = new Set<SemanticsNode>();
+      final Set<SemanticsNode> seenChildren = new Set<SemanticsNode>();
       for (SemanticsNode child in _newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
@@ -411,7 +409,7 @@ class SemanticsNode extends AbstractNode {
         }
       }
     }
-    List<SemanticsNode> oldChildren = _children;
+    final List<SemanticsNode> oldChildren = _children;
     _children = _newChildren;
     oldChildren?.clear();
     _newChildren = oldChildren;
@@ -473,6 +471,7 @@ class SemanticsNode extends AbstractNode {
     owner._nodes.remove(id);
     owner._detachedNodes.add(this);
     super.detach();
+    assert(owner == null);
     if (_children != null) {
       for (SemanticsNode child in _children) {
         // The list of children may be stale and may contain nodes that have
@@ -481,6 +480,10 @@ class SemanticsNode extends AbstractNode {
           child.detach();
       }
     }
+    // The other side will have forgotten this node if we ever send
+    // it again, so make sure to mark it dirty so that it'll get
+    // sent if it is resurrected.
+    _markDirty();
   }
 
   bool _dirty = false;
@@ -560,10 +563,10 @@ class SemanticsNode extends AbstractNode {
 
   @override
   String toString() {
-    StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
     buffer.write('$runtimeType($id');
     if (_dirty)
-      buffer.write(" (${ owner != null && owner._dirtyNodes.contains(this) ? 'dirty' : 'STALE' })");
+      buffer.write(' (${ owner != null && owner._dirtyNodes.contains(this) ? "dirty" : "STALE; owner=$owner" })');
     if (_shouldMergeAllDescendantsIntoThisNode)
       buffer.write(' (leaf merge)');
     buffer.write('; $rect');
@@ -590,7 +593,7 @@ class SemanticsNode extends AbstractNode {
     String result = '$prefixLineOne$this\n';
     if (_children != null && _children.isNotEmpty) {
       for (int index = 0; index < _children.length - 1; index += 1) {
-        SemanticsNode child = _children[index];
+        final SemanticsNode child = _children[index];
         result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
       }
       result += '${_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
@@ -602,8 +605,9 @@ class SemanticsNode extends AbstractNode {
 /// Owns [SemanticsNode] objects and notifies listeners of changes to the
 /// render tree semantics.
 ///
-/// To listen for semantic updates, call [PipelineOwner.addSemanticsListener],
-/// which will create a [SemanticsOwner] if necessary.
+/// To listen for semantic updates, call [PipelineOwner.ensureSemantics] to
+/// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
+/// necessary.
 class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = new Set<SemanticsNode>();
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
@@ -622,21 +626,15 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [ui.window.updateSemantics].
+  /// Update the semantics using [Window.updateSemantics].
   void sendSemanticsUpdate() {
-    for (SemanticsNode oldNode in _detachedNodes) {
-      // The other side will have forgotten this node if we even send
-      // it again, so make sure to mark it dirty so that it'll get
-      // sent if it is resurrected.
-      oldNode._dirty = true;
-    }
-    _detachedNodes.clear();
     if (_dirtyNodes.isEmpty)
       return;
-    List<SemanticsNode> visitedNodes = <SemanticsNode>[];
+    final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
-      List<SemanticsNode> localDirtyNodes = _dirtyNodes.toList();
+      final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
       _dirtyNodes.clear();
+      _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
       visitedNodes.addAll(localDirtyNodes);
       for (SemanticsNode node in localDirtyNodes) {
@@ -670,7 +668,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    ui.SemanticsUpdateBuilder builder = new ui.SemanticsUpdateBuilder();
+    final ui.SemanticsUpdateBuilder builder = new ui.SemanticsUpdateBuilder();
     for (SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
@@ -713,13 +711,13 @@ class SemanticsOwner extends ChangeNotifier {
   /// this function does nothing.
   void performAction(int id, SemanticsAction action) {
     assert(action != null);
-    SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
     handler?.performAction(action);
   }
 
-  SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Point position, SemanticsAction action) {
+  SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
     if (node.transform != null) {
-      Matrix4 inverse = new Matrix4.identity();
+      final Matrix4 inverse = new Matrix4.identity();
       if (inverse.copyInverse(node.transform) == 0.0)
         return null;
       position = MatrixUtils.transformPoint(inverse, position);
@@ -739,7 +737,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     if (node.hasChildren) {
       for (SemanticsNode child in node._children.reversed) {
-        SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
+        final SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
         if (handler != null)
           return handler;
       }
@@ -747,16 +745,19 @@ class SemanticsOwner extends ChangeNotifier {
     return node._canPerformAction(action) ? node._actionHandler : null;
   }
 
-  /// Asks the [SemanticsNode] with at the given position to perform the given action.
+  /// Asks the [SemanticsNode] at the given position to perform the given action.
   ///
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.
-  void performActionAt(Point position, SemanticsAction action) {
+  void performActionAt(Offset position, SemanticsAction action) {
     assert(action != null);
     final SemanticsNode node = rootSemanticsNode;
     if (node == null)
       return;
-    SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
+    final SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
     handler?.performAction(action);
   }
+
+  @override
+  String toString() => '$runtimeType#$hashCode';
 }

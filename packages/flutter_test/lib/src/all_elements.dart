@@ -23,9 +23,8 @@ Iterable<Element> collectAllElementsFrom(Element rootElement, {
 }
 
 class _DepthFirstChildIterator implements Iterator<Element> {
-  _DepthFirstChildIterator(Element rootElement, bool skipOffstage)
-    : skipOffstage = skipOffstage,
-      _stack = _reverseChildrenOf(rootElement, skipOffstage).toList();
+  _DepthFirstChildIterator(Element rootElement, this.skipOffstage)
+    : _stack = _reverseChildrenOf(rootElement, skipOffstage).toList();
 
   final bool skipOffstage;
 

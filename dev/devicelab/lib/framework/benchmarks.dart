@@ -33,7 +33,7 @@ Future<num> runBenchmark(Benchmark benchmark, {
 }) async {
   await benchmark.init();
 
-  List<num> allRuns = <num>[];
+  final List<num> allRuns = <num>[];
 
   num minValue;
 
@@ -46,7 +46,7 @@ Future<num> runBenchmark(Benchmark benchmark, {
     print('');
 
     try {
-      num result = await benchmark.run();
+      final num result = await benchmark.run();
       allRuns.add(result);
 
       if (minValue == null || result < minValue) {

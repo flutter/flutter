@@ -6,15 +6,17 @@ import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
-import 'binding.dart';
 
 /// The layout constraints for the root render object.
+@immutable
 class ViewConfiguration {
   /// Creates a view configuration.
   ///
@@ -78,7 +80,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (configuration == value)
       return;
     _configuration = value;
-    replaceRootLayer(new TransformLayer(transform: configuration.toMatrix()));
+    final ContainerLayer rootLayer = new TransformLayer(transform: configuration.toMatrix());
+    rootLayer.attach(this);
+    replaceRootLayer(rootLayer);
     markNeedsLayout();
   }
 
@@ -86,7 +90,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void scheduleInitialFrame() {
     assert(owner != null);
     scheduleInitialLayout();
-    scheduleInitialPaint(new TransformLayer(transform: configuration.toMatrix()));
+    final ContainerLayer rootLayer = new TransformLayer(transform: configuration.toMatrix());
+    rootLayer.attach(this);
+    scheduleInitialPaint(rootLayer);
     owner.requestVisualUpdate();
   }
 
@@ -108,7 +114,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       _orientation = configuration.orientation;
     }
     _size = configuration.size;
-    assert(!_size.isInfinite);
+    assert(_size.isFinite);
 
     if (child != null)
       child.layout(new BoxConstraints.tight(_size));
@@ -126,7 +132,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// given hit test result.
   ///
   /// The [position] argument is in the coordinate system of the render view.
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (child != null)
       child.hitTest(result, position: position);
     result.add(new HitTestEntry(this));
@@ -148,13 +154,13 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void compositeFrame() {
     Timeline.startSync('Compositing');
     try {
-      ui.SceneBuilder builder = new ui.SceneBuilder();
+      final ui.SceneBuilder builder = new ui.SceneBuilder();
       layer.addToScene(builder, Offset.zero);
-      ui.Scene scene = builder.build();
+      final ui.Scene scene = builder.build();
       ui.window.render(scene);
       scene.dispose();
       assert(() {
-        if (debugRepaintRainbowEnabled)
+        if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
           debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(debugCurrentRepaintColor.hue + debugRepaintRainbowHueIncrement);
         return true;
       });
@@ -164,10 +170,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  Rect get paintBounds => Point.origin & size;
+  Rect get paintBounds => Offset.zero & size;
 
   @override
-  Rect get semanticBounds => Point.origin & size;
+  Rect get semanticBounds => Offset.zero & size;
 
   @override
   void debugFillDescription(List<String> description) {

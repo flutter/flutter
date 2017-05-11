@@ -58,7 +58,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   AnimationController _controller;
   CurvedAnimation _animation;
-  SizeTween _sizeTween = new SizeTween();
+  final SizeTween _sizeTween = new SizeTween();
   bool _didChangeTargetSizeLastFrame = false;
   bool _hasVisualOverflow;
   double _lastValue;
@@ -153,7 +153,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && _hasVisualOverflow) {
-      final Rect rect = Point.origin & size;
+      final Rect rect = Offset.zero & size;
       context.pushClipRect(needsCompositing, offset, rect, super.paint);
     } else {
       super.paint(context, offset);

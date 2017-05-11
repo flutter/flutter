@@ -13,12 +13,11 @@ import 'package:flutter/widgets.dart';
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/progress-indicators/#activity-indicators>
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator.
-  CupertinoActivityIndicator({
+  const CupertinoActivityIndicator({
     Key key,
     this.animating: true,
-  }) : super(key: key) {
-    assert(animating != null);
-  }
+  }) : assert(animating != null),
+       super(key: key);
 
   /// Whether the activity indicator is running its animation.
   ///
@@ -43,14 +42,15 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       vsync: this,
     );
 
-    if (config.animating)
+    if (widget.animating)
       _controller.repeat();
   }
 
   @override
-  void didUpdateConfig(CupertinoActivityIndicator oldConfig) {
-    if (config.animating != oldConfig.animating) {
-      if (config.animating)
+  void didUpdateWidget(CupertinoActivityIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animating != oldWidget.animating) {
+      if (widget.animating)
         _controller.repeat();
       else
         _controller.stop();
@@ -86,8 +86,8 @@ final RRect _kTickFundamentalRRect = new RRect.fromLTRBXY(-10.0, 1.0, -5.0, -1.0
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
-    Animation<double> position,
-  }) : position = position, super(repaint: position);
+    this.position,
+  }) : super(repaint: position);
 
   final Animation<double> position;
 

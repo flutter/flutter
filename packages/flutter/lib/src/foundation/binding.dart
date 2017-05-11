@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'platform.dart';
 
 /// Signature for service extensions.
 ///
@@ -115,6 +116,36 @@ abstract class BindingBase {
       name: 'frameworkPresent',
       callback: () => new Future<Null>.value()
     );
+    assert(() {
+      registerServiceExtension(
+        name: 'platformOverride',
+        callback: (Map<String, String> parameters) async {
+          if (parameters.containsKey('value')) {
+            switch (parameters['value']) {
+              case 'android':
+                debugDefaultTargetPlatformOverride = TargetPlatform.android;
+                break;
+              case 'iOS':
+                debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+                break;
+              case 'fuchsia':
+                debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+                break;
+              case 'default':
+              default:
+                debugDefaultTargetPlatformOverride = null;
+            }
+            await reassembleApplication();
+          }
+          return <String, String>{
+            'value': defaultTargetPlatform
+                     .toString()
+                     .substring('$TargetPlatform.'.length),
+          };
+        }
+      );
+      return true;
+    });
     assert(() { _debugServiceExtensionsRegistered = true; return true; });
   }
 
@@ -132,7 +163,6 @@ abstract class BindingBase {
     FlutterError.resetErrorCount();
     return new Future<Null>.value();
   }
-
 
   /// Registers a service extension method with the given name (full
   /// name "ext.flutter.name"), which takes no arguments and returns
@@ -169,7 +199,7 @@ abstract class BindingBase {
   /// service extension method is called with a new value.
   @protected
   void registerBoolServiceExtension({
-    String name,
+    @required String name,
     @required AsyncValueGetter<bool> getter,
     @required AsyncValueSetter<bool> setter
   }) {
@@ -250,7 +280,7 @@ abstract class BindingBase {
   /// extension method is called. The callback must return a [Future]
   /// that either eventually completes to a return value in the form
   /// of a name/value map where the values can all be converted to
-  /// JSON using [JSON.encode], or fails. In case of failure, the
+  /// JSON using `JSON.encode()` (see [JsonCodec.encode]), or fails. In case of failure, the
   /// failure is reported to the remote caller and is dumped to the
   /// logs.
   ///

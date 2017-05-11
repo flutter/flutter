@@ -18,16 +18,25 @@ void main() {
     });
 
     test('navigation', () async {
-      SerializableFinder menuItem = find.text('Text fields');
-      await driver.scrollIntoView(menuItem);
-      await new Future<Null>.delayed(kWaitBetweenActions);
-
-      for (int i = 0; i < 15; i++) {
-        await driver.tap(menuItem);
+      final Completer<Null> completer = new Completer<Null>();
+      bool scroll = true;
+      final SerializableFinder menuItem = find.text('Text fields');
+      driver.waitFor(menuItem).then<Null>((Null value) async {
+        scroll = false;
         await new Future<Null>.delayed(kWaitBetweenActions);
-        await driver.tap(find.byTooltip('Back'));
+        for (int i = 0; i < 15; i++) {
+          await driver.tap(menuItem);
+          await new Future<Null>.delayed(kWaitBetweenActions);
+          await driver.tap(find.byTooltip('Back'));
+          await new Future<Null>.delayed(kWaitBetweenActions);
+        }
+        completer.complete();
+      });
+      while (scroll) {
+        await driver.scroll(find.text('Flutter Gallery'), 0.0, -500.0, const Duration(milliseconds: 80));
         await new Future<Null>.delayed(kWaitBetweenActions);
       }
-    }, timeout: new Timeout(new Duration(minutes: 1)));
+      await completer.future;
+    }, timeout: const Timeout(const Duration(minutes: 1)));
   });
 }

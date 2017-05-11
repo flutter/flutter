@@ -13,10 +13,10 @@ void main() {
         home: new Material(
           child: new Center(
             child: new Chip(
-              avatar: new CircleAvatar(
-                child: new Text('C')
+              avatar: const CircleAvatar(
+                child: const Text('C')
               ),
-              label: new Text('Chip'),
+              label: const Text('Chip'),
               onDeleted: () {
                 didDeleteChip = true;
               }

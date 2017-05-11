@@ -6,9 +6,10 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 import 'routes.dart';
+import 'will_pop_scope.dart';
 
 /// An optional container for grouping together multiple form field widgets
-/// (e.g. [Input] widgets).
+/// (e.g. [TextField] widgets).
 ///
 /// Each individual form field should be wrapped in a [FormField] widget, with
 /// the [Form] widget as a common ancestor of all of those. Call methods on
@@ -20,14 +21,13 @@ class Form extends StatefulWidget {
   /// Creates a container for form fields.
   ///
   /// The [child] argument must not be null.
-  Form({
+  const Form({
     Key key,
     @required this.child,
     this.autovalidate: false,
     this.onWillPop,
-  }) : super(key: key) {
-    assert(child != null);
-  }
+  }) : assert(child != null),
+       super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
   ///
@@ -38,7 +38,7 @@ class Form extends StatefulWidget {
   /// form.save();
   /// ```
   static FormState of(BuildContext context) {
-    _FormScope scope = context.inheritFromWidgetOfExactType(_FormScope);
+    final _FormScope scope = context.inheritFromWidgetOfExactType(_FormScope);
     return scope?._formState;
   }
 
@@ -55,37 +55,21 @@ class Form extends StatefulWidget {
   ///
   /// If the callback returns a Future that resolves to false, the form's route
   /// will not be popped.
-  WillPopCallback onWillPop;
+  final WillPopCallback onWillPop;
 
   @override
   FormState createState() => new FormState();
 }
 
+/// State assocated with a [Form] widget.
+///
+/// A [FormState] object can be used to [save], [reset], and [validate] every
+/// [FormField] that is a descendant of the associated [Form].
+///
+/// Typically obtained via [Form.of].
 class FormState extends State<Form> {
   int _generation = 0;
-  Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
-
-  @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
-    final ModalRoute<dynamic> route = ModalRoute.of(context);
-    if (route != null && config.onWillPop != null) {
-      // Avoid adding our callback twice by removing it first.
-      route.removeScopedWillPopCallback(config.onWillPop);
-      route.addScopedWillPopCallback(config.onWillPop);
-    }
-  }
-
-  @override
-  void didUpdateConfig(Form oldConfig) {
-    final ModalRoute<dynamic> route = ModalRoute.of(context);
-    if (config.onWillPop != oldConfig.onWillPop && route != null) {
-      if (oldConfig.onWillPop != null)
-        route.removeScopedWillPopCallback(oldConfig.onWillPop);
-      if (config.onWillPop != null)
-        route.addScopedWillPopCallback(config.onWillPop);
-    }
-  }
+  final Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -105,12 +89,15 @@ class FormState extends State<Form> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.autovalidate)
+    if (widget.autovalidate)
       _validate();
-    return new _FormScope(
-      formState: this,
-      generation: _generation,
-      child: config.child
+    return new WillPopScope(
+      onWillPop: widget.onWillPop,
+      child: new _FormScope(
+        formState: this,
+        generation: _generation,
+        child: widget.child,
+      ),
     );
   }
 
@@ -129,7 +116,7 @@ class FormState extends State<Form> {
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
-  /// returns true iff there are no errors.
+  /// returns true if there are no errors.
   bool validate() {
     _fieldDidChange();
     return _validate();
@@ -144,7 +131,7 @@ class FormState extends State<Form> {
 }
 
 class _FormScope extends InheritedWidget {
-  _FormScope({
+  const _FormScope({
     Key key,
     Widget child,
     FormState formState,
@@ -160,7 +147,7 @@ class _FormScope extends InheritedWidget {
   final int _generation;
 
   /// The [Form] associated with this widget.
-  Form get form => _formState.config;
+  Form get form => _formState.widget;
 
   @override
   bool updateShouldNotify(_FormScope old) => _generation != old._generation;
@@ -181,9 +168,10 @@ typedef void FormFieldSetter<T>(T newValue);
 /// Used by [FormField.builder].
 typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
 
-/// A single form field. This widget maintains the current state of the form
-/// field, so that updates and validation errors are visually reflected in the
-/// UI.
+/// A single form field.
+///
+/// This widget maintains the current state of the form field, so that updates
+/// and validation errors are visually reflected in the UI.
 ///
 /// When used inside a [Form], you can use methods on [FormState] to query or
 /// manipulate the form data as a whole. For example, calling [FormState.save]
@@ -202,16 +190,18 @@ typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
 ///  * [Form], which is the widget that aggregates the form fields.
 ///  * [TextField], which is a commonly used form field for entering text.
 class FormField<T> extends StatefulWidget {
-  FormField({
+  /// Creates a single form field.
+  ///
+  /// The [builder] argument must not be null.
+  const FormField({
     Key key,
     @required this.builder,
     this.onSaved,
     this.validator,
     this.initialValue,
     this.autovalidate: false,
-  }) : super(key: key) {
-    assert(builder != null);
-  }
+  }) : assert(builder != null),
+       super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
   /// Form.save().
@@ -229,7 +219,7 @@ class FormField<T> extends StatefulWidget {
   /// An optional value to initialize the form field to, or null otherwise.
   final T initialValue;
 
-  /// If true, this form fields will validate and update its error text
+  /// If true, this form field will validate and update its error text
   /// immediately after every change. Otherwise, you must call
   /// [FormFieldState.validate] to validate. If part of a [Form] that
   /// autovalidates, this value will be ignored.
@@ -258,14 +248,14 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
-    if (config.onSaved != null)
-      config.onSaved(value);
+    if (widget.onSaved != null)
+      widget.onSaved(value);
   }
 
   /// Resets the field to its initial value.
   void reset() {
     setState(() {
-      _value = config.initialValue;
+      _value = widget.initialValue;
       _errorText = null;
     });
   }
@@ -280,8 +270,8 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   bool _validate() {
-    if (config.validator != null)
-      _errorText = config.validator(_value);
+    if (widget.validator != null)
+      _errorText = widget.validator(_value);
     return !hasError;
   }
 
@@ -297,7 +287,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   @override
   void initState() {
     super.initState();
-    _value = config.initialValue;
+    _value = widget.initialValue;
   }
 
   @override
@@ -308,9 +298,9 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.autovalidate)
+    if (widget.autovalidate)
       _validate();
     Form.of(context)?._register(this);
-    return config.builder(this);
+    return widget.builder(this);
   }
 }

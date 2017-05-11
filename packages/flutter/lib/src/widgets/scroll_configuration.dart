@@ -6,25 +6,33 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
-import 'scroll_behavior.dart';
-import 'scroll_physics.dart';
 import 'overscroll_indicator.dart';
+import 'scroll_physics.dart';
 
-class ScrollBehavior2 {
-  const ScrollBehavior2();
+const Color _kDefaultGlowColor = const Color(0xFFFFFFFF);
+
+/// Describes how [Scrollable] widgets should behave.
+///
+/// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
+/// subtree.
+@immutable
+class ScrollBehavior {
+  /// Creates a description of how [Scrollable] widgets should behave.
+  const ScrollBehavior();
 
   /// The platform whose scroll physics should be implemented.
   ///
   /// Defaults to the current platform.
   TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
 
-  /// The color to use for the glow effect when [platform] indicates a platform
-  /// that uses a [GlowingOverscrollIndicator].
+  /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
-  /// Defaults to white.
-  Color getGlowColor(BuildContext context) => const Color(0xFFFFFFFF);
-
+  /// For example, on Android, this method wraps the given widget with a
+  /// [GlowingOverscrollIndicator] to provide visual feedback when the user
+  /// overscrolls.
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    // When modifying this function, consider modifying the implementation in
+    // _MaterialScrollBehavior as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
         return child;
@@ -33,16 +41,16 @@ class ScrollBehavior2 {
         return new GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
-          color: getGlowColor(context),
+          color: _kDefaultGlowColor,
         );
     }
     return null;
   }
 
-  /// The scroll physics to use for the given platform.
+  /// The scroll physics to use for the platform given by [getPlatform].
   ///
-  /// Used by [createScrollPosition] to get the scroll physics for newly created
-  /// scroll positions.
+  /// Defaults to [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
+  /// Android.
   ScrollPhysics getScrollPhysics(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
@@ -54,125 +62,58 @@ class ScrollBehavior2 {
     return null;
   }
 
-  bool shouldNotify(@checked ScrollBehavior2 oldDelegate) => false;
+  /// Called whenever a [ScrollConfiguration] is rebuilt with a new
+  /// [ScrollBehavior] of the same [runtimeType].
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If this method returns true, all the widgets that inherit from the
+  /// [ScrollConfiguration] will rebuild using the new [ScrollBehavior]. If this
+  /// method returns false, the rebuilds might be optimized away.
+  bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
+
+  @override
+  String toString() => '$runtimeType';
 }
 
-class ScrollConfiguration2 extends InheritedWidget {
-  const ScrollConfiguration2({
+/// Controls how [Scrollable] widgets behave in a subtree.
+///
+/// The scroll configuration determines the [ScrollPhysics] and viewport
+/// decorations used by decendants of [child].
+class ScrollConfiguration extends InheritedWidget {
+  /// Creates a widget that controls how [Scrollable] widgets behave in a subtree.
+  ///
+  /// The [behavior] and [child] arguments must not be null.
+  const ScrollConfiguration({
     Key key,
     @required this.behavior,
     @required Widget child,
   }) : super(key: key, child: child);
 
-  final ScrollBehavior2 behavior;
+  /// How [Scrollable] widgets that are decendants of [child] should behave.
+  final ScrollBehavior behavior;
 
-  static ScrollBehavior2 of(BuildContext context) {
-    final ScrollConfiguration2 configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration2);
-    return configuration?.behavior ?? const ScrollBehavior2();
+  /// The [ScrollBehavior] for [Scrollable] widgets in the given [BuildContext].
+  ///
+  /// If no [ScrollConfiguration] widget is in scope of the given `context`,
+  /// a default [ScrollBehavior] instance is returned.
+  static ScrollBehavior of(BuildContext context) {
+    final ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
+    return configuration?.behavior ?? const ScrollBehavior();
   }
 
   @override
-  bool updateShouldNotify(ScrollConfiguration2 old) {
+  bool updateShouldNotify(ScrollConfiguration oldWidget) {
     assert(behavior != null);
-    return behavior.runtimeType != old.behavior.runtimeType
-        || behavior.shouldNotify(old.behavior);
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// DELETE EVERYTHING BELOW THIS LINE WHEN REMOVING LEGACY SCROLLING CODE
-////////////////////////////////////////////////////////////////////////////////
-
-/// Controls how [Scrollable] widgets in a subtree behave.
-///
-/// Used by [ScrollConfiguration].
-abstract class ScrollConfigurationDelegate {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const ScrollConfigurationDelegate();
-
-  /// Returns the platform whose scroll physics should be approximated. See
-  /// [ScrollBehavior.platform].
-  TargetPlatform get platform;
-
-  /// Returns the ScrollBehavior to be used by generic scrolling containers like
-  /// [Block].
-  ExtentScrollBehavior createScrollBehavior();
-
-  /// Generic scrolling containers like [Block] will apply this function to the
-  /// Scrollable they create. It can be used to add widgets that wrap the
-  /// Scrollable, like scrollbars or overscroll indicators. By default the
-  /// [scrollWidget] parameter is returned unchanged.
-  Widget wrapScrollWidget(BuildContext context, Widget scrollWidget) => scrollWidget;
-
-  /// Overrides should return true if this ScrollConfigurationDelegate differs
-  /// from the provided old delegate in a way that requires rebuilding its
-  /// scrolling container descendants.
-  bool updateShouldNotify(@checked ScrollConfigurationDelegate old);
-}
-
-class _DefaultScrollConfigurationDelegate extends ScrollConfigurationDelegate {
-  const _DefaultScrollConfigurationDelegate();
-
-  @override
-  TargetPlatform get platform => defaultTargetPlatform;
-
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: platform);
-
-  @override
-  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
-}
-
-/// A widget that controls descendant [Scrollable] widgets.
-///
-/// Classes that create Scrollables are not required to depend on this
-/// Widget. The following general purpose scrolling widgets do depend
-/// on [ScrollConfiguration]: [Block], [LazyBlock], [ScrollableViewport],
-/// [ScrollableList], [ScrollableLazyList]. The [Scrollable] base class uses
-/// [ScrollConfiguration] to create its [ScrollBehavior].
-class ScrollConfiguration extends InheritedWidget {
-  /// Creates a widget that controls descendant [Scrollable] widgets.
-  ///
-  /// If the [delegate] argument is null, the scroll configuration for this
-  /// subtree is controlled by the default implementation of
-  /// [ScrollConfigurationDelegate].
-  ScrollConfiguration({
-    Key key,
-    this.delegate,
-    @required Widget child
-  }) : super(key: key, child: child);
-
-  static const ScrollConfigurationDelegate _defaultDelegate = const _DefaultScrollConfigurationDelegate();
-
-  /// Defines the ScrollBehavior and scrollable wrapper for descendants.
-  final ScrollConfigurationDelegate delegate;
-
-  /// The delegate property of the closest instance of this class that encloses
-  /// the given context.
-  ///
-  /// If no such instance exists, returns a default
-  /// [ScrollConfigurationDelegate] that approximates the scrolling physics of
-  /// the current platform (see [defaultTargetPlatform]) using a
-  /// [OverscrollWhenScrollableBehavior] behavior model.
-  ///
-  /// Typical usage is as follows:
-  ///
-  /// ```dart
-  /// ScrollConfigurationDelegate scrollConfiguration = ScrollConfiguration.of(context);
-  /// ```
-  static ScrollConfigurationDelegate of(BuildContext context) {
-    ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
-    return configuration?.delegate ?? _defaultDelegate;
-  }
-
-  /// A utility function that calls [ScrollConfigurationDelegate.wrapScrollWidget].
-  static Widget wrap(BuildContext context, Widget scrollWidget) {
-    return ScrollConfiguration.of(context).wrapScrollWidget(context, scrollWidget);
+    return behavior.runtimeType != oldWidget.behavior.runtimeType
+        || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }
 
   @override
-  bool updateShouldNotify(ScrollConfiguration old) {
-    return delegate?.updateShouldNotify(old.delegate) ?? false;
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('behavior: $behavior');
   }
 }

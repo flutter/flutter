@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 void main() {
 
   testWidgets('Drawer control test', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     BuildContext savedContext;
     await tester.pumpWidget(
       new MaterialApp(
@@ -18,7 +18,7 @@ void main() {
             savedContext = context;
             return new Scaffold(
               key: scaffoldKey,
-              drawer: new Text('drawer'),
+              drawer: const Text('drawer'),
               body: new Container()
             );
           }
@@ -40,12 +40,12 @@ void main() {
   });
 
   testWidgets('Drawer tap test', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
           key: scaffoldKey,
-          drawer: new Text('drawer'),
+          drawer: const Text('drawer'),
           body: new Container()
         )
       )
@@ -62,7 +62,7 @@ void main() {
     expect(find.text('drawer'), findsOneWidget);
     await tester.pump(const Duration(seconds: 1)); // ditto
     expect(find.text('drawer'), findsOneWidget);
-    await tester.tapAt(const Point(750.0, 100.0)); // on the mask
+    await tester.tapAt(const Offset(750.0, 100.0)); // on the mask
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     // drawer should be starting to animate away
@@ -72,20 +72,18 @@ void main() {
   });
 
   testWidgets('Drawer drag cancel resume', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
           key: scaffoldKey,
           drawer: new Drawer(
-            child: new Block(
+            child: new ListView(
               children: <Widget>[
-                new Text('drawer'),
+                const Text('drawer'),
                 new Container(
                   height: 1000.0,
-                  decoration: new BoxDecoration(
-                    backgroundColor: Colors.blue[500]
-                  )
+                  color: Colors.blue[500],
                 ),
               ]
             )
@@ -101,31 +99,31 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // animation done
     expect(find.text('drawer'), findsOneWidget);
 
-    await tester.tapAt(const Point(750.0, 100.0)); // on the mask
+    await tester.tapAt(const Offset(750.0, 100.0)); // on the mask
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     // drawer should be starting to animate away
-    RenderBox textBox = tester.renderObject(find.text('drawer'));
-    double textLeft = textBox.localToGlobal(Point.origin).x;
+    final RenderBox textBox = tester.renderObject(find.text('drawer'));
+    final double textLeft = textBox.localToGlobal(Offset.zero).dx;
     expect(textLeft, lessThan(0.0));
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     // drawer should be stopped.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
-    expect(textBox.localToGlobal(Point.origin).x, equals(textLeft));
+    expect(textBox.localToGlobal(Offset.zero).dx, equals(textLeft));
 
-    await gesture.moveBy(const Offset(0.0, -50.0));
+    await gesture.moveBy(const Offset(0.0, 50.0));
     // drawer should be returning to visible
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(textBox.localToGlobal(Point.origin).x, equals(0.0));
+    expect(textBox.localToGlobal(Offset.zero).dx, equals(0.0));
 
     await gesture.up();
   });
 
   testWidgets('Drawer navigator back button', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     bool buttonPressed = false;
 
     await tester.pumpWidget(
@@ -137,9 +135,9 @@ void main() {
               drawer: new Drawer(
                 child: new ListView(
                   children: <Widget>[
-                    new Text('drawer'),
+                    const Text('drawer'),
                     new FlatButton(
-                      child: new Text('close'),
+                      child: const Text('close'),
                       onPressed: () => Navigator.pop(context)
                     ),
                   ]
@@ -147,7 +145,7 @@ void main() {
               ),
               body: new Container(
                 child: new FlatButton(
-                  child: new Text('button'),
+                  child: const Text('button'),
                   onPressed: () { buttonPressed = true; }
                 )
               )

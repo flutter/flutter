@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' show File, Platform;
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'media_query.dart';
 export 'package:flutter/services.dart' show
   AssetImage,
   ExactAssetImage,
+  MemoryImage,
   NetworkImage,
   FileImage;
 
@@ -25,10 +27,10 @@ export 'package:flutter/services.dart' show
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size size }) {
   return new ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
+    devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     // TODO(ianh): provide the locale
     size: size,
-    platform: Platform.operatingSystem
+    platform: Platform.operatingSystem,
   );
 }
 
@@ -37,11 +39,12 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// Several constructors are provided for the various ways that an image can be
 /// specified:
 ///
-/// * [new Image], for obtaining an image from an [ImageProvider].
-/// * [new Image.asset], for obtaining an image from an [AssetBundle]
-///   using a key.
-/// * [new Image.network], for obtaining an image from a URL.
-/// * [new Image.file], for obtaining an image from a [File].
+///  * [new Image], for obtaining an image from an [ImageProvider].
+///  * [new Image.asset], for obtaining an image from an [AssetBundle]
+///    using a key.
+///  * [new Image.network], for obtaining an image from a URL.
+///  * [new Image.file], for obtaining an image from a [File].
+///  * [new Image.memory], for obtaining an image from a [Uint8List].
 ///
 /// To automatically perform pixel-density-aware asset resolution, specify the
 /// image using an [AssetImage] and make sure that a [MaterialApp], [WidgetsApp],
@@ -60,20 +63,20 @@ class Image extends StatefulWidget {
   /// [new Image.network] and [new Image.asset] respectively.
   ///
   /// The [image] and [repeat] arguments must not be null.
-  Image({
+  const Image({
     Key key,
     @required this.image,
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.gaplessPlayback: false
-  }) : super(key: key) {
-    assert(image != null);
-  }
+  }) : assert(image != null),
+       super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
@@ -84,6 +87,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -104,6 +108,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -132,6 +137,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -139,6 +145,24 @@ class Image extends StatefulWidget {
     this.gaplessPlayback: false
   }) : image = scale != null ? new ExactAssetImage(name, bundle: bundle, scale: scale)
                              : new AssetImage(name, bundle: bundle),
+       super(key: key);
+
+  /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
+  ///
+  /// The [bytes], [scale], and [repeat] arguments must not be null.
+  Image.memory(Uint8List bytes, {
+    Key key,
+    double scale: 1.0,
+    this.width,
+    this.height,
+    this.color,
+    this.colorBlendMode,
+    this.fit,
+    this.alignment,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice,
+    this.gaplessPlayback: false
+  }) : image = new MemoryImage(bytes, scale: scale),
        super(key: key);
 
   /// The image to display.
@@ -156,14 +180,24 @@ class Image extends StatefulWidget {
   /// aspect ratio.
   final double height;
 
-  /// If non-null, apply this color filter to the image before painting.
+  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color color;
+
+  /// Used to combine [color] with this image.
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
+  /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  final BlendMode colorBlendMode;
 
   /// How to inscribe the image into the space allocated during layout.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  final ImageFit fit;
+  final BoxFit fit;
 
   /// How to align the image within its bounds.
   ///
@@ -201,6 +235,8 @@ class Image extends StatefulWidget {
       description.add('height: $height');
     if (color != null)
       description.add('color: $color');
+    if (colorBlendMode != null)
+      description.add('colorBlendMode: $colorBlendMode');
     if (fit != null)
       description.add('fit: $fit');
     if (alignment != null)
@@ -217,14 +253,15 @@ class _ImageState extends State<Image> {
   ImageInfo _imageInfo;
 
   @override
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     _resolveImage();
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override
-  void didUpdateConfig(Image oldConfig) {
-    if (config.image != oldConfig.image)
+  void didUpdateWidget(Image oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.image != oldWidget.image)
       _resolveImage();
   }
 
@@ -236,14 +273,14 @@ class _ImageState extends State<Image> {
 
   void _resolveImage() {
     final ImageStream oldImageStream = _imageStream;
-    _imageStream = config.image.resolve(createLocalImageConfiguration(
+    _imageStream = widget.image.resolve(createLocalImageConfiguration(
       context,
-      size: config.width != null && config.height != null ? new Size(config.width, config.height) : null
+      size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
     ));
     assert(_imageStream != null);
     if (_imageStream.key != oldImageStream?.key) {
       oldImageStream?.removeListener(_handleImageChanged);
-      if (!config.gaplessPlayback)
+      if (!widget.gaplessPlayback)
         setState(() { _imageInfo = null; });
       _imageStream.addListener(_handleImageChanged);
     }
@@ -266,14 +303,15 @@ class _ImageState extends State<Image> {
   Widget build(BuildContext context) {
     return new RawImage(
       image: _imageInfo?.image,
-      width: config.width,
-      height: config.height,
+      width: widget.width,
+      height: widget.height,
       scale: _imageInfo?.scale ?? 1.0,
-      color: config.color,
-      fit: config.fit,
-      alignment: config.alignment,
-      repeat: config.repeat,
-      centerSlice: config.centerSlice
+      color: widget.color,
+      colorBlendMode: widget.colorBlendMode,
+      fit: widget.fit,
+      alignment: widget.alignment,
+      repeat: widget.repeat,
+      centerSlice: widget.centerSlice
     );
   }
 

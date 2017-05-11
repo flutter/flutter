@@ -62,7 +62,7 @@ bool debugPaintBaselinesEnabled = false;
 /// The color to use when painting alphabetic baselines.
 Color debugPaintAlphabeticBaselineColor = _kDebugPaintAlphabeticBaselineColor;
 
-/// The color ot use when painting ideographic baselines.
+/// The color to use when painting ideographic baselines.
 Color debugPaintIdeographicBaselineColor = _kDebugPaintIdeographicBaselineColor;
 
 /// Causes each Layer to paint a box around its bounds.
@@ -85,6 +85,9 @@ int debugPaintPointersColorValue = _kDebugPaintPointersColorValue;
 /// Overlay a rotating set of colors when repainting layers in checked mode.
 bool debugRepaintRainbowEnabled = false;
 
+/// Overlay a rotating set of colors when repainting text in checked mode.
+bool debugRepaintTextRainbowEnabled = false;
+
 /// The current color to overlay when repainting a layer.
 HSVColor debugCurrentRepaintColor = _kDebugCurrentRepaintColor;
 
@@ -105,16 +108,17 @@ bool debugPrintMarkNeedsLayoutStacks = false;
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 bool debugCheckIntrinsicSizes = false;
 
-/// Adds [Timeline] events for every RenderObject painted.
+/// Adds [dart:developer.Timeline] events for every RenderObject painted.
 ///
-/// For details on how to use [Timeline] events in the Dart Observatory to
-/// optimize your app, see https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
+/// For details on how to use [dart:developer.Timeline] events in the Dart
+/// Observatory to optimize your app, see:
+/// <https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md>
 bool debugProfilePaintsEnabled = false;
 
 
 /// Returns a list of strings representing the given transform in a format useful for [RenderObject.debugFillDescription].
 List<String> debugDescribeTransform(Matrix4 transform) {
-  List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
+  final List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;
 }
@@ -162,6 +166,7 @@ bool debugAssertAllRenderVarsUnset(String reason) {
         debugPaintLayerBordersEnabled ||
         debugPaintPointersEnabled ||
         debugRepaintRainbowEnabled ||
+        debugRepaintTextRainbowEnabled ||
         debugPrintMarkNeedsPaintStacks ||
         debugPrintMarkNeedsLayoutStacks ||
         debugCheckIntrinsicSizes ||

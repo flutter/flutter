@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/stop.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -14,19 +15,23 @@ import 'src/mocks.dart';
 
 void main() {
   group('stop', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     testUsingContext('returns 0 when Android is connected and ready to be stopped', () async {
-      StopCommand command = new StopCommand();
+      final StopCommand command = new StopCommand();
       applyMocksToCommand(command);
-      MockAndroidDevice device = new MockAndroidDevice();
+      final MockAndroidDevice device = new MockAndroidDevice();
       when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
       await createTestCommandRunner(command).run(<String>['stop']);
     });
 
     testUsingContext('returns 0 when iOS is connected and ready to be stopped', () async {
-      StopCommand command = new StopCommand();
+      final StopCommand command = new StopCommand();
       applyMocksToCommand(command);
-      MockIOSDevice device = new MockIOSDevice();
+      final MockIOSDevice device = new MockIOSDevice();
       when(device.stopApp(any)).thenReturn(new Future<bool>.value(true));
       testDeviceManager.addDevice(device);
 

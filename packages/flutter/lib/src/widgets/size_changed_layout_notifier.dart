@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -9,12 +10,26 @@ import 'package:flutter/widgets.dart';
 /// this notification has changed, and that therefore any assumptions about that
 /// layout are no longer valid.
 ///
+/// For example, sent by [SizeChangedLayoutNotifier] whenever
+/// [SizeChangedLayoutNotifier] changes size.
+///
+/// This notification for triggering repaints, but if you use this notification
+/// to trigger rebuilds or relayouts, you'll create a backwards dependency in
+/// the frame pipeline because [SizeChangedLayoutNotification]s are generated
+/// during layout, which is after the build phase and in the middle of the
+/// layout phase. This backwards dependency can lead to visual corruption or
+/// lags.
+///
 /// See [LayoutChangedNotification] for additional discussion of layout
 /// notifications such as this one.
+///
+/// See also:
+///
+///  * [SizeChangedLayoutNotifier], which sends this notification.
 class SizeChangedLayoutNotification extends LayoutChangedNotification { }
 
-/// A widget that automatically dispatches a [SizeChangedLayoutNotifier] when
-/// the layout of its child changes.
+/// A widget that automatically dispatches a [SizeChangedLayoutNotification]
+/// when the layout of its child changes.
 ///
 /// Useful especially when having some complex, layout-changing animation within
 /// [Material] that is also interactive.
@@ -24,7 +39,7 @@ class SizeChangedLayoutNotification extends LayoutChangedNotification { }
 class SizeChangedLayoutNotifier extends SingleChildRenderObjectWidget {
   /// Creates a [SizeChangedLayoutNotifier] that dispatches layout changed
   /// notifications when [child] changes layout size.
-  SizeChangedLayoutNotifier({
+  const SizeChangedLayoutNotifier({
     Key key,
     Widget child
   }) : super(key: key, child: child);
@@ -42,7 +57,7 @@ class SizeChangedLayoutNotifier extends SingleChildRenderObjectWidget {
 class _RenderSizeChangedWithCallback extends RenderProxyBox {
   _RenderSizeChangedWithCallback({
     RenderBox child,
-    this.onLayoutChangedCallback
+    @required this.onLayoutChangedCallback
   }) : super(child) {
     assert(onLayoutChangedCallback != null);
   }

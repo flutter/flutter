@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
 import '../common.dart';
@@ -32,19 +33,19 @@ void main() {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
     test('test directory copy', () async {
-      MemoryFileSystem sourceMemoryFs = new MemoryFileSystem();
-      String sourcePath = '/some/origin';
-      Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
+      final MemoryFileSystem sourceMemoryFs = new MemoryFileSystem();
+      final String sourcePath = '/some/origin';
+      final Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
       sourceMemoryFs.currentDirectory = sourcePath;
-      File sourceFile1 = sourceMemoryFs.file('some_file.txt')..writeAsStringSync('bleh');
-      DateTime writeTime = sourceFile1.lastModifiedSync();
+      final File sourceFile1 = sourceMemoryFs.file('some_file.txt')..writeAsStringSync('bleh');
+      final DateTime writeTime = sourceFile1.lastModifiedSync();
       sourceMemoryFs.file('sub_dir/another_file.txt').createSync(recursive: true);
       sourceMemoryFs.directory('empty_directory').createSync();
 
       // Copy to another memory file system instance.
-      MemoryFileSystem targetMemoryFs = new MemoryFileSystem();
-      String targetPath = '/some/non-existent/target';
-      Directory targetDirectory = targetMemoryFs.directory(targetPath);
+      final MemoryFileSystem targetMemoryFs = new MemoryFileSystem();
+      final String targetPath = '/some/non-existent/target';
+      final Directory targetDirectory = targetMemoryFs.directory(targetPath);
       copyDirectorySync(sourceDirectory, targetDirectory);
 
       expect(targetDirectory.existsSync(), true);
@@ -57,6 +58,50 @@ void main() {
       expect(sourceMemoryFs.file('some_file.txt').lastModifiedSync(), writeTime);
       // There's still 3 things in the original directory as there were initially.
       expect(sourceMemoryFs.directory(sourcePath).listSync().length, 3);
+    });
+  });
+
+  group('canonicalizePath', () {
+    test('does not lowercase on Windows', () {
+      String path = 'C:\\Foo\\bAr\\cOOL.dart';
+      expect(canonicalizePath(path), path);
+      // fs.path.canonicalize does lowercase on Windows
+      expect(fs.path.canonicalize(path), isNot(path));
+
+      path = '..\\bar\\.\\\\Foo';
+      final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      expect(canonicalizePath(path), expected);
+      // fs.path.canonicalize should return the same result (modulo casing)
+      expect(fs.path.canonicalize(path), expected.toLowerCase());
+    }, testOn: 'windows');
+
+    test('does not lowercase on posix', () {
+      String path = '/Foo/bAr/cOOL.dart';
+      expect(canonicalizePath(path), path);
+      // fs.path.canonicalize and canonicalizePath should be the same on Posix
+      expect(fs.path.canonicalize(path), path);
+
+      path = '../bar/.//Foo';
+      final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      expect(canonicalizePath(path), expected);
+    }, testOn: 'posix');
+  });
+
+  group('escapePath', () {
+    testUsingContext('on Windows', () {
+      expect(escapePath('C:\\foo\\bar\\cool.dart'), 'C:\\\\foo\\\\bar\\\\cool.dart');
+      expect(escapePath('foo\\bar\\cool.dart'), 'foo\\\\bar\\\\cool.dart');
+      expect(escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+    }, overrides: <Type, Generator>{
+      Platform: () => new FakePlatform(operatingSystem: 'windows')
+    });
+
+    testUsingContext('on Linux', () {
+      expect(escapePath('/foo/bar/cool.dart'), '/foo/bar/cool.dart');
+      expect(escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
+      expect(escapePath('foo\\cool.dart'), 'foo\\cool.dart');
+    }, overrides: <Type, Generator>{
+      Platform: () => new FakePlatform(operatingSystem: 'linux')
     });
   });
 }

@@ -4,8 +4,8 @@
 
 import 'package:test/test.dart';
 
-import '../rendering/rendering_tester.dart';
 import '../../../../examples/layers/rendering/custom_coordinate_systems.dart';
+import '../rendering/rendering_tester.dart';
 
 void main() {
   test('Sector layout can paint', () {

@@ -57,7 +57,7 @@ To run tests from a specific stage, use option `-s` (`--stage`):
 dart bin/run.dart -s {NAME_OF_STAGE}
 ```
 
-Currently there are only two stages defined, `devicelab` and `devicelab_ios`.
+Currently there are only three stages defined, `devicelab`, `devicelab_ios` and `devicelab_win`.
 
 # Reproducing broken builds locally
 

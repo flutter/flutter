@@ -12,7 +12,7 @@ class ExampleDragTarget extends StatefulWidget {
 }
 
 class ExampleDragTargetState extends State<ExampleDragTarget> {
-  Color _color = Colors.grey[500];
+  Color _color = Colors.grey;
 
   void _handleAccept(Color data) {
     setState(() {
@@ -27,13 +27,13 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
       builder: (BuildContext context, List<Color> data, List<dynamic> rejectedData) {
         return new Container(
           height: 100.0,
-          margin: new EdgeInsets.all(10.0),
+          margin: const EdgeInsets.all(10.0),
           decoration: new BoxDecoration(
+            color: data.isEmpty ? _color : Colors.grey.shade200,
             border: new Border.all(
               width: 3.0,
-              color: data.isEmpty ? Colors.white : Colors.blue[500]
+              color: data.isEmpty ? Colors.white : Colors.blue
             ),
-            backgroundColor: data.isEmpty ? _color : Colors.grey[200]
           )
         );
       }
@@ -42,7 +42,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatefulWidget {
-  Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
+  const Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
 
   final Color color;
   final double size;
@@ -58,23 +58,23 @@ class DotState extends State<Dot> {
   @override
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onTap: config.tappable ? () { setState(() { taps += 1; }); } : null,
+      onTap: widget.tappable ? () { setState(() { taps += 1; }); } : null,
       child: new Container(
-        width: config.size,
-        height: config.size,
+        width: widget.size,
+        height: widget.size,
         decoration: new BoxDecoration(
-          backgroundColor: config.color,
+          color: widget.color,
           border: new Border.all(width: taps.toDouble()),
           shape: BoxShape.circle
         ),
-        child: config.child
+        child: widget.child
       )
     );
   }
 }
 
 class ExampleDragSource extends StatelessWidget {
-  ExampleDragSource({
+  const ExampleDragSource({
     Key key,
     this.color,
     this.heavy: false,
@@ -97,7 +97,7 @@ class ExampleDragSource extends StatelessWidget {
     if (heavy)
       size *= kHeavyMultiplier;
 
-    Widget contents = new DefaultTextStyle(
+    final Widget contents = new DefaultTextStyle(
       style: Theme.of(context).textTheme.body1,
       textAlign: TextAlign.center,
       child: new Dot(
@@ -163,7 +163,7 @@ class DashOutlineCirclePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = radius / 10.0;
     final Path path = new Path();
-    final Rect box = Point.origin & size;
+    final Rect box = Offset.zero & size;
     for (double theta = 0.0; theta < math.PI * 2.0; theta += deltaTheta)
       path.addArc(box, theta + startOffset, segmentArc);
     canvas.drawPath(path, paint);
@@ -174,7 +174,7 @@ class DashOutlineCirclePainter extends CustomPainter {
 }
 
 class MovableBall extends StatelessWidget {
-  MovableBall(this.position, this.ballPosition, this.callback);
+  const MovableBall(this.position, this.ballPosition, this.callback);
 
   final int position;
   final int ballPosition;
@@ -185,21 +185,21 @@ class MovableBall extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget ball = new DefaultTextStyle(
+    final Widget ball = new DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.body1,
       textAlign: TextAlign.center,
       child: new Dot(
         key: kBallKey,
-        color: Colors.blue[700],
+        color: Colors.blue.shade700,
         size: kBallSize,
         tappable: true,
-        child: new Center(child: new Text('BALL'))
+        child: const Center(child: const Text('BALL'))
       )
     );
-    Widget dashedBall = new Container(
+    final Widget dashedBall = new Container(
       width: kBallSize,
       height: kBallSize,
-      child: new CustomPaint(
+      child: const CustomPaint(
         painter: const DashOutlineCirclePainter()
       )
     );
@@ -238,7 +238,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Drag and Drop Flutter Demo')
+        title: const Text('Drag and Drop Flutter Demo')
       ),
       body: new Column(
         children: <Widget>[
@@ -248,22 +248,22 @@ class DragAndDropAppState extends State<DragAndDropApp> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 new ExampleDragSource(
-                  color: Colors.yellow[300],
+                  color: Colors.yellow.shade300,
                   under: true,
                   heavy: false,
-                  child: new Text('under')
+                  child: const Text('under')
                 ),
                 new ExampleDragSource(
-                  color: Colors.green[300],
+                  color: Colors.green.shade300,
                   under: false,
                   heavy: true,
-                  child: new Text('long-press above')
+                  child: const Text('long-press above')
                 ),
                 new ExampleDragSource(
-                  color: Colors.indigo[300],
+                  color: Colors.indigo.shade300,
                   under: false,
                   heavy: false,
-                  child: new Text('above')
+                  child: const Text('above')
                 ),
               ],
             )

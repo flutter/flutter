@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class TestStatefulWidget extends StatefulWidget {
-  TestStatefulWidget({ Key key }) : super(key: key);
+  const TestStatefulWidget({ Key key }) : super(key: key);
 
   @override
   TestStatefulWidgetState createState() => new TestStatefulWidgetState();
@@ -25,26 +25,26 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAAAAA'), new Text('B'), new Text('C')
+              const Text('AAAAAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('EEE'), new Text('F')
+              const Text('D'), const Text('EEE'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('AAAAAA'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('AAAAAA'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size, equals(boxB.size));
@@ -56,24 +56,24 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('A'), new Text('B'), new Text('C')
+              const Text('A'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('F')
+              const Text('D'), const Text('E'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('I')
+              const Text('G'), const Text('H'), const Text('I')
             ]
           ),
         ]
       )
     );
-    RenderBox boxA1 = tester.renderObject(find.text('A'));
-    RenderBox boxG1 = tester.renderObject(find.text('G'));
+    final RenderBox boxA1 = tester.renderObject(find.text('A'));
+    final RenderBox boxG1 = tester.renderObject(find.text('G'));
     expect(boxA1, isNotNull);
     expect(boxG1, isNotNull);
     await tester.pumpWidget(
@@ -81,19 +81,19 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('a'), new Text('b'), new Text('c'), new Text('d')
+              const Text('a'), const Text('b'), const Text('c'), const Text('d')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('e'), new Text('f'), new Text('g'), new Text('h')
+              const Text('e'), const Text('f'), const Text('g'), const Text('h')
             ]
           ),
         ]
       )
     );
-    RenderBox boxA2 = tester.renderObject(find.text('a'));
-    RenderBox boxG2 = tester.renderObject(find.text('g'));
+    final RenderBox boxA2 = tester.renderObject(find.text('a'));
+    final RenderBox boxG2 = tester.renderObject(find.text('g'));
     expect(boxA2, isNotNull);
     expect(boxG2, isNotNull);
     expect(boxA1, equals(boxA2));
@@ -106,17 +106,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAAAAA'), new Text('B'), new Text('C')
+              const Text('AAAAAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('EEE'), new Text('F')
+              const Text('D'), const Text('EEE'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -127,26 +127,26 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAA'), new Text('B'), new Text('C')
+              const Text('AAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('FFFFFF')
+              const Text('D'), const Text('E'), const Text('FFFFFF')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('AAA'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('AAA'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size, equals(boxB.size));
@@ -159,26 +159,26 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAA'), new Text('B'), new Text('C')
+              const Text('AAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('FFFFFF')
+              const Text('D'), const Text('E'), const Text('FFFFFF')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('AAA'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('AAA'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, greaterThan(boxB.size.width));
@@ -192,17 +192,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAAAAA'), new Text('B'), new Text('C')
+              const Text('AAAAAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('EEE'), new Text('F')
+              const Text('D'), const Text('EEE'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -214,26 +214,26 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('A'), new Text('B'), new Text('C')
+              const Text('A'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('EEE'), new Text('F')
+              const Text('D'), const Text('EEE'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('A'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('A'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, lessThan(boxB.size.width));
@@ -246,17 +246,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAA'), new Text('B'), new Text('C')
+              const Text('AAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('FFFFFF')
+              const Text('D'), const Text('E'), const Text('FFFFFF')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -268,26 +268,26 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAA'), new Text('B'), new Text('C')
+              const Text('AAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('FFFFFF')
+              const Text('D'), const Text('E'), const Text('FFFFFF')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('AAA'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('AAA'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, greaterThan(boxB.size.width));
@@ -295,7 +295,7 @@ void main() {
   });
 
   testWidgets('Table widget - moving test', (WidgetTester tester) async {
-    List<BuildContext> contexts = <BuildContext>[];
+    final List<BuildContext> contexts = <BuildContext>[];
     await tester.pumpWidget(
       new Table(
         children: <TableRow>[
@@ -305,14 +305,14 @@ void main() {
               new StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   contexts.add(context);
-                  return new Text('A');
+                  return const Text('A');
                 }
               )
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('b')
+              const Text('b')
             ]
           ),
         ]
@@ -323,7 +323,7 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('b')
+              const Text('b')
             ]
           ),
           new TableRow(
@@ -332,7 +332,7 @@ void main() {
               new StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   contexts.add(context);
-                  return new Text('A');
+                  return const Text('A');
                 }
               )
             ]
@@ -351,25 +351,25 @@ void main() {
           new TableRow(
             key: const ValueKey<int>(1),
             children: <Widget>[
-              new TestStatefulWidget(key: const ValueKey<int>(11)),
-              new TestStatefulWidget(key: const ValueKey<int>(12)),
+              const TestStatefulWidget(key: const ValueKey<int>(11)),
+              const TestStatefulWidget(key: const ValueKey<int>(12)),
             ],
           ),
           new TableRow(
             key: const ValueKey<int>(2),
             children: <Widget>[
-              new TestStatefulWidget(key: const ValueKey<int>(21)),
-              new TestStatefulWidget(key: const ValueKey<int>(22)),
+              const TestStatefulWidget(key: const ValueKey<int>(21)),
+              const TestStatefulWidget(key: const ValueKey<int>(22)),
             ],
           ),
         ]
       )
     );
 
-    TestStatefulWidgetState state11 = tester.state(find.byKey(const ValueKey<int>(11)));
-    TestStatefulWidgetState state12 = tester.state(find.byKey(const ValueKey<int>(12)));
-    TestStatefulWidgetState state21 = tester.state(find.byKey(const ValueKey<int>(21)));
-    TestStatefulWidgetState state22 = tester.state(find.byKey(const ValueKey<int>(22)));
+    final TestStatefulWidgetState state11 = tester.state(find.byKey(const ValueKey<int>(11)));
+    final TestStatefulWidgetState state12 = tester.state(find.byKey(const ValueKey<int>(12)));
+    final TestStatefulWidgetState state21 = tester.state(find.byKey(const ValueKey<int>(21)));
+    final TestStatefulWidgetState state22 = tester.state(find.byKey(const ValueKey<int>(22)));
 
     expect(state11.mounted, isTrue);
     expect(state12.mounted, isTrue);
@@ -382,8 +382,8 @@ void main() {
           new TableRow(
             key: const ValueKey<int>(2),
             children: <Widget>[
-              new TestStatefulWidget(key: const ValueKey<int>(21)),
-              new TestStatefulWidget(key: const ValueKey<int>(22)),
+              const TestStatefulWidget(key: const ValueKey<int>(21)),
+              const TestStatefulWidget(key: const ValueKey<int>(22)),
             ],
           ),
         ]
@@ -397,8 +397,8 @@ void main() {
   });
 
   testWidgets('Table widget - global key reparenting', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
-    Key tableKey = new UniqueKey();
+    final GlobalKey key = new GlobalKey();
+    final Key tableKey = new UniqueKey();
 
     await tester.pumpWidget(
       new Column(
@@ -421,7 +421,7 @@ void main() {
       ),
     );
 
-    RenderTable table = tester.renderObject(find.byType(Table));
+    final RenderTable table = tester.renderObject(find.byType(Table));
     expect(table.row(0).length, 3);
 
     await tester.pumpWidget(

@@ -10,7 +10,7 @@ void main() {
     const EdgeInsets insets = const EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0);
 
     expect(insets, hasOneLineDescription);
-    expect(insets.hashCode, equals(new EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0).hashCode));
+    expect(insets.hashCode, equals(const EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0).hashCode));
 
     expect(insets.topLeft, const Offset(5.0, 7.0));
     expect(insets.topRight, const Offset(-11.0, 7.0));
@@ -39,8 +39,8 @@ void main() {
   });
 
   test('EdgeInsets.lerp()', () {
-    EdgeInsets a = const EdgeInsets.all(10.0);
-    EdgeInsets b = const EdgeInsets.all(20.0);
+    final EdgeInsets a = const EdgeInsets.all(10.0);
+    final EdgeInsets b = const EdgeInsets.all(20.0);
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a * 1.25));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(b * 0.625));
     expect(EdgeInsets.lerp(a, b, 0.25), equals(a + const EdgeInsets.all(2.5)));

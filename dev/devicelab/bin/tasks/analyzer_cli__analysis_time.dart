@@ -9,9 +9,9 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 Future<Null> main() async {
-  String revision = await getCurrentFlutterRepoCommit();
-  DateTime revisionTimestamp = await getFlutterRepoCommitTimestamp(revision);
-  String dartSdkVersion = await getDartVersion();
+  final String revision = await getCurrentFlutterRepoCommit();
+  final DateTime revisionTimestamp = await getFlutterRepoCommitTimestamp(revision);
+  final String dartSdkVersion = await getDartVersion();
   await task(createAnalyzerCliTest(
     sdk: dartSdkVersion,
     commit: revision,

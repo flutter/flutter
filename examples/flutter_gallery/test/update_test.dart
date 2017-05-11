@@ -11,12 +11,13 @@ Future<String> mockUpdateUrlFetcher() {
 }
 
 void main() {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  if (binding is LiveTestWidgetsFlutterBinding) binding.allowAllFrames = true;
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  if (binding is LiveTestWidgetsFlutterBinding)
+    binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('update dialog', (WidgetTester tester) async {
-    await tester.pumpWidget(new GalleryApp(updateUrlFetcher: mockUpdateUrlFetcher));
+    await tester.pumpWidget(const GalleryApp(updateUrlFetcher: mockUpdateUrlFetcher));
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
@@ -29,7 +30,7 @@ void main() {
     await tester.pump(); // Launch shrine
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
-    Finder backButton = find.byTooltip('Back');
+    final Finder backButton = find.byTooltip('Back');
     expect(backButton, findsOneWidget);
     await tester.tap(backButton);
     await tester.pump(); // Start the pop "back" operation.

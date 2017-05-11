@@ -54,13 +54,13 @@ class SectorAppState extends State<SectorApp> {
     int index = 0;
     while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index])
       index += 1;
-    RenderSectorRing ring = sectors.child;
+    final RenderSectorRing ring = sectors.child;
     while (index < actualSectorSizes.length) {
       ring.remove(ring.lastChild);
       actualSectorSizes.removeLast();
     }
     while (index < wantedSectorSizes.length) {
-      Color color = new Color(((0xFF << 24) + rand.nextInt(0xFFFFFF)) | 0x808080);
+      final Color color = new Color(((0xFF << 24) + rand.nextInt(0xFFFFFF)) | 0x808080);
       ring.add(new RenderSolidColor(color, desiredDeltaTheta: wantedSectorSizes[index]));
       actualSectorSizes.add(wantedSectorSizes[index]);
       index += 1;
@@ -68,7 +68,7 @@ class SectorAppState extends State<SectorApp> {
   }
 
   static RenderBox initSector(Color color) {
-    RenderSectorRing ring = new RenderSectorRing(padding: 1.0);
+    final RenderSectorRing ring = new RenderSectorRing(padding: 1.0);
     ring.add(new RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
     ring.add(new RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
     ring.add(new RenderSolidColor(color, desiredDeltaTheta: kTwoPi * 0.2));
@@ -93,7 +93,7 @@ class SectorAppState extends State<SectorApp> {
     return new Column(
       children: <Widget>[
         new Container(
-          padding: new EdgeInsets.symmetric(horizontal: 8.0, vertical: 25.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 25.0),
           child: new Row(
             children: <Widget>[
               new RaisedButton(
@@ -102,11 +102,11 @@ class SectorAppState extends State<SectorApp> {
                   child: new Row(
                     children: <Widget>[
                       new Container(
-                        padding: new EdgeInsets.all(4.0),
-                        margin: new EdgeInsets.only(right: 10.0),
+                        padding: const EdgeInsets.all(4.0),
+                        margin: const EdgeInsets.only(right: 10.0),
                         child: new WidgetToRenderBoxAdapter(renderBox: sectorAddIcon)
                       ),
-                      new Text('ADD SECTOR'),
+                      const Text('ADD SECTOR'),
                     ]
                   )
                 )
@@ -117,11 +117,11 @@ class SectorAppState extends State<SectorApp> {
                   child: new Row(
                     children: <Widget>[
                       new Container(
-                        padding: new EdgeInsets.all(4.0),
-                        margin: new EdgeInsets.only(right: 10.0),
+                        padding: const EdgeInsets.all(4.0),
+                        margin: const EdgeInsets.only(right: 10.0),
                         child: new WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon)
                       ),
-                      new Text('REMOVE SECTOR'),
+                      const Text('REMOVE SECTOR'),
                     ]
                   )
                 )
@@ -132,11 +132,11 @@ class SectorAppState extends State<SectorApp> {
         ),
         new Expanded(
           child: new Container(
-            margin: new EdgeInsets.all(8.0),
+            margin: const EdgeInsets.all(8.0),
             decoration: new BoxDecoration(
               border: new Border.all()
             ),
-            padding: new EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: new WidgetToRenderBoxAdapter(
               renderBox: sectors,
               onBuild: doUpdates
@@ -155,7 +155,7 @@ class SectorAppState extends State<SectorApp> {
       title: 'Sector Layout',
       home: new Scaffold(
         appBar: new AppBar(
-          title: new Text('Sector Layout in a Widget Tree')
+          title: const Text('Sector Layout in a Widget Tree')
         ),
         body: buildBody()
       )

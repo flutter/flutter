@@ -4,11 +4,14 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 /// A mapping of the unit interval to the unit interval.
 ///
 /// A curve must map t=0.0 to 0.0 and t=1.0 to 1.0.
 ///
 /// See [Curves] for a collection of common animation curves.
+@immutable
 abstract class Curve {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -50,7 +53,7 @@ class SawTooth extends Curve {
   /// Creates a sawtooth curve.
   ///
   /// The [count] argument must not be null.
-  const SawTooth(this.count);
+  const SawTooth(this.count) : assert(count != null);
 
   /// The number of repetitions of the sawtooth pattern in the unit interval.
   final int count;
@@ -70,20 +73,33 @@ class SawTooth extends Curve {
   }
 }
 
-/// A curve that is 0.0 until [start], then curved from 0.0 to 1.0 at [end], then 1.0.
+/// A curve that is 0.0 until [begin], then curved (according to [curve] from
+/// 0.0 to 1.0 at [end], then 1.0.
+///
+/// An [Interval] can be used to delay an animation. For example, a six second
+/// animation that uses an [Interval] with its [begin] set to 0.5 and its [end]
+/// set to 1.0 will essentially become a three-second animation that starts
+/// three seconds later.
 class Interval extends Curve {
   /// Creates an interval curve.
   ///
-  /// The [start] and [end] arguments must not be null.
-  const Interval(this.begin, this.end, { this.curve: Curves.linear });
+  /// The arguments must not be null.
+  const Interval(this.begin, this.end, { this.curve: Curves.linear })
+      : assert(begin != null),
+        assert(end != null),
+        assert(curve != null);
 
-  /// The smallest value for which this interval is 0.0.
+  /// The largest value for which this interval is 0.0.
+  ///
+  /// From t=0.0 to t=`begin`, the interval's value is 0.0.
   final double begin;
 
   /// The smallest value for which this interval is 1.0.
+  ///
+  /// From t=`end` to t=1.0, the interval's value is 1.0.
   final double end;
 
-  /// The curve to apply between [start] and [end].
+  /// The curve to apply between [begin] and [end].
   final Curve curve;
 
   @override
@@ -115,7 +131,7 @@ class Threshold extends Curve {
   /// Creates a threshold curve.
   ///
   /// The [threshold] argument must not be null.
-  const Threshold(this.threshold);
+  const Threshold(this.threshold) : assert(threshold != null);
 
   /// The value before which the curve is 0.0 and after which the curve is 1.0.
   ///
@@ -150,7 +166,11 @@ class Cubic extends Curve {
   /// cubic curves in [Curves].
   ///
   /// The [a], [b], [c], and [d] arguments must not be null.
-  const Cubic(this.a, this.b, this.c, this.d);
+  const Cubic(this.a, this.b, this.c, this.d)
+      : assert(a != null),
+        assert(b != null),
+        assert(c != null),
+        assert(d != null);
 
   /// The x coordinate of the first control point.
   ///
@@ -190,8 +210,8 @@ class Cubic extends Curve {
     double start = 0.0;
     double end = 1.0;
     while (true) {
-      double midpoint = (start + end) / 2;
-      double estimate = _evaluateCubic(a, c, midpoint);
+      final double midpoint = (start + end) / 2;
+      final double estimate = _evaluateCubic(a, c, midpoint);
       if ((t - estimate).abs() < _kCubicErrorBound)
         return _evaluateCubic(b, d, midpoint);
       if (estimate < t)
@@ -216,7 +236,7 @@ class FlippedCurve extends Curve {
   /// Creates a flipped curve.
   ///
   /// The [curve] argument must not be null.
-  const FlippedCurve(this.curve);
+  const FlippedCurve(this.curve) : assert(curve != null);
 
   /// The curve that is being flipped.
   final Curve curve;
@@ -326,7 +346,7 @@ class ElasticInCurve extends Curve {
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    double s = period / 4.0;
+    final double s = period / 4.0;
     t = t - 1.0;
     return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);
   }
@@ -350,7 +370,7 @@ class ElasticOutCurve extends Curve {
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    double s = period / 4.0;
+    final double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.PI * 2.0) / period) + 1.0;
   }
 
@@ -373,7 +393,7 @@ class ElasticInOutCurve extends Curve {
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    double s = period / 4.0;
+    final double s = period / 4.0;
     t = 2.0 * t - 1.0;
     if (t < 0.0)
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);

@@ -12,9 +12,7 @@ void main() {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       new Container(
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00),
-        ),
+        color: const Color(0xFF00FF00),
         child: new Stack(
           children: <Widget>[
             new Positioned(
@@ -27,12 +25,11 @@ void main() {
                       didReceiveTap = true;
                     },
                     child: new Container(
-                      decoration: const BoxDecoration(
-                          backgroundColor: const Color(0xFF0000FF)),
+                      color: const Color(0xFF0000FF),
                       width: 100.0,
                       height: 100.0,
-                      child: new Center(
-                        child: new Text('X'),
+                      child: const Center(
+                        child: const Text('X'),
                       ),
                     ),
                   ),
@@ -52,12 +49,12 @@ void main() {
     await tester.pumpWidget(
       new Row(
         children: <Widget>[
-          new Flexible(child: new SizedBox(width: 100.0, height: 200.0)),
+          const Flexible(child: const SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
     );
 
-    RenderBox box = tester.renderObject(find.byType(SizedBox));
+    final RenderBox box = tester.renderObject(find.byType(SizedBox));
     expect(box.size.width, 100.0);
   });
 
@@ -65,8 +62,8 @@ void main() {
     await tester.pumpWidget(
       new Row(
         children: <Widget>[
-          new Expanded(flex: null, child: new Text('one')),
-          new Flexible(flex: null, child: new Text('two')),
+          const Expanded(flex: null, child: const Text('one')),
+          const Flexible(flex: null, child: const Text('two')),
         ],
       ),
     );

@@ -21,7 +21,7 @@ class TestGestureRecognizer extends GestureRecognizer {
 
 void main() {
   test('GestureRecognizer.toStringShort defaults to toString', () {
-    TestGestureRecognizer recognizer = new TestGestureRecognizer();
+    final TestGestureRecognizer recognizer = new TestGestureRecognizer();
     expect(recognizer.toStringShort(), equals(recognizer.toString()));
   });
 }

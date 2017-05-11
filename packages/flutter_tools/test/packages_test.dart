@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/commands/create.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:test/test.dart';
 
@@ -17,6 +17,10 @@ void main() {
   group('packages', () {
     Directory temp;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
     });
@@ -25,37 +29,43 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
-    Future<Null> createProject() async {
-      CreateCommand command = new CreateCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+    Future<String> runCommand(String verb, { List<String> args }) async {
+      final String projectPath = await createProject(temp);
 
-      await runner.run(<String>['create', '--no-pub', temp.path]);
+      final PackagesCommand command = new PackagesCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+
+      final List<String> commandArgs = <String>['packages', verb];
+      if (args != null)
+        commandArgs.addAll(args);
+      commandArgs.add(projectPath);
+
+      await runner.run(commandArgs);
+
+      return projectPath;
     }
 
-    Future<Null> runCommand(String verb) async {
-      await createProject();
-
-      PackagesCommand command = new PackagesCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>['packages', verb, temp.path]);
-    }
-
-    void expectExists(String relPath) {
-      expect(fs.isFileSync('${temp.path}/$relPath'), true);
+    void expectExists(String projectPath, String relPath) {
+      expect(fs.isFileSync(fs.path.join(projectPath, relPath)), true);
     }
 
     // Verify that we create a project that is well-formed.
     testUsingContext('get', () async {
-      await runCommand('get');
-      expectExists('lib/main.dart');
-      expectExists('.packages');
+      final String projectPath = await runCommand('get');
+      expectExists(projectPath, 'lib/main.dart');
+      expectExists(projectPath, '.packages');
+    });
+
+    testUsingContext('get --offline', () async {
+      final String projectPath = await runCommand('get', args: <String>['--offline']);
+      expectExists(projectPath, 'lib/main.dart');
+      expectExists(projectPath, '.packages');
     });
 
     testUsingContext('upgrade', () async {
-      await runCommand('upgrade');
-      expectExists('lib/main.dart');
-      expectExists('.packages');
+      final String projectPath = await runCommand('upgrade');
+      expectExists(projectPath, 'lib/main.dart');
+      expectExists(projectPath, '.packages');
     });
   });
 }

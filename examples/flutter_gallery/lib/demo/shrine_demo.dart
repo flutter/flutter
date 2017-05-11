@@ -14,7 +14,7 @@ Widget buildShrine(BuildContext context, Widget child) {
   return new Theme(
     data: new ThemeData(
       primarySwatch: Colors.grey,
-      iconTheme: new IconThemeData(color: const Color(0xFF707070)),
+      iconTheme: const IconThemeData(color: const Color(0xFF707070)),
       platform: Theme.of(context).platform,
     ),
     child: new ShrineTheme(child: child)
@@ -29,8 +29,8 @@ class ShrinePageRoute<T> extends MaterialPageRoute<T> {
   }) : super(builder: builder, settings: settings);
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    return buildShrine(context, super.buildPage(context, animation, forwardAnimation));
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return buildShrine(context, super.buildPage(context, animation, secondaryAnimation));
   }
 }
 

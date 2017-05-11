@@ -1,0 +1,5 @@
+name: tests_on_bots
+description: Script to run all tests on bots.
+
+dependencies:
+  path: ^1.4.0

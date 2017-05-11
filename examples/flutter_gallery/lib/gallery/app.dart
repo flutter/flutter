@@ -8,11 +8,14 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
-import 'item.dart';
 import 'home.dart';
+import 'item.dart';
 import 'updates.dart';
 
 final Map<String, WidgetBuilder> _kRoutes = new Map<String, WidgetBuilder>.fromIterable(
+  // For a different example of how to set up an application routing table,
+  // consider the Stocks example:
+  // https://github.com/flutter/flutter/blob/master/examples/stocks/lib/main.dart
   kAllGalleryItems,
   key: (GalleryItem item) => item.routeName,
   value: (GalleryItem item) => item.buildRoute,
@@ -29,7 +32,7 @@ final ThemeData _kGalleryDarkTheme = new ThemeData(
 );
 
 class GalleryApp extends StatefulWidget {
-  GalleryApp({
+  const GalleryApp({
     this.updateUrlFetcher,
     this.enablePerformanceOverlay: true,
     this.checkerboardRasterCacheImages: true,
@@ -54,7 +57,7 @@ class GalleryAppState extends State<GalleryApp> {
   bool _showPerformanceOverlay = false;
   bool _checkerboardRasterCacheImages = false;
   double _timeDilation = 1.0;
-  TargetPlatform _platform = defaultTargetPlatform;
+  TargetPlatform _platform;
 
   Timer _timeDilationTimer;
 
@@ -81,20 +84,20 @@ class GalleryAppState extends State<GalleryApp> {
         });
       },
       showPerformanceOverlay: _showPerformanceOverlay,
-      onShowPerformanceOverlayChanged: config.enablePerformanceOverlay ? (bool value) {
+      onShowPerformanceOverlayChanged: widget.enablePerformanceOverlay ? (bool value) {
         setState(() {
           _showPerformanceOverlay = value;
         });
       } : null,
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
-      onCheckerboardRasterCacheImagesChanged: config.checkerboardRasterCacheImages ? (bool value) {
+      onCheckerboardRasterCacheImagesChanged: widget.checkerboardRasterCacheImages ? (bool value) {
         setState(() {
           _checkerboardRasterCacheImages = value;
         });
       } : null,
       onPlatformChanged: (TargetPlatform value) {
         setState(() {
-          _platform = value;
+          _platform = value == defaultTargetPlatform ? null : value;
         });
       },
       timeDilation: _timeDilation,
@@ -115,20 +118,20 @@ class GalleryAppState extends State<GalleryApp> {
           }
         });
       },
-      onSendFeedback: config.onSendFeedback,
+      onSendFeedback: widget.onSendFeedback,
     );
 
-    if (config.updateUrlFetcher != null) {
+    if (widget.updateUrlFetcher != null) {
       home = new Updater(
-        updateUrlFetcher: config.updateUrlFetcher,
+        updateUrlFetcher: widget.updateUrlFetcher,
         child: home,
       );
     }
 
     return new MaterialApp(
       title: 'Flutter Gallery',
-      color: Colors.grey[500],
-      theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: _platform),
+      color: Colors.grey,
+      theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: _platform ?? defaultTargetPlatform),
       showPerformanceOverlay: _showPerformanceOverlay,
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       routes: _kRoutes,

@@ -35,9 +35,8 @@ import 'typography.dart';
 ///
 /// See also:
 ///
-///  * [CheckBox]
-///  * [Radio]
-///  * [Switch]
+///  * [Radio], for selecting among a set of explicit values.
+///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.google.com/components/sliders.html>
 class Slider extends StatefulWidget {
   /// Creates a material design slider.
@@ -49,7 +48,7 @@ class Slider extends StatefulWidget {
   ///
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
-  Slider({
+  const Slider({
     Key key,
     @required this.value,
     @required this.onChanged,
@@ -59,14 +58,13 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.thumbOpenAtMin: false,
-  }) : super(key: key) {
-    assert(value != null);
-    assert(min != null);
-    assert(max != null);
-    assert(value >= min && value <= max);
-    assert(divisions == null || divisions > 0);
-    assert(thumbOpenAtMin != null);
-  }
+  }) : assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       assert(thumbOpenAtMin != null),
+       super(key: key);
 
   /// The currently selected value for this slider.
   ///
@@ -143,33 +141,41 @@ class Slider extends StatefulWidget {
 
   @override
   _SliderState createState() => new _SliderState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('value: ${value.toStringAsFixed(1)}');
+    description.add('min: $min');
+    description.add('max: $max');
+  }
 }
 
 class _SliderState extends State<Slider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
-    assert(config.onChanged != null);
-    config.onChanged(value * (config.max - config.min) + config.min);
+    assert(widget.onChanged != null);
+    widget.onChanged(value * (widget.max - widget.min) + widget.min);
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return new _SliderRenderObjectWidget(
-      value: (config.value - config.min) / (config.max - config.min),
-      divisions: config.divisions,
-      label: config.label,
-      activeColor: config.activeColor ?? theme.accentColor,
-      thumbOpenAtMin: config.thumbOpenAtMin,
+      value: (widget.value - widget.min) / (widget.max - widget.min),
+      divisions: widget.divisions,
+      label: widget.label,
+      activeColor: widget.activeColor ?? theme.accentColor,
+      thumbOpenAtMin: widget.thumbOpenAtMin,
       textTheme: theme.accentTextTheme,
-      onChanged: config.onChanged != null ? _handleChanged : null,
+      onChanged: widget.onChanged != null ? _handleChanged : null,
       vsync: this,
     );
   }
 }
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
-  _SliderRenderObjectWidget({
+  const _SliderRenderObjectWidget({
     Key key,
     this.value,
     this.divisions,
@@ -224,8 +230,8 @@ const double _kActiveThumbRadius = 9.0;
 const double _kDisabledThumbRadius = 4.0;
 const double _kReactionRadius = 16.0;
 const double _kTrackWidth = 144.0;
-final Color _kInactiveTrackColor = Colors.grey[400];
-final Color _kActiveTrackColor = Colors.grey[500];
+final Color _kInactiveTrackColor = Colors.grey.shade400;
+final Color _kActiveTrackColor = Colors.grey;
 final Tween<double> _kReactionRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kReactionRadius);
 final Tween<double> _kThumbRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kActiveThumbRadius);
 final ColorTween _kTrackColorTween = new ColorTween(begin: _kInactiveTrackColor, end: _kActiveTrackColor);
@@ -253,7 +259,7 @@ BoxConstraints _getAdditionalConstraints(String label) {
 
 class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandler {
   _RenderSlider({
-    double value,
+    @required double value,
     int divisions,
     String label,
     Color activeColor,
@@ -269,7 +275,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
         super(additionalConstraints: _getAdditionalConstraints(label)) {
     assert(value != null && value >= 0.0 && value <= 1.0);
     this.label = label;
-    GestureArenaTeam team = new GestureArenaTeam();
+    final GestureArenaTeam team = new GestureArenaTeam();
     _drag = new HorizontalDragGestureRecognizer()
       ..team = team
       ..onStart = _handleDragStart
@@ -308,27 +314,27 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
 
   int get divisions => _divisions;
   int _divisions;
-  set divisions(int newDivisions) {
-    if (newDivisions == _divisions)
+  set divisions(int value) {
+    if (value == _divisions)
       return;
-    _divisions = newDivisions;
+    _divisions = value;
     markNeedsPaint();
   }
 
   String get label => _label;
   String _label;
-  set label(String newLabel) {
-    if (newLabel == _label)
+  set label(String value) {
+    if (value == _label)
       return;
-    _label = newLabel;
+    _label = value;
     additionalConstraints = _getAdditionalConstraints(_label);
-    if (newLabel != null) {
+    if (value != null) {
       // TODO(abarth): Handle textScaleFactor.
       // https://github.com/flutter/flutter/issues/5938
       _labelPainter
         ..text = new TextSpan(
           style: _textTheme.body1.copyWith(fontSize: 10.0),
-          text: newLabel
+          text: value
         )
         ..layout();
     } else {
@@ -381,8 +387,8 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
 
   bool get isInteractive => onChanged != null;
 
-  double _getValueFromGlobalPosition(Point globalPosition) {
-    return (globalToLocal(globalPosition).x - _kReactionRadius) / _trackLength;
+  double _getValueFromGlobalPosition(Offset globalPosition) {
+    return (globalToLocal(globalPosition).dx - _kReactionRadius) / _trackLength;
   }
 
   double _discretize(double value) {
@@ -422,7 +428,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -453,7 +459,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     final Paint primaryPaint = new Paint()..color = enabled ? _activeColor : _kInactiveTrackColor;
     final Paint trackPaint = new Paint()..color = _kTrackColorTween.evaluate(_reaction);
 
-    final Point thumbCenter = new Point(trackActive, trackCenter);
+    final Offset thumbCenter = new Offset(trackActive, trackCenter);
     final double thumbRadius = enabled ? _kThumbRadiusTween.evaluate(_reaction) : _kDisabledThumbRadius;
 
     if (enabled) {
@@ -487,22 +493,22 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
       }
 
       if (label != null) {
-        final Point center = new Point(trackActive, _kLabelBalloonCenterTween.evaluate(_reaction) + trackCenter);
+        final Offset center = new Offset(trackActive, _kLabelBalloonCenterTween.evaluate(_reaction) + trackCenter);
         final double radius = _kLabelBalloonRadiusTween.evaluate(_reaction);
-        final Point tip = new Point(trackActive, _kLabelBalloonTipTween.evaluate(_reaction) + trackCenter);
+        final Offset tip = new Offset(trackActive, _kLabelBalloonTipTween.evaluate(_reaction) + trackCenter);
         final double tipAttachment = _kLabelBalloonTipAttachmentRatio * radius;
 
         canvas.drawCircle(center, radius, primaryPaint);
-        Path path = new Path()
-          ..moveTo(tip.x, tip.y)
-          ..lineTo(center.x - tipAttachment, center.y + tipAttachment)
-          ..lineTo(center.x + tipAttachment, center.y + tipAttachment)
+        final Path path = new Path()
+          ..moveTo(tip.dx, tip.dy)
+          ..lineTo(center.dx - tipAttachment, center.dy + tipAttachment)
+          ..lineTo(center.dx + tipAttachment, center.dy + tipAttachment)
           ..close();
         canvas.drawPath(path, primaryPaint);
         _labelPainter.layout();
-        Offset labelOffset = new Offset(
-          center.x - _labelPainter.width / 2.0,
-          center.y - _labelPainter.height / 2.0
+        final Offset labelOffset = new Offset(
+          center.dx - _labelPainter.width / 2.0,
+          center.dy - _labelPainter.height / 2.0
         );
         _labelPainter.paint(canvas, labelOffset);
         return;

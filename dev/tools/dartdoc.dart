@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 const String kDocRoot = 'dev/docs/doc';
@@ -18,13 +19,18 @@ const String kDocRoot = 'dev/docs/doc';
 /// at the root of docs.flutter.io. We are keeping the files inside of
 /// docs.flutter.io/flutter for now, so we need to manipulate paths
 /// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
+///
+/// This will only work on UNIX systems, not Windows. It requires that 'git' be
+/// in your path. It requires that 'flutter' has been run previously. It uses
+/// the version of Dart downloaded by the 'flutter' tool in this repository and
+/// will crash if that is absent.
 Future<Null> main(List<String> args) async {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
   // Create the pubspec.yaml file.
-  StringBuffer buf = new StringBuffer('''
+  final StringBuffer buf = new StringBuffer('''
 name: Flutter
 dependencies:
 ''');
@@ -32,39 +38,58 @@ dependencies:
     buf.writeln('  $package:');
     buf.writeln('    sdk: flutter');
   }
+  buf.writeln('  platform_integration: 0.0.1');
+  buf.writeln('dependency_overrides:');
+  buf.writeln('  platform_integration:');
+  buf.writeln('    path: platform_integration');
   new File('dev/docs/pubspec.yaml').writeAsStringSync(buf.toString());
 
   // Create the library file.
-  Directory libDir = new Directory('dev/docs/lib');
+  final Directory libDir = new Directory('dev/docs/lib');
   libDir.createSync();
 
-  StringBuffer contents = new StringBuffer('library temp_doc;\n\n');
+  final StringBuffer contents = new StringBuffer('library temp_doc;\n\n');
   for (String libraryRef in libraryRefs()) {
     contents.writeln('import \'package:$libraryRef\';');
   }
   new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
   // Run pub.
-  Process process = await Process.start('pub', <String>['get'],
+  Process process = await Process.start(
+    '../../bin/cache/dart-sdk/bin/pub',
+    <String>['get'],
     workingDirectory: 'dev/docs',
     environment: <String, String>{
-      'FLUTTER_ROOT': Directory.current.path
-    }
+      'FLUTTER_ROOT': Directory.current.path,
+    },
   );
   printStream(process.stdout);
   printStream(process.stderr);
-  int code = await process.exitCode;
+  final int code = await process.exitCode;
   if (code != 0)
     exit(code);
 
+  createFooter('dev/docs/lib/footer.html');
+
+  // Verify which version of dartdoc we're using.
+  final ProcessResult result = Process.runSync(
+    '../../bin/cache/dart-sdk/bin/pub',
+    <String>['global', 'run', 'dartdoc', '--version'],
+    workingDirectory: 'dev/docs',
+  );
+  print('\n${result.stdout}');
+
   // Generate the documentation.
-  List<String> args = <String>[
+  final List<String> args = <String>[
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
+    '--footer', 'lib/footer.html',
     '--exclude', 'temp_doc',
     '--favicon=favicon.ico',
-    '--use-categories'
+    '--use-categories',
+    '--category-order',
+    'flutter,Dart Core,flutter_markdown,flutter_test,flutter_driver',
   ];
 
   for (String libraryRef in libraryRefs(diskPath: true)) {
@@ -72,10 +97,14 @@ dependencies:
     args.add(libraryRef);
   }
 
-  process = await Process.start('pub', args, workingDirectory: 'dev/docs');
+  process = await Process.start(
+    '../../bin/cache/dart-sdk/bin/pub',
+    args,
+    workingDirectory: 'dev/docs',
+  );
   printStream(process.stdout);
   printStream(process.stderr);
-  int exitCode = await process.exitCode;
+  final int exitCode = await process.exitCode;
 
   if (exitCode != 0)
     exit(exitCode);
@@ -85,16 +114,45 @@ dependencies:
   createIndexAndCleanup();
 }
 
+void createFooter(String footerPath) {
+  final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+  final String gitHead = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+
+  final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
+
+  new File(footerPath).writeAsStringSync(
+    '<p class="text-center" style="font-size: 10px">'
+    'Generated on $timestamp - Version $gitHead</p>'
+  );
+}
+
 void sanityCheckDocs() {
-  List<String> canaries = <String>[
+  // TODO(jcollins-g): remove old_sdk_canaries for dartdoc >= 0.10.0
+  final List<String> oldSdkCanaries = <String>[
+    '$kDocRoot/api/dart.io/File-class.html',
+    '$kDocRoot/api/dart.ui/Canvas-class.html',
+    '$kDocRoot/api/dart.ui/Canvas/drawRect.html',
+  ];
+  final List<String> newSdkCanaries = <String>[
     '$kDocRoot/api/dart-io/File-class.html',
     '$kDocRoot/api/dart-ui/Canvas-class.html',
     '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
+  ];
+  final List<String> canaries = <String>[
     '$kDocRoot/api/flutter_test/WidgetTester/pumpWidget.html',
     '$kDocRoot/api/material/Material-class.html',
     '$kDocRoot/api/material/Tooltip-class.html',
     '$kDocRoot/api/widgets/Widget-class.html',
   ];
+  bool oldMissing = false;
+  for (String canary in oldSdkCanaries) {
+    if (!new File(canary).existsSync()) {
+      oldMissing = true;
+      break;
+    }
+  }
+  if (oldMissing)
+    canaries.addAll(newSdkCanaries);
   for (String canary in canaries) {
     if (!new File(canary).existsSync())
       throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
@@ -130,15 +188,19 @@ void copyIndexToRootOfDocs() {
 }
 
 void addHtmlBaseToIndex() {
-  File indexFile = new File('$kDocRoot/index.html');
+  final File indexFile = new File('$kDocRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst('</title>\n',
     '</title>\n  <base href="./flutter/">\n');
+  indexContents = indexContents.replaceAll(
+    'href="Android/Android-library.html"',
+    'href="https://docs.flutter.io/javadoc/"'
+  );
   indexFile.writeAsStringSync(indexContents);
 }
 
 void putRedirectInOldIndexLocation() {
-  String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
+  final String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
   new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
@@ -153,7 +215,7 @@ List<Directory> findPackages() {
     .where((FileSystemEntity entity) {
       if (entity is! Directory)
         return false;
-      File pubspec = new File('${entity.path}/pubspec.yaml');
+      final File pubspec = new File('${entity.path}/pubspec.yaml');
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })
@@ -165,7 +227,7 @@ List<Directory> findPackages() {
 /// diskPath toggles between import paths vs. disk paths.
 Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   for (Directory dir in findPackages()) {
-    String dirName = path.basename(dir.path);
+    final String dirName = path.basename(dir.path);
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart')) {
         if (diskPath)
@@ -175,6 +237,12 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
        }
     }
   }
+
+  // Add a fake package for platform integration APIs.
+  if (diskPath)
+    yield 'platform_integration/lib/android.dart';
+  else
+    yield 'platform_integration/android.dart';
 }
 
 void printStream(Stream<List<int>> stream) {

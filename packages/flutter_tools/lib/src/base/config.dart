@@ -4,15 +4,13 @@
 
 import 'dart:convert';
 
-import 'package:path/path.dart' as path;
-
 import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
 class Config {
   Config([File configFile]) {
-    _configFile = configFile ?? fs.file(path.join(_userHomeDir(), '.flutter_settings'));
+    _configFile = configFile ?? fs.file(fs.path.join(_userHomeDir(), '.flutter_settings'));
     if (_configFile.existsSync())
       _values = JSON.decode(_configFile.readAsStringSync());
   }
@@ -39,14 +37,14 @@ class Config {
   }
 
   void _flushValues() {
-    String json = new JsonEncoder.withIndent('  ').convert(_values);
+    String json = const JsonEncoder.withIndent('  ').convert(_values);
     json = '$json\n';
     _configFile.writeAsStringSync(json);
   }
 }
 
 String _userHomeDir() {
-  String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  String value = platform.environment[envKey];
+  final String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  final String value = platform.environment[envKey];
   return value == null ? '.' : value;
 }

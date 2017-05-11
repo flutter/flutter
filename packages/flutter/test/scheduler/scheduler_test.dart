@@ -18,11 +18,11 @@ class TestStrategy {
 
 void main() {
   test("Tasks are executed in the right order", () {
-    SchedulerBinding scheduler = new TestSchedulerBinding();
-    TestStrategy strategy = new TestStrategy();
+    final SchedulerBinding scheduler = new TestSchedulerBinding();
+    final TestStrategy strategy = new TestStrategy();
     scheduler.schedulingStrategy = strategy.shouldRunTaskWithPriority;
-    List<int> input = <int>[2, 23, 23, 11, 0, 80, 3];
-    List<int> executedTasks = <int>[];
+    final List<int> input = <int>[2, 23, 23, 11, 0, 80, 3];
+    final List<int> executedTasks = <int>[];
 
     void scheduleAddingTask(int x) {
       scheduler.scheduleTask(() { executedTasks.add(x); }, Priority.idle + x);

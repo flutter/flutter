@@ -4,12 +4,15 @@
 
 import 'dart:async';
 
-import 'platform_messages.dart';
+import 'package:flutter/foundation.dart';
+
+import 'system_channels.dart';
 
 /// Data stored on the system clipboard.
 ///
 /// The system clipboard can contain data of various media types. This data
 /// structure currently supports only plain text data, in the [text] property.
+@immutable
 class ClipboardData {
   /// Creates data for the system clipboard.
   const ClipboardData({ this.text });
@@ -17,8 +20,6 @@ class ClipboardData {
   /// Plain text variant of this clipboard data.
   final String text;
 }
-
-const String _kChannelName = 'flutter/platform';
 
 /// Utility methods for interacting with the system's clipboard.
 class Clipboard {
@@ -33,12 +34,11 @@ class Clipboard {
 
   /// Stores the given clipboard data on the clipboard.
   static Future<Null> setData(ClipboardData data) async {
-    await PlatformMessages.invokeMethod(
-       _kChannelName,
+    await SystemChannels.platform.invokeMethod(
       'Clipboard.setData',
-      <Map<String, dynamic>>[<String, dynamic>{
+      <String, dynamic>{
         'text': data.text,
-      }],
+      },
     );
   }
 
@@ -50,10 +50,9 @@ class Clipboard {
   /// Returns a future which completes to null if the data could not be
   /// obtained, and to a [ClipboardData] object if it could.
   static Future<ClipboardData> getData(String format) async {
-    Map<String, dynamic> result = await PlatformMessages.invokeMethod(
-      _kChannelName,
+    final Map<String, dynamic> result = await SystemChannels.platform.invokeMethod(
       'Clipboard.getData',
-      <String>[format]
+      format,
     );
     if (result == null)
       return null;

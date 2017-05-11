@@ -44,9 +44,9 @@ class ExpansionPanel {
     @required this.body,
     this.isExpanded: false
   }) {
-    assert(this.headerBuilder != null);
-    assert(this.body != null);
-    assert(this.isExpanded != null);
+    assert(headerBuilder != null);
+    assert(body != null);
+    assert(isExpanded != null);
   }
 
   /// The widget builder that builds the expansion panels' header.
@@ -73,18 +73,17 @@ class ExpansionPanel {
 class ExpansionPanelList extends StatelessWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
-  ExpansionPanelList({
+  const ExpansionPanelList({
     Key key,
     this.children: const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration: kThemeAnimationDuration
-  }) : super(key: key) {
-    assert(this.children != null);
-    assert(this.animationDuration != null);
-  }
+  }) : assert(children != null),
+       assert(animationDuration != null),
+       super(key: key);
 
   /// The children of the expansion panel list. They are layed in a similar
-  /// fashion to [BlockBody].
+  /// fashion to [ListBody].
   final List<ExpansionPanel> children;
 
   /// The callback that gets called whenever one of the expand/collapse buttons
@@ -114,7 +113,7 @@ class ExpansionPanelList extends StatelessWidget {
       if (_isChildExpanded(i) && i != 0 && !_isChildExpanded(i - 1))
         items.add(new MaterialGap(key: new ValueKey<int>(i * 2 - 1)));
 
-      Row header = new Row(
+      final Row header = new Row(
         children: <Widget>[
           new Expanded(
             child: new AnimatedContainer(

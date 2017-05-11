@@ -12,17 +12,17 @@ import 'transitions.dart';
 /// A widget that prevents the user from interacting with widgets behind itself.
 class ModalBarrier extends StatelessWidget {
   /// Creates a widget that blocks user interaction.
-  ModalBarrier({
+  const ModalBarrier({
     Key key,
     this.color,
-    this.dismissable: true
+    this.dismissible: true
   }) : super(key: key);
 
   /// If non-null, fill the barrier with this color.
   final Color color;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
-  final bool dismissable;
+  final bool dismissible;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class ModalBarrier extends StatelessWidget {
       container: true,
       child: new GestureDetector(
         onTapDown: (TapDownDetails details) {
-          if (dismissable)
+          if (dismissible)
             Navigator.pop(context);
         },
         behavior: HitTestBehavior.opaque,
@@ -38,7 +38,7 @@ class ModalBarrier extends StatelessWidget {
           constraints: const BoxConstraints.expand(),
           child: color == null ? null : new DecoratedBox(
             decoration: new BoxDecoration(
-              backgroundColor: color
+              color: color
             )
           )
         )
@@ -50,23 +50,23 @@ class ModalBarrier extends StatelessWidget {
 /// A widget that prevents the user from interacting with widgets behind itself.
 class AnimatedModalBarrier extends AnimatedWidget {
   /// Creates a widget that blocks user interaction.
-  AnimatedModalBarrier({
+  const AnimatedModalBarrier({
     Key key,
     Animation<Color> color,
-    this.dismissable: true
-  }) : super(key: key, animation: color);
+    this.dismissible: true
+  }) : super(key: key, listenable: color);
 
   /// If non-null, fill the barrier with this color.
-  Animation<Color> get color => animation;
+  Animation<Color> get color => listenable;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
-  final bool dismissable;
+  final bool dismissible;
 
   @override
   Widget build(BuildContext context) {
     return new ModalBarrier(
       color: color?.value,
-      dismissable: dismissable
+      dismissible: dismissible
     );
   }
 }

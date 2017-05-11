@@ -32,7 +32,7 @@ class TestDataSource extends DataTableSource {
   }
 
   @override
-  int get rowCount => 500 * kDesserts.length;
+  int get rowCount => 50 * kDesserts.length;
 
   @override
   bool get isRowCountApproximate => false;
@@ -42,40 +42,103 @@ class TestDataSource extends DataTableSource {
 }
 
 void main() {
+  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
+    final TestDataSource source = new TestDataSource();
+
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: 2,
+        availableRowsPerPage: <int>[
+          2, 4, 8, 16,
+        ],
+        onRowsPerPageChanged: (int rowsPerPage) {
+          log.add('rows-per-page-changed: $rowsPerPage');
+        },
+        onPageChanged: (int rowIndex) {
+          log.add('page-changed: $rowIndex');
+        },
+        columns: <DataColumn>[
+          const DataColumn(label: const Text('Name')),
+          const DataColumn(label: const Text('Calories'), numeric: true),
+          const DataColumn(label: const Text('Generation')),
+        ],
+      )
+    ));
+
+    await tester.tap(find.byTooltip('Next page'));
+
+    expect(log, <String>['page-changed: 2']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(find.text('Frozen yogurt (0)'), findsNothing);
+    expect(find.text('Eclair (0)'), findsOneWidget);
+    expect(find.text('Gingerbread (0)'), findsNothing);
+
+    await tester.tap(find.icon(Icons.chevron_left));
+
+    expect(log, <String>['page-changed: 0']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(find.text('Frozen yogurt (0)'), findsOneWidget);
+    expect(find.text('Eclair (0)'), findsNothing);
+    expect(find.text('Gingerbread (0)'), findsNothing);
+
+    await tester.tap(find.icon(Icons.chevron_left));
+
+    expect(log, isEmpty);
+
+    await tester.tap(find.text('2'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    await tester.tap(find.text('8').last);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    expect(log, <String>['rows-per-page-changed: 8']);
+    log.clear();
+  });
+
   testWidgets('PaginatedDataTable control test', (WidgetTester tester) async {
     TestDataSource source = new TestDataSource()
       ..generation = 42;
 
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     Widget buildTable(TestDataSource source) {
       return new PaginatedDataTable(
-        header: new Text('Test table'),
+        header: const Text('Test table'),
         source: source,
         onPageChanged: (int rowIndex) {
           log.add('page-changed: $rowIndex');
         },
         columns: <DataColumn>[
-          new DataColumn(
-            label: new Text('Name'),
+          const DataColumn(
+            label: const Text('Name'),
             tooltip: 'Name',
           ),
           new DataColumn(
-            label: new Text('Calories'),
+            label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
             onSort: (int columnIndex, bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
             }
           ),
-          new DataColumn(
-            label: new Text('Generation'),
+          const DataColumn(
+            label: const Text('Generation'),
             tooltip: 'Generation',
           ),
         ],
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.adjust),
+            icon: const Icon(Icons.adjust),
             onPressed: () {
               log.add('action: adjust');
             },
@@ -109,7 +172,7 @@ void main() {
     expect(find.text('43'), findsNothing);
     expect(find.text('15'), findsNWidgets(10));
 
-    PaginatedDataTableState state = tester.state(find.byType(PaginatedDataTable));
+    final PaginatedDataTableState state = tester.state(find.byType(PaginatedDataTable));
 
     expect(log, isEmpty);
     state.pageTo(23);
@@ -124,69 +187,6 @@ void main() {
 
     await tester.tap(find.icon(Icons.adjust));
     expect(log, <String>['action: adjust']);
-    log.clear();
-  });
-
-  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
-    TestDataSource source = new TestDataSource();
-
-    List<String> log = <String>[];
-
-    await tester.pumpWidget(new MaterialApp(
-      home: new PaginatedDataTable(
-        header: new Text('Test table'),
-        source: source,
-        rowsPerPage: 2,
-        availableRowsPerPage: <int>[
-          2, 4, 8, 16,
-        ],
-        onRowsPerPageChanged: (int rowsPerPage) {
-          log.add('rows-per-page-changed: $rowsPerPage');
-        },
-        onPageChanged: (int rowIndex) {
-          log.add('page-changed: $rowIndex');
-        },
-        columns: <DataColumn>[
-          new DataColumn(label: new Text('Name')),
-          new DataColumn(label: new Text('Calories'), numeric: true),
-          new DataColumn(label: new Text('Generation')),
-        ],
-      )
-    ));
-
-    await tester.tap(find.byTooltip('Next page'));
-
-    expect(log, <String>['page-changed: 2']);
-    log.clear();
-
-    await tester.pump();
-
-    expect(find.text('Frozen yogurt (0)'), findsNothing);
-    expect(find.text('Eclair (0)'), findsOneWidget);
-    expect(find.text('Gingerbread (0)'), findsNothing);
-
-    await tester.tap(find.icon(Icons.chevron_left));
-
-    expect(log, <String>['page-changed: 0']);
-    log.clear();
-
-    await tester.pump();
-
-    expect(find.text('Frozen yogurt (0)'), findsOneWidget);
-    expect(find.text('Eclair (0)'), findsNothing);
-    expect(find.text('Gingerbread (0)'), findsNothing);
-
-    await tester.tap(find.icon(Icons.chevron_left));
-
-    expect(log, isEmpty);
-
-    await tester.tap(find.text('2'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
-
-    await tester.tap(find.text('8').last);
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
-
-    expect(log, <String>['rows-per-page-changed: 8']);
     log.clear();
   });
 }

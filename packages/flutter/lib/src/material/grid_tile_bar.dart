@@ -24,7 +24,7 @@ class GridTileBar extends StatelessWidget {
   /// Creates a grid tile bar.
   ///
   /// Typically used to with [GridTile].
-  GridTileBar({
+  const GridTileBar({
     Key key,
     this.backgroundColor,
     this.leading,
@@ -62,7 +62,7 @@ class GridTileBar extends StatelessWidget {
   Widget build(BuildContext context) {
     BoxDecoration decoration;
     if (backgroundColor != null)
-      decoration = new BoxDecoration(backgroundColor: backgroundColor);
+      decoration = new BoxDecoration(color: backgroundColor);
 
     final List<Widget> children = <Widget>[];
     final EdgeInsets padding = new EdgeInsets.only(
@@ -73,8 +73,8 @@ class GridTileBar extends StatelessWidget {
     if (leading != null)
       children.add(new Padding(padding: const EdgeInsets.only(right: 8.0), child: leading));
 
-    ThemeData theme = Theme.of(context);
-    ThemeData darkTheme = new ThemeData(
+    final ThemeData theme = Theme.of(context);
+    final ThemeData darkTheme = new ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
       accentColorBrightness: theme.accentColorBrightness
@@ -124,8 +124,7 @@ class GridTileBar extends StatelessWidget {
       height: (title != null && subtitle != null) ? 68.0 : 48.0,
       child: new Theme(
         data: darkTheme,
-        child: new IconTheme.merge(
-          context: context,
+        child: IconTheme.merge(
           data: const IconThemeData(color: Colors.white),
           child: new Row(
             crossAxisAlignment: CrossAxisAlignment.center,

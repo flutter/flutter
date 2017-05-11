@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'platform_messages.dart';
+import 'system_channels.dart';
 
 /// Base class for platform specific key event data.
 ///
@@ -20,6 +20,7 @@ import 'platform_messages.dart';
 ///  * [RawKeyEvent]
 ///  * [RawKeyDownEvent]
 ///  * [RawKeyUpEvent]
+@immutable
 abstract class RawKeyEventData {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -41,7 +42,11 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.keyCode: 0,
     this.scanCode: 0,
     this.metaState: 0,
-  });
+  }) : assert(flags != null),
+       assert(codePoint != null),
+       assert(keyCode != null),
+       assert(scanCode != null),
+       assert(metaState != null);
 
   /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getFlags()>
   final int flags;
@@ -66,12 +71,14 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
   ///
-  /// The [hidUsage] and [codePoint] arguments must not be null.
+  /// The [hidUsage], [codePoint], and [modifiers] arguments must not be null.
   const RawKeyEventDataFuchsia({
     this.hidUsage: 0,
     this.codePoint: 0,
     this.modifiers: 0,
-  });
+  }) : assert(hidUsage != null),
+       assert(codePoint != null),
+       assert(modifiers != null);
 
   /// The USB HID usage.
   ///
@@ -83,7 +90,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// If there is no Unicode code point, this value is zero.
   final int codePoint;
 
-  /// The modifiers that we present when the key event occured.
+  /// The modifiers that we present when the key event occurred.
   ///
   /// See <https://fuchsia.googlesource.com/mozart/+/master/services/input/input_event_constants.fidl>
   /// for the numerical values of the modifiers.
@@ -101,6 +108,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 ///  * [RawKeyDownEvent]
 ///  * [RawKeyUpEvent]
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
+@immutable
 abstract class RawKeyEvent {
   /// Initializes fields for subclasses.
   const RawKeyEvent({
@@ -130,7 +138,7 @@ class RawKeyUpEvent extends RawKeyEvent {
 RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
   RawKeyEventData data;
 
-  String keymap = message['keymap'];
+  final String keymap = message['keymap'];
   switch (keymap) {
     case 'android':
       data = new RawKeyEventDataAndroid(
@@ -154,7 +162,7 @@ RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
       throw new FlutterError('Unknown keymap for key events: $keymap');
   }
 
-  String type = message['type'];
+  final String type = message['type'];
   switch (type) {
     case 'keydown':
       return new RawKeyDownEvent(data: data);
@@ -182,7 +190,7 @@ RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
 ///  * [RawKeyUpEvent]
 class RawKeyboard {
   RawKeyboard._() {
-    PlatformMessages.setJSONMessageHandler('flutter/keyevent', _handleKeyEvent);
+    SystemChannels.keyEvent.setMessageHandler(_handleKeyEvent);
   }
 
   /// The shared instance of [RawKeyboard].
@@ -207,7 +215,7 @@ class RawKeyboard {
   Future<dynamic> _handleKeyEvent(dynamic message) async {
     if (_listeners.isEmpty)
       return;
-    RawKeyEvent event = _toRawKeyEvent(message);
+    final RawKeyEvent event = _toRawKeyEvent(message);
     if (event == null)
       return;
     for (ValueChanged<RawKeyEvent> listener in new List<ValueChanged<RawKeyEvent>>.from(_listeners))

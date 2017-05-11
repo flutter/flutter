@@ -9,18 +9,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Activity indicator animate property works', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new CupertinoActivityIndicator()));
+    await tester.pumpWidget(const Center(child: const CupertinoActivityIndicator()));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
 
-    await tester.pumpWidget(new Center(child: new CupertinoActivityIndicator(animating: false)));
+    await tester.pumpWidget(const Center(child: const CupertinoActivityIndicator(animating: false)));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
     await tester.pumpWidget(new Container());
 
-    await tester.pumpWidget(new Center(child: new CupertinoActivityIndicator(animating: false)));
+    await tester.pumpWidget(const Center(child: const CupertinoActivityIndicator(animating: false)));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
 
-    await tester.pumpWidget(new Center(child: new CupertinoActivityIndicator()));
+    await tester.pumpWidget(const Center(child: const CupertinoActivityIndicator()));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 }

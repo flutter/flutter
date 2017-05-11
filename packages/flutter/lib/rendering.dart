@@ -22,20 +22,25 @@
 /// initialized with those features.
 library rendering;
 
+export 'package:flutter/foundation.dart' show
+  VoidCallback,
+  ValueChanged,
+  ValueGetter,
+  ValueSetter;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
 export 'src/rendering/animated_size.dart';
 export 'src/rendering/binding.dart';
 export 'src/rendering/block.dart';
 export 'src/rendering/box.dart';
 export 'src/rendering/custom_layout.dart';
 export 'src/rendering/debug.dart';
-export 'src/rendering/editable_line.dart';
+export 'src/rendering/editable.dart';
 export 'src/rendering/error.dart';
 export 'src/rendering/flex.dart';
 export 'src/rendering/flow.dart';
-export 'src/rendering/grid.dart';
 export 'src/rendering/image.dart';
 export 'src/rendering/layer.dart';
-export 'src/rendering/list.dart';
 export 'src/rendering/node.dart';
 export 'src/rendering/object.dart';
 export 'src/rendering/paragraph.dart';
@@ -45,6 +50,7 @@ export 'src/rendering/rotated_box.dart';
 export 'src/rendering/semantics.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
+export 'src/rendering/sliver_fill.dart';
 export 'src/rendering/sliver_fixed_extent_list.dart';
 export 'src/rendering/sliver_grid.dart';
 export 'src/rendering/sliver_list.dart';
@@ -57,11 +63,4 @@ export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
 export 'src/rendering/viewport.dart';
 export 'src/rendering/viewport_offset.dart';
-
-export 'package:flutter/foundation.dart' show
-  VoidCallback,
-  ValueChanged,
-  ValueGetter,
-  ValueSetter;
-
-export 'package:vector_math/vector_math_64.dart' show Matrix4;
+export 'src/rendering/wrap.dart';

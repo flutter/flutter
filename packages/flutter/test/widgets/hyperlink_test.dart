@@ -9,18 +9,18 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Can tap a hyperlink', (WidgetTester tester) async {
     bool didTapLeft = false;
-    TapGestureRecognizer tapLeft = new TapGestureRecognizer()
+    final TapGestureRecognizer tapLeft = new TapGestureRecognizer()
       ..onTap = () {
         didTapLeft = true;
       };
 
     bool didTapRight = false;
-    TapGestureRecognizer tapRight = new TapGestureRecognizer()
+    final TapGestureRecognizer tapRight = new TapGestureRecognizer()
       ..onTap = () {
         didTapRight = true;
       };
 
-    Key textKey = new Key('text');
+    final Key textKey = const Key('text');
 
     await tester.pumpWidget(
       new Center(
@@ -43,26 +43,26 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byKey(textKey));
+    final RenderBox box = tester.renderObject(find.byKey(textKey));
 
     expect(didTapLeft, isFalse);
     expect(didTapRight, isFalse);
 
-    await tester.tapAt(box.localToGlobal(Point.origin) + const Offset(2.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Offset.zero) + const Offset(2.0, 2.0));
 
     expect(didTapLeft, isTrue);
     expect(didTapRight, isFalse);
 
     didTapLeft = false;
 
-    await tester.tapAt(box.localToGlobal(Point.origin) + const Offset(30.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Offset.zero) + const Offset(30.0, 2.0));
 
     expect(didTapLeft, isTrue);
     expect(didTapRight, isFalse);
 
     didTapLeft = false;
 
-    await tester.tapAt(box.localToGlobal(new Point(box.size.width, 0.0)) + const Offset(-2.0, 2.0));
+    await tester.tapAt(box.localToGlobal(new Offset(box.size.width, 0.0)) + const Offset(-2.0, 2.0));
 
     expect(didTapLeft, isFalse);
     expect(didTapRight, isTrue);

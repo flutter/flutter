@@ -6,9 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class TestFlowDelegate extends FlowDelegate {
-  TestFlowDelegate({
-    Animation<double> startOffset
-  }) : startOffset = startOffset, super(repaint: startOffset);
+  TestFlowDelegate({this.startOffset}) : super(repaint: startOffset);
 
   final Animation<double> startOffset;
 
@@ -32,10 +30,10 @@ class TestFlowDelegate extends FlowDelegate {
 
 void main() {
   testWidgets('Flow control test', (WidgetTester tester) async {
-    AnimationController startOffset = new AnimationController.unbounded(
+    final AnimationController startOffset = new AnimationController.unbounded(
       vsync: tester,
     );
-    List<int> log = <int>[];
+    final List<int> log = <int>[];
 
     Widget buildBox(int i) {
       return new GestureDetector(
@@ -45,9 +43,7 @@ void main() {
         child: new Container(
           width: 100.0,
           height: 100.0,
-          decoration: const BoxDecoration(
-            backgroundColor: const Color(0xFF0000FF)
-          ),
+          color: const Color(0xFF0000FF),
           child: new Text('$i')
         )
       );
@@ -76,14 +72,14 @@ void main() {
     expect(log, equals(<int>[0, 1, 2]));
 
     log.clear();
-    await tester.tapAt(const Point(20.0, 90.0));
+    await tester.tapAt(const Offset(20.0, 90.0));
     expect(log, equals(<int>[1]));
 
     startOffset.value = 50.0;
     await tester.pump();
 
     log.clear();
-    await tester.tapAt(const Point(20.0, 90.0));
+    await tester.tapAt(const Offset(20.0, 90.0));
     expect(log, equals(<int>[0]));
   });
 }

@@ -108,7 +108,7 @@ abstract class FlowDelegate {
   /// This should compare the fields of the current delegate and the given
   /// oldDelegate and return true if the fields are such that the layout would
   /// be different.
-  bool shouldRelayout(@checked FlowDelegate oldDelegate) => false;
+  bool shouldRelayout(covariant FlowDelegate oldDelegate) => false;
 
   /// Override this method to return true when the children need to be
   /// repainted. This should compare the fields of the current delegate and the
@@ -123,7 +123,7 @@ abstract class FlowDelegate {
   /// The flow container might repaint even if this function returns false, for
   /// example if layout triggers painting (e.g., if [shouldRelayout] returns
   /// true).
-  bool shouldRepaint(@checked FlowDelegate oldDelegate);
+  bool shouldRepaint(covariant FlowDelegate oldDelegate);
 
   /// Override this method to include additional information in the
   /// debugging data printed by [debugDumpRenderTree] and friends.
@@ -177,10 +177,10 @@ class RenderFlow extends RenderBox
   /// Creates a render object for a flow layout.
   ///
   /// For optimal performance, consider using children that return true from
-  /// [isRepaintBounday].
+  /// [isRepaintBoundary].
   RenderFlow({
     List<RenderBox> children,
-    FlowDelegate delegate
+    @required FlowDelegate delegate
   }) : _delegate = delegate {
     assert(delegate != null);
     addAll(children);
@@ -203,7 +203,7 @@ class RenderFlow extends RenderBox
   /// [FlowDelegate.shouldRelayout] and [FlowDelegate.shouldRepaint] functions
   /// to determine whether the new delegate requires this object to update its
   /// layout or painting.
-  set delegate (FlowDelegate newDelegate) {
+  set delegate(FlowDelegate newDelegate) {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
@@ -285,7 +285,7 @@ class RenderFlow extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       _randomAccessChildren.add(child);
-      BoxConstraints innerConstraints = _delegate.getConstraintsForChild(i, constraints);
+      final BoxConstraints innerConstraints = _delegate.getConstraintsForChild(i, constraints);
       child.layout(innerConstraints, parentUsesSize: true);
       final FlowParentData childParentData = child.parentData;
       childParentData.offset = Offset.zero;
@@ -314,7 +314,7 @@ class RenderFlow extends RenderBox
   @override
   void paintChild(int i, { Matrix4 transform, double opacity: 1.0 }) {
     transform ??= new Matrix4.identity();
-    RenderBox child = _randomAccessChildren[i];
+    final RenderBox child = _randomAccessChildren[i];
     final FlowParentData childParentData = child.parentData;
     assert(() {
       if (childParentData._transform != null) {
@@ -364,11 +364,11 @@ class RenderFlow extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintWithDelegate);
+    context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate);
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     final List<RenderBox> children = getChildrenAsList();
     for (int i = _lastPaintOrder.length - 1; i >= 0; --i) {
       final int childIndex = _lastPaintOrder[i];
@@ -386,7 +386,7 @@ class RenderFlow extends RenderBox
         // on screen and cannot be hit.
         continue;
       }
-      final Point childPosition = MatrixUtils.transformPoint(inverse, position);
+      final Offset childPosition = MatrixUtils.transformPoint(inverse, position);
       if (child.hitTest(result, position: childPosition))
         return true;
     }

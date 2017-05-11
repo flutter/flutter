@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import 'package:coverage/coverage.dart';
-import 'package:path/path.dart' as path;
+import 'package:coverage/coverage.dart' as coverage;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -20,7 +19,7 @@ class CoverageCollector {
     if (_globalHitmap == null)
       _globalHitmap = hitmap;
     else
-      mergeHitmaps(hitmap, _globalHitmap);
+      coverage.mergeHitmaps(hitmap, _globalHitmap);
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -29,23 +28,39 @@ class CoverageCollector {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<Null> collectCoverage(Process process, InternetAddress host, int port) async {
+  Future<Null> collectCoverage(Process process, Uri observatoryUri) async {
     assert(process != null);
-    assert(port != null);
+    assert(observatoryUri != null);
 
-    int pid = process.pid;
+    final int pid = process.pid;
     int exitCode;
     process.exitCode.then<Null>((int code) {
       exitCode = code;
     });
-
-    printTrace('pid $pid (port $port): collecting coverage data...');
-    final Map<String, dynamic> data = await collect(host.address, port, false, false);
-    printTrace('pid $pid (port $port): ${ exitCode != null ? "process terminated prematurely with exit code $exitCode; aborting" : "collected coverage data; merging..." }');
     if (exitCode != null)
-      throw new Exception('Failed to collect coverage, process terminated prematurely.');
-    _addHitmap(createHitmap(data['coverage']));
-    printTrace('pid $pid (port $port): done merging coverage data into global coverage map.');
+      throw new Exception('Failed to collect coverage, process terminated before coverage could be collected.');
+
+    printTrace('pid $pid: collecting coverage data from $observatoryUri...');
+    final Map<String, dynamic> data = await coverage
+        .collect(observatoryUri, false, false)
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            throw new Exception('Failed to collect coverage, it took more than thirty seconds.');
+          },
+        );
+    printTrace(() {
+      final StringBuffer buf = new StringBuffer()
+          ..write('pid $pid ($observatoryUri): ')
+          ..write(exitCode == null
+              ? 'collected coverage data; merging...'
+              : 'process terminated prematurely with exit code $exitCode; aborting');
+      return buf.toString();
+    }());
+    if (exitCode != null)
+      throw new Exception('Failed to collect coverage, process terminated while coverage was being collected.');
+    _addHitmap(coverage.createHitmap(data['coverage']));
+    printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Returns a future that will complete with the formatted coverage data
@@ -57,19 +72,19 @@ class CoverageCollector {
   /// If [timeout] is specified, the future will timeout (with a
   /// [TimeoutException]) after the specified duration.
   Future<String> finalizeCoverage({
-    Formatter formatter,
+    coverage.Formatter formatter,
     Duration timeout,
   }) async {
     printTrace('formating coverage data');
     if (_globalHitmap == null)
       return null;
     if (formatter == null) {
-      Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
-      String packagePath = fs.currentDirectory.path;
-      List<String> reportOn = <String>[path.join(packagePath, 'lib')];
-      formatter = new LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
+      final coverage.Resolver resolver = new coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
+      final String packagePath = fs.currentDirectory.path;
+      final List<String> reportOn = <String>[fs.path.join(packagePath, 'lib')];
+      formatter = new coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
-    String result = await formatter.format(_globalHitmap);
+    final String result = await formatter.format(_globalHitmap);
     _globalHitmap = null;
     return result;
   }

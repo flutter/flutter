@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'platform_messages.dart';
+import 'system_channels.dart';
 
 /// A sound provided by the system.
 enum SystemSoundType {
@@ -20,10 +20,9 @@ class SystemSound {
   /// Play the specified system sound. If that sound is not present on the
   /// system, the call is ignored.
   static Future<Null> play(SystemSoundType type) async {
-    await PlatformMessages.invokeMethod(
-      'flutter/platform',
+    await SystemChannels.platform.invokeMethod(
       'SystemSound.play',
-      <String>[ type.toString() ],
+      type.toString(),
     );
   }
 }

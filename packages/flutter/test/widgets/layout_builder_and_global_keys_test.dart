@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 import 'package:flutter/widgets.dart';
 
 class Wrapper extends StatelessWidget {
-  Wrapper({
+  const Wrapper({
     Key key,
     this.child,
   }) : super(key: key);
@@ -18,7 +18,7 @@ class Wrapper extends StatelessWidget {
 }
 
 class StatefulWrapper extends StatefulWidget {
-  StatefulWrapper({
+  const StatefulWrapper({
     Key key,
     this.child,
   }) : super(key: key);
@@ -36,12 +36,12 @@ class StatefulWrapperState extends State<StatefulWrapper> {
   }
 
   @override
-  Widget build(BuildContext context) => config.child;
+  Widget build(BuildContext context) => widget.child;
 }
 
 void main() {
   testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
-    GlobalKey<StatefulWrapperState> key = new GlobalKey<StatefulWrapperState>();
+    final GlobalKey<StatefulWrapperState> key = new GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
       new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         return new Wrapper(

@@ -31,16 +31,16 @@ void main() {
 
   testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new ExpandIcon(
+      const Material(
+        child: const Center(
+          child: const ExpandIcon(
             onPressed: null
           )
         )
       )
     );
 
-    IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme));
+    final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme));
     expect(iconTheme.data.color, equals(Colors.black26));
   });
 

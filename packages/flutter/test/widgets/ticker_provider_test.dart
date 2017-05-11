@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
-    Widget widget = new TickerMode(
+    final Widget widget = const TickerMode(
       enabled: false,
-      child: new LinearProgressIndicator()
+      child: const LinearProgressIndicator()
     );
     expect(widget.toString, isNot(throwsException));
 
@@ -17,16 +17,16 @@ void main() {
 
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(new TickerMode(
+    await tester.pumpWidget(const TickerMode(
       enabled: true,
-      child: new LinearProgressIndicator()
+      child: const LinearProgressIndicator()
     ));
 
     expect(tester.binding.transientCallbackCount, 1);
 
-    await tester.pumpWidget(new TickerMode(
+    await tester.pumpWidget(const TickerMode(
       enabled: false,
-      child: new LinearProgressIndicator()
+      child: const LinearProgressIndicator()
     ));
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -34,9 +34,9 @@ void main() {
 
   testWidgets('Navigation with TickerMode', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
-      home: new LinearProgressIndicator(),
+      home: const LinearProgressIndicator(),
       routes: <String, WidgetBuilder>{
-        '/test': (BuildContext context) => new Text('hello'),
+        '/test': (BuildContext context) => const Text('hello'),
       },
     ));
     expect(tester.binding.transientCallbackCount, 1);
@@ -55,7 +55,7 @@ void main() {
   });
 
   testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
-    Widget widget = new BoringTickerTest();
+    final Widget widget = new BoringTickerTest();
     expect(widget.toString, isNot(throwsException));
 
     await tester.pumpWidget(widget);

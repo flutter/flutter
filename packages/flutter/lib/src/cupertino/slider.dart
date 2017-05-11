@@ -41,7 +41,7 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
-  CupertinoSlider({
+  const CupertinoSlider({
     Key key,
     @required this.value,
     @required this.onChanged,
@@ -49,13 +49,12 @@ class CupertinoSlider extends StatefulWidget {
     this.max: 1.0,
     this.divisions,
     this.activeColor: const Color(0xFF027AFF),
-  }) : super(key: key) {
-    assert(value != null);
-    assert(min != null);
-    assert(max != null);
-    assert(value >= min && value <= max);
-    assert(divisions == null || divisions > 0);
-  }
+  }) : assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
 
   /// The currently selected value for this slider.
   ///
@@ -101,8 +100,6 @@ class CupertinoSlider extends StatefulWidget {
 
   /// The number of discrete divisions.
   ///
-  /// Typically used with [label] to show the current discrete value.
-  ///
   /// If null, the slider is continuous.
   final int divisions;
 
@@ -111,28 +108,36 @@ class CupertinoSlider extends StatefulWidget {
 
   @override
   _CupertinoSliderState createState() => new _CupertinoSliderState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('value: ${value.toStringAsFixed(1)}');
+    description.add('min: $min');
+    description.add('max: $max');
+  }
 }
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
-    assert(config.onChanged != null);
-    config.onChanged(value * (config.max - config.min) + config.min);
+    assert(widget.onChanged != null);
+    widget.onChanged(value * (widget.max - widget.min) + widget.min);
   }
 
   @override
   Widget build(BuildContext context) {
     return new _CupertinoSliderRenderObjectWidget(
-      value: (config.value - config.min) / (config.max - config.min),
-      divisions: config.divisions,
-      activeColor: config.activeColor,
-      onChanged: config.onChanged != null ? _handleChanged : null,
+      value: (widget.value - widget.min) / (widget.max - widget.min),
+      divisions: widget.divisions,
+      activeColor: widget.activeColor,
+      onChanged: widget.onChanged != null ? _handleChanged : null,
       vsync: this,
     );
   }
 }
 
 class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
-  _CupertinoSliderRenderObjectWidget({
+  const _CupertinoSliderRenderObjectWidget({
     Key key,
     this.value,
     this.divisions,
@@ -181,7 +186,7 @@ const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material s
 
 class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsActionHandler {
   _RenderCupertinoSlider({
-    double value,
+    @required double value,
     int divisions,
     Color activeColor,
     this.onChanged,
@@ -217,10 +222,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
 
   int get divisions => _divisions;
   int _divisions;
-  set divisions(int newDivisions) {
-    if (newDivisions == _divisions)
+  set divisions(int value) {
+    if (value == _divisions)
       return;
-    _divisions = newDivisions;
+    _divisions = value;
     markNeedsPaint();
   }
 
@@ -273,8 +278,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  bool hitTestSelf(Point position) {
-    return (position.x - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
+  bool hitTestSelf(Offset position) {
+    return (position.dx - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
   }
 
   @override
@@ -311,7 +316,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
       canvas.drawRRect(new RRect.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0), paint);
     }
 
-    final Point thumbCenter = new Point(trackActive, trackCenter);
+    final Offset thumbCenter = new Offset(trackActive, trackCenter);
     _thumbPainter.paint(canvas, new Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 

@@ -88,15 +88,25 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
+    argParser.addFlag('use-test-fonts',
+        negatable: true,
+        defaultsTo: false,
+        help: 'Enable (and default to) the "Ahem" font. This is a special font\n'
+              'used in tests to remove any dependencies on the font metrics. It\n'
+              'is enabled when you use "flutter test". Set this flag when running\n'
+              'a test using "flutter run" for debugging purposes. This flag is\n'
+              'only available when running in debug mode.');
     argParser.addFlag('build',
         defaultsTo: true,
         help: 'If necessary, build the app before running.');
     argParser.addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
-    argParser.addOption('snapshotter',
+    argParser.addOption('kernel',
         hide: !verboseHelp,
-        help: 'Specify the path to the sky_snapshot binary.');
+        help: 'Path to a pre-built kernel blob to use when running.\n'
+              'This option only exists for testing new kernel code execution on devices\n'
+              'and is not needed during normal application development.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Specify the path to the .packages file.');
@@ -124,32 +134,36 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Stay resident after launching the application.');
 
-    // Hidden option to enable a benchmarking mode. This will run the given
-    // application, measure the startup time and the app restart time, write the
-    // results out to 'refresh_benchmark.json', and exit. This flag is intended
-    // for use in generating automated flutter benchmarks.
-    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp);
+    argParser.addFlag('benchmark',
+      negatable: false,
+      hide: !verboseHelp,
+      help: 'Enable a benchmarking mode. This will run the given application,\n'
+            'measure the startup time and the app restart time, write the\n'
+            'results out to "refresh_benchmark.json", and exit. This flag is\n'
+            'intended for use in generating automated flutter benchmarks.');
 
     commandValidator = () {
-      if (!runningWithPrebuiltApplication)
-        commonCommandValidator();
-
       // When running with a prebuilt application, no command validation is
       // necessary.
+      if (!runningWithPrebuiltApplication)
+        commonCommandValidator();
     };
   }
 
-  Device device;
+  List<Device> devices;
 
   @override
-  String get usagePath {
-    String command = shouldUseHotMode() ? 'hotrun' : name;
+  Future<String> get usagePath async {
+    final String command = shouldUseHotMode() ? 'hotrun' : name;
 
-    if (device == null)
+    if (devices == null)
       return command;
 
     // Return 'run/ios'.
-    return '$command/${getNameForTargetPlatform(device.platform)}';
+    if (devices.length > 1)
+      return '$command/all';
+    else
+      return '$command/${getNameForTargetPlatform(await devices[0].targetPlatform)}';
   }
 
   @override
@@ -175,7 +189,7 @@ class RunCommand extends RunCommandBase {
   }
 
   bool shouldUseHotMode() {
-    bool hotArg = argResults['hot'] ?? false;
+    final bool hotArg = argResults['hot'] ?? false;
     final bool shouldUseHotMode = hotArg;
     return (getBuildMode() == BuildMode.debug) && shouldUseHotMode;
   }
@@ -186,17 +200,32 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => argResults['resident'];
 
   @override
-  Future<Null> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     commandValidator();
-    device = await findTargetDevice();
-    if (device == null)
+    devices = await findAllTargetDevices();
+    if (devices == null)
       throwToolExit(null);
+    if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication)
+      throwToolExit('Using -d all with --use-application-binary is not supported');
     return super.verifyThenRunCommand();
   }
 
-  @override
-  Future<Null> runCommand() async {
+  DebuggingOptions _createDebuggingOptions() {
+    if (getBuildMode() == BuildMode.release) {
+      return new DebuggingOptions.disabled(getBuildMode());
+    } else {
+      return new DebuggingOptions.enabled(
+        getBuildMode(),
+        startPaused: argResults['start-paused'],
+        useTestFonts: argResults['use-test-fonts'],
+        observatoryPort: observatoryPort,
+        diagnosticPort: diagnosticPort,
+      );
+    }
+  }
 
+  @override
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     // Enable hot mode by default if `--no-hot` was not passed and we are in
@@ -204,61 +233,65 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     if (argResults['machine']) {
-      Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
+      if (devices.length > 1)
+        throwToolExit('--machine does not support -d all.');
+      final Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
-        app = daemon.appDomain.startApp(
-          device, fs.currentDirectory.path, targetFile, route,
-          getBuildMode(), argResults['start-paused'], hotMode,
+        app = await daemon.appDomain.startApp(
+          devices.first, fs.currentDirectory.path, targetFile, route,
+          _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: argResults['packages'],
-          projectAssets: argResults['project-assets']);
+          projectAssets: argResults['project-assets']
+        );
       } catch (error) {
         throwToolExit(error.toString());
       }
-      int result = await app.runner.waitForAppToFinish();
+      final DateTime appStartedTime = clock.now();
+      final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
-      return null;
-    }
-
-    if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
-      throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
-
-    DebuggingOptions options;
-
-    if (getBuildMode() == BuildMode.release) {
-      options = new DebuggingOptions.disabled(getBuildMode());
-    } else {
-      options = new DebuggingOptions.enabled(
-        getBuildMode(),
-        startPaused: argResults['start-paused'],
-        observatoryPort: observatoryPort,
-        diagnosticPort: diagnosticPort,
+      return new FlutterCommandResult(
+        ExitStatus.success,
+        analyticsParameters: <String>['daemon'],
+        endTimeOverride: appStartedTime,
       );
     }
 
-    if (hotMode) {
-      if (!device.supportsHotMode)
-        throwToolExit('Hot mode is not supported by this device. Run with --no-hot.');
+    for (Device device in devices) {
+      if (await device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
+        throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
     }
 
-    String pidFile = argResults['pid-file'];
+    if (hotMode) {
+      for (Device device in devices) {
+        if (!device.supportsHotMode)
+          throwToolExit('Hot mode is not supported by ${device.name}. Run with --no-hot.');
+      }
+    }
+
+    final String pidFile = argResults['pid-file'];
     if (pidFile != null) {
       // Write our pid to the file.
       fs.file(pidFile).writeAsStringSync(pid.toString());
     }
-    ResidentRunner runner;
 
+    final List<FlutterDevice> flutterDevices = devices.map((Device device) {
+      return new FlutterDevice(device);
+    }).toList();
+
+    ResidentRunner runner;
     if (hotMode) {
       runner = new HotRunner(
-        device,
+        flutterDevices,
         target: targetFile,
-        debuggingOptions: options,
+        debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
+        kernelFilePath: argResults['kernel'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: argResults['packages'],
         projectAssets: argResults['project-assets'],
@@ -266,20 +299,43 @@ class RunCommand extends RunCommandBase {
       );
     } else {
       runner = new ColdRunner(
-        device,
+        flutterDevices,
         target: targetFile,
-        debuggingOptions: options,
+        debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
         stayResident: stayResident,
       );
     }
 
-    int result = await runner.run(
+    DateTime appStartedTime;
+    // Sync completer so the completing agent attaching to the resident doesn't 
+    // need to know about analytics. 
+    //
+    // Do not add more operations to the future.
+    final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync();
+    appStartedTimeRecorder.future.then(
+      (_) { appStartedTime = clock.now(); }
+    );
+
+    final int result = await runner.run(
+      appStartedCompleter: appStartedTimeRecorder,
       route: route,
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );
     if (result != 0)
       throwToolExit(null, exitCode: result);
+    return new FlutterCommandResult(
+      ExitStatus.success,
+      analyticsParameters: <String>[
+        hotMode ? 'hot' : 'cold',
+        getModeName(getBuildMode()),
+        devices.length == 1 
+            ? getNameForTargetPlatform(await devices[0].targetPlatform)
+            : 'multiple',
+        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null
+      ],
+      endTimeOverride: appStartedTime,
+    );
   }
 }

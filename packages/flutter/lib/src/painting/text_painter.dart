@@ -4,11 +4,11 @@
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'text_editing.dart';
 import 'text_span.dart';
 
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
@@ -95,9 +95,15 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// The string used to ellipsize overflowing text.  Setting this to a nonempty
+  /// The string used to ellipsize overflowing text. Setting this to a non-empty
   /// string will cause this string to be substituted for the remaining text
-  /// if the text can not fit within the specificed maximum width.
+  /// if the text can not fit within the specified maximum width.
+  ///
+  /// Specifically, the ellipsis is applied to the last line before the line
+  /// truncated by [maxLines], if [maxLines] is non-null and that line overflows
+  /// the width constraint, or to the first line that is wider than the width
+  /// constraint, if [maxLines] is null. The width constraint is the `maxWidth`
+  /// passed to [layout].
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
   String get ellipsis => _ellipsis;
@@ -111,9 +117,11 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// An optional maximum number of lines for the text to span, wrapping if necessary.
-  /// If the text exceeds the given number of lines, it will be truncated according
-  /// to [overflow].
+  /// An optional maximum number of lines for the text to span, wrapping if
+  /// necessary.
+  ///
+  /// If the text exceeds the given number of lines, it is truncated such that
+  /// subsequent lines are dropped.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
   int get maxLines => _maxLines;
@@ -127,10 +135,16 @@ class TextPainter {
   }
 
   ui.Paragraph _layoutTemplate;
+
+  /// The height of a zero-width space in [text] in logical pixels.
+  ///
+  /// Not every line of text in [text] will have this height, but this height
+  /// is "typical" for text in [text] and useful for sizing other objects
+  /// relative a typical line of text.
   double get preferredLineHeight {
     assert(text != null);
     if (_layoutTemplate == null) {
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle());
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle());
       if (text.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(_kZeroWidthSpace);
@@ -191,7 +205,8 @@ class TextPainter {
     return new Size(width, height);
   }
 
-  /// Returns the distance from the top of the text to the first baseline of the given type.
+  /// Returns the distance from the top of the text to the first baseline of the
+  /// given type.
   ///
   /// Valid only after [layout] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
@@ -206,6 +221,17 @@ class TextPainter {
     return null;
   }
 
+  /// Whether any text was truncated or ellipsized.
+  ///
+  /// If [maxLines] is not null, this is true if there were more lines to be
+  /// drawn than the given [maxLines], and thus at least one line was omitted in
+  /// the output; otherwise it is false.
+  ///
+  /// If [maxLines] is null, this is true if [ellipsis] is not the empty string
+  /// and there was a line that overflowed the `maxWidth` argument passed to
+  /// [layout]; otherwise it is false.
+  ///
+  /// Valid only after [layout] has been called.
   bool get didExceedMaxLines {
     assert(!_needsLayout);
     return _paragraph.didExceedMaxLines;
@@ -236,7 +262,7 @@ class TextPainter {
         maxLines: maxLines,
         ellipsis: ellipsis,
       );
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
       _text.build(builder, textScaleFactor: textScaleFactor);
       _paragraph = builder.build();
     }
@@ -280,31 +306,45 @@ class TextPainter {
   }
 
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
-    int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
-    int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
-    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+    final int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
+    final List<ui.TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
     if (boxes.isEmpty)
       return null;
-    ui.TextBox box = boxes[0];
-    double caretEnd = box.end;
-    double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
+    final ui.TextBox box = boxes[0];
+    final double caretEnd = box.end;
+    final double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
     return new Offset(dx, box.top);
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    int nextCodeUnit = _text.codeUnitAt(offset + 1);
+    final int nextCodeUnit = _text.codeUnitAt(offset + 1);
     if (nextCodeUnit == null)
       return null;
-    int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
-    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+    final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+    final List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
     if (boxes.isEmpty)
       return null;
-    ui.TextBox box = boxes[0];
-    double caretStart = box.start;
-    double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
+    final ui.TextBox box = boxes[0];
+    final double caretStart = box.start;
+    final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
     return new Offset(dx, box.top);
+  }
+
+  Offset get _emptyOffset {
+    // TODO(abarth): Handle the directionality of the text painter itself.
+    switch (textAlign ?? TextAlign.left) {
+      case TextAlign.left:
+      case TextAlign.justify:
+        return Offset.zero;
+      case TextAlign.right:
+        return new Offset(width, 0.0);
+      case TextAlign.center:
+        return new Offset(width / 2.0, 0.0);
+    }
+    return null;
   }
 
   /// Returns the offset at which to paint the caret.
@@ -312,18 +352,16 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
     assert(!_needsLayout);
-    int offset = position.offset;
-    // TODO(abarth): Handle the directionality of the text painter itself.
-    const Offset emptyOffset = Offset.zero;
+    final int offset = position.offset;
     switch (position.affinity) {
       case TextAffinity.upstream:
         return _getOffsetFromUpstream(offset, caretPrototype)
             ?? _getOffsetFromDownstream(offset, caretPrototype)
-            ?? emptyOffset;
+            ?? _emptyOffset;
       case TextAffinity.downstream:
         return _getOffsetFromDownstream(offset, caretPrototype)
             ?? _getOffsetFromUpstream(offset, caretPrototype)
-            ?? emptyOffset;
+            ?? _emptyOffset;
     }
     assert(position.affinity != null);
     return null;
@@ -354,7 +392,7 @@ class TextPainter {
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
     assert(!_needsLayout);
-    List<int> indices = _paragraph.getWordBoundary(position.offset);
+    final List<int> indices = _paragraph.getWordBoundary(position.offset);
     return new TextRange(start: indices[0], end: indices[1]);
   }
 }

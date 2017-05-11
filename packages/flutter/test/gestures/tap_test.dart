@@ -22,43 +22,43 @@ void main() {
   // Down/up pair 1: normal tap sequence
   const PointerDownEvent down1 = const PointerDownEvent(
     pointer: 1,
-    position: const Point(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
   const PointerUpEvent up1 = const PointerUpEvent(
     pointer: 1,
-    position: const Point(11.0, 9.0)
+    position: const Offset(11.0, 9.0)
   );
 
   // Down/up pair 2: normal tap sequence far away from pair 1
   const PointerDownEvent down2 = const PointerDownEvent(
     pointer: 2,
-    position: const Point(30.0, 30.0)
+    position: const Offset(30.0, 30.0)
   );
 
   const PointerUpEvent up2 = const PointerUpEvent(
     pointer: 2,
-    position: const Point(31.0, 29.0)
+    position: const Offset(31.0, 29.0)
   );
 
   // Down/move/up sequence 3: intervening motion
   const PointerDownEvent down3 = const PointerDownEvent(
     pointer: 3,
-    position: const Point(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
   const PointerMoveEvent move3 = const PointerMoveEvent(
     pointer: 3,
-    position: const Point(25.0, 25.0)
+    position: const Offset(25.0, 25.0)
   );
 
   const PointerUpEvent up3 = const PointerUpEvent(
     pointer: 3,
-    position: const Point(25.0, 25.0)
+    position: const Offset(25.0, 25.0)
   );
 
   testGesture('Should recognize tap', (GestureTester tester) {
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -80,7 +80,7 @@ void main() {
   });
 
   testGesture('No duplicate tap events', (GestureTester tester) {
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     int tapsRecognized = 0;
     tap.onTap = () {
@@ -113,7 +113,7 @@ void main() {
   });
 
   testGesture('Should not recognize two overlapping taps', (GestureTester tester) {
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     int tapsRecognized = 0;
     tap.onTap = () {
@@ -147,7 +147,7 @@ void main() {
   });
 
   testGesture('Distance cancels tap', (GestureTester tester) {
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -180,7 +180,7 @@ void main() {
   });
 
   testGesture('Timeout does not cancel tap', (GestureTester tester) {
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -204,7 +204,7 @@ void main() {
   });
 
   testGesture('Should yield to other arena members', (GestureTester tester) {
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -212,8 +212,8 @@ void main() {
     };
 
     tap.addPointer(down1);
-    TestGestureArenaMember member = new TestGestureArenaMember();
-    GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
+    final TestGestureArenaMember member = new TestGestureArenaMember();
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
     tester.closeArena(1);
     expect(tapRecognized, isFalse);
@@ -232,7 +232,7 @@ void main() {
   });
 
   testGesture('Should trigger on release of held arena', (GestureTester tester) {
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool tapRecognized = false;
     tap.onTap = () {
@@ -240,8 +240,8 @@ void main() {
     };
 
     tap.addPointer(down1);
-    TestGestureArenaMember member = new TestGestureArenaMember();
-    GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
+    final TestGestureArenaMember member = new TestGestureArenaMember();
+    final GestureArenaEntry entry = GestureBinding.instance.gestureArena.add(1, member);
     GestureBinding.instance.gestureArena.hold(1);
     tester.closeArena(1);
     expect(tapRecognized, isFalse);
@@ -261,13 +261,13 @@ void main() {
   });
 
   testGesture('Should log exceptions from callbacks', (GestureTester tester) {
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     tap.onTap = () {
       throw new Exception(test);
     };
 
-    FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
     bool gotError = false;
     FlutterError.onError = (FlutterErrorDetails details) {
       gotError = true;

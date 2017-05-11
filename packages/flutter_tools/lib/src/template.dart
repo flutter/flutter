@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:mustache/mustache.dart' as mustache;
-import 'package:path/path.dart' as path;
 
 import 'base/file_system.dart';
 import 'cache.dart';
@@ -25,13 +24,13 @@ const String _kCopyTemplateExtension = '.copy.tmpl';
 /// extensions.
 class Template {
   Template(Directory templateSource, Directory baseDir) {
-    _templateFilePaths = new Map<String, String>();
+    _templateFilePaths = <String, String>{};
 
     if (!templateSource.existsSync()) {
       return;
     }
 
-    List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
+    final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
 
     for (FileSystemEntity entity in templateFiles) {
       if (entity is! File) {
@@ -39,21 +38,21 @@ class Template {
         continue;
       }
 
-      String relativePath = path.relative(entity.path,
+      final String relativePath = fs.path.relative(entity.path,
           from: baseDir.absolute.path);
 
       if (relativePath.contains(_kTemplateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
         // itself is a template.
-        _templateFilePaths[relativePath] = path.absolute(entity.path);
+        _templateFilePaths[relativePath] = fs.path.absolute(entity.path);
       }
     }
   }
 
   factory Template.fromName(String name) {
     // All named templates are placed in the 'templates' directory
-    Directory templateDir = _templateDirectoryInPackage(name);
+    final Directory templateDir = _templateDirectoryInPackage(name);
     return new Template(templateDir, templateDir);
   }
 
@@ -63,22 +62,25 @@ class Template {
     Directory destination,
     Map<String, dynamic> context, {
     bool overwriteExisting: true,
-    String projectName
   }) {
     destination.createSync(recursive: true);
     int fileCount = 0;
 
-    String destinationDirPath = destination.absolute.path;
+    final String projectName = context['projectName'];
+    final String pluginClass = context['pluginClass'];
+    final String destinationDirPath = destination.absolute.path;
 
     _templateFilePaths.forEach((String relativeDestPath, String absoluteSrcPath) {
-      String finalDestinationPath = path
+      String finalDestinationPath = fs.path
           .join(destinationDirPath, relativeDestPath)
           .replaceAll(_kCopyTemplateExtension, '')
           .replaceAll(_kTemplateExtension, '');
       if (projectName != null)
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
-      File finalDestinationFile = fs.file(finalDestinationPath);
-      String relativePathForLogging = path.relative(finalDestinationFile.path);
+      if (pluginClass != null)
+        finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
+      final File finalDestinationFile = fs.file(finalDestinationPath);
+      final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
 
       // Step 1: Check if the file needs to be overwritten.
 
@@ -98,7 +100,7 @@ class Template {
       fileCount++;
 
       finalDestinationFile.createSync(recursive: true);
-      File sourceFile = fs.file(absoluteSrcPath);
+      final File sourceFile = fs.file(absoluteSrcPath);
 
       // Step 2: If the absolute paths ends with a 'copy.tmpl', this file does
       //         not need mustache rendering but needs to be directly copied.
@@ -113,8 +115,8 @@ class Template {
       //         rendering via mustache.
 
       if (sourceFile.path.endsWith(_kTemplateExtension)) {
-        String templateContents = sourceFile.readAsStringSync();
-        String renderedContents = new mustache.Template(templateContents).renderString(context);
+        final String templateContents = sourceFile.readAsStringSync();
+        final String renderedContents = new mustache.Template(templateContents).renderString(context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 
@@ -132,7 +134,7 @@ class Template {
 }
 
 Directory _templateDirectoryInPackage(String name) {
-  String templatesDir = path.join(Cache.flutterRoot,
+  final String templatesDir = fs.path.join(Cache.flutterRoot,
       'packages', 'flutter_tools', 'templates');
-  return fs.directory(path.join(templatesDir, name));
+  return fs.directory(fs.path.join(templatesDir, name));
 }

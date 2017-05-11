@@ -4,11 +4,8 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
@@ -18,6 +15,7 @@ import 'build.dart';
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     usesTargetOption();
+    usesPubOption();
     argParser.addFlag('debug',
       negatable: false,
       help: 'Build a debug version of your app (default mode for iOS simulator builds).');
@@ -40,19 +38,19 @@ class BuildIOSCommand extends BuildSubCommand {
 
   @override
   Future<Null> runCommand() async {
-    bool forSimulator = argResults['simulator'];
+    final bool forSimulator = argResults['simulator'];
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
     await super.runCommand();
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       throwToolExit('Building for iOS is only supported on the Mac.');
 
-    IOSApp app = applicationPackages.getPackageForPlatform(TargetPlatform.ios);
+    final IOSApp app = applicationPackages.getPackageForPlatform(TargetPlatform.ios);
 
     if (app == null)
       throwToolExit('Application not configured for iOS');
 
-    bool shouldCodesign = argResults['codesign'];
+    final bool shouldCodesign = argResults['codesign'];
 
     if (!forSimulator && !shouldCodesign) {
       printStatus('Warning: Building for device with codesigning disabled. You will '
@@ -62,23 +60,21 @@ class BuildIOSCommand extends BuildSubCommand {
     if (forSimulator && !isEmulatorBuildMode(getBuildMode()))
       throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
 
-    String logTarget = forSimulator ? 'simulator' : 'device';
+    final String logTarget = forSimulator ? 'simulator' : 'device';
 
-    String typeName = path.basename(tools.getEngineArtifactsDirectory(TargetPlatform.ios, getBuildMode()).path);
-    Status status = logger.startProgress('Building $app for $logTarget ($typeName)...');
-    XcodeBuildResult result = await buildXcodeProject(
+    final String typeName = artifacts.getEngineType(TargetPlatform.ios, getBuildMode());
+    printStatus('Building $app for $logTarget ($typeName)...');
+    final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       mode: getBuildMode(),
       target: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign
     );
-    status.stop();
 
     if (!result.success) {
-      printError('Encountered error while building for $logTarget.');
-      diagnoseXcodeBuildFailure(result);
-      throwToolExit('');
+      await diagnoseXcodeBuildFailure(result);
+      throwToolExit('Encountered error while building for $logTarget.');
     }
 
     if (result.output != null)

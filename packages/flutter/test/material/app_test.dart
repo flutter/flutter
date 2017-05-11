@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 class StateMarker extends StatefulWidget {
-  StateMarker({ Key key, this.child }) : super(key: key);
+  const StateMarker({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
@@ -19,8 +19,8 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.child != null)
-      return config.child;
+    if (widget.child != null)
+      return widget.child;
     return new Container();
   }
 }
@@ -30,45 +30,59 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new MaterialApp(
-          home: new Text('Home sweet home')
-        )
-      )
+          home: const Text('Home sweet home'),
+        ),
+      ),
     );
 
     expect(find.text('Home sweet home'), findsOneWidget);
   });
 
   testWidgets('Focus handling', (WidgetTester tester) async {
-    GlobalKey inputKey = new GlobalKey();
+    final FocusNode focusNode = new FocusNode();
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
         child: new Center(
-          child: new Input(key: inputKey, autofocus: true)
-        )
-      )
+          child: new TextField(focusNode: focusNode, autofocus: true),
+        ),
+      ),
     ));
 
-    expect(Focus.at(inputKey.currentContext), isTrue);
+    expect(focusNode.hasFocus, isTrue);
+  });
+
+  testWidgets('Can place app inside FocusScope', (WidgetTester tester) async {
+    final FocusScopeNode focusScopeNode = new FocusScopeNode();
+
+    await tester.pumpWidget(new FocusScope(
+      autofocus: true,
+      node: focusScopeNode,
+      child: new MaterialApp(
+        home: const Text('Home'),
+      ),
+    ));
+
+    expect(find.text('Home'), findsOneWidget);
   });
 
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: new StateMarker()
-      )
+        home: const StateMarker(),
+      ),
     );
 
-    StateMarkerState state1 = tester.state(find.byType(StateMarker));
+    final StateMarkerState state1 = tester.state(find.byType(StateMarker));
     state1.marker = 'original';
 
     await tester.pumpWidget(
       new MaterialApp(
         debugShowMaterialGrid: true,
-        home: new StateMarker()
-      )
+        home: const StateMarker(),
+      ),
     );
 
-    StateMarkerState state2 = tester.state(find.byType(StateMarker));
+    final StateMarkerState state2 = tester.state(find.byType(StateMarker));
     expect(state1, equals(state2));
     expect(state2.marker, equals('original'));
   });
@@ -81,9 +95,9 @@ void main() {
           builder: (BuildContext context) {
             return new Material(
               child: new RaisedButton(
-                child: new Text('X'),
-                onPressed: () { Navigator.of(context).pushNamed('/next'); }
-              )
+                child: const Text('X'),
+                onPressed: () { Navigator.of(context).pushNamed('/next'); },
+              ),
             );
           }
         ),
@@ -93,11 +107,11 @@ void main() {
               builder: (BuildContext context) {
                 ++buildCounter;
                 return new Container();
-              }
+              },
             );
-          }
-        }
-      )
+          },
+        },
+      ),
     );
 
     expect(buildCounter, 0);
@@ -117,4 +131,16 @@ void main() {
     expect(buildCounter, 2);
   });
 
+  testWidgets('Cannot pop the initial route', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(home: const Text('Home')));
+
+    expect(find.text('Home'), findsOneWidget);
+
+    final NavigatorState navigator = tester.state(find.byType(Navigator));
+    final bool result = await navigator.maybePop();
+
+    expect(result, isFalse);
+
+    expect(find.text('Home'), findsOneWidget);
+  });
 }

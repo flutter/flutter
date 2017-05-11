@@ -1,0 +1,3 @@
+#include "Generated.xcconfig"
+
+#include "TestConfig.xcconfig"

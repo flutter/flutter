@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
-    Key switchKey = new UniqueKey();
+    final Key switchKey = new UniqueKey();
     bool value = false;
     await tester.pumpWidget(
       new StatefulBuilder(

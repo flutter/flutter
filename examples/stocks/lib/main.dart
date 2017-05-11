@@ -72,7 +72,7 @@ class StocksAppState extends State<StocksApp> {
       case StockMode.pessimistic:
         return new ThemeData(
           brightness: Brightness.dark,
-          accentColor: Colors.redAccent[200]
+          accentColor: Colors.redAccent
         );
     }
     assert(_configuration.stockMode != null);
@@ -80,7 +80,7 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Route<Null> _getRoute(RouteSettings settings) {
-    List<String> path = settings.name.split('/');
+    final List<String> path = settings.name.split('/');
     if (path[0] != '')
       return null;
     if (path[1] == 'stock') {
@@ -97,7 +97,7 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Future<LocaleQueryData> _onLocaleChanged(Locale locale) async {
-    String localeString = locale.toString();
+    final String localeString = locale.toString();
     await initializeMessages(localeString);
     Intl.defaultLocale = localeString;
     return StockStrings.instance;

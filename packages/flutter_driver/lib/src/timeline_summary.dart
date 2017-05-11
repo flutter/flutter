@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'timeline.dart';
 
-final JsonEncoder _prettyEncoder = new JsonEncoder.withIndent('  ');
+final JsonEncoder _prettyEncoder = const JsonEncoder.withIndent('  ');
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
@@ -30,34 +30,34 @@ class TimelineSummary {
   ///
   /// Returns `null` if no frames were recorded.
   double computeAverageFrameBuildTimeMillis() {
-    return _averageDurationInMillis(_extractFrameEvents());
+    return _averageInMillis(_extractFrameThreadDurations());
   }
 
   /// The longest frame build time in milliseconds.
   ///
   /// Returns `null` if no frames were recorded.
   double computeWorstFrameBuildTimeMillis() {
-    return _maxDurationInMillis(_extractFrameEvents());
+    return _maxInMillis(_extractFrameThreadDurations());
   }
 
   /// The number of frames that missed the [kBuildBudget] and therefore are
   /// in the danger of missing frames.
-  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractFrameEvents()
-    .where((TimedEvent event) => event.duration > kBuildBudget)
+  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractFrameThreadDurations()
+    .where((Duration duration) => duration > kBuildBudget)
     .length;
 
   /// Average amount of time spent per frame in the GPU rasterizer.
   ///
   /// Returns `null` if no frames were recorded.
   double computeAverageFrameRasterizerTimeMillis() {
-    return _averageDurationInMillis(_extractGpuRasterizerDrawEvents());
+    return _averageInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()));
   }
 
   /// The longest frame rasterization time in milliseconds.
   ///
   /// Returns `null` if no frames were recorded.
   double computeWorstFrameRasterizerTimeMillis() {
-    return _maxDurationInMillis(_extractGpuRasterizerDrawEvents());
+    return _maxInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()));
   }
 
   /// The number of frames that missed the [kBuildBudget] on the GPU and
@@ -67,7 +67,7 @@ class TimelineSummary {
       .length;
 
   /// The total number of frames recorded in the timeline.
-  int countFrames() => _extractFrameEvents().length;
+  int countFrames() => _extractFrameThreadDurations().length;
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
@@ -79,8 +79,8 @@ class TimelineSummary {
       'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
-      'frame_build_times': _extractFrameEvents()
-        .map((TimedEvent event) => event.duration.inMicroseconds)
+      'frame_build_times': _extractFrameThreadDurations()
+        .map((Duration duration) => duration.inMicroseconds)
         .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawEvents()
           .map((TimedEvent event) => event.duration.inMicroseconds)
@@ -93,7 +93,7 @@ class TimelineSummary {
       {String destinationDirectory, bool pretty: false}) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
-    File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
+    final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
     await file.writeAsString(_encodeJson(_timeline.json, pretty));
   }
 
@@ -102,7 +102,7 @@ class TimelineSummary {
       {String destinationDirectory, bool pretty: false}) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
-    File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
+    final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
     await file.writeAsString(_encodeJson(summaryJson, pretty));
   }
 
@@ -118,34 +118,24 @@ class TimelineSummary {
       .toList();
   }
 
-  /// Extracts timed events that are reported as complete ("X") timeline events.
-  ///
-  /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
-  List<TimedEvent> _extractCompleteEvents(String name) {
+  List<Duration> _extractThreadDurations(String name) {
     return _extractNamedEvents(name)
-        .where((TimelineEvent event) => event.phase == 'X')
-        .map((TimelineEvent event) {
-          return new TimedEvent(
-            event.timestampMicros,
-            event.timestampMicros + event.duration.inMicroseconds,
-          );
-        })
-        .toList();
+        .map((TimelineEvent event) => event.threadDuration).toList();
   }
 
   /// Extracts timed events that are reported as a pair of begin/end events.
   ///
   /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
   List<TimedEvent> _extractBeginEndEvents(String name) {
-    List<TimedEvent> result = <TimedEvent>[];
+    final List<TimedEvent> result = <TimedEvent>[];
 
     // Timeline does not guarantee that the first event is the "begin" event.
-    Iterator<TimelineEvent> events = _extractNamedEvents(name)
+    final Iterator<TimelineEvent> events = _extractNamedEvents(name)
         .skipWhile((TimelineEvent evt) => evt.phase != 'B').iterator;
     while(events.moveNext()) {
-      TimelineEvent beginEvent = events.current;
+      final TimelineEvent beginEvent = events.current;
       if (events.moveNext()) {
-        TimelineEvent endEvent = events.current;
+        final TimelineEvent endEvent = events.current;
         result.add(new TimedEvent(
             beginEvent.timestampMicros,
             endEvent.timestampMicros
@@ -156,25 +146,30 @@ class TimelineSummary {
     return result;
   }
 
-  double _averageDurationInMillis(List<TimedEvent> events) {
-    if (events.length == 0)
+  double _averageInMillis(Iterable<Duration> durations) {
+    if (durations.isEmpty)
       return null;
 
-    int total = events.fold<int>(0, (int t, TimedEvent e) => t + e.duration.inMilliseconds);
-    return total / events.length;
+    final int total = durations.fold<int>(0, (int t, Duration duration) => t + duration.inMilliseconds);
+    return total / durations.length;
   }
 
-  double _maxDurationInMillis(List<TimedEvent> events) {
-    if (events.length == 0)
+  double _maxInMillis(Iterable<Duration> durations) {
+    if (durations.isEmpty)
       return null;
 
-    return events
-        .map<double>((TimedEvent e) => e.duration.inMilliseconds.toDouble())
-        .reduce((double a, double b) => math.max(a, b));
+    return durations
+        .map<double>((Duration duration) => duration.inMilliseconds.toDouble())
+        .reduce(math.max);
   }
 
-  List<TimedEvent> _extractFrameEvents() => _extractCompleteEvents('Frame');
   List<TimedEvent> _extractGpuRasterizerDrawEvents() => _extractBeginEndEvents('GPURasterizer::Draw');
+
+  List<Duration> _extractFrameThreadDurations() => _extractThreadDurations('Frame');
+
+  Iterable<Duration> _extractDuration(Iterable<TimedEvent> events) {
+    return events.map((TimedEvent e) => e.duration);
+  }
 }
 
 /// Timing information about an event that happened in the event loop.
@@ -189,8 +184,6 @@ class TimedEvent {
   final Duration duration;
 
   /// Creates a timed event given begin and end timestamps in microseconds.
-  TimedEvent(int beginTimeMicros, int endTimeMicros)
-    : this.beginTimeMicros = beginTimeMicros,
-      this.endTimeMicros = endTimeMicros,
-      this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
+  TimedEvent(this.beginTimeMicros, this.endTimeMicros)
+    : this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
 }

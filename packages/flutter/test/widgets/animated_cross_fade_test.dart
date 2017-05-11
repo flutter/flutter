@@ -9,8 +9,8 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('AnimatedCrossFade test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedCrossFade(
+      const Center(
+        child: const AnimatedCrossFade(
           firstChild: const SizedBox(
             width: 100.0,
             height: 100.0
@@ -31,8 +31,8 @@ void main() {
     expect(box.size.height, equals(100.0));
 
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedCrossFade(
+      const Center(
+        child: const AnimatedCrossFade(
           firstChild: const SizedBox(
             width: 100.0,
             height: 100.0
@@ -57,8 +57,8 @@ void main() {
 
   testWidgets('AnimatedCrossFade test showSecond', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedCrossFade(
+      const Center(
+        child: const AnimatedCrossFade(
           firstChild: const SizedBox(
             width: 100.0,
             height: 100.0
@@ -74,7 +74,7 @@ void main() {
     );
 
     expect(find.byType(FadeTransition), findsNWidgets(2));
-    RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
+    final RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
     expect(box.size.width, equals(200.0));
     expect(box.size.height, equals(200.0));
   });

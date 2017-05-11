@@ -12,7 +12,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 4', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
     //    O
     //   / \       O=root
@@ -22,25 +22,27 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
+        fit: StackFit.expand,
         children: <Widget>[
-          new Semantics(
-            label: 'L1'
+          const Semantics(
+            label: 'L1',
           ),
           new Semantics(
             label: 'L2',
             child: new Stack(
+              fit: StackFit.expand,
               children: <Widget>[
-                new Semantics(
-                  checked: true
+                const Semantics(
+                  checked: true,
                 ),
-                new Semantics(
-                  checked: false
-                )
-              ]
-            )
-          )
-        ]
-      )
+                const Semantics(
+                  checked: false,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
 
     expect(semantics, hasSemantics(
@@ -76,23 +78,25 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
+        fit: StackFit.expand,
         children: <Widget>[
-          new Semantics(
-            label: 'L1'
+          const Semantics(
+            label: 'L1',
           ),
           new Semantics(
             label: 'L2',
             child: new Stack(
+              fit: StackFit.expand,
               children: <Widget>[
-                new Semantics(
-                  checked: true
+                const Semantics(
+                  checked: true,
                 ),
-                new Semantics()
-              ]
-            )
-          )
-        ]
-      )
+                const Semantics(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
 
     expect(semantics, hasSemantics(
@@ -118,21 +122,23 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
+        fit: StackFit.expand,
         children: <Widget>[
-          new Semantics(),
+          const Semantics(),
           new Semantics(
             label: 'L2',
             child: new Stack(
+              fit: StackFit.expand,
               children: <Widget>[
-                new Semantics(
-                  checked: true
+                const Semantics(
+                  checked: true,
                 ),
-                new Semantics()
-              ]
-            )
-          )
-        ]
-      )
+                const Semantics(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
 
     expect(semantics, hasSemantics(

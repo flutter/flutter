@@ -59,13 +59,16 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
+
+  @override
+  void setDidUnderflow(bool value) { }
 }
 
 void main() {
   test('RenderSliverList basic test - down', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
-    TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
       children: <RenderBox>[
         a = new RenderSizedBox(const Size(100.0, 400.0)),
         b = new RenderSizedBox(const Size(100.0, 400.0)),
@@ -74,7 +77,7 @@ void main() {
         e = new RenderSizedBox(const Size(100.0, 400.0)),
       ],
     );
-    RenderViewport2 root = new RenderViewport2(
+    final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -86,8 +89,8 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -95,8 +98,8 @@ void main() {
     // make sure that layout is stable by laying out again
     inner.markNeedsLayout();
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -104,8 +107,8 @@ void main() {
     // now try various scroll offsets
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -113,8 +116,8 @@ void main() {
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
     expect(a.attached, false);
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
     expect(d.attached, false);
     expect(e.attached, false);
 
@@ -122,15 +125,15 @@ void main() {
     pumpFrame();
     expect(a.attached, false);
     expect(b.attached, false);
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -100.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 300.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
     expect(e.attached, false);
 
     // try going back up
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -139,7 +142,7 @@ void main() {
   test('RenderSliverList basic test - up', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
-    TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
       children: <RenderBox>[
         a = new RenderSizedBox(const Size(100.0, 400.0)),
         b = new RenderSizedBox(const Size(100.0, 400.0)),
@@ -148,7 +151,7 @@ void main() {
         e = new RenderSizedBox(const Size(100.0, 400.0)),
       ],
     );
-    RenderViewport2 root = new RenderViewport2(
+    final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -160,8 +163,8 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -169,8 +172,8 @@ void main() {
     // make sure that layout is stable by laying out again
     inner.markNeedsLayout();
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -178,8 +181,8 @@ void main() {
     // now try various scroll offsets
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);
@@ -187,8 +190,8 @@ void main() {
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
     expect(a.attached, false);
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
     expect(d.attached, false);
     expect(e.attached, false);
 
@@ -196,15 +199,15 @@ void main() {
     pumpFrame();
     expect(a.attached, false);
     expect(b.attached, false);
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 300.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -100.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
     expect(e.attached, false);
 
     // try going back up
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
     expect(c.attached, false);
     expect(d.attached, false);
     expect(e.attached, false);

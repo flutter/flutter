@@ -5,10 +5,10 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
 import 'thumb_painter.dart';
 
@@ -25,7 +25,8 @@ import 'thumb_painter.dart';
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
-  CupertinoSwitch({
+  /// Creates an iOS-style switch.
+  const CupertinoSwitch({
     Key key,
     @required this.value,
     @required this.onChanged,
@@ -78,16 +79,16 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     return new _CupertinoSwitchRenderObjectWidget(
-      value: config.value,
-      activeColor: config.activeColor,
-      onChanged: config.onChanged,
+      value: widget.value,
+      activeColor: widget.activeColor,
+      onChanged: widget.onChanged,
       vsync: this,
     );
   }
 }
 
 class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
-  _CupertinoSwitchRenderObjectWidget({
+  const _CupertinoSwitchRenderObjectWidget({
     Key key,
     this.value,
     this.activeColor,
@@ -135,15 +136,15 @@ const Duration _kToggleDuration = const Duration(milliseconds: 200);
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsActionHandler {
   _RenderCupertinoSwitch({
-    bool value,
-    Color activeColor,
+    @required bool value,
+    @required Color activeColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
   }) : _value = value,
         _activeColor = activeColor,
         _onChanged = onChanged,
         _vsync = vsync,
-        super(additionalConstraints: new BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
+        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
     assert(value != null);
     assert(activeColor != null);
     assert(vsync != null);
@@ -320,7 +321,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {

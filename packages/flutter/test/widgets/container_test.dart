@@ -9,11 +9,12 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Container control test', (WidgetTester tester) async {
-    Container container = new Container(
+    final Container container = new Container(
       alignment: FractionalOffset.bottomRight,
       padding: const EdgeInsets.all(7.0),
-      decoration: const BoxDecoration(backgroundColor: const Color(0xFF00FF00)),
-      foregroundDecoration: const BoxDecoration(backgroundColor: const Color(0x7F0000FF)),
+      // uses color, not decoration:
+      color: const Color(0xFF00FF00),
+      foregroundDecoration: const BoxDecoration(color: const Color(0x7F0000FF)),
       width: 53.0,
       height: 76.0,
       constraints: const BoxConstraints(
@@ -23,11 +24,12 @@ void main() {
         maxHeight: 82.0,
       ),
       margin: const EdgeInsets.all(5.0),
-      child: new SizedBox(
+      child: const SizedBox(
         width: 25.0,
         height: 33.0,
-        child: new DecoratedBox(
-          decoration: const BoxDecoration(backgroundColor: const Color(0xFFFFFF00)),
+        child: const DecoratedBox(
+          // uses decoration, not color:
+          decoration: const BoxDecoration(color: const Color(0xFFFFFF00)),
         ),
       ),
     );
@@ -39,7 +41,7 @@ void main() {
       child: container
     ));
 
-    RenderBox box = tester.renderObject(find.byType(Container));
+    final RenderBox box = tester.renderObject(find.byType(Container));
     expect(box, isNotNull);
 
     expect(box, paints

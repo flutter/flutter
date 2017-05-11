@@ -190,4 +190,49 @@ void main() {
     expect(() { source.dispose(); }, throwsFlutterError);
     expect(() { source.notify(); }, throwsFlutterError);
   });
+
+  test('Value notifier', () {
+    final ValueNotifier<double> notifier = new ValueNotifier<double>(2.0);
+
+    final List<double> log = <double>[];
+    final VoidCallback listener = () { log.add(notifier.value); };
+
+    notifier.addListener(listener);
+    notifier.value = 3.0;
+
+    expect(log, equals(<double>[ 3.0 ]));
+    log.clear();
+
+    notifier.value = 3.0;
+    expect(log, isEmpty);
+  });
+
+  test('Listenable.merge toString', () {
+    final TestNotifier source1 = new TestNotifier();
+    final TestNotifier source2 = new TestNotifier();
+
+    ChangeNotifier listenableUnderTest = new Listenable.merge(<Listenable>[]);
+    expect(listenableUnderTest.toString(), 'Listenable.merge([])');
+
+    listenableUnderTest = new Listenable.merge(<Listenable>[null]);
+    expect(listenableUnderTest.toString(), 'Listenable.merge([null])');
+
+    listenableUnderTest = new Listenable.merge(<Listenable>[source1]);
+    expect(
+      listenableUnderTest.toString(), 
+      "Listenable.merge([Instance of 'TestNotifier'])",
+    );
+
+    listenableUnderTest = new Listenable.merge(<Listenable>[source1, source2]);
+    expect(
+      listenableUnderTest.toString(), 
+      "Listenable.merge([Instance of 'TestNotifier', Instance of 'TestNotifier'])",
+    );
+
+    listenableUnderTest = new Listenable.merge(<Listenable>[null, source2]);
+    expect(
+      listenableUnderTest.toString(), 
+      "Listenable.merge([null, Instance of 'TestNotifier'])",
+    );
+  });
 }

@@ -22,11 +22,11 @@ RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, Rec
     return rectCallback;
   }
   if (containedInkWell)
-    return () => Point.origin & referenceBox.size;
+    return () => Offset.zero & referenceBox.size;
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback, Point position) {
+double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback, Offset position) {
   if (containedInkWell) {
     final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
     return _getSplashRadiusForPoistionInSize(size, position);
@@ -34,11 +34,11 @@ double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallb
   return Material.defaultSplashRadius;
 }
 
-double _getSplashRadiusForPoistionInSize(Size bounds, Point position) {
-  double d1 = (position - bounds.topLeft(Point.origin)).distance;
-  double d2 = (position - bounds.topRight(Point.origin)).distance;
-  double d3 = (position - bounds.bottomLeft(Point.origin)).distance;
-  double d4 = (position - bounds.bottomRight(Point.origin)).distance;
+double _getSplashRadiusForPoistionInSize(Size bounds, Offset position) {
+  final double d1 = (position - bounds.topLeft(Offset.zero)).distance;
+  final double d2 = (position - bounds.topRight(Offset.zero)).distance;
+  final double d3 = (position - bounds.bottomLeft(Offset.zero)).distance;
+  final double d4 = (position - bounds.bottomRight(Offset.zero)).distance;
   return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
 }
 
@@ -76,18 +76,21 @@ class InkSplash extends InkFeature {
   InkSplash({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
-    Point position,
+    Offset position,
     Color color,
     bool containedInkWell: false,
     RectCallback rectCallback,
+    BorderRadius borderRadius = BorderRadius.zero,
     double radius,
     VoidCallback onRemoved,
   }) : _position = position,
        _color = color,
+       _borderRadius = borderRadius,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
        super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+    assert(_borderRadius != null);
     _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
@@ -106,8 +109,8 @@ class InkSplash extends InkFeature {
     controller.addInkFeature(this);
   }
 
-  final Point _position;
-  final Color _color;
+  final Offset _position;
+  final BorderRadius _borderRadius;
   final double _targetRadius;
   final RectCallback _clipCallback;
   final bool _repositionToReferenceBox;
@@ -117,6 +120,17 @@ class InkSplash extends InkFeature {
 
   Animation<int> _alpha;
   AnimationController _alphaController;
+
+  /// The color of the splash.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    if (value == _color)
+      return;
+    _color = value;
+    controller.markNeedsPaint();
+  }
+
 
   /// The user input is confirmed.
   ///
@@ -148,24 +162,45 @@ class InkSplash extends InkFeature {
     super.dispose();
   }
 
+  RRect _clipRRectFromRect(Rect rect) {
+    return new RRect.fromRectAndCorners(
+      rect,
+      topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+      bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+    );
+  }
+
+  void _clipCanvasWithRect(Canvas canvas, Rect rect, {Offset offset}) {
+    Rect clipRect = rect;
+    if (offset != null) {
+      clipRect = clipRect.shift(offset);
+    }
+    if (_borderRadius != BorderRadius.zero) {
+      canvas.clipRRect(_clipRRectFromRect(clipRect));
+    } else {
+      canvas.clipRect(clipRect);
+    }
+  }
+
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = new Paint()..color = _color.withAlpha(_alpha.value);
-    Point center = _position;
+    Offset center = _position;
     if (_repositionToReferenceBox)
-      center = Point.lerp(center, referenceBox.size.center(Point.origin), _radiusController.value);
+      center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);
     final Offset originOffset = MatrixUtils.getAsTranslation(transform);
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);
-      if (_clipCallback != null)
-        canvas.clipRect(_clipCallback());
+      if (_clipCallback != null) {
+        _clipCanvasWithRect(canvas, _clipCallback());
+      }
       canvas.drawCircle(center, _radius.value, paint);
       canvas.restore();
     } else {
       if (_clipCallback != null) {
         canvas.save();
-        canvas.clipRect(_clipCallback().shift(originOffset));
+        _clipCanvasWithRect(canvas, _clipCallback(), offset: originOffset);
       }
       canvas.drawCircle(center + originOffset, _radius.value, paint);
       if (_clipCallback != null)
