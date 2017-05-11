@@ -162,16 +162,14 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
       to: mainAxisPadding + childLayoutGeometry.scrollExtent,
     );
     final double mainAxisPaddingPaintExtent = beforePaddingPaintExtent + afterPaddingPaintExtent;
+    final double paintExtent = math.min(
+      beforePaddingPaintExtent + math.max(childLayoutGeometry.paintExtent, childLayoutGeometry.layoutExtent + afterPaddingPaintExtent),
+      constraints.remainingPaintExtent,
+    );
     geometry = new SliverGeometry(
       scrollExtent: mainAxisPadding + childLayoutGeometry.scrollExtent,
-      paintExtent: math.min(
-        beforePaddingPaintExtent + math.max(childLayoutGeometry.paintExtent, childLayoutGeometry.layoutExtent + afterPaddingPaintExtent),
-        constraints.remainingPaintExtent,
-      ),
-      layoutExtent: math.min(
-        mainAxisPaddingPaintExtent + childLayoutGeometry.layoutExtent,
-        constraints.remainingPaintExtent,
-      ),
+      paintExtent: paintExtent,
+      layoutExtent: math.min(mainAxisPaddingPaintExtent + childLayoutGeometry.layoutExtent, paintExtent),
       maxPaintExtent: mainAxisPadding + childLayoutGeometry.maxPaintExtent,
       hitTestExtent: math.max(
         mainAxisPaddingPaintExtent + childLayoutGeometry.paintExtent,

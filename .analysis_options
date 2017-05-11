@@ -132,7 +132,7 @@ linter:
     # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
-    # - unnecessary_overrides # not yet tested
+    # - unnecessary_overrides # https://github.com/dart-lang/linter/issues/626 and https://github.com/dart-lang/linter/issues/627
     - unnecessary_this
     # - use_rethrow_when_possible # not yet tested
     # - use_setters_to_change_properties # not yet tested
