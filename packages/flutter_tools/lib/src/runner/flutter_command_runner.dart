@@ -37,14 +37,13 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     'flutter',
     'Manage your Flutter app development.\n'
       '\n'
-      'Common actions:\n'
+      'Common commands:\n'
       '\n'
       '  flutter create <output directory>\n'
       '    Create a new Flutter project in the specified directory.\n'
       '\n'
       '  flutter run [options]\n'
-      '    Run your Flutter application on an attached device\n'
-      '    or in an emulator.',
+      '    Run your Flutter application on an attached device or in an emulator.',
   ) {
     argParser.addFlag('verbose',
         abbr: 'v',
@@ -72,7 +71,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         negatable: false,
         help:
             'Captures a bug report file to submit to the Flutter team '
-            '(contains local paths, device identifiers, and log snippets).');
+            '(contains local paths, device\nidentifiers, and log snippets).');
 
     String packagesHelp;
     if (fs.isFileSync(kPackagesFileName))
