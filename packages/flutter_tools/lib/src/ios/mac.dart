@@ -380,7 +380,10 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
   // If the user already has it set in the project build settings itself,
   // continue with that.
   if (isNotEmpty(iosApp.buildSettings['DEVELOPMENT_TEAM'])) {
-    printStatus('Automatically signing iOS for device deployment using specified development team in Xcode project: ${iosApp.buildSettings['DEVELOPMENT_TEAM']}');
+    printStatus(
+      'Automatically signing iOS for device deployment using specified development '
+      'team in Xcode project: ${iosApp.buildSettings['DEVELOPMENT_TEAM']}'
+    );
     return null;
   }
 
@@ -436,10 +439,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
       ..write(signingCertificate)
       ..close();
 
-  String opensslOutput;
-  opensslProcess.stdout
-      .transform<String>(UTF8.decoder)
-      .listen((String output) { opensslOutput = output; });
+  final String opensslOutput = await UTF8.decodeStream(opensslProcess.stdout);
   opensslProcess.stderr.drain<String>();
 
   if (await opensslProcess.exitCode != 0) {

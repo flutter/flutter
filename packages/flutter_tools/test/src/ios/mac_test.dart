@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/application_package.dart';
@@ -109,7 +110,6 @@ void main() {
 
       final MockProcess mockProcess = new MockProcess();
       final MockStdIn mockStdIn = new MockStdIn();
-      final MockStream mockStdOut = new MockStream();
       final MockStream mockStdErr = new MockStream();
 
       when(mockProcessManager.start(
@@ -117,16 +117,13 @@ void main() {
       )).thenReturn(new Future<Process>.value(mockProcess));
 
       when(mockProcess.stdin).thenReturn(mockStdIn);
-      when(mockProcess.stdout).thenReturn(mockStdOut);
+      when(mockProcess.stdout).thenReturn(new Stream<List<int>>.fromFuture(
+        new Future<List<int>>.value(UTF8.encode(
+          'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US'
+        ))
+      ));
       when(mockProcess.stderr).thenReturn(mockStdErr);
       when(mockProcess.exitCode).thenReturn(0);
-      when(mockStdOut.transform<String>(any)).thenReturn(mockStdOut);
-      when(mockStdOut.listen(any)).thenAnswer((Invocation invocation) {
-        final Function listener = invocation.positionalArguments[0];
-        Function.apply(listener, <String>[
-          'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
-        ]);
-      });
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
 
