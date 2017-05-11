@@ -84,6 +84,10 @@ hb_face_t* FontSkia::CreateHarfBuzzFace() const {
   return hb_face_create_for_tables(GetTable, typeface_.get(), 0);
 }
 
+const std::vector<minikin::FontVariation>& FontSkia::GetAxes() const {
+  return variations_;
+}
+
 const sk_sp<SkTypeface>& FontSkia::GetSkTypeface() const {
   return typeface_;
 }
