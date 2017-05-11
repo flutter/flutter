@@ -147,12 +147,22 @@ class FlutterDevice {
       await view.uiIsolate.flutterDebugDumpRenderTree();
   }
 
+  Future<Null> debugDumpLayerTree() async {
+    for (FlutterView view in views)
+      await view.uiIsolate.flutterDebugDumpLayerTree();
+  }
+
+  Future<Null> debugDumpSemanticsTree() async {
+    for (FlutterView view in views)
+      await view.uiIsolate.flutterDebugDumpSemanticsTree();
+  }
+
   Future<Null> toggleDebugPaintSizeEnabled() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
-  Future<String> togglePlatform({String from}) async {
+  Future<String> togglePlatform({ String from }) async {
     String to;
     switch (from) {
       case 'iOS':
@@ -163,9 +173,8 @@ class FlutterDevice {
         to = 'iOS';
         break;
     }
-    for (FlutterView view in views) {
+    for (FlutterView view in views)
       await view.uiIsolate.flutterPlatformOverride(to);
-    }
     return to;
   }
 
@@ -415,6 +424,18 @@ abstract class ResidentRunner {
       await device.debugDumpRenderTree();
   }
 
+  Future<Null> _debugDumpLayerTree() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices)
+      await device.debugDumpLayerTree();
+  }
+
+  Future<Null> _debugDumpSemanticsTree() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices)
+      await device.debugDumpSemanticsTree();
+  }
+
   Future<Null> _debugToggleDebugPaintSizeEnabled() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
@@ -505,9 +526,8 @@ abstract class ResidentRunner {
   }
 
   Future<Null> connectToServiceProtocol({String viewFilter}) async {
-    if (!debuggingOptions.debuggingEnabled) {
+    if (!debuggingOptions.debuggingEnabled)
       return new Future<Null>.error('Error the service protocol is not enabled.');
-    }
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
@@ -564,12 +584,22 @@ abstract class ResidentRunner {
         await _debugDumpRenderTree();
         return true;
       }
+    } else if (character == 'L') {
+      if (supportsServiceProtocol) {
+        await _debugDumpLayerTree();
+        return true;
+      }
+    } else if (character == 'S') {
+      if (supportsServiceProtocol) {
+        await _debugDumpSemanticsTree();
+        return true;
+      }
     } else if (lower == 'p') {
       if (supportsServiceProtocol && isRunningDebug) {
         await _debugToggleDebugPaintSizeEnabled();
         return true;
       }
-    } else if (lower == 's') {
+    } else if (character == 's') {
       for (FlutterDevice device in flutterDevices) {
         if (device.device.supportsScreenshot)
           await _screenshot(device);
@@ -656,16 +686,13 @@ abstract class ResidentRunner {
     final DependencyChecker dependencyChecker =
         new DependencyChecker(dartDependencySetBuilder, assetBundle);
     final String path = device.package.packagePath;
-    if (path == null) {
+    if (path == null)
       return true;
-    }
     final FileStat stat = fs.file(path).statSync();
-    if (stat.type != FileSystemEntityType.FILE) {
+    if (stat.type != FileSystemEntityType.FILE)
       return true;
-    }
-    if (!fs.file(path).existsSync()) {
+    if (!fs.file(path).existsSync())
       return true;
-    }
     final DateTime lastBuildTime = stat.modified;
     return dependencyChecker.check(lastBuildTime);
   }
@@ -683,8 +710,9 @@ abstract class ResidentRunner {
 
   void printHelpDetails() {
     if (supportsServiceProtocol) {
-      printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
+      printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
       printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+      printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S".');
       if (isRunningDebug) {
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
