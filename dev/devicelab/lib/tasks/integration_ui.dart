@@ -24,7 +24,7 @@ Future<TaskResult> runEndToEndTests() async {
       await flutter('build', options: <String>['ios', 'lib/keyboard_resize.dart']);
     }
 
-    await flutter('drive', options: <String>['-d', deviceId, 'lib/keyboard_resize.dart']);
+    await flutter('drive', options: <String>['-d', deviceId, '-t', 'lib/keyboard_resize.dart']);
   });
 
   return new TaskResult.success(<String, dynamic>{});
