@@ -20,10 +20,6 @@ source_set("util") {
   sources = [
     "FileUtils.cpp",
     "FileUtils.h",
-    "FontTestUtils.cpp",
-    "FontTestUtils.h",
-    "MinikinFontForTest.cpp",
-    "MinikinFontForTest.h",
     "UnicodeUtils.cpp",
     "UnicodeUtils.h",
   ]
@@ -32,9 +28,5 @@ source_set("util") {
 
   public_deps = [
     "//lib/txt/libs/minikin",
-  ]
-
-  deps = [
-    "//third_party/libxml2",
   ]
 }
