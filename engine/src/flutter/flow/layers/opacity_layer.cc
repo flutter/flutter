@@ -37,8 +37,7 @@ void OpacityLayer::Paint(PaintContext& context) {
   SkPaint paint;
   paint.setAlpha(alpha_);
 
-  SkAutoCanvasRestore save(&context.canvas, false);
-  context.canvas.saveLayer(&paint_bounds(), &paint);
+  Layer::AutoSaveLayer save(context, paint_bounds(), &paint);
   PaintChildren(context);
 }
 

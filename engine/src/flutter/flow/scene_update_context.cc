@@ -109,7 +109,8 @@ void SceneUpdateContext::ExecutePaintTasks(
     SkCanvas* canvas = task.surface->getCanvas();
     Layer::PaintContext context = {*canvas, frame.context().frame_time(),
                                    frame.context().engine_time(),
-                                   frame.context().memory_usage()};
+                                   frame.context().memory_usage(),
+                                   false};
 
     canvas->clear(SK_ColorTRANSPARENT);
     canvas->scale(task.scaleX, task.scaleY);

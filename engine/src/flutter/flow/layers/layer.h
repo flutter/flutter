@@ -45,6 +45,25 @@ class Layer {
     const Stopwatch& frame_time;
     const Stopwatch& engine_time;
     const CounterValues& memory_usage;
+    const bool checkerboard_offscreen_layers;
+  };
+
+  // Calls SkCanvas::saveLayer and restores the layer upon destruction. Also
+  // draws a checkerboard over the layer if that is enabled in the PaintContext.
+  class AutoSaveLayer {
+   public:
+    AutoSaveLayer(const PaintContext& paint_context,
+                  const SkRect& bounds,
+                  const SkPaint* paint);
+
+    AutoSaveLayer(const PaintContext& paint_context,
+                  const SkCanvas::SaveLayerRec& layer_rec);
+
+    ~AutoSaveLayer();
+
+   private:
+    const PaintContext& paint_context_;
+    const SkRect bounds_;
   };
 
   virtual void Paint(PaintContext& context) = 0;

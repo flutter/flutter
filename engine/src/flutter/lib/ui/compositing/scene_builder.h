@@ -67,6 +67,7 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
   void setRasterizerTracingThreshold(uint32_t frameInterval);
 
   void setCheckerboardRasterCacheImages(bool checkerboard);
+  void setCheckerboardOffscreenLayers(bool checkerboard);
 
   ftl::RefPtr<Scene> build();
 
@@ -82,6 +83,7 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
   flow::ContainerLayer* m_currentLayer;
   int32_t m_currentRasterizerTracingThreshold;
   bool m_checkerboardRasterCacheImages;
+  bool m_checkerboardOffscreenLayers;
   std::stack<SkRect> m_cullRects;
 };
 
