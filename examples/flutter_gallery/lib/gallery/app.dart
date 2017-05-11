@@ -36,6 +36,7 @@ class GalleryApp extends StatefulWidget {
     this.updateUrlFetcher,
     this.enablePerformanceOverlay: true,
     this.checkerboardRasterCacheImages: true,
+    this.checkerboardOffscreenLayers: true,
     this.onSendFeedback,
     Key key}
   ) : super(key: key);
@@ -45,6 +46,8 @@ class GalleryApp extends StatefulWidget {
   final bool enablePerformanceOverlay;
 
   final bool checkerboardRasterCacheImages;
+
+  final bool checkerboardOffscreenLayers;
 
   final VoidCallback onSendFeedback;
 
@@ -56,6 +59,7 @@ class GalleryAppState extends State<GalleryApp> {
   bool _useLightTheme = true;
   bool _showPerformanceOverlay = false;
   bool _checkerboardRasterCacheImages = false;
+  bool _checkerboardOffscreenLayers = false;
   double _timeDilation = 1.0;
   TargetPlatform _platform;
 
@@ -93,6 +97,12 @@ class GalleryAppState extends State<GalleryApp> {
       onCheckerboardRasterCacheImagesChanged: widget.checkerboardRasterCacheImages ? (bool value) {
         setState(() {
           _checkerboardRasterCacheImages = value;
+        });
+      } : null,
+      checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
+      onCheckerboardOffscreenLayersChanged: widget.checkerboardOffscreenLayers ? (bool value) {
+        setState(() {
+          _checkerboardOffscreenLayers = value;
         });
       } : null,
       onPlatformChanged: (TargetPlatform value) {
@@ -134,6 +144,7 @@ class GalleryAppState extends State<GalleryApp> {
       theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: _platform ?? defaultTargetPlatform),
       showPerformanceOverlay: _showPerformanceOverlay,
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
       routes: _kRoutes,
       home: home,
     );

@@ -60,6 +60,7 @@ class MaterialApp extends StatefulWidget {
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
+    this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
   }) : super(key: key) {
@@ -134,6 +135,9 @@ class MaterialApp extends StatefulWidget {
 
   /// Turns on checkerboarding of raster cache images.
   final bool checkerboardRasterCacheImages;
+
+  /// Turns on checkerboarding of layers rendered to offscreen bitmaps.
+  final bool checkerboardOffscreenLayers;
 
   /// Turns on an overlay that shows the accessibility information
   /// reported by the framework.
@@ -240,6 +244,7 @@ class _MaterialAppState extends State<MaterialApp> {
         onLocaleChanged: widget.onLocaleChanged,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner
       )
