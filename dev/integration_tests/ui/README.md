@@ -1,3 +1,7 @@
-# Flutter end-to-end driver tests
+# Flutter UI integration tests
 
-This is a collection of end-to-end integration tests for Flutter. 
+This project contains a collection of non-plugin-dependent UI integration tests.
+
+## keyboard\_resize
+
+Verifies that showing and hiding the keyboard resizes the content.
