@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:end_to_end/keys.dart' as keys;
+import 'package:integration_ui/keys.dart' as keys;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 

@@ -1,5 +1,5 @@
-name: end_to_end
-description: Flutter end-to-end test.
+name: integration_ui
+description: Flutter non-plugin UI integration tests.
 
 dependencies:
   flutter:
