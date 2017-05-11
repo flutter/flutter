@@ -284,10 +284,10 @@ void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 void RuntimeHolder::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
   if (message->channel() == kAssetChannel) {
-    if (HandleAssetPlatformMessage(std::move(message)))
+    if (HandleAssetPlatformMessage(message.get()))
       return;
   } else if (message->channel() == kTextInputChannel) {
-    if (HandleTextInputPlatformMessage(std::move(message)))
+    if (HandleTextInputPlatformMessage(message.get()))
       return;
   }
   if (auto response = message->response())
@@ -338,7 +338,7 @@ void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
 }
 
 bool RuntimeHolder::HandleAssetPlatformMessage(
-    ftl::RefPtr<blink::PlatformMessage> message) {
+    blink::PlatformMessage* message) {
   ftl::RefPtr<blink::PlatformMessageResponse> response = message->response();
   if (!response)
     return false;
@@ -355,7 +355,7 @@ bool RuntimeHolder::HandleAssetPlatformMessage(
 }
 
 bool RuntimeHolder::HandleTextInputPlatformMessage(
-    ftl::RefPtr<blink::PlatformMessage> message) {
+    blink::PlatformMessage* message) {
   const auto& data = message->data();
 
   rapidjson::Document document;
@@ -386,8 +386,12 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
       return false;
     // TODO(abarth): Read the keyboard type form the configuration.
     current_text_input_client_ = args->value[0].GetInt();
+    mozart::TextInputStatePtr state = mozart::TextInputState::New();
+    state->text = std::string();
+    state->selection = mozart::TextSelection::New();
+    state->composing = mozart::TextRange::New();
     text_input_service_->GetInputMethodEditor(
-        mozart::KeyboardType::TEXT, mozart::TextInputState::New(),
+        mozart::KeyboardType::TEXT, std::move(state),
         text_input_binding_.NewBinding(),
         fidl::GetProxy(&input_method_editor_));
   } else if (method->value == "TextInput.setEditingState") {

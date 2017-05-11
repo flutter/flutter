@@ -71,9 +71,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
   void InitRootBundle(std::vector<char> bundle);
   blink::UnzipperProvider GetUnzipperProviderForRootBundle();
-  bool HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
-  bool HandleTextInputPlatformMessage(
-      ftl::RefPtr<blink::PlatformMessage> message);
+  bool HandleAssetPlatformMessage(blink::PlatformMessage* message);
+  bool HandleTextInputPlatformMessage(blink::PlatformMessage* message);
 
   void InitFidlInternal();
   void InitMozartInternal();
