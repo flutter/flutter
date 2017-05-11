@@ -1,4 +1,4 @@
-name: e2e
+name: end_to_end
 description: Flutter end-to-end test.
 
 dependencies:

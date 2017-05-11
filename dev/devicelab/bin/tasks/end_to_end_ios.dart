@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
-import 'package:flutter_devicelab/tasks/e2e.dart';
+import 'package:flutter_devicelab/tasks/end_to_end.dart';
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
-/// End to end tests for Android.
+/// End to end tests for iOS.
 Future<Null> main() async {
-  deviceOperatingSystem = DeviceOperatingSystem.android;
+  deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(runEndToEndTests);
 }

@@ -14,7 +14,7 @@ Future<TaskResult> runEndToEndTests() async {
   final Device device = await devices.workingDevice;
   await device.unlock();
   final String deviceId = device.deviceId;
-  final Directory testDirectory = dir('${flutterDirectory.path}/dev/e2e');
+  final Directory testDirectory = dir('${flutterDirectory.path}/dev/end_to_end');
   await inDirectory(testDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
