@@ -21,7 +21,7 @@ Future<TaskResult> runEndToEndTests() async {
     if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
       await prepareProvisioningCertificates(testDirectory.path);
       // This causes an Xcode project to be created.
-      await flutter('build', options: <String>['ios']);
+      await flutter('build', options: <String>['ios', 'lib/keyboard_resize.dart']);
     }
 
     await flutter('drive', options: <String>['-d', deviceId, 'lib/keyboard_resize.dart']);
