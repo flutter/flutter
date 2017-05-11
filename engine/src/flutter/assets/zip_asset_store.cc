@@ -10,9 +10,9 @@
 #include <string>
 #include <utility>
 
-#include "flutter/fml/trace_event.h"
 #include "lib/ftl/files/eintr_wrapper.h"
 #include "lib/ftl/files/unique_fd.h"
+#include "flutter/glue/trace_event.h"
 #include "lib/zip/unique_unzipper.h"
 
 namespace blink {
