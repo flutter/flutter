@@ -38,7 +38,7 @@ class FontSkia : public minikin::MinikinFont {
 
   const std::vector<minikin::FontVariation>& GetAxes() const override;
 
-  const sk_sp<SkTypeface>& GetSkTypeface();
+  const sk_sp<SkTypeface>& GetSkTypeface() const;
 
  private:
   sk_sp<SkTypeface> typeface_;

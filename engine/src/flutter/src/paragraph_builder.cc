@@ -46,4 +46,11 @@ void ParagraphBuilder::AddText(const uint16_t* text, size_t length) {
   text_.insert(text_.end(), text, text + length);
 }
 
+std::unique_ptr<Paragraph> ParagraphBuilder::Build() {
+  runs_.EndRunIfNeeded(text_.size());
+  std::unique_ptr<Paragraph> paragraph = std::make_unique<Paragraph>();
+  paragraph->SetText(std::move(text_), std::move(runs_));
+  return paragraph;
+}
+
 }  // namespace txt

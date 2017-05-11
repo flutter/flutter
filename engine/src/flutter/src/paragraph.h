@@ -14,42 +14,47 @@
  * limitations under the License.
  */
 
-#ifndef LIB_TXT_SRC_PARAGRAPH_BUILDER_H_
-#define LIB_TXT_SRC_PARAGRAPH_BUILDER_H_
+#ifndef LIB_TXT_SRC_PARAGRAPH_H_
+#define LIB_TXT_SRC_PARAGRAPH_H_
 
-#include <memory>
-#include <string>
+#include <vector>
+
+#include <minikin/LineBreaker.h>
 
 #include "lib/ftl/macros.h"
-#include "lib/txt/src/paragraph.h"
-#include "lib/txt/src/paragraph_style.h"
+#include "lib/txt/src/paint_record.h"
 #include "lib/txt/src/styled_runs.h"
-#include "lib/txt/src/text_style.h"
+#include "third_party/skia/include/core/SkTextBlob.h"
+
+class SkCanvas;
 
 namespace txt {
 
-class ParagraphBuilder {
+class Paragraph {
  public:
-  explicit ParagraphBuilder(ParagraphStyle style);
+  Paragraph();
 
-  ~ParagraphBuilder();
+  ~Paragraph();
 
-  void PushStyle(const TextStyle& style);
+  void Layout(double width);
 
-  void Pop();
-
-  void AddText(const uint16_t* text, size_t length);
-
-  std::unique_ptr<Paragraph> Build();
+  void Paint(SkCanvas* canvas, double x, double y);
 
  private:
-  std::vector<uint16_t> text_;
-  std::vector<size_t> style_stack_;
-  StyledRuns runs_;
+  friend class ParagraphBuilder;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
+  std::vector<uint16_t> text_;
+  StyledRuns runs_;
+  minikin::LineBreaker breaker_;
+  std::vector<PaintRecord> records_;
+
+  void SetText(std::vector<uint16_t> text, StyledRuns runs);
+
+  void AddRunsToLineBreaker();
+
+  FTL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };
 
 }  // namespace txt
 
-#endif  // LIB_TXT_SRC_PARAGRAPH_BUILDER_H_
+#endif  // LIB_TXT_SRC_PARAGRAPH_H_
