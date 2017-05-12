@@ -308,8 +308,8 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// ## Sample code
 ///
 /// This sample shows a [StreamBuilder] configuring a text label to show the
-/// latest bid received for a lot in an auction. Presumably, the `_lot` field is
-/// set by a selector elsewhere in the UI:
+/// latest bid received for a lot in an auction. Assume the `_lot` field is
+/// set by a selector elsewhere in the UI.
 ///
 /// ```dart
 /// new StreamBuilder<int>(
@@ -318,13 +318,13 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ///     if (snapshot.hasError)
 ///       return new Text('Error: ${snapshot.error}');
 ///     switch (snapshot.connectionState) {
-￼///       case ConnectionState.none: return new Text('Select lot');
-￼///       case ConnectionState.waiting: return new Text('Awaiting bids...');
-￼///       case ConnectionState.active: return new Text('$${snapshot.data}');
-￼///       case ConnectionState.done: return new Text('$${snapshot.data} (closed)');
+///       case ConnectionState.none: return new Text('Select lot');
+///       case ConnectionState.waiting: return new Text('Awaiting bids...');
+///       case ConnectionState.active: return new Text('\$${snapshot.data}');
+///       case ConnectionState.done: return new Text('\$${snapshot.data} (closed)');
 ///       default: throw "Unknown: ${snapshot.connectionState}";
-￼///     }
-￼///   },
+///     }
+///   },
 /// ),
 /// ```
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
@@ -407,23 +407,23 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// ## Sample code
 ///
 /// This sample shows a [FutureBuilder] configuring a text label to show the
-/// state of an asynchronous calculation returning a string. Presumably,
-/// the `_calculation` field is set by pressing a button elsewhere in the UI:
+/// state of an asynchronous calculation returning a string. Assume the
+/// `_calculation` field is set by pressing a button elsewhere in the UI.
 ///
 /// ```dart
 /// new FutureBuilder<String>(
 ///   future: _calculation, // a Future<String> or null
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
-￼///       case ConnectionState.none: return new Text('Press button to start');
-￼///       case ConnectionState.waiting: return new Text('Awaiting result...');
-￼///       default:
-￼///         if (snapshot.hasError)
-￼///           return new Text('Error: ${snapshot.error}');
-￼///         else
-￼///           return new Text('Result: ${snapshot.data}');
-￼///     }
-￼///   },
+///       case ConnectionState.none: return new Text('Press button to start');
+///       case ConnectionState.waiting: return new Text('Awaiting result...');
+///       default:
+///         if (snapshot.hasError)
+///           return new Text('Error: ${snapshot.error}');
+///         else
+///           return new Text('Result: ${snapshot.data}');
+///     }
+///   },
 /// ),
 /// ```
 class FutureBuilder<T> extends StatefulWidget {
