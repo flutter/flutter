@@ -313,7 +313,7 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ///
 /// ```dart
 /// new StreamBuilder<int>(
-///   future: _lot.bids, // a Stream<int>
+///   future: _lot?.bids, // a Stream<int> or null
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     if (snapshot.hasError)
 ///       return new Text('Error: ${snapshot.error}');
@@ -412,7 +412,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// ```dart
 /// new FutureBuilder<String>(
-///   future: _calculation, // a Future<String>
+///   future: _calculation, // a Future<String> or null
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
 ￼///       case ConnectionState.none: return new Text('Press button to start');
