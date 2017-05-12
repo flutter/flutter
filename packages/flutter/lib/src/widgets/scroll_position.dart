@@ -530,19 +530,19 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Called by [beginActivity] to report when an activity has started.
   void didStartScroll() {
-    activity.dispatchScrollStartNotification(cloneMetrics(), context.notificationContext);
+    activity.dispatchScrollStartNotification(toMetrics(), context.notificationContext);
   }
 
   /// Called by [setPixels] to report a change to the [pixels] position.
   void didUpdateScrollPositionBy(double delta) {
-    activity.dispatchScrollUpdateNotification(cloneMetrics(), context.notificationContext, delta);
+    activity.dispatchScrollUpdateNotification(toMetrics(), context.notificationContext, delta);
   }
 
   /// Called by [beginActivity] to report when an activity has ended.
   ///
   /// This also saves the scroll offset using [saveScrollOffset].
   void didEndScroll() {
-    activity.dispatchScrollEndNotification(cloneMetrics(), context.notificationContext);
+    activity.dispatchScrollEndNotification(toMetrics(), context.notificationContext);
     saveScrollOffset();
   }
 
@@ -551,14 +551,14 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// not applied to the [pixels] value.
   void didOverscrollBy(double value) {
     assert(activity.isScrolling);
-    activity.dispatchOverscrollNotification(cloneMetrics(), context.notificationContext, value);
+    activity.dispatchOverscrollNotification(toMetrics(), context.notificationContext, value);
   }
 
   /// Dispatches a notification that the [userScrollDirection] has changed.
   ///
   /// Subclasses should call this function when they change [userScrollDirection].
   void didUpdateScrollDirection(ScrollDirection direction) {
-    new UserScrollNotification(metrics: cloneMetrics(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
+    new UserScrollNotification(metrics: toMetrics(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
   }
 
   @override

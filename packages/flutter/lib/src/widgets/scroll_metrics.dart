@@ -36,7 +36,7 @@ abstract class ScrollMetrics {
   ///
   /// This is useful if this object is mutable, but you want to get a snapshot
   /// of the current state.
-  ScrollMetrics cloneMetrics() => new FixedScrollMetrics.clone(this);
+  ScrollMetrics toMetrics() => new FixedScrollMetrics.clone(this);
 
   /// The minimum in-range value for [pixels].
   ///
