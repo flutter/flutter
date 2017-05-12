@@ -6,8 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('Back during pushReplacement',
-      (WidgetTester tester) async {
+  testWidgets('Back during pushReplacement', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       home: const Material(child: const Text("home")),
       routes: <String, WidgetBuilder> {
@@ -38,5 +37,44 @@ void main() {
     expect(find.text('a'), findsNothing);
     expect(find.text('b'), findsNothing);
     expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('pushAndRemoveUntil', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: const Material(child: const Text("home")),
+      routes: <String, WidgetBuilder> {
+        '/a': (BuildContext context) => const Material(child: const Text("a")),
+        '/b': (BuildContext context) => const Material(child: const Text("b")),
+      },
+    ));
+
+    final NavigatorState navigator = tester.state(find.byType(Navigator));
+    navigator.pushNamed('/a');
+    await tester.pumpAndSettle();
+
+    expect(find.text('home', skipOffstage: false), findsOneWidget);
+    expect(find.text('a', skipOffstage: false), findsOneWidget);
+    expect(find.text('b', skipOffstage: false), findsNothing);
+
+    navigator.pushNamedAndRemoveUntil('/b', (Route<dynamic> route) => false);
+    await tester.pumpAndSettle();
+
+    expect(find.text('home', skipOffstage: false), findsNothing);
+    expect(find.text('a', skipOffstage: false), findsNothing);
+    expect(find.text('b', skipOffstage: false), findsOneWidget);
+
+    navigator.pushNamed('/');
+    await tester.pumpAndSettle();
+
+    expect(find.text('home', skipOffstage: false), findsOneWidget);
+    expect(find.text('a', skipOffstage: false), findsNothing);
+    expect(find.text('b', skipOffstage: false), findsOneWidget);
+
+    navigator.pushNamedAndRemoveUntil('/a', ModalRoute.withName('/b'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('home', skipOffstage: false), findsNothing);
+    expect(find.text('a', skipOffstage: false), findsOneWidget);
+    expect(find.text('b', skipOffstage: false), findsOneWidget);
   });
 }
