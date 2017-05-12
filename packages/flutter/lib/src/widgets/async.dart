@@ -314,7 +314,7 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// ```dart
 /// new StreamBuilder<int>(
 ///   stream: _lot?.bids, // a Stream<int> or null
-///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
 ///     if (snapshot.hasError)
 ///       return new Text('Error: ${snapshot.error}');
 ///     switch (snapshot.connectionState) {
