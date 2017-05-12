@@ -143,13 +143,18 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
 
   if (validCodeSigningIdentities.length > 1) {
     final int count = validCodeSigningIdentities.length;
-    printStatus('Multiple valid development certificates available:');
+    printStatus(
+      'Multiple valid development certificates available:',
+      emphasis: true,
+    );
     for (int i=0; i<count; i++) {
-      printStatus('  ${i+1}) ${validCodeSigningIdentities[i]}');
+      printStatus('  ${i+1}) ${validCodeSigningIdentities[i]}', emphasis: true);
     }
-    printStatus('  a) Abort');
+    printStatus('  a) Abort', emphasis: true);
     String choice;
     terminal.singleCharMode = true;
+    final Stream<String> terminalBroadcastInput =
+        terminal.onCharInput.asBroadcastStream();
     while(
       isEmpty(choice)
       || choice.length != 1
@@ -158,16 +163,17 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
         || (
           isDigit(choice.runes.first)
           && int.parse(choice) > 0
-          && int.parse(choice) < count
+          && int.parse(choice) < count + 1
         )
       )
     ) {
       printStatus(
         'Please select a certificate for code signing [${range(1, count + 1).join("|")}|a]: ',
         emphasis: true,
+        newline: false,
       );
-      choice = await terminal.onCharInput.asBroadcastStream().first;
-      printStatus('');
+      choice = await terminalBroadcastInput.first;
+      print(choice);
     }
     terminal.singleCharMode = false;
     if (choice == 'a')
