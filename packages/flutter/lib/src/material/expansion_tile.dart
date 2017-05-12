@@ -112,7 +112,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       if (_isExpanded)
         _controller.forward();
       else
-        _controller.reverse().then((Null value) {
+        _controller.reverse().then<Null>((Null value) {
           setState(() {
             // Rebuild without widget.children.
           });
