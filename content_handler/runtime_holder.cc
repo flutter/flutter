@@ -203,8 +203,6 @@ void RuntimeHolder::CreateView(
   input_listener_binding_.Bind(GetProxy(&input_listener));
   input_connection_->SetEventListener(std::move(input_listener));
 
-  ConnectToService(view_services.get(), fidl::GetProxy(&text_input_service_));
-
   mozart::ScenePtr scene;
   view_->CreateScene(fidl::GetProxy(&scene));
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([
@@ -368,9 +366,13 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
     return false;
 
   if (method->value == "TextInput.show") {
-    // TODO(abarth): How do we tell Mozart to show the keyboard?
+    if (input_method_editor_) {
+      input_method_editor_->Show();
+    }
   } else if (method->value == "TextInput.hide") {
-    // TODO(abarth): How do we tell Mozart to hide the keyboard?
+    if (input_method_editor_) {
+      input_method_editor_->Hide();
+    }
   } else if (method->value == "TextInput.setClient") {
     current_text_input_client_ = 0;
     if (text_input_binding_.is_bound())
@@ -390,7 +392,7 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
     state->text = std::string();
     state->selection = mozart::TextSelection::New();
     state->composing = mozart::TextRange::New();
-    text_input_service_->GetInputMethodEditor(
+    input_connection_->GetInputMethodEditor(
         mozart::KeyboardType::TEXT, std::move(state),
         text_input_binding_.NewBinding(),
         fidl::GetProxy(&input_method_editor_));

@@ -108,7 +108,6 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   bool is_ready_to_draw_ = false;
   int outstanding_requests_ = 0;
 
-  mozart::TextInputServicePtr text_input_service_;
   mozart::InputMethodEditorPtr input_method_editor_;
   fidl::Binding<mozart::InputMethodEditorClient> text_input_binding_;
   int current_text_input_client_ = 0;
