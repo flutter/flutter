@@ -424,7 +424,7 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
       // We ignore selectionIsDirectional because that concept doesn't exist on
       // Fuchsia.
       auto composing_base = args.FindMember("composingBase");
-      if (composing_base != args.MemberEnd() && selection_base->value.IsInt())
+      if (composing_base != args.MemberEnd() && composing_base->value.IsInt())
         state->composing->start = composing_base->value.GetInt();
       auto composing_extent = args.FindMember("composingExtent");
       if (composing_extent != args.MemberEnd() &&
@@ -581,9 +581,9 @@ void RuntimeHolder::DidUpdateState(mozart::TextInputStatePtr state,
                               allocator);
       break;
     case mozart::TextAffinity::DOWNSTREAM:
-      document.AddMember("selectionAffinity",
-                         rapidjson::Value("TextAffinity.downstream"),
-                         allocator);
+      encoded_state.AddMember("selectionAffinity",
+                              rapidjson::Value("TextAffinity.downstream"),
+                              allocator);
       break;
   }
   encoded_state.AddMember("selectionIsDirectional", true, allocator);
