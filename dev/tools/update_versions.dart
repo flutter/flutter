@@ -4,6 +4,8 @@
 
 // Updates the version numbers of the Flutter repo.
 // Only tested on Linux.
+//
+// See: https://github.com/flutter/flutter/wiki/Release-process
 
 import 'dart:io';
 
@@ -91,6 +93,12 @@ void main(List<String> args) {
   print('flutter package is now at version: $framework');
   print('flutter_test package is now at version: $test');
   print('flutter_driver package is now at version: $driver');
+
+  if (release) {
+    print('\nDuring the tagging step in the instructions, the commands will be:');
+    print('git tag $sdk');
+    print('git push upstream $sdk');
+  }
 }
 
 abstract class Version {
