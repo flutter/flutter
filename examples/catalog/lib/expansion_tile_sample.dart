@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class Entry {
-  Entry(this.title, [this.children]);
+  Entry(this.title, [this.children = const <Entry>[]]);
   final String title;
   final List<Entry> children;
 }
@@ -52,9 +52,10 @@ class EntryItem extends StatelessWidget {
   final Entry entry;
 
   Widget _buildTiles(Entry root) {
-    if (root.children == null)
+    if (root.children.isEmpty)
       return new ListTile(title: new Text(root.title));
     return new ExpansionTile(
+      key: new ValueKey<Entry>(root),
       title: new Text(root.title),
       children: root.children.map(_buildTiles).toList(),
     );
@@ -73,8 +74,9 @@ class ExpansionTileSample extends StatelessWidget {
       appBar: new AppBar(
         title: const Text('ExpansionTile'),
       ),
-      body: new ListView(
-        children: data.map((Entry entry) => new EntryItem(entry)).toList(),
+      body: new ListView.builder(
+        itemBuilder: (BuildContext context, int index) => new EntryItem(data[index]),
+        itemCount: data.length,
       ),
     );
   }
