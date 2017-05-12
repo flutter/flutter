@@ -145,9 +145,9 @@ void main() {
         r'^'
         r'RenderView#[0-9]+\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
-        r'   window size: Size\(800\.0, 600\.0\) \(in physical pixels\)\n'
-        r'   device pixel ratio: 1\.0 \(physical pixels per logical pixel\)\n'
-        r'   configuration: Size\(800\.0, 600\.0\) at 1\.0x \(in logical pixels\)\n'
+        r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
+        r'   device pixel ratio: 3\.0 \(physical pixels per logical pixel\)\n'
+        r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
         r'$'
       ),
     ]);
@@ -168,8 +168,8 @@ void main() {
         r'   creator: RenderView\n'
         r'   offset: Offset\(0\.0, 0\.0\)\n'
         r'   transform:\n'
-        r'     \[0] 1\.0,0\.0,0\.0,0\.0\n'
-        r'     \[1] 0\.0,1\.0,0\.0,0\.0\n'
+        r'     \[0] 3\.0,0\.0,0\.0,0\.0\n'
+        r'     \[1] 0\.0,3\.0,0\.0,0\.0\n'
         r'     \[2] 0\.0,0\.0,1\.0,0\.0\n'
         r'     \[3] 0\.0,0\.0,0\.0,1\.0\n'
         r'$'

@@ -68,17 +68,17 @@ void main() {
   });
 
   test('Synthetic move events', () {
-    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
-      data: const <ui.PointerData>[
-        const ui.PointerData(
+    final ui.PointerDataPacket packet = new ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        new ui.PointerData(
           change: ui.PointerChange.down,
-          physicalX: 1.0,
-          physicalY: 3.0,
+          physicalX: 1.0 * ui.window.devicePixelRatio,
+          physicalY: 3.0 * ui.window.devicePixelRatio,
         ),
-        const ui.PointerData(
+        new ui.PointerData(
           change: ui.PointerChange.up,
-          physicalX: 10.0,
-          physicalY: 15.0,
+          physicalX: 10.0 * ui.window.devicePixelRatio,
+          physicalY: 15.0 * ui.window.devicePixelRatio,
         ),
       ]
     );
@@ -154,10 +154,10 @@ void main() {
   });
 
   test('Synthetic hover and cancel for misplaced down and remove', () {
-    final ui.PointerDataPacket packet = const ui.PointerDataPacket(
-      data: const <ui.PointerData>[
-        const ui.PointerData(change: ui.PointerChange.add, device: 25, physicalX: 10.0, physicalY: 10.0),
-        const ui.PointerData(change: ui.PointerChange.down, device: 25, physicalX: 15.0, physicalY: 17.0),
+    final ui.PointerDataPacket packet = new ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        new ui.PointerData(change: ui.PointerChange.add, device: 25, physicalX: 10.0 * ui.window.devicePixelRatio, physicalY: 10.0 * ui.window.devicePixelRatio),
+        new ui.PointerData(change: ui.PointerChange.down, device: 25, physicalX: 15.0 * ui.window.devicePixelRatio, physicalY: 17.0 * ui.window.devicePixelRatio),
         const ui.PointerData(change: ui.PointerChange.remove, device: 25),
       ]
     );
@@ -168,7 +168,7 @@ void main() {
     expect(events.length, 5);
     expect(events[0].runtimeType, equals(PointerAddedEvent));
     expect(events[1].runtimeType, equals(PointerHoverEvent));
-    expect(events[1].delta, equals(const Offset(5.0, 7.0) / ui.window.devicePixelRatio));
+    expect(events[1].delta, equals(const Offset(5.0, 7.0)));
     expect(events[2].runtimeType, equals(PointerDownEvent));
     expect(events[3].runtimeType, equals(PointerCancelEvent));
     expect(events[4].runtimeType, equals(PointerRemovedEvent));
