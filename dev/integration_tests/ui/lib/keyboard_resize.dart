@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
         key: const Key(keys.kUnfocusButton),
         onPressed: () { textField.focusNode.unfocus(); },
         tooltip: 'Unfocus',
-        child: new Icon(Icons.done),
+        child: const Icon(Icons.done),
       ),
     );
   }
