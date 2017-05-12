@@ -136,7 +136,7 @@ linter:
     - unnecessary_this
     # - use_rethrow_when_possible # not yet tested
     # - use_setters_to_change_properties # not yet tested
-    # - use_string_buffers # not yet tested
+    # - use_string_buffers # https://github.com/dart-lang/linter/pull/664
     # - use_to_and_as_if_applicable # not yet tested
 
     # === pub rules ===

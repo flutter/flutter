@@ -2936,16 +2936,19 @@ abstract class Element implements BuildContext {
 
   /// A detailed, textual description of this element, includings its children.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    String result = '$prefixLineOne$this\n';
+    final StringBuffer result = new StringBuffer()
+      ..write(prefixLineOne)
+      ..write(this)
+      ..write('\n');
     final List<Element> children = <Element>[];
     visitChildren(children.add);
     if (children.isNotEmpty) {
       final Element last = children.removeLast();
       for (Element child in children)
-        result += '${child.toStringDeep("$prefixOtherLines\u251C", "$prefixOtherLines\u2502")}';
-      result += '${last.toStringDeep("$prefixOtherLines\u2514", "$prefixOtherLines ")}';
+        result.write(child.toStringDeep("$prefixOtherLines\u251C", "$prefixOtherLines\u2502"));
+      result.write(last.toStringDeep("$prefixOtherLines\u2514", "$prefixOtherLines "));
     }
-    return result;
+    return result.toString();
   }
 
   /// Returns true if the element has been marked as needing rebuilding.
