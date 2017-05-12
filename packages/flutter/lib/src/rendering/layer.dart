@@ -163,6 +163,7 @@ class PerformanceOverlayLayer extends Layer {
     @required this.optionsMask,
     @required this.rasterizerThreshold,
     @required this.checkerboardRasterCacheImages,
+    @required this.checkerboardOffscreenLayers,
   });
 
   /// The rectangle in this layer's coordinate system that the overlay should occupy.
@@ -193,12 +194,23 @@ class PerformanceOverlayLayer extends Layer {
   /// that aid it in making better decisions about caching.
   final bool checkerboardRasterCacheImages;
 
+  /// Whether the compositor should checkerboard layers that are rendered to offscreen
+  /// bitmaps. This can be useful for debugging rendering performance.
+  ///
+  /// Render target switches are caused by using opacity layers (via a [FadeTransition] or
+  /// [Opacity] widget), clips, shader mask layers, etc. Selecting a new render target
+  /// and merging it with the rest of the scene has a performance cost. This can sometimes
+  /// be avoided by using equivalent widgets that do not require these layers (for example,
+  /// replacing an [Opacity] widget with an [widgets.Image] using a [BlendMode]).
+  final bool checkerboardOffscreenLayers;
+
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
     builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
+    builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
   }
 }
 

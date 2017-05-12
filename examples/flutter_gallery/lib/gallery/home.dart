@@ -76,6 +76,8 @@ class GalleryHome extends StatefulWidget {
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,
     this.onCheckerboardRasterCacheImagesChanged,
+    this.checkerboardOffscreenLayers,
+    this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
     this.onSendFeedback,
   }) : super(key: key) {
@@ -94,6 +96,9 @@ class GalleryHome extends StatefulWidget {
 
   final bool checkerboardRasterCacheImages;
   final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
+
+  final bool checkerboardOffscreenLayers;
+  final ValueChanged<bool> onCheckerboardOffscreenLayersChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
 
@@ -161,6 +166,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         onShowPerformanceOverlayChanged: widget.onShowPerformanceOverlayChanged,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         onCheckerboardRasterCacheImagesChanged: widget.onCheckerboardRasterCacheImagesChanged,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+        onCheckerboardOffscreenLayersChanged: widget.onCheckerboardOffscreenLayersChanged,
         onPlatformChanged: widget.onPlatformChanged,
         onSendFeedback: widget.onSendFeedback,
       ),

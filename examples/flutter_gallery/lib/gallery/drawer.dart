@@ -98,6 +98,8 @@ class GalleryDrawer extends StatelessWidget {
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,
     this.onCheckerboardRasterCacheImagesChanged,
+    this.checkerboardOffscreenLayers,
+    this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
     this.onSendFeedback,
   }) : super(key: key) {
@@ -116,6 +118,9 @@ class GalleryDrawer extends StatelessWidget {
 
   final bool checkerboardRasterCacheImages;
   final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
+
+  final bool checkerboardOffscreenLayers;
+  final ValueChanged<bool> onCheckerboardOffscreenLayersChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
 
@@ -295,6 +300,23 @@ class GalleryDrawer extends StatelessWidget {
         selected: checkerboardRasterCacheImages,
         onTap: () {
           onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
+        },
+      ));
+    }
+
+    if (onCheckerboardOffscreenLayersChanged != null) {
+      allDrawerItems.insert(8, new ListTile(
+        leading: const Icon(Icons.assessment),
+        title: const Text('Checkerboard Offscreen Layers'),
+        trailing: new Checkbox(
+          value: checkerboardOffscreenLayers,
+          onChanged: (bool value) {
+            onCheckerboardOffscreenLayersChanged(!checkerboardOffscreenLayers);
+          },
+        ),
+        selected: checkerboardOffscreenLayers,
+        onTap: () {
+          onCheckerboardOffscreenLayersChanged(!checkerboardOffscreenLayers);
         },
       ));
     }
