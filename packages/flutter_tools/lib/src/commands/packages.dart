@@ -13,6 +13,8 @@ class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
     addSubcommand(new PackagesGetCommand('get', false));
     addSubcommand(new PackagesGetCommand('upgrade', true));
+    addSubcommand(new PackagesTestCommand());
+    addSubcommand(new PackagesPassthroughCommand());
   }
 
   @override
@@ -35,17 +37,17 @@ class PackagesCommand extends FlutterCommand {
 }
 
 class PackagesGetCommand extends FlutterCommand {
-  @override
-  final String name;
-
-  final bool upgrade;
-
   PackagesGetCommand(this.name, this.upgrade) {
     argParser.addFlag('offline',
       negatable: false,
       help: 'Use cached packages instead of accessing the network.'
     );
   }
+
+  @override
+  final String name;
+
+  final bool upgrade;
 
   @override
   String get description {
@@ -72,9 +74,6 @@ class PackagesGetCommand extends FlutterCommand {
       );
     }
 
-    // TODO(ianh): If the user is using a local build, we should use the
-    // packages from their build instead of the cache.
-
     await pubGet(
       directory: target,
       upgrade: upgrade,
@@ -82,4 +81,48 @@ class PackagesGetCommand extends FlutterCommand {
       checkLastModified: false,
     );
   }
+}
+
+class PackagesTestCommand extends FlutterCommand {
+  @override
+  String get name => 'test';
+
+  @override
+  String get description {
+    return 'Run the "test" package.\n'
+           'This is similar to "flutter test", but instead of hosting the tests in the\n'
+           'flutter environment it hosts the tests in a pure Dart environment. The main\n'
+           'differences are that the "dart:ui" library is not available and that tests\n'
+           'run faster. This is helpful for testing libraries that do not depend on any\n'
+           'packages from the Flutter SDK. It is equivalent to "pub run test".';
+  }
+
+  @override
+  String get invocation {
+    return '${runner.executableName} packages test [<tests...>]';
+  }
+
+  @override
+  Future<Null> runCommand() => pub(<String>['run', 'test']..addAll(argResults.rest));
+}
+
+class PackagesPassthroughCommand extends FlutterCommand {
+  PackagesPassthroughCommand();
+
+  @override
+  String get name => 'pub';
+
+  @override
+  String get description {
+    return 'Pass the remaining arguments to Dart\'s "pub" tool.\n'
+           'This runs the "pub" tool in a Flutter context.';
+  }
+
+  @override
+  String get invocation {
+    return '${runner.executableName} packages pub [<arguments...>]';
+  }
+
+  @override
+  Future<Null> runCommand() => pub(argResults.rest);
 }
