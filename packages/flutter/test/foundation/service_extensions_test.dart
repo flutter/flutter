@@ -142,13 +142,49 @@ void main() {
     expect(result, <String, String>{});
     expect(console, <Matcher>[
       matches(
+        r'^'
         r'RenderView#[0-9]+\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
         r'   window size: Size\(800\.0, 600\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 1\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 1\.0x \(in logical pixels\)\n'
+        r'$'
       ),
     ]);
+    console.clear();
+  });
+
+  test('Service extensions - debugDumpLayerTree', () async {
+    Map<String, String> result;
+
+    await binding.doFrame();
+    result = await binding.testExtension('debugDumpLayerTree', <String, String>{});
+    expect(result, <String, String>{});
+    expect(console, <Matcher>[
+      matches(
+        r'^'
+        r'TransformLayer#[0-9]+\n'
+        r'   owner: RenderView#[0-9]+\n'
+        r'   creator: RenderView\n'
+        r'   offset: Offset\(0\.0, 0\.0\)\n'
+        r'   transform:\n'
+        r'     \[0] 1\.0,0\.0,0\.0,0\.0\n'
+        r'     \[1] 0\.0,1\.0,0\.0,0\.0\n'
+        r'     \[2] 0\.0,0\.0,1\.0,0\.0\n'
+        r'     \[3] 0\.0,0\.0,0\.0,1\.0\n'
+        r'$'
+      ),
+    ]);
+    console.clear();
+  });
+
+  test('Service extensions - debugDumpSemanticsTree', () async {
+    Map<String, String> result;
+
+    await binding.doFrame();
+    result = await binding.testExtension('debugDumpSemanticsTree', <String, String>{});
+    expect(result, <String, String>{});
+    expect(console, <String>['Semantics not collected.']);
     console.clear();
   });
 
@@ -381,7 +417,7 @@ void main() {
   test('Service extensions - posttest', () async {
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 12);
+    expect(binding.extensions.length, 14);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
