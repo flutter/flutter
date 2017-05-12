@@ -8,7 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
