@@ -15,7 +15,7 @@ void main() {
       verboseLogger.printTrace('Oooh, I do I do I do');
       verboseLogger.printError('Helpless!');
 
-      expect(mockLogger.statusText, matches(r'^\[     (?: {0,2}\+[0-9]{1,3} ms|       )\] Hey Hey Hey Hey\n'
+      expect(mockLogger.statusText, matches(r'^\[     (?: {0,2}\+[0-9]{1,3} ms|       )\] Hey HI Hey Hey\n'
                                             r'\[     (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(mockLogger.errorText, matches(r'^\[     (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
