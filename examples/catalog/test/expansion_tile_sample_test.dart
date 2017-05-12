@@ -76,5 +76,16 @@ void main() {
       }
       await tapEntry(chapter.title); // close the chapter
     }
+
+    // Finally only the top level EntryItems (the "chapters") are present.
+    for (Entry chapter in expansion_tile_sample.data) {
+      expect(find.text(chapter.title), findsOneWidget);
+      for (Entry section in chapter.children) {
+        expect(find.text(section.title), findsNothing);
+        for (Entry item in section.children)
+          expect(find.text(item.title), findsNothing);
+      }
+    }
+
   });
 }

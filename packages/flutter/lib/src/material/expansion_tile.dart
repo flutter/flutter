@@ -178,7 +178,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       ..begin = Colors.transparent
       ..end = widget.backgroundColor ?? Colors.transparent;
 
-    final bool closed = !_isExpanded && _controller.value == 0.0;
+    final bool closed = !_isExpanded && _controller.isDismissed;
     return new AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
