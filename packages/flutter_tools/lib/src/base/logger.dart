@@ -180,11 +180,13 @@ class BufferLogger extends Logger {
 }
 
 class VerboseLogger extends Logger {
-  Stopwatch stopwatch = new Stopwatch();
-
-  VerboseLogger() {
+  VerboseLogger(this.parent) {
     stopwatch.start();
   }
+
+  final Logger parent;
+
+  Stopwatch stopwatch = new Stopwatch();
 
   @override
   bool get isVerbose => true;
@@ -221,7 +223,7 @@ class VerboseLogger extends Logger {
     stopwatch.reset();
 
     String prefix;
-    const int prefixWidth = 8;
+    const int prefixWidth = 12;
     if (millis == 0) {
       prefix = ''.padLeft(prefixWidth);
     } else {
@@ -235,13 +237,13 @@ class VerboseLogger extends Logger {
     final String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
-      stderr.writeln(prefix + terminal.bolden(indentMessage));
+      parent.printError(prefix + terminal.bolden(indentMessage));
       if (stackTrace != null)
-        stderr.writeln(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
+        parent.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
     } else if (type == _LogType.status) {
-      print(prefix + terminal.bolden(indentMessage));
+      parent.printStatus(prefix + terminal.bolden(indentMessage));
     } else {
-      print(prefix + indentMessage);
+      parent.printStatus(prefix + indentMessage);
     }
   }
 }

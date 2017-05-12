@@ -161,7 +161,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     // Check for verbose.
     if (globalResults['verbose']) {
       // Override the logger.
-      context.setVariable(Logger, new VerboseLogger());
+      context.setVariable(Logger, new VerboseLogger(context[Logger]));
     }
 
     String recordTo = globalResults['record-to'];
