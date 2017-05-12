@@ -304,6 +304,28 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ///
 /// * [StreamBuilderBase], which supports widget building based on a computation
 /// that spans all interactions made with the stream.
+///
+/// ## Sample code
+///
+/// This sample shows a [StreamBuilder] configuring a text label to show the
+/// latest bid received for a lot in an auction. Presumably, the `_lot` field is
+/// set by a selector elsewhere in the UI:
+///
+/// ```dart
+/// new StreamBuilder<int>(
+///   future: _lot.bids, // a Stream<int>
+///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+///     if (snapshot.hasError)
+///       return new Text('Error: ${snapshot.error}');
+///     switch (snapshot.connectionState) {
+￼///       case ConnectionState.none: return new Text('Select lot');
+￼///       case ConnectionState.waiting: return new Text('Awaiting bids...');
+￼///       case ConnectionState.active: return new Text('$${snapshot.data}');
+￼///       case ConnectionState.done: return new Text('$${snapshot.data} (closed)');
+￼///     }
+￼///   },
+/// ),
+/// ```
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
@@ -388,7 +410,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// the `_calculation` field is set by pressing a button elsewhere in the UI:
 ///
 /// ```dart
-/// new FutureBuilder(
+/// new FutureBuilder<String>(
 ///   future: _calculation, // a Future<String>
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
