@@ -114,7 +114,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       else
         _controller.reverse().then((Null value) {
           setState(() {
-            //
+            // Rebuild without widget.children.
           });
         });
       PageStorage.of(context)?.writeState(context, _isExpanded);
