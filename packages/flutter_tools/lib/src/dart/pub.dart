@@ -47,19 +47,18 @@ Future<Null> pubGet({
 
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
     final String command = upgrade ? 'upgrade' : 'get';
-    final Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
-        expectSlowOperation: true);
-    final List<String> args = <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-precompile'];
+    final Status status = logger.startProgress(
+      'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
+      expectSlowOperation: true,
+    );
+    final List<String> args = <String>['--verbosity=warning', command, '--no-precompile'];
     if (offline)
       args.add('--offline');
-    final int code = await runCommandAndStreamOutput(args,
-      workingDirectory: directory,
-      mapFunction: _filterOverrideWarnings,
-      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
-    );
-    status.stop();
-    if (code != 0)
-      throwToolExit('pub $command failed ($code)', exitCode: code);
+    try {
+      await pub(args, directory: directory, filter: _filterOverrideWarnings, failureMessage: 'pub $command failed');
+    } finally {
+      status.stop();
+    }
   }
 
   if (!dotPackages.existsSync())
@@ -67,6 +66,24 @@ Future<Null> pubGet({
 
   if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync()))
     throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
+}
+
+typedef String MessageFilter(String message);
+
+Future<Null> pub(List<String> arguments, {
+  String directory,
+  MessageFilter filter,
+  String failureMessage: 'pub failed'
+}) async {
+  final List<String> command = <String>[ sdkBinaryName('pub') ]..addAll(arguments);
+  final int code = await runCommandAndStreamOutput(
+    command,
+    workingDirectory: directory,
+    mapFunction: filter,
+    environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
+  );
+  if (code != 0)
+    throwToolExit('$failureMessage ($code)', exitCode: code);
 }
 
 final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
