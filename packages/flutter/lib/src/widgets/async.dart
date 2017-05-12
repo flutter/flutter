@@ -322,6 +322,7 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ￼///       case ConnectionState.waiting: return new Text('Awaiting bids...');
 ￼///       case ConnectionState.active: return new Text('$${snapshot.data}');
 ￼///       case ConnectionState.done: return new Text('$${snapshot.data} (closed)');
+///       default: throw "Unknown: ${snapshot.connectionState}";
 ￼///     }
 ￼///   },
 /// ),
