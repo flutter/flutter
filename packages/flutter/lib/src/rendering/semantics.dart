@@ -590,15 +590,18 @@ class SemanticsNode extends AbstractNode {
 
   /// Returns a string representation of this node and its descendants.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    String result = '$prefixLineOne$this\n';
+    final StringBuffer result = new StringBuffer()
+      ..write(prefixLineOne)
+      ..write(this)
+      ..write('\n');
     if (_children != null && _children.isNotEmpty) {
       for (int index = 0; index < _children.length - 1; index += 1) {
         final SemanticsNode child = _children[index];
-        result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
+        result.write(child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502"));
       }
-      result += '${_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
+      result.write(_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  "));
     }
-    return result;
+    return result.toString();
   }
 }
 
