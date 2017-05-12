@@ -34,5 +34,5 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Vary font sizes'));
     await tester.pump();
-  }, skip: true); // https://github.com/dart-lang/sdk/issues/29230
+  });
 }
