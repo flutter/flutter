@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../card_collection.dart' as card_collection;
+import '../lib/card_collection.dart' as card_collection;
 
 void main() {
   testWidgets("Card Collection smoke test", (WidgetTester tester) async {
