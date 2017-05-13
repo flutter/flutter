@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' show Color, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -41,6 +42,32 @@ const Color _kLightThemeSplashColor = const Color(0x66C8C8C8);
 // means we assume the values in the spec are actually correct.
 const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
 const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
+
+// See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
+double _linearizeColorComponent(double component) {
+  if (component <= 0.03928)
+    return component / 12.92;
+  return math.pow((component + 0.055) / 1.055, 2.4);
+}
+
+Brightness _estimateBrightnessForColor(Color color) {
+  // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
+  final double R = _linearizeColorComponent(color.red / 0xFF);
+  final double G = _linearizeColorComponent(color.green / 0xFF);
+  final double B = _linearizeColorComponent(color.blue / 0xFF);
+  final double L = 0.2126 * R + 0.7152 * G + 0.0722 * B;
+
+  // See <https://www.w3.org/TR/WCAG20/#contrast-ratiodef>
+  // The spec says to use kThreshold=0.0525, but Material Design appears to bias
+  // more towards using light text than WCAG20 recommends. Material Design spec
+  // doesn't say what value to use, but 0.15 seemed close to what the Material
+  // Design spec shows for its color palette on
+  // <https://material.io/guidelines/style/color.html#color-color-palette>.
+  const double kThreshold = 0.15;
+  if ((L + 0.05) * (L + 0.05) > kThreshold )
+    return Brightness.light;
+  return Brightness.dark;
+}
 
 /// Holds the color and typography values for a material design theme.
 ///
@@ -107,10 +134,10 @@ class ThemeData {
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
-    primaryColorBrightness ??= Brightness.dark;
+    primaryColorBrightness ??= _estimateBrightnessForColor(primaryColor);
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
-    accentColorBrightness ??= isDark ? Brightness.light : Brightness.dark;
+    accentColorBrightness ??= _estimateBrightnessForColor(accentColor);
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
     scaffoldBackgroundColor ??= canvasColor;
