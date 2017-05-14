@@ -220,7 +220,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
   }
 
   @override
-  PageMetrics cloneMetrics() {
+  PageMetrics toMetrics() {
     return new PageMetrics(
       parent: this,
       page: page,
