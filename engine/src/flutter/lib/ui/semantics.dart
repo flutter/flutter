@@ -186,7 +186,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// system.
   ///
   /// The `transform` is a matrix that maps this node's coodinate system into
-  /// its parent's coordate system.
+  /// its parent's coordinate system.
   void updateNode({
     int id,
     int flags,
@@ -197,7 +197,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     Int32List children
   }) {
     if (transform.length != 16)
-      throw new ArgumentError("[transform] must have 16 entries.");
+      throw new ArgumentError('transform argument must have 16 entries.');
     _updateNode(id,
                 flags,
                 actions,
