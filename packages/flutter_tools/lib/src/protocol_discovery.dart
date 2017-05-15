@@ -95,8 +95,6 @@ class ProtocolDiscovery {
   void _located(Uri uri) {
     assert(_completer != null);
     assert(!_completer.isCompleted);
-
     _completer.complete(uri);
-    _completer = new Completer<Uri>();
   }
 }
