@@ -108,6 +108,7 @@ Future<Null> main() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
 
     print('${bold}DONE: All tests successful.$reset');
   }
