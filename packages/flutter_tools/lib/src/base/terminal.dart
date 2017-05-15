@@ -7,10 +7,10 @@ import 'dart:convert' show ASCII;
 
 import 'package:quiver/strings.dart';
 
+import '../globals.dart';
 import 'context.dart';
 import 'io.dart';
 import 'platform.dart';
-import '../globals.dart';
 
 final AnsiTerminal _kAnsiTerminal = new AnsiTerminal();
 
