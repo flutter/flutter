@@ -48,4 +48,18 @@ void main() {
     painter.layout();
     expect(painter.size, const Size(123.0, 123.0));
   });
+
+  test('TextPainter default text height is 14 pixels', () {
+    final TextPainter painter = new TextPainter(text: const TextSpan(text: 'x'));
+    painter.layout();
+    expect(painter.preferredLineHeight, 14.0);
+    expect(painter.size, const Size(14.0, 14.0));
+  });
+
+  test('TextPainter sets paragraph size from root', () {
+    final TextPainter painter = new TextPainter(text: const TextSpan(text: 'x', style: const TextStyle(fontSize: 100.0)));
+    painter.layout();
+    expect(painter.preferredLineHeight, 100.0);
+    expect(painter.size, const Size(100.0, 100.0));
+  });
 }
