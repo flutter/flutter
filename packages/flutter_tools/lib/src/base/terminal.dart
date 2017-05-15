@@ -7,11 +7,18 @@ import 'dart:convert' show ASCII;
 
 import 'package:quiver/strings.dart';
 
+import 'context.dart';
 import 'io.dart';
 import 'platform.dart';
 import '../globals.dart';
 
-final AnsiTerminal terminal = new AnsiTerminal();
+final AnsiTerminal _kAnsiTerminal = new AnsiTerminal();
+
+AnsiTerminal get terminal {
+  return context == null
+      ? _kAnsiTerminal
+      : context[AnsiTerminal];
+}
 
 class AnsiTerminal {
   static const String _bold  = '\u001B[1m';
@@ -100,7 +107,7 @@ class AnsiTerminal {
         printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters)
           printStatus(' [${acceptedCharacters.join("|")}]', newline: false);
-        printStatus(':', emphasis: true, newline: false);
+        printStatus(': ', emphasis: true, newline: false);
       }
       choice = await onCharInput.first;
       printStatus(choice);
