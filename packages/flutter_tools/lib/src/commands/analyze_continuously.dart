@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/sdk.dart';

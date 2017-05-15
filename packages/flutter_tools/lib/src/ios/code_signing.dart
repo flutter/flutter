@@ -10,8 +10,8 @@ import 'package:quiver/strings.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../globals.dart';
 
 const String noCertificatesInstruction = '''
@@ -151,31 +151,14 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
       printStatus('  ${i+1}) ${validCodeSigningIdentities[i]}', emphasis: true);
     }
     printStatus('  a) Abort', emphasis: true);
-    String choice;
-    terminal.singleCharMode = true;
-    final Stream<String> terminalBroadcastInput =
-        terminal.onCharInput.asBroadcastStream();
-    while(
-      isEmpty(choice)
-      || choice.length != 1
-      || !(
-        choice == 'a'
-        || (
-          isDigit(choice.runes.first)
-          && int.parse(choice) > 0
-          && int.parse(choice) < count + 1
-        )
-      )
-    ) {
-      printStatus(
-        'Please select a certificate for code signing [${range(1, count + 1).join("|")}|a]: ',
-        emphasis: true,
-        newline: false,
-      );
-      choice = await terminalBroadcastInput.first;
-      print(choice);
-    }
-    terminal.singleCharMode = false;
+
+    final String choice = await terminal.promptForCharInput(
+      range(1, count + 1).map((num number) => number.toString()).toList()
+          ..add('a'),
+      prompt: 'Please select a certificate for code signing',
+      displayAcceptedCharacters: true,
+    );
+
     if (choice == 'a')
       throwToolExit('Aborted. Code signing is required to build a deployable iOS app.');
     else
