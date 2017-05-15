@@ -77,7 +77,7 @@ linter:
     # - avoid_classes_with_only_static_members # not yet tested
     # - avoid_function_literals_in_foreach_calls # not yet tested
     - avoid_init_to_null
-    # - avoid_null_checks_in_equality_operators # not yet tested
+    - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # not yet tested
     - avoid_return_types_on_setters
     # - avoid_returning_null # not yet tested
