@@ -137,7 +137,7 @@ linter:
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
     # - use_string_buffers # https://github.com/dart-lang/linter/pull/664
-    # - use_to_and_as_if_applicable # NOT WANTED https://github.com/flutter/flutter/pull/10038#discussion_r116327942
+    # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
 
     # === pub rules ===
     - package_names
