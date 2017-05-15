@@ -304,6 +304,9 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
 ///
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item intead a pixel value to define
+///    the main axis extent of each item.
 ///  * [SliverGrid], which places its children in arbitrary positions.
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
@@ -333,6 +336,9 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 ///
 /// See also:
 ///
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item intead a pixel value to define
+///    the main axis extent of each item.
 ///  * [SliverFillViewport], which determines the [itemExtent] based on
 ///    [SliverConstraints.viewportMainAxisExtent].
 ///  * [SliverList], which does not require its children to have the same
@@ -372,6 +378,9 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///  * [SliverList], which places its children in a linear array.
 ///  * [SliverFixedExtentList], which places its children in a linear
 ///    array with a fixed extent in the main axis.
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item intead a pixel value to define
+///    the main axis extent of each item.
 class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement.
@@ -423,6 +432,9 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///
 ///  * [SliverFixedExtentList], which has a configurable
 ///    [SliverFixedExtentList.itemExtent].
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item intead a pixel value to define
+///    the main axis extent of each item.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
@@ -469,7 +481,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   RenderSliverMultiBoxAdaptor get renderObject => super.renderObject;
 
   @override
-  void update(SliverMultiBoxAdaptorWidget newWidget) {
+  void update(covariant SliverMultiBoxAdaptorWidget newWidget) {
     final SliverMultiBoxAdaptorWidget oldWidget = widget;
     super.update(newWidget);
     final SliverChildDelegate newDelegate = newWidget.delegate;
