@@ -110,6 +110,16 @@ class Window {
   /// The number of device pixels for each logical pixel. This number might not
   /// be a power of two. Indeed, it might not even be an integer. For example,
   /// the Nexus 6 has a device pixel ratio of 3.5.
+  ///
+  /// Device pixels are also referred to as physical pixels. Logical pixels are
+  /// also referred to as device-independent or resolution-independent pixels.
+  ///
+  /// By definition, there are roughly 38 logical pixels per centimeter, or
+  /// about 96 logical pixels per inch, of the physical display. The value
+  /// returned by [devicePixelRatio] is ultimately obtained either from the
+  /// hardware itself, the device drivers, or a hard-coded value stored in the
+  /// operating system or firmware, and may be inaccurate, sometimes by a
+  /// significant margin.
   double get devicePixelRatio => _devicePixelRatio;
   double _devicePixelRatio = 1.0;
 
@@ -127,7 +137,9 @@ class Window {
   WindowPadding _padding = WindowPadding.zero;
 
   /// A callback that is invoked whenever the [devicePixelRatio],
-  /// [physicalSize], or [padding] values change.
+  /// [physicalSize], or [padding] values change, for example when the device is
+  /// rotated or when the application is resized (e.g. when showing applications
+  /// side-by-side on Android).
   VoidCallback onMetricsChanged;
 
   /// The system-reported locale.
