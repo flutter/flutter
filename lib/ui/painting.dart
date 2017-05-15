@@ -1194,6 +1194,7 @@ class Vertices extends NativeFieldWrapperClass2 {
 
 /// Defines how a list of points is interpreted when drawing a set of points.
 ///
+// ignore: deprecated_member_use
 /// Used by [Canvas.drawPoints].
 enum PointMode {
   /// Draw each point separately.
@@ -1602,6 +1603,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Draws a sequence of points according to the given [PointMode].
   ///
   /// The `points` argument is interpreted as offsets from the origin.
+  @Deprecated('We are planning on changing the signature of this function. See <https://github.com/flutter/flutter/issues/10087>.')
   void drawPoints(PointMode pointMode, List<Offset> points, Paint paint) {
     _drawPoints(paint._objects, paint._data, pointMode.index, _encodePointList(points));
   }
@@ -1698,10 +1700,10 @@ abstract class Picture extends NativeFieldWrapperClass2 {
   Picture(); // (this constructor is here just so we can document it)
 
   /// Creates an image from this picture.
-  /// 
+  ///
   /// The picture is rasterized using the number of pixels specified by the
   /// given width and height.
-  /// 
+  ///
   /// Although the image is returned synchronously, the picture is actually
   /// rasterized the first time the image is drawn and then cached.
   Image toImage(int width, int height) native "Picture_toImage";
