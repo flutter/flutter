@@ -9,16 +9,14 @@ import 'basic.dart';
 import 'framework.dart';
 import 'sliver.dart';
 
-export 'package:flutter/rendering.dart' show RenderSliverFixedExtentBoxAdaptor;
-
-class SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
-  SliverPrototypeExtentListElement(SliverPrototypeExtentList widget) : super(widget);
+class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
+  _SliverPrototypeExtentListElement(SliverPrototypeExtentList widget) : super(widget);
 
   @override
   SliverPrototypeExtentList get widget => super.widget;
 
   @override
-  RenderSliverPrototypeExtentList get renderObject => super.renderObject;
+  _RenderSliverPrototypeExtentList get renderObject => super.renderObject;
 
   Element _prototype;
   static final Object _prototypeSlot = new Object();
@@ -79,9 +77,9 @@ class SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 }
 
-class RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor {
-  RenderSliverPrototypeExtentList({
-    @required SliverPrototypeExtentListElement childManager,
+class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor {
+  _RenderSliverPrototypeExtentList({
+    @required _SliverPrototypeExtentListElement childManager,
   }) : super(childManager: childManager);
 
   RenderBox _child;
@@ -139,26 +137,26 @@ class RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor 
 /// A sliver that places its box children in a linear array and constrains them
 /// to have the same extent as a prototype item along the main axis.
 ///
-/// [RenderSliverPrototypeExtentList] places its children in a linear array along
-/// the main axis starting at offset zero and without gaps. Each child is forced
-/// to have the same extent as the [prototypeItem] along the main axis and the
-/// [SliverConstraints.crossAxisExtent] along the cross axis.
+/// [SliverPrototypeExtentList] places its children in a linear array along
+/// the main axis starting at offset zero and without gaps. Each child is
+/// constrained to the same extent as the [prototypeItem] along the main axis
+/// and the [SliverConstraints.crossAxisExtent] along the cross axis.
 ///
-/// [RenderSliverPrototypeExtentList] is more efficient than [RenderSliverList]
-/// because [RenderSliverPrototypeExtentList] does not need to perform layout on
-/// its children to obtain their extent in the main axis. It's a little
-/// more flexible than [RenderSliverFixedExtentList] because there's no need to
-/// determine the approriate item extent in pixels.
+/// [SliverPrototypeExtentList] is more efficient than [SliverList] because
+/// [SliverPrototypeExtentList] does not need to layout its children to obtain
+/// their extent along the main axis. It's a little more flexible than
+/// [SliverFixedExtentList] because there's no need to determine the approriate
+/// item extent in pixels.
 ///
 /// See also:
 ///
-///  * [RenderSliverFixedExtentList], which has a configurable [itemExtent].
-///  * [RenderSliverList], which does not require its children to have the same
+///  * [SliverFixedExtentList], which has a configurable [itemExtent].
+///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
-///  * [RenderSliverFillViewport], which determines the [itemExtent] based on
-///    [SliverConstraints.viewportMainAxisExtent].
-///  * [RenderSliverFillRemaining], which determines the [itemExtent] based on
-///    [SliverConstraints.remainingPaintExtent].
+///  * [SliverFillViewport], which sizes its children based on the
+///    size of the viewport, regardless of what else is in the scroll view.
+///  * [SliverList], which shows a list of variable-sized children in a
+///    viewport.
 class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places its box children in a linear array and
   /// constrains them to have the same extent as a prototype item along
@@ -178,11 +176,11 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   final Widget prototypeItem;
 
   @override
-  RenderSliverPrototypeExtentList createRenderObject(BuildContext context) {
-    final SliverPrototypeExtentListElement element = context;
-    return new RenderSliverPrototypeExtentList(childManager: element);
+  _RenderSliverPrototypeExtentList createRenderObject(BuildContext context) {
+    final _SliverPrototypeExtentListElement element = context;
+    return new _RenderSliverPrototypeExtentList(childManager: element);
   }
 
   @override
-  SliverPrototypeExtentListElement createElement() => new SliverPrototypeExtentListElement(this);
+  _SliverPrototypeExtentListElement createElement() => new _SliverPrototypeExtentListElement(this);
 }
