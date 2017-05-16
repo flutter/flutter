@@ -30,9 +30,21 @@ const TextStyle _kLabelStyle = const TextStyle(
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// ## Sample code
+///
+/// ```dart
+/// new Chip(
+///   avatar: new CircleAvatar(
+///     backgroundColor: Colors.grey.shade800,
+///     child: new Text('AB'),
+///   ),
+///   label: new Text('Aaron Burr'),
+/// )
+/// ```
+///
 /// See also:
 ///
-///  * [CircleAvatar]
+///  * [CircleAvatar], which shows images or initials of people.
 ///  * <https://material.google.com/components/chips.html>
 class Chip extends StatelessWidget {
   /// Creates a material design chip.
