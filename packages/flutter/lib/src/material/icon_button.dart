@@ -18,6 +18,7 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
+// See: <https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size>
 const double _kMinButtonSize = 48.0;
 
 /// A material design icon button.
@@ -34,8 +35,10 @@ const double _kMinButtonSize = 48.0;
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// The hit region of an icon button will, if possible, be at least 48.0 pixels
-/// in size, regardless of the actual [iconSize]. The [alignment] controls how
-/// the icon itself is positioned within the hit region.
+/// in size, regardless of the actual [iconSize], to satisfy the [touch target
+/// size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
+/// requirements in the Material Design specification. The [alignment] controls
+/// how the icon itself is positioned within the hit region.
 ///
 /// See also:
 ///
