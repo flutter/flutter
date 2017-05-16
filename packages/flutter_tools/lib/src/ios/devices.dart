@@ -281,10 +281,10 @@ class IOSDevice extends Device {
       final ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
         getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
 
-      final Future<Uri> forwardObsUri = observatoryDiscovery.nextUri();
+      final Future<Uri> forwardObsUri = observatoryDiscovery.uri;
       Future<Uri> forwardDiagUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagUri = diagnosticDiscovery.nextUri();
+        forwardDiagUri = diagnosticDiscovery.uri;
       } else {
         forwardDiagUri = new Future<Uri>.value(null);
       }

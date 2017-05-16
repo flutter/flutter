@@ -407,12 +407,12 @@ class AndroidDevice extends Device {
 
       if (debuggingOptions.buildMode == BuildMode.debug) {
         final List<Uri> deviceUris = await Future.wait(
-            <Future<Uri>>[observatoryDiscovery.nextUri(), diagnosticDiscovery.nextUri()]
+            <Future<Uri>>[observatoryDiscovery.uri, diagnosticDiscovery.uri]
         );
         observatoryUri = deviceUris[0];
         diagnosticUri = deviceUris[1];
       } else if (debuggingOptions.buildMode == BuildMode.profile) {
-        observatoryUri = await observatoryDiscovery.nextUri();
+        observatoryUri = await observatoryDiscovery.uri;
       }
 
       return new LaunchResult.succeeded(
