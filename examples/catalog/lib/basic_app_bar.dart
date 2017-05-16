@@ -4,69 +4,17 @@
 
 import 'package:flutter/material.dart';
 
-/*
-Sample Catalog
-
-Title: AppBar Basics
-
-Summary: An [AppBar] with a title, actions, and an overflow dropdown menu.
-One of the app's choices can be selected with an action button or the menu.
-
-Description:
-An app that displays one of a half dozen choices with an icon and a title.
-The two most common choices are available as action buttons and the remaining
-choices are included in the overflow dropdow menu.
-
-Classes: [AppBar], [IconButton], [PopupMenuButton], [Scaffold]
-
-See also:
-  * The "Layout-Structure" section of the material design specification:
-    <https://material.io/guidelines/layout/structure.html#structure-app-bar>
-*/
-
-class _BasicAppBarSampleState extends State<BasicAppBarSample> {
-  Choice _selectedChoice = choices[0]; // The app's "state".
-
-  void _select(Choice choice) {
-    setState(() { // Causes the app to rebuild with the new _selectedChoice.
-      _selectedChoice = choice;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: const Text('Basic AppBar'),
-        actions: <Widget>[
-          new IconButton( // action button
-            icon: new Icon(choices[0].icon),
-            onPressed: () { _select(choices[0]); },
-          ),
-          new IconButton( // action button
-            icon: new Icon(choices[1].icon),
-            onPressed: () { _select(choices[1]); },
-          ),
-          new PopupMenuButton<Choice>( // overflow menu
-            onSelected: _select,
-            itemBuilder: (BuildContext context) {
-              return choices.skip(2).map((Choice choice) {
-                return new PopupMenuItem<Choice>(
-                  value: choice,
-                  child: new Text(choice.title),
-                );
-              }).toList();
-            },
-          ),
-        ],
-      ),
-      body: new Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: new ChoiceCard(choice: _selectedChoice),
-      ),
-    );
-  }
-}
+/// Sample Catalog: Basic AppBar
+///
+/// An AppBar with a title, actions, and an overflow menu. One of the app's
+/// choices can be selected action buttons or the menu.
+///
+/// Sample classes: [AppBar], [IconButton], [PopupMenuButton], [Scaffold].
+///
+/// See also:
+///
+///  * The "Layout-Structure" section of the material design specification:
+///    <https://material.io/guidelines/layout/structure.html#structure-app-bar>
 
 class Choice {
   const Choice({ this.title, this.icon });
@@ -107,10 +55,53 @@ class ChoiceCard extends StatelessWidget {
   }
 }
 
-// This app is a stateful, it tracks the current selected Choice.
 class BasicAppBarSample extends StatefulWidget {
   @override
   _BasicAppBarSampleState createState() => new _BasicAppBarSampleState();
+}
+
+class _BasicAppBarSampleState extends State<BasicAppBarSample> {
+  Choice _selectedChoice = choices[0];
+
+  void _select(Choice choice) {
+    setState(() {
+      _selectedChoice = choice;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: const Text('Basic AppBar'),
+        actions: <Widget>[
+          new IconButton(
+            icon: new Icon(choices[0].icon),
+            onPressed: () { _select(choices[0]); },
+          ),
+          new IconButton(
+            icon: new Icon(choices[1].icon),
+            onPressed: () { _select(choices[1]); },
+          ),
+          new PopupMenuButton<Choice>(
+            onSelected: _select,
+            itemBuilder: (BuildContext context) {
+              return choices.skip(2).map((Choice choice) {
+                return new PopupMenuItem<Choice>(
+                  value: choice,
+                  child: new Text(choice.title),
+                );
+              }).toList();
+            },
+          ),
+        ],
+      ),
+      body: new Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: new ChoiceCard(choice: _selectedChoice),
+      ),
+    );
+  }
 }
 
 void main() {
