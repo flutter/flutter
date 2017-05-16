@@ -133,7 +133,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.drawRect] call are ignored.
-  void rect({ Rect rect, Color color });
+  void rect({ Rect rect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that a rounded rectangle clip is expected next.
   ///
@@ -157,7 +157,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.drawRRect] call are ignored.
-  void rrect({ RRect rrect, Color color, bool hasMaskFilter, PaintingStyle style });
+  void rrect({ RRect rrect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that a circle is expected next.
   ///
@@ -169,7 +169,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.drawCircle] call are ignored.
-  void circle({ double x, double y, double radius, Color color, bool hasMaskFilter, PaintingStyle style });
+  void circle({ double x, double y, double radius, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that a path is expected next.
   ///
@@ -184,7 +184,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.drawPath] call are ignored.
-  void path({ Color color, bool hasMaskFilter, PaintingStyle style });
+  void path({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that a line is expected next.
   ///
@@ -196,7 +196,7 @@ abstract class PaintPattern {
   ///
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.drawLine] call are ignored.
-  void line({ Color color, bool hasMaskFilter, PaintingStyle style });
+  void line({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that a paragraph is expected next.
   ///
@@ -270,8 +270,8 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   }
 
   @override
-  void rect({ Rect rect, Color color, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _RectPaintPredicate(rect: rect, color: color, hasMaskFilter: hasMaskFilter, style: style));
+  void rect({ Rect rect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _RectPaintPredicate(rect: rect, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -280,23 +280,23 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   }
 
   @override
-  void rrect({ RRect rrect, Color color, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _RRectPaintPredicate(rrect: rrect, color: color, hasMaskFilter: hasMaskFilter, style: style));
+  void rrect({ RRect rrect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _RRectPaintPredicate(rrect: rrect, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
-  void circle({ double x, double y, double radius, Color color, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _CirclePaintPredicate(x: x, y: y, radius: radius, color: color, hasMaskFilter: hasMaskFilter, style: style));
+  void circle({ double x, double y, double radius, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _CirclePaintPredicate(x: x, y: y, radius: radius, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
-  void path({ Color color, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _PathPaintPredicate(color: color, hasMaskFilter: hasMaskFilter, style: style));
+  void path({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _PathPaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
-  void line({ Color color, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _LinePaintPredicate(color: color, hasMaskFilter: hasMaskFilter, style: style));
+  void line({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _LinePaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -413,7 +413,7 @@ abstract class _PaintPredicate {
 abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   _DrawCommandPaintPredicate(
     this.symbol, this.name, this.argumentCount, this.paintArgumentIndex,
-    { this.color, this.hasMaskFilter, this.style }
+    { this.color, this.strokeWidth, this.hasMaskFilter, this.style }
   );
 
   final Symbol symbol;
@@ -421,6 +421,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   final int argumentCount;
   final int paintArgumentIndex;
   final Color color;
+  final double strokeWidth;
   final bool hasMaskFilter;
   final PaintingStyle style;
 
@@ -450,6 +451,8 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
     final Paint paintArgument = arguments[paintArgumentIndex];
     if (color != null && paintArgument.color != color)
       throw 'called $methodName with a paint whose color, ${paintArgument.color}, was not exactly the expected color ($color).';
+    if (strokeWidth != null && paintArgument.strokeWidth != strokeWidth)
+      throw 'called $methodName with a paint whose strokeWidth, ${paintArgument.strokeWidth}, was not exactly the expected strokeWidth ($strokeWidth).';
     if (hasMaskFilter != null && (paintArgument.maskFilter != null) != hasMaskFilter) {
       if (hasMaskFilter)
         throw 'called $methodName with a paint that did not have a mask filter, despite expecting one.';
@@ -475,6 +478,8 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   void debugFillDescription(List<String> description) {
     if (color != null)
       description.add('$color');
+    if (strokeWidth != null)
+      description.add('strokeWidth: $strokeWidth');
     if (hasMaskFilter != null)
       description.add(hasMaskFilter ? 'a mask filter' : 'no mask filter');
     if (style != null)
@@ -486,10 +491,11 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
   _OneParameterPaintPredicate(Symbol symbol, String name, {
     @required this.expected,
     @required Color color,
+    @required double strokeWidth,
     @required bool hasMaskFilter,
     @required PaintingStyle style
   }) : super(
-    symbol, name, 2, 1, color: color, hasMaskFilter: hasMaskFilter, style: style);
+    symbol, name, 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style);
 
   final T expected;
 
@@ -516,30 +522,32 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
 
 
 class _RectPaintPredicate extends _OneParameterPaintPredicate<Rect> {
-  _RectPaintPredicate({ Rect rect, Color color, bool hasMaskFilter, PaintingStyle style }) : super(
+  _RectPaintPredicate({ Rect rect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawRect,
     'a rectangle',
     expected: rect,
     color: color,
+    strokeWidth: strokeWidth,
     hasMaskFilter: hasMaskFilter,
     style: style,
   );
 }
 
 class _RRectPaintPredicate extends _OneParameterPaintPredicate<RRect> {
-  _RRectPaintPredicate({ RRect rrect, Color color, bool hasMaskFilter, PaintingStyle style }) : super(
+  _RRectPaintPredicate({ RRect rrect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawRRect,
     'a rounded rectangle',
     expected: rrect,
     color: color,
+    strokeWidth: strokeWidth,
     hasMaskFilter: hasMaskFilter,
     style: style,
   );
 }
 
 class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
-  _CirclePaintPredicate({ this.x, this.y, this.radius, Color color, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawCircle, 'a circle', 3, 2, color: color, hasMaskFilter: hasMaskFilter, style: style
+  _CirclePaintPredicate({ this.x, this.y, this.radius, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawCircle, 'a circle', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
 
   final double x;
@@ -582,15 +590,15 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
 }
 
 class _PathPaintPredicate extends _DrawCommandPaintPredicate {
-  _PathPaintPredicate({ Color color, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawPath, 'a path', 2, 1, color: color, hasMaskFilter: hasMaskFilter, style: style
+  _PathPaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawPath, 'a path', 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
 }
 
 // TODO(ianh): add arguments to test the points, length, angle, that kind of thing
 class _LinePaintPredicate extends _DrawCommandPaintPredicate {
-  _LinePaintPredicate({ Color color, bool hasMaskFilter, PaintingStyle style }) : super(
-    #drawLine, 'a line', 3, 2, color: color, hasMaskFilter: hasMaskFilter, style: style
+  _LinePaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawLine, 'a line', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
 }
 
