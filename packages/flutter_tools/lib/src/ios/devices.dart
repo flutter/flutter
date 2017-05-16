@@ -262,8 +262,8 @@ class IOSDevice extends Device {
     }
 
     int installationResult = -1;
-    Uri localObsUri;
-    Uri localDiagUri;
+    Uri localObservatoryUri;
+    Uri localDiagnosticUri;
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
@@ -281,12 +281,12 @@ class IOSDevice extends Device {
       final ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
         getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
 
-      final Future<Uri> forwardObsUri = observatoryDiscovery.uri;
-      Future<Uri> forwardDiagUri;
+      final Future<Uri> forwardObservatoryUri = observatoryDiscovery.uri;
+      Future<Uri> forwardDiagnosticUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagUri = diagnosticDiscovery.uri;
+        forwardDiagnosticUri = diagnosticDiscovery.uri;
       } else {
-        forwardDiagUri = new Future<Uri>.value(null);
+        forwardDiagnosticUri = new Future<Uri>.value(null);
       }
 
       final Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
@@ -300,14 +300,14 @@ class IOSDevice extends Device {
         }
 
         printTrace('Application launched on the device. Attempting to forward ports.');
-        return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri]);
+        return await Future.wait(<Future<Uri>>[forwardObservatoryUri, forwardDiagnosticUri]);
       }).whenComplete(() {
         observatoryDiscovery.cancel();
         diagnosticDiscovery.cancel();
       });
 
-      localObsUri = uris[0];
-      localDiagUri = uris[1];
+      localObservatoryUri = uris[0];
+      localDiagnosticUri = uris[1];
     }
 
     if (installationResult != 0) {
@@ -318,7 +318,7 @@ class IOSDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    return new LaunchResult.succeeded(observatoryUri: localObsUri, diagnosticUri: localDiagUri);
+    return new LaunchResult.succeeded(observatoryUri: localObservatoryUri, diagnosticUri: localDiagnosticUri);
   }
 
   @override
