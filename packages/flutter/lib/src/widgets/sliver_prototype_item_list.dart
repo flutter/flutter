@@ -40,9 +40,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   @override
   void moveChildRenderObject(RenderBox child, dynamic slot) {
     if (slot == _prototypeSlot) {
-      renderObject.remove(child);
-      assert(child is RenderBox);
-      renderObject.child = child;
+      assert(false);
     } else {
       super.moveChildRenderObject(child, slot);
     }
