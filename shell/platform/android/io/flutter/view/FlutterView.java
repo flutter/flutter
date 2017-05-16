@@ -699,13 +699,12 @@ public class FlutterView extends SurfaceView
     @Override
     public void onAccessibilityStateChanged(boolean enabled) {
         if (enabled) {
-            mAccessibilityEnabled = true;
             ensureAccessibilityEnabled();
         } else {
             mAccessibilityEnabled = false;
-        }
-        if (mAccessibilityNodeProvider != null) {
-            mAccessibilityNodeProvider.setAccessibilityEnabled(mAccessibilityEnabled);
+            if (mAccessibilityNodeProvider != null) {
+                mAccessibilityNodeProvider.setAccessibilityEnabled(false);
+            }
         }
         resetWillNotDraw();
     }
@@ -737,10 +736,12 @@ public class FlutterView extends SurfaceView
     private AccessibilityBridge mAccessibilityNodeProvider;
 
     void ensureAccessibilityEnabled() {
+        mAccessibilityEnabled = true;
         if (mAccessibilityNodeProvider == null) {
             mAccessibilityNodeProvider = new AccessibilityBridge(this);
             nativeSetSemanticsEnabled(mNativePlatformView, true);
         }
+        mAccessibilityNodeProvider.setAccessibilityEnabled(true);
     }
 
     void resetAccessibilityTree() {
@@ -796,6 +797,10 @@ public class FlutterView extends SurfaceView
 
     /**
      * Broadcast receiver used to discover active Flutter instances.
+     *
+     * This is used by the `flutter` tool to find the observatory ports
+     * for all the active Flutter views. We dump the data to the logs
+     * and the tool scrapes the log lines for the data.
      */
     private class DiscoveryReceiver extends BroadcastReceiver {
 
@@ -806,7 +811,7 @@ public class FlutterView extends SurfaceView
             try {
                 discover.put("id", getContext().getPackageName());
                 discover.put("observatoryPort", observatoryUri.getPort());
-                Log.i(TAG, "DISCOVER: " + discover);
+                Log.i(TAG, "DISCOVER: " + discover); // The tool looks for this data. See android_device.dart.
             } catch (JSONException e) {
             }
         }
