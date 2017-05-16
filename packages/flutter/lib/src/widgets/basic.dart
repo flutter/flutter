@@ -1557,9 +1557,9 @@ class Baseline extends SingleChildRenderObjectWidget {
 ///
 /// Rather than using multiple [SliverToBoxAdapter] widgets to display multiple
 /// box widgets in a [CustomScrollView], consider using [SliverList],
-/// [SliverFixedExtentList], or [SliverGrid], which are more efficient because
-/// they instantiate only those children that are actually visible through the
-/// scroll view's viewport.
+/// [SliverFixedExtentList], [SliverPrototypeExtentList], or [SliverGrid],
+/// which are more efficient because they instantiate only those children that
+/// are actually visible through the scroll view's viewport.
 ///
 /// See also:
 ///
@@ -1567,6 +1567,8 @@ class Baseline extends SingleChildRenderObjectWidget {
 ///  * [SliverList], which displays multiple box widgets in a linear array.
 ///  * [SliverFixedExtentList], which displays multiple box widgets with the
 ///    same main-axis extent in a linear array.
+///  * [SliverPrototypeExtentList], which displays multiple box widgets with the
+///    same main-axis extent as a prototype item, in a linear array.
 ///  * [SliverGrid], which displays multiple box widgets in arbitrary positions.
 class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
   /// Creates a sliver that contains a single box widget.
