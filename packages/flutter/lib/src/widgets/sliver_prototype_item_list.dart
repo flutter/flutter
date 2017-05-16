@@ -39,11 +39,10 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
 
   @override
   void moveChildRenderObject(RenderBox child, dynamic slot) {
-    if (slot == _prototypeSlot) {
-      assert(false);
-    } else {
+    if (slot == _prototypeSlot)
+      assert(false); // There's no moving one child.
+    else
       super.moveChildRenderObject(child, slot);
-    }
   }
 
   @override
@@ -163,7 +162,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
     Key key,
     @required SliverChildDelegate delegate,
     @required this.prototypeItem,
-  }) : super(key: key, delegate: delegate);
+  }) : assert(prototypeItem != null), super(key: key, delegate: delegate);
 
   /// Defines the main axis extent of all of this sliver's children.
   ///

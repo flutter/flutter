@@ -107,7 +107,7 @@ void main() {
 
   testWidgets('SliverPrototypeExtentList first item is also the prototype', (WidgetTester tester) async {
     final List<Widget> items = new List<Widget>.generate(10, (int index) {
-      return new TestItem(key: new ValueKey<int>(index), item: index, height: 60.0);
+      return new TestItem(key: new ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
     }).toList();
 
     await tester.pumpWidget(
