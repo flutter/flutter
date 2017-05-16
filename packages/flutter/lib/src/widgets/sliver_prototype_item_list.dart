@@ -9,6 +9,57 @@ import 'basic.dart';
 import 'framework.dart';
 import 'sliver.dart';
 
+/// A sliver that places its box children in a linear array and constrains them
+/// to have the same extent as a prototype item along the main axis.
+///
+/// [SliverPrototypeExtentList] arranges its children in a line along
+/// the main axis starting at offset zero and without gaps. Each child is
+/// constrained to the same extent as the [prototypeItem] along the main axis
+/// and the [SliverConstraints.crossAxisExtent] along the cross axis.
+///
+/// [SliverPrototypeExtentList] is more efficient than [SliverList] because
+/// [SliverPrototypeExtentList] does not need to lay out its children to obtain
+/// their extent along the main axis. It's a little more flexible than
+/// [SliverFixedExtentList] because there's no need to determine the approriate
+/// item extent in pixels.
+///
+/// See also:
+///
+///  * [SliverFixedExtentList], whose [itemExtent] is a pixel value.
+///  * [SliverList], which does not require its children to have the same
+///    extent in the main axis.
+///  * [SliverFillViewport], which sizes its children based on the
+///    size of the viewport, regardless of what else is in the scroll view.
+///  * [SliverList], which shows a list of variable-sized children in a
+///    viewport.
+class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
+  /// Creates a sliver that places its box children in a linear array and
+  /// constrains them to have the same extent as a prototype item along
+  /// the main axis.
+  const SliverPrototypeExtentList({
+    Key key,
+    @required SliverChildDelegate delegate,
+    @required this.prototypeItem,
+  }) : assert(prototypeItem != null), super(key: key, delegate: delegate);
+
+  /// Defines the main axis extent of all of this sliver's children.
+  ///
+  /// The [prototypeItem] is laid out before the rest of the sliver's children
+  /// and its size along the main axis fixes the size of each child. The
+  /// [prototypeItem] is essentially [Offstage]: it is not painted and it
+  /// cannot respond to input.
+  final Widget prototypeItem;
+
+  @override
+  _RenderSliverPrototypeExtentList createRenderObject(BuildContext context) {
+    final _SliverPrototypeExtentListElement element = context;
+    return new _RenderSliverPrototypeExtentList(childManager: element);
+  }
+
+  @override
+  _SliverPrototypeExtentListElement createElement() => new _SliverPrototypeExtentListElement(this);
+}
+
 class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   _SliverPrototypeExtentListElement(SliverPrototypeExtentList widget) : super(widget);
 
@@ -40,7 +91,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   @override
   void moveChildRenderObject(RenderBox child, dynamic slot) {
     if (slot == _prototypeSlot)
-      assert(false); // There's no moving one child.
+      assert(false); // There's only one prototype child so it cannot be moved.
     else
       super.moveChildRenderObject(child, slot);
   }
@@ -129,55 +180,4 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
     assert(child != null && child.hasSize);
     return constraints.axis == Axis.vertical ? child.size.height : child.size.width;
   }
-}
-
-/// A sliver that places its box children in a linear array and constrains them
-/// to have the same extent as a prototype item along the main axis.
-///
-/// [SliverPrototypeExtentList] places its children in a linear array along
-/// the main axis starting at offset zero and without gaps. Each child is
-/// constrained to the same extent as the [prototypeItem] along the main axis
-/// and the [SliverConstraints.crossAxisExtent] along the cross axis.
-///
-/// [SliverPrototypeExtentList] is more efficient than [SliverList] because
-/// [SliverPrototypeExtentList] does not need to layout its children to obtain
-/// their extent along the main axis. It's a little more flexible than
-/// [SliverFixedExtentList] because there's no need to determine the approriate
-/// item extent in pixels.
-///
-/// See also:
-///
-///  * [SliverFixedExtentList], which has a configurable [itemExtent].
-///  * [SliverList], which does not require its children to have the same
-///    extent in the main axis.
-///  * [SliverFillViewport], which sizes its children based on the
-///    size of the viewport, regardless of what else is in the scroll view.
-///  * [SliverList], which shows a list of variable-sized children in a
-///    viewport.
-class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
-  /// Creates a sliver that places its box children in a linear array and
-  /// constrains them to have the same extent as a prototype item along
-  /// the main axis.
-  const SliverPrototypeExtentList({
-    Key key,
-    @required SliverChildDelegate delegate,
-    @required this.prototypeItem,
-  }) : assert(prototypeItem != null), super(key: key, delegate: delegate);
-
-  /// Defines the main axis extent of all of this sliver's children.
-  ///
-  /// The [prototypeItem] is laid out before the rest of the sliver's children
-  /// and its size along the main axis fixes the size of each child. The
-  /// [prototypeItem] is essentially [Offstage]: it is not painted and it
-  /// can not respond to input.
-  final Widget prototypeItem;
-
-  @override
-  _RenderSliverPrototypeExtentList createRenderObject(BuildContext context) {
-    final _SliverPrototypeExtentListElement element = context;
-    return new _RenderSliverPrototypeExtentList(childManager: element);
-  }
-
-  @override
-  _SliverPrototypeExtentListElement createElement() => new _SliverPrototypeExtentListElement(this);
 }
