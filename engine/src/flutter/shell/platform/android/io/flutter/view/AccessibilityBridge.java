@@ -430,7 +430,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
             if (forceUpdate) {
                 if (globalTransform == null)
                     globalTransform = new float[16];
-                Matrix.multiplyMM(globalTransform, 0, transform, 0, ancestorTransform, 0);
+                Matrix.multiplyMM(globalTransform, 0, ancestorTransform, 0, transform, 0);
 
                 final float[] sample = new float[4];
                 sample[2] = 0;
