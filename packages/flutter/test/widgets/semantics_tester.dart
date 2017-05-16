@@ -13,20 +13,69 @@ export 'package:flutter/rendering.dart' show SemanticsData;
 /// Useful with [hasSemantics] and [SemanticsTester] to test the contents of the
 /// semantics tree.
 class TestSemantics {
-  /// Creates an object witht some test semantics data.
+  /// Creates an object with some test semantics data.
   ///
-  /// If [rect] argument is null, the [rect] field with ve initialized with
-  /// `new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)`, which is the default size of
-  /// the screen during unit testing.
+  /// The [id] field is required. The root node has an id of zero. Other nodes
+  /// are given a unique id when they are created, in a predictable fashion, and
+  /// so these values can be hard-coded.
+  ///
+  /// The [rect] field is required and has no default. Convenient values are
+  /// available:
+  ///
+  ///  * [TestSemantics.rootRect]: 2400x1600, the test screen's size in physical
+  ///    pixels, useful for the node with id zero.
+  ///
+  ///  * [TestSemantics.fullScreen] 800x600, the test screen's size in logical
+  ///    pixels, useful for other full-screen widgets.
   TestSemantics({
-    this.id,
+    @required this.id,
     this.flags: 0,
     this.actions: 0,
     this.label: '',
-    Rect rect,
+    @required this.rect,
     this.transform,
     this.children: const <TestSemantics>[],
-  }) : rect = rect ?? new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0);
+  }) : assert(id != null),
+       assert(flags != null),
+       assert(label != null),
+       assert(rect != null),
+       assert(children != null);
+
+  /// Creates an object with some test semantics data, with the [id] and [rect]
+  /// set to the appropriate values for the root node.
+  TestSemantics.root({
+    this.flags: 0,
+    this.actions: 0,
+    this.label: '',
+    this.transform,
+    this.children: const <TestSemantics>[],
+  }) : id = 0,
+       assert(flags != null),
+       assert(label != null),
+       rect = TestSemantics.rootRect,
+       assert(children != null);
+
+  /// Creates an object with some test semantics data, with the [id] and [rect]
+  /// set to the appropriate values for direct children of the root node.
+  ///
+  /// The [transform] is set to a 3.0 scale (to account for the
+  /// [Window.devicePixelRatio] being 3.0 on the test pseudo-device).
+  ///
+  /// The [rect] field is required and has no default. The
+  /// [TestSemantics.fullScreen] property may be useful as a value; it describes
+  /// an 800x600 rectangle, which is the test screen's size in logical pixels.
+  TestSemantics.rootChild({
+    @required this.id,
+    this.flags: 0,
+    this.actions: 0,
+    this.label: '',
+    @required this.rect,
+    Matrix4 transform,
+    this.children: const <TestSemantics>[],
+  }) : assert(flags != null),
+       assert(label != null),
+       transform = _applyRootChildScale(transform),
+       assert(children != null);
 
   /// The unique identifier for this node.
   ///
@@ -45,8 +94,25 @@ class TestSemantics {
 
   /// The bounding box for this node in its coordinate system.
   ///
-  /// Defaults to filling the screen.
+  /// Convenient values are available:
+  ///
+  ///  * [TestSemantics.rootRect]: 2400x1600, the test screen's size in physical
+  ///    pixels, useful for the node with id zero.
+  ///
+  ///  * [TestSemantics.fullScreen] 800x600, the test screen's size in logical
+  ///    pixels, useful for other full-screen widgets.
   final Rect rect;
+
+  /// The test screen's size in physical pixels, typically used as the [rect]
+  /// for the node with id zero.
+  ///
+  /// See also [new TestSemantics.root], which uses this value to describe the
+  /// root node.
+  static final Rect rootRect = new Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
+
+  /// The test screen's size in logical pixels, useful for the [rect] of
+  /// full-screen widgets other than the root node.
+  static final Rect fullScreen = new Rect.fromLTWH(0.0, 0.0, 800.0, 600.0);
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
@@ -54,6 +120,13 @@ class TestSemantics {
   /// transformation (i.e., that this node has the same coorinate system as its
   /// parent).
   final Matrix4 transform;
+
+  static Matrix4 _applyRootChildScale(Matrix4 transform) {
+    final Matrix4 result = new Matrix4.diagonal3Values(3.0, 3.0, 1.0);
+    if (transform != null)
+      result.multiply(transform);
+    return result;
+  }
 
   /// The children of this node.
   final List<TestSemantics> children;
@@ -154,7 +227,7 @@ class _HasSemantics extends Matcher {
     if (testNode.rect != data.rect)
       return mismatchDescription.add('expected node id ${testNode.id} to have rect ${testNode.rect} but found rect ${data.rect}');
     if (testNode.transform != data.transform)
-      return mismatchDescription.add('expected node id ${testNode.id} to have transform ${testNode.transform} but found transform ${data.transform}');
+      return mismatchDescription.add('expected node id ${testNode.id} to have transform ${testNode.transform} but found transform:\n${data.transform}');
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (testNode.children.length != childrenCount)
       return mismatchDescription.add('expected node id ${testNode.id} to have ${testNode.children.length} but found $childrenCount children');

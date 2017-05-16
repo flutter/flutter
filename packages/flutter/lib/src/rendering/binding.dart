@@ -143,7 +143,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     final double devicePixelRatio = ui.window.devicePixelRatio;
     return new ViewConfiguration(
       size: ui.window.physicalSize / devicePixelRatio,
-      devicePixelRatio: devicePixelRatio
+      devicePixelRatio: devicePixelRatio,
     );
   }
 
