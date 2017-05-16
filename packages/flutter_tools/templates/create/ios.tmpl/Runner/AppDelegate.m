@@ -36,10 +36,11 @@
   [super applicationWillTerminate:application];
 }
 
-- (BOOL)application:(UIApplication *)application
-            openURL:(NSURL *)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options {
+- (BOOL)application:(UIApplication*)application
+            openURL:(NSURL*)url
+  sourceApplication:(NSString*)sourceApplication
+         annotation:(id)annotation {
   // Called when the application is asked to open a resource specified by a URL.
-  return [super application:application openURL:url options:options];
+  return [super application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
 }
 @end
