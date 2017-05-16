@@ -50,7 +50,7 @@ App::App() {
                                      io_task_runner    // IO
                                      ));
 
-  if (!icu_data::Initialize(context_->environment_services().get())) {
+  if (!icu_data::Initialize(context_.get())) {
     FTL_LOG(ERROR) << "Could not initialize ICU data.";
   }
 
