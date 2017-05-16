@@ -48,7 +48,7 @@ void main() {
         expect(discoverer.uri, isNotNull);
       });
 
-      testUsingContext('discovers uri is logs already produced output', () async {
+      testUsingContext('discovers uri if logs already produced output', () async {
         initialize();
         logReader.addLine('HELLO WORLD');
         logReader.addLine('Observatory listening on http://127.0.0.1:9999');
