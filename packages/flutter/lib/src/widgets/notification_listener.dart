@@ -98,8 +98,8 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   /// Called when a notification of the appropriate type arrives at this
   /// location in the tree.
   ///
-  /// Return true to cancel the notification bubbling. Return false to allow the
-  /// notification to continue to be dispatched to further ancestors.
+  /// Return true to cancel the notification bubbling. Return false (or null) to
+  /// allow the notification to continue to be dispatched to further ancestors.
   ///
   /// The notification's [Notification.visitAncestor] method is called for each
   /// ancestor, and invokes this callback as appropriate.
@@ -108,21 +108,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   bool _dispatch(Notification notification, Element element) {
     if (onNotification != null && notification is T) {
       final bool result = onNotification(notification);
-      assert(() {
-        if (result == null)
-          throw new FlutterError(
-            'NotificationListener<$T> handler returned null.\n'
-            'The onNotification handler for the NotificationListener with the '
-            'following element returned null:\n'
-            '  $element\n'
-            'The ancestor chain for this widget was as follows:\n'
-            '  ${element.debugGetCreatorChain(12)}\n'
-            'Notification listeners must return true to stop the notification bubbling, '
-            'or false to allow it to continue (the common case is returning false).'
-          );
-        return true;
-      });
-      return result;
+      return result == true; // so that null and false have the same effect
     }
     return false;
   }
