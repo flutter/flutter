@@ -85,6 +85,36 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
+  testWidgets('Slider can be given zero values',
+      (WidgetTester tester) async {
+    final List<double> log = <double>[];
+    await tester.pumpWidget(new Material(
+      child: new Slider(
+        value: 0.0,
+        min: 0.0,
+        max: 1.0,
+        onChanged: (double newValue) { log.add(newValue); },
+      ),
+    ));
+
+    await tester.tap(find.byType(Slider));
+    expect(log, <double>[0.5]);
+    log.clear();
+
+    await tester.pumpWidget(new Material(
+      child: new Slider(
+        value: 0.0,
+        min: 0.0,
+        max: 0.0,
+        onChanged: (double newValue) { log.add(newValue); },
+      ),
+    ));
+
+    await tester.tap(find.byType(Slider));
+    expect(log, <double>[]);
+    log.clear();
+  });
+
   testWidgets('Slider can draw an open thumb at min',
       (WidgetTester tester) async {
     Widget buildApp(bool thumbOpenAtMin) {
