@@ -31,6 +31,9 @@ import 'typography.dart';
 /// that use a slider will listen for the [onChanged] callback and rebuild the
 /// slider with a new [value] to update the visual appearance of the slider.
 ///
+/// The slider will be disabled if [onChanged] is null or if the range given by
+/// [min]..[max] is empty (i.e. if [min] is equal to [max]).
+///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
@@ -61,6 +64,7 @@ class Slider extends StatefulWidget {
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
+       assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
        assert(thumbOpenAtMin != null),
@@ -101,12 +105,16 @@ class Slider extends StatefulWidget {
 
   /// The minimum value the user can select.
   ///
-  /// Defaults to 0.0.
+  /// Defaults to 0.0. Must be less than or equal to [max].
+  ///
+  /// If the [max] is equal to the [min], then the slider is disabled.
   final double min;
 
   /// The maximum value the user can select.
   ///
-  /// Defaults to 1.0.
+  /// Defaults to 1.0. Must be greater than or equal to [min].
+  ///
+  /// If the [max] is equal to the [min], then the slider is disabled.
   final double max;
 
   /// The number of discrete divisions.
@@ -162,13 +170,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
     return new _SliderRenderObjectWidget(
-      value: (widget.value - widget.min) / (widget.max - widget.min),
+      value: widget.max > widget.min ? (widget.value - widget.min) / (widget.max - widget.min) : 0.0,
       divisions: widget.divisions,
       label: widget.label,
       activeColor: widget.activeColor ?? theme.accentColor,
       thumbOpenAtMin: widget.thumbOpenAtMin,
       textTheme: theme.accentTextTheme,
-      onChanged: widget.onChanged != null ? _handleChanged : null,
+      onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       vsync: this,
     );
   }
