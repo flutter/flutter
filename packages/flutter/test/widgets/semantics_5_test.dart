@@ -31,15 +31,16 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics(
-        id: 0,
+      new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 1,
+            rect: TestSemantics.fullScreen,
           ),
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 2,
             label: 'label',
+            rect: TestSemantics.fullScreen,
           ),
         ]
       )

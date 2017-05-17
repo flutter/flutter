@@ -274,12 +274,12 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// of the following snapshots that includes the last one (the one with
 /// ConnectionState.done):
 ///
-/// * `AsyncSnapshot<int>.withData(ConnectionState.waiting, null)`
-/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 0)`
-/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 1)`
+/// * `new AsyncSnapshot<int>.withData(ConnectionState.waiting, null)`
+/// * `new AsyncSnapshot<int>.withData(ConnectionState.active, 0)`
+/// * `new AsyncSnapshot<int>.withData(ConnectionState.active, 1)`
 /// * ...
-/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 9)`
-/// * `AsyncSnapshot<int>.withData(ConnectionState.done, 9)`
+/// * `new AsyncSnapshot<int>.withData(ConnectionState.active, 9)`
+/// * `new AsyncSnapshot<int>.withData(ConnectionState.done, 9)`
 ///
 /// The actual sequence of invocations of [build] depends on the relative timing
 /// of events produced by the stream and the build rate of the Flutter pipeline.
@@ -287,15 +287,15 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// Changing the [StreamBuilder] configuration to another stream during event
 /// generation introduces snapshot pairs of the form
 ///
-/// * `AsyncSnapshot<int>.withData(ConnectionState.none, 5)`
-/// * `AsyncSnapshot<int>.withData(ConnectionState.waiting, 5)`
+/// * `new AsyncSnapshot<int>.withData(ConnectionState.none, 5)`
+/// * `new AsyncSnapshot<int>.withData(ConnectionState.waiting, 5)`
 ///
 /// The latter will be produced only when the new stream is non-null. The former
 /// only when the old stream is non-null.
 ///
 /// The stream may produce errors, resulting in snapshots of the form
 ///
-/// * `AsyncSnapshot<int>.withError(ConnectionState.active, 'some error')`
+/// * `new AsyncSnapshot<int>.withError(ConnectionState.active, 'some error')`
 ///
 /// The data and error fields of snapshots produced are only changed when the
 /// state is `ConnectionState.active`.
@@ -304,6 +304,29 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ///
 /// * [StreamBuilderBase], which supports widget building based on a computation
 /// that spans all interactions made with the stream.
+///
+/// ## Sample code
+///
+/// This sample shows a [StreamBuilder] configuring a text label to show the
+/// latest bid received for a lot in an auction. Assume the `_lot` field is
+/// set by a selector elsewhere in the UI.
+///
+/// ```dart
+/// new StreamBuilder<int>(
+///   stream: _lot?.bids, // a Stream<int> or null
+///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+///     if (snapshot.hasError)
+///       return new Text('Error: ${snapshot.error}');
+///     switch (snapshot.connectionState) {
+///       case ConnectionState.none: return new Text('Select lot');
+///       case ConnectionState.waiting: return new Text('Awaiting bids...');
+///       case ConnectionState.active: return new Text('\$${snapshot.data}');
+///       case ConnectionState.done: return new Text('\$${snapshot.data} (closed)');
+///       default: throw "Unknown: ${snapshot.connectionState}";
+///     }
+///   },
+/// ),
+/// ```
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
@@ -356,14 +379,14 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// For a future that completes successfully with data, the [builder] may
 /// be called with either both or only the latter of the following snapshots:
 ///
-/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-/// * `AsyncSnapshot<String>.withData(ConnectionState.done, 'some data')`
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.done, 'some data')`
 ///
 /// For a future completing with an error, the [builder] may be called with
 /// either both or only the latter of:
 ///
-/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-/// * `AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
+/// * `new AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
 ///
 /// The data and error fields of the snapshot change only as the connection
 /// state field transitions from `waiting` to `done`, and they will be retained
@@ -371,8 +394,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// old future has already completed successfully with data as above, changing
 /// configuration to a new future results in snapshot pairs of the form:
 ///
-/// * `AsyncSnapshot<String>.withData(ConnectionState.none, 'some data')`
-/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, 'some data')`
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.none, 'some data')`
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, 'some data')`
 ///
 /// In general, the latter will be produced only when the new future is
 /// non-null. The former only when the old future is non-null.
@@ -383,25 +406,14 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// ## Sample code
 ///
-/// This sample shows a button used to initiate an asynchronous computation
-/// with a string result, and a text label reflecting the progress:
+/// This sample shows a [FutureBuilder] configuring a text label to show the
+/// state of an asynchronous calculation returning a string. Assume the
+/// `_calculation` field is set by pressing a button elsewhere in the UI.
 ///
 /// ```dart
-/// class Calculator extends StatefulWidget {
-///   @override
-///   _CalculatorState createState() => new _CalculatorState();
-/// }
-///
-/// class _CalculatorState extends State<Calculator> {
-///   Future<String> _calculation;
-///
-///   void _initiateCalculation() {
-///     setState(() {
-///       _calculation = new Future.delayed(const Duration(seconds: 2), () => 'long awaited');
-///     });
-///   }
-///
-///   Widget _buildCalculationWidget(BuildContext context, AsyncSnapshot<String> snapshot) {
+/// new FutureBuilder<String>(
+///   future: _calculation, // a Future<String> or null
+///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
 ///       case ConnectionState.none: return new Text('Press button to start');
 ///       case ConnectionState.waiting: return new Text('Awaiting result...');
@@ -411,24 +423,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///         else
 ///           return new Text('Result: ${snapshot.data}');
 ///     }
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return new Scaffold(
-///       body: new Center(
-///         child: new FutureBuilder(
-///           future: _calculation,
-///           builder: _buildCalculationWidget,
-///         ),
-///       ),
-///       floatingActionButton: new FloatingActionButton(
-///         onPressed: _initiateCalculation,
-///         child: new Icon(Icons.forward),
-///       ),
-///     );
-///   }
-/// }
+///   },
+/// ),
 /// ```
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of

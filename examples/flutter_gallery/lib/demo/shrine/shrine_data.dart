@@ -56,7 +56,7 @@ const List<Product> _allProducts = const <Product> [
     price: 300.00,
     vendor: _sandra,
     description:
-      'Isn’t it cool when things look old, but their not. Looks Old But Not makes '
+      'Isn’t it cool when things look old, but they\'re not. Looks Old But Not makes '
       'awesome vintage goods that are super smart. This ol’ radio just got an upgrade. '
       'Connect to it with an app and jam out to some top forty.'
   ),

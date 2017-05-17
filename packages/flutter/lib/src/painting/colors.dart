@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' show Color, lerpDouble, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -22,6 +23,37 @@ class HSVColor {
         assert(hue != null),
         assert(saturation != null),
         assert(value != null);
+
+  /// Creates an [HSVColor] from an RGB [Color].
+  ///
+  /// This constructor does not necessarily round-trip with [toColor] because
+  /// of floating point imprecision.
+  factory HSVColor.fromColor(Color color) {
+    final double alpha = color.alpha / 0xFF;
+    final double red = color.red / 0xFF;
+    final double green = color.green / 0xFF;
+    final double blue = color.blue / 0xFF;
+
+    final double max = math.max(red, math.max(green, blue));
+    final double min = math.min(red, math.min(green, blue));
+    final double delta = max - min;
+
+    double hue = 0.0;
+
+    if (max == 0.0) {
+      hue = 0.0;
+    } else if (max == red) {
+      hue = 60.0 * (((green - blue) / delta) % 6);
+    } else if (max == green) {
+      hue = 60.0 * (((blue - red) / delta) + 2);
+    } else if (max == blue) {
+      hue = 60.0 * (((red - green) / delta) + 4);
+    }
+
+    final double saturation = max == 0.0 ? 0.0 : delta / max;
+
+    return new HSVColor.fromAHSV(alpha, hue, saturation, max);
+  }
 
   /// Alpha, from 0.0 to 1.0.
   final double alpha;

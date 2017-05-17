@@ -297,7 +297,7 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox> children,
-    FractionalOffset alignment: FractionalOffset.center,
+    FractionalOffset alignment: FractionalOffset.topLeft,
     StackFit fit: StackFit.loose,
     Overflow overflow: Overflow.clip
   }) : _alignment = alignment,

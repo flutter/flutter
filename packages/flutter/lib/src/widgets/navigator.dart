@@ -58,7 +58,7 @@ abstract class Route<T> {
   ///
   /// The returned value resolves when the push transition is complete.
   @protected
-  Future<Null> didPush() => new Future<Null>.value();
+  TickerFuture didPush() => new TickerFuture.complete();
 
   /// When this route is popped (see [Navigator.pop]) if the result isn't
   /// specified or if it's null, this value will be used instead.
@@ -894,7 +894,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute._navigator = this;
       newRoute.install(_currentOverlayEntry);
       _history[index] = newRoute;
-      newRoute.didPush().then<Null>((Null value) {
+      newRoute.didPush().whenCompleteOrCancel(() {
         // The old route's exit is not animated. We're assuming that the
         // new route completely obscures the old one.
         if (mounted) {
@@ -966,6 +966,66 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       targetRoute.dispose();
     });
     assert(() { _debugLocked = false; return true; });
+  }
+
+  /// Push the given route and then remove all the previous routes until the
+  /// `predicate` returns true.
+  ///
+  /// The predicate may be applied to the same route more than once if
+  /// [Route.willHandlePopInternally] is true.
+  ///
+  /// To remove routes until a route with a certain name, use the
+  /// [RoutePredicate] returned from [ModalRoute.withName].
+  ///
+  /// To remove all the routes before the pushed route, use a [RoutePredicate]
+  /// that always returns false.
+  Future<dynamic> pushAndRemoveUntil(Route<dynamic> newRoute, RoutePredicate predicate) {
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
+    while (_history.isNotEmpty && !predicate(_history.last)) {
+      final Route<dynamic> removedRoute = _history.removeLast();
+      assert(removedRoute != null && removedRoute._navigator == this);
+      assert(removedRoute.overlayEntries.isNotEmpty);
+      removedRoutes.add(removedRoute);
+    }
+    assert(newRoute._navigator == null);
+    assert(newRoute.overlayEntries.isEmpty);
+    setState(() {
+      final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
+      newRoute._navigator = this;
+      newRoute.install(_currentOverlayEntry);
+      _history.add(newRoute);
+      newRoute.didPush().whenCompleteOrCancel(() {
+        if (mounted) {
+          for (Route<dynamic> route in removedRoutes)
+            route.dispose();
+        }
+      });
+      newRoute.didChangeNext(null);
+      if (oldRoute != null)
+        oldRoute.didChangeNext(newRoute);
+      for (NavigatorObserver observer in widget.observers)
+        observer.didPush(newRoute, oldRoute);
+    });
+    assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
+    return newRoute.popped;
+  }
+
+  /// Push the route with the given name and then remove all the previous routes
+  /// until the `predicate` returns true.
+  ///
+  /// The predicate may be applied to the same route more than once if
+  /// [Route.willHandlePopInternally] is true.
+  ///
+  /// To remove routes until a route with a certain name, use the
+  /// [RoutePredicate] returned from [ModalRoute.withName].
+  ///
+  /// To remove all the routes before the pushed route, use a [RoutePredicate]
+  /// that always returns false.
+  Future<dynamic> pushNamedAndRemoveUntil(String routeName, RoutePredicate predicate) {
+    return pushAndRemoveUntil(_routeNamed(routeName), predicate);
   }
 
   /// Tries to pop the current route, first giving the active route the chance

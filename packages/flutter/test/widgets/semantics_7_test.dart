@@ -49,19 +49,20 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics(
-        id: 0,
+      new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 1,
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
             label: label,
+            rect: TestSemantics.fullScreen,
           ),
           // IDs 2 and 3 are used up by the nodes that get merged in
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 4,
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
             label: label,
+            rect: TestSemantics.fullScreen,
           ),
           // IDs 5 and 6 are used up by the nodes that get merged in
         ],
@@ -101,19 +102,20 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics(
-        id: 0,
+      new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 1,
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
             label: label,
+            rect: TestSemantics.fullScreen,
           ),
           // IDs 2 and 3 are used up by the nodes that get merged in
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 4,
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
             label: label,
+            rect: TestSemantics.fullScreen,
           ),
           // IDs 5 and 6 are used up by the nodes that get merged in
         ],

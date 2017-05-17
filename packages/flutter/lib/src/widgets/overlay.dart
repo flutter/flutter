@@ -560,26 +560,31 @@ class _RenderTheatre extends RenderBox
 
   @override
   String debugDescribeChildren(String prefix) {
-    String result = '';
+    final StringBuffer result = new StringBuffer();
     if (child != null)
-      result += '$prefix \u2502\n${child.toStringDeep('$prefix \u251C\u2500onstage: ', '$prefix \u254E')}';
+      result
+        ..write(prefix)
+        ..write(' \u2502\n')
+        ..write(child.toStringDeep('$prefix \u251C\u2500onstage: ', '$prefix \u254E'));
     if (firstChild != null) {
       RenderBox child = firstChild;
       int count = 1;
       while (child != lastChild) {
-        result += '${child.toStringDeep("$prefix \u254E\u254Coffstage $count: ", "$prefix \u254E")}';
+        result.write(child.toStringDeep("$prefix \u254E\u254Coffstage $count: ", "$prefix \u254E"));
         count += 1;
         final StackParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
       if (child != null) {
         assert(child == lastChild);
-        result += '${child.toStringDeep("$prefix \u2514\u254Coffstage $count: ", "$prefix  ")}';
+        result.write(child.toStringDeep("$prefix \u2514\u254Coffstage $count: ", "$prefix  "));
       }
     } else {
-      result += '$prefix \u2514\u254Cno offstage children';
+      result
+        ..write(prefix)
+        ..write(' \u2514\u254Cno offstage children');
     }
-    return result;
+    return result.toString();
   }
 
   @override

@@ -102,19 +102,16 @@ class TabController extends ChangeNotifier {
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
-        .orCancel.then<Null>(_indexChanged, onError: _indexChanged);
+        .whenCompleteOrCancel(() {
+          _indexIsChangingCount -= 1;
+          notifyListeners();
+        });
     } else {
       _indexIsChangingCount += 1;
       _animationController.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       notifyListeners();
     }
-  }
-
-  Null _indexChanged(dynamic value) {
-    _indexIsChangingCount -= 1;
-    notifyListeners();
-    return null;
   }
 
   /// The index of the currently selected tab. Changing the index also updates

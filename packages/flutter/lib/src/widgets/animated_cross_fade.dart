@@ -51,6 +51,7 @@ class AnimatedCrossFade extends StatefulWidget {
     this.firstCurve: Curves.linear,
     this.secondCurve: Curves.linear,
     this.sizeCurve: Curves.linear,
+    this.alignment: FractionalOffset.topCenter,
     @required this.crossFadeState,
     @required this.duration
   }) : assert(firstCurve != null),
@@ -77,13 +78,24 @@ class AnimatedCrossFade extends StatefulWidget {
   final Duration duration;
 
   /// The fade curve of the first child.
+  ///
+  /// Defaults to [Curves.linear].
   final Curve firstCurve;
 
   /// The fade curve of the second child.
+  ///
+  /// Defaults to [Curves.linear].
   final Curve secondCurve;
 
   /// The curve of the animation between the two children's sizes.
+  ///
+  /// Defaults to [Curves.linear].
   final Curve sizeCurve;
+
+  /// How the children should be aligned while the size is animating.
+  ///
+  /// Defaults to [FractionalOffset.topCenter].
+  final FractionalOffset alignment;
 
   @override
   _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
@@ -152,7 +164,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       children = <Widget>[
         new FadeTransition(
           opacity: _secondAnimation,
-          child: widget.secondChild
+          child: widget.secondChild,
         ),
         new Positioned(
           // TODO(dragostis): Add a way to crop from top right for
@@ -162,15 +174,15 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
           right: 0.0,
           child: new FadeTransition(
             opacity: _firstAnimation,
-            child: widget.firstChild
-          )
-        )
+            child: widget.firstChild,
+          ),
+        ),
       ];
     } else {
       children = <Widget>[
         new FadeTransition(
           opacity: _firstAnimation,
-          child: widget.firstChild
+          child: widget.firstChild,
         ),
         new Positioned(
           // TODO(dragostis): Add a way to crop from top right for
@@ -180,24 +192,24 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
           right: 0.0,
           child: new FadeTransition(
             opacity: _secondAnimation,
-            child: widget.secondChild
-          )
-        )
+            child: widget.secondChild,
+          ),
+        ),
       ];
     }
 
     return new ClipRect(
       child: new AnimatedSize(
         key: new ValueKey<Key>(widget.key),
-        alignment: FractionalOffset.topCenter,
+        alignment: widget.alignment,
         duration: widget.duration,
         curve: widget.sizeCurve,
         vsync: this,
         child: new Stack(
           overflow: Overflow.visible,
-          children: children
-        )
-      )
+          children: children,
+        ),
+      ),
     );
   }
 }

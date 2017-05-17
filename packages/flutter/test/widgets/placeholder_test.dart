@@ -23,8 +23,15 @@ void main() {
 
   testWidgets('Placeholder color', (WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
-    expect(tester.renderObject(find.byType(Placeholder)), paints..path());
+    expect(tester.renderObject(find.byType(Placeholder)), paints..path(color: const Color(0xFF455A64)));
     await tester.pumpWidget(const Placeholder(color: const Color(0xFF00FF00)));
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(color: const Color(0xFF00FF00)));
+  });
+
+  testWidgets('Placeholder stroke width', (WidgetTester tester) async {
+    await tester.pumpWidget(const Placeholder());
+    expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 2.0));
+    await tester.pumpWidget(const Placeholder(strokeWidth: 10.0));
+    expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 10.0));
   });
 }

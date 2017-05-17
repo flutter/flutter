@@ -49,12 +49,14 @@ class WidgetsApp extends StatefulWidget {
     this.onLocaleChanged,
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
+    this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
   }) : assert(color != null),
        assert(onGenerateRoute != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
+       assert(checkerboardOffscreenLayers != null),
        assert(showSemanticsDebugger != null),
        super(key: key);
 
@@ -89,7 +91,14 @@ class WidgetsApp extends StatefulWidget {
   final bool showPerformanceOverlay;
 
   /// Checkerboards raster cache images.
+  ///
+  /// See [PerformanceOverlay.checkerboardRasterCacheImages].
   final bool checkerboardRasterCacheImages;
+
+  /// Checkerboards layers rendered to offscreen bitmaps.
+  ///
+  /// See [PerformanceOverlay.checkerboardOffscreenLayers].
+  final bool checkerboardOffscreenLayers;
 
   /// Turns on an overlay that shows the accessibility information
   /// reported by the framework.
@@ -220,9 +229,14 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     // options are set.
     if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
       performanceOverlay = new PerformanceOverlay.allEnabled(
-                  checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages);
-    } else if (widget.checkerboardRasterCacheImages) {
-      performanceOverlay = const PerformanceOverlay(checkerboardRasterCacheImages: true);
+          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+      );
+    } else if (widget.checkerboardRasterCacheImages || widget.checkerboardOffscreenLayers) {
+      performanceOverlay = new PerformanceOverlay(
+          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+      );
     }
 
     if (performanceOverlay != null) {

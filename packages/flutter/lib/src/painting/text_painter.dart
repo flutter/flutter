@@ -136,15 +136,30 @@ class TextPainter {
 
   ui.Paragraph _layoutTemplate;
 
+  ui.ParagraphStyle _createParagraphStyle() {
+    return _text.style?.getParagraphStyle(
+      textAlign: textAlign,
+      textScaleFactor: textScaleFactor,
+      maxLines: _maxLines,
+      ellipsis: _ellipsis,
+    ) ?? new ui.ParagraphStyle(
+      textAlign: textAlign,
+      maxLines: maxLines,
+      ellipsis: ellipsis,
+    );
+  }
+
   /// The height of a zero-width space in [text] in logical pixels.
   ///
   /// Not every line of text in [text] will have this height, but this height
   /// is "typical" for text in [text] and useful for sizing other objects
   /// relative a typical line of text.
+  ///
+  /// Obtaining this value does not require calling [layout].
   double get preferredLineHeight {
     assert(text != null);
     if (_layoutTemplate == null) {
-      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle());
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(_createParagraphStyle());
       if (text.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(_kZeroWidthSpace);
@@ -165,7 +180,8 @@ class TextPainter {
     return layoutValue.ceilToDouble();
   }
 
-  /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds.
+  /// The width at which decreasing the width of the text would prevent it from
+  /// painting itself completely within its bounds.
   ///
   /// Valid only after [layout] has been called.
   double get minIntrinsicWidth {
@@ -251,18 +267,7 @@ class TextPainter {
       return;
     _needsLayout = false;
     if (_paragraph == null) {
-      ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(
-        textAlign: textAlign,
-        textScaleFactor: textScaleFactor,
-        maxLines: _maxLines,
-        ellipsis: _ellipsis,
-      );
-      paragraphStyle ??= new ui.ParagraphStyle(
-        textAlign: textAlign,
-        maxLines: maxLines,
-        ellipsis: ellipsis,
-      );
-      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(_createParagraphStyle());
       _text.build(builder, textScaleFactor: textScaleFactor);
       _paragraph = builder.build();
     }

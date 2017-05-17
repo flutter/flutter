@@ -3059,20 +3059,22 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   @override
   String debugDescribeChildren(String prefix) {
     if (firstChild != null) {
-      String result = '$prefix \u2502\n';
+      final StringBuffer result = new StringBuffer()
+        ..write(prefix)
+        ..write(' \u2502\n');
       ChildType child = firstChild;
       int count = 1;
       while (child != lastChild) {
-        result += '${child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502")}';
+        result.write(child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502"));
         count += 1;
         final ParentDataType childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
       if (child != null) {
         assert(child == lastChild);
-        result += '${child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  ")}';
+        result.write(child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  "));
       }
-      return result;
+      return result.toString();
     }
     return '';
   }

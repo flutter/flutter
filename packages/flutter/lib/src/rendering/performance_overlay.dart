@@ -59,18 +59,21 @@ enum PerformanceOverlayOption {
 class RenderPerformanceOverlay extends RenderBox {
   /// Creates a performance overlay render object.
   ///
-  /// The [optionsMask], [rasterizerThreshold] and [checkerboardRasterCacheImages]
-  /// arguments must not be null.
+  /// The [optionsMask], [rasterizerThreshold], [checkerboardRasterCacheImages],
+  /// and [checkerboardOffscreenLayers] arguments must not be null.
   RenderPerformanceOverlay({
     int optionsMask: 0,
     int rasterizerThreshold: 0,
     bool checkerboardRasterCacheImages: false,
+    bool checkerboardOffscreenLayers: false,
   }) : _optionsMask = optionsMask,
       _rasterizerThreshold = rasterizerThreshold,
-      _checkerboardRasterCacheImages = checkerboardRasterCacheImages {
+      _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
+      _checkerboardOffscreenLayers = checkerboardOffscreenLayers {
     assert(optionsMask != null);
     assert(rasterizerThreshold != null);
     assert(checkerboardRasterCacheImages != null);
+    assert(checkerboardOffscreenLayers != null);
   }
 
   /// The mask is created by shifting 1 by the index of the specific
@@ -106,6 +109,17 @@ class RenderPerformanceOverlay extends RenderBox {
     if (value == _checkerboardRasterCacheImages)
       return;
     _checkerboardRasterCacheImages = value;
+    markNeedsPaint();
+  }
+
+  /// Whether the compositor should checkerboard layers rendered to offscreen bitmaps.
+  bool get checkerboardOffscreenLayers => _checkerboardOffscreenLayers;
+  bool _checkerboardOffscreenLayers;
+  set checkerboardOffscreenLayers(bool value) {
+    assert(value != null);
+    if (value == _checkerboardOffscreenLayers)
+      return;
+    _checkerboardOffscreenLayers = value;
     markNeedsPaint();
   }
 
@@ -160,6 +174,7 @@ class RenderPerformanceOverlay extends RenderBox {
       optionsMask: optionsMask,
       rasterizerThreshold: rasterizerThreshold,
       checkerboardRasterCacheImages: checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: checkerboardOffscreenLayers,
     ));
   }
 }

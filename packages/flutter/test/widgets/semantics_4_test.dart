@@ -46,24 +46,27 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics(
-        id: 0,
+      new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 1,
             label: 'L1',
+            rect: TestSemantics.fullScreen,
           ),
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 2,
             label: 'L2',
+            rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
               new TestSemantics(
                 id: 3,
                 flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+                rect: TestSemantics.fullScreen,
               ),
               new TestSemantics(
                 id: 4,
                 flags: SemanticsFlags.hasCheckedState.index,
+                rect: TestSemantics.fullScreen,
               ),
             ]
           ),
@@ -100,17 +103,18 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics(
-        id: 0,
+      new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 1,
             label: 'L1',
+            rect: TestSemantics.fullScreen,
           ),
-          new TestSemantics(
+          new TestSemantics.rootChild(
             id: 2,
             label: 'L2',
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            rect: TestSemantics.fullScreen,
           ),
         ],
       )
@@ -142,8 +146,7 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics(
-        id: 0,
+      new TestSemantics.root(
         label: 'L2',
         flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
       )

@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
+import 'node.dart';
 import 'object.dart';
 
 // This class should only be used in debug builds.
@@ -1806,9 +1807,19 @@ abstract class RenderBox extends RenderObject {
   /// system of `ancestor`.
   ///
   /// If `ancestor` is null, this method returns a matrix that maps from the
-  /// local coordinate system to the global coordinate system.
+  /// local coordinate system to the coordinate system of the
+  /// [PipelineOwner.rootNode]. For the render tree owner by the
+  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
+  /// this means that this method maps to the global coordinate system in
+  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
+  /// [RenderView] to further transform the coordinate.
   Matrix4 getTransformTo(RenderObject ancestor) {
     assert(attached);
+    if (ancestor == null) {
+      final AbstractNode rootNode = owner.rootNode;
+      if (rootNode is RenderObject)
+        ancestor = rootNode;
+    }
     final List<RenderObject> renderers = <RenderObject>[];
     for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent) {
       assert(renderer != null); // Failed to find ancestor in parent chain.
@@ -1820,8 +1831,8 @@ abstract class RenderBox extends RenderObject {
     return transform;
   }
 
-  /// Convert the given point from the global coodinate system to the local
-  /// coordinate system for this box.
+  /// Convert the given point from the global coodinate system in logical pixels
+  /// to the local coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is
   /// degenerate, this function returns [Offset.zero].
@@ -1829,6 +1840,8 @@ abstract class RenderBox extends RenderObject {
   /// If `ancestor` is non-null, this function converts the given point from the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of from the global coordinate system.
+  ///
+  /// This method is implemented in terms of [getTransformTo].
   Offset globalToLocal(Offset point, { RenderObject ancestor }) {
     final Matrix4 transform = getTransformTo(ancestor);
     final double det = transform.invert();
@@ -1838,11 +1851,13 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Convert the given point from the local coordinate system for this box to
-  /// the global coordinate system.
+  /// the global coordinate system in logical pixels.
   ///
   /// If `ancestor` is non-null, this function converts the given point to the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of to the global coordinate system.
+  ///
+  /// This method is implemented in terms of [getTransformTo].
   Offset localToGlobal(Offset point, { RenderObject ancestor }) {
     return MatrixUtils.transformPoint(getTransformTo(ancestor), point);
   }

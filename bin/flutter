@@ -52,7 +52,6 @@ if [[ "$EUID" == "0" ]]; then
   echo "   We strongly recommend running the flutter tool without superuser privileges."
   echo "  /"
   echo "📎"
-  exit 1
 fi
 
 # Test if Git is available on the Host

@@ -184,7 +184,7 @@ class SemanticsNode extends AbstractNode {
   Matrix4 _transform;
   set transform(Matrix4 value) {
     if (!MatrixUtils.matrixEquals(_transform, value)) {
-      _transform = value;
+      _transform = MatrixUtils.isIdentity(value) ? null : value;
       _markDirty();
     }
   }
@@ -569,7 +569,20 @@ class SemanticsNode extends AbstractNode {
       buffer.write(' (${ owner != null && owner._dirtyNodes.contains(this) ? "dirty" : "STALE; owner=$owner" })');
     if (_shouldMergeAllDescendantsIntoThisNode)
       buffer.write(' (leaf merge)');
-    buffer.write('; $rect');
+    final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
+    if (offset != null) {
+      buffer.write('; ${rect.shift(offset)}');
+    } else {
+      final double scale = transform != null ? MatrixUtils.getAsScale(transform) : null;
+      if (scale != null) {
+        buffer.write('; $rect scaled by ${scale.toStringAsFixed(1)}x');
+      } else if (transform != null && !MatrixUtils.isIdentity(transform)) {
+        final String matrix = transform.toString().split('\n').take(4).map((String line) => line.substring(4)).join('; ');
+        buffer.write('; $rect with transform [$matrix]');
+      } else {
+        buffer.write('; $rect');
+      }
+    }
     if (wasAffectedByClip)
       buffer.write(' (clipped)');
     for (SemanticsAction action in SemanticsAction.values.values) {
@@ -590,15 +603,18 @@ class SemanticsNode extends AbstractNode {
 
   /// Returns a string representation of this node and its descendants.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    String result = '$prefixLineOne$this\n';
+    final StringBuffer result = new StringBuffer()
+      ..write(prefixLineOne)
+      ..write(this)
+      ..write('\n');
     if (_children != null && _children.isNotEmpty) {
       for (int index = 0; index < _children.length - 1; index += 1) {
         final SemanticsNode child = _children[index];
-        result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
+        result.write(child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502"));
       }
-      result += '${_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
+      result.write(_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  "));
     }
-    return result;
+    return result.toString();
   }
 }
 

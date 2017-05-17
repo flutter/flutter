@@ -13,8 +13,8 @@ import 'basic_types.dart';
 class MatrixUtils {
   MatrixUtils._();
 
-  /// Returns the given [transform] matrix as Offset, if the matrix is nothing
-  /// but a 2D translation.
+  /// Returns the given [transform] matrix as an [Offset], if the matrix is
+  /// nothing but a 2D translation.
   ///
   /// Otherwise, returns null.
   static Offset getAsTranslation(Matrix4 transform) {
@@ -36,6 +36,34 @@ class MatrixUtils {
         values[14] == 0.0 && // bottom of col 4 (values 12 and 13 are the x and y offsets)
         values[15] == 1.0) {
       return new Offset(values[12], values[13]);
+    }
+    return null;
+  }
+
+  /// Returns the given [transform] matrix as a [double] describing a uniform
+  /// scale, if the matrix is nothing but a symmetric 2D scale transform.
+  ///
+  /// Otherwise, returns null.
+  static double getAsScale(Matrix4 transform) {
+    assert(transform != null);
+    final Float64List values = transform.storage;
+    // Values are stored in column-major order.
+    if (values[1] == 0.0 && // col 1 (value 0 is the scale)
+        values[2] == 0.0 &&
+        values[3] == 0.0 &&
+        values[4] == 0.0 && // col 2 (value 5 is the scale)
+        values[6] == 0.0 &&
+        values[7] == 0.0 &&
+        values[8] == 0.0 && // col 3
+        values[9] == 0.0 &&
+        values[10] == 1.0 &&
+        values[11] == 0.0 &&
+        values[12] == 0.0 && // col 4
+        values[13] == 0.0 &&
+        values[14] == 0.0 &&
+        values[15] == 1.0 &&
+        values[0] == values[5]) { // uniform scale
+      return values[0];
     }
     return null;
   }

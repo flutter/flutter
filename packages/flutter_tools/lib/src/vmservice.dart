@@ -998,6 +998,14 @@ class Isolate extends ServiceObjectOwner {
     return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpRenderTree', timeout: kLongRequestTimeout);
   }
 
+  Future<Map<String, dynamic>> flutterDebugDumpLayerTree() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpLayerTree', timeout: kLongRequestTimeout);
+  }
+
+  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTree() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTree', timeout: kLongRequestTimeout);
+  }
+
   Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() async {
     Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint');
     if (state != null && state.containsKey('enabled') && state['enabled'] is String) {
