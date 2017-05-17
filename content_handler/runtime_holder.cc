@@ -327,10 +327,10 @@ void RuntimeHolder::InitMozartInternal() {
   DART_CHECK_VALID(Dart_SetNativeResolver(
       mozart_internal, mozart::NativeLookup, mozart::NativeSymbol));
 
-  DART_CHECK_VALID(Dart_SetField(
-      mozart_internal, ToDart("_viewContainer"),
-      DartConverter<uint64_t>::ToDart(reinterpret_cast<intptr_t>(
-          static_cast<mozart::NativesDelegate*>(this)))));
+  DART_CHECK_VALID(
+      Dart_SetField(mozart_internal, ToDart("_context"),
+                    DartConverter<uint64_t>::ToDart(reinterpret_cast<intptr_t>(
+                        static_cast<mozart::NativesDelegate*>(this)))));
 
   DART_CHECK_VALID(Dart_SetField(
       mozart_internal, ToDart("_viewContainer"),
