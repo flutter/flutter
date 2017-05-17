@@ -49,17 +49,20 @@ void main() {
         builder: (BuildContext context, StateSetter setState) {
           return new Material(
             child: new Center(
-              child: new Slider(
-                key: sliderKey,
-                min: 0.0,
-                max: 100.0,
-                divisions: 10,
-                value: value,
-                onChanged: (double newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                },
+              child: new SizedBox(
+                width: 144.0 + 2 * 16.0, // _kPreferredTotalWidth
+                child: new Slider(
+                  key: sliderKey,
+                  min: 0.0,
+                  max: 100.0,
+                  divisions: 10,
+                  value: value,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
               ),
             ),
           );
@@ -187,5 +190,43 @@ void main() {
     expect(value, greaterThan(0.5));
 
     await gesture.up();
+  });
+
+  testWidgets('Slider sizing', (WidgetTester tester) async {
+    await tester.pumpWidget(const Material(
+      child: const Center(
+        child: const Slider(
+          value: 0.5,
+          onChanged: null,
+        ),
+      ),
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(800.0, 600.0));
+
+    await tester.pumpWidget(const Material(
+      child: const Center(
+        child: const IntrinsicWidth(
+          child: const Slider(
+            value: 0.5,
+            onChanged: null,
+          ),
+        ),
+      ),
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 600.0));
+
+    await tester.pumpWidget(const Material(
+      child: const Center(
+        child: const OverflowBox(
+          maxWidth: double.INFINITY,
+          maxHeight: double.INFINITY,
+          child: const Slider(
+            value: 0.5,
+            onChanged: null,
+          ),
+        ),
+      ),
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 32.0));
   });
 }
