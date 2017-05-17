@@ -26,13 +26,17 @@ import 'typography.dart';
 /// [max] is 50.0 and [divisions] is 5, then the slider can take on the values
 /// discrete values 0.0, 10.0, 20.0, 30.0, 40.0, and 50.0.
 ///
+/// The slider will be disabled if [onChanged] is null or if the range given by
+/// [min]..[max] is empty (i.e. if [min] is equal to [max]).
+///
 /// The slider itself does not maintain any state. Instead, when the state of
 /// the slider changes, the widget calls the [onChanged] callback. Most widgets
 /// that use a slider will listen for the [onChanged] callback and rebuild the
 /// slider with a new [value] to update the visual appearance of the slider.
 ///
-/// The slider will be disabled if [onChanged] is null or if the range given by
-/// [min]..[max] is empty (i.e. if [min] is equal to [max]).
+/// By default, a slider will be as wide as possible, centered vertically. When
+/// given unbounded constraints, it will attempt to make the track 144 pixels
+/// wide (with margins on each side) and will shrink-wrap vertically.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -237,7 +241,11 @@ const double _kThumbRadius = 6.0;
 const double _kActiveThumbRadius = 9.0;
 const double _kDisabledThumbRadius = 4.0;
 const double _kReactionRadius = 16.0;
-const double _kTrackWidth = 144.0;
+const double _kPreferredTrackWidth = 144.0;
+const double _kMinimumTrackWidth = _kActiveThumbRadius; // biggest of the thumb radii
+const double _kPreferredTotalWidth = _kPreferredTrackWidth + 2 * _kReactionRadius;
+const double _kMinimumTotalWidth = _kMinimumTrackWidth + 2 * _kReactionRadius;
+
 final Color _kInactiveTrackColor = Colors.grey.shade400;
 final Color _kActiveTrackColor = Colors.grey;
 final Tween<double> _kReactionRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kReactionRadius);
@@ -258,14 +266,11 @@ double _getAdditionalHeightForLabel(String label) {
   return label == null ? 0.0 : _kLabelBalloonRadius * 2.0;
 }
 
-BoxConstraints _getAdditionalConstraints(String label) {
-  return new BoxConstraints.tightFor(
-    width: _kTrackWidth + 2 * _kReactionRadius,
-    height: 2 * _kReactionRadius + _getAdditionalHeightForLabel(label)
-  );
+double _getPreferredTotalHeight(String label) {
+  return 2 * _kReactionRadius + _getAdditionalHeightForLabel(label);
 }
 
-class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandler {
+class _RenderSlider extends RenderBox implements SemanticsActionHandler {
   _RenderSlider({
     @required double value,
     int divisions,
@@ -279,8 +284,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
        _divisions = divisions,
        _activeColor = activeColor,
        _thumbOpenAtMin = thumbOpenAtMin,
-       _textTheme = textTheme,
-        super(additionalConstraints: _getAdditionalConstraints(label)) {
+       _textTheme = textTheme {
     assert(value != null && value >= 0.0 && value <= 1.0);
     this.label = label;
     final GestureArenaTeam team = new GestureArenaTeam();
@@ -335,7 +339,6 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     if (value == _label)
       return;
     _label = value;
-    additionalConstraints = _getAdditionalConstraints(_label);
     if (value != null) {
       // TODO(abarth): Handle textScaleFactor.
       // https://github.com/flutter/flutter/issues/5938
@@ -348,7 +351,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     } else {
       _labelPainter.text = null;
     }
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   Color get activeColor => _activeColor;
@@ -448,11 +451,45 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     }
   }
 
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return _kMinimumTotalWidth;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    // This doesn't quite match the definition of computeMaxIntrinsicWidth,
+    // but it seems within the spirit...
+    return _kPreferredTotalWidth;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return _getPreferredTotalHeight(label);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return _getPreferredTotalHeight(label);
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  void performResize() {
+    size = new Size(
+      constraints.hasBoundedWidth ? constraints.maxWidth : _kPreferredTotalWidth,
+      constraints.hasBoundedHeight ? constraints.maxHeight : _getPreferredTotalHeight(label),
+    );
+  }
+
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
-    final double trackLength = _trackLength;
+    final double trackLength = size.width - 2 * _kReactionRadius;
     final bool enabled = isInteractive;
     final double value = _position.value;
 
