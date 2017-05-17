@@ -90,8 +90,8 @@ class IconsDemoState extends State<IconsDemo> {
                       buildSizeLabel(18, textStyle),
                       buildSizeLabel(24, textStyle),
                       buildSizeLabel(36, textStyle),
-                      buildSizeLabel(48, textStyle)
-                    ]
+                      buildSizeLabel(48, textStyle),
+                    ],
                   ),
                   new Expanded(
                     child: new Column(
@@ -101,8 +101,8 @@ class IconsDemoState extends State<IconsDemo> {
                         buildIconButton(18.0, Icons.face, true),
                         buildIconButton(24.0, Icons.alarm, true),
                         buildIconButton(36.0, Icons.home, true),
-                        buildIconButton(48.0, Icons.android, true)
-                      ]
+                        buildIconButton(48.0, Icons.android, true),
+                      ],
                     )
                   ),
                   new Expanded(
@@ -113,47 +113,16 @@ class IconsDemoState extends State<IconsDemo> {
                         buildIconButton(18.0, Icons.face, false),
                         buildIconButton(24.0, Icons.alarm, false),
                         buildIconButton(36.0, Icons.home, false),
-                        buildIconButton(48.0, Icons.android, false)
-                      ]
-                    )
-                  )
-                ]
+                        buildIconButton(48.0, Icons.android, false),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              new Expanded(
-                child: new Center(
-                  child: new IconTheme(
-                    data: const IconThemeData(opacity: 1.0),
-                    child: new Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new Icon(
-                          Icons.brightness_7,
-                          color: iconColor.withAlpha(0x33) // 0.2 * 255 = 0x33
-                        ),
-                        new Slider(
-                          value: iconOpacity,
-                          min: 0.2,
-                          max: 1.0,
-                          activeColor: iconColor,
-                          onChanged: (double newValue) {
-                            setState(() {
-                              iconOpacity = newValue;
-                            });
-                          }
-                        ),
-                        new Icon(
-                          Icons.brightness_7,
-                          color: iconColor.withAlpha(0xFF)
-                        ),
-                      ]
-                    )
-                  )
-                )
-              )
-            ]
-          )
-        )
-      )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
