@@ -15,6 +15,7 @@
 #include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkRSXform.h"
 
 namespace blink {
 
