@@ -324,6 +324,14 @@ void RuntimeHolder::InitMozartInternal() {
   Dart_Handle mozart_internal =
       Dart_LookupLibrary(ToDart("dart:mozart.internal"));
 
+  DART_CHECK_VALID(Dart_SetNativeResolver(
+      mozart_internal, mozart::NativeLookup, mozart::NativeSymbol));
+
+  DART_CHECK_VALID(Dart_SetField(
+      mozart_internal, ToDart("_viewContainer"),
+      DartConverter<uint64_t>::ToDart(reinterpret_cast<intptr_t>(
+          static_cast<mozart::NativesDelegate*>(this)))));
+
   DART_CHECK_VALID(Dart_SetField(
       mozart_internal, ToDart("_viewContainer"),
       DartConverter<mx::channel>::ToDart(view_container.PassHandle())));
@@ -333,6 +341,10 @@ void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
   root_bundle_data_ = std::move(bundle);
   asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
       GetUnzipperProviderForRootBundle());
+}
+
+mozart::View* RuntimeHolder::GetMozartView() {
+  return view_.get();
 }
 
 bool RuntimeHolder::HandleAssetPlatformMessage(

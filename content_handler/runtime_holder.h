@@ -11,6 +11,7 @@
 
 #include "application/services/application_environment.fidl.h"
 #include "application/services/service_provider.fidl.h"
+#include "apps/mozart/lib/flutter/sdk_ext/src/natives.h"
 #include "apps/mozart/services/input/input_connection.fidl.h"
 #include "apps/mozart/services/input/text_input.fidl.h"
 #include "apps/mozart/services/views/view_manager.fidl.h"
@@ -29,6 +30,7 @@ namespace flutter_runner {
 class Rasterizer;
 
 class RuntimeHolder : public blink::RuntimeDelegate,
+                      public mozart::NativesDelegate,
                       public mozart::ViewListener,
                       public mozart::InputListener,
                       public mozart::InputMethodEditorClient {
@@ -54,6 +56,9 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void HandlePlatformMessage(
       ftl::RefPtr<blink::PlatformMessage> message) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
+
+  // |mozart::NativesDelegate| implementation:
+  mozart::View* GetMozartView() override;
 
   // |mozart::InputListener| implementation:
   void OnEvent(mozart::InputEventPtr event,
