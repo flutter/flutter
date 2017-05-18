@@ -84,7 +84,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('Test extract single identity and certificate organization works', () async {
+    testUsingContext('Test single identity and certificate organization works', () async {
       when(mockProcessManager.runSync(<String>['which', 'security']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(<String>['which', 'openssl']))
@@ -138,7 +138,7 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('Test extract identity and certificate organization works', () async {
+    testUsingContext('Test multiple identity and certificate organization works', () async {
       when(mockProcessManager.runSync(<String>['which', 'security']))
           .thenReturn(exitsHappy);
       when(mockProcessManager.runSync(<String>['which', 'openssl']))

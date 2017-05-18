@@ -89,10 +89,14 @@ class AnsiTerminal {
 
   /// Prompts the user to input a chraracter within the accepted list.
   /// Reprompts if inputted character is not in the list.
+  ///
+  /// Throws a [TimeoutException] if a `timeout` is provided and its duration
+  /// expired without user input. Duration resets per key press.
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
     String prompt,
     bool displayAcceptedCharacters: true,
+    Duration timeout,
   }) async {
     assert(acceptedCharacters != null);
     assert(acceptedCharacters.isNotEmpty);
@@ -109,7 +113,10 @@ class AnsiTerminal {
           printStatus(' [${acceptedCharacters.join("|")}]', newline: false);
         printStatus(': ', emphasis: true, newline: false);
       }
-      choice = await onCharInput.first;
+      Future<String> inputFuture = onCharInput.first;
+      if (timeout != null)
+        inputFuture = inputFuture.timeout(timeout);
+      choice = await inputFuture;
       printStatus(choice);
     }
     singleCharMode = false;

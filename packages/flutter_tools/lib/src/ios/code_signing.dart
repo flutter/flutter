@@ -73,12 +73,11 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
 
   // If the user's environment is missing the tools needed to find and read
   // certificates, abandon. Tools should be pre-equipped on macOS.
-  if (!exitsHappy(<String>['which', 'security'])
-      || !exitsHappy(<String>['which', 'openssl']))
+  if (!exitsHappy(const <String>['which', 'security']) || !exitsHappy(const <String>['which', 'openssl']))
     return null;
 
   final List<String> findIdentityCommand =
-      <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
+      const <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
   final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
       .split('\n')
       .map<String>((String outputLine) {
@@ -86,14 +85,13 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
             .firstMatch(outputLine)
             ?.group(1);
       })
-      .where((String identityCN) => isNotEmpty(identityCN))
+      .where(isNotEmpty)
       .toSet() // Unique.
       .toList();
 
-  final String signingIdentity =
-      await _chooseSigningIdentity(validCodeSigningIdentities);
+  final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities);
 
-  // If none are chosen.
+  // If none are chosen, return null.
   if (signingIdentity == null)
     return null;
 
@@ -104,7 +102,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
           .firstMatch(signingIdentity)
           ?.group(1);
 
-  // If `security`'s output format changes, we'd have to update this
+  // If `security`'s output format changes, we'd have to update the above regex.
   if (signingCertificateId == null)
     return null;
 
@@ -112,9 +110,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
     <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
   );
 
-  final Process opensslProcess = await runCommand(
-    <String>['openssl', 'x509', '-subject']
-  );
+  final Process opensslProcess = await runCommand(const <String>['openssl', 'x509', '-subject']);
   opensslProcess.stdin
       ..write(signingCertificate)
       ..close();
@@ -153,7 +149,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
     printStatus('  a) Abort', emphasis: true);
 
     final String choice = await terminal.promptForCharInput(
-      range(1, count + 1).map((num number) => number.toString()).toList()
+      range(1, count + 1).map((num number) => '$number').toList()
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
       displayAcceptedCharacters: true,
