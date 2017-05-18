@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'icon_theme.dart';
 import 'theme_data.dart';
 
 export 'theme_data.dart' show Brightness, ThemeData;
@@ -27,7 +28,7 @@ const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 ///    than changing the theme all at once.
 ///  * [MaterialApp], which includes an [AnimatedTheme] widget configured via
 ///    the [MaterialApp.theme] argument.
-class Theme extends InheritedWidget {
+class Theme extends StatelessWidget {
   /// Applies the given theme [data] to [child].
   ///
   /// The [data] and [child] arguments must not be null.
@@ -35,10 +36,10 @@ class Theme extends InheritedWidget {
     Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
-    @required Widget child
+    @required this.child,
   }) : assert(child != null),
        assert(data != null),
-       super(key: key, child: child);
+       super(key: key);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -53,6 +54,9 @@ class Theme extends InheritedWidget {
   /// to the class that creates a route's widgets. Material widgets that push
   /// routes, like [PopupMenuButton] and [DropdownButton], do this.
   final bool isMaterialAppTheme;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
@@ -110,23 +114,46 @@ class Theme extends InheritedWidget {
   /// }
   /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly: false }) {
-    final Theme theme = context.inheritFromWidgetOfExactType(Theme);
+    final _InheritedTheme inheritedTheme =
+        context.inheritFromWidgetOfExactType(_InheritedTheme);
     if (shadowThemeOnly) {
-      if (theme == null || theme.isMaterialAppTheme)
+      if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
         return null;
-      return theme.data;
+      return inheritedTheme.theme.data;
     }
-    return (theme != null) ? theme.data : _kFallbackTheme;
+    return (inheritedTheme != null) ? inheritedTheme.theme.data : _kFallbackTheme;
   }
 
   @override
-  bool updateShouldNotify(Theme old) => data != old.data;
+  Widget build(BuildContext context) {
+    return new IconTheme(
+      data: data.iconTheme,
+      child: new _InheritedTheme(
+        theme: this,
+        child: child,
+      ),
+    );
+  }
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$data');
   }
+}
+
+class _InheritedTheme extends InheritedWidget {
+  const _InheritedTheme({
+    Key key,
+    @required this.theme,
+    @required Widget child
+  }) : assert(theme != null),
+       super(key: key, child: child);
+
+  final Theme theme;
+
+  @override
+  bool updateShouldNotify(_InheritedTheme old) => theme != old.theme;
 }
 
 /// An interpolation between two [ThemeData]s.
