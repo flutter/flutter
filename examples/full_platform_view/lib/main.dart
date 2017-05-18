@@ -33,6 +33,8 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _channel = "samples.flutter.io/full_screen";
   static const BasicMessageChannel<String> platform =
       const BasicMessageChannel<String>(_channel, const StringCodec());
+  static const MethodChannel _methodChannel =
+      const MethodChannel("samples.flutter.io/full");
 
   int _counter = 0;
 
@@ -42,24 +44,26 @@ class _MyHomePageState extends State<MyHomePage> {
     platform.setMessageHandler(_handlePlatformCount);
   }
 
-
   Future<String> _handlePlatformCount(String message) async {
-
     print("WE ARE BACK $message");
-  setState(() {
-  _counter += int.parse(message);
-  });
-  return "";
+    setState(() {
+      _counter += int.parse(message);
+    });
+    return "";
   }
+
   void _incrementCounter() {
     setState(() {
       _counter++;
     });
   }
 
-  void _launchPlatformCount() {
-
-    platform.send("launch full screen");
+  Future<Null> _launchPlatformCount() async {
+  final int countDelta = await _methodChannel.invokeMethod("launch", _counter);
+  setState((){
+    _counter = countDelta;
+  });
+//    platform.send("launch full screen");
   }
 
   @override
