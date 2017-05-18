@@ -162,25 +162,32 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 }
 
 - (void)setTextInputState:(NSDictionary*)state {
-  [self.inputDelegate selectionWillChange:self];
-  [self.inputDelegate textWillChange:self];
-
-  [self.text setString:state[@"text"]];
+  NSString* newText = state[@"text"];
+  BOOL textChanged = ![self.text isEqualToString:newText];
+  if (textChanged) {
+    [self.inputDelegate textWillChange:self];
+    [self.text setString:newText];
+  }
 
   NSInteger selectionBase = [state[@"selectionBase"] intValue];
   NSInteger selectionExtent = [state[@"selectionExtent"] intValue];
   NSUInteger start = MIN(MAX(0, MIN(selectionBase, selectionExtent)), (NSInteger)self.text.length);
   NSUInteger end = MIN(MAX(0, MAX(selectionBase, selectionExtent)), (NSInteger)self.text.length);
   NSRange selectedRange = NSMakeRange(start, end - start);
-  [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:selectedRange]
-          updateEditingState:NO];
+  NSRange oldSelectedRange = [(FlutterTextRange*)self.selectedTextRange range];
+  if (selectedRange.location != oldSelectedRange.location ||
+      selectedRange.length != oldSelectedRange.length) {
+    [self.inputDelegate selectionWillChange:self];
+    [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:selectedRange]
+            updateEditingState:NO];
+    _selectionAffinity = _kTextAffinityDownstream;
+    if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)])
+      _selectionAffinity = _kTextAffinityUpstream;
+    [self.inputDelegate selectionDidChange:self];
+  }
 
-  _selectionAffinity = _kTextAffinityDownstream;
-  if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)])
-    _selectionAffinity = _kTextAffinityUpstream;
-
-  [self.inputDelegate selectionDidChange:self];
-  [self.inputDelegate textDidChange:self];
+  if (textChanged)
+    [self.inputDelegate textDidChange:self];
 }
 
 #pragma mark - UIResponder Overrides
