@@ -148,7 +148,6 @@ class BufferLogger extends Logger {
     _error.writeln(message);
   }
 
-
   @override
   void printStatus(
     String message,

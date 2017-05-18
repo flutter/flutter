@@ -116,7 +116,7 @@ linter:
     # - prefer_interpolation_to_compose_strings # not yet tested
     - prefer_is_empty
     - prefer_is_not_empty
-    # - public_member_api_docs # this is the only difference from .analysis_options_repo
+    - public_member_api_docs # this is the only difference from .analysis_options_repo
     # - recursive_getters # https://github.com/dart-lang/linter/issues/452
     - slash_for_doc_comments
     - sort_constructors_first
