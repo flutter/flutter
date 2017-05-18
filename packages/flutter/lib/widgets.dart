@@ -72,7 +72,7 @@ export 'src/widgets/single_child_scroll_view.dart';
 export 'src/widgets/size_changed_layout_notifier.dart';
 export 'src/widgets/sliver.dart';
 export 'src/widgets/sliver_persistent_header.dart';
-export 'src/widgets/sliver_prototype_item_list.dart';
+export 'src/widgets/sliver_prototype_extent_list.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
