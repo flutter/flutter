@@ -25,7 +25,7 @@ import 'sliver.dart';
 ///
 /// See also:
 ///
-///  * [SliverFixedExtentList], whose [itemExtent] is a pixel value.
+///  * [SliverFixedExtentList], whose itemExtent is a pixel value.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 ///  * [SliverFillViewport], which sizes its children based on the
