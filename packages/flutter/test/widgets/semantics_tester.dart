@@ -195,7 +195,7 @@ class SemanticsTester {
 }
 
 class _HasSemantics extends Matcher {
-  const _HasSemantics(this._semantics);
+  const _HasSemantics(this._semantics) : assert(_semantics != null);
 
   final TestSemantics _semantics;
 
@@ -211,26 +211,27 @@ class _HasSemantics extends Matcher {
 
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    const String help = 'Try dumping the semantics with debugDumpSemanticsTree() from the rendering library to see what the semantics tree looks like.';
     final TestSemantics testNode = matchState[TestSemantics];
     final SemanticsNode node = matchState[SemanticsNode];
     if (node == null)
-      return mismatchDescription.add('could not find node with id ${testNode.id}');
+      return mismatchDescription.add('could not find node with id ${testNode.id}.\n$help');
     if (testNode.id != node.id)
-      return mismatchDescription.add('expected node id ${testNode.id} but found id ${node.id}');
+      return mismatchDescription.add('expected node id ${testNode.id} but found id ${node.id}.\n$help');
     final SemanticsData data = node.getSemanticsData();
     if (testNode.flags != data.flags)
-      return mismatchDescription.add('expected node id ${testNode.id} to have flags ${testNode.flags} but found flags ${data.flags}');
+      return mismatchDescription.add('expected node id ${testNode.id} to have flags ${testNode.flags} but found flags ${data.flags}.\n$help');
     if (testNode.actions != data.actions)
-      return mismatchDescription.add('expected node id ${testNode.id} to have actions ${testNode.actions} but found actions ${data.actions}');
+      return mismatchDescription.add('expected node id ${testNode.id} to have actions ${testNode.actions} but found actions ${data.actions}.\n$help');
     if (testNode.label != data.label)
-      return mismatchDescription.add('expected node id ${testNode.id} to have label "${testNode.label}" but found label "${data.label}"');
+      return mismatchDescription.add('expected node id ${testNode.id} to have label "${testNode.label}" but found label "${data.label}".\n$help');
     if (testNode.rect != data.rect)
-      return mismatchDescription.add('expected node id ${testNode.id} to have rect ${testNode.rect} but found rect ${data.rect}');
+      return mismatchDescription.add('expected node id ${testNode.id} to have rect ${testNode.rect} but found rect ${data.rect}.\n$help');
     if (testNode.transform != data.transform)
-      return mismatchDescription.add('expected node id ${testNode.id} to have transform ${testNode.transform} but found transform:\n${data.transform}');
+      return mismatchDescription.add('expected node id ${testNode.id} to have transform ${testNode.transform} but found transform:.\n${data.transform}.\n$help');
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (testNode.children.length != childrenCount)
-      return mismatchDescription.add('expected node id ${testNode.id} to have ${testNode.children.length} but found $childrenCount children');
+      return mismatchDescription.add('expected node id ${testNode.id} to have ${testNode.children.length} children but found $childrenCount.\n$help');
     return mismatchDescription;
   }
 }

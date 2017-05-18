@@ -17,9 +17,10 @@ const double _kInnerRadius = 5.0;
 
 /// A material design radio button.
 ///
-/// Used to select between a number of mutually exclusive values. When one
-/// radio button in a group is selected, the other radio buttons in the group
-/// cease to be selected.
+/// Used to select between a number of mutually exclusive values. When one radio
+/// button in a group is selected, the other radio buttons in the group cease to
+/// be selected. The values are of type `T`, the type parameter of the [Radio]
+/// class. Enums are commonly used for this purpose.
 ///
 /// The radio button itself does not maintain any state. Instead, when the state
 /// of the radio button changes, the widget calls the [onChanged] callback.
@@ -31,20 +32,25 @@ const double _kInnerRadius = 5.0;
 ///
 /// See also:
 ///
+///  * [RadioListTile], which combines this widget with a [ListTile] so that
+///    you can give the radio button a label.
 ///  * [Slider], for selecting a value in a range.
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-radio-button>
 class Radio<T> extends StatefulWidget {
   /// Creates a material design radio button.
   ///
-  /// The radio button itself does not maintain any state. Instead, when the state
-  /// of the radio button changes, the widget calls the [onChanged] callback.
-  /// Most widget that use a radio button will listen for the [onChanged]
-  /// callback and rebuild the radio button with a new [groupValue] to update the
-  /// visual appearance of the radio button.
+  /// The radio button itself does not maintain any state. Instead, when the
+  /// radio button is selected, the widget calls the [onChanged] callback. Most
+  /// widgets that use a radio button will listen for the [onChanged] callback
+  /// and rebuild the radio button with a new [groupValue] to update the visual
+  /// appearance of the radio button.
   ///
-  /// * [value] and [groupValue] together determines whether the radio button is selected.
-  /// * [onChanged] is when the user selects this radio button.
+  /// The following arguments are required:
+  ///
+  /// * [value] and [groupValue] together determine whether the radio button is
+  ///   selected.
+  /// * [onChanged] is called when the user selects this radio button.
   const Radio({
     Key key,
     @required this.value,
@@ -70,7 +76,7 @@ class Radio<T> extends StatefulWidget {
   ///
   /// If null, the radio button will be displayed as disabled.
   ///
-  /// The callback provided to onChanged should update the state of the parent
+  /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///

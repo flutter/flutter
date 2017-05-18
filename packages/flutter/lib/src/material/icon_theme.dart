@@ -19,7 +19,7 @@ class IconTheme extends InheritedWidget {
   const IconTheme({
     Key key,
     @required this.data,
-    @required Widget child
+    @required Widget child,
   }) : assert(data != null),
        assert(child != null),
        super(key: key, child: child);
@@ -31,7 +31,7 @@ class IconTheme extends InheritedWidget {
   static Widget merge({
     Key key,
     @required IconThemeData data,
-    @required Widget child
+    @required Widget child,
   }) {
     return new Builder(
       builder: (BuildContext context) {

@@ -35,7 +35,8 @@ enum ListTileStyle {
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
 class ListTileTheme extends InheritedWidget {
-  /// Creates an inherited widget that defines color and style parameters for [ListTile]s.
+  /// Creates a list tile theme that controls the color and style parameters for
+  /// [ListTile]s.
   const ListTileTheme({
     Key key,
     this.dense: false,
@@ -45,6 +46,36 @@ class ListTileTheme extends InheritedWidget {
     this.textColor,
     Widget child,
   }) : super(key: key, child: child);
+
+  /// Creates a list tile theme that controls the color and style parameters for
+  /// [ListTile]s, and merges in the current list tile theme, if any.
+  ///
+  /// The [child] argument must not be null.
+  static Widget merge({
+    Key key,
+    bool dense,
+    ListTileStyle style,
+    Color selectedColor,
+    Color iconColor,
+    Color textColor,
+    @required Widget child,
+  }) {
+    assert(child != null);
+    return new Builder(
+      builder: (BuildContext context) {
+        final ListTileTheme parent = ListTileTheme.of(context);
+        return new ListTileTheme(
+          key: key,
+          dense: dense ?? parent.dense,
+          style: style ?? parent.style,
+          selectedColor: selectedColor ?? parent.selectedColor,
+          iconColor: iconColor ?? parent.iconColor,
+          textColor: textColor ?? parent.textColor,
+          child: child,
+        );
+      },
+    );
+  }
 
   /// If true then [ListTile]s will have the vertically dense layout.
   final bool dense;
@@ -83,6 +114,28 @@ class ListTileTheme extends InheritedWidget {
   }
 }
 
+/// Where to place the control in widgets that use [ListTile] to position a
+/// control next to a label.
+///
+/// See also:
+///
+///  * [CheckboxListTile], which combines a [ListTile] with a [Checkbox].
+///  * [RadioListTile], which combines a [ListTile] with a [Radio] button.
+enum ListTileControlAffinity {
+  /// Position the control on the leading edge, and the secondary widget, if
+  /// any, on the trailing edge.
+  leading,
+
+  /// Position the control on the trailing edge, and the secondary widget, if
+  /// any, on the leading edge.
+  trailing,
+
+  /// Position the control relative to the text in the fashion that is typical
+  /// for the current platform, and place the secondary widget on the opposite
+  /// side.
+  platform,
+}
+
 /// A single fixed-height row that typically contains some text as well as
 /// a leading or trailing icon.
 ///
@@ -114,7 +167,8 @@ class ListTileTheme extends InheritedWidget {
 ///  * [Card], which can be used with [Column] to show a few [ListTile]s.
 ///  * [Divider], which can be used to separate [ListTile]s.
 ///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTile]s.
-///  * [kListTileExtent], which defines the ListTile sizes.
+///  * [CheckboxListTile], [RadioListTile], and [SwitchListTile], widgets
+///    that combine [ListTile] with other controls.
 ///  * <https://material.google.com/components/lists.html>
 class ListTile extends StatelessWidget {
   /// Creates a list tile.
@@ -314,7 +368,7 @@ class ListTile extends StatelessWidget {
           margin: const EdgeInsets.only(right: 16.0),
           width: 40.0,
           alignment: FractionalOffset.centerLeft,
-          child: leading
+          child: leading,
         ),
       ));
     }
@@ -335,8 +389,8 @@ class ListTile extends StatelessWidget {
             style: _subtitleTextStyle(theme, tileTheme),
             duration: kThemeChangeDuration,
             child: subtitle,
-          )
-        ]
+          ),
+        ],
       );
     }
     children.add(new Expanded(
