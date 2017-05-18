@@ -1,0 +1,30 @@
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:test/test.dart';
+import 'dart:io';
+
+void main() async {
+  group('sample screenshots', () {
+    FlutterDriver driver;
+
+    setUpAll(() async {
+      driver = await FlutterDriver.connect();
+    });
+
+    tearDownAll(() async {
+        await driver?.close();
+    });
+
+    test('take sample screenshots', () async {
+      final List<String> paths = <String>[
+        @(paths)
+      ];
+      for (String path in paths) {
+        final List<int> pixels = await driver.screenshot();
+        final File file = new File(path);
+        await file.writeAsBytes(pixels);
+        print('wrote $file');
+        await driver.tap(find.byValueKey('screenshotGestureDetector'));
+      }
+    });
+  });
+}
