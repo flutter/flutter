@@ -126,10 +126,10 @@ class Theme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new IconTheme(
-      data: data.iconTheme,
-      child: new _InheritedTheme(
-        theme: this,
+    return new _InheritedTheme(
+      theme: this,
+      child: new IconTheme(
+        data: data.iconTheme,
         child: child,
       ),
     );
