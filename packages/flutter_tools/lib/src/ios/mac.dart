@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON, UTF8;
+import 'dart:convert' show JSON;
 
 import 'package:meta/meta.dart';
-import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -23,6 +22,7 @@ import '../flx.dart' as flx;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
+import 'code_signing.dart';
 import 'xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 7;
@@ -287,21 +287,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       if (checkBuildSettings.exitCode == 0 &&
           !checkBuildSettings.stdout?.contains(new RegExp(r'\bDEVELOPMENT_TEAM\b')) == true &&
           !checkBuildSettings.stdout?.contains(new RegExp(r'\bPROVISIONING_PROFILE\b')) == true) {
-        printError('''
-═══════════════════════════════════════════════════════════════════════════════════
-Building a deployable iOS app requires a selected Development Team with a Provisioning Profile
-Please ensure that a Development Team is selected by:
-  1- Opening the Flutter project's Xcode target with
-       open ios/Runner.xcworkspace
-  2- Select the 'Runner' project in the navigator then the 'Runner' target
-     in the project settings
-  3- In the 'General' tab, make sure a 'Development Team' is selected\n
-For more information, please visit:
-  https://flutter.io/setup/#deploy-to-ios-devices\n
-Or run on an iOS simulator
-═══════════════════════════════════════════════════════════════════════════════════''',
-          emphasis: true,
-        );
+        printError(noDevelopmentTeamInstruction, emphasis: true);
       }
     }
   }
@@ -360,118 +346,6 @@ bool _checkXcodeVersion() {
     return false;
   }
   return true;
-}
-
-final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
-    new RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
-final RegExp _securityFindIdentityCertificateCnExtractionPattern = new RegExp(r'.*\(([a-zA-Z0-9]+)\)');
-final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=([a-zA-Z0-9]+)');
-
-/// Given a [BuildableIOSApp], this will try to find valid development code
-/// signing identities in the user's keychain prompting a choice if multiple
-/// are found.
-///
-/// Will return null if none are found, if the user cancels or if the Xcode
-/// project has a development team set in the project's build settings.
-Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) async{
-  if (iosApp.buildSettings == null)
-    return null;
-
-  // If the user already has it set in the project build settings itself,
-  // continue with that.
-  if (isNotEmpty(iosApp.buildSettings['DEVELOPMENT_TEAM'])) {
-    printStatus(
-      'Automatically signing iOS for device deployment using specified development '
-      'team in Xcode project: ${iosApp.buildSettings['DEVELOPMENT_TEAM']}'
-    );
-    return null;
-  }
-
-  if (isNotEmpty(iosApp.buildSettings['PROVISIONING_PROFILE']))
-    return null;
-
-  // If the user's environment is missing the tools needed to find and read
-  // certificates, abandon. Tools should be pre-equipped on macOS.
-  if (!exitsHappy(<String>['which', 'security'])
-      || !exitsHappy(<String>['which', 'openssl']))
-    return null;
-
-  final List<String> findIdentityCommand =
-      <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
-  final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
-      .split('\n')
-      .map<String>((String outputLine) {
-        return _securityFindIdentityDeveloperIdentityExtractionPattern.firstMatch(outputLine)?.group(1);
-      })
-      .where((String identityCN) => isNotEmpty(identityCN))
-      .toSet() // Unique.
-      .toList();
-
-  final String signingIdentity = _chooseSigningIdentity(validCodeSigningIdentities);
-
-  // If none are chosen.
-  if (signingIdentity == null)
-    return null;
-
-  printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
-
-  final String signingCertificateId =
-      _securityFindIdentityCertificateCnExtractionPattern.firstMatch(signingIdentity)?.group(1);
-
-  // If `security`'s output format changes, we'd have to update this
-  if (signingCertificateId == null)
-    return null;
-
-  final String signingCertificate = runCheckedSync(
-    <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
-  );
-
-  final Process opensslProcess = await runCommand(
-    <String>['openssl', 'x509', '-subject']
-  );
-  opensslProcess.stdin
-      ..write(signingCertificate)
-      ..close();
-
-  final String opensslOutput = await UTF8.decodeStream(opensslProcess.stdout);
-  opensslProcess.stderr.drain<String>();
-
-  if (await opensslProcess.exitCode != 0) {
-    return null;
-  }
-
-  return _certificateOrganizationalUnitExtractionPattern.firstMatch(opensslOutput)?.group(1);
-}
-
-String _chooseSigningIdentity(List<String> validCodeSigningIdentities) {
-  // The user has no valid code signing identities.
-  if (validCodeSigningIdentities.isEmpty) {
-    printError(
-      '''
-═══════════════════════════════════════════════════════════════════════════════════
-No valid code signing certificates were found
-Please ensure that you have a valid Development Team with valid iOS Development Certificates
-associated with your Apple ID by:
-  1- Opening the Xcode application
-  2- Go to Xcode->Preferences->Accounts
-  3- Make sure that you're signed in with your Apple ID via the '+' button on the bottom left
-  4- Make sure that you have development certificates available by signing up to Apple
-     Developer Program and/or downloading available profiles as needed.
-For more information, please visit:
-  https://developer.apple.com/library/content/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
-
-Or run on an iOS simulator without code signing
-═══════════════════════════════════════════════════════════════════════════════════''',
-      emphasis: true
-    );
-    throwToolExit('No development certificates available to code sign app for device deployment');
-  }
-
-  // TODO(xster): let the user choose one.
-  if (validCodeSigningIdentities.isNotEmpty)
-    return validCodeSigningIdentities.first;
-
-  return null;
 }
 
 final String noCocoaPodsConsequence = '''
