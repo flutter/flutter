@@ -92,7 +92,7 @@ A TabBar can be used to navigate among the pages displayed in a TabBarView.
 Although a TabBar is an ordinary widget that can appear, it's most often
 included in the application's AppBar.
 
-Classes: [AppBar], [DefaultTabController], [TabBar], [Scaffold], [TabBarView].
+Classes: AppBar, DefaultTabController, TabBar, Scaffold, TabBarView
 
 Sample: TabbedAppBarSample
 

@@ -132,7 +132,7 @@ that displays the relative position of the selected page in the app's
 TabBarView. The arrow buttons in the toolbar part of the app bar select
 the previous or the next choice.
 
-Classes: [AppBar], [PreferredSize], [TabBarView], [TabController]
+Classes: AppBar, PreferredSize, TabBarView, TabController
 
 Sample: AppBarBottomSample
 

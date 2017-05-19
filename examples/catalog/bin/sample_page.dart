@@ -2,11 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This application generates markdown pages and screenshots for each
+// sample app. For more information see ../README.md.
+
 import 'dart:io';
 
-// See /builds/dev/flutter/packages/flutter_tools/bin/fuchsia_builder.dart for arg parsing
+class SampleError extends Error {
+  SampleError(this.message);
+  final String message;
+  @override
+  String toString() => message;
+}
 
-const sampleCatalogKeywords = r'^Title:|^Summary:|^Description:|^Classes:|^Sample:|^See also:';
+// Sample apps are .dart files in the lib directory which contain a block
+// comment that begins with a '/* Sample Catalog' line, and ends with a line
+// that just  contains '*/'. The following keywords may appear at the
+// beginning of lines within the comment. A keyword's value is all of
+// the following text up to the next keyword or the end of the comment,
+// sans leading and trailing whitespace.
+const String sampleCatalogKeywords = r'^Title:|^Summary:|^Description:|^Classes:|^Sample:|^See also:';
 
 Directory outputDirectory;
 Directory sampleDirectory;
@@ -16,9 +30,8 @@ String sampleTemplate;
 String screenshotTemplate;
 String screenshotDriverTemplate;
 
-void logMessage(String s) {
-  print(s);
-}
+void logMessage(String s) { print(s); }
+void logError(String s) { print(s); }
 
 File inputFile(String dir, String name) {
   return new File(dir + Platform.pathSeparator + name);
@@ -42,16 +55,6 @@ void initialize() {
   screenshotDriverTemplate = screenshotDriverTemplateFile.readAsStringSync();
 }
 
-// fileName(new File('/foo/bar/baz.dart')) => 'baz'
-String fileName(File file) {
-  // In /foo/bar/baz.dart, matches baz.dart, match[1] == 'baz'
-  final RegExp nameRE = new RegExp(r'(\w+)\.dart$');
-  final Match nameMatch = nameRE.firstMatch(file.path);
-  if (nameMatch.groupCount != 1)
-    throw new SampleError('bad file path ${file.path}');
-  return nameMatch[1];
-}
-
 // Return a copy of template with each occurrence of @(foo) replaced
 // by values[foo].
 String expandTemplate(String template, Map<String, String> values) {
@@ -70,17 +73,8 @@ void writeExpandedTemplate(File output, String template, Map<String, String> val
   logMessage('wrote $output');
 }
 
-class SampleError extends Error {
-  SampleError(this.message);
-
-  final String message;
-
-  @override
-  String toString() => '$message ($sampleFile)';
-}
-
-class SamplePageGenerator {
-  SamplePageGenerator(this.sourceFile);
+class SampleGenerator {
+  SampleGenerator(this.sourceFile);
 
   final File sourceFile;
   String sourceCode;
@@ -117,22 +111,22 @@ class SamplePageGenerator {
       return false;
 
     final int startIndex = startMatch.end;
-    final Math endMatch = endRE.firstMatch(contents.substring(startIndex));
+    final Match endMatch = endRE.firstMatch(contents.substring(startIndex));
     if (endMatch == null)
       return false;
 
     final String comment = contents.substring(startIndex, startIndex + endMatch.start);
     sourceCode = contents.substring(0, startMatch.start) + contents.substring(startIndex + endMatch.end);
-    if (sourceCode.length == 0)
-      throw new SampleError('did not find any source code');
+    if (sourceCode.trim().isEmpty)
+      throw new SampleError('did not find any source code in $sourceFile');
 
     final RegExp keywordsRE = new RegExp(sampleCatalogKeywords, multiLine: true);
     final List<Match> keywordMatches = keywordsRE.allMatches(comment).toList();
     // TBD: fix error generation
-    if (keywordMatches.length == 0)
-      throw new SampleError('did not find any keywords in the Sample Catalog comment');
+    if (keywordMatches.isEmpty)
+      throw new SampleError('did not find any keywords in the Sample Catalog comment in $sourceFile');
 
-    commentValues = new Map<String, String>();
+    commentValues = <String, String>{};
     for (int i = 0; i < keywordMatches.length; i += 1) {
       final String keyword = comment.substring(keywordMatches[i].start, keywordMatches[i].end - 1);
       final String value = comment.substring(
@@ -147,13 +141,13 @@ class SamplePageGenerator {
   }
 }
 
-void main(List<String> args) {
+void generate() {
   initialize();
 
-  List<SampleGenerator> samples = <SampleGenerator>[];
-  sampleDirectory.listSync().forEach((FilSystemEntity entity) {
-    if (entity is File && (entity as File).path.endsWith('.dart')) {
-      SamplePageGenerator sample = new SamplePageGenerator(entity);
+  final List<SampleGenerator> samples = <SampleGenerator>[];
+  sampleDirectory.listSync().forEach((FileSystemEntity entity) {
+    if (entity is File && entity.path.endsWith('.dart')) {
+      final SampleGenerator sample = new SampleGenerator(entity);
       if (sample.initialize()) { // skip files that lack the Sample Catalog comment
         writeExpandedTemplate(
           outputFile(sample.sourceName + '.md'),
@@ -166,7 +160,7 @@ void main(List<String> args) {
   });
 
   writeExpandedTemplate(
-    outputFile('screenshot.dart', testDirectory),
+    outputFile('screenshot.dart', driverDirectory),
     screenshotTemplate,
     <String, String>{
       'imports': samples.map((SampleGenerator page) {
@@ -187,4 +181,23 @@ void main(List<String> args) {
       }).toList().join(',\n'),
     },
   );
+
+  final List<String> flutterDriveArgs = <String>['drive', 'test_driver/screenshot.dart'];
+  logMessage('Generating screenshots with: flutter ${flutterDriveArgs.join(" ")}');
+  Process.runSync('flutter', flutterDriveArgs);
+}
+
+void main(List<String> args) {
+  try {
+    generate();
+  } catch (error) {
+    logError(
+      'Error: sample_page.dart failed: $error\n'
+      'This sample_page.dart app expects to be run from the examples/catalog directory. '
+      'More information can be found in examples/catalog/README.md.'
+    );
+    exit(255);
+  }
+
+  exit(0);
 }

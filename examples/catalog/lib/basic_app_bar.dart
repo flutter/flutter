@@ -104,7 +104,7 @@ Sample Catalog
 
 Title: AppBar Basics
 
-Summary: An [AppBar] with a title, actions, and an overflow dropdown menu.
+Summary: An AppBar with a title, actions, and an overflow dropdown menu.
 One of the app's choices can be selected with an action button or the menu.
 
 Description:
@@ -112,7 +112,7 @@ An app that displays one of a half dozen choices with an icon and a title.
 The two most common choices are available as action buttons and the remaining
 choices are included in the overflow dropdow menu.
 
-Classes: [AppBar], [IconButton], [PopupMenuButton], [Scaffold]
+Classes: AppBar, IconButton, PopupMenuButton, Scaffold
 
 Sample: BasicAppBarSample
 

@@ -4,12 +4,31 @@
 
 import 'package:flutter/material.dart';
 
+class ExpansionTileSample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      home: new Scaffold(
+        appBar: new AppBar(
+          title: const Text('ExpansionTile'),
+        ),
+        body: new ListView.builder(
+          itemBuilder: (BuildContext context, int index) => new EntryItem(data[index]),
+          itemCount: data.length,
+        ),
+      ),
+    );
+  }
+}
+
+// One entry in the multilevel list displayed by this app.
 class Entry {
   Entry(this.title, [this.children = const <Entry>[]]);
   final String title;
   final List<Entry> children;
 }
 
+// The entire multilevel list displayed by this app.
 final List<Entry> data = <Entry>[
   new Entry('Chapter A',
     <Entry>[
@@ -46,6 +65,8 @@ final List<Entry> data = <Entry>[
   ),
 ];
 
+// Displays one Entry. If the entry has children then it's displayed
+// with an ExpansionTile.
 class EntryItem extends StatelessWidget {
   EntryItem(this.entry);
 
@@ -67,21 +88,31 @@ class EntryItem extends StatelessWidget {
   }
 }
 
-class ExpansionTileSample extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: const Text('ExpansionTile'),
-      ),
-      body: new ListView.builder(
-        itemBuilder: (BuildContext context, int index) => new EntryItem(data[index]),
-        itemCount: data.length,
-      ),
-    );
-  }
+void main() {
+  runApp(new ExpansionTileSample());
 }
 
-void main() {
-  runApp(new MaterialApp(home: new ExpansionTileSample()));
-}
+/*
+Sample Catalog
+
+Title: ExpansionTile
+
+Summary: ExpansionTiles can used to produce two-level or multi-level lists.
+When displayed within a scrollable that creates its list items lazily,
+like a scrollable list created with `ListView.builder()`, they can be quite
+efficient, particularly for material design "expand/collapse" lists.
+
+Description:
+This app displays hierarchical data with ExpansionTiles. Tapping a tile
+expands or collapses the view of its children. When a tile is collapsed
+its children are disposed so that the widget footprint of the list only
+reflects what's visible.
+
+Classes: ExpansionTile, ListView
+
+Sample: ExpansionTileSample
+
+See also:
+  - The "expand/collapse" part of the material design specification:
+    <https://material.io/guidelines/components/lists-controls.html#lists-controls-types-of-list-controls>
+*/

@@ -1,9 +1,13 @@
-import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test/test.dart';
+// This file was generated using bin/screenshot_test.dart.template and
+// bin/sample_page.dart. For more information see README.md.
+
 import 'dart:io';
 
-void main() async {
-  group('sample screenshots', () {
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('sample screenshots', () async {
     FlutterDriver driver;
 
     setUpAll(() async {
@@ -11,7 +15,7 @@ void main() async {
     });
 
     tearDownAll(() async {
-        await driver?.close();
+      await driver?.close();
     });
 
     test('take sample screenshots', () async {
@@ -24,6 +28,7 @@ void main() async {
         await file.writeAsBytes(pixels);
         print('wrote $file');
         await driver.tap(find.byValueKey('screenshotGestureDetector'));
+        await driver.waitUntilNoTransientCallbacks();
       }
     });
   });
