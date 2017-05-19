@@ -417,7 +417,7 @@ class AppDomain extends Domain {
         );
         _sendAppEvent(app, 'stop');
       } catch (error) {
-        _sendAppEvent(app, 'stop', <String, dynamic>{'error': error.toString()});
+        _sendAppEvent(app, 'stop', <String, dynamic>{'error': _toJsonable(error)});
       } finally {
         fs.currentDirectory = cwd;
         _apps.remove(app);
@@ -699,7 +699,8 @@ dynamic _toJsonable(dynamic obj) {
     return obj;
   if (obj is OperationResult)
     return obj;
-  assert(false, 'obj not jsonable');
+  if (obj is ToolExit)
+    return obj.message;
   return '$obj';
 }
 
