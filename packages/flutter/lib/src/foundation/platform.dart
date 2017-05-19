@@ -4,8 +4,6 @@
 
 import 'dart:io' show Platform;
 
-import 'assertions.dart';
-
 /// The platform that user interaction should adapt to target.
 ///
 /// The [defaultTargetPlatform] getter returns the current platform.
@@ -46,15 +44,13 @@ TargetPlatform get defaultTargetPlatform {
       result = debugDefaultTargetPlatformOverride;
     return true;
   });
-  if (result == null) {
-    throw new FlutterError(
+  assert(result != null,
       'Unknown platform.\n'
       '${Platform.operatingSystem} was not recognized as a target platform. '
-      'Consider updating the list of TargetPlatforms to include this platform.'
-    );
-  }
+      'Consider updating the list of TargetPlatforms to include this platform.');
   return result;
 }
+
 /// Override the [defaultTargetPlatform].
 ///
 /// Setting this to null returns the [defaultTargetPlatform] to its original
