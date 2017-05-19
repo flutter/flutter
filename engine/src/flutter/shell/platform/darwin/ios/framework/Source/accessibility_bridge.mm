@@ -113,7 +113,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 - (CGRect)accessibilityFrame {
   SkMatrix44 globalTransform = _node.transform;
   for (SemanticsObject* parent = _parent; parent; parent = parent.parent) {
-    globalTransform = globalTransform * parent->_node.transform;
+    globalTransform = parent->_node.transform * globalTransform;
   }
 
   SkPoint quad[4];
@@ -126,7 +126,12 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   SkRect rect;
   rect.set(quad, 4);
 
-  auto result = CGRectMake(rect.x(), rect.y(), rect.width(), rect.height());
+  // `rect` is in the physical pixel coordinate system. iOS expects the accessibility frame in
+  // the logical pixel coordinate system. Therefore, we divide by the `scale` (pixel ratio) to
+  // convert.
+  CGFloat scale = [[_bridge->view() window] screen].scale;
+  auto result =
+      CGRectMake(rect.x() / scale, rect.y() / scale, rect.width() / scale, rect.height() / scale);
   return UIAccessibilityConvertFrameToScreenCoordinates(result, _bridge->view());
 }
 
