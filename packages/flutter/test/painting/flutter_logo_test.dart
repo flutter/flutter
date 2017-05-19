@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
 
 void main() {
-  const FlutterLogoDecoration start = const FlutterLogoDecoration(
+  // Here and below, see: https://github.com/dart-lang/sdk/issues/26980
+  // ignore: prefer_const_constructors
+  final FlutterLogoDecoration start = new FlutterLogoDecoration(
     lightColor: const Color(0xFF000000),
     darkColor: const Color(0xFFFFFFFF),
     textColor: const Color(0xFFD4F144),
@@ -14,7 +16,8 @@ void main() {
     margin: const EdgeInsets.all(10.0),
   );
 
-  const FlutterLogoDecoration end = const FlutterLogoDecoration(
+  // ignore: prefer_const_constructors
+  final FlutterLogoDecoration end = new FlutterLogoDecoration(
     lightColor: const Color(0xFFFFFFFF),
     darkColor: const Color(0xFF000000),
     textColor: const Color(0xFF81D4FA),
