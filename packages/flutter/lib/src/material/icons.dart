@@ -2,45 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
-/// A description of a material design icon.
-///
-/// See [Icons] for a number of predefined icons.
-@immutable
-class IconData {
-  /// Creates icon data.
-  ///
-  /// Rarely used directly. Instead, consider using one of the predefined icons
-  /// from the [Icons] collection.
-  const IconData(this.codePoint, {
-    this.fontFamily: 'MaterialIcons'
-  });
-
-  /// The unicode code point at which this icon is stored in the icon font.
-  final int codePoint;
-
-  /// The font family from which the glyph for the [codePoint] will be selected.
-  final String fontFamily;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! IconData)
-      return false;
-    final IconData typedOther = other;
-    return codePoint == typedOther.codePoint;
-  }
-
-  @override
-  int get hashCode => codePoint.hashCode;
-
-  @override
-  String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';
-}
+import 'package:flutter/widgets.dart';
 
 /// Identifiers for the supported material design icons.
 ///
 /// Use with with the [Icon] class to show specific icons.
+///
+/// Available icons are shown on this page: <https://design.google.com/icons/>
+///
+/// Icons are identified by their name (as given on that page), with spaces
+/// converted to underscores, from the [Icons] class. For example, the "alarm
+/// add" icon is [Icons.alarm_add].
+///
+/// To use this class, make sure you set `uses-material-design: true` in your
+/// project's `pubspec.yaml` file in the `flutter` section. This ensures that
+/// the MaterialIcons font is included in your application. This font is used to
+/// display the icons. For example:
+///
+/// ```yaml
+/// name: my_awesome_application
+/// flutter:
+///   uses-material-design: true
+/// ```
 ///
 /// See also:
 ///

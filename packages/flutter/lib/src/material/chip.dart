@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'debug.dart';
-import 'icon.dart';
 import 'icons.dart';
 import 'tooltip.dart';
 

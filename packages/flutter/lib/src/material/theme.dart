@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'icon_theme.dart';
 import 'theme_data.dart';
 
 export 'theme_data.dart' show Brightness, ThemeData;

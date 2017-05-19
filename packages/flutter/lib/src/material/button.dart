@@ -9,8 +9,6 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flat_button.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'raised_button.dart';

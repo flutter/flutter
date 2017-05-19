@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
+import 'basic.dart';
+import 'framework.dart';
 import 'icon_theme_data.dart';
 
 /// Controls the default color, opacity, and size of icons in a widget subtree.
