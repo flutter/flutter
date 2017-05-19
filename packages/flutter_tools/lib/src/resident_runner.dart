@@ -623,6 +623,8 @@ abstract class ResidentRunner {
   }
 
   Future<Null> processTerminalInput(String command) async {
+    // When terminal doesn't support line mode, '\n' can sneak into the input.
+    command = command.replaceAll('\n', '');
     if (_processingUserRequest) {
       printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;
