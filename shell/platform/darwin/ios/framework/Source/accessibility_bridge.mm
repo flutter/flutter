@@ -18,20 +18,23 @@ constexpr int32_t kRootNodeId = 0;
 
 blink::SemanticsAction GetSemanticsActionForScrollDirection(
     UIAccessibilityScrollDirection direction) {
+  // To describe scroll direction, UIAccessibilityScrollDirection uses the direction the scroll bar
+  // moves in and SemanticsAction uses the direction the finger moves in. Both move in opposite
+  // directions, which is why the following maps left to right and vice versa.
   switch (direction) {
     case UIAccessibilityScrollDirectionRight:
     case UIAccessibilityScrollDirectionPrevious:  // TODO(abarth): Support RTL.
-      return blink::SemanticsAction::kScrollRight;
+      return blink::SemanticsAction::kScrollLeft;
     case UIAccessibilityScrollDirectionLeft:
     case UIAccessibilityScrollDirectionNext:  // TODO(abarth): Support RTL.
-      return blink::SemanticsAction::kScrollLeft;
+      return blink::SemanticsAction::kScrollRight;
     case UIAccessibilityScrollDirectionUp:
-      return blink::SemanticsAction::kScrollUp;
-    case UIAccessibilityScrollDirectionDown:
       return blink::SemanticsAction::kScrollDown;
+    case UIAccessibilityScrollDirectionDown:
+      return blink::SemanticsAction::kScrollUp;
   }
   FTL_DCHECK(false);  // Unreachable
-  return blink::SemanticsAction::kScrollDown;
+  return blink::SemanticsAction::kScrollUp;
 }
 
 }  // namespace
@@ -183,7 +186,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 
 - (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
   blink::SemanticsAction action = GetSemanticsActionForScrollDirection(direction);
-  if (_node.HasAction(action))
+  if (!_node.HasAction(action))
     return NO;
   _bridge->DispatchSemanticsAction(_uid, action);
   // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
