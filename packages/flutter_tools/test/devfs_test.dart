@@ -380,7 +380,7 @@ class MockVMService extends BasicMock implements VMService {
   }
 
   Future<Null> tearDown() async {
-    await _server.close();
+    await _server?.close();
   }
 
   @override
