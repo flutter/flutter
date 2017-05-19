@@ -699,13 +699,8 @@ dynamic _toJsonable(dynamic obj) {
     return obj;
   if (obj is OperationResult)
     return obj;
-  if (obj is ToolExit) {
-    return <String, String>{
-      'type': 'ToolExit',
-      'message': obj.message,
-      'exitCode': '${obj.exitCode}',
-    };
-  }
+  if (obj is ToolExit)
+    return obj.message;
   return '$obj';
 }
 
