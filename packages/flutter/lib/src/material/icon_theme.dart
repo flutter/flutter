@@ -63,7 +63,7 @@ class IconTheme extends InheritedWidget {
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {
     final IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
-    return iconTheme?.data;
+    return iconTheme?.data ?? const IconThemeData.fallback();
   }
 
   @override
