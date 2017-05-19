@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
 
 void main() {
-  final FlutterLogoDecoration start = new FlutterLogoDecoration(
+  const FlutterLogoDecoration start = const FlutterLogoDecoration(
     lightColor: const Color(0xFF000000),
     darkColor: const Color(0xFFFFFFFF),
     textColor: const Color(0xFFD4F144),
@@ -14,7 +14,7 @@ void main() {
     margin: const EdgeInsets.all(10.0),
   );
 
-  final FlutterLogoDecoration end = new FlutterLogoDecoration(
+  const FlutterLogoDecoration end = const FlutterLogoDecoration(
     lightColor: const Color(0xFFFFFFFF),
     darkColor: const Color(0xFF000000),
     textColor: const Color(0xFF81D4FA),
