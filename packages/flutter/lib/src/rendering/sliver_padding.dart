@@ -146,7 +146,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
         scrollOffset: math.max(0.0, constraints.scrollOffset - beforePadding),
         overlap: 0.0,
         remainingPaintExtent: constraints.remainingPaintExtent - calculatePaintOffset(constraints, from: 0.0, to: beforePadding),
-        crossAxisExtent: constraints.crossAxisExtent - crossAxisPadding,
+        crossAxisExtent: math.max(0.0, constraints.crossAxisExtent - crossAxisPadding),
       ),
       parentUsesSize: true,
     );
