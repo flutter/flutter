@@ -15,7 +15,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the Icons class.
   uses-material-design: true
-
+  assets:
+    - assets/flutter-mark-square-64.png
   # To add assets to your application, add an assets section here, in
   # this "flutter" section, as in:
   # assets:

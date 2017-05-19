@@ -1,4 +1,9 @@
+// Copyright 2017, the Flutter project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -7,15 +12,14 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Flutter Demo',
       theme: new ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.grey,
       ),
-      home: new MyHomePage(title: 'Flutter Demo Home Page'),
+      home: new MyHomePage(title: 'Platform View'),
     );
   }
 }
@@ -30,27 +34,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const String _channel = "samples.flutter.io/full_screen";
-  static const BasicMessageChannel<String> platform =
-      const BasicMessageChannel<String>(_channel, const StringCodec());
   static const MethodChannel _methodChannel =
-      const MethodChannel("samples.flutter.io/full");
+      const MethodChannel("samples.flutter.io/platform_view");
 
   int _counter = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    platform.setMessageHandler(_handlePlatformCount);
-  }
-
-  Future<String> _handlePlatformCount(String message) async {
-    print("WE ARE BACK $message");
-    setState(() {
-      _counter += int.parse(message);
-    });
-    return "";
-  }
 
   void _incrementCounter() {
     setState(() {
@@ -59,11 +46,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<Null> _launchPlatformCount() async {
-  final int countDelta = await _methodChannel.invokeMethod("launch", _counter);
-  setState((){
-    _counter = countDelta;
-  });
-//    platform.send("launch full screen");
+    final int countDelta =
+        await _methodChannel.invokeMethod("switchView", _counter);
+    setState(() {
+      _counter = countDelta;
+    });
   }
 
   @override
@@ -76,15 +63,32 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             new Expanded(
               child: new Center(
-                  child: new Text(
-                      'Platform button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
-                      style: const TextStyle(fontSize: 17.0))),
+                  child: new Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  new Text(
+                      'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
+                      style: const TextStyle(fontSize: 17.0)),
+                  new Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: new RaisedButton(
+                        child: Platform.isIOS
+                            ? const Text('Continue in iOS view')
+                            : new Text('Continue in Android view'),
+                        onPressed: _launchPlatformCount),
+                  ),
+                ],
+              )),
             ),
-            new Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: new RaisedButton(
-                  child: new Text('Launch full screen platform view'),
-                  onPressed: _launchPlatformCount),
+            new Container(
+              padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
+              child: new Row(
+                children: <Widget>[
+                  new Image.asset('assets/flutter-mark-square-64.png',
+                      scale: 1.5),
+                  const Text('Flutter', style: const TextStyle(fontSize: 30.0)),
+                ],
+              ),
             ),
           ],
         ),

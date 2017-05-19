@@ -26,7 +26,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.yourcompany.full_platform_view"
+        applicationId "com.example.full_platform_view"
     }
 
     buildTypes {
