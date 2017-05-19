@@ -359,8 +359,8 @@ class MockVMService extends BasicMock implements VMService {
   VM get vm => _vm;
 
   Future<Null> setUp() async {
-    _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, 0);
-    _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
+    _server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V6, 0);
+    _httpAddress = Uri.parse('http://[::1]:${_server.port}');
     _server.listen((HttpRequest request) {
       final String fsName = request.headers.value('dev_fs_name');
       final String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_uri_b64')));
