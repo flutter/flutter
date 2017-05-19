@@ -111,7 +111,7 @@ class AnsiTerminal {
     if (defaultChoiceIndex != null) {
       charactersToDisplay = new List<String>.from(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
-      assert(defaultChoiceIndex > 0 && defaultChoiceIndex < acceptedCharacters.length);
+      assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       acceptedCharacters.add('\n');
     }
     String choice;
@@ -134,7 +134,7 @@ class AnsiTerminal {
       printStatus(choice);
     }
     singleCharMode = false;
-    if (defaultChoiceIndex != null)
+    if (defaultChoiceIndex != null && choice == '\n')
       choice = acceptedCharacters[defaultChoiceIndex];
     return choice;
   }
