@@ -187,6 +187,7 @@ Your main program file is lib/main.dart in the $relativeAppPath directory.
 Your plugin code is in lib/$projectName.dart in the $relativePluginPath directory.
 
 Host platform code is in the android/ and ios/ directories under $relativePluginPath.
+To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-code.
 ''');
       }
     } else {
