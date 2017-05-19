@@ -752,6 +752,12 @@ class Padding extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPadding renderObject) {
     renderObject.padding = padding;
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('padding: $padding');
+  }
 }
 
 /// A widget that aligns its child within itself and optionally sizes itself

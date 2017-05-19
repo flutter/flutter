@@ -119,17 +119,55 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///
 /// An app bar consists of a toolbar and potentially other widgets, such as a
 /// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
-/// common actions with [IconButton]s which are optionally followed by a
-/// [PopupMenuButton] for less common operations.
+/// common [actions] with [IconButton]s which are optionally followed by a
+/// [PopupMenuButton] for less common operations (sometimes called the "overflow
+/// menu").
 ///
 /// App bars are typically used in the [Scaffold.appBar] property, which places
 /// the app bar as a fixed-height widget at the top of the screen. For a
 /// scrollable app bar, see [SliverAppBar], which embeds an [AppBar] in a sliver
 /// for use in a [CustomScrollView].
 ///
-/// The AppBar displays the toolbar widgets, [leading], [title], and
-/// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
-/// specified then it is stacked behind the toolbar and the bottom widget.
+/// The AppBar displays the toolbar widgets, [leading], [title], and [actions],
+/// above the [bottom] (if any). The [bottom] is usually used for a [TabBar]. If
+/// a [flexibleSpace] widget is specified then it is stacked behind the toolbar
+/// and the bottom widget. The following diagram shows where each of these slots
+/// appears in the toolbar when the writing language is left-to-right (e.g.
+/// English):
+///
+/// ![The leading widget is in the top left, the actions are in the top right,
+/// the title is between them. The bottom is, naturally, at the bottom, and the
+/// flexibleSpace is behind all of them.](https://flutter.github.io/assets-for-api-docs/material/app_bar.png)
+///
+/// If the [leading] widget is omitted, but the [AppBar] is in a [Scaffold] with
+/// a [Drawer], then a button will be inserted to open the drawer. Otherwise, if
+/// the nearest [Navigator] has any previous routes, a [BackButton] is inserted
+/// instead.
+///
+/// ## Sample code
+///
+/// ```dart
+/// new AppBar(
+///   title: new Text('My Fancy Dress'),
+///   actions: <Widget>[
+///     new IconButton(
+///       icon: new Icon(Icons.playlist_play),
+///       tooltip: 'Air it',
+///       onPressed: _airDress,
+///     ),
+///     new IconButton(
+///       icon: new Icon(Icons.playlist_add),
+///       tooltip: 'Restitch it',
+///       onPressed: _restitchDress,
+///     ),
+///     new IconButton(
+///       icon: new Icon(Icons.playlist_add_check),
+///       tooltip: 'Repair it',
+///       onPressed: _repairDress,
+///     ),
+///   ],
+/// )
+/// ```
 ///
 /// See also:
 ///
@@ -451,11 +489,17 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
+    appBar = new Align(
+      alignment: FractionalOffset.topCenter,
+      child: appBar,
+    );
+
     if (widget.flexibleSpace != null) {
       appBar = new Stack(
+        fit: StackFit.passthrough,
         children: <Widget>[
           widget.flexibleSpace,
-          new Positioned(top: 0.0, left: 0.0, right: 0.0, child: appBar),
+          appBar,
         ],
       );
     }
@@ -463,10 +507,7 @@ class _AppBarState extends State<AppBar> {
     return new Material(
       color: widget.backgroundColor ?? themeData.primaryColor,
       elevation: widget.elevation,
-      child: new Align(
-        alignment: FractionalOffset.topCenter,
-        child: appBar,
-      ),
+      child: appBar,
     );
   }
 }
