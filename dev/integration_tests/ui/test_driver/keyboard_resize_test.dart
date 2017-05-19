@@ -30,6 +30,10 @@ void main() {
       await driver.tap(defaultTextField);
       await new Future<Null>.delayed(const Duration(seconds: 1));
 
+      // Measure the height with keyboard displayed.
+      final String heightWithKeyboardShown = await driver.getText(heightText);
+      expect(double.parse(heightWithKeyboardShown) < double.parse(startHeight), isTrue);
+
       // Unfocus the text field to dismiss the keyboard.
       final SerializableFinder unfocusButton = find.byValueKey(keys.kUnfocusButton);
       await driver.waitFor(unfocusButton);
