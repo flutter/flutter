@@ -310,7 +310,37 @@ DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
     fonts.addAll(manifestDescriptor['fonts']);
   if (fonts.isEmpty)
     return null;
-  return new DevFSStringContent(JSON.encode(fonts));
+
+  return new DevFSStringContent(JSON.encode(_traverseCloneAsMutableAndRemoveLeadingParent(fonts)));
+}
+
+final RegExp _leadingParentRegExp = new RegExp(r'(\.\.\/)+');
+
+dynamic _traverseCloneAsMutableAndRemoveLeadingParent(dynamic node) {
+  if (node is List) {
+    return node.map<dynamic>(_traverseCloneAsMutableAndRemoveLeadingParent).toList();
+  } else if (node is Map) {
+    Map<String, dynamic> map = node;
+    map = _unwrapYamlMap(map);
+    if (map.containsKey('asset')) {
+      map['asset'] = map['asset'].replaceFirst(_leadingParentRegExp, '');
+    } else {
+      for (String key in map.keys) {
+        map[key] = _traverseCloneAsMutableAndRemoveLeadingParent(map[key]);
+      }
+    }
+    return map;
+  } else {
+    return node;
+  }
+}
+
+Map<String, dynamic> _unwrapYamlMap(Map<String, dynamic> yamlMap) {
+  final Map<String, dynamic> cloneMap = new Map<String, dynamic>();
+  for (String key in yamlMap.keys) {
+    cloneMap[key] = yamlMap[key];
+  }
+  return cloneMap;
 }
 
 /// Given an assetBase location and a pubspec.yaml Flutter manifest, return a
@@ -417,6 +447,12 @@ _Asset _resolveAsset(
       final File file = fs.file(uri);
       return new _Asset(base: file.path, assetEntry: asset, relativePath: relativeAsset);
     }
+  } else if (asset.startsWith('../')) {
+    return new _Asset(
+      base: assetBase,
+      assetEntry: asset.replaceFirst(_leadingParentRegExp, ''),
+      relativePath: asset
+    );
   }
 
   return new _Asset(base: assetBase, relativePath: asset);

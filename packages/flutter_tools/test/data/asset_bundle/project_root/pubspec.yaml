@@ -1,0 +1,11 @@
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - ../asset_1.txt
+  fonts:
+    - family: Test
+      fonts:
+        - asset: ../font_1.ttf
