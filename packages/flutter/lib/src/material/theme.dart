@@ -21,6 +21,9 @@ const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 /// [Theme.of]. When a widget uses [Theme.of], it is automatically rebuilt if
 /// the theme later changes, so that the changes can be applied.
 ///
+/// The [Theme] widget implies an [IconTheme] widget, set to the value of the
+/// [ThemeData.iconTheme] of the [data] for the [Theme].
+///
 /// See also:
 ///
 ///  * [ThemeData], which describes the actual configuration of a theme.

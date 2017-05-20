@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -230,5 +231,32 @@ void main() {
     expect(materials.length, equals(2));
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold
+  });
+
+  testWidgets('IconThemes are applied', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
+        home: new Icon(Icons.computer),
+      )
+    );
+
+    RenderParagraph glyphText = tester.renderObject(find.byType(RichText));
+
+    expect(glyphText.text.style.color, Colors.green);
+    expect(glyphText.text.style.fontSize, 10.0);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(iconTheme: const IconThemeData(color: Colors.orange, size: 20.0)),
+        home: new Icon(Icons.computer),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 200)); // For the theme to transition over.
+
+    glyphText = tester.renderObject(find.byType(RichText));
+
+    expect(glyphText.text.style.color, Colors.orange);
+    expect(glyphText.text.style.fontSize, 20.0);
   });
 }
