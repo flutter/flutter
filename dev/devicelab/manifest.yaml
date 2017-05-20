@@ -80,6 +80,7 @@ tasks:
       Tracks how many members are still lacking documentation.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
+    flaky: true
 
   # Android on-device tests
 
