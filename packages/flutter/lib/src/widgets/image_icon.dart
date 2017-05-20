@@ -18,7 +18,8 @@ import 'image.dart';
 ///
 ///  * [IconButton], for interactive icons.
 ///  * [IconTheme], which provides ambient configuration for icons.
-///  * [Icon], for icons based on glyphs from fonts instead of images.
+///  * [Icon] and [Icons], for icons based on glyphs from fonts instead of images
+///     and a predefined font based set from the material design library.
 class ImageIcon extends StatelessWidget {
   /// Creates an image icon.
   ///

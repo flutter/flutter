@@ -6,20 +6,20 @@ import 'package:flutter/foundation.dart';
 
 /// A description of an icon fulfilled by a font glyph.
 ///
-/// See [Icons] in material for a number of predefined icons available for material
-/// designs.
+/// See [Icons] for a number of predefined icons available for material
+/// design applications.
 @immutable
 class IconData {
   /// Creates icon data.
   ///
   /// Rarely used directly. Instead, consider using one of the predefined icons
-  /// like material's [Icons] collection.
+  /// like the [Icons] collection.
   const IconData(
     this.codePoint, {
-    this.fontFamily
+    this.fontFamily,
   });
 
-  /// The unicode code point at which this icon is stored in the icon font.
+  /// The Unicode code point at which this icon is stored in the icon font.
   final int codePoint;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
@@ -27,7 +27,7 @@ class IconData {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! IconData)
+    if (runtimeType != other?.runtimeType)
       return false;
     final IconData typedOther = other;
     return codePoint == typedOther.codePoint;

@@ -12,7 +12,7 @@ import 'icon_theme_data.dart';
 
 
 /// A graphical icon widget drawn with a glyph from a font described in
-/// a [IconData] such as material's prefedined [IconData]s in [Icons].
+/// an [IconData] such as material's predefined [IconData]s in [Icons].
 ///
 /// Icons are not interactive. For an interactive icon, consider material's
 /// [IconButton].
@@ -20,7 +20,7 @@ import 'icon_theme_data.dart';
 /// See also:
 ///
 ///  * [IconButton], for interactive icons.
-///  * [Icons] in material, for the list of available icons for use with this class.
+///  * [Icons], for the list of available icons for use with this class.
 ///  * [IconTheme], which provides ambient configuration for icons.
 ///  * [ImageIcon], for showing icons from [AssetImage]s or other [ImageProvider]s.
 class Icon extends StatelessWidget {
@@ -60,8 +60,11 @@ class Icon extends StatelessWidget {
   /// The given color will be adjusted by the opacity of the current
   /// [IconTheme], if any.
   ///
-  /// In material apps, if there is no [IconTheme], then it defaults to
-  /// white if the theme is dark and black if the theme is light.
+  /// If no [IconTheme]s are specified, icons will default to black.
+  ///
+  /// In material apps, if there is a [Theme] without any [IconTheme]s
+  /// specified, icon colors default to white if the theme is dark
+  /// and black if the theme is light.
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   ///

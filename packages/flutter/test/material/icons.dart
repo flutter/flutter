@@ -11,4 +11,9 @@ void main() {
     expect(Icons.account_balance.hashCode, isNot(equals(Icons.account_box.hashCode)));
     expect(Icons.account_balance, hasOneLineDescription);
   });
+
+  testWidgets('Icons specify the material font', (WidgetTester tester) async {
+    expect(Icons.clear.fontFamily, 'MaterialIcons');
+    expect(Icons.search.fontFamily, 'MaterialIcons');
+  });
 }

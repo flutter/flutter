@@ -8,11 +8,7 @@ import 'package:flutter/widgets.dart';
 ///
 /// Use with with the [Icon] class to show specific icons.
 ///
-/// Available icons are shown on this page: <https://design.google.com/icons/>
-///
-/// Icons are identified by their name (as given on that page), with spaces
-/// converted to underscores, from the [Icons] class. For example, the "alarm
-/// add" icon is [Icons.alarm_add].
+/// Icons are identified by their name as listed below.
 ///
 /// To use this class, make sure you set `uses-material-design: true` in your
 /// project's `pubspec.yaml` file in the `flutter` section. This ensures that
