@@ -77,7 +77,7 @@ using namespace shell;
 }
 
 - (void)vibrateHapticFeedback {
-  AudioServicesPlayAlertSound(kSystemSoundID_Vibrate);
+  AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
 }
 
 - (void)setSystemChromePreferredOrientations:(NSArray*)orientations {
