@@ -1,0 +1,5 @@
+name: fml
+version: 0.0.1
+author: Flutter Authors <flutter-dev@googlegroups.com>
+description: Library for parsing the Flutter Markup Language
+homepage: https://github.com/flutter/flutter/tree/master/packages/fml
