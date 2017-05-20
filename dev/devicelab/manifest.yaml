@@ -75,6 +75,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  dartdocs:
+    description: >
+      Tracks how many members are still lacking documentation.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
   # Android on-device tests
 
   complex_layout_scroll_perf__timeline_summary:
@@ -190,14 +196,14 @@ tasks:
 #      Measures the startup time of the Flutter Gallery app on iOS.
 #    stage: devicelab_ios
 #    required_agent_capabilities: ["has-ios-device"]
-#    flaky: true    
+#    flaky: true
 
 #  complex_layout_ios__start_up:
 #    description: >
 #      Measures the startup time of the Complex Layout sample app on iOS.
 #    stage: devicelab_ios
 #    required_agent_capabilities: ["has-ios-device"]
-#    flaky: true    
+#    flaky: true
 
   flutter_gallery_ios__transition_perf:
     description: >
@@ -225,7 +231,7 @@ tasks:
 #      Verifies that Flutter View can be used from an iOS project.
 #    stage: devicelab_ios
 #    required_agent_capabilities: ["has-ios-device"]
-#    flaky: true    
+#    flaky: true
 
   integration_ui_ios:
     description: >
