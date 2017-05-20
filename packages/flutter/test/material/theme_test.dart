@@ -237,7 +237,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
-        home: new Icon(Icons.computer),
+        home: const Icon(Icons.computer),
       )
     );
 
@@ -249,11 +249,17 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(iconTheme: const IconThemeData(color: Colors.orange, size: 20.0)),
-        home: new Icon(Icons.computer),
+        home: const Icon(Icons.computer),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 200)); // For the theme to transition over.
+    await tester.pump(const Duration(milliseconds: 100)); // Halfway through the theme transition
 
+    glyphText = tester.renderObject(find.byType(RichText));
+
+    expect(glyphText.text.style.color, Color.lerp(Colors.green, Colors.orange, 0.5));
+    expect(glyphText.text.style.fontSize, 15.0);
+
+    await tester.pump(const Duration(milliseconds: 100)); // Finish the transition
     glyphText = tester.renderObject(find.byType(RichText));
 
     expect(glyphText.text.style.color, Colors.orange);
