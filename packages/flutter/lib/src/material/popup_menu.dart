@@ -554,9 +554,9 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child == null) {
+    if (widget.child == null || widget.child is Icon) {
       return new IconButton(
-        icon: _getIcon(Theme.of(context).platform),
+        icon: widget.child ?? _getIcon(Theme.of(context).platform),
         padding: widget.padding,
         tooltip: widget.tooltip,
         onPressed: showButtonMenu,
