@@ -42,9 +42,9 @@ class MaterialApp extends StatefulWidget {
   /// Creates a MaterialApp.
   ///
   /// At least one of [home], [routes], or [onGenerateRoute] must be
-  /// given. If only [routes] is given, it must include an entry for
-  /// [Navigator.defaultRouteName] (`'/'`) or specify the
-  /// [initialRoute].
+  /// given. If only [routes] is given, it must include an entry for the
+  /// [initialRoute], which defaults to [Navigator.defaultRouteName]
+  /// (`'/'`).
   ///
   /// This class creates an instance of [WidgetsApp].
   MaterialApp({
@@ -54,7 +54,7 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
-    this.initialRoute = Navigator.defaultRouteName,
+    this.initialRoute: Navigator.defaultRouteName,
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.navigatorObservers: const <NavigatorObserver>[],
