@@ -1,8 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="flutter_tools" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
-    <option name="arguments" value="run -v" />
     <option name="filePath" value="$PROJECT_DIR$/packages/flutter_tools/bin/flutter_tools.dart" />
-    <option name="workingDirectory" value="$PROJECT_DIR$/examples/hello_world" />
     <method />
   </configuration>
 </component>
