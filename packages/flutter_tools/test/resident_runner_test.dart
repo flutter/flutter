@@ -12,21 +12,10 @@ import 'src/context.dart';
 
 class TestRunner extends ResidentRunner {
   bool hasHelpBeenPrinted = false;
-
   String receivedCommand;
 
-  TestRunner(
-    List<FlutterDevice> devices, {
-    String target,
-    DebuggingOptions debuggingOptions,
-    bool usesTerminalUI: true,
-    bool stayResident: true,
-  })
-      : super(devices,
-            target: target,
-            debuggingOptions: debuggingOptions,
-            usesTerminalUI: usesTerminalUI,
-            stayResident: stayResident);
+  TestRunner(List<FlutterDevice> devices)
+      : super(devices);
 
   @override
   Future<Null> cleanupAfterSignal() => null;
@@ -45,13 +34,10 @@ class TestRunner extends ResidentRunner {
   }
 
   @override
-  Future<int> run(
-      {Completer<DebugConnectionInfo> connectionInfoCompleter,
-      Completer<dynamic> appStartedCompleter,
-      String route,
-      bool shouldBuild: true}) {
-    return null;
-  }
+  Future<int> run({Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<dynamic> appStartedCompleter,
+    String route,
+    bool shouldBuild: true}) => null;
 }
 
 void main() {
@@ -79,6 +65,12 @@ void main() {
       await testRunner.processTerminalInput('r\n');
       expect(testRunner.receivedCommand,
           equals('r'));
+    });
+    testUsingContext('newlines', () async {
+      expect(testRunner.receivedCommand, isNull);
+      await testRunner.processTerminalInput('\n\n');
+      expect(testRunner.receivedCommand,
+          equals(''));
     });
   });
 }
