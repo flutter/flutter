@@ -143,4 +143,22 @@ void main() {
 
     expect(find.text('Home'), findsOneWidget);
   });
+
+  testWidgets('Could not implicitly use root initialRoute',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) => new Text('route "/"')
+    }));
+  });
+
+  testWidgets('Could not use non-root initialRoute',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      initialRoute: '/a',
+      routes: <String, WidgetBuilder>{
+        '/a': (BuildContext context) => new Text('route "/a"')
+      },
+    ));
+  });
+
 }
