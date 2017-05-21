@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({Key key, this.child}) : super(key: key);
+  const StateMarker({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
@@ -19,7 +19,8 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child != null) return widget.child;
+    if (widget.child != null)
+      return widget.child;
     return new Container();
   }
 }
@@ -86,21 +87,20 @@ void main() {
     expect(state2.marker, equals('original'));
   });
 
-  testWidgets('Do not rebuild page on the second frame of the route transition',
-      (WidgetTester tester) async {
+  testWidgets('Do not rebuild page on the second frame of the route transition', (WidgetTester tester) async {
     int buildCounter = 0;
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Builder(builder: (BuildContext context) {
-          return new Material(
-            child: new RaisedButton(
-              child: const Text('X'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/next');
-              },
-            ),
-          );
-        }),
+        home: new Builder(
+          builder: (BuildContext context) {
+            return new Material(
+              child: new RaisedButton(
+                child: const Text('X'),
+                onPressed: () { Navigator.of(context).pushNamed('/next'); },
+              ),
+            );
+          }
+        ),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return new Builder(
@@ -142,22 +142,5 @@ void main() {
     expect(result, isFalse);
 
     expect(find.text('Home'), findsOneWidget);
-  });
-
-  testWidgets('Could not implicitly use root initialRoute',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-      '/': (context) => new Text('route "/"')
-    }));
-  });
-
-  testWidgets('Could not use non-root initialRoute',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
-      initialRoute: '/a',
-      routes: <String, WidgetBuilder>{
-        '/a': (context) => new Text('route "/a"')
-      },
-    ));
   });
 }
