@@ -9,10 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'divider.dart';
-import 'icon.dart';
 import 'icon_button.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'list_tile.dart';

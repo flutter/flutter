@@ -8,9 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
-import 'icon.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';

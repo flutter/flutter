@@ -2,34 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 
-import 'icon_button.dart';
+import 'basic.dart';
+import 'framework.dart';
+import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
-import 'icons.dart';
-import 'theme.dart';
 
-/// A material design icon.
+
+/// A graphical icon widget drawn with a glyph from a font described in
+/// an [IconData] such as material's predefined [IconData]s in [Icons].
 ///
-/// Icons are not interactive. For an interactive icon, consider [IconButton].
-///
-/// Icons are identified by their name (as given on that page), with spaces
-/// converted to underscores, from the [Icons] class. For example, the "alarm
-/// add" icon is [Icons.alarm_add].
-///
-/// Available icons are shown on this page: <https://design.google.com/icons/>
-///
-/// To use this class, make sure you set `uses-material-design: true` in your
-/// project's `pubspec.yaml` file in the `flutter` section. This ensures that
-/// the MaterialIcons font is included in your application. This font is used to
-/// display the icons. For example:
-///
-/// ```yaml
-/// name: my_awesome_application
-/// flutter:
-///   uses-material-design: true
-/// ```
+/// Icons are not interactive. For an interactive icon, consider material's
+/// [IconButton].
 ///
 /// See also:
 ///
@@ -69,14 +55,18 @@ class Icon extends StatelessWidget {
 
   /// The color to use when drawing the icon.
   ///
-  /// Defaults to the current [IconTheme] color, if any. If there is
-  /// no [IconTheme], then it defaults to white if the theme is dark
-  /// and black if the theme is light. See [Theme] to set the current
-  /// theme and [ThemeData.brightness] for setting the current theme's
-  /// brightness.
+  /// Defaults to the current [IconTheme] color, if any.
   ///
   /// The given color will be adjusted by the opacity of the current
   /// [IconTheme], if any.
+  ///
+  /// If no [IconTheme]s are specified, icons will default to black.
+  ///
+  /// In material apps, if there is a [Theme] without any [IconTheme]s
+  /// specified, icon colors default to white if the theme is dark
+  /// and black if the theme is light.
+  /// See [Theme] to set the current theme and [ThemeData.brightness]
+  /// for setting the current theme's brightness.
   ///
   /// Typically, a material design color will be used, as follows:
   ///

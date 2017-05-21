@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
-import 'icon_button.dart';
+import 'basic.dart';
+import 'framework.dart';
+import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
-import 'icons.dart';
+import 'image.dart';
 
 /// An icon that comes from an [ImageProvider], e.g. an [AssetImage].
 ///
@@ -16,7 +18,8 @@ import 'icons.dart';
 ///
 ///  * [IconButton], for interactive icons.
 ///  * [IconTheme], which provides ambient configuration for icons.
-///  * [Icon] and [Icons], for icons from the material design library.
+///  * [Icon], for icons based on glyphs from fonts instead of images
+///  * [Icons], a predefined font based set of icons from the material design library.
 class ImageIcon extends StatelessWidget {
   /// Creates an image icon.
   ///

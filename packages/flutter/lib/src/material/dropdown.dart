@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'icon.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
