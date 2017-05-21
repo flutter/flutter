@@ -33,6 +33,7 @@ class TestRunner extends ResidentRunner {
     hasHelpBeenPrinted = true;
   }
 
+  @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<dynamic> appStartedCompleter,
