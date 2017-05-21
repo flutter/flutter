@@ -27,7 +27,7 @@ class IconData {
 
   @override
   bool operator ==(dynamic other) {
-    if (runtimeType != other?.runtimeType)
+    if (runtimeType != other.runtimeType)
       return false;
     final IconData typedOther = other;
     return codePoint == typedOther.codePoint;

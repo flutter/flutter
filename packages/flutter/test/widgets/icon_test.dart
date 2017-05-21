@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Can set opacity for an Icon', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new IconTheme(
-        data: new IconThemeData(
+      const IconTheme(
+        data: const IconThemeData(
           color: const Color(0xFF666666),
           opacity: 0.5
         ),
