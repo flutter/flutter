@@ -54,7 +54,7 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
-    this.initialRoute,
+    this.initialRoute = Navigator.defaultRouteName,
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.navigatorObservers: const <NavigatorObserver>[],
@@ -67,8 +67,8 @@ class MaterialApp extends StatefulWidget {
   }) : super(key: key) {
     assert(debugShowMaterialGrid != null);
     assert(routes != null);
-    assert(!routes.containsKey(initialRoute??Navigator.defaultRouteName) || (home == null));
-    assert(routes.containsKey(initialRoute??Navigator.defaultRouteName) || (home != null) || (onGenerateRoute != null));
+    assert(!routes.containsKey(initialRoute) || (home == null));
+    assert(routes.containsKey(initialRoute) || (home != null) || (onGenerateRoute != null));
  }
 
   /// A one-line description of this app for use in the window manager.
