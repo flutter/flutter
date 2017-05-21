@@ -471,7 +471,7 @@ typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
 /// the selected menu item.
 ///
 /// One of [child] or [icon] may be provided, but not both. If [icon] is provided,
-/// then [PopupMenuButton] behaves like an IconButton.
+/// then [PopupMenuButton] behaves like an [IconButton].
 ///
 /// If both are null, then a standard overflow icon is created (depending on the
 /// platform).
@@ -488,7 +488,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.elevation: 8.0,
     this.padding: const EdgeInsets.all(8.0),
     this.child,
-    this.icon
+    this.icon,
   }) : assert(itemBuilder != null),
        assert(child == null || icon == null), // or both
        super(key: key);
@@ -516,10 +516,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// to set the padding to zero.
   final EdgeInsets padding;
 
-  /// The widget below this widget in the tree.
+  /// If provided, the widget used for this button.
   final Widget child;
 
-  /// The icon used for this button.
+  /// If provided, the icon used for this button.
   final Icon icon;
 
   @override
@@ -567,11 +567,13 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return widget.child != null
       ? new InkWell(
           onTap: showButtonMenu,
-          child: widget.child)
+          child: widget.child,
+        )
       : new IconButton(
           icon: widget.icon ?? _getIcon(Theme.of(context).platform),
           padding: widget.padding,
           tooltip: widget.tooltip,
-          onPressed: showButtonMenu);
+          onPressed: showButtonMenu,
+        );
   }
 }
