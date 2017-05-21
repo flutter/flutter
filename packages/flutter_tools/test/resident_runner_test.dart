@@ -44,7 +44,8 @@ void main() {
   TestRunner testRunner;
 
   setUp(() {
-    testRunner = new TestRunner([new FlutterDevice(new MockDevice())]);
+    testRunner =
+    new TestRunner(<FlutterDevice>[new FlutterDevice(new MockDevice())]);
   });
 
   group('keyboard input handling', () {
