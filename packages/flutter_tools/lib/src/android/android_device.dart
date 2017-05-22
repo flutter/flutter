@@ -27,6 +27,17 @@ import 'android_sdk.dart';
 
 const String _defaultAdbPath = 'adb';
 
+enum _HardwareType { emulator, physical }
+
+/// Map to help our `isLocalEmulator` detection.
+const Map<String, _HardwareType> _knownHardware = const <String, _HardwareType>{
+  'goldfish': _HardwareType.emulator,
+  'qcom': _HardwareType.physical,
+  'ranchu': _HardwareType.emulator,
+  'samsungexynos7420': _HardwareType.physical,
+  'samsungexynos8895': _HardwareType.physical,
+};
+
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices() : super('Android devices');
 
@@ -90,8 +101,17 @@ class AndroidDevice extends Device {
   @override
   Future<bool> get isLocalEmulator async {
     if (_isLocalEmulator == null) {
-      final String characteristics = await _getProperty('ro.build.characteristics');
-      _isLocalEmulator = characteristics != null && characteristics.contains('emulator');
+      final String hardware = await _getProperty('ro.hardware');
+      printTrace('ro.hardware = $hardware');
+      if (_knownHardware.containsKey(hardware)) {
+        // Look for known hardware models.
+        _isLocalEmulator = _knownHardware[hardware] == _HardwareType.emulator;
+      } else {
+        // Fall back to a best-effort heuristic-based approach.
+        final String characteristics = await _getProperty('ro.build.characteristics');
+        printTrace('ro.build.characteristics = $characteristics');
+        _isLocalEmulator = characteristics != null && characteristics.contains('emulator');
+      }
     }
     return _isLocalEmulator;
   }
