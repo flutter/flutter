@@ -251,7 +251,8 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
-      'language': <String, String>{ 'android': androidLanguage, 'ios': iosLanguage },
+      'androidLanguage': androidLanguage,
+      'iosLanguage': iosLanguage,
     };
   }
 

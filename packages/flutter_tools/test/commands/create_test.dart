@@ -49,17 +49,18 @@ void main() {
       );
     });
 
-    testUsingContext('swift project', () async {
+    testUsingContext('kotlin/swift project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--ios-language', 'swift'],
+        <String>['--android-language', 'kotlin', '--ios-language', 'swift'],
         <String>[
-          'android/app/src/main/java/com/yourcompany/flutter_project/MainActivity.java',
+          'android/app/src/main/kotlin/com/yourcompany/flutter_project/MainActivity.kt',
           'ios/Runner/AppDelegate.swift',
           'ios/Runner/Runner-Bridging-Header.h',
           'lib/main.dart',
         ],
         <String>[
+          'android/app/src/main/java/com/yourcompany/flutter_project/MainActivity.java',
           'ios/Runner/AppDelegate.h',
           'ios/Runner/AppDelegate.m',
           'ios/Runner/main.m',
@@ -85,22 +86,24 @@ void main() {
       );
     });
 
-    testUsingContext('swift plugin project', () async {
+    testUsingContext('kotlin/swift plugin project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--plugin', '--ios-language', 'swift'],
+        <String>['--plugin', '--android-language', 'kotlin', '--ios-language', 'swift'],
         <String>[
-          'android/src/main/java/com/yourcompany/flutter_project/FlutterProjectPlugin.java',
+          'android/src/main/kotlin/com/yourcompany/flutter_project/FlutterProjectPlugin.kt',
           'ios/Classes/FlutterProjectPlugin.h',
           'ios/Classes/FlutterProjectPlugin.m',
           'ios/Classes/SwiftFlutterProjectPlugin.swift',
           'lib/flutter_project.dart',
-          'example/android/app/src/main/java/com/yourcompany/flutter_project_example/MainActivity.java',
+          'example/android/app/src/main/kotlin/com/yourcompany/flutter_project_example/MainActivity.kt',
           'example/ios/Runner/AppDelegate.swift',
           'example/ios/Runner/Runner-Bridging-Header.h',
           'example/lib/main.dart',
         ],
         <String>[
+          'android/src/main/java/com/yourcompany/flutter_project/FlutterProjectPlugin.java',
+          'example/android/app/src/main/java/com/yourcompany/flutter_project_example/MainActivity.java',
           'example/ios/Runner/AppDelegate.h',
           'example/ios/Runner/AppDelegate.m',
           'example/ios/Runner/main.m',

@@ -72,7 +72,7 @@ class Template {
       final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
         final String platform = match.group(1);
-        final String language = context['language'][platform];
+        final String language = context['${platform}Language'];
         if (language != match.group(2))
           return null;
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
