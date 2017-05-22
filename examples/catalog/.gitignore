@@ -1,0 +1,3 @@
+.generated/
+test_driver/screenshot.dart
+test_driver/screenshot_test.dart
