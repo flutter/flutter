@@ -222,18 +222,18 @@ Future<Null> _createAndAnalyzeProject(
   for (String path in unexpectedPaths) {
     expect(fs.file(fs.path.join(dir.path, path)).existsSync(), false, reason: '$path exists');
   }
-//  final String flutterToolsPath = fs.path.absolute(fs.path.join(
-//    'bin',
-//    'flutter_tools.dart',
-//  ));
-//  final ProcessResult exec = Process.runSync(
-//    '$dartSdkPath/bin/dart',
-//    <String>[flutterToolsPath, 'analyze'],
-//    workingDirectory: dir.path,
-//  );
-//  if (exec.exitCode != 0) {
-//    print(exec.stdout);
-//    print(exec.stderr);
-//  }
-//  expect(exec.exitCode, 0);
+  final String flutterToolsPath = fs.path.absolute(fs.path.join(
+    'bin',
+    'flutter_tools.dart',
+  ));
+  final ProcessResult exec = Process.runSync(
+    '$dartSdkPath/bin/dart',
+    <String>[flutterToolsPath, 'analyze'],
+    workingDirectory: dir.path,
+  );
+  if (exec.exitCode != 0) {
+    print(exec.stdout);
+    print(exec.stderr);
+  }
+  expect(exec.exitCode, 0);
 }
