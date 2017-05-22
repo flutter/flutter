@@ -1,9 +1,10 @@
-.DS_Store
 .atom/
+.DS_Store
+.buildlog
 .idea
 .packages
 .pub/
 build/
-ios/.generated/
-packages
+packages/
 pubspec.lock
+.flutter-plugins
