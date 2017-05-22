@@ -8,12 +8,13 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
 
 Future<Null> main() async {
   await task(() async {
     final Stopwatch clock = new Stopwatch()..start();
     final Process analysis = await startProcess(
-      'flutter',
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
       <String>['analyze', '--flutter-repo', '--dartdocs'],
       workingDirectory: flutterDirectory.path,
     );
