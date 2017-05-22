@@ -1,4 +1,4 @@
-Signature: 1dd1e60e03d3a8731a9459ed80f0b8a3
+Signature: 01dbc1899b46fdc23da42e219822b51e
 
 UNUSED LICENSES:
 
@@ -246,7 +246,6 @@ FILE: ../../../dart/runtime/vm/class_table.h
 FILE: ../../../dart/runtime/vm/code_descriptors.cc
 FILE: ../../../dart/runtime/vm/code_descriptors.h
 FILE: ../../../dart/runtime/vm/code_descriptors_test.cc
-FILE: ../../../dart/runtime/vm/code_generator.h
 FILE: ../../../dart/runtime/vm/code_generator_test.cc
 FILE: ../../../dart/runtime/vm/code_observers.cc
 FILE: ../../../dart/runtime/vm/code_observers.h
@@ -817,7 +816,6 @@ FILE: ../../../dart/runtime/vm/atomic_win.h
 FILE: ../../../dart/runtime/vm/block_scheduler.cc
 FILE: ../../../dart/runtime/vm/block_scheduler.h
 FILE: ../../../dart/runtime/vm/class_finalizer.cc
-FILE: ../../../dart/runtime/vm/code_generator.cc
 FILE: ../../../dart/runtime/vm/code_patcher_arm.cc
 FILE: ../../../dart/runtime/vm/code_patcher_arm_test.cc
 FILE: ../../../dart/runtime/vm/code_patcher_mips.cc
@@ -1229,7 +1227,6 @@ FILE: ../../../dart/.mailmap
 FILE: ../../../dart/.travis.yml
 FILE: ../../../dart/client/idea/.idea/.name
 FILE: ../../../dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
-FILE: ../../../dart/client/idea/.idea/modules.xml
 FILE: ../../../dart/client/idea/.idea/vcs.xml
 FILE: ../../../dart/runtime/CPPLINT.cfg
 FILE: ../../../dart/runtime/bin/vmserviceio_dartium.dart
@@ -1589,6 +1586,15 @@ FILE: ../../../dart/runtime/bin/snapshot_utils.h
 FILE: ../../../dart/runtime/bin/socket_base.cc
 FILE: ../../../dart/runtime/bin/socket_base.h
 FILE: ../../../dart/runtime/bin/socket_base_unsupported.cc
+FILE: ../../../dart/runtime/bin/sync_socket.cc
+FILE: ../../../dart/runtime/bin/sync_socket.h
+FILE: ../../../dart/runtime/bin/sync_socket_android.cc
+FILE: ../../../dart/runtime/bin/sync_socket_fuchsia.cc
+FILE: ../../../dart/runtime/bin/sync_socket_linux.cc
+FILE: ../../../dart/runtime/bin/sync_socket_macos.cc
+FILE: ../../../dart/runtime/bin/sync_socket_patch.dart
+FILE: ../../../dart/runtime/bin/sync_socket_unsupported.cc
+FILE: ../../../dart/runtime/bin/sync_socket_win.cc
 FILE: ../../../dart/runtime/lib/async.cc
 FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_ref.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_view.dart
@@ -1613,12 +1619,13 @@ FILE: ../../../dart/runtime/vm/fixed_cache.h
 FILE: ../../../dart/runtime/vm/fixed_cache_test.cc
 FILE: ../../../dart/runtime/vm/kernel_binary.h
 FILE: ../../../dart/runtime/vm/kernel_binary_flowgraph.h
-FILE: ../../../dart/runtime/vm/malloc_hooks.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks.h
 FILE: ../../../dart/runtime/vm/malloc_hooks_arm.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_arm64.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_ia32.cc
+FILE: ../../../dart/runtime/vm/malloc_hooks_jemalloc.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_mips.cc
+FILE: ../../../dart/runtime/vm/malloc_hooks_tcmalloc.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_test.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_unsupported.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_x64.cc
@@ -1626,6 +1633,7 @@ FILE: ../../../dart/runtime/vm/stack_trace.cc
 FILE: ../../../dart/runtime/vm/stack_trace.h
 FILE: ../../../dart/runtime/vm/zone_text_buffer.cc
 FILE: ../../../dart/runtime/vm/zone_text_buffer.h
+FILE: ../../../dart/sdk/lib/io/sync_socket.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved. Use of this source code is governed by a

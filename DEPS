@@ -24,12 +24,18 @@ vars = {
   'github_git': 'https://github.com',
   'skia_revision': 'efa48d599de15d960d7335a4a93a6bbeb97d3c41',
 
-  # Note: When updating the Dart revision, ensure that all entries that are
-  # dependencies of dart are also updated
-  'dart_revision': '42ec925a9e8be87e515f06440e01e11c832b8da7',
+  # When updating the Dart revision, ensure that all entries that are
+  # dependencies of Dart are also updated to match the entries in the
+  # Dart SDK's DEPS file for that revision of Dart. The DEPS file for
+  # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS
+  'dart_revision': '425626363a0c8f80cd8861fa5c7ee9eba121533a',
+  # Dart calls the next one "boringssl_gen_rev"
   'dart_boringssl_gen_revision': '753224969dbe43dad29343146529727b5066c0f3',
+  # Dart calls the next one "boringssl_rev"
   'dart_boringssl_revision': 'd519bf6be0b447fb80fbc539d4bff4479b5482a2',
+  # Dart calls the next one "observatory_pub_packages_rev"
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
+  # Dart calls the next one "root_certificates_rev"
   'dart_root_certificates_revision': 'a4c7c6f23a664a37bc1b6f15a819e3f2a292791a',
 
   'buildtools_revision': 'c8db819853bcf8ce1635a8b7a395820f39b5a9fc',
