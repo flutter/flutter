@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -32,53 +33,55 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
 
-  bool get hasWorkingLibimobiledevice {
+  Future<bool> get hasWorkingLibimobiledevice async {
     // Verify that libimobiledevice tools are installed.
     if (!hasIDeviceId)
       return false;
 
     // If a device is attached, verify that we can get its name.
-    final String result = runSync(<String>['idevice_id', '-l']);
-    if (result.isNotEmpty && !exitsHappy(<String>['idevicename']))
+    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+    if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['idevicename']))
       return false;
 
     return true;
   }
 
-  bool get hasIDeviceInstaller => exitsHappy(<String>['ideviceinstaller', '-h']);
+  Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
-  bool get hasIosDeploy => exitsHappy(<String>['ios-deploy', '--version']);
+  Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
 
   String get iosDeployMinimumVersion => '1.9.0';
 
-  String get iosDeployVersionText => runSync(<String>['ios-deploy', '--version']).replaceAll('\n', '');
+  Future<String> get iosDeployVersionText async =>
+      (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
   bool get hasHomebrew => os.which('brew') != null;
 
   bool get hasPythonSixModule => kPythonSix.isInstalled;
 
-  bool get hasCocoaPods => exitsHappy(<String>['pod', '--version']);
+  Future<bool> get hasCocoaPods => exitsHappyAsync(<String>['pod', '--version']);
 
   String get cocoaPodsMinimumVersion => '1.0.0';
 
-  String get cocoaPodsVersionText => runSync(<String>['pod', '--version']).trim();
+  Future<String> get cocoaPodsVersionText async =>
+      (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
 
-  bool get _iosDeployIsInstalledAndMeetsVersionCheck {
-    if (!hasIosDeploy)
+  Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
+    if (!await hasIosDeploy)
       return false;
     try {
-      final Version version = new Version.parse(iosDeployVersionText);
+      final Version version = new Version.parse(await iosDeployVersionText);
       return version >= new Version.parse(iosDeployMinimumVersion);
     } on FormatException catch (_) {
       return false;
     }
   }
 
-  bool get isCocoaPodsInstalledAndMeetsVersionCheck {
-    if (!hasCocoaPods)
+  Future<bool> get isCocoaPodsInstalledAndMeetsVersionCheck async {
+    if (!await hasCocoaPods)
       return false;
     try {
-      final Version installedVersion = new Version.parse(cocoaPodsVersionText);
+      final Version installedVersion = new Version.parse(await cocoaPodsVersionText);
       return installedVersion >= new Version.parse(cocoaPodsMinimumVersion);
     } on FormatException {
       return false;
@@ -86,11 +89,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   }
 
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
-  bool get isCocoaPodsInitialized {
-    return fs.isDirectorySync(
-      fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')
-    );
-  }
+  Future<bool> get isCocoaPodsInitialized =>
+      fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
 
   @override
   Future<ValidationResult> validate() async {
@@ -152,7 +152,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (hasHomebrew) {
       brewStatus = ValidationType.installed;
 
-      if (!hasWorkingLibimobiledevice) {
+      if (!await hasWorkingLibimobiledevice) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
             'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
@@ -162,7 +162,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         ));
       }
 
-      if (!hasIDeviceInstaller) {
+      if (!await hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
@@ -174,12 +174,12 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       }
 
       // Check ios-deploy is installed at meets version requirements.
-      if (hasIosDeploy) {
-        messages.add(new ValidationMessage('ios-deploy $iosDeployVersionText'));
+      if (await hasIosDeploy) {
+        messages.add(new ValidationMessage('ios-deploy ${await iosDeployVersionText}'));
       }
-      if (!_iosDeployIsInstalledAndMeetsVersionCheck) {
+      if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
         brewStatus = ValidationType.partial;
-        if (hasIosDeploy) {
+        if (await hasIosDeploy) {
           messages.add(new ValidationMessage.error(
             'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
             '  brew update\n'
@@ -194,9 +194,9 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       }
 
-      if (isCocoaPodsInstalledAndMeetsVersionCheck) {
-        if (isCocoaPodsInitialized) {
-          messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
+      if (await isCocoaPodsInstalledAndMeetsVersionCheck) {
+        if (await isCocoaPodsInitialized) {
+          messages.add(new ValidationMessage('CocoaPods version ${await cocoaPodsVersionText}'));
         } else {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
@@ -209,7 +209,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       } else {
         brewStatus = ValidationType.partial;
-        if (!hasCocoaPods) {
+        if (!await hasCocoaPods) {
           messages.add(new ValidationMessage.error(
             'CocoaPods not installed.\n'
             '$noCocoaPodsConsequence\n'

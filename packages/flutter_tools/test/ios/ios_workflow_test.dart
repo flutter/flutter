@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -30,10 +32,11 @@ void main() {
     testUsingContext('Emit missing status when nothing is installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn(null);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..hasPythonSixModule = false
-        ..hasHomebrew = false
-        ..hasIosDeploy = false;
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(
+        hasPythonSixModule: false,
+        hasHomebrew: false,
+        hasIosDeploy: false,
+      );
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -82,8 +85,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..hasPythonSixModule = false;
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasPythonSixModule: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -94,8 +96,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..hasHomebrew = false;
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -106,8 +107,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..hasWorkingLibimobiledevice = false;
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasWorkingLibimobiledevice: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -118,8 +118,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..hasIosDeploy = false;
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasIosDeploy: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -130,8 +129,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..iosDeployVersionText = '1.8.0';
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(iosDeployVersionText: '1.8.0');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -142,8 +140,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..hasCocoaPods = false;
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasCocoaPods: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -154,8 +151,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..cocoaPodsVersionText = '0.39.0';
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(cocoaPodsVersionText: '0.39.0');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -215,27 +211,43 @@ class MockXcode extends Mock implements Xcode {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class IOSWorkflowTestTarget extends IOSWorkflow {
-  @override
-  bool hasPythonSixModule = true;
+  IOSWorkflowTestTarget({
+    this.hasPythonSixModule: true,
+    this.hasHomebrew: true,
+    bool hasWorkingLibimobiledevice: true,
+    bool hasIosDeploy: true,
+    String iosDeployVersionText: '1.9.0',
+    bool hasIDeviceInstaller: true,
+    bool hasCocoaPods: true,
+    String cocoaPodsVersionText: '1.2.0',
+  }) : hasWorkingLibimobiledevice = new Future<bool>.value(hasWorkingLibimobiledevice),
+       hasIosDeploy = new Future<bool>.value(hasIosDeploy),
+       iosDeployVersionText = new Future<String>.value(iosDeployVersionText),
+       hasIDeviceInstaller = new Future<bool>.value(hasIDeviceInstaller),
+       hasCocoaPods = new Future<bool>.value(hasCocoaPods),
+       cocoaPodsVersionText = new Future<String>.value(cocoaPodsVersionText);
 
   @override
-  bool hasHomebrew = true;
+  final bool hasPythonSixModule;
 
   @override
-  bool hasWorkingLibimobiledevice = true;
+  final bool hasHomebrew;
 
   @override
-  bool hasIosDeploy = true;
+  final Future<bool> hasWorkingLibimobiledevice;
 
   @override
-  String iosDeployVersionText = '1.9.0';
+  final Future<bool> hasIosDeploy;
 
   @override
-  bool get hasIDeviceInstaller => true;
+  final Future<String> iosDeployVersionText;
 
   @override
-  bool hasCocoaPods = true;
+  final Future<bool> hasIDeviceInstaller;
 
   @override
-  String cocoaPodsVersionText = '1.2.0';
+  final Future<bool> hasCocoaPods;
+
+  @override
+  final Future<String> cocoaPodsVersionText;
 }
