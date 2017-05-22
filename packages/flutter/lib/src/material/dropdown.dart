@@ -196,6 +196,8 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   final _DropdownRoute<T> route;
 
   Rect get buttonRect => route.buttonRect;
+  double get menuTop => route.menuTop;
+  double get menuHeight => route.menuHeight;
   int get selectedIndex => route.selectedIndex;
   ScrollController get scrollController => route.scrollController;
 
@@ -217,41 +219,19 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    final double buttonTop = buttonRect.top;
-    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
-    double top = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
-    final double topPreferredLimit = _kMenuItemHeight;
-    if (top < topPreferredLimit)
-      top = math.min(buttonTop, topPreferredLimit);
-    double bottom = top + childSize.height;
-    final double bottomPreferredLimit = size.height - _kMenuItemHeight;
-    if (bottom > bottomPreferredLimit) {
-      bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
-      top = bottom - childSize.height;
-    }
     assert(() {
       final Rect container = Offset.zero & size;
       if (container.intersect(buttonRect) == buttonRect) {
         // If the button was entirely on-screen, then verify
         // that the menu is also on-screen.
         // If the button was a bit off-screen, then, oh well.
-        assert(top >= 0.0);
-        assert(top + childSize.height <= size.height);
+        assert(menuTop >= 0.0);
+        assert(menuTop + menuHeight <= size.height);
       }
       return true;
     });
 
-    if (route.initialLayout) {
-      route.initialLayout = false;
-      final double scrollOffset = selectedItemOffset - (buttonTop - top);
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        // TODO(ianh): Compute and set this during layout instead of being
-        // lagged by one frame. https://github.com/flutter/flutter/issues/5751
-        scrollController.jumpTo(scrollOffset);
-      });
-    }
-
-    return new Offset(buttonRect.left, top);
+    return new Offset(buttonRect.left, menuTop);
   }
 
   @override
@@ -290,13 +270,17 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     assert(style != null);
   }
 
-  final ScrollController scrollController = new ScrollController();
   final List<DropdownMenuItem<T>> items;
   final Rect buttonRect;
   final int selectedIndex;
   final int elevation;
   final ThemeData theme;
   final TextStyle style;
+
+  // These fields are used by _DropdownMenuRouteLayout and initialized by buildPage().
+  ScrollController scrollController;
+  double menuTop;
+  double menuHeight;
 
   // The layout gets this route's scrollController so that it can scroll the
   // selected item into position, but only on the initial layout.
@@ -313,6 +297,30 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    // Compute the dropdown menu's top and height as well as its initial scroll
+    // offset. The menu's height is limited to two menu item heights less than the
+    // screen's height. We attempt to line up the vertical center of the selected
+    // item with the vertical center of the dropdown button.
+    final double screenHeight = MediaQuery.of(context).size.height;
+    menuHeight = math.min(
+      (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical,
+      screenHeight - 2.0 * _kMenuItemHeight
+    );
+    final double buttonTop = buttonRect.top;
+    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
+    menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
+    final double topPreferredLimit = _kMenuItemHeight;
+    if (menuTop < topPreferredLimit)
+      menuTop = math.min(buttonTop, topPreferredLimit);
+    double bottom = menuTop + menuHeight;
+    final double bottomPreferredLimit = screenHeight - _kMenuItemHeight;
+    if (bottom > bottomPreferredLimit) {
+      bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
+      menuTop = bottom - menuHeight;
+    }
+    final double scrollOffset = selectedItemOffset - (buttonTop - menuTop);
+    scrollController = new ScrollController(initialScrollOffset: scrollOffset);
+
     Widget menu = new _DropdownMenu<T>(route: this);
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
