@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -32,6 +31,19 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
 
   bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
+
+  bool get hasWorkingLibimobiledevice {
+    // Verify that libimobiledevice tools are installed.
+    if (!hasIDeviceId)
+      return false;
+
+    // If a device is attached, verify that we can get its name.
+    final String result = runSync(<String>['idevice_id', '-l']);
+    if (result.isNotEmpty && !exitsHappy(<String>['idevicename']))
+      return false;
+
+    return true;
+  }
 
   bool get hasIDeviceInstaller => exitsHappy(<String>['ideviceinstaller', '-h']);
 
@@ -140,6 +152,16 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (hasHomebrew) {
       brewStatus = ValidationType.installed;
 
+      if (!hasWorkingLibimobiledevice) {
+        brewStatus = ValidationType.partial;
+        messages.add(new ValidationMessage.error(
+            'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
+                '  brew update\n'
+                '  brew uninstall --ignore-dependencies libimobiledevice\n'
+                '  brew install --HEAD libimobiledevice'
+        ));
+      }
+
       if (!hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
@@ -155,7 +177,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       if (hasIosDeploy) {
         messages.add(new ValidationMessage('ios-deploy $iosDeployVersionText'));
       }
-      if (!hasIDeviceId || !_iosDeployIsInstalledAndMeetsVersionCheck) {
+      if (!_iosDeployIsInstalledAndMeetsVersionCheck) {
         brewStatus = ValidationType.partial;
         if (hasIosDeploy) {
           messages.add(new ValidationMessage.error(
@@ -170,20 +192,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
             '  brew install ios-deploy'
           ));
         }
-      } else {
-        // Check for compatibility between libimobiledevice and Xcode.
-        // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
-        final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-        if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['ideviceName'])) {
-          brewStatus = ValidationType.partial;
-          messages.add(new ValidationMessage.error(
-            'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
-            '  brew update\n'
-            '  brew uninstall --ignore-dependencies libimobiledevice\n'
-            '  brew install --HEAD libimobiledevice'
-          ));
-        }
       }
+
       if (isCocoaPodsInstalledAndMeetsVersionCheck) {
         if (isCocoaPodsInitialized) {
           messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
