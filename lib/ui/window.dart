@@ -29,7 +29,7 @@ typedef void PlatformMessageCallback(String name, ByteData data, PlatformMessage
 enum AppLifecycleState {
   /// The application is not currently visible to the user. When the
   /// application is in this state, the engine will not call the
-  /// [Window.onBeginFrame] callback.
+  /// [Window.onBeginFrame] and [Window.onDrawFrame] callbacks.
   paused,
 
   /// The application is visible to the user.
@@ -159,12 +159,16 @@ class Window {
   /// [render] method. When possible, this is driven by the hardware VSync
   /// signal. This is only called if [scheduleFrame] has been called since the
   /// last time this callback was invoked.
+  ///
+  /// The [onDrawFrame] callback is invoked immediately after [onBeginFrame],
+  /// after draining any microtasks (e.g. completions of any [Future]s) queued
+  /// by the [onBeginFrame] handler.
   FrameCallback onBeginFrame;
 
-  /// A callback that is invoked for each frame after onBeginFrame has
-  /// completed and after the microtask queue has been drained.  This can be
+  /// A callback that is invoked for each frame after [onBeginFrame] has
+  /// completed and after the microtask queue has been drained. This can be
   /// used to implement a second phase of frame rendering that happens
-  /// after any deferred work queued by the onBeginFrame phase.
+  /// after any deferred work queued by the [onBeginFrame] phase.
   VoidCallback onDrawFrame;
 
   /// A callback that is invoked when pointer data is available.
@@ -176,14 +180,15 @@ class Window {
   String _defaultRouteName;
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
-  /// callback be invoked.
+  /// and [onDrawFrame] callbacks be invoked.
   void scheduleFrame() native "Window_scheduleFrame";
 
   /// Updates the application's rendering on the GPU with the newly provided
   /// [Scene]. This function must be called within the scope of the
-  /// [onBeginFrame] callback being invoked. If this function is called multiple
-  /// times during a single [onBeginFrame] callback or called outside the scope
-  /// of an [onBeginFrame], the call will be ignored.
+  /// [onBeginFrame] or [onDrawFrame] callbacks being invoked. If this function
+  /// is called a second time during a single [onBeginFrame]/[onDrawFrame]
+  /// callback sequence or called outside the scope of those callbacks, the call
+  /// will be ignored.
   ///
   /// To record graphical operations, first create a [PictureRecorder], then
   /// construct a [Canvas], passing that [PictureRecorder] to its constructor.
