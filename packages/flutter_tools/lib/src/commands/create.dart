@@ -46,6 +46,16 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: 'A new flutter project.',
       help: 'The description to use for your new flutter project. This string ends up in the pubspec.yaml file.'
     );
+    argParser.addOption(
+      'ios-language',
+      defaultsTo: 'objc',
+      allowed: <String>['objc', 'swift'],
+    );
+    argParser.addOption(
+      'android-language',
+      defaultsTo: 'java',
+      allowed: <String>['java', 'kotlin'],
+    );
   }
 
   @override
@@ -109,9 +119,14 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
 
     final Map<String, dynamic> templateContext = _templateContext(
-        projectName, argResults['description'], dirPath,
-        flutterRoot, renderDriverTest: argResults['with-driver-test'],
-        withPluginHook: generatePlugin,
+      projectName: projectName,
+      projectDescription: argResults['description'],
+      dirPath: dirPath,
+      flutterRoot: flutterRoot,
+      renderDriverTest: argResults['with-driver-test'],
+      withPluginHook: generatePlugin,
+      androidLanguage: argResults['android-language'],
+      iosLanguage: argResults['ios-language'],
     );
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
@@ -206,9 +221,16 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
     }
   }
 
-  Map<String, dynamic> _templateContext(String projectName,
-      String projectDescription, String dirPath, String flutterRoot,
-      { bool renderDriverTest: false, bool withPluginHook: false }) {
+  Map<String, dynamic> _templateContext({
+    String projectName,
+    String projectDescription,
+    String androidLanguage,
+    String iosLanguage,
+    String dirPath,
+    String flutterRoot,
+    bool renderDriverTest: false,
+    bool withPluginHook: false,
+  }) {
     flutterRoot = fs.path.normalize(flutterRoot);
 
     final String pluginDartClass = _createPluginClassName(projectName);
@@ -229,6 +251,7 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
+      'language': <String, String>{ 'android': androidLanguage, 'ios': iosLanguage },
     };
   }
 

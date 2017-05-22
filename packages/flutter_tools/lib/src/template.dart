@@ -10,9 +10,11 @@ import 'globals.dart';
 
 const String _kTemplateExtension = '.tmpl';
 const String _kCopyTemplateExtension = '.copy.tmpl';
+final Pattern _kTemplateLanguageVariant = new RegExp(r"(\w+)-(\w+)\.tmpl.*");
 
 /// Expands templates in a directory to a destination. All files that must
-/// undergo template expansion should end with the '.tmpl' extension. All other
+/// undergo template expansion should end with the '.tmpl' extension or the
+/// context-specific '.xxx-tmpl' extension. All other
 /// files are ignored. In case the contents of entire directories must be copied
 /// as is, the directory itself can end with '.tmpl' extension. Files within
 /// such a directory may also contain the '.tmpl' extension and will be
@@ -66,19 +68,34 @@ class Template {
     destination.createSync(recursive: true);
     int fileCount = 0;
 
-    final String projectName = context['projectName'];
-    final String pluginClass = context['pluginClass'];
-    final String destinationDirPath = destination.absolute.path;
-
-    _templateFilePaths.forEach((String relativeDestPath, String absoluteSrcPath) {
+    String renderPath(String relativeDestinationPath) {
+      final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
+      if (match != null) {
+        final String platform = match.group(1);
+        final String language = context['language'][platform];
+        if (language != match.group(2))
+          return null;
+        relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
+      }
+      final String projectName = context['projectName'];
+      final String pluginClass = context['pluginClass'];
+      final String destinationDirPath = destination.absolute.path;
       String finalDestinationPath = fs.path
-          .join(destinationDirPath, relativeDestPath)
-          .replaceAll(_kCopyTemplateExtension, '')
-          .replaceAll(_kTemplateExtension, '');
+        .join(destinationDirPath, relativeDestinationPath)
+        .replaceAll(_kCopyTemplateExtension, '')
+        .replaceAll(_kTemplateExtension, '');
       if (projectName != null)
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       if (pluginClass != null)
         finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
+      return finalDestinationPath;
+    }
+
+    _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
+      final String finalDestinationPath = renderPath(relativeDestinationPath);
+      if (finalDestinationPath == null) {
+        return;
+      }
       final File finalDestinationFile = fs.file(finalDestinationPath);
       final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
 
@@ -100,7 +117,7 @@ class Template {
       fileCount++;
 
       finalDestinationFile.createSync(recursive: true);
-      final File sourceFile = fs.file(absoluteSrcPath);
+      final File sourceFile = fs.file(absoluteSourcePath);
 
       // Step 2: If the absolute paths ends with a 'copy.tmpl', this file does
       //         not need mustache rendering but needs to be directly copied.
