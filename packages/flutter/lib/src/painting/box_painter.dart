@@ -1239,9 +1239,9 @@ void paintImage({
   @required ui.Image image,
   ColorFilter colorFilter,
   BoxFit fit,
-  ImageRepeat repeat: ImageRepeat.noRepeat,
+  FractionalOffset alignment,
   Rect centerSlice,
-  FractionalOffset alignment
+  ImageRepeat repeat: ImageRepeat.noRepeat,
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -1266,7 +1266,7 @@ void paintImage({
     destinationSize += sliceBorder;
     // We don't have the ability to draw a subset of the image at the same time
     // as we apply a nine-patch stretch.
-    assert(sourceSize == inputSize);
+    assert(sourceSize == inputSize, 'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
   }
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
     // There's no need to repeat the image because we're exactly filling the
@@ -1315,11 +1315,11 @@ class DecorationImage {
   /// The [image] argument must not be null.
   const DecorationImage({
     @required this.image,
-    this.fit,
-    this.repeat: ImageRepeat.noRepeat,
-    this.centerSlice,
     this.colorFilter,
+    this.fit,
     this.alignment,
+    this.centerSlice,
+    this.repeat: ImageRepeat.noRepeat,
   }) : assert(image != null);
 
   /// The image to be painted into the decoration.
@@ -1327,6 +1327,9 @@ class DecorationImage {
   /// Typically this will be an [AssetImage] (for an image shipped with the
   /// application) or a [NetworkImage] (for an image obtained from the network).
   final ImageProvider image;
+
+  /// A color filter to apply to the image before painting it.
+  final ColorFilter colorFilter;
 
   /// How the image should be inscribed into the box.
   ///
@@ -1336,9 +1339,14 @@ class DecorationImage {
   /// See the discussion at [paintImage] for more details.
   final BoxFit fit;
 
-  /// How to paint any portions of the box that would not otherwise be covered
-  /// by the image.
-  final ImageRepeat repeat;
+  /// How to align the image within its bounds.
+  ///
+  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
+  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
+  /// of the right edge of its layout bounds.
+  ///
+  /// Defaults to [FractionalOffset.center].
+  final FractionalOffset alignment;
 
   /// The center slice for a nine-patch image.
   ///
@@ -1357,17 +1365,9 @@ class DecorationImage {
   /// scaling, as if it wasn't specified).
   final Rect centerSlice;
 
-  /// A color filter to apply to the image before painting it.
-  final ColorFilter colorFilter;
-
-  /// How to align the image within its bounds.
-  ///
-  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
-  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
-  /// of the right edge of its layout bounds.
-  ///
-  /// Defaults to [FractionalOffset.center].
-  final FractionalOffset alignment;
+  /// How to paint any portions of the box that would not otherwise be covered
+  /// by the image.
+  final ImageRepeat repeat;
 
   @override
   bool operator ==(dynamic other) {
@@ -1376,19 +1376,35 @@ class DecorationImage {
     if (runtimeType != other.runtimeType)
       return false;
     final DecorationImage typedOther = other;
-    return image == typedOther.image &&
-           fit == typedOther.fit &&
-           repeat == typedOther.repeat &&
-           centerSlice == typedOther.centerSlice &&
-           colorFilter == typedOther.colorFilter &&
-           alignment == typedOther.alignment;
+    return image == typedOther.image
+        && colorFilter == typedOther.colorFilter
+        && fit == typedOther.fit
+        && alignment == typedOther.alignment
+        && centerSlice == typedOther.centerSlice
+        && repeat == typedOther.repeat;
   }
 
   @override
-  int get hashCode => hashValues(image, fit, repeat, centerSlice, colorFilter, alignment);
+  int get hashCode => hashValues(image, colorFilter, fit, alignment, centerSlice, repeat);
 
   @override
-  String toString() => '$runtimeType($image, $fit, $repeat)';
+  String toString() {
+    final List<String> properties = <String>[];
+    properties.add('$image');
+    if (colorFilter != null)
+      properties.add('$colorFilter');
+    if (fit != null &&
+        !(fit == BoxFit.fill && centerSlice != null) &&
+        !(fit == BoxFit.scaleDown && centerSlice == null))
+      properties.add('$fit');
+    if (alignment != null)
+      properties.add('$alignment');
+    if (centerSlice != null)
+      properties.add('centerSlice: $centerSlice');
+    if (repeat != ImageRepeat.noRepeat)
+      properties.add('$repeat');
+    return '$runtimeType(${properties.join(", ")})';
+  }
 }
 
 /// An immutable description of how to paint a box.
@@ -1452,7 +1468,7 @@ class BoxDecoration extends Decoration {
     this.borderRadius,
     this.boxShadow,
     this.gradient,
-    this.shape: BoxShape.rectangle
+    this.shape: BoxShape.rectangle,
   });
 
   @override
@@ -1505,7 +1521,7 @@ class BoxDecoration extends Decoration {
       borderRadius: BorderRadius.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
-      shape: shape
+      shape: shape,
     );
   }
 
@@ -1532,7 +1548,7 @@ class BoxDecoration extends Decoration {
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: b.gradient,
-      shape: b.shape
+      shape: b.shape,
     );
   }
 
@@ -1575,7 +1591,7 @@ class BoxDecoration extends Decoration {
       borderRadius,
       boxShadow,
       gradient,
-      shape
+      shape,
     );
   }
 
@@ -1741,9 +1757,10 @@ class _BoxDecorationPainter extends BoxPainter {
       rect: rect,
       image: image,
       colorFilter: backgroundImage.colorFilter,
-      alignment: backgroundImage.alignment,
       fit: backgroundImage.fit,
-      repeat: backgroundImage.repeat
+      alignment: backgroundImage.alignment,
+      centerSlice: backgroundImage.centerSlice,
+      repeat: backgroundImage.repeat,
     );
 
     if (clipPath != null)
