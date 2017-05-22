@@ -1,3 +1,14 @@
+.DS_Store
+.atom/
+.idea
+.packages
+.pub/
+build/
+ios/.generated/
+packages
+pubspec.lock
+.flutter-plugins
+
 .generated/
 test_driver/screenshot.dart
 test_driver/screenshot_test.dart
