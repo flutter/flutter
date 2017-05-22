@@ -100,14 +100,14 @@ void main() {
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
-    testUsingContext('Emits partial status when ideviceid is not installed', () async {
+    testUsingContext('Emits partial status when libimobiledevice is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.xcodeVersionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
-        ..hasIDeviceId = false;
+        ..hasWorkingLibimobiledevice = false;
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
@@ -222,7 +222,7 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
   bool hasHomebrew = true;
 
   @override
-  bool hasIDeviceId = true;
+  bool hasWorkingLibimobiledevice = true;
 
   @override
   bool hasIosDeploy = true;
