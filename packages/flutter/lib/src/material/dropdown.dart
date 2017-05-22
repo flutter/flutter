@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -297,15 +296,11 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    // Compute the dropdown menu's top and height as well as its initial scroll
-    // offset. The menu's height is limited to two menu item heights less than the
-    // screen's height. We attempt to line up the vertical center of the selected
-    // item with the vertical center of the dropdown button.
     final double screenHeight = MediaQuery.of(context).size.height;
-    menuHeight = math.min(
-      (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical,
-      screenHeight - 2.0 * _kMenuItemHeight
-    );
+    final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
+    final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
+    menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
+
     final double buttonTop = buttonRect.top;
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
     menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
@@ -318,7 +313,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       bottom = math.max(buttonTop + _kMenuItemHeight, bottomPreferredLimit);
       menuTop = bottom - menuHeight;
     }
-    final double scrollOffset = selectedItemOffset - (buttonTop - menuTop);
+
+    double scrollOffset = 0.0;
+    if (preferredMenuHeight > maxMenuHeight)
+      scrollOffset = selectedItemOffset - (buttonTop - menuTop);
     scrollController = new ScrollController(initialScrollOffset: scrollOffset);
 
     Widget menu = new _DropdownMenu<T>(route: this);
