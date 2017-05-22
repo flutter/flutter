@@ -100,6 +100,18 @@ void main() {
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
+    testUsingContext('Emits partial status when ideviceid is not installed', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.xcodeVersionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+        ..hasIDeviceId = false;
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+
     testUsingContext('Emits partial status when ios-deploy is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.xcodeVersionText)
@@ -208,6 +220,9 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
 
   @override
   bool hasHomebrew = true;
+
+  @override
+  bool hasIDeviceId = true;
 
   @override
   bool hasIosDeploy = true;
