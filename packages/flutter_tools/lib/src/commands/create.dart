@@ -48,11 +48,13 @@ class CreateCommand extends FlutterCommand {
     );
     argParser.addOption(
       'ios-language',
+      abbr: 'i',
       defaultsTo: 'objc',
       allowed: <String>['objc', 'swift'],
     );
     argParser.addOption(
       'android-language',
+      abbr: 'a',
       defaultsTo: 'java',
       allowed: <String>['java', 'kotlin'],
     );
