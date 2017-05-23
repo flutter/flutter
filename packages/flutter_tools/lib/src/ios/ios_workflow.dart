@@ -52,8 +52,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   String get iosDeployMinimumVersion => '1.9.0';
 
-  Future<String> get iosDeployVersionText async =>
-      (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
+  Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
   bool get hasHomebrew => os.which('brew') != null;
 
@@ -63,8 +62,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   String get cocoaPodsMinimumVersion => '1.0.0';
 
-  Future<String> get cocoaPodsVersionText async =>
-      (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
+  Future<String> get cocoaPodsVersionText async => (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
 
   Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
     if (!await hasIosDeploy)
@@ -89,8 +87,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   }
 
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
-  Future<bool> get isCocoaPodsInitialized =>
-      fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
+  Future<bool> get isCocoaPodsInitialized => fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
 
   @override
   Future<ValidationResult> validate() async {
