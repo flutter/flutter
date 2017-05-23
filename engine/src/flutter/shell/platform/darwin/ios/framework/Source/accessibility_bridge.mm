@@ -96,7 +96,12 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 
 - (NSString*)accessibilityLabel {
   if (_node.label.empty()) {
-    return nil;
+    NSMutableString *label = [NSMutableString string];
+    for (auto& child : _children) {
+      [label appendString: [child accessibilityLabel]];
+      [label appendString: @"\n"];
+    }
+    return label;
   }
   return @(_node.label.data());
 }
