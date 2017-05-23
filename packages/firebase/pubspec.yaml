@@ -1,0 +1,14 @@
+name: firebase
+description: Dart wrapper for Flutter apps to use native Firebase mobile SDKs
+version: 0.0.1
+author: Flutter Authors <flutter-dev@googlegroups.com>
+
+dependencies:
+  flutter:
+    path: ../flutter
+
+dev_dependencies:
+  test: '>=0.12.0 <0.13.0'
+
+environment:
+  sdk: '>=1.12.0 <2.0.0'
