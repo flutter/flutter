@@ -472,16 +472,33 @@ class DropdownButton<T> extends StatefulWidget {
   _DropdownButtonState<T> createState() => new _DropdownButtonState<T>();
 }
 
-class _DropdownButtonState<T> extends State<DropdownButton<T>> {
+class _DropdownButtonState<T> extends State<DropdownButton<T>> implements WidgetsBindingObserver {
   int _selectedIndex;
+  _DropdownRoute<T> _dropdownRoute;
 
   @override
   void initState() {
     super.initState();
     _updateSelectedIndex();
+    WidgetsBinding.instance.addObserver(this);
   }
 
- @override
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    //TODO(hansmuller) if _dropDownRoute != null Navigator.remove(context, _dropdownRoute)
+    super.dispose();
+  }
+
+  // Typically called because the device's orientation has changed.
+  // Defined by WidgetsBindingObserver
+  @override
+  void didChangeMetrics() {
+    //TODO(hansmuller) if _dropDownRoute != null Navigator.remove(context, _dropdownRoute)
+    _dropdownRoute = null;
+  }
+
+  @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateSelectedIndex();
@@ -504,14 +521,19 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
-    Navigator.push(context, new _DropdownRoute<T>(
+
+    assert(_dropdownRoute == null);
+    _dropdownRoute = new _DropdownRoute<T>(
       items: widget.items,
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
       selectedIndex: _selectedIndex ?? 0,
       elevation: widget.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
       style: _textStyle,
-    )).then<Null>((_DropdownRouteResult<T> newValue) {
+    );
+
+    Navigator.push(context, _dropdownRoute).then<Null>((_DropdownRouteResult<T> newValue) {
+      _dropdownRoute = null;
       if (!mounted || newValue == null)
         return null;
       if (widget.onChanged != null)
