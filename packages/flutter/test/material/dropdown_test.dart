@@ -7,7 +7,12 @@ import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-final List<String> menuItems = <String>['one', 'two', 'three', 'four'];
+const List<String> menuItems = const <String>['one', 'two', 'three', 'four'];
+
+final Type dropdownButtonType = new DropdownButton<String>(
+  onChanged: (_){ },
+  items: const <DropdownMenuItem<String>>[]
+).runtimeType;
 
 Widget buildFrame({
     Key buttonKey,
@@ -15,17 +20,20 @@ Widget buildFrame({
     ValueChanged<String> onChanged,
     bool isDense: false,
     Widget hint,
+    List<String> items: menuItems,
+    FractionalOffset alignment: FractionalOffset.center,
   }) {
   return new MaterialApp(
     home: new Material(
-      child: new Center(
+      child: new Align(
+        alignment: alignment,
         child: new DropdownButton<String>(
           key: buttonKey,
           value: value,
           hint: hint,
           onChanged: onChanged,
           isDense: isDense,
-          items: menuItems.map((String item) {
+          items: items.map((String item) {
             return new DropdownMenuItem<String>(
               key: new ValueKey<String>(item),
               value: item,
@@ -56,7 +64,6 @@ bool sameGeometry(RenderBox box1, RenderBox box2) {
   expect(box1.size.height, equals(box2.size.height));
   return true;
 }
-
 
 void main() {
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
@@ -348,4 +355,112 @@ void main() {
     expect(buttonBox.size, equals(buttonBoxHintValue.size));
   });
 
+  testWidgets('Dropdown menus must fit within the screen', (WidgetTester tester) async {
+
+    // The dropdown menu isn't readaily accessible. To find it we're assuming that it
+    // contains a ListView and that it's an instance of _DropdownMenu.
+    Rect getMenuRect() {
+      Rect menuRect;
+      tester.element(find.byType(ListView)).visitAncestorElements((Element element) {
+        if (element.toString().startsWith("_DropdownMenu")) {
+          final RenderBox box = element.findRenderObject();
+          assert(box != null);
+          menuRect =  box.localToGlobal(Offset.zero) & box.size;
+          return false;
+        }
+        return true;
+      });
+      assert(menuRect != null);
+      return menuRect;
+    }
+
+    // In all of the tests that follow we're assuming that the dropdown menu
+    // is horizontally aligned with the center of the dropdown button and padded
+    // on the top, left, and right.
+    const EdgeInsets buttonPadding = const EdgeInsets.only(top: 8.0, left: 16.0, right: 24.0);
+
+    Rect getExpandedButtonRect() {
+      final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+      final Rect buttonRect = box.localToGlobal(Offset.zero) & box.size;
+      return buttonPadding.inflateRect(buttonRect);
+    }
+
+    Rect buttonRect;
+    Rect menuRect;
+
+    Future<Null> popUpAndDown(Widget frame) async {
+      await tester.pumpWidget(frame);
+      await tester.tap(find.byType(dropdownButtonType));
+      await tester.pumpAndSettle();
+      menuRect = getMenuRect();
+      buttonRect = getExpandedButtonRect();
+      await tester.tap(find.byType(dropdownButtonType));
+    }
+
+    // Dropdown button is along the top of the app. The top of the menu is
+    // aligned with the top of the expanded button and shifted horizontally
+    // so that it fits within the frame.
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.topLeft, value: menuItems.last)
+    );
+    expect(menuRect.topLeft, Offset.zero);
+    expect(menuRect.topRight, new Offset(menuRect.width, 0.0));
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.topCenter, value: menuItems.last)
+    );
+    expect(menuRect.topLeft, new Offset(buttonRect.left, 0.0));
+    expect(menuRect.topRight, new Offset(buttonRect.right, 0.0));
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.topRight, value: menuItems.last)
+    );
+    expect(menuRect.topLeft, new Offset(800.0 - menuRect.width, 0.0));
+    expect(menuRect.topRight, const Offset(800.0, 0.0));
+
+    // Dropdown button is along the middle of the app. The top of the menu is
+    // aligned with the top of the expanded button (because the 1st item
+    // is selected) and shifted horizontally so that it fits within the frame.
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.centerLeft, value: menuItems.first)
+    );
+    expect(menuRect.topLeft, new Offset(0.0, buttonRect.top));
+    expect(menuRect.topRight, new Offset(menuRect.width, buttonRect.top));
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.center, value: menuItems.first)
+    );
+    expect(menuRect.topLeft, buttonRect.topLeft);
+    expect(menuRect.topRight, buttonRect.topRight);
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.centerRight, value: menuItems.first)
+    );
+    expect(menuRect.topLeft, new Offset(800.0 - menuRect.width, buttonRect.top));
+    expect(menuRect.topRight, new Offset(800.0, buttonRect.top));
+
+    // Dropdown button is along the bottom of the app. The bottom of the menu is
+    // aligned with the bottom of the expanded button and shifted horizontally
+    // so that it fits within the frame.
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.bottomLeft, value: menuItems.first)
+    );
+    expect(menuRect.bottomLeft, const Offset(0.0, 600.0));
+    expect(menuRect.bottomRight, new Offset(menuRect.width, 600.0));
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.bottomCenter, value: menuItems.first)
+    );
+    expect(menuRect.bottomLeft, new Offset(buttonRect.left, 600.0));
+    expect(menuRect.bottomRight, new Offset(buttonRect.right, 600.0));
+
+    await popUpAndDown(
+      buildFrame(alignment: FractionalOffset.bottomRight, value: menuItems.first)
+    );
+    expect(menuRect.bottomLeft, new Offset(800.0 - menuRect.width, 600.0));
+    expect(menuRect.bottomRight, const Offset(800.0, 600.0));
+  });
 }
