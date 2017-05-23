@@ -74,7 +74,7 @@ class Template {
     /// raw destination path, after performing language filtering and template
     /// expansion on the path itself.
     ///
-    /// Returns null if the given raw destination path is to be ignored.
+    /// Returns null if the given raw destination path has been filtered.
     String renderPath(String relativeDestinationPath) {
       final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
@@ -100,9 +100,8 @@ class Template {
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
       final String finalDestinationPath = renderPath(relativeDestinationPath);
-      if (finalDestinationPath == null) {
+      if (finalDestinationPath == null)
         return;
-      }
       final File finalDestinationFile = fs.file(finalDestinationPath);
       final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
 
