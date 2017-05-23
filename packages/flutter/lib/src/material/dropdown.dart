@@ -190,15 +190,11 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
 }
 
 class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
-  _DropdownMenuRouteLayout({ this.route });
+  _DropdownMenuRouteLayout({ this.buttonRect, this.menuTop, this.menuHeight });
 
-  final _DropdownRoute<T> route;
-
-  Rect get buttonRect => route.buttonRect;
-  double get menuTop => route.menuTop;
-  double get menuHeight => route.menuHeight;
-  int get selectedIndex => route.selectedIndex;
-  ScrollController get scrollController => route.scrollController;
+  final Rect buttonRect;
+  final double menuTop;
+  final double menuHeight;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -230,11 +226,16 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       return true;
     });
 
-    return new Offset(buttonRect.left, menuTop);
+    final double width = buttonRect.width + 8.0;
+    return new Offset(buttonRect.left.clamp(0.0, size.width - width), menuTop);
   }
 
   @override
-  bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) => oldDelegate.route != route;
+  bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) {
+    return buttonRect != oldDelegate.buttonRect
+      || menuTop != oldDelegate.menuTop
+      || menuHeight != oldDelegate.menuHeight;
+  }
 }
 
 // We box the return value so that the return value can be null. Otherwise,
@@ -276,14 +277,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final ThemeData theme;
   final TextStyle style;
 
-  // These fields are used by _DropdownMenuRouteLayout and initialized by buildPage().
   ScrollController scrollController;
-  double menuTop;
-  double menuHeight;
-
-  // The layout gets this route's scrollController so that it can scroll the
-  // selected item into position, but only on the initial layout.
-  bool initialLayout = true;
 
   @override
   Duration get transitionDuration => _kDropdownMenuDuration;
@@ -299,11 +293,11 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
     final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
-    menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
+    final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
 
     final double buttonTop = buttonRect.top;
     final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
-    menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
+    double menuTop = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
     final double topPreferredLimit = _kMenuItemHeight;
     if (menuTop < topPreferredLimit)
       menuTop = math.min(buttonTop, topPreferredLimit);
@@ -314,17 +308,23 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       menuTop = bottom - menuHeight;
     }
 
-    double scrollOffset = 0.0;
-    if (preferredMenuHeight > maxMenuHeight)
-      scrollOffset = selectedItemOffset - (buttonTop - menuTop);
-    scrollController = new ScrollController(initialScrollOffset: scrollOffset);
+    if (scrollController == null) {
+      double scrollOffset = 0.0;
+      if (preferredMenuHeight > maxMenuHeight)
+        scrollOffset = selectedItemOffset - (buttonTop - menuTop);
+      scrollController = new ScrollController(initialScrollOffset: scrollOffset);
+    }
 
     Widget menu = new _DropdownMenu<T>(route: this);
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
 
     return new CustomSingleChildLayout(
-      delegate: new _DropdownMenuRouteLayout<T>(route: this),
+      delegate: new _DropdownMenuRouteLayout<T>(
+        buttonRect: buttonRect,
+        menuTop: menuTop,
+        menuHeight: menuHeight,
+      ),
       child: menu,
     );
   }
