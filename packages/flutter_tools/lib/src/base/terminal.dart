@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show ASCII;
 
-import 'package:meta/meta.dart';
 import 'package:quiver/strings.dart';
 
 import '../globals.dart';
@@ -99,7 +98,7 @@ class AnsiTerminal {
   /// Throws a [TimeoutException] if a `timeout` is provided and its duration
   /// expired without user input. Duration resets per key press.
   Future<String> promptForCharInput(
-    @required List<String> acceptedCharacters, {
+    List<String> acceptedCharacters, {
     String prompt,
     int defaultChoiceIndex,
     bool displayAcceptedCharacters: true,
@@ -109,9 +108,9 @@ class AnsiTerminal {
     assert(acceptedCharacters.isNotEmpty);
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
+      assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = new List<String>.from(charactersToDisplay);
       charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
-      assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       acceptedCharacters.add('\n');
     }
     String choice;
