@@ -13,8 +13,7 @@ const String _kCopyTemplateExtension = '.copy.tmpl';
 final Pattern _kTemplateLanguageVariant = new RegExp(r"(\w+)-(\w+)\.tmpl.*");
 
 /// Expands templates in a directory to a destination. All files that must
-/// undergo template expansion should end with the '.tmpl' extension or the
-/// context-specific '.xxx-tmpl' extension. All other
+/// undergo template expansion should end with the '.tmpl' extension. All other
 /// files are ignored. In case the contents of entire directories must be copied
 /// as is, the directory itself can end with '.tmpl' extension. Files within
 /// such a directory may also contain the '.tmpl' extension and will be
@@ -22,8 +21,11 @@ final Pattern _kTemplateLanguageVariant = new RegExp(r"(\w+)-(\w+)\.tmpl.*");
 /// without template expansion (images, data files, etc.), the '.copy.tmpl'
 /// extension may be used.
 ///
-/// Files in the destination will not contain either the '.tmpl' or '.copy.tmpl'
-/// extensions.
+/// Folders with platform/language-specific content must be named
+/// '<platform>-<language>.tmpl'.
+///
+/// Files in the destination will contain none of the '.tmpl', '.copy.tmpl'
+/// or '-<language>.tmpl' extensions.
 class Template {
   Template(Directory templateSource, Directory baseDir) {
     _templateFilePaths = <String, String>{};
@@ -68,6 +70,11 @@ class Template {
     destination.createSync(recursive: true);
     int fileCount = 0;
 
+    /// Returns the resolved destination path corresponding to the specified
+    /// raw destination path, after performing language filtering and template
+    /// expansion on the path itself.
+    ///
+    /// Returns null if the given raw destination path is to be ignored.
     String renderPath(String relativeDestinationPath) {
       final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
