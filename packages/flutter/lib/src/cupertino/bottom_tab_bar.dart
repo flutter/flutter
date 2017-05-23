@@ -66,16 +66,14 @@ class CupertinoTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool addBlur = backgroundColor.opacity < 1.0;
+    final bool addBlur = backgroundColor.alpha != 0xFF;
 
-    Widget returnWidget;
-
-    returnWidget = new DecoratedBox(
+    Widget result = new DecoratedBox(
       decoration: new BoxDecoration(
         border: const Border(
           top: const BorderSide(
             color: const Color(0x4C000000),
-            width: 0.5, // One physical pixel.
+            width: 0.0, // One physical pixel.
             style: BorderStyle.solid,
           ),
         ),
@@ -106,46 +104,45 @@ class CupertinoTabBar extends StatelessWidget {
 
     if (addBlur) {
       // For non-opaque backgrounds, apply a blur effect.
-      returnWidget = new ClipRect(
+      result = new ClipRect(
         child: new BackdropFilter(
           filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-          child: returnWidget,
+          child: result,
         ),
       );
     }
 
-    return returnWidget;
+    return result;
   }
 
   List<Widget> _buildTabItems() {
-    final List<Widget> returnWidgets = <Widget>[];
+    final List<Widget> result = <Widget>[];
 
-    for (int i=0; i<items.length; i++) {
-      returnWidgets.add(
+    for (int index = 0; index < items.length; index++) {
+      result.add(
         _wrapActiveItem(
-
           new Expanded(
             child: new GestureDetector(
               onTap: () {
                 if (onTap != null)
-                  onTap(i);
+                  onTap(index);
               },
               child: new Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget> [
-                  new Expanded(child: new Center(child: items[i].icon)),
-                  items[i].title,
+                  new Expanded(child: new Center(child: items[index].icon)),
+                  items[index].title,
                   const Padding(padding: const EdgeInsets.only(bottom: 4.0)),
                 ],
               ),
             ),
           ),
-          active: i == currentIndex
+          active: index == currentIndex,
         ),
       );
     }
 
-    return returnWidgets;
+    return result;
   }
 
   /// Change the active tab item's icon and title colors to active.

@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-// TODO(xster): move this to a common Cupertino color palette with the next yak.
 const Color _kDisabledBackground = const Color(0xFFA9A9A9);
 const Color _kDisabledForeground = const Color(0xFFC4C4C4);
 
@@ -25,7 +24,7 @@ final TextStyle _kDisabledButtonTextStyle = _kButtonTextStyle.copyWith(
 );
 
 final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
-  color: CupertinoColors.activeBlue,
+  color: CupertinoColors.white,
 );
 
 const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
