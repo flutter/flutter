@@ -234,6 +234,14 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
 
   SemanticsObject* root = objects_[kRootNodeId];
 
+  if (root) {
+    if (!view_.accessibilityElements) {
+      view_.accessibilityElements = @[ root ];
+    }
+  } else {
+    view_.accessibilityElements = nil;
+  }
+
   std::unordered_set<int> visited_objects;
   if (root)
     VisitObjectsRecursively(root, &visited_objects);
@@ -247,17 +255,27 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
     // TODO(abarth): Use extract once we're at C++17.
   }
 
-  ReleaseObjects(doomed_objects);
-  doomed_objects.clear();
-
-  if (root) {
-    if (!view_.accessibilityElements) {
-      view_.accessibilityElements = @[ root ];
+  SemanticsObject* doomed_focused_object = nil;
+  for (const auto& entry : doomed_objects) {
+    SemanticsObject* object = entry.second;
+    if ([object accessibilityElementIsFocused]) {
+      doomed_focused_object = object;
+      break;
     }
-  } else {
-    view_.accessibilityElements = nil;
   }
-  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+
+  if (doomed_focused_object != nil) {
+    // Previously focused element is no longer in the tree.
+    // Passing `nil` as argument to let iOS figure out what to focus next.
+    // TODO(goderbauer): Figure out which element should be focused next and post
+    //     UIAccessibilityLayoutChangedNotification with that element instead.
+    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, nil);
+  } else {
+    // Passing `nil` as argument to keep focus where it is.
+    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+  }
+
+  ReleaseObjects(doomed_objects);
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, blink::SemanticsAction action) {
@@ -280,12 +298,13 @@ void AccessibilityBridge::VisitObjectsRecursively(SemanticsObject* object,
     VisitObjectsRecursively(child, visited_objects);
 }
 
-void AccessibilityBridge::ReleaseObjects(const std::unordered_map<int, SemanticsObject*>& objects) {
+void AccessibilityBridge::ReleaseObjects(std::unordered_map<int, SemanticsObject*>& objects) {
   for (const auto& entry : objects) {
     SemanticsObject* object = entry.second;
     [object neuter];
     [object release];
   }
+  objects.clear();
 }
 
 }  // namespace shell
