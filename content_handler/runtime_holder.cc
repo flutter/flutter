@@ -101,17 +101,17 @@ RuntimeHolder::~RuntimeHolder() {
 }
 
 void RuntimeHolder::Init(
-    fidl::InterfaceHandle<app::ApplicationEnvironment> environment,
+    std::unique_ptr<app::ApplicationContext> context,
     fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
     std::vector<char> bundle) {
   FTL_DCHECK(!rasterizer_);
   rasterizer_ = Rasterizer::Create();
   FTL_DCHECK(rasterizer_);
 
-  environment_.Bind(std::move(environment));
-  environment_->GetServices(fidl::GetProxy(&environment_services_));
-  ConnectToService(environment_services_.get(), fidl::GetProxy(&view_manager_));
+  context_ = std::move(context);
   outgoing_services_ = std::move(outgoing_services);
+
+  context_->ConnectToEnvironmentService(view_manager_.NewRequest());
 
   InitRootBundle(std::move(bundle));
 
@@ -301,7 +301,7 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
 
 void RuntimeHolder::InitFidlInternal() {
   fidl::InterfaceHandle<app::ApplicationEnvironment> environment;
-  environment_->Duplicate(GetProxy(&environment));
+  context_->ConnectToEnvironmentService(environment.NewRequest());
 
   Dart_Handle fidl_internal = Dart_LookupLibrary(ToDart("dart:fidl.internal"));
 
@@ -324,8 +324,8 @@ void RuntimeHolder::InitMozartInternal() {
   Dart_Handle mozart_internal =
       Dart_LookupLibrary(ToDart("dart:mozart.internal"));
 
-  DART_CHECK_VALID(Dart_SetNativeResolver(
-      mozart_internal, mozart::NativeLookup, mozart::NativeSymbol));
+  DART_CHECK_VALID(Dart_SetNativeResolver(mozart_internal, mozart::NativeLookup,
+                                          mozart::NativeSymbol));
 
   DART_CHECK_VALID(
       Dart_SetField(mozart_internal, ToDart("_context"),

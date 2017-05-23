@@ -44,9 +44,9 @@ ApplicationControllerImpl::ApplicationControllerImpl(
 
   url_ = startup_info->launch_info->url;
   runtime_holder_.reset(new RuntimeHolder());
-  runtime_holder_->Init(std::move(startup_info->environment),
-                        fidl::GetProxy(&dart_service_provider_),
-                        std::move(bundle));
+  runtime_holder_->Init(
+      app::ApplicationContext::CreateFrom(std::move(startup_info)),
+      fidl::GetProxy(&dart_service_provider_), std::move(bundle));
 }
 
 ApplicationControllerImpl::~ApplicationControllerImpl() = default;

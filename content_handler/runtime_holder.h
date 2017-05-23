@@ -9,6 +9,7 @@
 
 #include <unordered_set>
 
+#include "application/lib/app/application_context.h"
 #include "application/services/application_environment.fidl.h"
 #include "application/services/service_provider.fidl.h"
 #include "apps/mozart/lib/flutter/sdk_ext/src/natives.h"
@@ -38,7 +39,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   RuntimeHolder();
   ~RuntimeHolder();
 
-  void Init(fidl::InterfaceHandle<app::ApplicationEnvironment> environment,
+  void Init(std::unique_ptr<app::ApplicationContext> context,
             fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
             std::vector<char> bundle);
   void CreateView(const std::string& script_uri,
@@ -86,8 +87,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void OnFrameComplete();
   void Invalidate();
 
-  app::ApplicationEnvironmentPtr environment_;
-  app::ServiceProviderPtr environment_services_;
+  std::unique_ptr<app::ApplicationContext> context_;
   fidl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
 
   std::vector<char> root_bundle_data_;
