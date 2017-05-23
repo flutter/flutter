@@ -16,10 +16,6 @@
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
-#ifdef OS_ANDROID
-#include <GLES2/gl2.h>
-#endif
-
 using tonic::DartInvoke;
 using tonic::DartPersistentValue;
 using tonic::ToDart;
@@ -34,24 +30,14 @@ sk_sp<SkImage> DecodeImage(sk_sp<SkData> buffer) {
     return nullptr;
   }
 
-  auto raster_image = SkImage::MakeFromEncoded(std::move(buffer));
-
-  if (raster_image == nullptr) {
-    return nullptr;
-  }
-
-  if (auto context = ResourceContext::Get()) {
+  GrContext* context = ResourceContext::Get();
+  if (context) {
     // TODO: Supply actual destination color space once available
-    if (auto texture_image =
-            raster_image->makeTextureImage(context, nullptr)) {
-#ifdef OS_ANDROID
-      glFlush();
-#endif
-      return texture_image;
-    }
+    return SkImage::MakeCrossContextFromEncoded(context, std::move(buffer),
+                                                false, nullptr);
+  } else {
+    return SkImage::MakeFromEncoded(std::move(buffer));
   }
-
-  return raster_image;
 }
 
 void InvokeImageCallback(sk_sp<SkImage> image,
