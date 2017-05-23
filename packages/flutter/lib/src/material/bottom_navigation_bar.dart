@@ -35,44 +35,6 @@ enum BottomNavigationBarType {
   shifting,
 }
 
-/// An interactive destination label within [BottomNavigationBar] with an icon
-/// and title.
-///
-/// See also:
-///
-///  * [BottomNavigationBar]
-///  * <https://material.google.com/components/bottom-navigation.html>
-class BottomNavigationBarItem {
-  /// Creates an item that is used with [BottomNavigationBar.items].
-  ///
-  /// The arguments [icon] and [title] should not be null.
-  BottomNavigationBarItem({
-    @required this.icon,
-    @required this.title,
-    this.backgroundColor
-  }) {
-    assert(icon != null);
-    assert(title != null);
-  }
-
-  /// The icon of the item.
-  ///
-  /// Typically the icon is an [Icon] or an [ImageIcon] widget. If another type
-  /// of widget is provided then it should configure itself to match the current
-  /// [IconTheme] size and color.
-  final Widget icon;
-
-  /// The title of the item.
-  final Widget title;
-
-  /// The color of the background radial animation.
-  ///
-  /// If the navigation bar's type is [BottomNavigationBarType.shifting], then
-  /// the entire bar is flooded with the [backgroundColor] when this item is
-  /// tapped.
-  final Color backgroundColor;
-}
-
 /// A material widget displayed at the bottom of an app for selecting among a
 /// small number of views.
 ///

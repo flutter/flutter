@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'thumb_painter.dart';
 
 /// An iOS-style slider.
@@ -48,7 +49,7 @@ class CupertinoSlider extends StatefulWidget {
     this.min: 0.0,
     this.max: 1.0,
     this.divisions,
-    this.activeColor: const Color(0xFF027AFF),
+    this.activeColor: CupertinoColors.activeBlue,
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
