@@ -55,7 +55,7 @@ class AccessibilityBridge final {
  private:
   SemanticsObject* GetOrCreateObject(int32_t id);
   void VisitObjectsRecursively(SemanticsObject* object, std::unordered_set<int>* visited_objects);
-  void ReleaseObjects(const std::unordered_map<int, SemanticsObject*>& objects);
+  void ReleaseObjects(std::unordered_map<int, SemanticsObject*>& objects);
 
   UIView* view_;
   PlatformViewIOS* platform_view_;
