@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+import 'dart:ui' show Color;
 
 class CupertinoColors {
   CupertinoColors._();
@@ -28,13 +28,13 @@ class CupertinoColors {
   /// Used in iOS 10 for unselected selectables such as tab bar items in their
   /// inactive state.
   ///
-  /// Note it's not the same gray as disabled buttons etc.
+  /// Not the same gray as disabled buttons etc.
   static const Color inactiveGray = const Color(0xFF929292);
 
   /// Used for iOS 10 for destructive actions such as the delete actions in
   /// table view cells and dialogs.
   ///
-  /// Note it's not the same red as the camera shutter or springboard icon notifications
+  /// Not the same red as the camera shutter or springboard icon notifications
   /// or the foreground red theme in various native apps such as HealthKit.
   static const Color destructiveRed = const Color(0xFFFF3B30);
 }

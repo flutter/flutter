@@ -79,6 +79,7 @@ class CupertinoTabBar extends StatelessWidget {
         ),
         color: backgroundColor,
       ),
+      // TODO(xster): allow icons-only versions of the tab bar too.
       child: new SizedBox(
         height: _kTabBarHeight,
         child: IconTheme.merge( // Default with the inactive state.
@@ -118,22 +119,21 @@ class CupertinoTabBar extends StatelessWidget {
   List<Widget> _buildTabItems() {
     final List<Widget> result = <Widget>[];
 
-    for (int index = 0; index < items.length; index++) {
+    for (int index = 0; index < items.length; ++index) {
       result.add(
         _wrapActiveItem(
           new Expanded(
             child: new GestureDetector(
-              onTap: () {
-                if (onTap != null)
-                  onTap(index);
-              },
-              child: new Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget> [
-                  new Expanded(child: new Center(child: items[index].icon)),
-                  items[index].title,
-                  const Padding(padding: const EdgeInsets.only(bottom: 4.0)),
-                ],
+              onTap: onTap == null ? null : () { onTap(index); },
+              child: new Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: new Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget> [
+                    new Expanded(child: new Center(child: items[index].icon)),
+                    items[index].title,
+                  ],
+                ),
               ),
             ),
           ),

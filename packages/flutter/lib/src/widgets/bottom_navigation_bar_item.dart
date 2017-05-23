@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
+import 'dart:ui' show Color;
+
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
@@ -10,8 +11,8 @@ import 'framework.dart';
 /// An interactive button within either material's [BottomNavigationBar]
 /// or the iOS themed [CupertinoTabBar] with an icon and title.
 ///
-/// Should not be used on its own but embedded in one of the bottom navigation
-/// widgets above.
+/// This calss is rarely used in isolation. Commonly embedded in one of the
+/// bottom navigation widgets above.
 ///
 /// See also:
 ///
@@ -23,14 +24,12 @@ class BottomNavigationBarItem {
   /// Creates an item that is used with [BottomNavigationBar.items].
   ///
   /// The arguments [icon] and [title] should not be null.
-  BottomNavigationBarItem({
+  const BottomNavigationBarItem({
     @required this.icon,
     @required this.title,
-    this.backgroundColor
-  }) {
-    assert(icon != null);
-    assert(title != null);
-  }
+    this.backgroundColor,
+  }) : assert(icon != null),
+       assert(title != null);
 
   /// The icon of the item.
   ///
@@ -52,7 +51,8 @@ class BottomNavigationBarItem {
   /// via [CupertinoTabBar.backgroundColor].
   ///
   /// See also:
-  ///  * [Icon.backgroundColor] and [ImageIcon.backgroundColor] to control the foreground color of
+  ///
+  ///  * [Icon.color] and [ImageIcon.color] to control the foreground color of
   ///     the icons themselves.
   final Color backgroundColor;
 }
