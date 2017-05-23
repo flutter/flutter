@@ -24,6 +24,9 @@ android {
     compileSdkVersion 25
     buildToolsVersion '25.0.3'
 
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
     defaultConfig {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
