@@ -27,6 +27,8 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
+///
+/// See also the discussion at [Widget.key].
 @immutable
 abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
@@ -45,6 +47,8 @@ abstract class Key {
 ///
 /// Keys must be unique amongst the [Element]s with the same parent. By
 /// contrast, [GlobalKey]s must be unique across the entire app.
+///
+/// See also the discussion at [Widget.key].
 abstract class LocalKey extends Key {
   /// Default constructor, used by subclasses.
   const LocalKey() : super._();
@@ -60,6 +64,8 @@ abstract class LocalKey extends Key {
 /// private, this results in a value key type that cannot collide with keys from
 /// other sources, which could be useful, for example, if the keys are being
 /// used as fallbacks in the same scope as keys supplied from another widget.
+///
+/// See also the discussion at [Widget.key].
 class ValueKey<T> extends LocalKey {
   /// Creates a key that delgates its [operator==] to the given value.
   const ValueKey(this.value);
@@ -104,6 +110,8 @@ class UniqueKey extends LocalKey {
 ///
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
+///
+/// See also the discussions at [Key] and [Widget.key].
 class ObjectKey extends LocalKey {
   /// Creates a key that uses [identical] on [value] for its [operator==].
   const ObjectKey(this.value);
@@ -148,6 +156,8 @@ class ObjectKey extends LocalKey {
 ///
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
+///
+/// See also the discussion at [Widget.key].
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for
@@ -406,12 +416,17 @@ abstract class Widget {
   /// widget is inflated into an element, and the new element is inserted into the
   /// tree.
   ///
-  /// Using a [GlobalKey] as the widget's [key] allows the element to be moved
-  /// around the tree (changing parent) without losing state. When a new widget
-  /// is found (its key and type do not match a previous widget in the same
-  /// location), but there was a widget with that same global key elsewhere in
-  /// the tree in the previous frame, then that widget's element is moved to the
-  /// new location.
+  /// In addition, using a [GlobalKey] as the widget's [key] allows the element
+  /// to be moved around the tree (changing parent) without losing state. When a
+  /// new widget is found (its key and type do not match a previous widget in
+  /// the same location), but there was a widget with that same global key
+  /// elsewhere in the tree in the previous frame, then that widget's element is
+  /// moved to the new location.
+  ///
+  /// Generally, a widget that is the only child of another widget does not need
+  /// an explicit key.
+  ///
+  /// See also the discussions at [Key] and [GlobalKey].
   final Key key;
 
   /// Inflates this configuration to a concrete instance.
@@ -482,6 +497,49 @@ abstract class Widget {
 /// is inflated. For compositions that can change dynamically, e.g. due to
 /// having an internal clock-driven state, or depending on some system state,
 /// consider using [StatefulWidget].
+///
+/// ## Sample code
+///
+/// The following is a skeleton of a stateless widget subclass called `GreenFrog`:
+///
+/// ```dart
+/// class GreenFrog extends StatelessWidget {
+///   const GreenFrog({ Key key }) : super(key: key);
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Container(color: const Color(0xFF2DBD3A));
+///   }
+/// }
+/// ```
+///
+/// Normally widgets have more constructor arguments, each of which corresponds
+/// to a `final` property. The next example shows the more generic widget `Frog`
+/// which can be given a color and a child:
+///
+/// ```dart
+/// class Frog extends StatelessWidget {
+///   const Frog({
+///     Key key,
+///     this.color: const Color(0xFF2DBD3A),
+///     this.child,
+///   }) : super(key: key);
+///
+///   final Color color;
+///
+///   final Widget child;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Container(color: color, child: child);
+///   }
+/// }
+/// ```
+///
+/// By convention, widget constructors only use named arguments. Named arguments
+/// can be marked as required using [@required]. Also by convention, the first
+/// argument is [key], and the last argument is `child`, `children`, or the
+/// equivalent.
 ///
 /// See also:
 ///
@@ -582,6 +640,72 @@ abstract class StatelessWidget extends Widget {
 /// (instead of being recreated) in the new location. However, in order to be
 /// eligible for grafting, the widget might be inserted into the new location in
 /// the same animation frame in which it was removed from the old location.
+///
+/// ## Sample code
+///
+/// The following is a skeleton of a stateful widget subclass called `GreenFrog`:
+///
+/// ```dart
+/// class GreenFrog extends StatefulWidget {
+///   const GreenFrog({ Key key }) : super(key: key);
+///
+///   @override
+///   _GreenFrogState createState() => new _GreenFrogState();
+/// }
+///
+/// class _GreenFrogState extends State<GreenFrog> {
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Container(color: const Color(0xFF2DBD3A));
+///   }
+/// }
+/// ```
+///
+/// In this example. the [State] has no actual state. State is normally
+/// represented as private member fields. Also, normally widgets have more
+/// constructor arguments, each of which corresponds to a `final` property.
+///
+/// The next example shows the more generic widget `Frog` which can be given a
+/// color and a child, and which has some internal state with a method that
+/// can be called to mutate it:
+///
+/// ```dart
+/// class Frog extends StatelessWidget {
+///   const Frog({
+///     Key key,
+///     this.color: const Color(0xFF2DBD3A),
+///     this.child,
+///   }) : super(key: key);
+///
+///   final Color color;
+///
+///   final Widget child;
+///
+///   _FrogState createState() => new _FrogState();
+/// }
+///
+/// class _FrogState extends State<Frog> {
+///   double _size = 1.0;
+///
+///   void grow() {
+///     setState(() { _size += 0.1; });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Container(
+///       color: widget.color,
+///       transform: new Matrix4.diagonalValues(_size, _size, 1.0),
+///       child: widget.child,
+///     );
+///   }
+/// }
+/// ```
+///
+/// By convention, widget constructors only use named arguments. Named arguments
+/// can be marked as required using [@required]. Also by convention, the first
+/// argument is [key], and the last argument is `child`, `children`, or the
+/// equivalent.
 ///
 /// See also:
 ///
@@ -721,12 +845,13 @@ typedef void StateSetter(VoidCallback fn);
 ///
 /// See also:
 ///
-///  * [StatefulWidget], where the current configuration of a [State] is hosted
-///    (see [Widget]).
+///  * [StatefulWidget], where the current configuration of a [State] is hosted,
+///    and whose documentation has sample code for [State].
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 ///  * [InheritedWidget], for widgets that introduce ambient state that can
 ///    be read by descendant widgets.
+///  * [Widget], for an overview of widgets in general.
 @optionalTypeArgs
 abstract class State<T extends StatefulWidget> {
   /// The current configuration.
@@ -1140,10 +1265,24 @@ abstract class State<T extends StatefulWidget> {
   }
 }
 
-/// A widget that has exactly one child widget.
+/// A widget that has a child widget provided to it, instead of building a new
+/// widget.
 ///
 /// Useful as a base class for other widgets, such as [InheritedWidget] and
 /// [ParentDataWidget].
+///
+/// See also:
+///
+///  * [InheritedWidget], for widgets that introduce ambient state that can
+///    be read by descendant widgets.
+///  * [ParentDataWidget], for widgets that populate the
+///    [RenderObject.parentData] slot of their child's [RenderObject] to
+///    configure the parent widget's layout.
+///  * [StatefulWidget] and [State], for widgets that can build differently
+///    several times over their lifetime.
+///  * [StatelessWidget], for widgets that always build the same way given a
+///    particular configuration and ambient state.
+///  * [Widget], for an overview of widgets in general.
 abstract class ProxyWidget extends Widget {
   /// Creates a widget that has exactly one child widget.
   const ProxyWidget({ Key key, @required this.child }) : super(key: key);
@@ -1162,6 +1301,46 @@ abstract class ProxyWidget extends Widget {
 /// A [ParentDataWidget] is specific to a particular kind of [RenderObject], and
 /// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
 /// [ParentDataWidget] type argument.
+///
+/// ## Sample code
+///
+/// This example shows how you would build a [ParentDataWidget] to configure a
+/// `FrogJar` widget's children by specifying a [Size] for each one.
+///
+/// ```dart
+/// class FrogSize extends ParentDataWidget<FrogJar> {
+///   Pond({
+///     Key key,
+///     @required this.size,
+///     @required Widget child,
+///   }) : assert(child != null),
+///        assert(size != null),
+///        super(key: key, child: child);
+///
+///   final Size size;
+///
+///   @override
+///   void applyParentData(RenderObject renderObject) {
+///     final FrogJarParentData parentData = renderObject.parentData;
+///     if (parentData.size != size) {
+///       parentData.size = size;
+///       final RenderFrogJar targetParent = renderObject.parent;
+///       targetParent.markNeedsLayout();
+///     }
+///   }
+/// }
+/// ```
+///
+/// See also:
+///
+///  * [RenderObject], the superclass for layout algorithms.
+///  * [RenderObject.parentData], the slot that this class configures.
+///  * [ParentData], the superclass of the data that will be placed in
+///    [RenderObject.parentData] slots.
+///  * [RenderObjectWidget], the class for widgets that wrap [RenderObject]s.
+///    The `T` type parameter for [ParentDataWidget] is a [RenderObjectWidget].
+///  * [StatefulWidget] and [State], for widgets that can build differently
+///    several times over their lifetime.
 abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1239,6 +1418,56 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// Inherited widgets, when referenced in this way, will cause the consumer to
 /// rebuild when the inherited widget itself changes state.
+///
+/// ## Sample code
+///
+/// The following is a skeleton of an inherited widget called `FrogColor`:
+///
+/// ```dart
+/// class FrogColor extends InheritedWidget {
+///   const FrogColor(
+///     Key key,
+///     @required this.color,
+///     @required Widget child,
+///   }) : assert(color != null),
+///        assert(child != null),
+///        super(key: key, child: child);
+///
+///   final Color color;
+///
+///   static FrogColor of(BuildContext context) {
+///     return context.inheritFromWidgetOfExactType(FrogColor);
+///   }
+///
+///   @override
+///   bool updateShouldNotify(FrogColor old) => color != old.color;
+/// }
+/// ```
+///
+/// The convention is to provide a static method `of` on the [InheritedWidget]
+/// which does the call to [BuildContext.inheritFromWidgetOfExactType]. This
+/// allows the class to define its own fallback logic in the case of there not
+/// being a widget in scope. In the example above, the value returned will be
+/// null in that case, but it could also have defaulted to a value.
+///
+/// Sometimes, the `of` method returns the data rather than the inherited
+/// widget; for example, in this case it could have returned a [Color] instead
+/// of the [FrogColor] widget.
+///
+/// Occasionally, the inherited widget is an implementation detail of another
+/// class, and is therefore private. The `of` method in that case is typically
+/// put on the public class instead. For example, [Theme] is implemented as a
+/// [StatelessWidget] that builds a private inherited widget; [Theme.of] looks
+/// for that inherited widget using [BuildContext.inheritFromWidgetOfExactType]
+/// and then returns the [ThemeData].
+///
+/// See also:
+///
+///  * [StatefulWidget] and [State], for widgets that can build differently
+///    several times over their lifetime.
+///  * [StatelessWidget], for widgets that always build the same way given a
+///    particular configuration and ambient state.
+///  * [Widget], for an overview of widgets in general.
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
