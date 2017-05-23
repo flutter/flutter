@@ -472,7 +472,7 @@ class DropdownButton<T> extends StatefulWidget {
   _DropdownButtonState<T> createState() => new _DropdownButtonState<T>();
 }
 
-class _DropdownButtonState<T> extends State<DropdownButton<T>> implements WidgetsBindingObserver {
+class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindingObserver {
   int _selectedIndex;
   _DropdownRoute<T> _dropdownRoute;
 
