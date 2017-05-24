@@ -684,6 +684,9 @@ class Navigator extends StatefulWidget {
   /// the [Navigator] has any [Navigator.observers], they will be notified with
   /// [NavigatorObserver.didRemove].
   ///
+  /// The routes before and after the removed route, if any, are notified with
+  /// [Route.didChangeNext] and [Route.didChangePrevious].
+  ///
   /// This method is used to dismiss dropdown menus that are up when the screen's
   /// orientation changes.
   static void removeRoute(BuildContext context, Route<dynamic> route) {
