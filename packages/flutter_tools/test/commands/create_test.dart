@@ -39,15 +39,32 @@ void main() {
       return _createAndAnalyzeProject(
         projectDir,
         <String>[],
-        fs.path.join(projectDir.path, 'lib', 'main.dart'),
+        <String>[
+          'android/app/src/main/java/com/yourcompany/flutter_project/MainActivity.java',
+          'ios/Runner/AppDelegate.h',
+          'ios/Runner/AppDelegate.m',
+          'ios/Runner/main.m',
+          'lib/main.dart',
+        ],
       );
     });
 
-    testUsingContext('project with-driver-test', () async {
+    testUsingContext('kotlin/swift project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--with-driver-test'],
-        fs.path.join(projectDir.path, 'lib', 'main.dart'),
+        <String>['--android-language', 'kotlin', '--ios-language', 'swift'],
+        <String>[
+          'android/app/src/main/kotlin/com/yourcompany/flutter_project/MainActivity.kt',
+          'ios/Runner/AppDelegate.swift',
+          'ios/Runner/Runner-Bridging-Header.h',
+          'lib/main.dart',
+        ],
+        <String>[
+          'android/app/src/main/java/com/yourcompany/flutter_project/MainActivity.java',
+          'ios/Runner/AppDelegate.h',
+          'ios/Runner/AppDelegate.m',
+          'ios/Runner/main.m',
+        ],
       );
     });
 
@@ -55,7 +72,50 @@ void main() {
       return _createAndAnalyzeProject(
         projectDir,
         <String>['--plugin'],
-        fs.path.join(projectDir.path, 'example', 'lib', 'main.dart'),
+        <String>[
+          'android/src/main/java/com/yourcompany/flutter_project/FlutterProjectPlugin.java',
+          'ios/Classes/FlutterProjectPlugin.h',
+          'ios/Classes/FlutterProjectPlugin.m',
+          'lib/flutter_project.dart',
+          'example/android/app/src/main/java/com/yourcompany/flutter_project_example/MainActivity.java',
+          'example/ios/Runner/AppDelegate.h',
+          'example/ios/Runner/AppDelegate.m',
+          'example/ios/Runner/main.m',
+          'example/lib/main.dart',
+        ],
+      );
+    });
+
+    testUsingContext('kotlin/swift plugin project', () async {
+      return _createAndAnalyzeProject(
+        projectDir,
+        <String>['--plugin', '--android-language', 'kotlin', '--ios-language', 'swift'],
+        <String>[
+          'android/src/main/kotlin/com/yourcompany/flutter_project/FlutterProjectPlugin.kt',
+          'ios/Classes/FlutterProjectPlugin.h',
+          'ios/Classes/FlutterProjectPlugin.m',
+          'ios/Classes/SwiftFlutterProjectPlugin.swift',
+          'lib/flutter_project.dart',
+          'example/android/app/src/main/kotlin/com/yourcompany/flutter_project_example/MainActivity.kt',
+          'example/ios/Runner/AppDelegate.swift',
+          'example/ios/Runner/Runner-Bridging-Header.h',
+          'example/lib/main.dart',
+        ],
+        <String>[
+          'android/src/main/java/com/yourcompany/flutter_project/FlutterProjectPlugin.java',
+          'example/android/app/src/main/java/com/yourcompany/flutter_project_example/MainActivity.java',
+          'example/ios/Runner/AppDelegate.h',
+          'example/ios/Runner/AppDelegate.m',
+          'example/ios/Runner/main.m',
+        ],
+      );
+    });
+
+    testUsingContext('project with-driver-test', () async {
+      return _createAndAnalyzeProject(
+        projectDir,
+        <String>['--with-driver-test'],
+        <String>['lib/main.dart'],
       );
     });
 
@@ -82,19 +142,16 @@ void main() {
             <String>[file.path],
             workingDirectory: projectDir.path,
           );
-          final String formatted =
-              await process.stdout.transform(UTF8.decoder).join();
+          final String formatted = await process.stdout.transform(UTF8.decoder).join();
 
           expect(original, formatted, reason: file.path);
         }
       }
 
       // Generated Xcode settings
-      final String xcodeConfigPath =
-          fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
+      final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
       expectExists(xcodeConfigPath);
-      final File xcodeConfigFile =
-          fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
+      final File xcodeConfigFile = fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
       final String xcodeConfig = xcodeConfigFile.readAsStringSync();
       expect(xcodeConfig, contains('FLUTTER_ROOT='));
       expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
@@ -121,8 +178,8 @@ void main() {
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       expect(
-          runner.run(<String>['create', projectDir.path, '--pub']),
-          throwsToolExit(exitCode: 2, message: 'Try moving --pub')
+        runner.run(<String>['create', projectDir.path, '--pub']),
+        throwsToolExit(exitCode: 2, message: 'Try moving --pub'),
       );
     });
 
@@ -135,8 +192,8 @@ void main() {
       if (!existingFile.existsSync())
         existingFile.createSync(recursive: true);
       expect(
-          runner.run(<String>['create', existingFile.path]),
-          throwsToolExit(message: 'file exists')
+        runner.run(<String>['create', existingFile.path]),
+        throwsToolExit(message: 'file exists'),
       );
     });
 
@@ -145,18 +202,16 @@ void main() {
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       expect(
-          runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
-          throwsToolExit(message: '"invalidName" is not a valid Dart package name.')
+        runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
+        throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
       );
     });
   });
 }
 
 Future<Null> _createAndAnalyzeProject(
-  Directory dir,
-  List<String> createArgs,
-  String mainPath,
-) async {
+    Directory dir, List<String> createArgs, List<String> expectedPaths,
+    [List<String> unexpectedPaths = const <String>[]]) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = new CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
@@ -165,7 +220,12 @@ Future<Null> _createAndAnalyzeProject(
   args.add(dir.path);
   await runner.run(args);
 
-  expect(fs.file(mainPath).existsSync(), true);
+  for (String path in expectedPaths) {
+    expect(fs.file(fs.path.join(dir.path, path)).existsSync(), true, reason: '$path does not exist');
+  }
+  for (String path in unexpectedPaths) {
+    expect(fs.file(fs.path.join(dir.path, path)).existsSync(), false, reason: '$path exists');
+  }
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',

@@ -6,9 +6,7 @@ if ENV['FLUTTER_FRAMEWORK_DIR'] == nil
 end
 
 target 'Runner' do
-  # Uncomment this line if you want to use Swift in your app.
-  # Note that some Flutter plugins are not compatible with use_frameworks!
-  # use_frameworks!
+  use_frameworks!
 
   # Pods for Runner
 
