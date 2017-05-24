@@ -794,7 +794,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     final bool excludeSemantics = !(_drawerKey.currentState?.isClosed ?? true);
 
-    _addChild(children, widget.body, _ScaffoldSlot.body);
+    _addChild(children, widget.body, _ScaffoldSlot.body, excludeSemantics: excludeSemantics);
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? padding.top : 0.0;
