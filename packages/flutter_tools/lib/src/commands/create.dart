@@ -39,12 +39,18 @@ class CreateCommand extends FlutterCommand {
       'plugin',
       negatable: true,
       defaultsTo: false,
-      help: 'Generate a new Flutter Plugin project.'
+      help: 'Generate a Flutter plugin project.'
     );
     argParser.addOption(
       'description',
-      defaultsTo: 'A new flutter project.',
-      help: 'The description to use for your new flutter project. This string ends up in the pubspec.yaml file.'
+      defaultsTo: 'A new Flutter project.',
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.'
+    );
+    argParser.addOption(
+      'org',
+      defaultsTo: 'com.yourcompany',
+      help: 'The organization responsible for your new Flutter project, in reverse domain name notation.\n'
+            'This string is used in Java package names and as prefix in the iOS bundle identifier.'
     );
     argParser.addOption(
       'ios-language',
@@ -110,6 +116,7 @@ class CreateCommand extends FlutterCommand {
     // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
     if (fs.path.basename(dirPath) == '.')
       dirPath = fs.path.dirname(dirPath);
+    final String organization = argResults['org'];
     final String projectName = fs.path.basename(dirPath);
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
@@ -121,6 +128,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
 
     final Map<String, dynamic> templateContext = _templateContext(
+      organization: organization,
       projectName: projectName,
       projectDescription: argResults['description'],
       dirPath: dirPath,
@@ -151,8 +159,8 @@ class CreateCommand extends FlutterCommand {
       final String androidPluginIdentifier = templateContext['androidIdentifier'];
       final String exampleProjectName = projectName + '_example';
       templateContext['projectName'] = exampleProjectName;
-      templateContext['androidIdentifier'] = _createAndroidIdentifier(exampleProjectName);
-      templateContext['iosIdentifier'] = _createUTIIdentifier(exampleProjectName);
+      templateContext['androidIdentifier'] = _createAndroidIdentifier(organization, exampleProjectName);
+      templateContext['iosIdentifier'] = _createUTIIdentifier(organization, exampleProjectName);
       templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
       templateContext['pluginProjectName'] = projectName;
       templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
@@ -224,6 +232,7 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
   }
 
   Map<String, dynamic> _templateContext({
+    String organization,
     String projectName,
     String projectDescription,
     String androidLanguage,
@@ -241,9 +250,10 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
         : pluginDartClass + 'Plugin';
 
     return <String, dynamic>{
+      'organization': organization,
       'projectName': projectName,
-      'androidIdentifier': _createAndroidIdentifier(projectName),
-      'iosIdentifier': _createUTIIdentifier(projectName),
+      'androidIdentifier': _createAndroidIdentifier(organization, projectName),
+      'iosIdentifier': _createUTIIdentifier(organization, projectName),
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android.minApiLevel,
@@ -264,8 +274,8 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
   }
 }
 
-String _createAndroidIdentifier(String name) {
-  return 'com.yourcompany.$name';
+String _createAndroidIdentifier(String organization, String name) {
+  return '$organization.$name';
 }
 
 String _createPluginClassName(String name) {
@@ -273,12 +283,12 @@ String _createPluginClassName(String name) {
   return camelizedName[0].toUpperCase() + camelizedName.substring(1);
 }
 
-String _createUTIIdentifier(String name) {
+String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
   final RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-\.\u0080-\uffff]+");
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
-  return 'com.yourcompany.$name';
+  return '$organization.$name';
 }
 
 final Set<String> _packageDependencies = new Set<String>.from(<String>[
