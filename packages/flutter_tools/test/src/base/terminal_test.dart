@@ -21,6 +21,7 @@ void main() {
     testUsingContext('character prompt', () async {
       mockStdInStream = new Stream<String>.fromFutures(<Future<String>>[
         new Future<String>.value('d'), // Not in accepted list.
+        new Future<String>.value('\n'), // Not in accepted list
         new Future<String>.value('b'),
       ]).asBroadcastStream();
       final String choice =
@@ -29,10 +30,32 @@ void main() {
             prompt: 'Please choose something',
           );
       expect(choice, 'b');
-      expect(testLogger.statusText, '''
-Please choose something [a|b|c]: d
-Please choose something [a|b|c]: b
-''');
+      expect(
+        testLogger.statusText,
+        'Please choose something [a|b|c]: d\n'
+        'Please choose something [a|b|c]: \n'
+        '\n'
+        'Please choose something [a|b|c]: b\n'
+      );
+    });
+
+    testUsingContext('default character choice without displayAcceptedCharacters', () async {
+      mockStdInStream = new Stream<String>.fromFutures(<Future<String>>[
+        new Future<String>.value('\n'), // Not in accepted list
+      ]).asBroadcastStream();
+      final String choice =
+          await terminalUnderTest.promptForCharInput(
+            <String>['a', 'b', 'c'],
+            prompt: 'Please choose something',
+            displayAcceptedCharacters: false,
+            defaultChoiceIndex: 1, // which is b.
+          );
+      expect(choice, 'b');
+      expect(
+        testLogger.statusText,
+        'Please choose something: \n'
+        '\n'
+      );
     });
   });
 }

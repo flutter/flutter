@@ -189,7 +189,7 @@ void main() {
 
       expect(
         testLogger.statusText,
-        contains('Please select a certificate for code signing [1|2|3|a]: 3')
+        contains('Please select a certificate for code signing [<bold>1</bold>|2|3|a]: 3')
       );
       expect(
         testLogger.statusText,
@@ -228,6 +228,9 @@ class MockStdIn extends Mock implements IOSink {}
 Stream<String> mockTerminalStdInStream;
 
 class TestTerminal extends AnsiTerminal {
+  @override
+  String bolden(String message) => '<bold>$message</bold>';
+
   @override
   Stream<String> get onCharInput {
     return mockTerminalStdInStream;
