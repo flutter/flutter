@@ -232,13 +232,13 @@ class NavigatorObserver {
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
 
-  /// The [Navigator] pushed [route].
+  /// The [Navigator] pushed `route`.
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// The [Navigator] popped [route].
+  /// The [Navigator] popped `route`.
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// The [Navigator] removed [route].
+  /// The [Navigator] removed `route`.
   void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// The [Navigator] is being controlled by a user gesture.
@@ -677,7 +677,7 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pushReplacement(route, result: result);
   }
 
-  /// Immediately remove [route] and [Route.dispose] it.
+  /// Immediately remove `route` and [Route.dispose] it.
   ///
   /// The route's animation does not run and the future returned from pushing
   /// the route will not complete. Ongoing input gestures are cancelled. If
@@ -1117,7 +1117,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     return true;
   }
 
-  /// Immediately remove [route] and [Route.dispose] it.
+  /// Immediately remove `route` and [Route.dispose] it.
   ///
   /// The route's animation does not run and the future returned from pushing
   /// the route will not complete. Ongoing input gestures are cancelled. If
@@ -1131,12 +1131,16 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(route._navigator == this);
-    final int routeIndex = _history.indexOf(route);
-    assert(routeIndex != -1);
+    final int index = _history.indexOf(route);
+    assert(index != -1);
+    final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
+    final Route<dynamic> nextRoute = (index + 1 < _history.length) ? _history[index + 1] : null;
     setState(() {
-      _history.removeAt(routeIndex);
+      _history.removeAt(index);
+      previousRoute?.didChangeNext(nextRoute);
+      nextRoute?.didChangePrevious(previousRoute);
       for (NavigatorObserver observer in widget.observers)
-        observer.didRemove(route, routeIndex > 0 ? _history[routeIndex - 1] : null);
+        observer.didRemove(route, previousRoute);
       route.dispose();
     });
     assert(() { _debugLocked = false; return true; });
@@ -1222,8 +1226,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
-      // If we're between frames (SchedulerPhase.idle) then absorb the rest of
-      // the gesture. The absorbing flag will be reset in the next frame, see build().
+      // If we're between frames (SchedulerPhase.idle) then absorb any
+      // subsequent pointers from this frame. The absorbing flag will be
+      // reset in the next frame, see build().
       final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
       setState(() {
         absorber?.absorbing = true;

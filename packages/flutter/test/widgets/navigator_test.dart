@@ -108,9 +108,8 @@ class TestObserver extends NavigatorObserver {
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) {
-    if (onRemoved != null) {
+    if (onRemoved != null)
       onRemoved(route, previousRoute);
-    }
   }
 }
 
