@@ -826,7 +826,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// subpath transformed by the given matrix.
   Path transform(Float64List matrix4) {
     if (matrix4.length != 16)
-      throw new ArgumentError("[matrix4] must have 16 entries.");
+      throw new ArgumentError('"matrix4" must have 16 entries.');
     return _transform(matrix4);
   }
   Path _transform(Float64List matrix4) native "Path_transform";
@@ -1110,10 +1110,10 @@ class Gradient extends Shader {
   static void _validateColorStops(List<Color> colors, List<double> colorStops) {
     if (colorStops == null) {
       if (colors.length != 2)
-        throw new ArgumentError("[colors] must have length 2 if [colorStops] is omitted.");
+        throw new ArgumentError('"colors" must have length 2 if "colorStops" is omitted.');
     } else {
       if (colors.length != colorStops.length)
-        throw new ArgumentError("[colors] and [colorStops] arguments must have equal length.");
+        throw new ArgumentError('"colors" and "colorStops" arguments must have equal length.');
     }
   }
 }
@@ -1127,15 +1127,15 @@ class ImageShader extends Shader {
   /// be null.
   ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {
     if (image == null)
-      throw new ArgumentError("[image] argument cannot be null");
+      throw new ArgumentError('"image" argument cannot be null.');
     if (tmx == null)
-      throw new ArgumentError("[tmx] argument cannot be null");
+      throw new ArgumentError('"tmx" argument cannot be null.');
     if (tmy == null)
-      throw new ArgumentError("[tmy] argument cannot be null");
+      throw new ArgumentError('"tmy" argument cannot be null.');
     if (matrix4 == null)
-      throw new ArgumentError("[matrix4] argument cannot be null");
+      throw new ArgumentError('"matrix4" argument cannot be null.');
     if (matrix4.length != 16)
-      throw new ArgumentError("[matrix4] must have 16 entries.");
+      throw new ArgumentError('"matrix4" must have 16 entries.');
     _constructor();
     _initWithImage(image, tmx.index, tmy.index, matrix4);
   }
@@ -1167,20 +1167,38 @@ class Vertices extends NativeFieldWrapperClass2 {
     List<int> indices,
   }) {
     if (textureCoordinates != null && textureCoordinates.length != positions.length)
-      throw new ArgumentError("[positions] and [textureCoordinates] lengths must match");
+      throw new ArgumentError('"positions" and "textureCoordinates" lengths must match.');
     if (colors != null && colors.length != positions.length)
-      throw new ArgumentError("[positions] and [colors] lengths must match");
+      throw new ArgumentError('"positions" and "colors" lengths must match.');
     if (indices != null && indices.any((int i) => i < 0 || i >= positions.length))
-      throw new ArgumentError("[indices] values must be valid indices in the positions list");
+      throw new ArgumentError('"indices" values must be valid indices in the positions list.');
 
     Float32List encodedPositions = _encodePointList(positions);
-    Float32List encodedTexs = (textureCoordinates != null) ?
+    Float32List encodedTextureCoordinates = (textureCoordinates != null) ?
       _encodePointList(textureCoordinates) : null;
     Int32List encodedColors = (colors != null) ? _encodeColorList(colors) : null;
     Int32List encodedIndices = (indices != null) ? new Int32List.fromList(indices) : null;
 
     _constructor();
-    _init(mode.index, encodedPositions, encodedTexs, encodedColors, encodedIndices);
+    _init(mode.index, encodedPositions, encodedTextureCoordinates, encodedColors, encodedIndices);
+  }
+
+  Vertices.raw(
+    VertexMode mode,
+    Float32List positions, {
+    Float32List textureCoordinates,
+    Int32List colors,
+    Int32List indices,
+  }) {
+    if (textureCoordinates != null && textureCoordinates.length != positions.length)
+      throw new ArgumentError('"positions" and "textureCoordinates" lengths must match.');
+    if (colors != null && colors.length * 2 != positions.length)
+      throw new ArgumentError('"positions" and "colors" lengths must match.');
+    if (indices != null && indices.any((int i) => i < 0 || i >= positions.length))
+      throw new ArgumentError('"indices" values must be valid indices in the positions list.');
+
+    _constructor();
+    _init(mode.index, positions, textureCoordinates, colors, indices);
   }
 
   void _constructor() native "Vertices_constructor";
@@ -1254,11 +1272,11 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// given recorder.
   Canvas(PictureRecorder recorder, Rect cullRect) {
     if (recorder == null)
-      throw new ArgumentError('The given PictureRecorder was null.');
+      throw new ArgumentError('"recorder" must not be null.');
     if (recorder.isRecording)
-      throw new ArgumentError('The given PictureRecorder is already associated with another Canvas.');
+      throw new ArgumentError('"recorder" must not already be associated with another Canvas.');
     if (!cullRect.isFinite)
-      throw new ArgumentError('The cullRect contains infinite or NaN coordinates.');
+      throw new ArgumentError('"cullRect" must not contain infinite or NaN coordinates.');
     // TODO(ianh): throw if recorder is defunct (https://github.com/flutter/flutter/issues/2531)
     _constructor(recorder, cullRect.left, cullRect.top, cullRect.right, cullRect.bottom);
   }
@@ -1344,7 +1362,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// specified as a list of values in column-major order.
   void transform(Float64List matrix4) {
     if (matrix4.length != 16)
-      throw new ArgumentError("[matrix4] must have 16 entries.");
+      throw new ArgumentError('"matrix4" must have 16 entries.');
     _transform(matrix4);
   }
   void _transform(Float64List matrix4) native "Canvas_transform";
@@ -1603,10 +1621,30 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Draws a sequence of points according to the given [PointMode].
   ///
   /// The `points` argument is interpreted as offsets from the origin.
-  @Deprecated('We are planning on changing the signature of this function. See <https://github.com/flutter/flutter/issues/10087>.')
+  ///
+  /// See also:
+  ///
+  ///  * [drawRawPoints], which takes `points` as a [Float32List] rather than a
+  ///    [List<Offset>].
   void drawPoints(PointMode pointMode, List<Offset> points, Paint paint) {
     _drawPoints(paint._objects, paint._data, pointMode.index, _encodePointList(points));
   }
+
+  /// Draws a sequence of points according to the given [PointMode].
+  ///
+  /// The `points` argument is interpreted as a list of pairs of floating point
+  /// numbers, where each pair represents an x and y offset from the origin.
+  ///
+  /// See also:
+  ///
+  ///  * [drawPoints], which takes `points` as a [List<Offset>] rather than a
+  ///    [List<Float32List>].
+  void drawRawPoints(PointMode pointMode, Float32List points, Paint paint) {
+    if (points.length % 2 != 0)
+      throw new ArgumentError('"points" must have an even number of values.');
+    _drawPoints(paint._objects, paint._data, pointMode.index, points);
+  }
+
   void _drawPoints(List<dynamic> paintObjects,
                    ByteData paintData,
                    int pointMode,
@@ -1615,11 +1653,17 @@ class Canvas extends NativeFieldWrapperClass2 {
   void drawVertices(Vertices vertices, BlendMode blendMode, Paint paint) {
     _drawVertices(vertices, blendMode, paint._objects, paint._data);
   }
+
   void _drawVertices(Vertices vertices,
                      BlendMode blendMode,
                      List<dynamic> paintObjects,
                      ByteData paintData) native "Canvas_drawVertices";
 
+  //
+  // See also:
+  //
+  //  * [drawRawAtlas], which takes its arguments as typed data lists rather
+  //    than objects.
   // TODO(eseidel): Paint should be optional, but optional doesn't work.
   void drawAtlas(Image atlas,
                  List<RSTransform> transforms,
@@ -1631,9 +1675,9 @@ class Canvas extends NativeFieldWrapperClass2 {
     final int rectCount = rects.length;
 
     if (transforms.length != rectCount)
-      throw new ArgumentError("[transforms] and [rects] lengths must match");
+      throw new ArgumentError('"transforms" and "rects" lengths must match.');
     if (colors.isNotEmpty && colors.length != rectCount)
-      throw new ArgumentError("if supplied, [colors] length must match that of [transforms] and [rects]");
+      throw new ArgumentError('If non-null, "colors" length must match that of "transforms" and "rects".');
 
     final Float32List rstTransformBuffer = new Float32List(rectCount * 4);
     final Float32List rectBuffer = new Float32List(rectCount * 4);
@@ -1663,6 +1707,44 @@ class Canvas extends NativeFieldWrapperClass2 {
       colorBuffer, blendMode.index, cullRectBuffer
     );
   }
+
+  //
+  // The `rstTransforms` argument is interpreted as a list of four-tuples, with
+  // each tuple being ([RSTransform.scos], [RSTransform.ssin],
+  // [RSTransform.tx], [RSTransform.ty]).
+  //
+  // The `rects` argument is interpreted as a list of four-tuples, with each
+  // tuple being ([Rect.left], [Rect.top], [Rect.right], [Rect.bottom]).
+  //
+  // The `colors` argument, which can be null, is interpreted as a list of
+  // 32-bit colors, with the same packing as [Color.value].
+  //
+  // See also:
+  //
+  //  * [drawAtlas], which takes its arguments as objects rather than typed
+  //    data lists.
+  void drawRawAtlas(Image atlas,
+                    Float32List rstTransforms,
+                    Float32List rects,
+                    Int32List colors,
+                    BlendMode blendMode,
+                    Rect cullRect,
+                    Paint paint) {
+    final int rectCount = rects.length;
+
+    if (rstTransforms.length != rectCount)
+      throw new ArgumentError('"rstTransforms" and "rects" lengths must match.');
+    if (rectCount % 4 != 0)
+      throw new ArgumentError('"rstTransforms" and "rects" lengths must be a multiple of four.');
+    if (colors != null && colors.length * 4 != rectCount)
+      throw new ArgumentError('If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
+
+    _drawAtlas(
+      paint._objects, paint._data, atlas, rstTransforms, rects,
+      colors, blendMode.index, cullRect?._value
+    );
+  }
+
   void _drawAtlas(List<dynamic> paintObjects,
                   ByteData paintData,
                   Image atlas,
