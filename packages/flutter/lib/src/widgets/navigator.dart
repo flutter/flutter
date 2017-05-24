@@ -231,11 +231,14 @@ class NavigatorObserver {
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
 
-  /// The [Navigator] pushed the given route.
+  /// The [Navigator] pushed [route].
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// The [Navigator] popped the given route.
+  /// The [Navigator] popped [route].
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
+
+  /// The [Navigator] removed [route].
+  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// The [Navigator] is being controlled by a user gesture.
   ///
@@ -673,6 +676,19 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pushReplacement(route, result: result);
   }
 
+  /// Immediately remove [route] and [Route.dispose] it.
+  ///
+  /// The route's animation does not run and the future returned from pushing
+  /// the route will not complete. Ongoing input gestures are cancelled. If
+  /// the [Navigator] has any [Navigator.observers], they will be notified with
+  /// [NavigatorObserver.didRemove].
+  ///
+  /// This method is used to dismiss dropdown menus that are up when the screen's
+  /// orientation changes.
+  static void removeRoute(BuildContext context, Route<dynamic> route) {
+    return Navigator.of(context).removeRoute(route);
+  }
+
   /// The state from the closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -1098,6 +1114,32 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
     return true;
+  }
+
+  /// Immediately remove [route] and [Route.dispose] it.
+  ///
+  /// The route's animation does not run and the future returned from pushing
+  /// the route will not complete. Ongoing input gestures are cancelled. If
+  /// the [Navigator] has any [Navigator.observers], they will be notified with
+  /// [NavigatorObserver.didRemove].
+  ///
+  /// This method is used to dismiss dropdown menus that are up when the screen's
+  /// orientation changes.
+  void removeRoute(Route<dynamic> route) {
+    assert(route != null);
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    assert(route._navigator == this);
+    final int routeIndex = _history.indexOf(route);
+    assert(routeIndex != -1);
+    setState(() {
+      _history.removeAt(routeIndex);
+      for (NavigatorObserver observer in widget.observers)
+        observer.didRemove(route, routeIndex > 0 ? _history[routeIndex - 1] : null);
+      route.dispose();
+    });
+    assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
   }
 
   /// Complete the lifecycle for a route that has been popped off the navigator.
