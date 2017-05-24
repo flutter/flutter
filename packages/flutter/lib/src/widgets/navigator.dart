@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -231,11 +232,14 @@ class NavigatorObserver {
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
 
-  /// The [Navigator] pushed the given route.
+  /// The [Navigator] pushed `route`.
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// The [Navigator] popped the given route.
+  /// The [Navigator] popped `route`.
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
+
+  /// The [Navigator] removed `route`.
+  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// The [Navigator] is being controlled by a user gesture.
   ///
@@ -673,6 +677,19 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pushReplacement(route, result: result);
   }
 
+  /// Immediately remove `route` and [Route.dispose] it.
+  ///
+  /// The route's animation does not run and the future returned from pushing
+  /// the route will not complete. Ongoing input gestures are cancelled. If
+  /// the [Navigator] has any [Navigator.observers], they will be notified with
+  /// [NavigatorObserver.didRemove].
+  ///
+  /// This method is used to dismiss dropdown menus that are up when the screen's
+  /// orientation changes.
+  static void removeRoute(BuildContext context, Route<dynamic> route) {
+    return Navigator.of(context).removeRoute(route);
+  }
+
   /// The state from the closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -1100,6 +1117,36 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     return true;
   }
 
+  /// Immediately remove `route` and [Route.dispose] it.
+  ///
+  /// The route's animation does not run and the future returned from pushing
+  /// the route will not complete. Ongoing input gestures are cancelled. If
+  /// the [Navigator] has any [Navigator.observers], they will be notified with
+  /// [NavigatorObserver.didRemove].
+  ///
+  /// This method is used to dismiss dropdown menus that are up when the screen's
+  /// orientation changes.
+  void removeRoute(Route<dynamic> route) {
+    assert(route != null);
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    assert(route._navigator == this);
+    final int index = _history.indexOf(route);
+    assert(index != -1);
+    final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
+    final Route<dynamic> nextRoute = (index + 1 < _history.length) ? _history[index + 1] : null;
+    setState(() {
+      _history.removeAt(index);
+      previousRoute?.didChangeNext(nextRoute);
+      nextRoute?.didChangePrevious(previousRoute);
+      for (NavigatorObserver observer in widget.observers)
+        observer.didRemove(route, previousRoute);
+      route.dispose();
+    });
+    assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
+  }
+
   /// Complete the lifecycle for a route that has been popped off the navigator.
   ///
   /// When the navigator pops a route, the navigator retains a reference to the
@@ -1178,10 +1225,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
-    final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
-    setState(() {
-      absorber?.absorbing = true;
-    });
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+      // If we're between frames (SchedulerPhase.idle) then absorb any
+      // subsequent pointers from this frame. The absorbing flag will be
+      // reset in the next frame, see build().
+      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+      setState(() {
+        absorber?.absorbing = true;
+      });
+    }
     for (int pointer in _activePointers.toList())
       WidgetsBinding.instance.cancelPointer(pointer);
   }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show window;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -463,4 +464,16 @@ void main() {
     expect(menuRect.bottomLeft, new Offset(800.0 - menuRect.width, 600.0));
     expect(menuRect.bottomRight, const Offset(800.0, 600.0));
   });
+
+  testWidgets('Dropdown menus are dismissed on screen orientation changes', (WidgetTester tester) async {
+    await tester.pumpWidget(buildFrame());
+    await tester.tap(find.byType(dropdownButtonType));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListView), findsOneWidget);
+
+    window.onMetricsChanged();
+    await tester.pump();
+    expect(find.byType(ListView, skipOffstage: false), findsNothing);
+  });
+
 }

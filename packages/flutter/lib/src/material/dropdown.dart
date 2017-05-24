@@ -328,6 +328,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       child: menu,
     );
   }
+
+  void _dismiss() {
+    navigator?.removeRoute(this);
+  }
 }
 
 /// An item in a menu created by a [DropdownButton].
@@ -486,7 +490,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    //TODO(hansmuller) if _dropDownRoute != null Navigator.remove(context, _dropdownRoute)
+    _removeDropdownRoute();
     super.dispose();
   }
 
@@ -494,7 +498,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Defined by WidgetsBindingObserver
   @override
   void didChangeMetrics() {
-    //TODO(hansmuller) if _dropDownRoute != null Navigator.remove(context, _dropdownRoute)
+    _removeDropdownRoute();
+  }
+
+  void _removeDropdownRoute() {
+    _dropdownRoute?._dismiss();
     _dropdownRoute = null;
   }
 
