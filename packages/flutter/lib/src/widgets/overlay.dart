@@ -62,7 +62,8 @@ class OverlayEntry {
     @required this.builder,
     bool opaque: false,
     bool maintainState: false,
-  }) : _opaque = opaque, _maintainState = maintainState {
+    bool semanticsBarrier: false,
+  }) : _opaque = opaque, _maintainState = maintainState, _semanticsBarrier = semanticsBarrier {
     assert(builder != null);
     assert(opaque != null);
     assert(maintainState != null);
@@ -113,6 +114,17 @@ class OverlayEntry {
     _maintainState = value;
     assert(_overlay != null);
     _overlay._didChangeEntryOpacity();
+  }
+
+  bool get semanticsBarrier => _semanticsBarrier;
+  bool _semanticsBarrier;
+  set semanticsBarrier(bool value) {
+    assert(_semanticsBarrier != null);
+    if (_semanticsBarrier == value)
+      return;
+    _semanticsBarrier = value;
+    assert(_overlay != null);
+    _overlay._didChangeEntryOpacity(); // TODO(goderbauer): rename?
   }
 
   OverlayState _overlay;
@@ -350,10 +362,16 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     final List<Widget> onstageChildren = <Widget>[];
     final List<Widget> offstageChildren = <Widget>[];
     bool onstage = true;
+    bool excludeSemantics = false;
     for (int i = _entries.length - 1; i >= 0; i -= 1) {
       final OverlayEntry entry = _entries[i];
       if (onstage) {
-        onstageChildren.add(new _OverlayEntry(entry));
+        onstageChildren.add(new ExcludeSemantics(
+            child: new _OverlayEntry(entry),
+            excluding: excludeSemantics,
+        ));
+        if (entry.semanticsBarrier)
+          excludeSemantics = true;
         if (entry.opaque)
           onstage = false;
       } else if (entry.maintainState) {

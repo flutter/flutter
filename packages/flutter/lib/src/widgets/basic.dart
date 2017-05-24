@@ -3272,10 +3272,28 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 /// redundant with the chip label.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that drops all the semantics of its descendants.
-  const ExcludeSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const ExcludeSemantics({
+    Key key,
+    this.excluding: true,
+    Widget child,
+  }) : assert(excluding != null),
+       super(key: key, child: child);
+
+  final bool excluding;
 
   @override
-  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics();
+  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics(excluding: excluding);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderExcludeSemantics renderObject) {
+    renderObject.excluding = excluding;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('excluding: $excluding');
+  }
 }
 
 /// A widget that builds its child.

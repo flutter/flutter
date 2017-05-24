@@ -2895,8 +2895,34 @@ class RenderMergeSemantics extends RenderProxyBox {
 /// to it (e.g. text included only for the visual effect).
 class RenderExcludeSemantics extends RenderProxyBox {
   /// Creates a render object that ignores the semantics of its subtree.
-  RenderExcludeSemantics({ RenderBox child }) : super(child);
+  RenderExcludeSemantics({
+    RenderBox child,
+    bool excluding : true,
+  }) : _excluding = excluding, super(child) {
+    assert(_excluding != null);
+  }
+
+  bool get excluding => _excluding;
+  bool _excluding;
+  set excluding(bool value) {
+    assert(value != null);
+    if (value == _excluding)
+      return;
+    _excluding = value;
+    markNeedsSemanticsUpdate();
+  }
 
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) { }
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (excluding) {
+      return;
+    }
+    super.visitChildrenForSemantics(visitor);
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('excluding: $excluding');
+  }
 }
