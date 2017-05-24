@@ -46,6 +46,10 @@ import 'ticker_provider.dart';
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
 /// call [State.setState], the user's battery will be drained unnecessarily.
 ///
+/// If this entry is declared to be a [semanticsBarrier], then entries below
+/// this one will not be included in the semantic tree, e.i. those entries will
+/// be unreachable via accessibility means.
+///
 /// See also:
 ///
 ///  * [Overlay].
@@ -116,6 +120,10 @@ class OverlayEntry {
     _overlay._didChangeEntryOpacity();
   }
 
+  /// Whether this entry is a semantics barrier for the entries below it.
+  ///
+  /// If `true`, entries below this entry will not be included in the semantic
+  /// tree. That means they are not reachable via accessibility means.
   bool get semanticsBarrier => _semanticsBarrier;
   bool _semanticsBarrier;
   set semanticsBarrier(bool value) {

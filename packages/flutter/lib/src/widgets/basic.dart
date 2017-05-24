@@ -3266,6 +3266,9 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 
 /// A widget that drops all the semantics of its descendants.
 ///
+/// When [excluding] is true, this widget (and its subtree) is excluded from
+/// the semantics tree.
+///
 /// This can be used to hide subwidgets that would otherwise be
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
@@ -3279,6 +3282,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
   }) : assert(excluding != null),
        super(key: key, child: child);
 
+  /// Whether this widget is included in the semantics tree.
   final bool excluding;
 
   @override

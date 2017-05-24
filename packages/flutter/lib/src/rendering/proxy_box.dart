@@ -2891,6 +2891,9 @@ class RenderMergeSemantics extends RenderProxyBox {
 
 /// Excludes this subtree from the semantic tree.
 ///
+/// When [excluding] is true, this render object (and its subtree) is excluded
+/// from the semantic tree.
+///
 /// Useful e.g. for hiding text that is redundant with other text next
 /// to it (e.g. text included only for the visual effect).
 class RenderExcludeSemantics extends RenderProxyBox {
@@ -2902,6 +2905,7 @@ class RenderExcludeSemantics extends RenderProxyBox {
     assert(_excluding != null);
   }
 
+  /// Whether this render object is excluded from the semantic tree.
   bool get excluding => _excluding;
   bool _excluding;
   set excluding(bool value) {
