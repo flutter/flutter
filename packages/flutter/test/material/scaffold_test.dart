@@ -475,5 +475,7 @@ void main() {
     expect(semantics, isNot(includesNodeWithLabel(bottomNavigationBarLabel)));
     expect(semantics, isNot(includesNodeWithLabel(floatingActionButtonLabel)));
     expect(semantics, includesNodeWithLabel(drawerLabel));
+
+    semantics.dispose();
   });
 }

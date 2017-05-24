@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -228,5 +227,7 @@ void main() {
 
     expect(semantics, includesNodeWithLabel(alertText));
     expect(semantics, isNot(includesNodeWithLabel(buttonText)));
+
+    semantics.dispose();
   });
 }
