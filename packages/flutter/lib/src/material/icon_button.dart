@@ -37,6 +37,16 @@ const double _kMinButtonSize = 48.0;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
+/// ## Sample code
+///
+/// ```dart
+/// new IconButton(
+///   icon: new Icon(Icons.volume_up),
+///   tooltip: 'Increase volume by 10%',
+///   onPressed: () { setState(() { _volume *= 1.1; }); },
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [Icons], a library of predefined icons.
