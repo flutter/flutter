@@ -762,9 +762,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _addIfNonNull(List<LayoutId> children, Widget child, Object childId) {
+  void _addChild(List<LayoutId> children, Widget child, Object childId, {bool excludeSemantics: false}) {
     if (child != null)
-      children.add(new LayoutId(child: child, id: childId));
+      children.add(new LayoutId(child: new ExcludeSemantics(child: child, excluding: excludeSemantics), id: childId));
   }
 
   @override
@@ -792,13 +792,15 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     final List<LayoutId> children = <LayoutId>[];
 
-    _addIfNonNull(children, widget.body, _ScaffoldSlot.body);
+    final bool excludeSemantics = !(_drawerKey.currentState?.isClosed ?? true);
+
+    _addChild(children, widget.body, _ScaffoldSlot.body);
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? padding.top : 0.0;
       final double extent = widget.appBar.preferredSize.height + topPadding;
       assert(extent >= 0.0 && extent.isFinite);
-      _addIfNonNull(
+      _addChild(
         children,
         new ConstrainedBox(
           constraints: new BoxConstraints(maxHeight: extent),
@@ -808,16 +810,21 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           ),
         ),
         _ScaffoldSlot.appBar,
+        excludeSemantics: excludeSemantics,
       );
     }
 
-    if (_snackBars.isNotEmpty)
-      _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
+    if (_snackBars.isNotEmpty) {
+      _addChild(
+        children, _snackBars.first._widget, _ScaffoldSlot.snackBar,
+        excludeSemantics: excludeSemantics,
+      );
+    }
 
     if (widget.persistentFooterButtons != null) {
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.persistentFooter,
-        child: new Container(
+      _addChild(
+        children,
+        new Container(
           decoration: new BoxDecoration(
             border: new Border(
               top: new BorderSide(
@@ -831,15 +838,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             ),
           ),
         ),
-      ));
+        _ScaffoldSlot.persistentFooter,
+        excludeSemantics: excludeSemantics,
+      );
     }
 
-    if (widget.bottomNavigationBar != null) {
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.bottomNavigationBar,
-        child: widget.bottomNavigationBar,
-      ));
-    }
+    _addChild(
+      children,
+      widget.bottomNavigationBar,
+      _ScaffoldSlot.bottomNavigationBar,
+      excludeSemantics: excludeSemantics,
+    );
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
       final List<Widget> bottomSheets = <Widget>[];
@@ -851,41 +860,51 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children: bottomSheets,
         alignment: FractionalOffset.bottomCenter,
       );
-      _addIfNonNull(children, stack, _ScaffoldSlot.bottomSheet);
+      _addChild(children, stack, _ScaffoldSlot.bottomSheet, excludeSemantics: excludeSemantics);
     }
 
-    children.add(new LayoutId(
-      id: _ScaffoldSlot.floatingActionButton,
-      child: new _FloatingActionButtonTransition(
+    _addChild(
+      children,
+      new _FloatingActionButtonTransition(
         child: widget.floatingActionButton,
-      )
-    ));
+      ),
+      _ScaffoldSlot.floatingActionButton,
+      excludeSemantics: excludeSemantics,
+    );
 
     if (themeData.platform == TargetPlatform.iOS) {
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.statusBar,
-        child: new GestureDetector(
+      _addChild(
+        children,
+        new GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _handleStatusBarTap,
-        )
-      ));
+        ),
+        _ScaffoldSlot.statusBar,
+        excludeSemantics: excludeSemantics,
+      );
     }
 
     if (widget.drawer != null) {
       assert(hasDrawer);
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.drawer,
-        child: new DrawerController(
+      _addChild(
+        children,
+        new DrawerController(
           key: _drawerKey,
+          onStateChanged: () {
+            // Rebuild Scaffold when drawer opens/closed to update semantics tree.
+            setState(() {});
+          },
           child: widget.drawer,
-        )
-      ));
+        ),
+        _ScaffoldSlot.drawer,
+        excludeSemantics: false,
+      );
     } else if (_shouldHandleBackGesture()) {
       assert(!hasDrawer);
       // Add a gesture for navigating back.
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.drawer,
-        child: new Align(
+      _addChild(
+        children,
+        new Align(
           alignment: FractionalOffset.centerLeft,
           child: new GestureDetector(
             key: _backGestureKey,
@@ -897,8 +916,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             excludeFromSemantics: true,
             child: new Container(width: _kBackGestureWidth)
           )
-        )
-      ));
+        ),
+        _ScaffoldSlot.drawer,
+        excludeSemantics: false,
+      );
     }
 
     return new _ScaffoldScope(

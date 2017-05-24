@@ -116,7 +116,8 @@ class DrawerController extends StatefulWidget {
   /// The [child] argument must not be null and is typically a [Drawer].
   const DrawerController({
     GlobalKey key,
-    @required this.child
+    this.onStateChanged,
+    @required this.child,
   }) : assert(child != null),
        super(key: key);
 
@@ -124,6 +125,8 @@ class DrawerController extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   final Widget child;
+
+  final VoidCallback onStateChanged;
 
   @override
   DrawerControllerState createState() => new DrawerControllerState();
@@ -178,8 +181,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         _historyEntry = null;
         break;
       case AnimationStatus.dismissed:
+        if (widget.onStateChanged != null)
+          widget.onStateChanged();
         break;
       case AnimationStatus.completed:
+        if (widget.onStateChanged != null)
+          widget.onStateChanged();
         break;
     }
   }
@@ -243,11 +250,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller.fling(velocity: -1.0);
   }
 
+  bool get isClosed => _controller.status == AnimationStatus.dismissed;
+
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
   Widget _buildDrawer(BuildContext context) {
-    if (_controller.status == AnimationStatus.dismissed) {
+    if (isClosed) {
       return new Align(
         alignment: FractionalOffset.centerLeft,
         child: new GestureDetector(
