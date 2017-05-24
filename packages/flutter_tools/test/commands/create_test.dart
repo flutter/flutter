@@ -52,7 +52,7 @@ void main() {
     testUsingContext('kotlin/swift project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--android-language', 'kotlin', '--ios-language', 'swift'],
+        <String>['--android-language', 'kotlin', '-i', 'swift'],
         <String>[
           'android/app/src/main/kotlin/com/yourcompany/flutter_project/MainActivity.kt',
           'ios/Runner/AppDelegate.swift',
@@ -89,7 +89,7 @@ void main() {
     testUsingContext('kotlin/swift plugin project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--plugin', '--android-language', 'kotlin', '--ios-language', 'swift'],
+        <String>['--plugin', '-a', 'kotlin', '--ios-language', 'swift'],
         <String>[
           'android/src/main/kotlin/com/yourcompany/flutter_project/FlutterProjectPlugin.kt',
           'ios/Classes/FlutterProjectPlugin.h',
@@ -111,6 +111,21 @@ void main() {
       );
     });
 
+    testUsingContext('plugin project with custom org', () async {
+      return _createAndAnalyzeProject(
+          projectDir,
+          <String>['--plugin', '--org', 'com.bar.foo'],
+          <String>[
+            'android/src/main/java/com/bar/foo/flutter_project/FlutterProjectPlugin.java',
+            'example/android/app/src/main/java/com/bar/foo/flutter_project_example/MainActivity.java',
+          ],
+          <String>[
+            'android/src/main/java/com/yourcompany/flutter_project/FlutterProjectPlugin.java',
+            'example/android/app/src/main/java/com/yourcompany/flutter_project_example/MainActivity.java',
+          ],
+      );
+    });
+
     testUsingContext('project with-driver-test', () async {
       return _createAndAnalyzeProject(
         projectDir,
@@ -126,7 +141,7 @@ void main() {
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', projectDir.path]);
+      await runner.run(<String>['create', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
       void expectExists(String relPath) {
         expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
@@ -156,6 +171,12 @@ void main() {
       expect(xcodeConfig, contains('FLUTTER_ROOT='));
       expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
       expect(xcodeConfig, contains('FLUTTER_FRAMEWORK_DIR='));
+      // App identification
+      final String xcodeProjectPath = fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
+      expectExists(xcodeProjectPath);
+      final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
+      final String xcodeProject = xcodeProjectFile.readAsStringSync();
+      expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
     });
 
     // Verify that we can regenerate over an existing project.

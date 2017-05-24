@@ -84,13 +84,15 @@ class Template {
           return null;
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
+      final String organization = context['organization'];
       final String projectName = context['projectName'];
       final String pluginClass = context['pluginClass'];
       final String destinationDirPath = destination.absolute.path;
       String finalDestinationPath = fs.path
         .join(destinationDirPath, relativeDestinationPath)
         .replaceAll(_kCopyTemplateExtension, '')
-        .replaceAll(_kTemplateExtension, '');
+        .replaceAll(_kTemplateExtension, '')
+        .replaceAll('/organization/', '/${organization.replaceAll('.', '/')}/');
       if (projectName != null)
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       if (pluginClass != null)
