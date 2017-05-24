@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -1220,10 +1221,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
-    final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
-    setState(() {
-      absorber?.absorbing = true;
-    });
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+      // If we're between frames (SchedulerPhase.idle) then absorb the rest of
+      // the gesture. The absorbing flag will be reset in the next frame, see build().
+      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+      setState(() {
+        absorber?.absorbing = true;
+      });
+    }
     for (int pointer in _activePointers.toList())
       WidgetsBinding.instance.cancelPointer(pointer);
   }

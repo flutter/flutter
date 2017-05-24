@@ -290,7 +290,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final double screenHeight = MediaQuery.of(context).size.height;
+    // No inherited widget dependency here. If the screen's dimensions change
+    // while the menu is up, we just remove it. See _DropdownButtonState.didChangeMetrics.
+    final MediaQuery query = context.ancestorWidgetOfExactType(MediaQuery);
+    final double screenHeight = query.data.size.height;
     final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
     final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
     final double menuHeight = math.min(maxMenuHeight, preferredMenuHeight);
@@ -327,6 +330,10 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
       ),
       child: menu,
     );
+  }
+
+  void _dismiss() {
+    navigator?.removeRoute(this);
   }
 }
 
@@ -486,6 +493,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _removeDropdownRoute();
     super.dispose();
   }
 
@@ -498,7 +506,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _removeDropdownRoute() {
     if (_dropdownRoute != null) {
-      Navigator.removeRoute(context, _dropdownRoute);
+      _dropdownRoute._dismiss();
       _dropdownRoute = null;
     }
   }

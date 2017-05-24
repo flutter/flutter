@@ -457,7 +457,7 @@ void main() {
     final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
        '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B'); }),
-      '/B': (BuildContext context) => new OnTapPage(id: 'B'),
+      '/B': (BuildContext context) => const OnTapPage(id: 'B'),
     };
     final Map<String, Route<String>> routes = <String, Route<String>>{};
 

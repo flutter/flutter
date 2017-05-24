@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show window;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -465,28 +466,14 @@ void main() {
   });
 
   testWidgets('Dropdown menus are dismissed on screen orientation changes', (WidgetTester tester) async {
-    final Key frameKey = new GlobalKey();
-
-    Widget sizedFrame(double width, double height) {
-      return new MediaQuery(
-        data: new MediaQueryData(size: new Size(width, height)),
-        child: new KeyedSubtree(
-          key: new GlobalKey(),
-          child: buildFrame(),
-        ),
-      );
-    }
-
-    // In the code below the ListView is a proxy for the actual
-    // dropdown menu - the _DropdownMenu contains a ListView.
-
-    await tester.pumpWidget(sizedFrame(800.0, 600.0));
+    await tester.pumpWidget(buildFrame());
     await tester.tap(find.byType(dropdownButtonType));
     await tester.pumpAndSettle();
     expect(find.byType(ListView), findsOneWidget);
 
-    await tester.pumpWidget(sizedFrame(600.0, 800.0));
-    expect(find.byType(ListView), findsNothing);
+    window.onMetricsChanged();
+    await tester.pump();
+    expect(find.byType(ListView, skipOffstage: false), findsNothing);
   });
 
 }
