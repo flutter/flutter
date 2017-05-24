@@ -126,6 +126,10 @@ class DrawerController extends StatefulWidget {
   /// Typically a [Drawer].
   final Widget child;
 
+  /// Callback for state change notifications.
+  ///
+  /// Gets called whenever the drawer's state switches from open to closed or
+  /// vice versa.
   final VoidCallback onStateChanged;
 
   @override
@@ -250,6 +254,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller.fling(velocity: -1.0);
   }
 
+  /// Whether the drawer is closed.
   bool get isClosed => _controller.status == AnimationStatus.dismissed;
 
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);

@@ -891,7 +891,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         new DrawerController(
           key: _drawerKey,
           onStateChanged: () {
-            // Rebuild Scaffold when drawer opens/closed to update semantics tree.
+            // Rebuild Scaffold when drawer opens/closes to update semantics tree.
             setState(() {});
           },
           child: widget.drawer,
