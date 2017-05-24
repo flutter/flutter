@@ -1323,15 +1323,21 @@ class DecorationImage {
   }) : assert(image != null);
 
   /// The image to be painted into the decoration.
+  ///
+  /// Typically this will be an [AssetImage] (for an image shipped with the
+  /// application) or a [NetworkImage] (for an image obtained from the network).
   final ImageProvider image;
 
   /// How the image should be inscribed into the box.
   ///
-  /// The default varies based on the other fields. See the discussion at
-  /// [paintImage].
+  /// The default is [BoxFit.scaleDown] if [centerSlice] is null, and
+  /// [BoxFit.fill] if [centerSlice] is not null.
+  ///
+  /// See the discussion at [paintImage] for more details.
   final BoxFit fit;
 
-  /// How to paint any portions of the box not covered by the image.
+  /// How to paint any portions of the box that would not otherwise be covered
+  /// by the image.
   final ImageRepeat repeat;
 
   /// The center slice for a nine-patch image.
@@ -1341,6 +1347,14 @@ class DecorationImage {
   /// region of the image above and below the center slice will be stretched
   /// only horizontally and the region of the image to the left and right of
   /// the center slice will be stretched only vertically.
+  ///
+  /// The stretching will be applied in order to make the image fit into the box
+  /// specified by [fit]. When [centerSlice] is not null, [fit] defaults to
+  /// [BoxFit.fill], which distorts the destination image size relative to the
+  /// image's original aspect ratio. Values of [BoxFit] which do not distort the
+  /// destination image size will result in [centerSlice] having no effect
+  /// (since the nine regions of the image will be rendered with the same
+  /// scaling, as if it wasn't specified).
   final Rect centerSlice;
 
   /// A color filter to apply to the image before painting it.
@@ -1379,6 +1393,22 @@ class DecorationImage {
 
 /// An immutable description of how to paint a box.
 ///
+/// The [BoxDecoration] class provides a variety of ways to draw a box.
+///
+/// The box has a [border], a body, and may cast a [shadow].
+///
+/// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
+/// then the [borderRadius] property controls the roundness of the corners.
+///
+/// The body of the box is painted in layers. The bottom-most layer is the
+/// [color], which fills the box. Above that is the [gradient], which also fills
+/// the box. Finally there is the [image], the precise alignment of which is
+/// controlled by the [DecorationImage] class.
+///
+/// The [border] paints over the body; the [shadow], naturally, paints below it.
+///
+/// ## Sample code
+///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw an image with a border:
 ///
@@ -1397,6 +1427,13 @@ class DecorationImage {
 ///   ),
 /// )
 /// ```
+///
+/// See also:
+///
+///  * [DecoratedBox] and [Container], widgets that can be configured with
+///    [BoxDecoration] objects.
+///  * [CustomPaint], a widget that lets you draw arbitrary graphics.
+///  * [Decoration], the base class which lets you define other decorations.
 class BoxDecoration extends Decoration {
   /// Creates a box decoration.
   ///

@@ -1177,8 +1177,18 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
 /// A box that limits its size only when it's unconstrained.
 ///
 /// If this widget's maximum width is unconstrained then its child's width is
-/// limited to maxWidth. Similarly, if this widget's maximum height is unconstrained
-/// then its child's height is limited to to maxHeight.
+/// limited to [maxWidth]. Similarly, if this widget's maximum height is
+/// unconstrained then its child's height is limited to [maxHeight].
+///
+/// This has the effect of giving the child a natural dimension in unbounded
+/// environments. For example, by providing a [maxHeight] to a widget that
+/// normally tries to be as big as possible, the widget will normally size
+/// itself to fit its parent, but when placed in a vertical list, it will take
+/// on the given height.
+///
+/// This is useful when composing widgets that normally try to match their
+/// parents' size, so that they behave reasonably in lists (which are
+/// unbounded).
 class LimitedBox extends SingleChildRenderObjectWidget {
   /// Creates a box that limits its size only when it's unconstrained.
   ///
@@ -1193,10 +1203,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
        assert(maxHeight != null && maxHeight >= 0.0),
        super(key: key, child: child);
 
-  /// The maximum width limit to apply in the absence of a maxWidth constraint.
+  /// The maximum width limit to apply in the absence of a
+  /// [BoxConstraints.maxWidth] constraint.
   final double maxWidth;
 
-  /// The maximum height limit to apply in the absence of a maxHeight constraint.
+  /// The maximum height limit to apply in the absence of a
+  /// [BoxConstraints.maxHeight] constraint.
   final double maxHeight;
 
   @override
@@ -1677,7 +1689,7 @@ class ListBody extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A widget that uses the stack layout algorithm for its children.
+/// A widget that positions its children relative to the edges of its box.
 ///
 /// This class is useful if you want to overlap several children in a simple
 /// way, for example having some text and an image, overlaid with a gradient and
@@ -2380,6 +2392,41 @@ class Expanded extends Flexible {
 ///
 /// The runs themselves are then positioned in the cross axis according to the
 /// [runSpacing] and [runAlignment].
+///
+/// ## Sample code
+///
+/// This example renders some [Chip]s representing four contacts in a [Wrap] so
+/// that they flow across lines as necessary.
+///
+/// ```dart
+/// new Wrap(
+///   spacing: 8.0, // gap between adjacent chips
+///   runSpacing: 4.0, // gap between lines
+///   children: <Widget>[
+///     new Chip(
+///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('AH')),
+///       label: new Text('Hamilton'),
+///     ),
+///     new Chip(
+///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('ML')),
+///       label: new Text('Lafayette'),
+///     ),
+///     new Chip(
+///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('HM')),
+///       label: new Text('Mulligan'),
+///     ),
+///     new Chip(
+///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('JL')),
+///       label: new Text('Laurens'),
+///     ),
+///   ],
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [Row], which places children in one line, and gives control over their
+///    alignment and spacing.
 class Wrap extends MultiChildRenderObjectWidget {
   /// Creates a wrap layout.
   ///
@@ -2500,7 +2547,8 @@ class Wrap extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A widget that implements the flow layout algorithm.
+/// A widget that sizes and positions children efficiently, according to the
+/// logic in a [FlowDelegate].
 ///
 /// Flow layouts are optimized for repositioning children using transformation
 /// matrices.
@@ -2513,15 +2561,19 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// Rather than positioning the children during layout, the children are
 /// positioned using transformation matrices during the paint phase using the
 /// matrices from the [FlowDelegate.paintChildren] function. The children can be
-/// repositioned efficiently by simply repainting the flow.
+/// repositioned efficiently by simply repainting the flow, which happens
+/// without the children being laid out again (contrast this with a [Stack],
+/// which does the sizing and positioning together during layout).
 ///
-/// The most efficient way to trigger a repaint of the flow is to supply a
-/// repaint argument to the constructor of the [FlowDelegate]. The flow will
-/// listen to this animation and repaint whenever the animation ticks, avoiding
-/// both the build and layout phases of the pipeline.
+/// The most efficient way to trigger a repaint of the flow is to supply an
+/// animation to the constructor of the [FlowDelegate]. The flow will listen to
+/// this animation and repaint whenever the animation ticks, avoiding both the
+/// build and layout phases of the pipeline.
 ///
 /// See also:
 ///
+///  * [Wrap], which provides the layout model that some other frameworks call
+///    "flow", and is otherwise unrelated to [Flow].
 ///  * [FlowDelegate], which controls the visual presentation of the children.
 ///  * [Stack], which arranges children relative to the edges of the container.
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of

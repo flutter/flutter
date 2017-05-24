@@ -123,16 +123,68 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// possible. Containers with children size themselves to their children. The
 /// `width`, `height`, and [constraints] arguments to the constructor override
 /// this.
+///
+/// ## Sample code
+///
+/// This example shows a 48x48 green square (placed inside a [Center] widget in
+/// case the parent widget has its own opinions regarding the size that the
+/// [Container] should take), with a margin so that it stays away from
+/// neighboring widgets:
+///
+/// ```dart
+/// new Center(
+///   child: new Container(
+///     margin: const EdgeInsets.all(10.0),
+///     color: const Color(0xFF00FF00),
+///     width: 48.0,
+///     height: 48.0,
+///   ),
+/// )
+/// ```
+///
+/// This example shows how to use many of the features of [Container] at once.
+/// The [constraints] are set to fit the font size plus ample headroom
+/// vertically, while expanding horizontally to fit the parent. The [padding] is
+/// used to make sure there is space between the contents and the text. The
+/// [color] makes the box teal. The [alignment] causes the [child] to be
+/// centered in the box. The [foregroundDecoration] overlays a nine-patch image
+/// onto the text. Finally, the [transform] applies a slight rotation to the
+/// entire contraption to complete the effect.
+///
+/// ```dart
+/// new Container(
+///   constraints: new BoxConstraints.expand(
+///     height: Theme.of(context).textTheme.display1.fontSize * 1.1 + 200.0,
+///   ),
+///   padding: const EdgeInsets.all(8.0),
+///   color: Colors.teal.shade700,
+///   alignment: FractionalOffset.center,
+///   child: new Text('Hello World', style: Theme.of(context).textTheme.display1.copyWith(color: Colors.white)),
+///   foregroundDecoration: new BoxDecoration(
+///     image: new DecorationImage(
+///       image: new NetworkImage('https://www.example.com/images/frame.png'),
+///       centerSlice: new Rect.fromLTRB(270.0, 180.0, 1360.0, 730.0),
+///     ),
+///   ),
+///   transform: new Matrix4.rotationZ(0.1),
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [AnimatedContainer], a variant that smoothly animates the properties when
+///    they change.
+///  * [Border], which has a sample which uses [Container] heavily.
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///
   /// The `height` and `width` values include the padding.
   ///
-  /// The `color` argument is a shorthand for
-  /// `decoration: new BoxDecoration(backgroundColor: color)`, which means you
-  /// cannot supply both a `color` and a `decoration` argument. If you want to
-  /// have both a `color` and a `decoration`, you can pass the color as the
-  /// `backgroundColor` argument to the `BoxDecoration`.
+  /// The `color` argument is a shorthand for `decoration: new
+  /// BoxDecoration(color: color)`, which means you cannot supply both a `color`
+  /// and a `decoration` argument. If you want to have both a `color` and a
+  /// `decoration`, you can pass the color as the `color` argument to the
+  /// `BoxDecoration`.
   Container({
     Key key,
     this.alignment,
@@ -159,7 +211,7 @@ class Container extends StatelessWidget {
     assert(constraints == null || constraints.debugAssertIsValid());
     assert(color == null || decoration == null,
       'Cannot provide both a color and a decoration\n'
-      'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
+      'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
     );
   }
 

@@ -121,6 +121,22 @@ class InkResponse extends StatefulWidget {
 
   @override
   _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    final List<String> gestures = <String>[];
+    if (onTap != null)
+      gestures.add('tap');
+    if (onDoubleTap != null)
+      gestures.add('double tap');
+    if (onLongPress != null)
+      gestures.add('long press');
+    if (gestures.isEmpty)
+      gestures.add('<none>');
+    description.add('gestures: ${gestures.join(", ")}');
+    description.add('${containedInkWell ? "clipped to " : ""}$highlightShape');
+  }
 }
 
 class _InkResponseState<T extends InkResponse> extends State<T> {
