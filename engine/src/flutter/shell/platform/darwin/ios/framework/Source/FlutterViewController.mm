@@ -190,6 +190,16 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
                object:nil];
 
   [center addObserver:self
+             selector:@selector(applicationDidEnterBackground:)
+                 name:UIApplicationDidEnterBackgroundNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(applicationWillEnterForeground:)
+                 name:UIApplicationWillEnterForegroundNotification
+               object:nil];
+
+  [center addObserver:self
              selector:@selector(keyboardWillChangeFrame:)
                  name:UIKeyboardWillChangeFrameNotification
                object:nil];
@@ -261,7 +271,15 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 }
 
 - (void)applicationWillResignActive:(NSNotification*)notification {
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.inactive"];
+}
+
+- (void)applicationDidEnterBackground:(NSNotification*)notification {
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.paused"];
+}
+
+- (void)applicationWillEnterForeground:(NSNotification*)notification {
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.inactive"];
 }
 
 #pragma mark - Touch event handling

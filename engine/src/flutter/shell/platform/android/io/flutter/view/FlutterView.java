@@ -213,6 +213,10 @@ public class FlutterView extends SurfaceView
         mFlutterLifecycleChannel.send("AppLifecycleState.resumed");
     }
 
+    public void onStop() {
+        mFlutterLifecycleChannel.send("AppLifecycleState.suspending");
+    }
+
     public void onMemoryPressure() {
         Map<String, Object> message = new HashMap<>(1);
         message.put("type", "memoryPressure");
