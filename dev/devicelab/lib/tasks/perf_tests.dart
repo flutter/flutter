@@ -83,7 +83,7 @@ TaskFunction createFlutterViewStartupTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  StartupTest(this.testDirectory, { this.reportMetrics: true, this.runPodInstall: false });
+  const StartupTest(this.testDirectory, { this.reportMetrics: true, this.runPodInstall: false });
 
   final String testDirectory;
   final bool reportMetrics;
@@ -128,7 +128,7 @@ class StartupTest {
 /// performance.
 class PerfTest {
 
-  PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
+  const PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
 
   final String testDirectory;
   final String testTarget;
@@ -181,7 +181,7 @@ class PerfTest {
 /// code is.
 class BuildTest {
 
-  BuildTest(this.testDirectory);
+  const BuildTest(this.testDirectory);
 
   final String testDirectory;
 
@@ -263,7 +263,7 @@ class BuildTest {
 
 /// Measure application memory usage.
 class MemoryTest {
-  MemoryTest(this.testDirectory, this.packageName, { this.testTarget });
+  const MemoryTest(this.testDirectory, this.packageName, { this.testTarget });
 
   final String testDirectory;
   final String packageName;
@@ -332,11 +332,11 @@ class MemoryTest {
 /// Measure application memory usage after pausing and resuming the app
 /// with the Android back button.
 class AndroidBackButtonMemoryTest {
+  const AndroidBackButtonMemoryTest(this.testDirectory, this.packageName, this.activityName);
+
   final String testDirectory;
   final String packageName;
   final String activityName;
-
-  AndroidBackButtonMemoryTest(this.testDirectory, this.packageName, this.activityName);
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
