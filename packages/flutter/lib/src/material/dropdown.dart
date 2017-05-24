@@ -486,7 +486,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    //TODO(hansmuller) if _dropDownRoute != null Navigator.remove(context, _dropdownRoute)
     super.dispose();
   }
 
@@ -494,8 +493,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Defined by WidgetsBindingObserver
   @override
   void didChangeMetrics() {
-    //TODO(hansmuller) if _dropDownRoute != null Navigator.remove(context, _dropdownRoute)
-    _dropdownRoute = null;
+    _removeDropdownRoute();
+  }
+
+  void _removeDropdownRoute() {
+    if (_dropdownRoute != null) {
+      Navigator.removeRoute(context, _dropdownRoute);
+      _dropdownRoute = null;
+    }
   }
 
   @override

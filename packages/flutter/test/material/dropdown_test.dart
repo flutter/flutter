@@ -463,4 +463,30 @@ void main() {
     expect(menuRect.bottomLeft, new Offset(800.0 - menuRect.width, 600.0));
     expect(menuRect.bottomRight, const Offset(800.0, 600.0));
   });
+
+  testWidgets('Dropdown menus are dismissed on screen orientation changes', (WidgetTester tester) async {
+    final Key frameKey = new GlobalKey();
+
+    Widget sizedFrame(double width, double height) {
+      return new MediaQuery(
+        data: new MediaQueryData(size: new Size(width, height)),
+        child: new KeyedSubtree(
+          key: new GlobalKey(),
+          child: buildFrame(),
+        ),
+      );
+    }
+
+    // In the code below the ListView is a proxy for the actual
+    // dropdown menu - the _DropdownMenu contains a ListView.
+
+    await tester.pumpWidget(sizedFrame(800.0, 600.0));
+    await tester.tap(find.byType(dropdownButtonType));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListView), findsOneWidget);
+
+    await tester.pumpWidget(sizedFrame(600.0, 800.0));
+    expect(find.byType(ListView), findsNothing);
+  });
+
 }
