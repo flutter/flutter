@@ -9,6 +9,8 @@ profile
 
 DerivedData/
 build/
+GeneratedPluginRegistrant.h
+GeneratedPluginRegistrant.m
 
 *.pbxuser
 *.mode1v3
