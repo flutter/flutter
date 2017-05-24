@@ -49,7 +49,7 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'org',
       defaultsTo: 'com.yourcompany',
-      help: 'The organization responsible for the new flutter project in reverse domain name notation. '
+      help: 'The organization responsible for the new flutter project in reverse domain name notation.\n'
             'This string is used in Java package names and as prefix in the iOS bundle identifier.'
     );
     argParser.addOption(
