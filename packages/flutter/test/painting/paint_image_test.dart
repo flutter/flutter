@@ -31,7 +31,7 @@ class TestCanvas implements Canvas {
 }
 
 void main() {
-  test("Cover and align", () {
+  test('Cover and align', () {
     final TestImage image = new TestImage(width: 300, height: 300);
     final TestCanvas canvas = new TestCanvas();
     paintImage(
@@ -51,4 +51,6 @@ void main() {
     expect(command.positionalArguments[1], equals(new Rect.fromLTWH(0.0, 75.0, 300.0, 150.0)));
     expect(command.positionalArguments[2], equals(new Rect.fromLTWH(50.0, 75.0, 200.0, 100.0)));
   });
+
+  // See also the DecorationImage tests in: decoration_test.dart
 }
