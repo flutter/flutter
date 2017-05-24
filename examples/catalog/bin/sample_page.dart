@@ -182,9 +182,7 @@ void generate() {
     },
   );
 
-  final List<String> flutterDriveArgs = <String>['drive', 'test_driver/screenshot.dart'];
-  logMessage('Generating screenshots with: flutter ${flutterDriveArgs.join(" ")}');
-  Process.runSync('flutter', flutterDriveArgs);
+  // To generate the screenshots: flutter drive test_driver/screenshot.dart
 }
 
 void main(List<String> args) {

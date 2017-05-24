@@ -31,6 +31,8 @@ class SampleCatalogGenerator {
         await flutter('build', options: <String>['ios', '--profile']);
       }
 
+      await dart(<String>['bin/sample_page.dart']);
+
       await flutter('drive', options: <String>[
         'test_driver/screenshot.dart',
         '-d',
