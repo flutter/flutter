@@ -39,17 +39,17 @@ class CreateCommand extends FlutterCommand {
       'plugin',
       negatable: true,
       defaultsTo: false,
-      help: 'Generate a new Flutter Plugin project.'
+      help: 'Generate a Flutter plugin project.'
     );
     argParser.addOption(
       'description',
-      defaultsTo: 'A new flutter project.',
-      help: 'The description to use for your new flutter project. This string ends up in the pubspec.yaml file.'
+      defaultsTo: 'A new Flutter project.',
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.'
     );
     argParser.addOption(
       'org',
       defaultsTo: 'com.yourcompany',
-      help: 'The organization responsible for the new flutter project in reverse domain name notation.\n'
+      help: 'The organization responsible for your new Flutter project, in reverse domain name notation.\n'
             'This string is used in Java package names and as prefix in the iOS bundle identifier.'
     );
     argParser.addOption(
