@@ -78,7 +78,7 @@
                       << "\nThe OS has terminated the Flutter debug connection for being "
                          "inactive in the background for too long.\n\n"
                          "There are no errors with your Flutter application.\n\n"
-                         "To reconnect, launch your application again via 'flutter run";
+                         "To reconnect, launch your application again via 'flutter run'";
                 }];
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   for (id<FlutterPlugin> plugin in _pluginDelegates) {
