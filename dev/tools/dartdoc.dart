@@ -84,7 +84,7 @@ dependencies:
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
-    '--footer', 'lib/footer.html',
+    '--footer-text', 'lib/footer.html',
     '--exclude', 'temp_doc',
     '--favicon=favicon.ico',
     '--use-categories',
@@ -120,8 +120,8 @@ void createFooter(String footerPath) {
   final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
 
   new File(footerPath).writeAsStringSync(
-    '<p class="text-center" style="font-size: 10px">'
-    'Generated on $timestamp - Version $gitHead</p>'
+    '• </span class="no-break">$timestamp<span> '
+    '• </span class="no-break">$gitHead</span>'
   );
 }
 
