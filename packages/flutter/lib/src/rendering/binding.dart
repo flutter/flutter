@@ -49,7 +49,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     super.initServiceExtensions();
 
     assert(() {
-      // these service extensions only works in checked mode
+      // these service extensions only work in checked mode
       registerBoolServiceExtension(
         name: 'debugPaint',
         getter: () async => debugPaintSizeEnabled,
@@ -63,12 +63,12 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
       registerBoolServiceExtension(
           name: 'debugPaintBaselinesEnabled',
           getter: () async => debugPaintBaselinesEnabled,
-          setter: (bool value) async {
-            if (debugPaintBaselinesEnabled != value) {
-              debugPaintBaselinesEnabled = value;
-              await _forceRepaint();
-            }
-          }
+          setter: (bool value) {
+          if (debugPaintBaselinesEnabled == value)
+            return new Future<Null>.value();
+          debugPaintBaselinesEnabled = value;
+          return _forceRepaint();
+        }
       );
       registerBoolServiceExtension(
           name: 'repaintRainbow',
