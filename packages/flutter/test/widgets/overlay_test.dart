@@ -5,6 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   testWidgets('OverflowEntries context contains Overlay',
       (WidgetTester tester) async {
@@ -25,5 +27,46 @@ void main() {
       ],
     ));
     expect(didBuild, isTrue);
+  });
+
+  testWidgets('semanticsBarrier should hide underlying semantic tree',
+        (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      label: 'included in tree',
+    );
+
+    final Key overlayKey = new UniqueKey();
+    await tester.pumpWidget(new Overlay(
+      key: overlayKey,
+      initialEntries: <OverlayEntry>[
+        new OverlayEntry(
+          builder: (BuildContext context) {
+            return new Container(
+              child: new Semantics(
+                label: 'not included in tree',
+                child: new Container()
+              )
+            );
+          },
+        ),
+        new OverlayEntry(
+          builder: (BuildContext context) {
+            return new Container(
+              child: new Semantics(
+                  label: 'included in tree',
+                  child: new Container()
+              )
+            );
+          },
+          semanticsBarrier: true,
+        )
+      ],
+    ));
+
+    expect(semantics, hasSemantics(expectedSemantics));
+
+    semantics.dispose();
   });
 }
