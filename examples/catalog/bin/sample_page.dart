@@ -50,6 +50,7 @@ void initialize() {
   sampleDirectory = new Directory('lib');
   testDirectory = new Directory('test');
   driverDirectory = new Directory('test_driver');
+  outputDirectory.createSync();
   sampleTemplate = sampleTemplateFile.readAsStringSync();
   screenshotTemplate = screenshotTemplateFile.readAsStringSync();
   screenshotDriverTemplate = screenshotDriverTemplateFile.readAsStringSync();
@@ -122,7 +123,6 @@ class SampleGenerator {
 
     final RegExp keywordsRE = new RegExp(sampleCatalogKeywords, multiLine: true);
     final List<Match> keywordMatches = keywordsRE.allMatches(comment).toList();
-    // TBD: fix error generation
     if (keywordMatches.isEmpty)
       throw new SampleError('did not find any keywords in the Sample Catalog comment in $sourceFile');
 
