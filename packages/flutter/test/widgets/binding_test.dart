@@ -17,6 +17,15 @@ class MemoryPressureObserver extends WidgetsBindingObserver {
   }
 }
 
+class AppLifecycleStateObserver extends WidgetsBindingObserver {
+  AppLifecycleState lifecycleState;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    lifecycleState = state;
+  }
+}
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -30,5 +39,26 @@ void main() {
     await BinaryMessages.handlePlatformMessage('flutter/system', message, (_) {});
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance.removeObserver(observer);
+  });
+
+  testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
+    final AppLifecycleStateObserver observer = new AppLifecycleStateObserver();
+    WidgetsBinding.instance.addObserver(observer);
+
+    ByteData message = const StringCodec().encodeMessage('AppLifecycleState.paused');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(observer.lifecycleState, AppLifecycleState.paused);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(observer.lifecycleState, AppLifecycleState.resumed);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(observer.lifecycleState, AppLifecycleState.inactive);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(observer.lifecycleState, AppLifecycleState.suspending);
   });
 }
