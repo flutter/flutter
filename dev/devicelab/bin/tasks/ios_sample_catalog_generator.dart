@@ -10,5 +10,5 @@ import 'package:flutter_devicelab/tasks/sample_catalog_generator.dart';
 
 Future<Null> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
-  await task(createSampleCatalogGenerator());
+  await task(samplePageCatalogGenerator);
 }

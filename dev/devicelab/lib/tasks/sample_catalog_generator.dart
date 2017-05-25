@@ -10,36 +10,29 @@ import '../framework/framework.dart';
 import '../framework/ios.dart';
 import '../framework/utils.dart';
 
-TaskFunction createSampleCatalogGenerator() {
-  return new SampleCatalogGenerator();
-}
+Future<TaskResult> samplePageCatalogGenerator() async {
+  final Device device = await devices.workingDevice;
+  await device.unlock();
+  final String deviceId = device.deviceId;
 
-class SampleCatalogGenerator {
+  final Directory catalogDirectory = dir('${flutterDirectory.path}/examples/catalog');
+  await inDirectory(catalogDirectory, () async {
+    await flutter('packages', options: <String>['get']);
 
-  Future<TaskResult> call() async {
-    final Device device = await devices.workingDevice;
-    await device.unlock();
-    final String deviceId = device.deviceId;
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      await prepareProvisioningCertificates(catalogDirectory.path);
+      // This causes an Xcode project to be created.
+      await flutter('build', options: <String>['ios', '--profile']);
+    }
 
-    final Directory catalogDirectory = dir('${flutterDirectory.path}/examples/catalog');
-    await inDirectory(catalogDirectory, () async {
-      await flutter('packages', options: <String>['get']);
+    await dart(<String>['bin/sample_page.dart']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-        await prepareProvisioningCertificates(catalogDirectory.path);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
+    await flutter('drive', options: <String>[
+      'test_driver/screenshot.dart',
+      '-d',
+      deviceId,
+    ]);
+  });
 
-      await dart(<String>['bin/sample_page.dart']);
-
-      await flutter('drive', options: <String>[
-        'test_driver/screenshot.dart',
-        '-d',
-        deviceId,
-      ]);
-    });
-
-    return new TaskResult.success(null);
-  }
+  return new TaskResult.success(null);
 }
