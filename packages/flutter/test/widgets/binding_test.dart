@@ -8,25 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class MemoryPressureObserver implements WidgetsBindingObserver {
+class MemoryPressureObserver extends WidgetsBindingObserver {
   bool sawMemoryPressure = false;
 
   @override
   void didHaveMemoryPressure() {
     sawMemoryPressure = true;
   }
-
-  @override
-  Future<bool> didPopRoute() => new Future<bool>.value(false);
-
-  @override
-  void didChangeMetrics() { }
-
-  @override
-  void didChangeLocale(Locale locale) { }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) { }
 }
 
 void main() {
