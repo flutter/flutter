@@ -155,7 +155,7 @@ class _InheritedTheme extends InheritedWidget {
   final Theme theme;
 
   @override
-  bool updateShouldNotify(_InheritedTheme old) => theme != old.theme;
+  bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
 }
 
 /// An interpolation between two [ThemeData]s.

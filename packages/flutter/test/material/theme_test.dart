@@ -265,4 +265,48 @@ void main() {
     expect(glyphText.text.style.color, Colors.orange);
     expect(glyphText.text.style.fontSize, 20.0);
   });
+
+  testWidgets(
+    'Same ThemeData reapplied does not trigger didChangeDepedencies',
+    (WidgetTester tester) async {
+      didChangeDepedenciesCalled = 0;
+      final ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));
+
+      await tester.pumpWidget(
+        new MaterialApp(
+          theme: themeData,
+          home: new Test(),
+        ),
+      );
+      expect(didChangeDepedenciesCalled, 1);
+
+      await tester.pumpWidget(
+        new MaterialApp(
+          theme: themeData,
+          home: new Test(),
+        ),
+      );
+      // No need to dispatchDidChangeDependencies since it's the same theme data.
+      expect(didChangeDepedenciesCalled, 1);
+    },
+  );
+}
+
+int didChangeDepedenciesCalled;
+class Test extends StatefulWidget {
+  @override
+  _TestState createState() => new _TestState();
+}
+
+class _TestState extends State<Test> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ++didChangeDepedenciesCalled;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container();
+  }
 }
