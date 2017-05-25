@@ -171,6 +171,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  android_sample_catalog_generator:
+    description: >
+      Builds sample catalog markdown pages and Android screenshots
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+    flaky: true
+
   # iOS on-device tests
 
   channels_integration_test_ios:
@@ -239,6 +246,13 @@ tasks:
       Runs end-to-end Flutter tests on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+
+  ios_sample_catalog_generator:
+    description: >
+      Builds sample catalog markdown pages and iOS screenshots
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   # Tests running on Windows host
 

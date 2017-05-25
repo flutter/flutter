@@ -135,6 +135,8 @@ class SampleGenerator {
       );
       commentValues[keyword.toLowerCase()] = value.trim();
     }
+    commentValues['name'] = sourceName;
+    commentValues['path'] = 'examples/catalog/${sourceFile.path}';
     commentValues['source'] = sourceCode.trim();
 
     return true;
@@ -177,14 +179,12 @@ void generate() {
     screenshotDriverTemplate,
     <String, String>{
       'paths': samples.map((SampleGenerator sample) {
-        return "'${outputFile(sample.sourceName + '.png').path}'";
+        return "'${outputFile('\${prefix}' + sample.sourceName + '.png').path}'";
       }).toList().join(',\n'),
     },
   );
 
-  final List<String> flutterDriveArgs = <String>['drive', 'test_driver/screenshot.dart'];
-  logMessage('Generating screenshots with: flutter ${flutterDriveArgs.join(" ")}');
-  Process.runSync('flutter', flutterDriveArgs);
+  // To generate the screenshots: flutter drive test_driver/screenshot.dart
 }
 
 void main(List<String> args) {

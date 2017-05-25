@@ -7,7 +7,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('sample screenshots', () async {
+  group('sample screenshots', () {
     FlutterDriver driver;
 
     setUpAll(() async {
@@ -19,6 +19,7 @@ void main() {
     });
 
     test('take sample screenshots', () async {
+      String prefix = Platform.isMacOS ? 'ios_' : "";
       final List<String> paths = <String>[
         @(paths)
       ];
