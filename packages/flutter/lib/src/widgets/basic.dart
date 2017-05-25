@@ -3282,7 +3282,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
   }) : assert(excluding != null),
        super(key: key, child: child);
 
-  /// Whether this widget is included in the semantics tree.
+  /// Whether this widget is excluded in the semantics tree.
   final bool excluding;
 
   @override

@@ -762,10 +762,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _addChild(List<LayoutId> children, Widget child, Object childId, {bool excludeSemantics: false}) {
+  void _addChild(List<LayoutId> children, Widget child, Object childId, { bool excludeSemantics: false }) {
     if (child != null)
       children.add(new LayoutId(child: new ExcludeSemantics(child: child, excluding: excludeSemantics), id: childId));
   }
+
+  bool _drawerIsClosed = true;
 
   @override
   Widget build(BuildContext context) {
@@ -792,7 +794,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     final List<LayoutId> children = <LayoutId>[];
 
-    final bool excludeSemantics = !(_drawerKey.currentState?.isClosed ?? true);
+    final bool excludeSemantics = !_drawerIsClosed;
 
     _addChild(children, widget.body, _ScaffoldSlot.body, excludeSemantics: excludeSemantics);
 
@@ -890,9 +892,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children,
         new DrawerController(
           key: _drawerKey,
-          onStateChanged: () {
-            // Rebuild Scaffold when drawer opens/closes to update semantics tree.
-            setState(() {});
+          onStateChanged: (bool drawerIsClosed) {
+            setState(() {
+              _drawerIsClosed = drawerIsClosed;
+            });
           },
           child: widget.drawer,
         ),

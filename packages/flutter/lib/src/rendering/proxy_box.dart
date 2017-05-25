@@ -2900,7 +2900,7 @@ class RenderExcludeSemantics extends RenderProxyBox {
   /// Creates a render object that ignores the semantics of its subtree.
   RenderExcludeSemantics({
     RenderBox child,
-    bool excluding : true,
+    bool excluding: true,
   }) : _excluding = excluding, super(child) {
     assert(_excluding != null);
   }
@@ -2918,9 +2918,8 @@ class RenderExcludeSemantics extends RenderProxyBox {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (excluding) {
+    if (excluding)
       return;
-    }
     super.visitChildrenForSemantics(visitor);
   }
 

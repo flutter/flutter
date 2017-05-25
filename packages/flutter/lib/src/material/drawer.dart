@@ -128,9 +128,9 @@ class DrawerController extends StatefulWidget {
 
   /// Callback for state change notifications.
   ///
-  /// Gets called whenever the drawer's state switches from open to closed or
-  /// vice versa.
-  final VoidCallback onStateChanged;
+  /// Gets called with `true` as argument whenever the drawer's state switched
+  /// to closed and `false` whenever it switched to open.
+  final ValueChanged<bool> onStateChanged;
 
   @override
   DrawerControllerState createState() => new DrawerControllerState();
@@ -186,11 +186,11 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         break;
       case AnimationStatus.dismissed:
         if (widget.onStateChanged != null)
-          widget.onStateChanged();
+          widget.onStateChanged(isClosed);
         break;
       case AnimationStatus.completed:
         if (widget.onStateChanged != null)
-          widget.onStateChanged();
+          widget.onStateChanged(isClosed);
         break;
     }
   }
