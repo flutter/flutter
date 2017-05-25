@@ -19,17 +19,15 @@ Future<TaskResult> samplePageCatalogGenerator() async {
   await inDirectory(catalogDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
-    if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios)
       await prepareProvisioningCertificates(catalogDirectory.path);
-      // This causes an Xcode project to be created.
-      await flutter('build', options: <String>['ios', '--profile']);
-    }
 
     await dart(<String>['bin/sample_page.dart']);
 
     await flutter('drive', options: <String>[
+      '--target',
       'test_driver/screenshot.dart',
-      '-d',
+      '--device-id',
       deviceId,
     ]);
   });
