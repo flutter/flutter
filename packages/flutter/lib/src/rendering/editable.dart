@@ -25,6 +25,11 @@ final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 /// Used by [RenderEditable.onSelectionChanged].
 typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, bool longPress);
 
+/// Signature for the callback that reports when the caret location changes.
+///
+/// Used by [RenderEditable.onCaretChanged].
+typedef void CaretChangedHandler(Rect caretRect);
+
 /// Represents a global screen coordinate of the point in a selection, and the
 /// text direction at that point.
 @immutable
@@ -65,6 +70,7 @@ class RenderEditable extends RenderBox {
     TextSelection selection,
     @required ViewportOffset offset,
     this.onSelectionChanged,
+    this.onCaretChanged,
   }) : _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
@@ -88,6 +94,11 @@ class RenderEditable extends RenderBox {
   SelectionChangedHandler onSelectionChanged;
 
   double _textLayoutLastWidth;
+
+  /// Called during the paint phase when the caret location changes.
+  CaretChangedHandler onCaretChanged;
+
+  Rect _lastCaretRect;
 
   /// Marks the render object as needing to be laid out again and have its text
   /// metrics recomputed.
@@ -422,7 +433,13 @@ class RenderEditable extends RenderBox {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
     final Paint paint = new Paint()..color = _cursorColor;
-    canvas.drawRect(_caretPrototype.shift(caretOffset + effectiveOffset), paint);
+    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
+    canvas.drawRect(caretRect, paint);
+    if (caretRect != _lastCaretRect) {
+      _lastCaretRect = caretRect;
+      if (onCaretChanged != null)
+        onCaretChanged(caretRect);
+    }
   }
 
   void _paintSelection(Canvas canvas, Offset effectiveOffset) {
