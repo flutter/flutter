@@ -40,7 +40,7 @@ class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   String toString() => '${super.toString()}; flex=$flex';
 }
 
-/// How much space space should be occupied in the main axis.
+/// How much space should be occupied in the main axis.
 ///
 /// During a flex layout, available space along the main axis is allocated to
 /// children. After allocating space, there might be some remaining free space.
@@ -192,7 +192,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  /// How much space space should be occupied in the main axis.
+  /// How much space should be occupied in the main axis.
   ///
   /// After allocating space to children, there might be some remaining free
   /// space. This value controls whether to maximize or minimize the amount of
