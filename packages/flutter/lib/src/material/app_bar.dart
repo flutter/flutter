@@ -269,7 +269,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget bottom;
 
-  /// The z-coordinate at which to place this app bar.
+  /// The z-coordinate at which to place this app bar. This controls the size of
+  /// the shadow below the app bar.
   ///
   /// Defaults to 4, the appropriate elevation for app bars.
   final double elevation;
@@ -694,6 +695,27 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 /// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
 /// specified then it is stacked behind the toolbar and the bottom widget.
 ///
+/// ## Sample code
+///
+/// This is an example that could be included in a [CustomScrollView]'s
+/// [CustomScrollView.slivers] list:
+///
+/// ```dart
+/// new SliverAppBar(
+///   expandedHeight: 150.0,
+///   flexibleSpace: const FlexibleSpaceBar(
+///     title: const Text('Available seats'),
+///   ),
+///   actions: <Widget>[
+///     new IconButton(
+///       icon: const Icon(Icons.add_circle),
+///       tooltip: 'Add new entry',
+///       onPressed: () { /* ... */ },
+///     ),
+///   ]
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [CustomScrollView], which integrates the [SliverAppBar] into its
@@ -800,7 +822,7 @@ class SliverAppBar extends StatefulWidget {
   final PreferredSizeWidget bottom;
 
   /// The z-coordinate at which to place this app bar when it is above other
-  /// content.
+  /// content. This controls the size of the shadow below the app bar.
   ///
   /// Defaults to 4, the appropriate elevation for app bars.
   ///

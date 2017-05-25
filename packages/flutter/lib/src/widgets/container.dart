@@ -34,7 +34,7 @@ import 'image.dart';
 ///       stops: <double>[0.9, 1.0],
 ///     ),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:

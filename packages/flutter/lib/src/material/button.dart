@@ -195,14 +195,27 @@ class MaterialButton extends StatefulWidget {
   /// Defaults to the highlight color from the [Theme].
   final Color highlightColor;
 
-  /// The z-coordinate at which to place this button.
+  /// The z-coordinate at which to place this button. This controls the size of
+  /// the shadow below the button.
   ///
   /// Defaults to 0.
+  ///
+  /// See also:
+  ///
+  ///  * [FlatButton], a material button specialized for the case where the
+  ///    elevation is zero.
+  ///  * [RaisedButton], a material button specialized for the case where the
+  ///    elevation is non-zero.
   final double elevation;
 
-  /// The z-coordinate at which to place this button when highlighted.
+  /// The z-coordinate at which to place this button when highlighted. This
+  /// controls the size of the shadow below the button.
   ///
   /// Defaults to 0.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
   final double highlightElevation;
 
   /// The smallest horizontal extent that the button will occupy.

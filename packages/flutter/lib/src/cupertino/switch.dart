@@ -57,7 +57,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///       _giveVerse = newValue;
   ///     });
   ///   },
-  /// ),
+  /// )
   /// ```
   final ValueChanged<bool> onChanged;
 

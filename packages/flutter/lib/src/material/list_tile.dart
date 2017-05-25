@@ -151,9 +151,37 @@ enum ListTileControlAffinity {
 /// height based on their contents. If you are looking for a widget that allows
 /// for arbitrary layout in a row, consider [Row].
 ///
-/// List tiles are typically used in [ListView]s, [Drawer]s, and [Card]s.
+/// List tiles are typically used in [ListView]s, or arranged in [Column]s in
+/// [Drawer]s and [Card]s.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
+///
+/// ## Sample code
+///
+/// Here is a simple tile with an icon and some text.
+///
+/// ```dart
+/// new ListTile(
+///   leading: const Icon(Icons.event_seat),
+///   title: const Text('The seat for the narrator'),
+/// )
+/// ```
+///
+/// Tiles can be much more elaborate. Here is a tile which can be tapped, but
+/// which is disabled when the `_act` variable is not 2. When the tile is
+/// tapped, the whole row has an ink splash effect (see [InkWell]).
+///
+/// ```dart
+/// int _act = 1;
+/// // ...
+/// new ListTile(
+///   leading: const Icon(Icons.flight_land),
+///   title: const Text('Trix\'s airplane'),
+///   subtitle: _act != 2 ? const Text('The airplane is only in Act II.') : null,
+///   enabled: _act == 2,
+///   onTap: () { /* react to the tile being tapped */ }
+/// )
+/// ```
 ///
 /// See also:
 ///

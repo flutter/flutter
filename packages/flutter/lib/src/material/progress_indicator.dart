@@ -14,7 +14,7 @@ const double _kMinCircularProgressIndicatorSize = 36.0;
 
 // TODO(hansmuller): implement the support for buffer indicator
 
-/// A base class for material design progress indicators
+/// A base class for material design progress indicators.
 ///
 /// This widget cannot be instantiated directly. For a linear progress
 /// indicator, see [LinearProgressIndicator]. For a circular progress indicator,
@@ -112,7 +112,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design linear progress indicator.
+/// A material design linear progress indicator, also known as a progress bar.
 ///
 /// A widget that shows progress along a line. There are two kinds of linear
 /// progress indicators:
@@ -253,7 +253,8 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 }
 
-/// A material design circular progress indicator.
+/// A material design circular progress indicator, which spins to indicate that
+/// the application is busy.
 ///
 /// A widget that shows progress along a circle. There are two kinds of circular
 /// progress indicators:

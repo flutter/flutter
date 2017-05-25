@@ -85,7 +85,7 @@ class CupertinoSlider extends StatefulWidget {
   ///       _duelCommandment = newValue.round();
   ///     });
   ///   },
-  /// ),
+  /// )
   /// ```
   final ValueChanged<double> onChanged;
 
