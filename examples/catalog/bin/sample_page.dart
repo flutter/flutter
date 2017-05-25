@@ -161,6 +161,10 @@ void generate() {
     }
   });
 
+  samples.sort((SampleGenerator a, SampleGenerator b) {
+    return a.sourceName.compareTo(b.sourceName);
+  });
+
   writeExpandedTemplate(
     outputFile('screenshot.dart', driverDirectory),
     screenshotTemplate,

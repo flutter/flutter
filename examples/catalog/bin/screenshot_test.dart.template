@@ -19,7 +19,7 @@ void main() {
     });
 
     test('take sample screenshots', () async {
-      String prefix = Platform.isMacOS ? 'ios_' : "";
+      final String prefix = Platform.isMacOS ? 'ios_' : "";
       final List<String> paths = <String>[
         @(paths)
       ];
