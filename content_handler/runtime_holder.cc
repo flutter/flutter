@@ -405,8 +405,8 @@ bool RuntimeHolder::HandleTextInputPlatformMessage(
     state->selection = mozart::TextSelection::New();
     state->composing = mozart::TextRange::New();
     input_connection_->GetInputMethodEditor(
-        mozart::KeyboardType::TEXT, std::move(state),
-        text_input_binding_.NewBinding(),
+        mozart::KeyboardType::TEXT, mozart::InputMethodAction::DONE,
+        std::move(state), text_input_binding_.NewBinding(),
         fidl::GetProxy(&input_method_editor_));
   } else if (method->value == "TextInput.setEditingState") {
     if (input_method_editor_) {
@@ -622,6 +622,10 @@ void RuntimeHolder::DidUpdateState(mozart::TextInputStatePtr state,
   runtime_->DispatchPlatformMessage(ftl::MakeRefCounted<blink::PlatformMessage>(
       kTextInputChannel, std::vector<uint8_t>(data, data + buffer.GetSize()),
       nullptr));
+}
+
+void RuntimeHolder::OnAction(mozart::InputMethodAction action) {
+  // TODO
 }
 
 ftl::WeakPtr<RuntimeHolder> RuntimeHolder::GetWeakPtr() {

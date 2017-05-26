@@ -72,6 +72,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   // |mozart::InputMethodEditorClient| implementation:
   void DidUpdateState(mozart::TextInputStatePtr state,
                       mozart::InputEventPtr event) override;
+  void OnAction(mozart::InputMethodAction action) override;
 
   ftl::WeakPtr<RuntimeHolder> GetWeakPtr();
 
