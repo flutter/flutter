@@ -22,7 +22,7 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// A [Key] is an identifier for [Widget]s and [Element]s.
 ///
 /// A new widget will only be used to update an existing element if its key is
-/// the same as the key of the current widget associted with the element.
+/// the same as the key of the current widget associated with the element.
 ///
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
