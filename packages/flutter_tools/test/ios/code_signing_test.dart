@@ -13,7 +13,7 @@ import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
-import '../context.dart';
+import '../src/context.dart';
 
 void main() {
   group('Auto signing', () {

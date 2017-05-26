@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:test/test.dart';
 
-import '../context.dart';
+import '../src/context.dart';
 
 
 void main() {
