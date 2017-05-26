@@ -459,7 +459,7 @@ void main() {
   test('Service extensions - posttest', () async {
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 15);
+    expect(binding.extensions.length, 16);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

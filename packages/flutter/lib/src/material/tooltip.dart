@@ -198,8 +198,9 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 }
 
-class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
-  _TooltipPositionDelegate({
+/// A delegate that positions a tooltip relative to a target.
+class TooltipPositionDelegate extends SingleChildLayoutDelegate {
+  TooltipPositionDelegate({
     this.target,
     this.verticalOffset,
     this.preferBelow
@@ -237,7 +238,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
+  bool shouldRelayout(TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target
         || verticalOffset != oldDelegate.verticalOffset
         || preferBelow != oldDelegate.preferBelow;
@@ -275,7 +276,7 @@ class _TooltipOverlay extends StatelessWidget {
     return new Positioned.fill(
       child: new IgnorePointer(
         child: new CustomSingleChildLayout(
-          delegate: new _TooltipPositionDelegate(
+          delegate: new TooltipPositionDelegate(
             target: target,
             verticalOffset: verticalOffset,
             preferBelow: preferBelow
