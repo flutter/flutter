@@ -40,18 +40,19 @@ void main() {
       ],
     );
 
-    final String dump = tree.toStringDeep().replaceAll(new RegExp(r'#\d+'), '');
-    expect(dump, equals('''TestTree
- ├─child node A: TestTree
+    final String dump =
+        tree.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
+    expect(dump, equals('''TestTree#000
+ ├─child node A: TestTree#000
  │
- ├─child node B: TestTree
- │ ├─child node B1: TestTree
+ ├─child node B: TestTree#000
+ │ ├─child node B1: TestTree#000
  │ │
- │ ├─child node B2: TestTree
+ │ ├─child node B2: TestTree#000
  │ │
- │ ├─child node B3: TestTree
+ │ ├─child node B3: TestTree#000
  │ │
- ├─child node C: TestTree
+ ├─child node C: TestTree#000
  │
 '''));
   });
