@@ -483,24 +483,24 @@ void main() {
     final MultiChildRenderObjectElement element = key0.currentContext;
 
     final String dump =
-        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '');
-    expect(dump, equals('''Column([GlobalKey]; renderObject: RenderFlex)
+        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
+    expect(dump, equals('''Column([GlobalKey#000]; renderObject: RenderFlex#000)
 ├Container()
-│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
-│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
-├Container([GlobalKey])
-│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
-│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
+│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
+│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
+├Container([GlobalKey#000])
+│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
+│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
 ├Container()
 │└Container()
-│ └LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
-│  └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
-├Container([GlobalKey])
-│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
-│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
+│ └LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
+│  └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
+├Container([GlobalKey#000])
+│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
+│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
 └Container()
- └LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
-  └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
+ └LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
+  └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
 '''));
   });
 }

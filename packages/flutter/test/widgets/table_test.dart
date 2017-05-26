@@ -524,26 +524,26 @@ void main() {
     final RenderObjectElement element = key0.currentContext;
 
     final String dump =
-        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '');
-    expect(dump, equals('''Table([GlobalKey]; renderObject: RenderTable)
+        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
+    expect(dump, equals('''Table([GlobalKey#000]; renderObject: RenderTable#000)
 ├Text("A")
-│└RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 ├Text("B")
-│└RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 ├Text("C")
-│└RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 ├Text("D")
-│└RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 ├Text("EEE")
-│└RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 ├Text("F")
-│└RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 ├Text("G")
-│└RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 ├Text("H")
-│└RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 └Text("III")
- └RichText(renderObject: RenderParagraph relayoutBoundary=up1)
+ └RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
 '''));
   });
 
