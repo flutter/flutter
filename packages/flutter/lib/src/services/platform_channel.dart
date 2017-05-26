@@ -17,7 +17,7 @@ import 'platform_messages.dart';
 /// Messages are encoded into binary before being sent, and binary messages
 /// received are decoded into Dart values. The [MessageCodec] used must be
 /// compatible with the one used by the platform plugin. This can be achieved
-/// by creating a `BasicMessageChannel` counterpart of this channel on the
+/// by creating a basic message channel counterpart of this channel on the
 /// platform side. The Dart type of messages sent and received is [T],
 /// but only the values supported by the specified [MessageCodec] can be used.
 /// The use of unsupported values should be considered programming errors, and
@@ -95,7 +95,7 @@ class BasicMessageChannel<T> {
 /// Method calls are encoded into binary before being sent, and binary results
 /// received are decoded into Dart values. The [MethodCodec] used must be
 /// compatible with the one used by the platform plugin. This can be achieved
-/// by creating a `MethodChannel` counterpart of this channel on the
+/// by creating a method channel counterpart of this channel on the
 /// platform side. The Dart type of arguments and results is `dynamic`,
 /// but only values supported by the specified [MethodCodec] can be used.
 /// The use of unsupported values should be considered programming errors, and
