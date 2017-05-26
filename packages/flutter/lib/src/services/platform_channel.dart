@@ -17,7 +17,7 @@ import 'platform_messages.dart';
 /// Messages are encoded into binary before being sent, and binary messages
 /// received are decoded into Dart values. The [MessageCodec] used must be
 /// compatible with the one used by the platform plugin. This can be achieved
-/// by creating a [BasicMessageChannel] counterpart of this channel on the
+/// by creating a basic message channel counterpart of this channel on the
 /// platform side. The Dart type of messages sent and received is [T],
 /// but only the values supported by the specified [MessageCodec] can be used.
 /// The use of unsupported values should be considered programming errors, and
@@ -95,7 +95,7 @@ class BasicMessageChannel<T> {
 /// Method calls are encoded into binary before being sent, and binary results
 /// received are decoded into Dart values. The [MethodCodec] used must be
 /// compatible with the one used by the platform plugin. This can be achieved
-/// by creating a `MethodChannel` counterpart of this channel on the
+/// by creating a method channel counterpart of this channel on the
 /// platform side. The Dart type of arguments and results is `dynamic`,
 /// but only values supported by the specified [MethodCodec] can be used.
 /// The use of unsupported values should be considered programming errors, and
@@ -123,12 +123,26 @@ class MethodChannel {
 
   /// Invokes a [method] on this channel with the specified [arguments].
   ///
+  /// The static type of [arguments] is `dynamic`, but only values supported by
+  /// the [codec] of this channel can be used. The same applies to the returned
+  /// result. The values supported by the default codec and their platform-specific
+  /// counterparts are documented with [StandardMessageCodec].
+  ///
   /// Returns a [Future] which completes to one of the following:
   ///
   /// * a result (possibly null), on successful invocation;
   /// * a [PlatformException], if the invocation failed in the platform plugin;
   /// * a [MissingPluginException], if the method has not been implemented by a
   ///   platform plugin.
+  ///
+  /// See also:
+  ///
+  /// * [StandardMessageCodec] which defines the payload values supported by
+  ///   [StandardMethodCodec].
+  /// * [JSONMessageCodec] which defines the payload values supported by
+  ///   [JSONMethodCodec].
+  /// * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
+  ///   for how to access method call arguments on Android.
   Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
     assert(method != null);
     final dynamic result = await BinaryMessages.send(
