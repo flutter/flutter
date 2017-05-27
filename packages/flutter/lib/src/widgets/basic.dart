@@ -2282,7 +2282,7 @@ class Row extends Flex {
 ///     new Text('Craft beautiful UIs'),
 ///     new Expanded(
 ///       child: new FittedBox(
-///         fit: BoxFit.contain,
+///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: const FlutterLogo(),
 ///       ),
 ///     ),

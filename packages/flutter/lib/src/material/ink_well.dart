@@ -37,7 +37,10 @@ import 'theme.dart';
 ///
 /// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
 ///
-/// Must have an ancestor [Material] widget in which to cause ink reactions.
+/// The [InkResponse] widbget must have a [Material] widget as an ancestor. The
+/// [Material] widget is where the ink reactions are actually painted. This
+/// matches the material design premise wherein the [Material] is what is
+/// actually reacting to touches by spreading ink.
 ///
 /// If a Widget uses this class directly, it should include the following line
 /// at the top of its build function to call [debugCheckHasMaterial]:
@@ -285,12 +288,15 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 ///
 /// For a variant of this widget that does not clip splashes, see [InkResponse].
 ///
-/// Must have an ancestor [Material] widget in which to cause ink reactions.
-///
 /// The following diagram shows how an [InkWell] looks when tapped, when using
 /// default values.
 ///
 /// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+///
+/// The [InkResponse] widbget must have a [Material] widget as an ancestor. The
+/// [Material] widget is where the ink reactions are actually painted. This
+/// matches the material design premise wherein the [Material] is what is
+/// actually reacting to touches by spreading ink.
 ///
 /// If a Widget uses this class directly, it should include the following line
 /// at the top of its build function to call [debugCheckHasMaterial]:
