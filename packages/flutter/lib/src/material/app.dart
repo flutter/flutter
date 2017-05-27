@@ -246,7 +246,7 @@ class _MaterialAppState extends State<MaterialApp> {
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner
+        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       )
     );
 
@@ -256,8 +256,8 @@ class _MaterialAppState extends State<MaterialApp> {
           color: const Color(0xE0F9BBE0),
           interval: 8.0,
           divisions: 2,
-          subDivisions: 1,
-          child: result
+          subdivisions: 1,
+          child: result,
         );
       }
       return true;
@@ -265,7 +265,7 @@ class _MaterialAppState extends State<MaterialApp> {
 
     return new ScrollConfiguration(
       behavior: new _MaterialScrollBehavior(),
-      child: result
+      child: result,
     );
   }
 }
