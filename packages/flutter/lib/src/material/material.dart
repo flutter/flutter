@@ -130,9 +130,14 @@ class Material extends StatefulWidget {
   /// the shape is rectangular, and the default color.
   final MaterialType type;
 
-  /// The z-coordinate at which to place this material.
+  /// The z-coordinate at which to place this material. This controls the size
+  /// of the shadow below the material.
   ///
-  /// Defaults to 0.
+  /// If this is non-zero, the contents of the card are clipped, because the
+  /// widget conceptually defines an independent printed piece of material.
+  ///
+  /// Defaults to 0. Changing this value will cause the shadow to animate over
+  /// [kThemeChangeDuration].
   final double elevation;
 
   /// The color to paint the material.

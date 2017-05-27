@@ -76,15 +76,22 @@ class FloatingActionButton extends StatefulWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The z-coordinate at which to place this button.
+  /// The z-coordinate at which to place this button. This controls the size of
+  /// the shadow below the floating action button.
   ///
   /// Defaults to 6, the appropriate elevation for floating action buttons.
   final double elevation;
 
-  /// The z-coordinate at which to place this button when the user is touching the button.
+  /// The z-coordinate at which to place this button when the user is touching
+  /// the button. This controls the size of the shadow below the floating action
+  /// button.
   ///
   /// Defaults to 12, the appropriate elevation for floating action buttons
   /// while they are being touched.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
   final double highlightElevation;
 
   /// Controls the size of this button.

@@ -334,6 +334,26 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 /// [SliverFixedExtentList] does not need to perform layout on its children to
 /// obtain their extent in the main axis.
 ///
+/// ## Sample code
+///
+/// This example, which would be inserted into a [CustomScrollView.slivers]
+/// list, shows an infinite number of items in varying shades of blue:
+///
+/// ```dart
+/// new SliverFixedExtentList(
+///   itemExtent: 50.0,
+///   delegate: new SliverChildBuilderDelegate(
+///     (BuildContext context, int index) {
+///       return new Container(
+///         alignment: FractionalOffset.center,
+///         color: Colors.lightBlue[100 * (index % 9)],
+///         child: new Text('list item $index'),
+///       );
+///     },
+///   ),
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
@@ -372,6 +392,32 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// [SliverGrid] places its children in arbitrary positions determined by
 /// [gridDelegate]. Each child is forced to have the size specified by the
 /// [gridDelegate].
+///
+/// ## Sample code
+///
+/// This example, which would be inserted into a [CustomScrollView.slivers]
+/// list, shows twenty boxes in a pretty teal grid:
+///
+/// ```dart
+/// new SliverGrid(
+///   gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+///     maxCrossAxisExtent: 200.0,
+///     mainAxisSpacing: 10.0,
+///     crossAxisSpacing: 10.0,
+///     childAspectRatio: 4.0,
+///   ),
+///   delegate: new SliverChildBuilderDelegate(
+///     (BuildContext context, int index) {
+///       return new Container(
+///         alignment: FractionalOffset.center,
+///         color: Colors.teal[100 * (index % 9)],
+///         child: new Text('grid item $index'),
+///       );
+///     },
+///     childCount: 20,
+///   ),
+/// )
+/// ```
 ///
 /// See also:
 ///

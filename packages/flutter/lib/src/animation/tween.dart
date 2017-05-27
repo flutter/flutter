@@ -90,7 +90,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// which results in two [Animation] separate objects, each configured with a
 /// single [Tween].
 ///
-/// ## Sample usage
+/// ## Sample code
 ///
 /// Suppose `_controller` is an [AnimationController], and we want to create an
 /// [Animation<Offset>] that is controlled by that controller, and save it in

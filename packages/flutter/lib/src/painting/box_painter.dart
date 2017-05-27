@@ -213,7 +213,7 @@ enum BorderStyle {
 ///     ),
 ///   ),
 ///   child: new Text('Flutter in the sky', textAlign: TextAlign.center),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -366,7 +366,7 @@ class BorderSide {
 ///       style: const TextStyle(color: const Color(0xFF000000))
 ///     ),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -809,7 +809,7 @@ abstract class Gradient {
 ///       tileMode: TileMode.repeated, // repeats the gradient over the canvas
 ///     ),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:

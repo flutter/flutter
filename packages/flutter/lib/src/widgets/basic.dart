@@ -217,7 +217,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///       ),
 ///     ),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -285,7 +285,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox]
 ///  * [SizedOverflowBox]
 ///
-/// ## Example
+/// ## Sample code
 ///
 /// For example, use a clip to show the top half of an [Image], you can use a
 /// [ClipRect] combined with an [Align]:
@@ -297,7 +297,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///     heightFactor: 0.5,
 ///     child: new Image(...),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -1096,7 +1096,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that sizes its child to a fraction of the total available space.
-/// For more details about the layout algorithm, see [RenderFractionallySizedOverflowBox].
+/// For more details about the layout algorithm, see
+/// [RenderFractionallySizedOverflowBox].
 ///
 /// See also:
 ///
@@ -2023,6 +2024,8 @@ class Positioned extends ParentDataWidget<Stack> {
 ///
 /// ## Layout algorithm
 ///
+/// _This section describes how a [Flex] is rendered by the framework._
+///
 /// Layout for a [Flex] proceeds in six steps:
 ///
 /// 1. Layout each child a null or zero flex factor (e.g., those that are not
@@ -2055,6 +2058,14 @@ class Positioned extends ParentDataWidget<Stack> {
 ///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any main axis
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
+///
+/// See also:
+///
+///  * [Row], for a version of this widget that is always horizontal.
+///  * [Column], for a version of this widget that is always vertical.
+///  * [Expanded], to indicate children that should take all the remaining room.
+///  * [Flexible], to indicate children that should share the remaining room but
+///    that may be sized smaller (leaving some remaining room unused).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
   ///
@@ -2152,7 +2163,34 @@ class Flex extends MultiChildRenderObjectWidget {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
+/// ## Sample code
+///
+/// This example divides the available space into three (horizontally), and
+/// places text centered in the first two cells and the Flutter logo centered in
+/// the third:
+///
+/// ```dart
+/// new Row(
+///   children: <Widget>[
+///     new Expanded(
+///       child: new Text('Deliver features faster', textAlign: TextAlign.center),
+///     ),
+///     new Expanded(
+///       child: new Text('Craft beautiful UIs', textAlign: TextAlign.center),
+///     ),
+///     new Expanded(
+///       child: new FittedBox(
+///         fit: BoxFit.contain, // otherwise the logo will be tiny
+///         child: const FlutterLogo(),
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+///
 /// ## Layout algorithm
+///
+/// _This section describes how a [Row] is rendered by the framework._
 ///
 /// Layout for a [Row] proceeds in six steps:
 ///
@@ -2184,6 +2222,15 @@ class Flex extends MultiChildRenderObjectWidget {
 ///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any horizontal
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
+///
+/// See also:
+///
+///  * [Column], for a vertical equivalent.
+///  * [Flex], if you don't know in advance if you want a horizontal or vertical
+///    arrangement.
+///  * [Expanded], to indicate children that should take all the remaining room.
+///  * [Flexible], to indicate children that should share the remaining room but
+///    that may by sized smaller (leaving some remaining room unused).
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
@@ -2223,7 +2270,51 @@ class Row extends Flex {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
+/// ## Sample code
+///
+/// This example uses a [Column] to arrange three widgets vertically, the last
+/// being made to fill all the remaining space.
+///
+/// ```dart
+/// new Column(
+///   children: <Widget>[
+///     new Text('Deliver features faster'),
+///     new Text('Craft beautiful UIs'),
+///     new Expanded(
+///       child: new FittedBox(
+///         fit: BoxFit.contain,
+///         child: const FlutterLogo(),
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+///
+/// In the sample above, the text and the logo are centered on each line. In the
+/// following example, the [crossAxisAlignment] is set to
+/// [CrossAxisAlignment.start], so that the children are left-aligned. The
+/// [mainAxisSize] is set to [MainAxisSize.min], so that the column shrinks to
+/// fit the children.
+///
+/// ```dart
+/// new Column(
+///   crossAxisAlignment: CrossAxisAlignment.start,
+///   mainAxisSize: MainAxisSize.min,
+///   children: <Widget>[
+///     new Text('We move under cover and we move as one'),
+///     new Text('Through the night, we have one shot to live another day'),
+///     new Text('We cannot let a stray gunshot give us away'),
+///     new Text('We will fight up close, seize the moment and stay in it'),
+///     new Text('It’s either that or meet the business end of a bayonet'),
+///     new Text('The code word is ‘Rochambeau,’ dig me?'),
+///     new Text('Rochambeau!', style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)),
+///   ],
+/// )
+/// ```
+///
 /// ## Layout algorithm
+///
+/// _This section describes how a [Column] is rendered by the framework._
 ///
 /// Layout for a [Column] proceeds in six steps:
 ///
@@ -2257,6 +2348,15 @@ class Row extends Flex {
 ///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any vertical
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
+///
+/// See also:
+///
+///  * [Row], for a horizontal equivalent.
+///  * [Flex], if you don't know in advance if you want a horizontal or vertical
+///    arrangement.
+///  * [Expanded], to indicate children that should take all the remaining room.
+///  * [Flexible], to indicate children that should share the remaining room but
+///    that may size smaller (leaving some remaining room unused).
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
@@ -2651,7 +2751,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///       new TextSpan(text: ' world!'),
 ///     ],
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
