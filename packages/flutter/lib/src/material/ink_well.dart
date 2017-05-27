@@ -28,17 +28,14 @@ import 'theme.dart';
 /// small. The main thing to notice is that the splashes happily exceed the
 /// bounds of the widget (because [containedInkWell] is false).
 ///
-/// ![The highlight is a disc centered in the box, smaller than the child widget.]
-/// (https://flutter.github.io/assets-for-api-docs/material/ink_response_large.png)
-/// ![The highlight is a disc overflowing the box, centered on the child.]
-/// (https://flutter.github.io/assets-for-api-docs/material/ink_response_small.png)
+/// ![The highlight is a disc centered in the box, smaller than the child widget.](https://flutter.github.io/assets-for-api-docs/material/ink_response_large.png)
+/// ![The highlight is a disc overflowing the box, centered on the child.](https://flutter.github.io/assets-for-api-docs/material/ink_response_small.png)
 ///
 /// The following diagram shows the effect when the [InkResponse] has a
 /// [highlightShape] of [BoxShape.rectangle] with [containedInkWell] set to
 /// true. These are the values used by [InkWell].
 ///
-/// ![The highlight is a rectangle the size of the box.]
-/// (https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
 ///
 /// Must have an ancestor [Material] widget in which to cause ink reactions.
 ///
@@ -293,8 +290,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 /// The following diagram shows how an [InkWell] looks when tapped, when using
 /// default values.
 ///
-/// ![The highlight is a rectangle the size of the box.]
-/// (https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
 ///
 /// If a Widget uses this class directly, it should include the following line
 /// at the top of its build function to call [debugCheckHasMaterial]:
