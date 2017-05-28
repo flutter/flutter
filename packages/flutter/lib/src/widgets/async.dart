@@ -325,7 +325,7 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ///       default: throw "Unknown: ${snapshot.connectionState}";
 ///     }
 ///   },
-/// ),
+/// )
 /// ```
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
@@ -424,7 +424,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///           return new Text('Result: ${snapshot.data}');
 ///     }
 ///   },
-/// ),
+/// )
 /// ```
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of

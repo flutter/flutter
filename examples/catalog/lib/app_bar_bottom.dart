@@ -4,17 +4,76 @@
 
 import 'package:flutter/material.dart';
 
-/// Sample Catalog: AppBar with a custom bottom widget.
-///
-/// The bottom widget's TabPageSelector displays the relative position of the
-/// selected choice. The arrow buttons in the toolbar part of the app bar
-/// select the previous or the next choice.
-///
-/// Sample classes: [AppBar], [TabController], [TabPageSelector], [Scaffold], [TabBarView].
-///
-/// See also:
-///  * The "Components-Tabs" section of the material design specification:
-///    <https://material.io/guidelines/components/tabs.html>
+class AppBarBottomSample extends StatefulWidget {
+  @override
+  _AppBarBottomSampleState createState() => new _AppBarBottomSampleState();
+}
+
+class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTickerProviderStateMixin {
+  TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = new TabController(vsync: this, length: choices.length);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _nextPage(int delta) {
+    final int newIndex = _tabController.index + delta;
+    if (newIndex < 0 || newIndex >= _tabController.length)
+      return;
+    _tabController.animateTo(newIndex);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      home: new Scaffold(
+        appBar: new AppBar(
+          title: const Text('AppBar Bottom Widget'),
+          leading: new IconButton(
+            tooltip: 'Previous choice',
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () { _nextPage(-1); },
+          ),
+          actions: <Widget>[
+            new IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              tooltip: 'Next choice',
+              onPressed: () { _nextPage(1); },
+            ),
+          ],
+          bottom: new PreferredSize(
+            preferredSize: const Size.fromHeight(48.0),
+            child: new Theme(
+              data: Theme.of(context).copyWith(accentColor: Colors.white),
+              child: new Container(
+                height: 48.0,
+                alignment: FractionalOffset.center,
+                child: new TabPageSelector(controller: _tabController),
+              ),
+            ),
+          ),
+        ),
+        body: new TabBarView(
+          controller: _tabController,
+          children: choices.map((Choice choice) {
+            return new Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: new ChoiceCard(choice: choice),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+}
 
 class Choice {
   const Choice({ this.title, this.icon });
@@ -55,75 +114,29 @@ class ChoiceCard extends StatelessWidget {
   }
 }
 
-class AppBarBottomSample extends StatefulWidget {
-  @override
-  _AppBarBottomSampleState createState() => new _AppBarBottomSampleState();
-}
-
-class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTickerProviderStateMixin {
-  TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = new TabController(vsync: this, length: choices.length);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  void _nextPage(int delta) {
-    final int newIndex = _tabController.index + delta;
-    if (newIndex < 0 || newIndex >= _tabController.length)
-      return;
-    _tabController.animateTo(newIndex);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: const Text('AppBar Bottom Widget'),
-        leading: new IconButton(
-            tooltip: 'Previous choice',
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () { _nextPage(-1); },
-        ),
-        actions: <Widget>[
-          new IconButton(
-            icon: const Icon(Icons.arrow_forward),
-            tooltip: 'Next choice',
-            onPressed: () { _nextPage(1); },
-          ),
-        ],
-        bottom: new PreferredSize(
-          preferredSize: const Size.fromHeight(48.0),
-          child: new Theme(
-            data: Theme.of(context).copyWith(accentColor: Colors.white),
-            child: new Container(
-              height: 48.0,
-              alignment: FractionalOffset.center,
-              child: new TabPageSelector(controller: _tabController),
-            ),
-          ),
-        ),
-      ),
-      body: new TabBarView(
-        controller: _tabController,
-        children: choices.map((Choice choice) {
-          return new Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: new ChoiceCard(choice: choice),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-
 void main() {
-  runApp(new MaterialApp(home: new AppBarBottomSample()));
+  runApp(new AppBarBottomSample());
 }
+
+/*
+Sample Catalog
+
+Title: AppBar with a custom bottom widget.
+
+Summary: The AppBar's bottom widget is often a TabBar however any widget with a
+PreferredSize can be used.
+
+Description:
+In this app, the app bar's bottom widget is a TabPageSelector
+that displays the relative position of the selected page in the app's
+TabBarView. The arrow buttons in the toolbar part of the app bar select
+the previous or the next choice.
+
+Classes: AppBar, PreferredSize, TabBarView, TabController
+
+Sample: AppBarBottomSample
+
+See also:
+  - The "Components-Tabs" section of the material design specification:
+    <https://material.io/guidelines/components/tabs.html>
+*/

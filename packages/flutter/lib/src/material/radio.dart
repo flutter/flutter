@@ -89,7 +89,7 @@ class Radio<T> extends StatefulWidget {
   ///       _character = newValue;
   ///     });
   ///   },
-  /// ),
+  /// )
   /// ```
   final ValueChanged<T> onChanged;
 

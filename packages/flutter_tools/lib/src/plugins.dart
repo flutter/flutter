@@ -126,10 +126,6 @@ const String _iosPluginRegistryHeaderTemplate = '''//
 
 #import <Flutter/Flutter.h>
 
-{{#plugins}}
-#import "{{class}}.h"
-{{/plugins}}
-
 @interface GeneratedPluginRegistrant : NSObject
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 @end
@@ -142,6 +138,9 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 //
 
 #import "GeneratedPluginRegistrant.h"
+{{#plugins}}
+#import <{{name}}/{{class}}.h>
+{{/plugins}}
 
 @implementation GeneratedPluginRegistrant
 

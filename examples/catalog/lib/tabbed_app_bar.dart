@@ -4,16 +4,38 @@
 
 import 'package:flutter/material.dart';
 
-/// Sample Catalog: Tabbed AppBar
-///
-/// A basic app bar with a tab bar at the bottom. One of the app's choices can be
-/// selected by tapping the tabs or by swiping the tab bar view.
-///
-/// Sample classes: [AppBar], [DefaultTabController], [TabBar], [Scaffold], [TabBarView].
-///
-/// See also:
-///  * The "Components-Tabs" section of the material design specification:
-///    <https://material.io/guidelines/components/tabs.html>
+class TabbedAppBarSample extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      home: new DefaultTabController(
+        length: choices.length,
+        child: new Scaffold(
+          appBar: new AppBar(
+            title: const Text('Tabbed AppBar'),
+            bottom: new TabBar(
+              isScrollable: true,
+              tabs: choices.map((Choice choice) {
+                return new Tab(
+                  text: choice.title,
+                  icon: new Icon(choice.icon),
+                );
+              }).toList(),
+            ),
+          ),
+          body: new TabBarView(
+            children: choices.map((Choice choice) {
+              return new Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: new ChoiceCard(choice: choice),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class Choice {
   const Choice({ this.title, this.icon });
@@ -54,37 +76,27 @@ class ChoiceCard extends StatelessWidget {
   }
 }
 
-class TabbedAppBarSample extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new DefaultTabController(
-      length: choices.length,
-      child: new Scaffold(
-        appBar: new AppBar(
-          title: const Text('Tabbed AppBar'),
-          bottom: new TabBar(
-            isScrollable: true,
-            tabs: choices.map((Choice choice) {
-              return new Tab(
-                text: choice.title,
-                icon: new Icon(choice.icon),
-              );
-            }).toList(),
-          ),
-        ),
-        body: new TabBarView(
-          children: choices.map((Choice choice) {
-            return new Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: new ChoiceCard(choice: choice),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
+void main() {
+  runApp(new TabbedAppBarSample());
 }
 
-void main() {
-  runApp(new MaterialApp(home: new TabbedAppBarSample()));
-}
+/*
+Sample Catalog
+
+Title: Tabbed AppBar
+
+Summary: An AppBar can include a TabBar as its bottom widget.
+
+Description:
+A TabBar can be used to navigate among the pages displayed in a TabBarView.
+Although a TabBar is an ordinary widget that can appear, it's most often
+included in the application's AppBar.
+
+Classes: AppBar, DefaultTabController, TabBar, Scaffold, TabBarView
+
+Sample: TabbedAppBarSample
+
+See also:
+  - The "Components-Tabs" section of the material design specification:
+    <https://material.io/guidelines/components/tabs.html>
+*/

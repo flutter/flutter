@@ -108,7 +108,7 @@ void main() {
   // Make sure the imports are not marked as unused.
   ${importRefs.toString().trim()}
 
-  runApp(new GalleryApp());
+  runApp(const GalleryApp());
 }
 ''';
 

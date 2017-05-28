@@ -230,6 +230,48 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
+  test('Service extensions - debugPaintBaselinesEnabled', () async {
+    Map<String, String> result;
+    Future<Map<String, String>> pendingResult;
+    bool completed;
+
+    expect(binding.frameScheduled, isFalse);
+    expect(debugPaintBaselinesEnabled, false);
+    result = await binding.testExtension('debugPaintBaselinesEnabled', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugPaintBaselinesEnabled, false);
+    expect(binding.frameScheduled, isFalse);
+    pendingResult = binding.testExtension('debugPaintBaselinesEnabled', <String, String>{ 'enabled': 'true' });
+    completed = false;
+    pendingResult.whenComplete(() { completed = true; });
+    await binding.flushMicrotasks();
+    expect(binding.frameScheduled, isTrue);
+    expect(completed, isFalse);
+    await binding.doFrame();
+    await binding.flushMicrotasks();
+    expect(completed, isTrue);
+    expect(binding.frameScheduled, isFalse);
+    result = await pendingResult;
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugPaintBaselinesEnabled, true);
+    result = await binding.testExtension('debugPaintBaselinesEnabled', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(debugPaintBaselinesEnabled, true);
+    expect(binding.frameScheduled, isFalse);
+    pendingResult = binding.testExtension('debugPaintBaselinesEnabled', <String, String>{ 'enabled': 'false' });
+    await binding.flushMicrotasks();
+    expect(binding.frameScheduled, isTrue);
+    await binding.doFrame();
+    expect(binding.frameScheduled, isFalse);
+    result = await pendingResult;
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugPaintBaselinesEnabled, false);
+    result = await binding.testExtension('debugPaintBaselinesEnabled', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(debugPaintBaselinesEnabled, false);
+    expect(binding.frameScheduled, isFalse);
+  });
+
   test('Service extensions - evict', () async {
     Map<String, String> result;
     bool completed;
@@ -417,7 +459,7 @@ void main() {
   test('Service extensions - posttest', () async {
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 14);
+    expect(binding.extensions.length, 15);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

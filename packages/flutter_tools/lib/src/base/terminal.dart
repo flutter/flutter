@@ -90,16 +90,29 @@ class AnsiTerminal {
   /// Prompts the user to input a chraracter within the accepted list.
   /// Reprompts if inputted character is not in the list.
   ///
+  /// `prompt` is the text displayed prior to waiting for user input each time.
+  /// `defaultChoiceIndex`, if given, will be the character in `acceptedCharacters`
+  ///     in the index given if the user presses enter without any key input.
+  /// `displayAcceptedCharacters` prints also the accepted keys next to the `prompt` if true.
+  ///
   /// Throws a [TimeoutException] if a `timeout` is provided and its duration
   /// expired without user input. Duration resets per key press.
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
     String prompt,
+    int defaultChoiceIndex,
     bool displayAcceptedCharacters: true,
     Duration timeout,
   }) async {
     assert(acceptedCharacters != null);
     assert(acceptedCharacters.isNotEmpty);
+    List<String> charactersToDisplay = acceptedCharacters;
+    if (defaultChoiceIndex != null) {
+      assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
+      charactersToDisplay = new List<String>.from(charactersToDisplay);
+      charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
+      acceptedCharacters.add('\n');
+    }
     String choice;
     singleCharMode = true;
     while(
@@ -110,7 +123,7 @@ class AnsiTerminal {
       if (isNotEmpty(prompt)) {
         printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters)
-          printStatus(' [${acceptedCharacters.join("|")}]', newline: false);
+          printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         printStatus(': ', emphasis: true, newline: false);
       }
       Future<String> inputFuture = onCharInput.first;
@@ -120,6 +133,8 @@ class AnsiTerminal {
       printStatus(choice);
     }
     singleCharMode = false;
+    if (defaultChoiceIndex != null && choice == '\n')
+      choice = acceptedCharacters[defaultChoiceIndex];
     return choice;
   }
 }

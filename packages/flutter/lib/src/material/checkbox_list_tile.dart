@@ -118,7 +118,7 @@ class CheckboxListTile extends StatelessWidget {
   ///     });
   ///   },
   ///   title: new Text('Throw away your shot'),
-  /// ),
+  /// )
   /// ```
   final ValueChanged<bool> onChanged;
 

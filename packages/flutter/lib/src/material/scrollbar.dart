@@ -156,8 +156,13 @@ class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   void _paintThumb(double before, double inside, double after, double viewport, Canvas canvas, Size size,
                    void painter(Canvas canvas, Size size, double thumbOffset, double thumbExtent)) {
-    final double thumbExtent = math.max(math.min(viewport, _kMinThumbExtent), viewport * inside / (before + inside + after));
-    final double thumbOffset = before * (viewport - thumbExtent) / (before + after);
+    double thumbExtent = math.min(viewport, _kMinThumbExtent);
+    if (before + inside + after > 0.0)
+      thumbExtent = math.max(thumbExtent, viewport * inside / (before + inside + after));
+
+    final double thumbOffset = (before + after > 0.0) ?
+        before * (viewport - thumbExtent) / (before + after) : 0.0;
+
     painter(canvas, size, thumbOffset, thumbExtent);
   }
 

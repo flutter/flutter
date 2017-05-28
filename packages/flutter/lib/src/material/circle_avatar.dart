@@ -15,6 +15,8 @@ import 'typography.dart';
 /// such an image, the user's initials. A given user's initials should
 /// always be paired with the same background color, for consistency.
 ///
+/// ## Sample code
+///
 /// If the avatar is to have an image, the image should be specified in the
 /// [backgroundImage] property:
 ///
@@ -33,7 +35,7 @@ import 'typography.dart';
 /// new CircleAvatar(
 ///   backgroundColor: Colors.brown.shade800,
 ///   child: new Text('AH'),
-/// );
+/// )
 /// ```
 ///
 /// See also:

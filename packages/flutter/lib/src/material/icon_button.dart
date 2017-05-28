@@ -8,9 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
-import 'icon.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -39,6 +36,16 @@ const double _kMinButtonSize = 48.0;
 /// size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
+///
+/// ## Sample code
+///
+/// ```dart
+/// new IconButton(
+///   icon: new Icon(Icons.volume_up),
+///   tooltip: 'Increase volume by 10%',
+///   onPressed: () { setState(() { _volume *= 1.1; }); },
+/// )
+/// ```
 ///
 /// See also:
 ///

@@ -80,7 +80,7 @@ class Checkbox extends StatefulWidget {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  /// ),
+  /// )
   /// ```
   final ValueChanged<bool> onChanged;
 

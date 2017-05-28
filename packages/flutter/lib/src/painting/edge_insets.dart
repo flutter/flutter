@@ -21,16 +21,49 @@ enum Axis {
 ///
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
+///
+/// ## Sample code
+///
+/// Here are some examples of how to create [EdgeInsets] instances:
+///
+/// ```dart
+/// // typical 8-pixel margin on all sides
+/// const EdgeInsets.all(8.0)
+///
+/// // 8-pixel margin above and below, no horizontal margins
+/// const EdgeInsets.symmetric(vertical: 8.0)
+///
+/// // left-margin indent of 40 pixels
+/// const EdgeInsets.only(left: 40.0)
+/// ```
+///
+/// See also:
+///
+///  * [Padding], a widget that describes margins using [EdgeInsets].
 @immutable
 class EdgeInsets {
   /// Creates insets from offsets from the left, top, right, and bottom.
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Creates insets where all the offsets are value.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // typical 8-pixel margin on all sides
+  /// const EdgeInsets.all(8.0)
+  /// ```
   const EdgeInsets.all(double value)
       : left = value, top = value, right = value, bottom = value;
 
   /// Creates insets with only the given values non-zero.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // left-margin indent of 40 pixels
+  /// const EdgeInsets.only(left: 40.0)
+  /// ```
   const EdgeInsets.only({
     this.left: 0.0,
     this.top: 0.0,
@@ -39,11 +72,23 @@ class EdgeInsets {
   });
 
   /// Creates insets with symmetrical vertical and horizontal offsets.
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// // 8-pixel margin above and below, no horizontal margins
+  /// const EdgeInsets.symmetric(vertical: 8.0)
+  /// ```
   const EdgeInsets.symmetric({ double vertical: 0.0,
                              double horizontal: 0.0 })
     : left = horizontal, top = vertical, right = horizontal, bottom = vertical;
 
   /// Creates insets that match the given window padding.
+  ///
+  /// If you need the current system padding in the context of a widget,
+  /// consider using [MediaQuery.of] to obtain the current padding rather than
+  /// using the value from [ui.window], so that you get notified when it
+  /// changes.
   EdgeInsets.fromWindowPadding(ui.WindowPadding padding, double devicePixelRatio)
     : left = padding.left / devicePixelRatio,
       top = padding.top / devicePixelRatio,
