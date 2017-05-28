@@ -146,7 +146,7 @@ void main() {
 
   testWidgets('Default initialRoute', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
-      '/': (BuildContext context) => new Text('route "/"')
+      '/': (BuildContext context) => const Text('route "/"')
     }));
 
     expect(find.text('route "/"'), findsOneWidget);
@@ -156,7 +156,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       initialRoute: '/a',
       routes: <String, WidgetBuilder>{
-        '/a': (BuildContext context) => new Text('route "/a"')
+        '/a': (BuildContext context) => const Text('route "/a"')
       },
     ));
 
