@@ -20,7 +20,7 @@ dependencies:
   meta: ^1.0.5
   mustache: ^0.2.5
   package_config: '>=0.1.5 <2.0.0'
-  platform: 2.0.0
+  platform: 2.1.0
   process: 2.0.3
   quiver: ^0.24.0
   stack_trace: ^1.4.0

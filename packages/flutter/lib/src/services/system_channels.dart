@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'message_codecs.dart';
 import 'platform_channel.dart';
 
@@ -38,6 +40,9 @@ class SystemChannels {
   );
 
   /// A string [BasicMessageChannel] for lifecycle events.
+  ///
+  /// Valid messages are string representations of the values of the
+  /// [AppLifecycleState] enumeration.
   static const BasicMessageChannel<String> lifecycle = const BasicMessageChannel<String>(
       'flutter/lifecycle',
       const StringCodec(),

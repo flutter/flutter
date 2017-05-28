@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class FirstWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  return new GestureDetector(
+    return new GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/second');
       },
@@ -85,12 +85,12 @@ class OnTapPage extends StatelessWidget {
   }
 }
 
-typedef void OnPushed(Route<dynamic> route, Route<dynamic> previousRoute);
-typedef void OnPopped(Route<dynamic> route, Route<dynamic> previousRoute);
+typedef void OnObservation(Route<dynamic> route, Route<dynamic> previousRoute);
 
 class TestObserver extends NavigatorObserver {
-  OnPushed onPushed;
-  OnPopped onPopped;
+  OnObservation onPushed;
+  OnObservation onPopped;
+  OnObservation onRemoved;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
@@ -104,6 +104,12 @@ class TestObserver extends NavigatorObserver {
     if (onPopped != null) {
       onPopped(route, previousRoute);
     }
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (onRemoved != null)
+      onRemoved(route, previousRoute);
   }
 }
 
@@ -445,4 +451,120 @@ void main() {
     final String replaceNamedValue = await value; // replaceNamed result was 'B'
     expect(replaceNamedValue, 'B');
   });
+
+  testWidgets('removeRoute', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pushNamed(context, '/B'); }),
+      '/B': (BuildContext context) => const OnTapPage(id: 'B'),
+    };
+    final Map<String, Route<String>> routes = <String, Route<String>>{};
+
+    Route<String> removedRoute;
+    Route<String> previousRoute;
+
+    final TestObserver observer = new TestObserver()
+      ..onRemoved = (Route<dynamic> route, Route<dynamic> previous) {
+        removedRoute = route;
+        previousRoute = previous;
+      };
+
+    await tester.pumpWidget(new MaterialApp(
+      navigatorObservers: <NavigatorObserver>[observer],
+      onGenerateRoute: (RouteSettings settings) {
+        routes[settings.name] = new PageRouteBuilder<String>(
+          settings: settings,
+          pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+            return pageBuilders[settings.name](context);
+          },
+        );
+        return routes[settings.name];
+      }
+    ));
+
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsNothing);
+
+    await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    await tester.tap(find.text('A')); // pushNamed('/B'), stack becomes /, /A, /B
+    await tester.pumpAndSettle();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+
+    // Verify that the navigator's stack is ordered as expected.
+    expect(routes['/'].isActive, true);
+    expect(routes['/A'].isActive, true);
+    expect(routes['/B'].isActive, true);
+    expect(routes['/'].isFirst, true);
+    expect(routes['/B'].isCurrent, true);
+
+    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.removeRoute(routes['/B']); // stack becomes /, /A
+    await tester.pump();
+    expect(find.text('/'), findsNothing);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    // Verify that the navigator's stack no longer includes /B
+    expect(routes['/'].isActive, true);
+    expect(routes['/A'].isActive, true);
+    expect(routes['/B'].isActive, false);
+    expect(routes['/'].isFirst, true);
+    expect(routes['/A'].isCurrent, true);
+
+    expect(removedRoute, routes['/B']);
+    expect(previousRoute, routes['/A']);
+
+    navigator.removeRoute(routes['/A']); // stack becomes just /
+    await tester.pump();
+    expect(find.text('/'), findsOneWidget);
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsNothing);
+
+    // Verify that the navigator's stack no longer includes /A
+    expect(routes['/'].isActive, true);
+    expect(routes['/A'].isActive, false);
+    expect(routes['/B'].isActive, false);
+    expect(routes['/'].isFirst, true);
+    expect(routes['/'].isCurrent, true);
+    expect(removedRoute, routes['/A']);
+    expect(previousRoute, routes['/']);
+  });
+
+  testWidgets('remove a route whose value is awaited', (WidgetTester tester) async {
+    Future<String> pageValue;
+    final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
+       '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { pageValue = Navigator.pushNamed(context, '/A'); }),
+      '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pop(context, 'A'); }),
+    };
+    final Map<String, Route<String>> routes = <String, Route<String>>{};
+
+    await tester.pumpWidget(new MaterialApp(
+      onGenerateRoute: (RouteSettings settings) {
+        routes[settings.name] = new PageRouteBuilder<String>(
+          settings: settings,
+          pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+            return pageBuilders[settings.name](context);
+          },
+        );
+        return routes[settings.name];
+      }
+    ));
+
+    await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
+    await tester.pumpAndSettle();
+    pageValue.then((String value) { assert(false); });
+
+    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.removeRoute(routes['/A']); // stack becomes /, pageValue will not complete
+  });
+
+
 }

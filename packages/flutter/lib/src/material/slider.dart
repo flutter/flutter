@@ -103,7 +103,7 @@ class Slider extends StatefulWidget {
   ///       _duelCommandment = newValue.round();
   ///     });
   ///   },
-  /// ),
+  /// )
   /// ```
   final ValueChanged<double> onChanged;
 

@@ -62,7 +62,7 @@ import 'theme.dart';
 ///       onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
 ///     ),
 ///   ],
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -136,7 +136,7 @@ class RadioListTile<T> extends StatelessWidget {
   ///       _character = newValue;
   ///     });
   ///   },
-  /// ),
+  /// )
   /// ```
   final ValueChanged<T> onChanged;
 

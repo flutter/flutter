@@ -235,6 +235,55 @@ abstract class ScrollView extends StatelessWidget {
 /// list and a grid, use a list of three slivers: [SliverAppBar], [SliverList],
 /// and [SliverGrid].
 ///
+/// ## Sample code
+///
+/// This sample code shows a scroll view that contains a flexible pinned app
+/// bar, a grid, and an infinite list.
+///
+/// ```dart
+/// new CustomScrollView(
+///   slivers: <Widget>[
+///     const SliverAppBar(
+///       pinned: true,
+///       expandedHeight: 250.0,
+///       flexibleSpace: const FlexibleSpaceBar(
+///         title: const Text('Demo'),
+///       ),
+///     ),
+///     new SliverGrid(
+///       gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+///         maxCrossAxisExtent: 200.0,
+///         mainAxisSpacing: 10.0,
+///         crossAxisSpacing: 10.0,
+///         childAspectRatio: 4.0,
+///       ),
+///       delegate: new SliverChildBuilderDelegate(
+///         (BuildContext context, int index) {
+///           return new Container(
+///             alignment: FractionalOffset.center,
+///             color: Colors.teal[100 * (index % 9)],
+///             child: new Text('grid item $index'),
+///           );
+///         },
+///         childCount: 20,
+///       ),
+///     ),
+///     new SliverFixedExtentList(
+///       itemExtent: 50.0,
+///       delegate: new SliverChildBuilderDelegate(
+///         (BuildContext context, int index) {
+///           return new Container(
+///             alignment: FractionalOffset.center,
+///             color: Colors.lightBlue[100 * (index % 9)],
+///             child: new Text('list item $index'),
+///           );
+///         },
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [SliverList], which is a sliver that displays linear list of children.
@@ -329,7 +378,7 @@ abstract class BoxScrollView extends ScrollView {
   }
 }
 
-/// A scrollable, linear list of widgets.
+/// A scrollable list of widgets arranged linearly.
 ///
 /// [ListView] is the most commonly used scrolling widget. It displays its
 /// children one after another in the scroll direction. In the cross axis, the
@@ -359,6 +408,20 @@ abstract class BoxScrollView extends ScrollView {
 ///     a [SliverChildDelegate] can control the algorithm used to estimate the
 ///     size of children that are not actually visible.
 ///
+/// ## Sample code
+///
+/// An infinite list of children:
+///
+/// ```dart
+/// new ListView.builder(
+///   padding: new EdgeInsets.all(8.0),
+///   itemExtent: 20.0,
+///   itemBuilder: (BuildContext context, int index) {
+///     return new Text('entry $index');
+///   },
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -368,6 +431,8 @@ abstract class BoxScrollView extends ScrollView {
 ///  * [GridView], which is scrollable, 2D array of widgets.
 ///  * [CustomScrollView], which is a scrollable widget that creates custom
 ///    scroll effects using slivers.
+///  * [ListBody], which arranges its children in a similar manner, but without
+///    scrolling.
 class ListView extends BoxScrollView {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
   ///

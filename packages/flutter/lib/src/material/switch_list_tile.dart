@@ -111,7 +111,7 @@ class SwitchListTile extends StatelessWidget {
   ///     });
   ///   },
   ///   title: new Text('Lights'),
-  /// ),
+  /// )
   /// ```
   final ValueChanged<bool> onChanged;
 

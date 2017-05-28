@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'theme.dart';
 
 /// A header used in a material design [GridTile].

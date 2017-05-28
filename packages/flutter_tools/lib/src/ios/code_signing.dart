@@ -153,6 +153,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
       displayAcceptedCharacters: true,
+      defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
     );
 
     if (choice == 'a')

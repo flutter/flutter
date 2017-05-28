@@ -497,5 +497,55 @@ void main() {
     expect(table.row(0).length, 2);
   });
 
+  testWidgets('Table widget diagnostics', (WidgetTester tester) async {
+    GlobalKey key0;
+    final Table table = new Table(
+        key: key0 = new GlobalKey(),
+        defaultColumnWidth: const IntrinsicColumnWidth(),
+        children: <TableRow>[
+          new TableRow(
+            children: <Widget>[
+              const Text('A'), const Text('B'), const Text('C')
+            ]
+          ),
+          new TableRow(
+            children: <Widget>[
+              const Text('D'), const Text('EEE'), const Text('F')
+            ]
+          ),
+          new TableRow(
+            children: <Widget>[
+              const Text('G'), const Text('H'), const Text('III')
+            ]
+          ),
+        ]
+      );
+    await tester.pumpWidget(table);
+    final RenderObjectElement element = key0.currentContext;
+
+    final String dump =
+        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
+    expect(dump, equals('''Table([GlobalKey#000]; renderObject: RenderTable#000)
+├Text("A")
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+├Text("B")
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+├Text("C")
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+├Text("D")
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+├Text("EEE")
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+├Text("F")
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+├Text("G")
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+├Text("H")
+│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+└Text("III")
+ └RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
+'''));
+  });
+
   // TODO(ianh): Test handling of TableCell object
 }

@@ -84,7 +84,7 @@ class FittedSizes {
 /// provides a convenience function, [FractionalOffset.inscribe], for resolving
 /// the sizes to rects, as shown in the example below.
 ///
-/// == Example ==
+/// ## Sample code
 ///
 /// This example paints an [Image] `image` onto the [Rect] `outputRect` on a
 /// [Canvas] `canvas`, using a [Paint] paint, applying the [BoxFit] algorithm
@@ -97,6 +97,13 @@ class FittedSizes {
 /// final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
 /// canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
 /// ```
+///
+/// See also:
+///
+///  * [FittedBox], a widget that applies this algorithm to another widget.
+///  * [paintImage], a function that applies this algorithm to images for painting.
+///  * [DecoratedBox], [BoxDecoration], and [DecorationImage], which together
+///    provide access to [paintImage] at the widgets layer.
 FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
   Size sourceSize, destinationSize;
   switch (fit) {

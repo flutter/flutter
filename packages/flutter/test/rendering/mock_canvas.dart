@@ -198,6 +198,18 @@ abstract class PaintPattern {
   /// [Canvas.drawLine] call are ignored.
   void line({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
+  /// Indicates that an arc is expected next.
+  ///
+  /// The next arc is examined. Any arguments that are passed to this method
+  /// are compared to the actual [Canvas.drawArc] call's `paint` argument, and
+  /// any mismatches result in failure.
+  ///
+  /// If no call to [Canvas.drawArc] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawArc] call are ignored.
+  void arc({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+
   /// Indicates that a paragraph is expected next.
   ///
   /// Calls are skipped until a call to [Canvas.drawParagraph] is found. Any
@@ -297,6 +309,11 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   @override
   void line({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _LinePaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
+  }
+
+  @override
+  void arc({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _ArcPaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -599,6 +616,12 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
 class _LinePaintPredicate extends _DrawCommandPaintPredicate {
   _LinePaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawLine, 'a line', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+  );
+}
+
+class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
+  _ArcPaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
 }
 

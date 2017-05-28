@@ -6,9 +6,9 @@ import 'dart:math' as math;
 import 'dart:ui' show Color, hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'icon_theme_data.dart';
 import 'typography.dart';
 
 /// Describes the contrast needs of a color.

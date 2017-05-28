@@ -2680,6 +2680,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     description.add('constraints: $constraints');
     if (_layer != null) // don't access it via the "layer" getter since that's only valid when we don't need paint
       description.add('layer: $_layer');
+    if (_semantics != null)
+      description.add('semantics: $_semantics');
   }
 
   /// Returns a string describing the current node's descendants. Each line of

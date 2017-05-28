@@ -213,7 +213,7 @@ enum BorderStyle {
 ///     ),
 ///   ),
 ///   child: new Text('Flutter in the sky', textAlign: TextAlign.center),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -366,7 +366,7 @@ class BorderSide {
 ///       style: const TextStyle(color: const Color(0xFF000000))
 ///     ),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -809,7 +809,7 @@ abstract class Gradient {
 ///       tileMode: TileMode.repeated, // repeats the gradient over the canvas
 ///     ),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -1239,9 +1239,9 @@ void paintImage({
   @required ui.Image image,
   ColorFilter colorFilter,
   BoxFit fit,
-  ImageRepeat repeat: ImageRepeat.noRepeat,
+  FractionalOffset alignment,
   Rect centerSlice,
-  FractionalOffset alignment
+  ImageRepeat repeat: ImageRepeat.noRepeat,
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -1266,7 +1266,7 @@ void paintImage({
     destinationSize += sliceBorder;
     // We don't have the ability to draw a subset of the image at the same time
     // as we apply a nine-patch stretch.
-    assert(sourceSize == inputSize);
+    assert(sourceSize == inputSize, 'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
   }
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
     // There's no need to repeat the image because we're exactly filling the
@@ -1315,36 +1315,29 @@ class DecorationImage {
   /// The [image] argument must not be null.
   const DecorationImage({
     @required this.image,
-    this.fit,
-    this.repeat: ImageRepeat.noRepeat,
-    this.centerSlice,
     this.colorFilter,
+    this.fit,
     this.alignment,
+    this.centerSlice,
+    this.repeat: ImageRepeat.noRepeat,
   }) : assert(image != null);
 
   /// The image to be painted into the decoration.
+  ///
+  /// Typically this will be an [AssetImage] (for an image shipped with the
+  /// application) or a [NetworkImage] (for an image obtained from the network).
   final ImageProvider image;
-
-  /// How the image should be inscribed into the box.
-  ///
-  /// The default varies based on the other fields. See the discussion at
-  /// [paintImage].
-  final BoxFit fit;
-
-  /// How to paint any portions of the box not covered by the image.
-  final ImageRepeat repeat;
-
-  /// The center slice for a nine-patch image.
-  ///
-  /// The region of the image inside the center slice will be stretched both
-  /// horizontally and vertically to fit the image into its destination. The
-  /// region of the image above and below the center slice will be stretched
-  /// only horizontally and the region of the image to the left and right of
-  /// the center slice will be stretched only vertically.
-  final Rect centerSlice;
 
   /// A color filter to apply to the image before painting it.
   final ColorFilter colorFilter;
+
+  /// How the image should be inscribed into the box.
+  ///
+  /// The default is [BoxFit.scaleDown] if [centerSlice] is null, and
+  /// [BoxFit.fill] if [centerSlice] is not null.
+  ///
+  /// See the discussion at [paintImage] for more details.
+  final BoxFit fit;
 
   /// How to align the image within its bounds.
   ///
@@ -1355,6 +1348,27 @@ class DecorationImage {
   /// Defaults to [FractionalOffset.center].
   final FractionalOffset alignment;
 
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
+  ///
+  /// The stretching will be applied in order to make the image fit into the box
+  /// specified by [fit]. When [centerSlice] is not null, [fit] defaults to
+  /// [BoxFit.fill], which distorts the destination image size relative to the
+  /// image's original aspect ratio. Values of [BoxFit] which do not distort the
+  /// destination image size will result in [centerSlice] having no effect
+  /// (since the nine regions of the image will be rendered with the same
+  /// scaling, as if it wasn't specified).
+  final Rect centerSlice;
+
+  /// How to paint any portions of the box that would not otherwise be covered
+  /// by the image.
+  final ImageRepeat repeat;
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -1362,22 +1376,54 @@ class DecorationImage {
     if (runtimeType != other.runtimeType)
       return false;
     final DecorationImage typedOther = other;
-    return image == typedOther.image &&
-           fit == typedOther.fit &&
-           repeat == typedOther.repeat &&
-           centerSlice == typedOther.centerSlice &&
-           colorFilter == typedOther.colorFilter &&
-           alignment == typedOther.alignment;
+    return image == typedOther.image
+        && colorFilter == typedOther.colorFilter
+        && fit == typedOther.fit
+        && alignment == typedOther.alignment
+        && centerSlice == typedOther.centerSlice
+        && repeat == typedOther.repeat;
   }
 
   @override
-  int get hashCode => hashValues(image, fit, repeat, centerSlice, colorFilter, alignment);
+  int get hashCode => hashValues(image, colorFilter, fit, alignment, centerSlice, repeat);
 
   @override
-  String toString() => '$runtimeType($image, $fit, $repeat)';
+  String toString() {
+    final List<String> properties = <String>[];
+    properties.add('$image');
+    if (colorFilter != null)
+      properties.add('$colorFilter');
+    if (fit != null &&
+        !(fit == BoxFit.fill && centerSlice != null) &&
+        !(fit == BoxFit.scaleDown && centerSlice == null))
+      properties.add('$fit');
+    if (alignment != null)
+      properties.add('$alignment');
+    if (centerSlice != null)
+      properties.add('centerSlice: $centerSlice');
+    if (repeat != ImageRepeat.noRepeat)
+      properties.add('$repeat');
+    return '$runtimeType(${properties.join(", ")})';
+  }
 }
 
 /// An immutable description of how to paint a box.
+///
+/// The [BoxDecoration] class provides a variety of ways to draw a box.
+///
+/// The box has a [border], a body, and may cast a [shadow].
+///
+/// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
+/// then the [borderRadius] property controls the roundness of the corners.
+///
+/// The body of the box is painted in layers. The bottom-most layer is the
+/// [color], which fills the box. Above that is the [gradient], which also fills
+/// the box. Finally there is the [image], the precise alignment of which is
+/// controlled by the [DecorationImage] class.
+///
+/// The [border] paints over the body; the [shadow], naturally, paints below it.
+///
+/// ## Sample code
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw an image with a border:
@@ -1397,6 +1443,13 @@ class DecorationImage {
 ///   ),
 /// )
 /// ```
+///
+/// See also:
+///
+///  * [DecoratedBox] and [Container], widgets that can be configured with
+///    [BoxDecoration] objects.
+///  * [CustomPaint], a widget that lets you draw arbitrary graphics.
+///  * [Decoration], the base class which lets you define other decorations.
 class BoxDecoration extends Decoration {
   /// Creates a box decoration.
   ///
@@ -1415,7 +1468,7 @@ class BoxDecoration extends Decoration {
     this.borderRadius,
     this.boxShadow,
     this.gradient,
-    this.shape: BoxShape.rectangle
+    this.shape: BoxShape.rectangle,
   });
 
   @override
@@ -1468,7 +1521,7 @@ class BoxDecoration extends Decoration {
       borderRadius: BorderRadius.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
-      shape: shape
+      shape: shape,
     );
   }
 
@@ -1495,7 +1548,7 @@ class BoxDecoration extends Decoration {
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: b.gradient,
-      shape: b.shape
+      shape: b.shape,
     );
   }
 
@@ -1538,7 +1591,7 @@ class BoxDecoration extends Decoration {
       borderRadius,
       boxShadow,
       gradient,
-      shape
+      shape,
     );
   }
 
@@ -1704,9 +1757,10 @@ class _BoxDecorationPainter extends BoxPainter {
       rect: rect,
       image: image,
       colorFilter: backgroundImage.colorFilter,
-      alignment: backgroundImage.alignment,
       fit: backgroundImage.fit,
-      repeat: backgroundImage.repeat
+      alignment: backgroundImage.alignment,
+      centerSlice: backgroundImage.centerSlice,
+      repeat: backgroundImage.repeat,
     );
 
     if (clipPath != null)
