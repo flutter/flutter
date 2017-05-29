@@ -670,7 +670,7 @@ abstract class StatelessWidget extends Widget {
 /// can be called to mutate it:
 ///
 /// ```dart
-/// class Frog extends StatelessWidget {
+/// class Frog extends StatefulWidget {
 ///   const Frog({
 ///     Key key,
 ///     this.color: const Color(0xFF2DBD3A),
