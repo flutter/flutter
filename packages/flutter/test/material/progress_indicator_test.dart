@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
 
   // The "can be constructed" tests that follow are primarily to ensure that any
@@ -56,4 +58,15 @@ void main() {
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));
   });
+
+  testWidgets('CircularProgressIndicator stoke width', (WidgetTester tester) async {
+    await tester.pumpWidget(const CircularProgressIndicator());
+
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
+
+    await tester.pumpWidget(const CircularProgressIndicator(strokeWidth: 16.0));
+
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
+  });
+
 }

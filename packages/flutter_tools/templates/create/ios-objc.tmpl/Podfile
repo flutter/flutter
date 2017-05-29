@@ -1,0 +1,36 @@
+# Uncomment this line to define a global platform for your project
+# platform :ios, '9.0'
+
+if ENV['FLUTTER_FRAMEWORK_DIR'] == nil
+  abort('Please set FLUTTER_FRAMEWORK_DIR to the directory containing Flutter.framework')
+end
+
+target 'Runner' do
+  # Pods for Runner
+
+  # Flutter Pods
+  pod 'Flutter', :path => ENV['FLUTTER_FRAMEWORK_DIR']
+
+  if File.exists? '../.flutter-plugins'
+    flutter_root = File.expand_path('..')
+    File.foreach('../.flutter-plugins') { |line|
+      plugin = line.split(pattern='=')
+      if plugin.length == 2
+        name = plugin[0].strip()
+        path = plugin[1].strip()
+        resolved_path = File.expand_path("#{path}/ios", flutter_root)
+        pod name, :path => resolved_path
+      else
+        puts "Invalid plugin specification: #{line}"
+      end
+    }
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+  end
+end

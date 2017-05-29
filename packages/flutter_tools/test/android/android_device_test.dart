@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/android/android_device.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
@@ -68,7 +73,59 @@ Use the 'android' tool to install them:
       expect(properties['ro.build.version.sdk'], '23');
     });
   });
+
+  group('isLocalEmulator', () {
+    final ProcessManager mockProcessManager = new MockProcessManager();
+    String hardware;
+    String buildCharacteristics;
+
+    setUp(() {
+      hardware = 'unknown';
+      buildCharacteristics = 'unused';
+      when(mockProcessManager.run(argThat(contains('getprop')), stderrEncoding: any, stdoutEncoding: any)).thenAnswer((_) {
+        final StringBuffer buf = new StringBuffer()
+          ..writeln('[ro.hardware]: [$hardware]')
+          ..writeln('[ro.build.characteristics]: [$buildCharacteristics]');
+        final ProcessResult result = new ProcessResult(1, 0, buf.toString(), '');
+        return new Future<ProcessResult>.value(result);
+      });
+    });
+
+    testUsingContext('knownPhysical', () async {
+      hardware = 'samsungexynos7420';
+      final AndroidDevice device = new AndroidDevice('test');
+      expect(await device.isLocalEmulator, false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('knownEmulator', () async {
+      hardware = 'goldfish';
+      final AndroidDevice device = new AndroidDevice('test');
+      expect(await device.isLocalEmulator, true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('unknownPhysical', () async {
+      buildCharacteristics = 'att';
+      final AndroidDevice device = new AndroidDevice('test');
+      expect(await device.isLocalEmulator, false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('unknownEmulator', () async {
+      buildCharacteristics = 'att,emulator';
+      final AndroidDevice device = new AndroidDevice('test');
+      expect(await device.isLocalEmulator, true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+  });
 }
+
+class MockProcessManager extends Mock implements ProcessManager {}
 
 const String kAdbShellGetprop = '''
 [dalvik.vm.dex2oat-Xms]: [64m]

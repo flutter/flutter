@@ -28,8 +28,6 @@ import 'sliver_multi_box_adaptor.dart';
 /// See also:
 ///
 ///  * [RenderSliverFixedExtentList], which has a configurable [itemExtent].
-///  * [RenderSliverPrototypeExtentList], which uses a prototype list item
-///    instead of a pixel value, to define the extent of each item.
 ///  * [RenderSliverFillViewport], which determines the [itemExtent] based on
 ///    [SliverConstraints.viewportMainAxisExtent].
 ///  * [RenderSliverFillRemaining], which determines the [itemExtent] based on
@@ -233,8 +231,6 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 ///
 /// See also:
 ///
-///  * [RenderSliverPrototypeExtentList], which uses a prototype list item
-///    instead of a pixel value, to define the extent of each item.
 ///  * [RenderSliverList], which does not require its children to have the same
 ///    extent in the main axis.
 ///  * [RenderSliverFillViewport], which determines the [itemExtent] based on

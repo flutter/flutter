@@ -13,6 +13,7 @@ import 'framework.dart';
 import 'media_query.dart';
 
 export 'package:flutter/services.dart' show
+  ImageProvider,
   AssetImage,
   ExactAssetImage,
   MemoryImage,

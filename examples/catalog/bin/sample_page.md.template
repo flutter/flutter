@@ -1,0 +1,18 @@
+---
+catalog: @(name)
+title: "@(title)"
+
+permalink: /catalog/@(name)/
+---
+
+@(summary)
+
+@(description)
+
+See also:
+@(see also)
+
+```dart
+@(source)
+```
+The source code is based on [@(path)](https://github.com/flutter/flutter/blob/master/@(path)).

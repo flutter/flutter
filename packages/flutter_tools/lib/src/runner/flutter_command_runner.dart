@@ -150,6 +150,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   @override
   Future<Null> run(Iterable<String> args) {
     // Have an invocation of 'build' print out it's sub-commands.
+    // TODO(ianh): Move this to the Build command itself somehow.
     if (args.length == 1 && args.first == 'build')
       args = <String>['build', '-h'];
 

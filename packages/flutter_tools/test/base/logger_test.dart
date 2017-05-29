@@ -10,6 +10,7 @@ void main() {
     test('error', () async {
       final BufferLogger mockLogger = new BufferLogger();
       final VerboseLogger verboseLogger = new VerboseLogger(mockLogger);
+      verboseLogger.supportsColor = false;
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
       verboseLogger.printTrace('Oooh, I do I do I do');

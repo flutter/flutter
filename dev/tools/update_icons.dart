@@ -97,6 +97,6 @@ String getIconDeclaration(String line) {
   return '''
 
   /// <p><i class="material-icons md-36">$name</i> &#x2014; material icon named "$description".</p>
-  static const IconData $identifier = const IconData(0x$codepoint);
+  static const IconData $identifier = const IconData(0x$codepoint, fontFamily: 'MaterialIcons');
 ''';
 }

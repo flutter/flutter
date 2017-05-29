@@ -156,6 +156,24 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
+  testWidgets('ListView can build out of overflow padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          width: 0.0,
+          height: 0.0,
+          child: new ListView(
+            padding: const EdgeInsets.all(8.0),
+            children: <Widget>[
+              const Text('padded'),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(find.text('padded'), findsOneWidget);
+  });
+
   testWidgets('ListView with itemExtent in unbounded context', (WidgetTester tester) async {
     await tester.pumpWidget(
       new SingleChildScrollView(

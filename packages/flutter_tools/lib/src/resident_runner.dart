@@ -13,6 +13,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
+import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
@@ -623,6 +624,8 @@ abstract class ResidentRunner {
   }
 
   Future<Null> processTerminalInput(String command) async {
+    // When terminal doesn't support line mode, '\n' can sneak into the input.
+    command = command.trim();
     if (_processingUserRequest) {
       printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;

@@ -221,6 +221,12 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       case 'AppLifecycleState.resumed':
         handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         break;
+      case 'AppLifecycleState.inactive':
+        handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        break;
+      case 'AppLifecycleState.suspending':
+        handleAppLifecycleStateChanged(AppLifecycleState.suspending);
+        break;
     }
     return null;
   }

@@ -132,77 +132,52 @@ class GalleryDrawer extends StatelessWidget {
     final TextStyle aboutTextStyle = themeData.textTheme.body2;
     final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
-    final Widget lightThemeItem = new ListTile(
-      leading: const Icon(Icons.brightness_5),
+    final Widget lightThemeItem = new RadioListTile<bool>(
+      secondary: const Icon(Icons.brightness_5),
       title: const Text('Light'),
-      trailing: new Radio<bool>(
-        value: true,
-        groupValue: useLightTheme,
-        onChanged: onThemeChanged,
-      ),
+      value: true,
+      groupValue: useLightTheme,
+      onChanged: onThemeChanged,
       selected: useLightTheme,
-      onTap: () {
-        onThemeChanged(true);
-      },
     );
 
-    final Widget darkThemeItem = new ListTile(
-      leading: const Icon(Icons.brightness_7),
+    final Widget darkThemeItem = new RadioListTile<bool>(
+      secondary: const Icon(Icons.brightness_7),
       title: const Text('Dark'),
-      trailing: new Radio<bool>(
-        value: false,
-        groupValue: useLightTheme,
-        onChanged: onThemeChanged
-      ),
+      value: false,
+      groupValue: useLightTheme,
+      onChanged: onThemeChanged,
       selected: !useLightTheme,
-      onTap: () {
-        onThemeChanged(false);
-      },
     );
 
-    final Widget mountainViewItem = new ListTile(
+    final Widget mountainViewItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show an Android phone icon
-      leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
+      secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
       title: const Text('Android'),
-      trailing: new Radio<TargetPlatform>(
-        value: TargetPlatform.android,
-        groupValue: Theme.of(context).platform,
-        onChanged: onPlatformChanged,
-      ),
+      value: TargetPlatform.android,
+      groupValue: Theme.of(context).platform,
+      onChanged: onPlatformChanged,
       selected: Theme.of(context).platform == TargetPlatform.android,
-      onTap: () {
-        onPlatformChanged(TargetPlatform.android);
-      },
     );
 
-    final Widget cupertinoItem = new ListTile(
+    final Widget cupertinoItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show the iPhone icon
-      leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
+      secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
       title: const Text('iOS'),
-      trailing: new Radio<TargetPlatform>(
-        value: TargetPlatform.iOS,
-        groupValue: Theme.of(context).platform,
-        onChanged: onPlatformChanged,
-      ),
+      value: TargetPlatform.iOS,
+      groupValue: Theme.of(context).platform,
+      onChanged: onPlatformChanged,
       selected: Theme.of(context).platform == TargetPlatform.iOS,
-      onTap: () {
-        onPlatformChanged(TargetPlatform.iOS);
-      },
     );
 
-    final Widget animateSlowlyItem = new ListTile(
-      leading: const Icon(Icons.hourglass_empty),
+    final Widget animateSlowlyItem = new CheckboxListTile(
       title: const Text('Animate Slowly'),
-      trailing: new Checkbox(
-        value: timeDilation != 1.0,
-        onChanged: (bool value) {
-          onTimeDilationChanged(value ? 20.0 : 1.0);
-        },
-      ),
-      selected: timeDilation != 1.0,
-      onTap: () {
-        onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0);
+      value: timeDilation != 1.0,
+      onChanged: (bool value) {
+        onTimeDilationChanged(value ? 20.0 : 1.0);
       },
+      secondary: const Icon(Icons.hourglass_empty),
+      selected: timeDilation != 1.0,
     );
 
     final Widget sendFeedbackItem = new ListTile(
@@ -271,53 +246,32 @@ class GalleryDrawer extends StatelessWidget {
     ];
 
     if (onShowPerformanceOverlayChanged != null) {
-      allDrawerItems.insert(8, new ListTile(
-        leading: const Icon(Icons.assessment),
+      allDrawerItems.insert(8, new CheckboxListTile(
         title: const Text('Performance Overlay'),
-        trailing: new Checkbox(
-          value: showPerformanceOverlay,
-          onChanged: (bool value) {
-            onShowPerformanceOverlayChanged(!showPerformanceOverlay);
-          },
-        ),
+        value: showPerformanceOverlay,
+        onChanged: onShowPerformanceOverlayChanged,
+        secondary: const Icon(Icons.assessment),
         selected: showPerformanceOverlay,
-        onTap: () {
-          onShowPerformanceOverlayChanged(!showPerformanceOverlay);
-        },
       ));
     }
 
     if (onCheckerboardRasterCacheImagesChanged != null) {
-      allDrawerItems.insert(8, new ListTile(
-        leading: const Icon(Icons.assessment),
+      allDrawerItems.insert(8, new CheckboxListTile(
         title: const Text('Checkerboard Raster Cache Images'),
-        trailing: new Checkbox(
-          value: checkerboardRasterCacheImages,
-          onChanged: (bool value) {
-            onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
-          },
-        ),
+        value: checkerboardRasterCacheImages,
+        onChanged: onCheckerboardRasterCacheImagesChanged,
+        secondary: const Icon(Icons.assessment),
         selected: checkerboardRasterCacheImages,
-        onTap: () {
-          onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
-        },
       ));
     }
 
     if (onCheckerboardOffscreenLayersChanged != null) {
-      allDrawerItems.insert(8, new ListTile(
-        leading: const Icon(Icons.assessment),
+      allDrawerItems.insert(8, new CheckboxListTile(
         title: const Text('Checkerboard Offscreen Layers'),
-        trailing: new Checkbox(
-          value: checkerboardOffscreenLayers,
-          onChanged: (bool value) {
-            onCheckerboardOffscreenLayersChanged(!checkerboardOffscreenLayers);
-          },
-        ),
+        value: checkerboardOffscreenLayers,
+        onChanged: onCheckerboardOffscreenLayersChanged,
+        secondary: const Icon(Icons.assessment),
         selected: checkerboardOffscreenLayers,
-        onTap: () {
-          onCheckerboardOffscreenLayersChanged(!checkerboardOffscreenLayers);
-        },
       ));
     }
 

@@ -98,8 +98,10 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void resolve(GestureDisposition disposition) {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
+      // This can happen if the superclass decides the primary pointer
+      // exceeded the touch slop, or if the recognizer is disposed.
       if (onTapCancel != null)
-        invokeCallback<Null>('onTapCancel', onTapCancel); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<Null>('spontaneous onTapCancel', onTapCancel);
       _reset();
     }
     super.resolve(disposition);
@@ -124,9 +126,10 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void rejectGesture(int pointer) {
     super.rejectGesture(pointer);
     if (pointer == primaryPointer) {
-      assert(state == GestureRecognizerState.defunct);
+      // Another gesture won the arena.
+      assert(state != GestureRecognizerState.possible);
       if (onTapCancel != null)
-        invokeCallback<Null>('onTapCancel', onTapCancel); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<Null>('forced onTapCancel', onTapCancel);
       _reset();
     }
   }
@@ -134,7 +137,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<Null>('onTapDown', () => onTapDown(new TapDownDetails(globalPosition: initialPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<Null>('onTapDown', () { onTapDown(new TapDownDetails(globalPosition: initialPosition)); });
       _sentTapDown = true;
     }
   }
@@ -143,9 +146,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
       if (onTapUp != null)
-        invokeCallback<Null>('onTapUp', () => onTapUp(new TapUpDetails(globalPosition: _finalPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<Null>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
       if (onTap != null)
-        invokeCallback<Null>('onTap', onTap); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        invokeCallback<Null>('onTap', onTap);
       _reset();
     }
   }

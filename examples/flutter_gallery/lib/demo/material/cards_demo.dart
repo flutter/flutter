@@ -110,7 +110,6 @@ class TravelDestinationItem extends StatelessWidget {
               ),
             ),
             // share, explore buttons
-            // TODO(abarth): The theme and the bar should be part of card.
             new ButtonTheme.bar(
               child: new ButtonBar(
                 alignment: MainAxisAlignment.start,

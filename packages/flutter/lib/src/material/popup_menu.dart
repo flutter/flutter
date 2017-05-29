@@ -9,10 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 import 'divider.dart';
-import 'icon.dart';
 import 'icon_button.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'list_tile.dart';
@@ -501,7 +498,10 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// used for accessibility.
   final String tooltip;
 
-  /// The z-coordinate at which to place the menu when open.
+  /// The z-coordinate at which to place the menu when open. This controls the
+  /// size of the shadow below the menu.
+  ///
+  /// Defaults to 8, the appropriate elevation for popup menus.
   final double elevation;
 
   /// Matches IconButton's 8 dps padding by default. In some cases, notably where

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show Image, ColorFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -33,7 +33,7 @@ class SynchronousTestImageProvider extends ImageProvider<int> {
   @override
   ImageStreamCompleter load(int key) {
     return new OneFrameImageStreamCompleter(
-      new SynchronousFuture<ImageInfo>(new TestImageInfo(key))
+      new SynchronousFuture<ImageInfo>(new TestImageInfo(key, image: new TestImage(), scale: 1.0))
     );
   }
 }
@@ -90,7 +90,7 @@ class TestImage extends ui.Image {
 }
 
 void main() {
-  test("Decoration.lerp()", () {
+  test('Decoration.lerp()', () {
     final BoxDecoration a = const BoxDecoration(color: const Color(0xFFFFFFFF));
     final BoxDecoration b = const BoxDecoration(color: const Color(0x00000000));
 
@@ -104,7 +104,7 @@ void main() {
     expect(c.color, equals(b.color));
   });
 
-  test("BoxDecorationImageListenerSync", () {
+  test('BoxDecorationImageListenerSync', () {
     final ImageProvider imageProvider = new SynchronousTestImageProvider();
     final DecorationImage backgroundImage = new DecorationImage(image: imageProvider);
 
@@ -122,7 +122,7 @@ void main() {
     expect(onChangedCalled, equals(false));
   });
 
-  test("BoxDecorationImageListenerAsync", () {
+  test('BoxDecorationImageListenerAsync', () {
     new FakeAsync().run((FakeAsync async) {
       final ImageProvider imageProvider = new AsyncTestImageProvider();
       final DecorationImage backgroundImage = new DecorationImage(image: imageProvider);
@@ -146,7 +146,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
-  test("BoxDecoration backgroundImage clip", () {
+  test('BoxDecoration backgroundImage clip', () {
     void testDecoration({ BoxShape shape, BorderRadius borderRadius, bool expectClip}) {
       new FakeAsync().run((FakeAsync async) {
         final DelayedImageProvider imageProvider = new DelayedImageProvider();
@@ -197,5 +197,33 @@ void main() {
     testDecoration(shape: BoxShape.circle, expectClip: true);
     testDecoration(borderRadius: const BorderRadius.all(const Radius.circular(16.0)), expectClip: true);
     testDecoration(expectClip: false);
+  });
+
+  test('DecorationImage test', () {
+    final ColorFilter colorFilter = const ui.ColorFilter.mode(const Color(0xFF00FF00), BlendMode.src);
+    final DecorationImage backgroundImage = new DecorationImage(
+      image: new SynchronousTestImageProvider(),
+      colorFilter: colorFilter,
+      fit: BoxFit.contain,
+      alignment: FractionalOffset.bottomLeft,
+      centerSlice: new Rect.fromLTWH(10.0, 20.0, 30.0, 40.0),
+      repeat: ImageRepeat.repeatY,
+    );
+
+    final BoxDecoration boxDecoration = new BoxDecoration(image: backgroundImage);
+    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
+    final TestCanvas canvas = new TestCanvas(<Invocation>[]);
+    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: const Size(10.0, 10.0)));
+
+    final Invocation call = canvas.invocations.singleWhere((Invocation call) => call.memberName == #drawImageNine);
+    expect(call.isMethod, isTrue);
+    expect(call.positionalArguments, hasLength(4));
+    expect(call.positionalArguments[0], const isInstanceOf<TestImage>());
+    expect(call.positionalArguments[1], new Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
+    expect(call.positionalArguments[2], new Rect.fromLTRB(0.0, 0.0, 32.5, 10.0));
+    expect(call.positionalArguments[3], const isInstanceOf<Paint>());
+    expect(call.positionalArguments[3].isAntiAlias, false);
+    expect(call.positionalArguments[3].colorFilter, colorFilter);
+    expect(call.positionalArguments[3].filterQuality, FilterQuality.low);
   });
 }
