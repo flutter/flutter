@@ -13,55 +13,55 @@
     android:layout_weight="1"
     />
 
-  <!--<android.support.design.widget.CoordinatorLayout-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_weight="1"-->
-    <!--android:background="@color/grey"-->
-    <!--&gt;-->
+  <android.support.design.widget.CoordinatorLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:background="@color/grey"
+    >
 
-    <!--<LinearLayout-->
-      <!--android:layout_width="match_parent"-->
-      <!--android:layout_height="match_parent"-->
-      <!--android:orientation="vertical"-->
-      <!--&gt;-->
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      >
 
-      <!--<TextView-->
-        <!--android:id="@+id/button_tap"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:text="@string/button_tap"-->
-        <!--android:layout_weight="1"-->
-        <!--android:gravity="center"-->
-        <!--android:textSize="@dimen/font_size"-->
-        <!--/>-->
+      <TextView
+        android:id="@+id/button_tap"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/button_tap"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textSize="@dimen/font_size"
+        />
 
-      <!--<TextView-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="@string/android"-->
-        <!--android:layout_margin="@dimen/edge_margin"-->
-        <!--android:textSize="@dimen/platform_label_font_size"-->
-        <!--android:background="@color/grey"-->
-        <!--/>-->
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/android"
+        android:layout_margin="@dimen/edge_margin"
+        android:textSize="@dimen/platform_label_font_size"
+        android:background="@color/grey"
+        />
 
-    <!--</LinearLayout>-->
+    </LinearLayout>
 
-    <!--<android.support.design.widget.FloatingActionButton-->
-      <!--android:id="@+id/button"-->
-      <!--android:layout_width="wrap_content"-->
-      <!--android:layout_height="wrap_content"-->
-      <!--android:layout_gravity="bottom|right"-->
-      <!--android:elevation="@dimen/fab_elevation_resting"-->
-      <!--app:pressedTranslationZ="@dimen/fab_elevation_pressed"-->
-      <!--android:layout_margin="@dimen/edge_margin"-->
-      <!--android:src="@drawable/ic_add_black_24dp"-->
-      <!--android:clickable="true"-->
-      <!--app:rippleColor="@color/grey"-->
-      <!--app:fabSize="normal"-->
-      <!--app:backgroundTint="@color/white"-->
-      <!--/>-->
+    <android.support.design.widget.FloatingActionButton
+      android:id="@+id/button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom|right"
+      android:elevation="@dimen/fab_elevation_resting"
+      app:pressedTranslationZ="@dimen/fab_elevation_pressed"
+      android:layout_margin="@dimen/edge_margin"
+      android:src="@drawable/ic_add_black_24dp"
+      android:clickable="true"
+      app:rippleColor="@color/grey"
+      app:fabSize="normal"
+      app:backgroundTint="@color/white"
+      />
 
-  <!--</android.support.design.widget.CoordinatorLayout>-->
+  </android.support.design.widget.CoordinatorLayout>
 
 </LinearLayout>
