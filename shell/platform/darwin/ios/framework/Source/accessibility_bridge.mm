@@ -173,8 +173,10 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 #pragma mark - UIAccessibilityAction overrides
 
 - (BOOL)accessibilityActivate {
-  // TODO(tvolkert): Implement
-  return NO;
+  if (!_node.HasAction(blink::SemanticsAction::kTap))
+    return NO;
+  _bridge->DispatchSemanticsAction(_uid, blink::SemanticsAction::kTap);
+  return YES;
 }
 
 - (void)accessibilityIncrement {
