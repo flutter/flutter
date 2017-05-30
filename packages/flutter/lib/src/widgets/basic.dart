@@ -3424,16 +3424,38 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 
 /// A widget that drops all the semantics of its descendants.
 ///
+/// When [excluding] is true, this widget (and its subtree) is excluded from
+/// the semantics tree.
+///
 /// This can be used to hide subwidgets that would otherwise be
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
 /// redundant with the chip label.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that drops all the semantics of its descendants.
-  const ExcludeSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const ExcludeSemantics({
+    Key key,
+    this.excluding: true,
+    Widget child,
+  }) : assert(excluding != null),
+        super(key: key, child: child);
+
+  /// Whether this widget is excluded in the semantics tree.
+  final bool excluding;
 
   @override
-  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics();
+  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics(excluding: excluding);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderExcludeSemantics renderObject) {
+    renderObject.excluding = excluding;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('excluding: $excluding');
+  }
 }
 
 /// A widget that builds its child.
