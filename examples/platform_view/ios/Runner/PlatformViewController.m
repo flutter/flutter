@@ -22,16 +22,14 @@
 }
 
 - (IBAction)switchToFlutterView:(id)sender {
-
-    [self dismissViewControllerAnimated:NO completion:^() {
-       [self.delegate didUpdateCounter:self.counter];
-    }];
+    [self.delegate didUpdateCounter:self.counter];
+    [self dismissViewControllerAnimated:NO completion:nil];
 }
 
 - (void)setIncrementLabelText {
     NSString* text = [NSString stringWithFormat:@"Button tapped %d %@.",
                                                 self.counter,
-                                                (self.counter == 1)? @"time" : @"times"];
+                                                (self.counter == 1) ? @"time" : @"times"];
     self.incrementLabel.text = text;
 }
 

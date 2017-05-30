@@ -15,7 +15,7 @@ class PlatformView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Platform View ',
+      title: 'Platform View',
       theme: new ThemeData(
         primarySwatch: Colors.grey,
       ),
@@ -63,22 +63,24 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             new Expanded(
               child: new Center(
-                  child: new Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  new Text(
+                child: new Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text(
                       'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
-                      style: const TextStyle(fontSize: 17.0)),
-                  new Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: new RaisedButton(
-                        child: Platform.isIOS
-                            ? const Text('Continue in iOS view')
-                            : new Text('Continue in Android view'),
-                        onPressed: _launchPlatformCount),
-                  ),
-                ],
-              )),
+                      style: const TextStyle(fontSize: 17.0),
+                    ),
+                    new Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: new RaisedButton(
+                          child: Platform.isIOS
+                              ? const Text('Continue in iOS view')
+                              : const Text('Continue in Android view'),
+                          onPressed: _launchPlatformCount),
+                    ),
+                  ],
+                ),
+              ),
             ),
             new Container(
               padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
@@ -86,7 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   new Image.asset('assets/flutter-mark-square-64.png',
                       scale: 1.5),
-                  const Text('Flutter', style: const TextStyle(fontSize: 30.0)),
+                  const Text(
+                    'Flutter',
+                    style: const TextStyle(fontSize: 30.0),
+                  ),
                 ],
               ),
             ),

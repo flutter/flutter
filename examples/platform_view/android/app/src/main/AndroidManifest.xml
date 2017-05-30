@@ -37,6 +37,7 @@
         <activity
             android:name="io.flutter.examples.platform_view.CountActivity"
             android:parentActivityName="io.flutter.examples.platform_view.MainActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"></activity>
     </application>
 </manifest>
