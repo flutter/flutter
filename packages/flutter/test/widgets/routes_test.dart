@@ -81,6 +81,32 @@ class TestRoute extends LocalHistoryRoute<String> {
 
 }
 
+class TestModalRoute extends ModalRoute<String> {
+
+  TestModalRoute({this.opaque: true});
+
+  @override
+  bool opaque;
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  Color get barrierColor => null;
+
+  @override
+  Duration get transitionDuration => const Duration(microseconds: 1);
+
+  @override
+  bool get maintainState => false;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return new Container();
+  }
+
+}
+
 Future<Null> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
@@ -391,4 +417,22 @@ void main() {
       ]
     );
   });
+
+  group('ModalRoute', () {
+    testWidgets('does not build modal barrier when opaque', (WidgetTester tester) async {
+      await tester.pumpWidget(new Navigator(
+          onGenerateRoute: (_) => new TestModalRoute(opaque: true)
+      ));
+      expect(tester.allWidgets, everyElement((Widget w) => w is! ModalBarrier));
+    });
+
+    testWidgets('does build modal barrier when not opaque', (WidgetTester tester) async {
+      await tester.pumpWidget(new Navigator(
+          onGenerateRoute: (_) => new TestModalRoute(opaque: false)
+      ));
+      expect(tester.allWidgets, anyElement((Widget w) => w is ModalBarrier));
+    });
+  });
+
+
 }
