@@ -652,6 +652,12 @@ class _SemanticsGeometry {
   }
 }
 
+/// Describes the shape of the semantic tree.
+///
+/// A _SemanticsFragment object is a node in a short-lived tree which is used to
+/// create the final SemanticsNode tree that is sent to the semantics server.
+/// These objects have a semantic annotator, and a list of [_SemanticsFragment]
+/// children.
 abstract class _SemanticsFragment {
   _SemanticsFragment({
     @required RenderObject renderObjectOwner,
@@ -689,9 +695,11 @@ abstract class _SemanticsFragment {
   String toString() => '$runtimeType#$hashCode';
 }
 
-/// Represents a subtree that doesn't need updating, it already has a
-/// SemanticsNode and isn't dirty. (We still update the matrix, since
-/// that comes from the (dirty) ancestors.)
+/// Represents a [RenderObject] which is in no way dirty.
+///
+/// This class has no children and no annotators, and when compiled, it returns
+/// the [SemanticsNode] that the [RenderObject] already has. (We still update
+/// the matrix, since that comes from the (dirty) ancestors.)
 class _CleanSemanticsFragment extends _SemanticsFragment {
   _CleanSemanticsFragment({
     @required RenderObject renderObjectOwner
@@ -749,7 +757,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics);
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry);
 }
-
+/// Represents the [RenderObject] found at the top of the render tree.
+///
+/// This class always compiles to a [SemanticsNode] with ID 0.
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
     RenderObject renderObjectOwner,
@@ -780,6 +790,9 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
+/// Represents a RenderObject that has [hasSemantics] set to `true`.
+///
+/// It returns the SemanticsNode for that [RenderObject].
 class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   _ConcreteSemanticsFragment({
     RenderObject renderObjectOwner,
@@ -808,6 +821,13 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
+/// Represents a RenderObject that does not have [hasSemantics] set to `true`,
+/// but which does have some semantic annotators.
+///
+/// When it is compiled, if the nearest ancestor [_SemanticsFragment] that isn't
+/// also an [_ImplicitSemanticsFragment] is a [_RootSemanticsFragment] or a
+/// [_ConcreteSemanticsFragment], then the [SemanticsNode] from that object is
+/// reused. Otherwise, a new one is created.
 class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
   _ImplicitSemanticsFragment({
     RenderObject renderObjectOwner,
@@ -851,6 +871,9 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
+/// Represents a [RenderObject] that introduces no semantics of its own, but
+/// which has two or more descendants that do introduce semantics
+/// (and which are not ancestors or descendants of each other).
 class _ForkingSemanticsFragment extends _SemanticsFragment {
   _ForkingSemanticsFragment({
     RenderObject renderObjectOwner,
@@ -1180,7 +1203,11 @@ class PipelineOwner {
   bool _debugDoingSemantics = false;
   final List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
 
-  /// Update the semantics for all render objects.
+  /// Update the semantics for render objects marked as needing a semantics
+  /// upadate.
+  ///
+  /// Initially, only the root node, as scheduled by [scheduleInitialSemantics].
+  /// needs a semantics update.
   ///
   /// This function is one of the core stages of the rendering pipeline. The
   /// semantics are compiled after painting and only after
@@ -2485,7 +2512,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
     }
   }
-
+  /// Updates the semantic information of the render object.
+  ///
+  /// This is essentially a two-pass walk of the render tree. The first pass
+  /// determines the shape of the output tree (captured in
+  /// [_SemanticsFragment]s), and the second creates the nodes of this tree and
+  /// hooks them together. The second walk is a sparse walk; it only walks the
+  /// nodes that are interesting for the purpose of semantics.
   void _updateSemantics() {
     try {
       assert(_needsSemanticsUpdate);
@@ -2500,6 +2533,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
+  /// Core function that walks the render tree to obtain the semantics.
+  ///
+  /// It collects semantic annotators for this RenderObject, then walks its
+  /// children collecting [_SemanticsFragments] for them, and then returns an
+  /// appropriate [_SemanticsFragment] object that describes the RenderObject's
+  /// semantics.
   _SemanticsFragment _getSemanticsFragment() {
     // early-exit if we're not dirty and have our own semantics
     if (!_needsSemanticsUpdate && isSemanticBoundary) {
@@ -2533,8 +2572,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (annotator != null)
       return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
     _semantics = null;
-    if (children == null)
+    if (children == null) {
+      // Introduces no semantics and has no descendants that introduce semantic
       return null;
+    }
     if (children.length > 1)
       return new _ForkingSemanticsFragment(renderObjectOwner: this, children: children);
     assert(children.length == 1);
@@ -2547,6 +2588,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// The default implementation mirrors the behavior of
   /// [visitChildren()] (which is supposed to walk all the children).
+  ///
+  /// The implementation has to return the children in paint order skipping all
+  /// children that are not relevant for semantics.
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren(visitor);
   }
