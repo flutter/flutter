@@ -12,25 +12,25 @@
 @implementation PlatformViewController
 
 - (void)viewDidLoad {
-    [super viewDidLoad];
-    [self setIncrementLabelText];
+  [super viewDidLoad];
+  [self setIncrementLabelText];
 }
 
 - (IBAction)handleIncrement:(id)sender {
-    self.counter++;
-    [self setIncrementLabelText];
+  self.counter++;
+  [self setIncrementLabelText];
 }
 
 - (IBAction)switchToFlutterView:(id)sender {
-    [self.delegate didUpdateCounter:self.counter];
-    [self dismissViewControllerAnimated:NO completion:nil];
+  [self.delegate didUpdateCounter:self.counter];
+  [self dismissViewControllerAnimated:NO completion:nil];
 }
 
 - (void)setIncrementLabelText {
-    NSString* text = [NSString stringWithFormat:@"Button tapped %d %@.",
-                                                self.counter,
-                                                (self.counter == 1) ? @"time" : @"times"];
-    self.incrementLabel.text = text;
+  NSString* text = [NSString stringWithFormat:@"Button tapped %d %@.",
+                    self.counter,
+                    (self.counter == 1) ? @"time" : @"times"];
+  self.incrementLabel.text = text;
 }
 
 @end

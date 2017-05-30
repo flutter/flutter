@@ -7,31 +7,31 @@
 #include "PlatformViewController.h"
 
 @implementation AppDelegate {
-    FlutterResult _flutterResult;
+  FlutterResult _flutterResult;
 }
 
 - (BOOL)application:(UIApplication *)application
-    didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
-      (FlutterViewController*)self.window.rootViewController;
+  (FlutterViewController*)self.window.rootViewController;
   FlutterMethodChannel* channel =
-      [FlutterMethodChannel methodChannelWithName:@"samples.flutter.io/platform_view"
-                                  binaryMessenger:controller];
+  [FlutterMethodChannel methodChannelWithName:@"samples.flutter.io/platform_view"
+                              binaryMessenger:controller];
   [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
-      if ([@"switchView" isEqualToString:call.method]) {
-          _flutterResult = result;
-          PlatformViewController* platformViewController =
-              [controller.storyboard instantiateViewControllerWithIdentifier:@"PlatformView"];
-          platformViewController.counter = ((NSNumber*)call.arguments).intValue;
-          platformViewController.delegate = self;
-          UINavigationController* navigationController =
-              [[UINavigationController alloc] initWithRootViewController:platformViewController];
-          navigationController.navigationBar.topItem.title = @"Platform View";
-          [controller presentViewController:navigationController animated:NO completion:nil];
-      } else {
-          result(FlutterMethodNotImplemented);
-      }
+    if ([@"switchView" isEqualToString:call.method]) {
+      _flutterResult = result;
+      PlatformViewController* platformViewController =
+      [controller.storyboard instantiateViewControllerWithIdentifier:@"PlatformView"];
+      platformViewController.counter = ((NSNumber*)call.arguments).intValue;
+      platformViewController.delegate = self;
+      UINavigationController* navigationController =
+      [[UINavigationController alloc] initWithRootViewController:platformViewController];
+      navigationController.navigationBar.topItem.title = @"Platform View";
+      [controller presentViewController:navigationController animated:NO completion:nil];
+    } else {
+      result(FlutterMethodNotImplemented);
+    }
   }];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
