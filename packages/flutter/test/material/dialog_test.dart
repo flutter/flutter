@@ -4,6 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matcher/matcher.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Dialog is scrollable', (WidgetTester tester) async {
@@ -191,5 +194,39 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog2'), findsOneWidget);
 
+  });
+
+  testWidgets('Dialog hides underlying semantics tree', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    const String buttonText = 'A button covered by dialog overlay';
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Material(
+          child: const Center(
+            child: const RaisedButton(
+              onPressed: null,
+              child: const Text(buttonText),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWithLabel(buttonText));
+
+    final BuildContext context = tester.element(find.text(buttonText));
+
+    const String alertText = 'A button in an overlay alert';
+    showDialog<Null>(
+      context: context,
+      child: const AlertDialog(title: const Text(alertText)),
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    expect(semantics, includesNodeWithLabel(alertText));
+    expect(semantics, isNot(includesNodeWithLabel(buttonText)));
+
+    semantics.dispose();
   });
 }
