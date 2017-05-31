@@ -152,14 +152,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       if (!await hasWorkingLibimobiledevice) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-            'libimobiledevice is not installed or requires updating. To update, run:\n'
+            'libimobiledevice and ideviceinstaller are not installed or require updating. To update, run:\n'
                 '  brew update\n'
                 '  brew uninstall --ignore-dependencies libimobiledevice\n'
-                '  brew install --HEAD libimobiledevice'
+                '  brew install --HEAD libimobiledevice\n'
+                '  brew install ideviceinstaller'
         ));
-      }
-
-      if (!await hasIDeviceInstaller) {
+      } else if (!await hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
