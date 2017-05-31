@@ -663,7 +663,8 @@ abstract class _SemanticsFragment {
   _SemanticsFragment({
     @required RenderObject renderObjectOwner,
     this.annotator,
-    List<_SemanticsFragment> children
+    List<_SemanticsFragment> children,
+    @required this.dropSemanticsOfLeftSiblings,
   }) {
     assert(renderObjectOwner != null);
     _ancestorChain = <RenderObject>[renderObjectOwner];
@@ -679,6 +680,7 @@ abstract class _SemanticsFragment {
   }
 
   final SemanticsAnnotator annotator;
+  bool dropSemanticsOfLeftSiblings;
 
   List<RenderObject> _ancestorChain;
   void addAncestor(RenderObject ancestor) {
@@ -696,6 +698,17 @@ abstract class _SemanticsFragment {
   String toString() => '$runtimeType#$hashCode';
 }
 
+
+class _EmptySemanticsFragment extends _SemanticsFragment {
+  _EmptySemanticsFragment({
+    @required RenderObject renderObjectOwner,
+    bool dropSemanticsOfLeftSiblings
+  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+
+  @override
+  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {}
+}
+
 /// Represents a [RenderObject] which is in no way dirty.
 ///
 /// This class has no children and no annotators, and when compiled, it returns
@@ -704,7 +717,7 @@ abstract class _SemanticsFragment {
 class _CleanSemanticsFragment extends _SemanticsFragment {
   _CleanSemanticsFragment({
     @required RenderObject renderObjectOwner
-  }) : super(renderObjectOwner: renderObjectOwner) {
+  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfLeftSiblings: false) {
     assert(renderObjectOwner != null);
     assert(renderObjectOwner._semantics != null);
   }
@@ -729,8 +742,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
+    Iterable<_SemanticsFragment> children,
+    @required bool blocksSemanticsOfLeftSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: blocksSemanticsOfLeftSiblings);
 
   bool get haveConcreteNode => true;
 
@@ -766,8 +780,9 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
+    Iterable<_SemanticsFragment> children,
+    bool dropSemanticsOfLeftSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, blocksSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -799,8 +814,9 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   _ConcreteSemanticsFragment({
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
+    Iterable<_SemanticsFragment> children,
+    bool dropSemanticsOfLeftSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, blocksSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -834,8 +850,9 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
   _ImplicitSemanticsFragment({
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
+    Iterable<_SemanticsFragment> children,
+    bool dropSemanticsOfLeftSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, blocksSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
 
   @override
   bool get haveConcreteNode => _haveConcreteNode;
@@ -879,8 +896,9 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
 class _ForkingSemanticsFragment extends _SemanticsFragment {
   _ForkingSemanticsFragment({
     RenderObject renderObjectOwner,
-    @required Iterable<_SemanticsFragment> children
-  }) : super(renderObjectOwner: renderObjectOwner, children: children) {
+    @required Iterable<_SemanticsFragment> children,
+    bool dropSemanticsOfLeftSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings) {
     assert(children != null);
     assert(children.length > 1);
   }
@@ -2417,7 +2435,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsSemanticsGeometryUpdate = true;
   SemanticsNode _semantics;
 
-  bool _blocksSemanticsOfLeftSiblings = false;
+//  bool _blocksSemanticsOfLeftSiblings = false;
 
   /// The semantics of this render object.
   ///
@@ -2551,7 +2569,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return new _CleanSemanticsFragment(renderObjectOwner: this);
     }
     List<_SemanticsFragment> children;
-    bool containsSemanticBlock = false;
+    bool dropSemanticsOfLeftSiblings = (this is RenderBlockSemantics);
     print(this);
     visitChildrenForSemantics((RenderObject child) {
       print('  $child');
@@ -2563,39 +2581,34 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         child._needsSemanticsGeometryUpdate = true;
       }
       final _SemanticsFragment fragment = child._getSemanticsFragment();
-      if (child is RenderBlockSemantics || child._blocksSemanticsOfLeftSiblings) {
-        print('children: $children, RenderBlockSemantics: ${child is RenderBlockSemantics}, child: ${child._blocksSemanticsOfLeftSiblings}');
+      assert(fragment != null);
+      if (fragment.dropSemanticsOfLeftSiblings) {
         children = null; // throw away all left siblings of [child].
-        containsSemanticBlock = true;
+        dropSemanticsOfLeftSiblings = true;
       }
-      if (fragment != null) {
-        fragment.addAncestor(this);
-        children ??= <_SemanticsFragment>[];
-        assert(!children.contains(fragment));
-        children.add(fragment);
-      }
+      fragment.addAncestor(this);
+      children ??= <_SemanticsFragment>[];
+      assert(!children.contains(fragment));
+      children.add(fragment);
     });
-    if (!isSemanticBoundary && _blocksSemanticsOfLeftSiblings != containsSemanticBlock) {
-      _blocksSemanticsOfLeftSiblings = containsSemanticBlock;
-    }
     _needsSemanticsUpdate = false;
     _needsSemanticsGeometryUpdate = false;
     final SemanticsAnnotator annotator = semanticsAnnotator;
     if (parent is! RenderObject)
-      return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
+      return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
     if (isSemanticBoundary)
-      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
+      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
     if (annotator != null)
-      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
+      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
     _semantics = null;
     if (children == null) {
       // Introduces no semantics and has no descendants that introduce semantics.
-      return null;
+      return new _EmptySemanticsFragment(renderObjectOwner: this, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
     }
     if (children.length > 1)
-      return new _ForkingSemanticsFragment(renderObjectOwner: this, children: children);
+      return new _ForkingSemanticsFragment(renderObjectOwner: this, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
     assert(children.length == 1);
-    return children.single;
+    return children.single..dropSemanticsOfLeftSiblings = dropSemanticsOfLeftSiblings;
   }
 
   /// Called when collecting the semantics of this node.
@@ -2742,7 +2755,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (_semantics != null)
       description.add('semantics: $_semantics');
     description.add('isSemanticBoundary: $isSemanticBoundary');
-    description.add('drop semantics of left siblings: $_blocksSemanticsOfLeftSiblings');
+//    description.add('drop semantics of left siblings: $_blocksSemanticsOfLeftSiblings');
   }
 
   /// Returns a string describing the current node's descendants. Each line of
