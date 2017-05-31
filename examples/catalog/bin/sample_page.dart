@@ -185,6 +185,12 @@ void generate() {
       'paths': samples.map((SampleGenerator sample) {
         return "'${outputFile('\${prefix}' + sample.sourceName + '.png').path}'";
       }).toList().join(',\n'),
+      'largeNames': samples.map((SampleGenerator sample) {
+        return "'\${prefix}${sample.sourceName}.png'";
+      }).toList().join(',\n'),
+      'smallNames': samples.map((SampleGenerator sample) {
+        return "'\${prefix}${sample.sourceName}_small.png'";
+      }).toList().join(',\n'),
     },
   );
 
