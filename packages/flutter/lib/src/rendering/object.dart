@@ -2341,6 +2341,35 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(child.parent == this);
   }
 
+  /// Returns a matrix that maps the local coordinate system to the coordinate
+  /// system of `ancestor`.
+  ///
+  /// If `ancestor` is null, this method returns a matrix that maps from the
+  /// local coordinate system to the coordinate system of the
+  /// [PipelineOwner.rootNode]. For the render tree owner by the
+  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
+  /// this means that this method maps to the global coordinate system in
+  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
+  /// [RenderView] to further transform the coordinate.
+  Matrix4 getTransformTo(RenderObject ancestor) {
+    assert(attached);
+    if (ancestor == null) {
+      final AbstractNode rootNode = owner.rootNode;
+      if (rootNode is RenderObject)
+        ancestor = rootNode;
+    }
+    final List<RenderObject> renderers = <RenderObject>[];
+    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent) {
+      assert(renderer != null); // Failed to find ancestor in parent chain.
+      renderers.add(renderer);
+    }
+    final Matrix4 transform = new Matrix4.identity();
+    for (int index = renderers.length - 1; index > 0; index -= 1)
+      renderers[index].applyPaintTransform(renderers[index - 1], transform);
+    return transform;
+  }
+
+
   /// Returns a rect in this object's coordinate system that describes
   /// the approximate bounding box of the clip rect that would be
   /// applied to the given child during the paint phase, if any.
