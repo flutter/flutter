@@ -664,7 +664,7 @@ abstract class _SemanticsFragment {
     @required RenderObject renderObjectOwner,
     this.annotator,
     List<_SemanticsFragment> children,
-    @required this.dropSemanticsOfLeftSiblings,
+    this.dropSemanticsOfLeftSiblings,
   }) {
     assert(renderObjectOwner != null);
     _ancestorChain = <RenderObject>[renderObjectOwner];
@@ -698,7 +698,7 @@ abstract class _SemanticsFragment {
   String toString() => '$runtimeType#$hashCode';
 }
 
-
+/// A SemanticsFragment that doesn't produce any [SemanticsNode]s when compiled.
 class _EmptySemanticsFragment extends _SemanticsFragment {
   _EmptySemanticsFragment({
     @required RenderObject renderObjectOwner,
@@ -743,8 +743,8 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
-    @required bool blocksSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: blocksSemanticsOfLeftSiblings);
+    bool dropSemanticsOfLeftSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
 
   bool get haveConcreteNode => true;
 
@@ -782,7 +782,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
     bool dropSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, blocksSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -816,7 +816,7 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
     bool dropSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, blocksSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -852,7 +852,7 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
     bool dropSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, blocksSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
 
   @override
   bool get haveConcreteNode => _haveConcreteNode;
@@ -2435,8 +2435,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsSemanticsGeometryUpdate = true;
   SemanticsNode _semantics;
 
-//  bool _blocksSemanticsOfLeftSiblings = false;
-
   /// The semantics of this render object.
   ///
   /// Exposed only for testing and debugging. To learn about the semantics of
@@ -2570,9 +2568,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
     List<_SemanticsFragment> children;
     bool dropSemanticsOfLeftSiblings = (this is RenderBlockSemantics);
-    print(this);
     visitChildrenForSemantics((RenderObject child) {
-      print('  $child');
       if (_needsSemanticsGeometryUpdate) {
         // If our geometry changed, make sure the child also does a
         // full update so that any changes to the clip are fully
@@ -2755,7 +2751,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (_semantics != null)
       description.add('semantics: $_semantics');
     description.add('isSemanticBoundary: $isSemanticBoundary');
-//    description.add('drop semantics of left siblings: $_blocksSemanticsOfLeftSiblings');
   }
 
   /// Returns a string describing the current node's descendants. Each line of
