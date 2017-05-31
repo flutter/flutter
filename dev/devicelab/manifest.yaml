@@ -37,13 +37,6 @@ tasks:
   # TODO: make these not require "has-android-device"; it is only there to
   #       ensure we have the Android SDK.
 
-  flutter_gallery__build:
-    description: >
-      Collects various performance metrics from AOT builds of the Flutter
-      Gallery.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
   complex_layout__build:
     description: >
       Collects various performance metrics from AOT builds of the Complex
@@ -90,22 +83,9 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
-  flutter_gallery__start_up:
-    description: >
-      Measures the startup time of the Flutter Gallery app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
   complex_layout__start_up:
     description: >
       Measures the startup time of the Complex Layout sample app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
-  flutter_gallery__transition_perf:
-    description: >
-      Measures the performance of screen transitions in Flutter Gallery on
-      Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
@@ -124,18 +104,6 @@ tasks:
   hello_world__memory:
     description: >
       Measures starting memory usage of the simplest Flutter app.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
-  flutter_gallery__memory_nav:
-    description: >
-      Measures memory usage after repeated navigation in Gallery.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
-  flutter_gallery__back_button_memory:
-    description: >
-      Measures memory usage after Android app suspend and resume.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
@@ -284,3 +252,35 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     flaky: true
+
+  flutter_gallery__build:
+    description: >
+      Collects various performance metrics from AOT builds of the Flutter
+      Gallery.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery__start_up:
+    description: >
+      Measures the startup time of the Flutter Gallery app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery__transition_perf:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      Android.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery__memory_nav:
+    description: >
+      Measures memory usage after repeated navigation in Gallery.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery__back_button_memory:
+    description: >
+      Measures memory usage after Android app suspend and resume.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
