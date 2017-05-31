@@ -757,6 +757,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics);
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry);
 }
+
 /// Represents the [RenderObject] found at the top of the render tree.
 ///
 /// This class always compiles to a [SemanticsNode] with ID 0.
@@ -2512,6 +2513,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
     }
   }
+
   /// Updates the semantic information of the render object.
   ///
   /// This is essentially a two-pass walk of the render tree. The first pass
