@@ -2587,6 +2587,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(!children.contains(fragment));
       children.add(fragment);
     });
+    if (isSemanticBoundary) {
+      // Don't propergate [dropSemanticsOfLeftSiblings] past a semantic boundary.
+      dropSemanticsOfLeftSiblings = false;
+    }
     _needsSemanticsUpdate = false;
     _needsSemanticsGeometryUpdate = false;
     final SemanticsAnnotator annotator = semanticsAnnotator;
