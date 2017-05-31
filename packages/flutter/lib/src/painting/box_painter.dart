@@ -330,7 +330,7 @@ class BorderSide {
 ///
 /// ```dart
 /// // All four borders the same, two-pixel wide solid white:
-/// const Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
+/// new Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
 /// ```
 ///
 /// ```dart
