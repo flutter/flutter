@@ -152,7 +152,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       if (!await hasWorkingLibimobiledevice) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-            'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
+            'libimobiledevice is not installed or requires updating. To update, run:\n'
                 '  brew update\n'
                 '  brew uninstall --ignore-dependencies libimobiledevice\n'
                 '  brew install --HEAD libimobiledevice'
