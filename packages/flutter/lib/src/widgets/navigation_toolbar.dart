@@ -32,11 +32,14 @@ class NavigationToolbar extends StatelessWidget {
 
   /// Widget to place at the start of the horizontal toolbar.
   final Widget leading;
+
   /// Widget to place in the middle of the horizontal toolbar, occupying
   /// as much remaining space as possible.
   final Widget middle;
+
   /// Widget to place at the end of the horizontal toolbar.
   final Widget trailing;
+
   /// Whether to align the [middle] widget to the center of this widget or
   /// next to the [leading] widget when false.
   final bool centerMiddle;
@@ -89,7 +92,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ToolbarSlot.leading)) {
       final BoxConstraints constraints = new BoxConstraints(
         minWidth: 0.0,
-        maxWidth: size.width / 3, // The leading widget shouldn't take up more than 1/3 of the space.
+        maxWidth: size.width / 3.0, // The leading widget shouldn't take up more than 1/3 of the space.
         minHeight: size.height, // The height should be exactly the height of the bar.
         maxHeight: size.height,
       );
@@ -107,7 +110,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.middle)) {
-      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - _kMiddleMargin * 2, 0.0);
+      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - _kMiddleMargin * 2.0, 0.0);
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
