@@ -15,6 +15,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'node.dart';
+import 'proxy_box.dart' show RenderBlockSemantics;
 import 'semantics.dart';
 
 export 'package:flutter/foundation.dart' show FlutterError, InformationCollector;
@@ -2416,6 +2417,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsSemanticsGeometryUpdate = true;
   SemanticsNode _semantics;
 
+  bool _blocksSemanticsOfLeftSiblings = false;
+
   /// The semantics of this render object.
   ///
   /// Exposed only for testing and debugging. To learn about the semantics of
@@ -2548,7 +2551,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return new _CleanSemanticsFragment(renderObjectOwner: this);
     }
     List<_SemanticsFragment> children;
+    bool containsSemanticBlock = false;
+    print(this);
     visitChildrenForSemantics((RenderObject child) {
+      print('  $child');
       if (_needsSemanticsGeometryUpdate) {
         // If our geometry changed, make sure the child also does a
         // full update so that any changes to the clip are fully
@@ -2557,6 +2563,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         child._needsSemanticsGeometryUpdate = true;
       }
       final _SemanticsFragment fragment = child._getSemanticsFragment();
+      if (child is RenderBlockSemantics || child._blocksSemanticsOfLeftSiblings) {
+        print('children: $children, RenderBlockSemantics: ${child is RenderBlockSemantics}, child: ${child._blocksSemanticsOfLeftSiblings}');
+        children = null; // throw away all left siblings of [child].
+        containsSemanticBlock = true;
+      }
       if (fragment != null) {
         fragment.addAncestor(this);
         children ??= <_SemanticsFragment>[];
@@ -2564,6 +2575,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         children.add(fragment);
       }
     });
+    if (!isSemanticBoundary && _blocksSemanticsOfLeftSiblings != containsSemanticBlock) {
+      _blocksSemanticsOfLeftSiblings = containsSemanticBlock;
+    }
     _needsSemanticsUpdate = false;
     _needsSemanticsGeometryUpdate = false;
     final SemanticsAnnotator annotator = semanticsAnnotator;
@@ -2727,6 +2741,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       description.add('layer: $_layer');
     if (_semantics != null)
       description.add('semantics: $_semantics');
+    description.add('isSemanticBoundary: $isSemanticBoundary');
+    description.add('drop semantics of left siblings: $_blocksSemanticsOfLeftSiblings');
   }
 
   /// Returns a string describing the current node's descendants. Each line of

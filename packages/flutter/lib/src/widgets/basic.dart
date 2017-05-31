@@ -3616,6 +3616,21 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
   RenderMergeSemantics createRenderObject(BuildContext context) => new RenderMergeSemantics();
 }
 
+/// A widget that drops the semantics of all widget that were painted before it
+/// in the same semantic container.
+///
+/// See also:
+///
+/// * [ExcludeSemantics] which drops all semantics of its descendants.
+class BlockSemantics extends SingleChildRenderObjectWidget {
+  /// Creates a widget that excludes the semantics of all widgets painted before
+  /// it in the same semantic container.
+  const BlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
+  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics();
+}
+
 /// A widget that drops all the semantics of its descendants.
 ///
 /// When [excluding] is true, this widget (and its subtree) is excluded from
