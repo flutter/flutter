@@ -167,6 +167,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   }
 
   @override
+  Future<bool> didPushRoute(String route) async {
+    assert(mounted);
+    final NavigatorState navigator = _navigator.currentState;
+    assert(navigator != null);
+    navigator.pushNamed(route);
+    return true;
+  }
+
+  @override
   void didChangeMetrics() {
     setState(() {
       // The properties of ui.window have changed. We use them in our build
