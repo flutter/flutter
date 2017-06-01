@@ -2341,11 +2341,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(child.parent == this);
   }
 
-  /// Returns a matrix that maps the local coordinate system to the coordinate
-  /// system of `ancestor`.
+  /// Applies the paint transform up the tree to `ancestor`.
+  ///
+  /// Returns a matrix that maps the local paint coordinate system to the
+  /// coordinate system of `ancestor`.
   ///
   /// If `ancestor` is null, this method returns a matrix that maps from the
-  /// local coordinate system to the coordinate system of the
+  /// local paint coordinate system to the coordinate system of the
   /// [PipelineOwner.rootNode]. For the render tree owner by the
   /// [RendererBinding] (i.e. for the main render tree displayed on the device)
   /// this means that this method maps to the global coordinate system in
