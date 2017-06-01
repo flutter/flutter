@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('OverflowEntries context contains Overlay',
       (WidgetTester tester) async {
-    final Key overlayKey = new UniqueKey();
+    final GlobalKey overlayKey = new GlobalKey();
     bool didBuild = false;
     await tester.pumpWidget(new Overlay(
       key: overlayKey,
@@ -25,5 +25,53 @@ void main() {
       ],
     ));
     expect(didBuild, isTrue);
+    final RenderObject theater = overlayKey.currentContext.findRenderObject();
+
+    // toStringDeep output is missing a trailing line break.
+    expect(theater, isNot(hasAGoodToStringDeep));
+    expect(
+      theater.toStringDeep(),
+      equalsIgnoringHashCodes(
+        '_RenderTheatre#00000\n'
+        ' │ creator: _Theatre ← Overlay-[GlobalKey#00000] ← [root]\n'
+        ' │ parentData: <none>\n'
+        ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │ size: Size(800.0, 600.0)\n'
+        ' │\n'
+        ' ├─onstage: RenderStack#00000\n'
+        ' ╎ │ creator: Stack ← _Theatre ← Overlay-[GlobalKey#00000] ← [root]\n'
+        ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' ╎ │   size)\n'
+        ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎ │ size: Size(800.0, 600.0)\n'
+        ' ╎ │ alignment: FractionalOffset(0.0, 0.0)\n'
+        ' ╎ │ fit: StackFit.expand\n'
+        ' ╎ │ overflow: Overflow.clip\n'
+        ' ╎ │\n'
+        ' ╎ └─child 1: RenderLimitedBox#00000\n'
+        ' ╎   │ creator: LimitedBox ← Container ←\n'
+        ' ╎   │   _OverlayEntry-[LabeledGlobalKey<_OverlayEntryState>#00000] ←\n'
+        ' ╎   │   Stack ← _Theatre ← Overlay-[GlobalKey#00000] ← [root]\n'
+        ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' ╎   │   size)\n'
+        ' ╎   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎   │ size: Size(800.0, 600.0)\n'
+        ' ╎   │ maxWidth: 0.0\n'
+        ' ╎   │ maxHeight: 0.0\n'
+        ' ╎   │\n'
+        ' ╎   └─child: RenderConstrainedBox#00000\n'
+        ' ╎       creator: ConstrainedBox ← LimitedBox ← Container ←\n'
+        ' ╎         _OverlayEntry-[LabeledGlobalKey<_OverlayEntryState>#00000] ←\n'
+        ' ╎         Stack ← _Theatre ← Overlay-[GlobalKey#00000] ← [root]\n'
+        ' ╎       parentData: <none> (can use size)\n'
+        ' ╎       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎       size: Size(800.0, 600.0)\n'
+        ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
+        ' ╎\n'
+        ' └╌no offstage children',
+      ),
+    );
+
+    // TODO(jacobr): add a test with offstage children.
   });
 }

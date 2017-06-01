@@ -65,6 +65,41 @@ void main() {
 
     actualDecoration = box.decoration;
     expect(actualDecoration.color, equals(decorationB.color));
+
+    expect(box, hasAGoodToStringDeep);
+    expect(
+      box.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderDecoratedBox#00000\n'
+        ' │ creator: DecoratedBox ← Container ←\n'
+        ' │   AnimatedContainer-[GlobalKey#00000] ← [root]\n'
+        ' │ parentData: <none>\n'
+        ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │ size: Size(800.0, 600.0)\n'
+        ' │ decoration:\n'
+        ' │   color: Color(0xff0000ff)\n'
+        ' │ configuration: ImageConfiguration(bundle:\n'
+        ' │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
+        ' │   macos)\n'
+        ' │\n'
+        ' └─child: RenderLimitedBox#00000\n'
+        '   │ creator: LimitedBox ← DecoratedBox ← Container ←\n'
+        '   │   AnimatedContainer-[GlobalKey#00000] ← [root]\n'
+        '   │ parentData: <none> (can use size)\n'
+        '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '   │ size: Size(800.0, 600.0)\n'
+        '   │ maxWidth: 0.0\n'
+        '   │ maxHeight: 0.0\n'
+        '   │\n'
+        '   └─child: RenderConstrainedBox#00000\n'
+        '       creator: ConstrainedBox ← LimitedBox ← DecoratedBox ← Container ←\n'
+        '         AnimatedContainer-[GlobalKey#00000] ← [root]\n'
+        '       parentData: <none> (can use size)\n'
+        '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '       size: Size(800.0, 600.0)\n'
+        '       additionalConstraints: BoxConstraints(biggest)\n',
+      ),
+    );
   });
 
   testWidgets('AnimatedContainer overanimate test', (WidgetTester tester) async {

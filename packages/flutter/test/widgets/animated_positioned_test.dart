@@ -76,6 +76,31 @@ void main() {
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0)));
+
+    expect(box, hasAGoodToStringDeep);
+    expect(
+      box.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderLimitedBox#00000\n'
+        ' │ creator: LimitedBox ← Container-[GlobalKey#00000] ← Positioned ←\n'
+        ' │   AnimatedPositioned ← Stack ← [root]\n'
+        ' │ parentData: top=31.0; left=37.0; width=59.0; height=71.0;\n'
+        ' │   offset=Offset(37.0, 31.0) (can use size)\n'
+        ' │ constraints: BoxConstraints(w=59.0, h=71.0)\n'
+        ' │ size: Size(59.0, 71.0)\n'
+        ' │ maxWidth: 0.0\n'
+        ' │ maxHeight: 0.0\n'
+        ' │\n'
+        ' └─child: RenderConstrainedBox#00000\n'
+        '     creator: ConstrainedBox ← LimitedBox ←\n'
+        '       Container-[GlobalKey#00000] ← Positioned ← AnimatedPositioned ←\n'
+        '       Stack ← [root]\n'
+        '     parentData: <none> (can use size)\n'
+        '     constraints: BoxConstraints(w=59.0, h=71.0)\n'
+        '     size: Size(59.0, 71.0)\n'
+        '     additionalConstraints: BoxConstraints(biggest)\n',
+      ),
+    );
   });
 
   testWidgets('AnimatedPositioned - interrupted animation', (WidgetTester tester) async {
