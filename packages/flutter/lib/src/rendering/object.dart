@@ -724,6 +724,7 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
     @required RenderObject renderObjectOwner
   }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfLeftSiblings: false) {
     assert(renderObjectOwner != null);
+    assert(renderObjectOwner.isSemanticBoundary);  // required for dropSemanticsOfLeftSiblings: false.
     assert(renderObjectOwner._semantics != null);
   }
 
