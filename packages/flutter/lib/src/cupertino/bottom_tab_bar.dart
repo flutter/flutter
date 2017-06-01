@@ -13,6 +13,7 @@ import 'colors.dart';
 const double _kTabBarHeight = 50.0;
 
 const Color _kDefaultTabBarBackgroundColor = const Color(0xCCF8F8F8);
+const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 
 class CupertinoTabBar extends StatelessWidget {
   CupertinoTabBar({
@@ -72,7 +73,7 @@ class CupertinoTabBar extends StatelessWidget {
       decoration: new BoxDecoration(
         border: const Border(
           top: const BorderSide(
-            color: const Color(0x4C000000),
+            color: _kDefaultTabBarBorderColor,
             width: 0.0, // One physical pixel.
             style: BorderStyle.solid,
           ),
