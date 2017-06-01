@@ -50,6 +50,9 @@ public class FlutterActivity extends Activity implements PluginRegistry {
         if (intent.getBooleanExtra("enable-dart-profiling", false)) {
             args.add("--enable-dart-profiling");
         }
+        if (intent.getBooleanExtra("enable-software-rendering", false)) {
+            args.add("--enable-software-rendering");
+        }
         if (!args.isEmpty()) {
             String[] argsArray = new String[args.size()];
             return args.toArray(argsArray);
