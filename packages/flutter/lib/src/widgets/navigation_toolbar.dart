@@ -9,12 +9,12 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-/// [NavigationToolbar] is an unthemed layout helper to position 3 groups
-/// of widgets along a horizontal axis that's sensible for an application's
+/// [NavigationToolbar] is a layout helper to position 3 widgets or groups of
+/// widgets along a horizontal axis that's sensible for an application's
 /// navigation bar such as in Material Design and in iOS.
 ///
-/// Optional [leading] and [trailing] widgets occupy the edges of the widget
-/// with reasonable constraints while the [middle] widget occupies the remaining
+/// [leading] and [trailing] widgets occupy the edges of the widget with
+/// reasonable size constraints while the [middle] widget occupies the remaining
 /// space in either a center aligned or start aligned fashion.
 ///
 /// Either directly use the themed app bars such as the Material [AppBar] or
@@ -74,14 +74,15 @@ enum _ToolbarSlot {
 
 const double _kMiddleMargin = 16.0;
 
+// TODO(xster): support RTL.
 class _ToolbarLayout extends MultiChildLayoutDelegate {
   _ToolbarLayout({ this.centerMiddle });
 
-  // If false the middle widget should be left or right justified within the space
-  // between the leading and trailing widgets, depending on the locale's writing
-  // direction.
+  // If false the middle widget should be left justified within the space
+  // between the leading and trailing widgets.
   // If true the middle widget is centered within the toolbar (not within the horizontal
   // space bewteen the leading and trailing widgets).
+  // TODO(xster): document RTL once supported.
   final bool centerMiddle;
 
   @override

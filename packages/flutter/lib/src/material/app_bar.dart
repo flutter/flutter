@@ -21,7 +21,7 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-const double _kLeadingWidth = 56.0; // So it's square with kToolbarHeight.
+const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 
 // Bottom justify the kToolbarHeight child which may overflow the top.
 class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
