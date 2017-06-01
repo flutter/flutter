@@ -682,6 +682,8 @@ abstract class _SemanticsFragment {
   final SemanticsAnnotator annotator;
   bool dropSemanticsOfLeftSiblings;
 
+  bool get producesSemanticNodes => true;
+
   List<RenderObject> _ancestorChain;
   void addAncestor(RenderObject ancestor) {
     _ancestorChain.add(ancestor);
@@ -707,6 +709,9 @@ class _EmptySemanticsFragment extends _SemanticsFragment {
 
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {}
+
+  @override
+  bool get producesSemanticNodes => false;
 }
 
 /// Represents a [RenderObject] which is in no way dirty.
@@ -2584,13 +2589,15 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         children = null; // throw away all left siblings of [child].
         dropSemanticsOfLeftSiblings = true;
       }
-      fragment.addAncestor(this);
-      children ??= <_SemanticsFragment>[];
-      assert(!children.contains(fragment));
-      children.add(fragment);
+      if (fragment.producesSemanticNodes) {
+        fragment.addAncestor(this);
+        children ??= <_SemanticsFragment>[];
+        assert(!children.contains(fragment));
+        children.add(fragment);
+      }
     });
     if (isSemanticBoundary) {
-      // Don't propergate [dropSemanticsOfLeftSiblings] past a semantic boundary.
+      // Don't propagate [dropSemanticsOfLeftSiblings] past a semantic boundary.
       dropSemanticsOfLeftSiblings = false;
     }
     _needsSemanticsUpdate = false;

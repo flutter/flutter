@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,71 +11,93 @@ import 'semantics_tester.dart';
 
 void main() {
   group('BlockSemantics', () {
-    testWidgets('hides semantic nodes of siblings', (WidgetTester tester) async {
+    testWidgets('hides semantic nodes of siblings',
+        (WidgetTester tester) async {
       final SemanticsTester semantics = new SemanticsTester(tester);
 
       await tester.pumpWidget(new Stack(
         children: <Widget>[
           new Semantics(
-            label: 'not included in tree',
+            label: 'layer#1',
             child: new Container(),
           ),
           const BlockSemantics(),
           new Semantics(
-            label: 'included in tree',
+            label: 'layer#2',
             child: new Container(),
           ),
         ],
       ));
 
-      expect(semantics, isNot(includesNodeWithLabel('not included in tree')));
+      expect(semantics, isNot(includesNodeWithLabel('layer#1')));
+
+      await tester.pumpWidget(new Stack(
+        children: <Widget>[
+          new Semantics(
+            label: 'layer#1',
+            child: new Container(),
+          ),
+        ],
+      ));
+
+      expect(semantics, includesNodeWithLabel('layer#1'));
 
       semantics.dispose();
     });
   });
 
   group('BlockSemantics', () {
-    testWidgets('does not hides semantic nodes of siblings outside the current semantic boundary', (WidgetTester tester) async {
+    testWidgets(
+        'does not hides semantic nodes of siblings outside the current semantic boundary',
+        (WidgetTester tester) async {
       final SemanticsTester semantics = new SemanticsTester(tester);
 
       await tester.pumpWidget(new Stack(
         children: <Widget>[
           new Semantics(
-            label: 'in the tree #1',
+            label: '#1',
             child: new Container(),
           ),
           new Semantics(
-            label: 'in the tree #4',
+            label: '#2',
             container: true,
             child: new Stack(
-                children: <Widget>[
-                  new Semantics(
-                    label: 'NOT in the tree #1',
+              children: <Widget>[
+                new Semantics(
+                  label: '#2.1',
+                  child: new Container(),
+                ),
+                new Semantics(
+                  label: '#2.2',
+                  child: new Semantics(
+                    label: '#2.2.1',
                     child: new Container(),
                   ),
-                  const BlockSemantics(),
-                  new Semantics(
-                    label: 'in the tree #3',
-                    child: new Container(),
-                  ),
-                ],
+                ),
+                new Semantics(
+                  label: '#2.3',
+                  child: new Container(),
+                ),
+              ],
             ),
           ),
           new Semantics(
-            label: 'in the tree #2',
+            label: '#3',
             child: new Container(),
           ),
         ],
       ));
 
-      expect(semantics, includesNodeWithLabel('in the tree #1'));
-      expect(semantics, includesNodeWithLabel('in the tree #2'));
-      expect(semantics, includesNodeWithLabel('in the tree #3'));
-      expect(semantics, includesNodeWithLabel('in the tree #4'));
-      expect(semantics, isNot(includesNodeWithLabel('NOT in the tree #1')));
+      print(debugDumpSemanticsTree());
+
+      expect(semantics, includesNodeWithLabel('#1'));
+      expect(semantics, includesNodeWithLabel('#2'));
+      expect(semantics, includesNodeWithLabel('#2.2'));
+      expect(semantics, includesNodeWithLabel('#2.1'));
+      expect(semantics, includesNodeWithLabel('#2.3'));
+      expect(semantics, includesNodeWithLabel('#3'));
 
       semantics.dispose();
     });
   });
-
 }
