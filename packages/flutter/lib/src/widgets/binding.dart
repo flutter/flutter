@@ -37,6 +37,14 @@ abstract class WidgetsBindingObserver {
   /// its current route if possible.
   Future<bool> didPopRoute() => new Future<bool>.value(false);
 
+  /// Called when the host tells the app to push a new route onto the
+  /// navigator.
+  ///
+  /// Observers are expected to return true if they were able to
+  /// handle the notification.  Observers are notified in registration
+  /// order until one returns true.
+  Future<bool> didPushRoute(String route) => new Future<bool>.value(false);
+
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
   void didChangeMetrics() { }
@@ -198,10 +206,23 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     SystemNavigator.pop();
   }
 
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) async {
-    if (methodCall.method == 'popRoute')
-      handlePopRoute();
-    // TODO(abarth): Handle 'pushRoute'.
+  /// Called when the host tells the app to push a new route onto the
+  /// navigator.
+  Future<Null> handlePushRoute(String route) async {
+    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
+      if (await observer.didPushRoute(route))
+        return;
+    }
+  }
+
+  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
+    switch (methodCall.method) {
+      case 'popRoute':
+        return handlePopRoute();
+      case 'pushRoute':
+        return handlePushRoute(methodCall.arguments);
+    }
+    return new Future<Null>.value();
   }
 
   /// Called when the application lifecycle state changes.
