@@ -58,6 +58,11 @@ DEF_SWITCH(EndlessTraceBuffer,
            "This is useful when very old events need to viewed. For example, "
            "during application launch. Memory usage will continue to grow "
            "indefinitely however.")
+DEF_SWITCH(EnableSoftwareRendering,
+           "enable-software-rendering",
+           "Enable rendering using the Skia software backend. This is useful"
+           "when testing Flutter on emulators. By default, Flutter will"
+           "attempt to either use OpenGL or Vulkan.")
 DEF_SWITCH(FLX, "flx", "Specify the the FLX path.")
 DEF_SWITCH(Help, "help", "Display this help text.")
 DEF_SWITCH(LogTag, "log-tag", "Tag associated with log messages.")

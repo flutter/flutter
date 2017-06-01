@@ -11,12 +11,14 @@
 
 #include <utility>
 
+#include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
+#include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 #include "lib/ftl/functional/make_copyable.h"
@@ -45,13 +47,12 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
 
   void CompleteEmpty() override {
     ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
-    blink::Threads::Platform()->PostTask(
-        ftl::MakeCopyable([ self ]() mutable {
-          if (!self->view_)
-            return;
-          static_cast<PlatformViewAndroid*>(self->view_.get())
-              ->HandlePlatformMessageEmptyResponse(self->response_id_);
-        }));
+    blink::Threads::Platform()->PostTask(ftl::MakeCopyable([self]() mutable {
+      if (!self->view_)
+        return;
+      static_cast<PlatformViewAndroid*>(self->view_.get())
+          ->HandlePlatformMessageEmptyResponse(self->response_id_);
+    }));
   }
 
  private:
@@ -85,7 +86,19 @@ static std::unique_ptr<AndroidSurface> InitializePlatformSurfaceVulkan() {
 #endif  // SHELL_ENABLE_VULKAN
 }
 
+static std::unique_ptr<AndroidSurface> InitializePlatformSurfaceSoftware() {
+  auto surface = std::make_unique<AndroidSurfaceSoftware>();
+  return surface->IsValid() ? std::move(surface) : nullptr;
+}
+
 static std::unique_ptr<AndroidSurface> InitializePlatformSurface() {
+  if (blink::Settings::Get().enable_software_rendering) {
+    if (auto surface = InitializePlatformSurfaceSoftware()) {
+      FTL_DLOG(INFO) << "Software surface initialized.";
+      return surface;
+    }
+  }
+
   if (auto surface = InitializePlatformSurfaceVulkan()) {
     FTL_DLOG(INFO) << "Vulkan surface initialized.";
     return surface;
@@ -252,8 +265,8 @@ void PlatformViewAndroid::DispatchEmptyPlatformMessage(JNIEnv* env,
   }
 
   PlatformView::DispatchPlatformMessage(
-      ftl::MakeRefCounted<blink::PlatformMessage>(
-          std::move(name), std::move(response)));
+      ftl::MakeRefCounted<blink::PlatformMessage>(std::move(name),
+                                                  std::move(response)));
 }
 
 void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
@@ -281,9 +294,9 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
   if (it == pending_responses_.end())
     return;
   uint8_t* response_data =
-     static_cast<uint8_t*>(env->GetDirectBufferAddress(java_response_data));
-  std::vector<uint8_t> response = std::vector<uint8_t>(response_data,
-                                                       response_data + java_response_position);
+      static_cast<uint8_t*>(env->GetDirectBufferAddress(java_response_data));
+  std::vector<uint8_t> response = std::vector<uint8_t>(
+      response_data, response_data + java_response_position);
   auto message_response = std::move(it->second);
   pending_responses_.erase(it);
   message_response->Complete(std::move(response));
@@ -316,22 +329,22 @@ void PlatformViewAndroid::HandlePlatformMessage(
   }
   auto java_channel = fml::jni::StringToJavaString(env, message->channel());
   if (message->hasData()) {
-    fml::jni::ScopedJavaLocalRef<jbyteArray> message_array(env,
-        env->NewByteArray(message->data().size()));
+    fml::jni::ScopedJavaLocalRef<jbyteArray> message_array(
+        env, env->NewByteArray(message->data().size()));
     env->SetByteArrayRegion(
         message_array.obj(), 0, message->data().size(),
         reinterpret_cast<const jbyte*>(message->data().data()));
     message = nullptr;
 
     // This call can re-enter in InvokePlatformMessageXxxResponseCallback.
-    FlutterViewHandlePlatformMessage(
-        env, view.obj(), java_channel.obj(), message_array.obj(), response_id);
+    FlutterViewHandlePlatformMessage(env, view.obj(), java_channel.obj(),
+                                     message_array.obj(), response_id);
   } else {
     message = nullptr;
 
     // This call can re-enter in InvokePlatformMessageXxxResponseCallback.
-    FlutterViewHandlePlatformMessage(
-        env, view.obj(), java_channel.obj(), nullptr, response_id);
+    FlutterViewHandlePlatformMessage(env, view.obj(), java_channel.obj(),
+                                     nullptr, response_id);
   }
 }
 
@@ -344,8 +357,8 @@ void PlatformViewAndroid::HandlePlatformMessageResponse(
 
   if (view.is_null())
     return;
-  fml::jni::ScopedJavaLocalRef<jbyteArray> data_array(env,
-      env->NewByteArray(data.size()));
+  fml::jni::ScopedJavaLocalRef<jbyteArray> data_array(
+      env, env->NewByteArray(data.size()));
   env->SetByteArrayRegion(data_array.obj(), 0, data.size(),
                           reinterpret_cast<const jbyte*>(data.data()));
 
@@ -353,8 +366,7 @@ void PlatformViewAndroid::HandlePlatformMessageResponse(
                                            data_array.obj());
 }
 
-void PlatformViewAndroid::HandlePlatformMessageEmptyResponse(
-    int response_id) {
+void PlatformViewAndroid::HandlePlatformMessageEmptyResponse(int response_id) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   fml::jni::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
@@ -433,8 +445,8 @@ void PlatformViewAndroid::UpdateSemantics(
         buffer_int32[position++] = child;
     }
 
-    fml::jni::ScopedJavaLocalRef<jobject> direct_buffer(env,
-        env->NewDirectByteBuffer(buffer.data(), buffer.size()));
+    fml::jni::ScopedJavaLocalRef<jobject> direct_buffer(
+        env, env->NewDirectByteBuffer(buffer.data(), buffer.size()));
 
     FlutterViewUpdateSemantics(
         env, view.obj(), direct_buffer.obj(),

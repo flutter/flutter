@@ -97,7 +97,9 @@ class PlatformViewAndroid : public PlatformView {
 
   void set_flutter_view(const fml::jni::JavaObjectWeakGlobalRef& flutter_view) {
     flutter_view_ = flutter_view;
+    android_surface_->SetFlutterView(flutter_view);
   }
+
 
  private:
   const std::unique_ptr<AndroidSurface> android_surface_;

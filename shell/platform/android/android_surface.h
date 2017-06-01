@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/shell/platform/android/android_native_window.h"
@@ -33,6 +35,9 @@ class AndroidSurface {
 
   virtual bool SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
                                PlatformView::SurfaceConfig config = {}) = 0;
+
+  virtual void SetFlutterView(
+      const fml::jni::JavaObjectWeakGlobalRef& flutter_view) = 0;
 };
 
 }  // namespace shell

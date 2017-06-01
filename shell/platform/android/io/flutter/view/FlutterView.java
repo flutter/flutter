@@ -13,6 +13,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Matrix;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -81,6 +84,9 @@ public class FlutterView extends SurfaceView
     private final BroadcastReceiver mDiscoveryReceiver;
     private final List<ActivityLifecycleListener> mActivityLifecycleListeners;
     private long mNativePlatformView;
+    private boolean mIsSoftwareRenderingEnabled = false; // using the software renderer or not
+
+    private volatile Bitmap mSoftwareRenderingBitmap;
 
     public FlutterView(Context context) {
         this(context, null);
@@ -88,6 +94,8 @@ public class FlutterView extends SurfaceView
 
     public FlutterView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mIsSoftwareRenderingEnabled = nativeGetIsSoftwareRenderingEnabled();
 
         mMetrics = new ViewportMetrics();
         mMetrics.devicePixelRatio = context.getResources().getDisplayMetrics().density;
@@ -196,6 +204,21 @@ public class FlutterView extends SurfaceView
         encodeKeyEvent(event, message);
         mFlutterKeyEventChannel.send(message);
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (mSoftwareRenderingBitmap != null) {
+            canvas.drawBitmap(mSoftwareRenderingBitmap, new Matrix(), new Paint());
+        }
+    }
+
+    // This method will be called on the GPU Thread.
+    public void updateSoftwareBuffer(ByteBuffer buffer, int width, int height) {
+        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        newBitmap.copyPixelsFromBuffer(buffer);
+        mSoftwareRenderingBitmap = newBitmap;
+        postInvalidate();
     }
 
     public void addActivityLifecycleListener(ActivityLifecycleListener listener) {
@@ -593,6 +616,8 @@ public class FlutterView extends SurfaceView
     private static native void nativeInvokePlatformMessageEmptyResponseCallback(
         long nativePlatformViewAndroid, int responseId);
 
+    private static native boolean nativeGetIsSoftwareRenderingEnabled();
+
     private void updateViewportMetrics() {
         nativeSetViewportMetrics(mNativePlatformView,
             mMetrics.devicePixelRatio,
@@ -697,7 +722,11 @@ public class FlutterView extends SurfaceView
     }
 
     private void resetWillNotDraw() {
-        setWillNotDraw(!(mAccessibilityEnabled || mTouchExplorationEnabled));
+        if (!mIsSoftwareRenderingEnabled) {
+            setWillNotDraw(!(mAccessibilityEnabled || mTouchExplorationEnabled));
+        } else {
+            setWillNotDraw(false);
+        }
     }
 
     @Override

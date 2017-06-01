@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_GL_H_
 
+#include <jni.h>
 #include <memory>
 
 #include "flutter/shell/gpu/gpu_surface_gl.h"
@@ -45,6 +46,9 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate, public AndroidSurface {
   bool GLContextPresent() override;
 
   intptr_t GLContextFBO() const override;
+
+  void SetFlutterView(
+      const fml::jni::JavaObjectWeakGlobalRef& flutter_view) override;
 
  private:
   ftl::RefPtr<AndroidContextGL> onscreen_context_;
