@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/sdk.dart';
@@ -19,9 +20,9 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  final List<Directory> repoAnalysisEntryPoints;
-
   AnalyzeContinuously(ArgResults argResults, this.repoAnalysisEntryPoints) : super(argResults);
+
+  final List<Directory> repoAnalysisEntryPoints;
 
   String analysisTarget;
   bool firstAnalysis = true;
@@ -34,6 +35,9 @@ class AnalyzeContinuously extends AnalyzeBase {
   @override
   Future<Null> analyze() async {
     List<String> directories;
+
+    if (argResults['dartdocs'])
+      throwToolExit('The --dartdocs option is currently not supported when using --watch.');
 
     if (argResults['flutter-repo']) {
       directories = repoAnalysisEntryPoints.map((Directory dir) => dir.path).toList();

@@ -49,7 +49,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     super.initServiceExtensions();
 
     assert(() {
-      // this service extension only works in checked mode
+      // these service extensions only work in checked mode
       registerBoolServiceExtension(
         name: 'debugPaint',
         getter: () async => debugPaintSizeEnabled,
@@ -60,6 +60,27 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
           return _forceRepaint();
         }
       );
+      registerBoolServiceExtension(
+          name: 'debugPaintBaselinesEnabled',
+          getter: () async => debugPaintBaselinesEnabled,
+          setter: (bool value) {
+          if (debugPaintBaselinesEnabled == value)
+            return new Future<Null>.value();
+          debugPaintBaselinesEnabled = value;
+          return _forceRepaint();
+        }
+      );
+      registerBoolServiceExtension(
+          name: 'repaintRainbow',
+          getter: () async => debugRepaintRainbowEnabled,
+          setter: (bool value) {
+            final bool repaint = debugRepaintRainbowEnabled && !value;
+            debugRepaintRainbowEnabled = value;
+            if (repaint)
+              return _forceRepaint();
+            return new Future<Null>.value();
+          }
+      );
       return true;
     });
 
@@ -68,21 +89,15 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
       callback: () { debugDumpRenderTree(); return debugPrintDone; }
     );
 
-    assert(() {
-      // this service extension only works in checked mode
-      registerBoolServiceExtension(
-        name: 'repaintRainbow',
-        getter: () async => debugRepaintRainbowEnabled,
-        setter: (bool value) {
-          final bool repaint = debugRepaintRainbowEnabled && !value;
-          debugRepaintRainbowEnabled = value;
-          if (repaint)
-            return _forceRepaint();
-          return new Future<Null>.value();
-        }
-      );
-      return true;
-    });
+    registerSignalServiceExtension(
+      name: 'debugDumpLayerTree',
+      callback: () { debugDumpLayerTree(); return debugPrintDone; }
+    );
+
+    registerSignalServiceExtension(
+      name: 'debugDumpSemanticsTree',
+      callback: () { debugDumpSemanticsTree(); return debugPrintDone; }
+    );
   }
 
   /// Creates a [RenderView] object to be the root of the
@@ -133,7 +148,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     final double devicePixelRatio = ui.window.devicePixelRatio;
     return new ViewConfiguration(
       size: ui.window.physicalSize / devicePixelRatio,
-      devicePixelRatio: devicePixelRatio
+      devicePixelRatio: devicePixelRatio,
     );
   }
 

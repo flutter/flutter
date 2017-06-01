@@ -100,20 +100,35 @@ class RaisedButton extends StatelessWidget {
   /// value.
   final Color disabledColor;
 
-  /// The z-coordinate at which to place this button.
+  /// The z-coordinate at which to place this button. This controls the size of
+  /// the shadow below the raised button.
   ///
   /// Defaults to 2, the appropriate elevation for raised buttons.
+  ///
+  /// See also:
+  ///
+  ///  * [FlatButton], a button with no elevation.
   final double elevation;
 
-  /// The z-coordinate at which to place this button when highlighted.
+  /// The z-coordinate at which to place this button when highlighted. This
+  /// controls the size of the shadow below the raised button.
   ///
   /// Defaults to 8, the appropriate elevation for raised buttons while they are
   /// being touched.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
   final double highlightElevation;
 
-  /// The z-coordinate at which to place this button when disabled.
+  /// The z-coordinate at which to place this button when disabled. This
+  /// controls the size of the shadow below the raised button.
   ///
   /// Defaults to 0, the appropriate elevation for disabled raised buttons.
+  ///
+  /// See also:
+  ///
+  ///  * [elevation], the default elevation.
   final double disabledElevation;
 
   /// The theme brightness to use for this button.

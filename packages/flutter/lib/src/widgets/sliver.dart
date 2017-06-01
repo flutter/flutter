@@ -304,6 +304,9 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
 ///
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item intead a pixel value to define
+///    the main axis extent of each item.
 ///  * [SliverGrid], which places its children in arbitrary positions.
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
@@ -331,8 +334,31 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 /// [SliverFixedExtentList] does not need to perform layout on its children to
 /// obtain their extent in the main axis.
 ///
+/// ## Sample code
+///
+/// This example, which would be inserted into a [CustomScrollView.slivers]
+/// list, shows an infinite number of items in varying shades of blue:
+///
+/// ```dart
+/// new SliverFixedExtentList(
+///   itemExtent: 50.0,
+///   delegate: new SliverChildBuilderDelegate(
+///     (BuildContext context, int index) {
+///       return new Container(
+///         alignment: FractionalOffset.center,
+///         color: Colors.lightBlue[100 * (index % 9)],
+///         child: new Text('list item $index'),
+///       );
+///     },
+///   ),
+/// )
+/// ```
+///
 /// See also:
 ///
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item intead a pixel value to define
+///    the main axis extent of each item.
 ///  * [SliverFillViewport], which determines the [itemExtent] based on
 ///    [SliverConstraints.viewportMainAxisExtent].
 ///  * [SliverList], which does not require its children to have the same
@@ -367,11 +393,40 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// [gridDelegate]. Each child is forced to have the size specified by the
 /// [gridDelegate].
 ///
+/// ## Sample code
+///
+/// This example, which would be inserted into a [CustomScrollView.slivers]
+/// list, shows twenty boxes in a pretty teal grid:
+///
+/// ```dart
+/// new SliverGrid(
+///   gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+///     maxCrossAxisExtent: 200.0,
+///     mainAxisSpacing: 10.0,
+///     crossAxisSpacing: 10.0,
+///     childAspectRatio: 4.0,
+///   ),
+///   delegate: new SliverChildBuilderDelegate(
+///     (BuildContext context, int index) {
+///       return new Container(
+///         alignment: FractionalOffset.center,
+///         color: Colors.teal[100 * (index % 9)],
+///         child: new Text('grid item $index'),
+///       );
+///     },
+///     childCount: 20,
+///   ),
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [SliverList], which places its children in a linear array.
 ///  * [SliverFixedExtentList], which places its children in a linear
 ///    array with a fixed extent in the main axis.
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item intead a pixel value to define
+///    the main axis extent of each item.
 class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement.
@@ -423,6 +478,9 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///
 ///  * [SliverFixedExtentList], which has a configurable
 ///    [SliverFixedExtentList.itemExtent].
+///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
+///    except that it uses a prototype list item intead a pixel value to define
+///    the main axis extent of each item.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
@@ -469,7 +527,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   RenderSliverMultiBoxAdaptor get renderObject => super.renderObject;
 
   @override
-  void update(SliverMultiBoxAdaptorWidget newWidget) {
+  void update(covariant SliverMultiBoxAdaptorWidget newWidget) {
     final SliverMultiBoxAdaptorWidget oldWidget = widget;
     super.update(newWidget);
     final SliverChildDelegate newDelegate = newWidget.delegate;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -231,4 +232,105 @@ void main() {
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold
   });
+
+  testWidgets('IconThemes are applied', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
+        home: const Icon(Icons.computer),
+      )
+    );
+
+    RenderParagraph glyphText = tester.renderObject(find.byType(RichText));
+
+    expect(glyphText.text.style.color, Colors.green);
+    expect(glyphText.text.style.fontSize, 10.0);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(iconTheme: const IconThemeData(color: Colors.orange, size: 20.0)),
+        home: const Icon(Icons.computer),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100)); // Halfway through the theme transition
+
+    glyphText = tester.renderObject(find.byType(RichText));
+
+    expect(glyphText.text.style.color, Color.lerp(Colors.green, Colors.orange, 0.5));
+    expect(glyphText.text.style.fontSize, 15.0);
+
+    await tester.pump(const Duration(milliseconds: 100)); // Finish the transition
+    glyphText = tester.renderObject(find.byType(RichText));
+
+    expect(glyphText.text.style.color, Colors.orange);
+    expect(glyphText.text.style.fontSize, 20.0);
+  });
+
+  testWidgets(
+    'Same ThemeData reapplied does not trigger descendents rebuilds',
+    (WidgetTester tester) async {
+      testBuildCalled = 0;
+      ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));
+
+      await tester.pumpWidget(
+        new Theme(
+          data: themeData,
+          child: const Test(),
+        ),
+      );
+      expect(testBuildCalled, 1);
+
+      // Pump the same widgets again.
+      await tester.pumpWidget(
+        new Theme(
+          data: themeData,
+          child: const Test(),
+        ),
+      );
+      // No repeated build calls to the child since it's the same theme data.
+      expect(testBuildCalled, 1);
+
+      // New instance of theme data but still the same content.
+      themeData = new ThemeData(primaryColor: const Color(0xFF000000));
+      await tester.pumpWidget(
+        new Theme(
+          data: themeData,
+          child: const Test(),
+        ),
+      );
+      // Still no repeated calls.
+      expect(testBuildCalled, 1);
+
+      // Different now.
+      themeData = new ThemeData(primaryColor: const Color(0xFF222222));
+      await tester.pumpWidget(
+        new Theme(
+          data: themeData,
+          child: const Test(),
+        ),
+      );
+      // Should call build again.
+      expect(testBuildCalled, 2);
+    },
+  );
+}
+
+int testBuildCalled;
+class Test extends StatefulWidget {
+  const Test();
+
+  @override
+  _TestState createState() => new _TestState();
+}
+
+class _TestState extends State<Test> {
+  @override
+  Widget build(BuildContext context) {
+    testBuildCalled += 1;
+    return new Container(
+      decoration: new BoxDecoration(
+        color: Theme.of(context).primaryColor,
+      ),
+    );
+  }
 }

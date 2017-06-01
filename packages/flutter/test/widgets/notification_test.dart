@@ -61,11 +61,18 @@ void main() {
   });
 
   testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
+    final List<Type> log = <Type>[];
     final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(new NotificationListener<MyNotification>(
-      onNotification: (MyNotification value) { },
-      child: new Container(key: key),
+      onNotification: (MyNotification value) {
+        log.add(value.runtimeType);
+      },
+      child: new NotificationListener<MyNotification>(
+        onNotification: (MyNotification value) { },
+        child: new Container(key: key),
+      ),
     ));
-    expect(() { new MyNotification().dispatch(key.currentContext); }, throwsAssertionError);
+    expect(() { new MyNotification().dispatch(key.currentContext); }, isNot(throwsException));
+    expect(log, <Type>[MyNotification]);
   });
 }

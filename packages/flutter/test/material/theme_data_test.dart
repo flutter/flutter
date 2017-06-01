@@ -89,4 +89,17 @@ void main() {
     expect(themeData.primaryTextTheme.title.fontFamily, equals('Ahem'));
     expect(themeData.accentTextTheme.display4.fontFamily, equals('Ahem'));
   });
+
+  test('Can estimate brightness', () {
+    expect(new ThemeData(primaryColor: Colors.white).primaryColorBrightness, equals(Brightness.light));
+    expect(new ThemeData(primaryColor: Colors.black).primaryColorBrightness, equals(Brightness.dark));
+    expect(new ThemeData(primaryColor: Colors.blue).primaryColorBrightness, equals(Brightness.dark));
+    expect(new ThemeData(primaryColor: Colors.yellow).primaryColorBrightness, equals(Brightness.light));
+    expect(new ThemeData(primaryColor: Colors.deepOrange).primaryColorBrightness, equals(Brightness.dark));
+    expect(new ThemeData(primaryColor: Colors.orange).primaryColorBrightness, equals(Brightness.light));
+    expect(new ThemeData(primaryColor: Colors.lime).primaryColorBrightness, equals(Brightness.light));
+    expect(new ThemeData(primaryColor: Colors.grey).primaryColorBrightness, equals(Brightness.light));
+    expect(new ThemeData(primaryColor: Colors.teal).primaryColorBrightness, equals(Brightness.dark));
+    expect(new ThemeData(primaryColor: Colors.indigo).primaryColorBrightness, equals(Brightness.dark));
+  });
 }

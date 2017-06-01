@@ -36,7 +36,6 @@ class AnalyzeOnce extends AnalyzeBase {
     final Stopwatch stopwatch = new Stopwatch()..start();
     final Set<Directory> pubSpecDirectories = new HashSet<Directory>();
     final List<File> dartFiles = <File>[];
-
     for (String file in argResults.rest.toList()) {
       file = fs.path.normalize(fs.path.absolute(file));
       final String root = fs.path.rootPrefix(file);
@@ -58,6 +57,9 @@ class AnalyzeOnce extends AnalyzeBase {
     // currently supports (e.g. missing member dartdoc summary).
     // TODO(danrubel): enhance dartanalyzer to provide this type of summary
     if (!flutterRepo) {
+      if (argResults['dartdocs'])
+        throwToolExit('The --dartdocs option is currently only supported with --flutter-repo.');
+
       final List<String> arguments = <String>[];
       arguments.addAll(dartFiles.map((FileSystemEntity f) => f.path));
 
@@ -123,8 +125,6 @@ class AnalyzeOnce extends AnalyzeBase {
       printStatus('Ran in ${elapsed}s');
       return;
     }
-
-    //TODO (pq): revisit package and directory defaults
 
     for (Directory dir in repoPackages) {
       _collectDartFiles(dir, dartFiles);

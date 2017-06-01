@@ -26,4 +26,14 @@ void main() {
     expect(FractionalOffset.lerp(null, b, 0.25), equals(b * 0.25));
     expect(FractionalOffset.lerp(a, null, 0.25), equals(a * 0.75));
   });
+
+  test('FractionalOffset.fromOffsetAndSize()', () {
+    final FractionalOffset a = new FractionalOffset.fromOffsetAndSize(const Offset(100.0, 100.0), const Size(200.0, 400.0));
+    expect(a, const FractionalOffset(0.5, 0.25));
+  });
+
+  test('FractionalOffset.fromOffsetAndRect()', () {
+    final FractionalOffset a = new FractionalOffset.fromOffsetAndRect(const Offset(150.0, 120.0), new Rect.fromLTWH(50.0, 20.0, 200.0, 400.0));
+    expect(a, const FractionalOffset(0.5, 0.25));
+  });
 }

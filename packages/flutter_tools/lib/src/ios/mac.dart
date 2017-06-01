@@ -22,6 +22,7 @@ import '../flx.dart' as flx;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
+import 'code_signing.dart';
 import 'xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 7;
@@ -145,6 +146,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
+  String developmentTeam;
+  if (codesign && mode != BuildMode.release && buildForDevice)
+    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
+
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
@@ -170,6 +175,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     '-configuration', 'Release',
     'ONLY_ACTIVE_ARCH=YES',
   ];
+
+  if (developmentTeam != null)
+    commands.add('DEVELOPMENT_TEAM=$developmentTeam');
 
   final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
@@ -279,21 +287,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       if (checkBuildSettings.exitCode == 0 &&
           !checkBuildSettings.stdout?.contains(new RegExp(r'\bDEVELOPMENT_TEAM\b')) == true &&
           !checkBuildSettings.stdout?.contains(new RegExp(r'\bPROVISIONING_PROFILE\b')) == true) {
-        printError('''
-═══════════════════════════════════════════════════════════════════════════════════
-Building an iOS app requires a selected Development Team with a Provisioning Profile
-Please ensure that a Development Team is selected by:
-  1- Opening the Flutter project's Xcode target with
-       open ios/Runner.xcworkspace
-  2- Select the 'Runner' project in the navigator then the 'Runner' target
-     in the project settings
-  3- In the 'General' tab, make sure a 'Development Team' is selected\n
-For more information, please visit:
-  https://flutter.io/setup/#deploy-to-ios-devices\n
-Or run on an iOS simulator
-═══════════════════════════════════════════════════════════════════════════════════''',
-          emphasis: true,
-        );
+        printError(noDevelopmentTeamInstruction, emphasis: true);
       }
     }
   }
@@ -371,7 +365,7 @@ final String cocoaPodsUpgradeInstructions = '''
 
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!doctor.iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
+    if (!await doctor.iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
       final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
       printError(
         'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
@@ -382,7 +376,7 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
       );
       return;
     }
-    if (!doctor.iosWorkflow.isCocoaPodsInitialized) {
+    if (!await doctor.iosWorkflow.isCocoaPodsInitialized) {
       printError(
         'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
         '$noCocoaPodsConsequence\n'

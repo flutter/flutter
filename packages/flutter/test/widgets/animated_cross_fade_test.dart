@@ -78,4 +78,57 @@ void main() {
     expect(box.size.width, equals(200.0));
     expect(box.size.height, equals(200.0));
   });
+
+  testWidgets('AnimatedCrossFade alignment', (WidgetTester tester) async {
+    final Key firstKey = new UniqueKey();
+    final Key secondKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Center(
+        child: new AnimatedCrossFade(
+          alignment: FractionalOffset.bottomRight,
+          firstChild: new SizedBox(
+            key: firstKey,
+            width: 100.0,
+            height: 100.0
+          ),
+          secondChild: new SizedBox(
+            key: secondKey,
+            width: 200.0,
+            height: 200.0
+          ),
+          duration: const Duration(milliseconds: 200),
+          crossFadeState: CrossFadeState.showFirst
+        )
+      )
+    );
+
+    await tester.pumpWidget(
+      new Center(
+        child: new AnimatedCrossFade(
+          alignment: FractionalOffset.bottomRight,
+          firstChild: new SizedBox(
+            key: firstKey,
+            width: 100.0,
+            height: 100.0
+          ),
+          secondChild: new SizedBox(
+            key: secondKey,
+            width: 200.0,
+            height: 200.0
+          ),
+          duration: const Duration(milliseconds: 200),
+          crossFadeState: CrossFadeState.showSecond
+        )
+      )
+    );
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final RenderBox box1 = tester.renderObject(find.byKey(firstKey));
+    final RenderBox box2 = tester.renderObject(find.byKey(secondKey));
+    expect(box1.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
+  });
+
 }

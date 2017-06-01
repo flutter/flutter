@@ -15,7 +15,7 @@ void main() {
       final ManifestTask task = manifest.tasks.firstWhere((ManifestTask task) => task.name == 'flutter_gallery__start_up');
       expect(task.description, 'Measures the startup time of the Flutter Gallery app on Android.\n');
       expect(task.stage, 'devicelab');
-      expect(task.requiredAgentCapabilities, <String>['has-android-device']);
+      expect(task.requiredAgentCapabilities, <String>['linux/android']);
     });
   });
 

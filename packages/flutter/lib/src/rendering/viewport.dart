@@ -476,16 +476,18 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (firstChild == null)
       return '$prefix\n';
     int count = indexOfFirstChild;
-    String result = '$prefix \u2502\n';
+    final StringBuffer result = new StringBuffer()
+      ..write(prefix)
+      ..write(' \u2502\n');
     RenderSliver child = firstChild;
     while (child != lastChild) {
-      result += '${child.toStringDeep("$prefix \u251C\u2500${labelForChild(count)}: ", "$prefix \u2502")}';
+      result.write(child.toStringDeep("$prefix \u251C\u2500${labelForChild(count)}: ", "$prefix \u2502"));
       count += 1;
       child = childAfter(child);
     }
     assert(child == lastChild);
-    result += '${child.toStringDeep("$prefix \u2514\u2500${labelForChild(count)}: ", "$prefix  ")}';
-    return result;
+    result.write(child.toStringDeep("$prefix \u2514\u2500${labelForChild(count)}: ", "$prefix  "));
+    return result.toString();
   }
 
   // API TO BE IMPLEMENTED BY SUBCLASSES

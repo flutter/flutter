@@ -7,9 +7,6 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'debug.dart';
-import 'icon.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'theme.dart';
 
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);

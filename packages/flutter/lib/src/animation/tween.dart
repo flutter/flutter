@@ -90,7 +90,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// which results in two [Animation] separate objects, each configured with a
 /// single [Tween].
 ///
-/// ## Sample usage
+/// ## Sample code
 ///
 /// Suppose `_controller` is an [AnimationController], and we want to create an
 /// [Animation<Offset>] that is controlled by that controller, and save it in
@@ -100,7 +100,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// _animation = new Tween<Offset>(
 ///   begin: const Offset(100.0, 50.0),
 ///   end: const Offset(200.0, 300.0),
-/// ).animation(_controller);
+/// ).animate(_controller);
 /// ```
 ///
 /// That would provide an `_animation` that, over the lifetime of the

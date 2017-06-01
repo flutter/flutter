@@ -185,5 +185,5 @@ class ValueNotifier<T> extends ChangeNotifier {
   }
 
   @override
-  String toString() => '$runtimeType(value: $value)';
+  String toString() => '$runtimeType#$hashCode($value)';
 }

@@ -21,7 +21,26 @@ import 'theme.dart';
 /// For a variant of this widget that is specialized for rectangular areas that
 /// always clip splashes, see [InkWell].
 ///
-/// Must have an ancestor [Material] widget in which to cause ink reactions.
+/// The following two diagrams show how [InkResponse] looks when tapped if the
+/// [highlightShape] is [BoxShape.circle] (the default) and [containedInkWell]
+/// is false (also the default). The first diagram shows how it looks if the
+/// [InkResponse] is relatively large, the second shows how it looks if it is
+/// small. The main thing to notice is that the splashes happily exceed the
+/// bounds of the widget (because [containedInkWell] is false).
+///
+/// ![The highlight is a disc centered in the box, smaller than the child widget.](https://flutter.github.io/assets-for-api-docs/material/ink_response_large.png)
+/// ![The highlight is a disc overflowing the box, centered on the child.](https://flutter.github.io/assets-for-api-docs/material/ink_response_small.png)
+///
+/// The following diagram shows the effect when the [InkResponse] has a
+/// [highlightShape] of [BoxShape.rectangle] with [containedInkWell] set to
+/// true. These are the values used by [InkWell].
+///
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+///
+/// The [InkResponse] widbget must have a [Material] widget as an ancestor. The
+/// [Material] widget is where the ink reactions are actually painted. This
+/// matches the material design premise wherein the [Material] is what is
+/// actually reacting to touches by spreading ink.
 ///
 /// If a Widget uses this class directly, it should include the following line
 /// at the top of its build function to call [debugCheckHasMaterial]:
@@ -121,6 +140,22 @@ class InkResponse extends StatefulWidget {
 
   @override
   _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    final List<String> gestures = <String>[];
+    if (onTap != null)
+      gestures.add('tap');
+    if (onDoubleTap != null)
+      gestures.add('double tap');
+    if (onLongPress != null)
+      gestures.add('long press');
+    if (gestures.isEmpty)
+      gestures.add('<none>');
+    description.add('gestures: ${gestures.join(", ")}');
+    description.add('${containedInkWell ? "clipped to " : ""}$highlightShape');
+  }
 }
 
 class _InkResponseState<T extends InkResponse> extends State<T> {
@@ -251,7 +286,17 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 
 /// A rectangular area of a [Material] that responds to touch.
 ///
-/// Must have an ancestor [Material] widget in which to cause ink reactions.
+/// For a variant of this widget that does not clip splashes, see [InkResponse].
+///
+/// The following diagram shows how an [InkWell] looks when tapped, when using
+/// default values.
+///
+/// ![The highlight is a rectangle the size of the box.](https://flutter.github.io/assets-for-api-docs/material/ink_well.png)
+///
+/// The [InkResponse] widbget must have a [Material] widget as an ancestor. The
+/// [Material] widget is where the ink reactions are actually painted. This
+/// matches the material design premise wherein the [Material] is what is
+/// actually reacting to touches by spreading ink.
 ///
 /// If a Widget uses this class directly, it should include the following line
 /// at the top of its build function to call [debugCheckHasMaterial]:

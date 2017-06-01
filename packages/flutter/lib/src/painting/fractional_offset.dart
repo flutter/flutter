@@ -8,10 +8,14 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
-/// An offset that's expressed as a fraction of a Size.
+/// An offset that's expressed as a fraction of a [Size].
 ///
-/// FractionalOffset(1.0, 0.0) represents the top right of the Size,
-/// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
+/// `FractionalOffset(1.0, 0.0)` represents the top right of the [Size].
+///
+/// `FractionalOffset(0.0, 1.0)` represents the bottom left of the [Size].
+///
+/// `FractionalOffset(0.5, 2.0)` represents a point half way across the [Size],
+/// below the bottom of the rectangle by the height of the [Size].
 @immutable
 class FractionalOffset {
   /// Creates a fractional offset.
@@ -21,16 +25,47 @@ class FractionalOffset {
     : assert(dx != null),
       assert(dy != null);
 
+  /// Creates a fractional offset from a specific offset and size.
+  ///
+  /// The returned [FractionalOffset] describes the position of the
+  /// [Offset] in the [Size], as a fraction of the [Size].
+  FractionalOffset.fromOffsetAndSize(Offset offset, Size size) :
+    assert(size != null),
+    assert(offset != null),
+    dx = offset.dx / size.width,
+    dy = offset.dy / size.height;
+
+  /// Creates a fractional offset from a specific offset and rectangle.
+  ///
+  /// The offset is assumed to be relative to the same origin as the rectangle.
+  ///
+  /// If the offset is relative to the top left of the rectangle, use [new
+  /// FractionalOffset.fromOffsetAndSize] instead, passing `rect.size`.
+  ///
+  /// The returned [FractionalOffset] describes the position of the
+  /// [Offset] in the [Rect], as a fraction of the [Rect].
+  factory FractionalOffset.fromOffsetAndRect(Offset offset, Rect rect) {
+    return new FractionalOffset.fromOffsetAndSize(
+      offset - rect.topLeft,
+      rect.size,
+    );
+  }
+
   /// The distance fraction in the horizontal direction.
   ///
   /// A value of 0.0 corresponds to the leftmost edge. A value of 1.0
-  /// corresponds to the rightmost edge.
+  /// corresponds to the rightmost edge. Values are not limited to that range;
+  /// negative values represent positions to the left of the left edge, and
+  /// values greater than 1.0 represent positions to the right of the right
+  /// edge.
   final double dx;
 
   /// The distance fraction in the vertical direction.
   ///
-  /// A value of 0.0 corresponds to the topmost edge. A value of 1.0
-  /// corresponds to the bottommost edge.
+  /// A value of 0.0 corresponds to the topmost edge. A value of 1.0 corresponds
+  /// to the bottommost edge. Values are not limited to that range; negative
+  /// values represent positions above the top, and values greated than 1.0
+  /// represent positions below the bottom.
   final double dy;
 
   /// The top left corner.

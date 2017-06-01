@@ -95,9 +95,10 @@ abstract class FlowDelegate {
   /// it paint entirely outside the container's clip.
   ///
   /// To paint a child, call [FlowPaintingContext.paintChild] on the given
-  /// [context]. The given context is valid only within the scope of this
-  /// function call and contains information (such as the size of the container)
-  /// that is useful for picking transformation matrices for the children.
+  /// [FlowPaintingContext] (the `context` argument). The given context is valid
+  /// only within the scope of this function call and contains information (such
+  /// as the size of the container) that is useful for picking transformation
+  /// matrices for the children.
   ///
   /// If this function depends on information other than the given context,
   /// override [shouldRepaint] to indicate when when the container should

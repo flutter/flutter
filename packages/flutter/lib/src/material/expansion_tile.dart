@@ -6,9 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'icon.dart';
-import 'icon_theme.dart';
-import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'list_tile.dart';
 import 'theme.dart';
@@ -20,7 +17,9 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 /// the tile to reveal or hide the [children].
 ///
 /// This widget is typically used with [ListView] to create an
-/// "expand / collapse" list entry.
+/// "expand / collapse" list entry. When used with scrolling widgets like
+/// [ListView], a unique [key] must be specified to enable the [ExpansionTile] to
+/// save and restore its expanded state when it is scrolled in and out of view.
 ///
 /// See also:
 ///
@@ -110,7 +109,11 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       if (_isExpanded)
         _controller.forward();
       else
-        _controller.reverse();
+        _controller.reverse().then<Null>((Null value) {
+          setState(() {
+            // Rebuild without widget.children.
+          });
+        });
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
     if (widget.onExpansionChanged != null)
@@ -172,10 +175,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       ..begin = Colors.transparent
       ..end = widget.backgroundColor ?? Colors.transparent;
 
+    final bool closed = !_isExpanded && _controller.isDismissed;
     return new AnimatedBuilder(
       animation: _controller.view,
       builder: _buildChildren,
-      child: new Column(children: widget.children),
+      child: closed ? null : new Column(children: widget.children),
     );
+
   }
 }

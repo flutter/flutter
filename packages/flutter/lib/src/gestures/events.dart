@@ -69,6 +69,26 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
 /// Base class for touch, stylus, or mouse events.
+///
+/// Pointer events operate in the coordinate space of the screen, scaled to
+/// logical pixels. Logical pixels approximate a grid with about 38 pixels per
+/// centimeter, or 96 pixels per inch.
+///
+/// This allows gestures to be recognised independent of the precise hardware
+/// characteristics of the device. In particular, features such as touch slop
+/// (see [kTouchSlop]) can be defined in terms of roughly physical lengths so
+/// that the user can shift their finger by the same distance on a high-density
+/// display as on a low-resolution device.
+///
+/// For similar reasons, pointer events are not affected by any transforms in
+/// the rendering layer. This means that deltas may need to be scaled before
+/// being applied to movement within the rendering. For example, if a scrolling
+/// list is shown scaled by 2x, the pointer deltas will have to be scaled by the
+/// inverse amount if the list is to appear to scroll with the user's finger.
+///
+/// See also:
+///
+///  * [Window.devicePixelRatio], which defines the device's current resolution.
 @immutable
 abstract class PointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide

@@ -333,6 +333,9 @@ class Ticker {
 /// [orCancel], which returns a derivative [Future] that completes with an error
 /// if the [Ticker] that returned the [TickerFuture] was stopped with `canceled`
 /// set to true, or if it was disposed without being stopped.
+///
+/// To run a callback when either this future resolves or when the tricker is
+/// canceled, use [whenCompleteOrCancel].
 class TickerFuture implements Future<Null> {
   TickerFuture._();
 
@@ -362,6 +365,16 @@ class TickerFuture implements Future<Null> {
     assert(_completed == null);
     _completed = false;
     _secondaryCompleter?.completeError(new TickerCanceled(ticker));
+  }
+
+  /// Calls `callback` either when this future resolves or when the ticker is
+  /// canceled.
+  void whenCompleteOrCancel(VoidCallback callback) {
+    Null thunk(dynamic value) {
+      callback();
+      return null;
+    }
+    orCancel.then(thunk, onError: thunk);
   }
 
   /// A future that resolves when this future resolves or throws when the ticker

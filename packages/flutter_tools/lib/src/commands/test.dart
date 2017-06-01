@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/terminal.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';

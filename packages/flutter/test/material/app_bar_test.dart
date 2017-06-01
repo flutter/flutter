@@ -216,8 +216,12 @@ void main() {
 
     final Finder title = find.byKey(titleKey);
     expect(tester.getTopLeft(title).dx, 72.0);
-    // The toolbar's contents are padded on the right by 4.0
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0));
+    expect(tester.getSize(title).width, equals(
+        800.0 // Screen width.
+        - 4.0 // Left margin before the leading button.
+        - 56.0 // Leading button width.
+        - 16.0 // Leading button to title padding.
+        - 16.0)); // Title right side padding.
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
@@ -227,13 +231,19 @@ void main() {
 
     expect(tester.getTopLeft(title).dx, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
+    expect(tester.getSize(title).width, equals(
+        800.0 // Screen width.
+        - 4.0 // Left margin before the leading button.
+        - 56.0 // Leading button width.
+        - 16.0 // Leading button to title padding.
+        - 16.0 // Title to actions padding
+        - 200.0)); // Actions' width.
 
     leading = new Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 4.0 - 56.0 - 16.0 - 16.0 - 200.0));
   });
 
   testWidgets('AppBar centerTitle:true title overflow OK ', (WidgetTester tester) async {
@@ -778,5 +788,129 @@ void main() {
       ),
     );
     expect(find.byIcon(Icons.menu), findsOneWidget);
+  });
+
+  testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new AppBar(
+            leading: new Placeholder(key: key),
+            title: const Text('Abc'),
+            actions: <Widget>[
+              const Placeholder(),
+              const Placeholder(),
+              const Placeholder(),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+  });
+
+  testWidgets('AppBar handles loose children 1', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new AppBar(
+            leading: new Placeholder(key: key),
+            title: const Text('Abc'),
+            actions: <Widget>[
+              const Placeholder(),
+              const Placeholder(),
+              const Placeholder(),
+            ],
+            flexibleSpace: new DecoratedBox(
+              decoration: new BoxDecoration(
+                gradient: new LinearGradient(
+                  begin: const FractionalOffset(0.50, 0.0),
+                  end: const FractionalOffset(0.48, 1.0),
+                  colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+  });
+
+  testWidgets('AppBar handles loose children 2', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new AppBar(
+            leading: new Placeholder(key: key),
+            title: const Text('Abc'),
+            actions: <Widget>[
+              const Placeholder(),
+              const Placeholder(),
+              const Placeholder(),
+            ],
+            flexibleSpace: new DecoratedBox(
+              decoration: new BoxDecoration(
+                gradient: new LinearGradient(
+                  begin: const FractionalOffset(0.50, 0.0),
+                  end: const FractionalOffset(0.48, 1.0),
+                  colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
+                ),
+              ),
+            ),
+            bottom: new PreferredSize(
+              preferredSize: const Size(0.0, kToolbarHeight),
+              child: new Container(
+                height: 50.0,
+                padding: const EdgeInsets.all(4.0),
+                child: const Placeholder(
+                  strokeWidth: 2.0,
+                  color: const Color(0xFFFFFFFF),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+  });
+
+  testWidgets('AppBar handles loose children 3', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Center(
+          child: new AppBar(
+            leading: new Placeholder(key: key),
+            title: const Text('Abc'),
+            actions: <Widget>[
+              const Placeholder(),
+              const Placeholder(),
+              const Placeholder(),
+            ],
+            bottom: new PreferredSize(
+              preferredSize: const Size(0.0, kToolbarHeight),
+              child: new Container(
+                height: 50.0,
+                padding: const EdgeInsets.all(4.0),
+                child: const Placeholder(
+                  strokeWidth: 2.0,
+                  color: const Color(0xFFFFFFFF),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
   });
 }

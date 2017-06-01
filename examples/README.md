@@ -32,7 +32,7 @@ Available examples include:
   demonstrates how to connect a Flutter app to platform-specific APIs. For
   documentation, see <https://flutter.io/platform-channels/>.
 
-- **Platform Channel Swift** The [platform channel swift app](platform_channel_swift) 
+- **Platform Channel Swift** The [platform channel swift app](platform_channel_swift)
   is the same as [platform channel](platform_channel) but the iOS version is in
   Swift and there is no Android version.
 
@@ -40,7 +40,7 @@ Available examples include:
   embed Flutter within an iOS or Android app.
 
 - **Layers** The [layers vignettes](layers) show how to use the various layers
-  in the Flutter framework. For details, see the [layers README](layers/README).
+  in the Flutter framework. For details, see the [layers README](layers/README.md).
 
 - **Stocks** The [stocks](stocks) demo shows how one might structure
   an application with several screens.

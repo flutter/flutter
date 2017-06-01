@@ -79,9 +79,9 @@ class MenuDemoState extends State<MenuDemo> {
                 value: 'Hooray!',
                 child: const Text('Hooray!')
               ),
-            ]
-          )
-        ]
+            ],
+          ),
+        ],
       ),
       body: new ListView(
         padding: kMaterialListPadding,

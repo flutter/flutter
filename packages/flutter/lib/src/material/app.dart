@@ -60,6 +60,7 @@ class MaterialApp extends StatefulWidget {
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
+    this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
   }) : super(key: key) {
@@ -134,6 +135,9 @@ class MaterialApp extends StatefulWidget {
 
   /// Turns on checkerboarding of raster cache images.
   final bool checkerboardRasterCacheImages;
+
+  /// Turns on checkerboarding of layers rendered to offscreen bitmaps.
+  final bool checkerboardOffscreenLayers;
 
   /// Turns on an overlay that shows the accessibility information
   /// reported by the framework.
@@ -240,8 +244,9 @@ class _MaterialAppState extends State<MaterialApp> {
         onLocaleChanged: widget.onLocaleChanged,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         showSemanticsDebugger: widget.showSemanticsDebugger,
-        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner
+        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       )
     );
 
@@ -251,8 +256,8 @@ class _MaterialAppState extends State<MaterialApp> {
           color: const Color(0xE0F9BBE0),
           interval: 8.0,
           divisions: 2,
-          subDivisions: 1,
-          child: result
+          subdivisions: 1,
+          child: result,
         );
       }
       return true;
@@ -260,7 +265,7 @@ class _MaterialAppState extends State<MaterialApp> {
 
     return new ScrollConfiguration(
       behavior: new _MaterialScrollBehavior(),
-      child: result
+      child: result,
     );
   }
 }

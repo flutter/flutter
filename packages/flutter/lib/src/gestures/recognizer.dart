@@ -58,6 +58,8 @@ abstract class GestureRecognizer extends GestureArenaMember {
 
   /// Invoke a callback provided by the application, catching and logging any
   /// exceptions.
+  ///
+  /// The `name` argument is ignored except when reporting exceptions.
   @protected
   T invokeCallback<T>(String name, RecognizerCallback<T> callback) {
     T result;
@@ -78,6 +80,9 @@ abstract class GestureRecognizer extends GestureArenaMember {
     }
     return result;
   }
+
+  @override
+  String toString() => '$runtimeType#$hashCode';
 }
 
 /// Base class for gesture recognizers that can only recognize one
@@ -109,7 +114,8 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   void didStopTrackingLastPointer(int pointer);
 
-  /// Resolves this recognizer's participation in each gesture arena with the given disposition.
+  /// Resolves this recognizer's participation in each gesture arena with the
+  /// given disposition.
   @protected
   @mustCallSuper
   void resolve(GestureDisposition disposition) {
@@ -277,7 +283,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void rejectGesture(int pointer) {
-    if (pointer == primaryPointer) {
+    if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
       _stopTimer();
       state = GestureRecognizerState.defunct;
     }
@@ -285,6 +291,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void didStopTrackingLastPointer(int pointer) {
+    assert(state != GestureRecognizerState.ready);
     _stopTimer();
     state = GestureRecognizerState.ready;
   }
@@ -307,4 +314,6 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     return offset.distance;
   }
 
+  @override
+  String toString() => '$runtimeType#$hashCode($state)';
 }

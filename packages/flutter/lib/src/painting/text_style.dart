@@ -51,9 +51,11 @@ class TextStyle {
   final FontStyle fontStyle;
 
   /// The amount of space (in logical pixels) to add between each letter.
+  /// A negative value can be used to bring the letters closer.
   final double letterSpacing;
 
   /// The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
+  /// A negative value can be used to bring the words closer.
   final double wordSpacing;
 
   /// The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.

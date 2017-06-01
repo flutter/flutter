@@ -51,7 +51,7 @@ String getFlutterRoot() {
 }
 
 CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
-  final FlutterCommandRunner runner  = new FlutterCommandRunner();
+  final FlutterCommandRunner runner = new FlutterCommandRunner();
   if (command != null)
     runner.addCommand(command);
   return runner;

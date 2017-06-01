@@ -181,11 +181,13 @@ abstract class IOSApp extends ApplicationPackage {
     if (id == null)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
-    id = substituteXcodeVariables(id, projectPath, 'Runner');
+    final Map<String, String> buildSettings = getXcodeBuildSettings(projectPath, 'Runner');
+    id = substituteXcodeVariables(id, buildSettings);
 
     return new BuildableIOSApp(
       appDirectory: fs.path.join('ios'),
-      projectBundleId: id
+      projectBundleId: id,
+      buildSettings: buildSettings,
     );
   }
 
@@ -203,9 +205,13 @@ class BuildableIOSApp extends IOSApp {
   BuildableIOSApp({
     this.appDirectory,
     String projectBundleId,
+    this.buildSettings,
   }) : super(projectBundleId: projectBundleId);
 
   final String appDirectory;
+
+  /// Build settings of the app's XCode project.
+  final Map<String, String> buildSettings;
 
   @override
   String get name => kBundleName;

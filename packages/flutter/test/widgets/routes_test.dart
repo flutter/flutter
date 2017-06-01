@@ -38,7 +38,7 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  Future<Null> didPush() {
+  TickerFuture didPush() {
     log('didPush');
     return super.didPush();
   }

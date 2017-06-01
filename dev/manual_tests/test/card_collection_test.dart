@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../card_collection.dart' as card_collection;
+import '../lib/card_collection.dart' as card_collection;
 
 void main() {
   testWidgets("Card Collection smoke test", (WidgetTester tester) async {
@@ -34,5 +34,5 @@ void main() {
     await tester.pump();
     await tester.tap(find.text('Vary font sizes'));
     await tester.pump();
-  }, skip: true); // https://github.com/dart-lang/sdk/issues/29230
+  });
 }

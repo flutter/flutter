@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -58,7 +59,7 @@ abstract class Route<T> {
   ///
   /// The returned value resolves when the push transition is complete.
   @protected
-  Future<Null> didPush() => new Future<Null>.value();
+  TickerFuture didPush() => new TickerFuture.complete();
 
   /// When this route is popped (see [Navigator.pop]) if the result isn't
   /// specified or if it's null, this value will be used instead.
@@ -231,11 +232,14 @@ class NavigatorObserver {
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
 
-  /// The [Navigator] pushed the given route.
+  /// The [Navigator] pushed `route`.
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// The [Navigator] popped the given route.
+  /// The [Navigator] popped `route`.
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
+
+  /// The [Navigator] removed `route`.
+  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// The [Navigator] is being controlled by a user gesture.
   ///
@@ -673,6 +677,22 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pushReplacement(route, result: result);
   }
 
+  /// Immediately remove `route` and [Route.dispose] it.
+  ///
+  /// The route's animation does not run and the future returned from pushing
+  /// the route will not complete. Ongoing input gestures are cancelled. If
+  /// the [Navigator] has any [Navigator.observers], they will be notified with
+  /// [NavigatorObserver.didRemove].
+  ///
+  /// The routes before and after the removed route, if any, are notified with
+  /// [Route.didChangeNext] and [Route.didChangePrevious].
+  ///
+  /// This method is used to dismiss dropdown menus that are up when the screen's
+  /// orientation changes.
+  static void removeRoute(BuildContext context, Route<dynamic> route) {
+    return Navigator.of(context).removeRoute(route);
+  }
+
   /// The state from the closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
@@ -894,7 +914,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute._navigator = this;
       newRoute.install(_currentOverlayEntry);
       _history[index] = newRoute;
-      newRoute.didPush().then<Null>((Null value) {
+      newRoute.didPush().whenCompleteOrCancel(() {
         // The old route's exit is not animated. We're assuming that the
         // new route completely obscures the old one.
         if (mounted) {
@@ -968,6 +988,66 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; });
   }
 
+  /// Push the given route and then remove all the previous routes until the
+  /// `predicate` returns true.
+  ///
+  /// The predicate may be applied to the same route more than once if
+  /// [Route.willHandlePopInternally] is true.
+  ///
+  /// To remove routes until a route with a certain name, use the
+  /// [RoutePredicate] returned from [ModalRoute.withName].
+  ///
+  /// To remove all the routes before the pushed route, use a [RoutePredicate]
+  /// that always returns false.
+  Future<dynamic> pushAndRemoveUntil(Route<dynamic> newRoute, RoutePredicate predicate) {
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
+    while (_history.isNotEmpty && !predicate(_history.last)) {
+      final Route<dynamic> removedRoute = _history.removeLast();
+      assert(removedRoute != null && removedRoute._navigator == this);
+      assert(removedRoute.overlayEntries.isNotEmpty);
+      removedRoutes.add(removedRoute);
+    }
+    assert(newRoute._navigator == null);
+    assert(newRoute.overlayEntries.isEmpty);
+    setState(() {
+      final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
+      newRoute._navigator = this;
+      newRoute.install(_currentOverlayEntry);
+      _history.add(newRoute);
+      newRoute.didPush().whenCompleteOrCancel(() {
+        if (mounted) {
+          for (Route<dynamic> route in removedRoutes)
+            route.dispose();
+        }
+      });
+      newRoute.didChangeNext(null);
+      if (oldRoute != null)
+        oldRoute.didChangeNext(newRoute);
+      for (NavigatorObserver observer in widget.observers)
+        observer.didPush(newRoute, oldRoute);
+    });
+    assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
+    return newRoute.popped;
+  }
+
+  /// Push the route with the given name and then remove all the previous routes
+  /// until the `predicate` returns true.
+  ///
+  /// The predicate may be applied to the same route more than once if
+  /// [Route.willHandlePopInternally] is true.
+  ///
+  /// To remove routes until a route with a certain name, use the
+  /// [RoutePredicate] returned from [ModalRoute.withName].
+  ///
+  /// To remove all the routes before the pushed route, use a [RoutePredicate]
+  /// that always returns false.
+  Future<dynamic> pushNamedAndRemoveUntil(String routeName, RoutePredicate predicate) {
+    return pushAndRemoveUntil(_routeNamed(routeName), predicate);
+  }
+
   /// Tries to pop the current route, first giving the active route the chance
   /// to veto the operation using [Route.willPop]. This method is typically
   /// called instead of [pop] when the user uses a back button. For example on
@@ -1038,6 +1118,36 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
     return true;
+  }
+
+  /// Immediately remove `route` and [Route.dispose] it.
+  ///
+  /// The route's animation does not run and the future returned from pushing
+  /// the route will not complete. Ongoing input gestures are cancelled. If
+  /// the [Navigator] has any [Navigator.observers], they will be notified with
+  /// [NavigatorObserver.didRemove].
+  ///
+  /// This method is used to dismiss dropdown menus that are up when the screen's
+  /// orientation changes.
+  void removeRoute(Route<dynamic> route) {
+    assert(route != null);
+    assert(!_debugLocked);
+    assert(() { _debugLocked = true; return true; });
+    assert(route._navigator == this);
+    final int index = _history.indexOf(route);
+    assert(index != -1);
+    final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
+    final Route<dynamic> nextRoute = (index + 1 < _history.length) ? _history[index + 1] : null;
+    setState(() {
+      _history.removeAt(index);
+      previousRoute?.didChangeNext(nextRoute);
+      nextRoute?.didChangePrevious(previousRoute);
+      for (NavigatorObserver observer in widget.observers)
+        observer.didRemove(route, previousRoute);
+      route.dispose();
+    });
+    assert(() { _debugLocked = false; return true; });
+    _cancelActivePointers();
   }
 
   /// Complete the lifecycle for a route that has been popped off the navigator.
@@ -1118,10 +1228,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
-    final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
-    setState(() {
-      absorber?.absorbing = true;
-    });
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
+      // If we're between frames (SchedulerPhase.idle) then absorb any
+      // subsequent pointers from this frame. The absorbing flag will be
+      // reset in the next frame, see build().
+      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+      setState(() {
+        absorber?.absorbing = true;
+      });
+    }
     for (int pointer in _activePointers.toList())
       WidgetsBinding.instance.cancelPointer(pointer);
   }
