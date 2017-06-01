@@ -15,7 +15,6 @@ import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'node.dart';
-import 'proxy_box.dart' show RenderBlockSemantics;
 import 'semantics.dart';
 
 export 'package:flutter/foundation.dart' show FlutterError, InformationCollector;
@@ -664,7 +663,7 @@ abstract class _SemanticsFragment {
     @required RenderObject renderObjectOwner,
     this.annotator,
     List<_SemanticsFragment> children,
-    this.dropSemanticsOfLeftSiblings,
+    this.dropSemanticsOfPreviousSiblings,
   }) {
     assert(renderObjectOwner != null);
     _ancestorChain = <RenderObject>[renderObjectOwner];
@@ -680,7 +679,7 @@ abstract class _SemanticsFragment {
   }
 
   final SemanticsAnnotator annotator;
-  bool dropSemanticsOfLeftSiblings;
+  bool dropSemanticsOfPreviousSiblings;
 
   bool get producesSemanticNodes => true;
 
@@ -704,8 +703,8 @@ abstract class _SemanticsFragment {
 class _EmptySemanticsFragment extends _SemanticsFragment {
   _EmptySemanticsFragment({
     @required RenderObject renderObjectOwner,
-    bool dropSemanticsOfLeftSiblings
-  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+    bool dropSemanticsOfPreviousSiblings
+  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {}
@@ -722,9 +721,9 @@ class _EmptySemanticsFragment extends _SemanticsFragment {
 class _CleanSemanticsFragment extends _SemanticsFragment {
   _CleanSemanticsFragment({
     @required RenderObject renderObjectOwner
-  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfLeftSiblings: false) {
+  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfPreviousSiblings: false) {
     assert(renderObjectOwner != null);
-    assert(renderObjectOwner.isSemanticBoundary);  // required for dropSemanticsOfLeftSiblings: false.
+    assert(renderObjectOwner.isSemanticBoundary);  // required for dropSemanticsOfPreviousSiblings: false.
     assert(renderObjectOwner._semantics != null);
   }
 
@@ -749,8 +748,8 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+    bool dropSemanticsOfPreviousSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
   bool get haveConcreteNode => true;
 
@@ -787,8 +786,8 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+    bool dropSemanticsOfPreviousSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -821,8 +820,8 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+    bool dropSemanticsOfPreviousSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -857,8 +856,8 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+    bool dropSemanticsOfPreviousSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
   @override
   bool get haveConcreteNode => _haveConcreteNode;
@@ -903,8 +902,8 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
   _ForkingSemanticsFragment({
     RenderObject renderObjectOwner,
     @required Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfLeftSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings) {
+    bool dropSemanticsOfPreviousSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings) {
     assert(children != null);
     assert(children.length > 1);
   }
@@ -2435,6 +2434,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///    setting [isSemanticBoundary] to true.
   bool get isSemanticBoundary => false;
 
+  /// Whether this [RenderObject] makes other [RenderObject]s previously painted
+  /// in the same semantics container unreachable for accessibility purposes.
+  ///
+  /// If `true` is returned, the [SemanticsNode]s for all siblings and cousins
+  /// of this node, that were painted before this node, are dropped from the
+  /// semantics tree up until a semantic boundary is reached.
+  ///
+  /// Paint order as established by [visitChildrenForSemantics] is used to
+  /// determine if a node is previous to this one.
+  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => false;
+
   /// The bounding box, in the local coordinate system, of this
   /// object, for accessibility purposes.
   Rect get semanticBounds;
@@ -2575,7 +2585,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return new _CleanSemanticsFragment(renderObjectOwner: this);
     }
     List<_SemanticsFragment> children;
-    bool dropSemanticsOfLeftSiblings = (this is RenderBlockSemantics);
+    bool dropSemanticsOfPreviousSiblings = isBlockingSemanticsOfPreviouslyPaintedNodes;
     visitChildrenForSemantics((RenderObject child) {
       if (_needsSemanticsGeometryUpdate) {
         // If our geometry changed, make sure the child also does a
@@ -2586,9 +2596,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
       final _SemanticsFragment fragment = child._getSemanticsFragment();
       assert(fragment != null);
-      if (fragment.dropSemanticsOfLeftSiblings) {
+      if (fragment.dropSemanticsOfPreviousSiblings) {
         children = null; // throw away all left siblings of [child].
-        dropSemanticsOfLeftSiblings = true;
+        dropSemanticsOfPreviousSiblings = true;
       }
       if (fragment.producesSemanticNodes) {
         fragment.addAncestor(this);
@@ -2598,27 +2608,27 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
     });
     if (isSemanticBoundary) {
-      // Don't propagate [dropSemanticsOfLeftSiblings] past a semantic boundary.
-      dropSemanticsOfLeftSiblings = false;
+      // Don't propagate [dropSemanticsOfPreviousSiblings] past a semantic boundary.
+      dropSemanticsOfPreviousSiblings = false;
     }
     _needsSemanticsUpdate = false;
     _needsSemanticsGeometryUpdate = false;
     final SemanticsAnnotator annotator = semanticsAnnotator;
     if (parent is! RenderObject)
-      return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+      return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     if (isSemanticBoundary)
-      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     if (annotator != null)
-      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     _semantics = null;
     if (children == null) {
       // Introduces no semantics and has no descendants that introduce semantics.
-      return new _EmptySemanticsFragment(renderObjectOwner: this, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+      return new _EmptySemanticsFragment(renderObjectOwner: this, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     }
     if (children.length > 1)
-      return new _ForkingSemanticsFragment(renderObjectOwner: this, children: children, dropSemanticsOfLeftSiblings: dropSemanticsOfLeftSiblings);
+      return new _ForkingSemanticsFragment(renderObjectOwner: this, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     assert(children.length == 1);
-    return children.single..dropSemanticsOfLeftSiblings = dropSemanticsOfLeftSiblings;
+    return children.single..dropSemanticsOfPreviousSiblings = dropSemanticsOfPreviousSiblings;
   }
 
   /// Called when collecting the semantics of this node.

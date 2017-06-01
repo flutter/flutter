@@ -3640,6 +3640,11 @@ class BlockSemantics extends SingleChildRenderObjectWidget {
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
 /// redundant with the chip label.
+///
+/// See also:
+///
+/// * [BlockSemantics] which drops semantics of previously painted sibling and
+///   cousin widgets.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that drops all the semantics of its descendants.
   const ExcludeSemantics({
