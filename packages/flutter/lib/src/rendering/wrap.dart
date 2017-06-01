@@ -59,7 +59,7 @@ class _RunMetrics {
 }
 
 /// Parent data for use with [RenderWrap].
-class WrapParentData extends ContainerBoxParentDataMixin<RenderBox> {
+class WrapParentData extends ContainerBoxParentData<RenderBox> {
   int _runIndex = 0;
 }
 

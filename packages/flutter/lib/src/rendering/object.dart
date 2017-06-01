@@ -2739,7 +2739,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 /// Generic mixin for render objects with one child.
 ///
 /// Provides a child model for a render object subclass that has a unique child.
-abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implements RenderObject {
+abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extends RenderObject {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory RenderObjectWithChildMixin._() => null;
+
   /// Checks whether the given render object has the correct [runtimeType] to be
   /// a child of this render object.
   ///
@@ -2816,7 +2820,11 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
 }
 
 /// Parent data to support a doubly-linked list of children.
-abstract class ContainerParentDataMixin<ChildType extends RenderObject> implements ParentData {
+abstract class ContainerParentDataMixin<ChildType extends RenderObject> extends ParentData {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory ContainerParentDataMixin._() => null;
+
   /// The previous sibling in the parent's child list.
   ChildType previousSibling;
   /// The next sibling in the parent's child list.
@@ -2847,7 +2855,10 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> implemen
 ///
 /// Provides a child model for a render object subclass that has a doubly-linked
 /// list of children.
-abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> implements RenderObject {
+abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> extends RenderObject {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory ContainerRenderObjectMixin._() => null;
 
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
     ParentDataType childParentData = child.parentData;

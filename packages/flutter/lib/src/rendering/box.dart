@@ -530,7 +530,10 @@ class BoxParentData extends ParentData {
 
 /// Abstract ParentData subclass for RenderBox subclasses that want the
 /// ContainerRenderObjectMixin.
-abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
+///
+/// This is a convenience class that mixes in the relevant classes with
+/// the relevant type arguments.
+abstract class ContainerBoxParentData<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
 enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
 
@@ -714,13 +717,13 @@ class _IntrinsicDimensionsCacheEntry {
 /// [parentData]. The class used for [parentData] must itself have the
 /// [ContainerParentDataMixin] class mixed into it; this is where
 /// [ContainerRenderObjectMixin] stores the linked list. A [ParentData] class
-/// can extend [ContainerBoxParentDataMixin]; this is essentially
+/// can extend [ContainerBoxParentData]; this is essentially
 /// [BoxParentData] mixed with [ContainerParentDataMixin]. For example, if a
 /// `RenderFoo` class wanted to have a linked list of [RenderBox] children, one
 /// might create a `FooParentData` class as follows:
 ///
 /// ```dart
-/// class FooParentData extends ContainerBoxParentDataMixin<RenderBox> {
+/// class FooParentData extends ContainerBoxParentData<RenderBox> {
 ///   // (any fields you might need for these children)
 /// }
 /// ```
@@ -2024,7 +2027,10 @@ abstract class RenderBox extends RenderObject {
 /// By convention, this class doesn't override any members of the superclass.
 /// Instead, it provides helpful functions that subclasses can call as
 /// appropriate.
-abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory RenderBoxContainerDefaultsMixin._() => null;
 
   /// Returns the baseline of the first child with a baseline.
   ///

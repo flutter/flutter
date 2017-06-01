@@ -138,7 +138,7 @@ class RelativeRect {
 }
 
 /// Parent data for use with [RenderStack].
-class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
+class StackParentData extends ContainerBoxParentData<RenderBox> {
   /// The distance by which the child's top edge is inset from the top of the stack.
   double top;
 

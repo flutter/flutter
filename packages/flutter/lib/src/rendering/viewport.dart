@@ -20,7 +20,11 @@ import 'viewport_offset.dart';
 /// content, which can be controlled by a [ViewportOffset]. This interface lets
 /// the framework recognize such render objects and interact with them without
 /// having specific knowledge of all the various types of viewports.
-abstract class RenderAbstractViewport implements RenderObject {
+abstract class RenderAbstractViewport extends RenderObject {
+  // This class is intended to be used as an interface with the implements
+  // keyword, and should not be extended directly.
+  factory RenderAbstractViewport._() => null;
+
   /// Returns the [RenderAbstractViewport] that most tightly encloses the given
   /// render object.
   ///
