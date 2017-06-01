@@ -50,7 +50,7 @@ void main() {
     expect(find.byType(BackdropFilter), findsNothing);
   });
 
-  testWidgets('Translucent background adds blur effects', (WidgetTester tester) async {
+  testWidgets('Non-opaque background adds blur effects', (WidgetTester tester) async {
     await tester.pumpWidget(
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),

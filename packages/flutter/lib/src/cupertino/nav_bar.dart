@@ -26,8 +26,8 @@ const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
 /// It should be placed at top of the screen and automatically accounts for
 /// the OS's status bar.
 ///
-/// If the given [backgroundColor] is translucent, it will produce a blurring
-/// effect to the content behind it.
+/// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
+/// default), it will produce a blurring effect to the content behind it.
 ///
 // TODO(xster): document automatic addition of a CupertinoBackButton.
 // TODO(xster): add sample code using icons.

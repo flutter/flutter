@@ -27,8 +27,8 @@ const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 /// Tab changes typically trigger a switch between [Navigator]s, each with its
 /// own navigation stack, per standard iOS design.
 ///
-/// If the given [backgroundColor] is translucent, it will produce a blurring
-/// effect to the content behind it.
+/// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
+/// default), it will produce a blurring effect to the content behind it.
 ///
 // TODO(xster): document using with a CupertinoScaffold.
 class CupertinoTabBar extends StatelessWidget {
