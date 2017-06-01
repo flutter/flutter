@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
@@ -439,5 +441,41 @@ void main() {
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 36.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
+  });
+
+  testWidgets('Open drawer hides underlying semantics tree', (WidgetTester tester) async {
+    const String bodyLabel = 'I am the body';
+    const String persistentFooterButtonLabel = 'a button on the bottom';
+    const String bottomNavigationBarLabel = 'a bar in an app';
+    const String floatingActionButtonLabel = 'I float in space';
+    const String drawerLabel = 'I am the reason for this test';
+
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+      body: new Semantics(label: bodyLabel, child: new Container()),
+      persistentFooterButtons: <Widget>[new Semantics(label: persistentFooterButtonLabel, child: new Container())],
+      bottomNavigationBar: new Semantics(label: bottomNavigationBarLabel, child: new Container()),
+      floatingActionButton: new Semantics(label: floatingActionButtonLabel, child: new Container()),
+      drawer: new Drawer(child:new Semantics(label: drawerLabel, child: new Container())),
+    )));
+
+    expect(semantics, includesNodeWithLabel(bodyLabel));
+    expect(semantics, includesNodeWithLabel(persistentFooterButtonLabel));
+    expect(semantics, includesNodeWithLabel(bottomNavigationBarLabel));
+    expect(semantics, includesNodeWithLabel(floatingActionButtonLabel));
+    expect(semantics, isNot(includesNodeWithLabel(drawerLabel)));
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(semantics, isNot(includesNodeWithLabel(bodyLabel)));
+    expect(semantics, isNot(includesNodeWithLabel(persistentFooterButtonLabel)));
+    expect(semantics, isNot(includesNodeWithLabel(bottomNavigationBarLabel)));
+    expect(semantics, isNot(includesNodeWithLabel(floatingActionButtonLabel)));
+    expect(semantics, includesNodeWithLabel(drawerLabel));
+
+    semantics.dispose();
   });
 }
