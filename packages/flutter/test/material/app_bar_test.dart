@@ -216,8 +216,12 @@ void main() {
 
     final Finder title = find.byKey(titleKey);
     expect(tester.getTopLeft(title).dx, 72.0);
-    // The toolbar's contents are padded on the right by 4.0
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0));
+    expect(tester.getSize(title).width, equals(
+        800.0 // Screen width.
+        - 4.0 // Left margin before the leading button.
+        - 56.0 // Leading button width.
+        - 16.0 // Leading button to title padding.
+        - 16.0)); // Title right side padding.
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
@@ -227,13 +231,19 @@ void main() {
 
     expect(tester.getTopLeft(title).dx, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
+    expect(tester.getSize(title).width, equals(
+        800.0 // Screen width.
+        - 4.0 // Left margin before the leading button.
+        - 56.0 // Leading button width.
+        - 16.0 // Leading button to title padding.
+        - 16.0 // Title to actions padding
+        - 200.0)); // Actions' width.
 
     leading = new Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 4.0 - 56.0 - 16.0 - 16.0 - 200.0));
   });
 
   testWidgets('AppBar centerTitle:true title overflow OK ', (WidgetTester tester) async {

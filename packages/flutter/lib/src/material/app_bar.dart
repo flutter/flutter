@@ -21,70 +21,7 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-enum _ToolbarSlot {
-  leading,
-  title,
-  actions,
-}
-
-class _ToolbarLayout extends MultiChildLayoutDelegate {
-  _ToolbarLayout({ this.centerTitle });
-
-  // If false the title should be left or right justified within the space bewteen
-  // the leading and actions widgets, depending on the locale's writing direction.
-  // If true the title is centered within the toolbar (not within the horizontal
-  // space bewteen the leading and actions widgets).
-  final bool centerTitle;
-
-  static const double kLeadingWidth = 56.0; // So it's square with kToolbarHeight.
-  static const double kTitleLeftWithLeading = 72.0; // As per https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-keylines-spacing.
-  static const double kTitleLeftWithoutLeading = 16.0;
-
-  @override
-  void performLayout(Size size) {
-    double actionsWidth = 0.0;
-
-    if (hasChild(_ToolbarSlot.leading)) {
-      final BoxConstraints constraints = new BoxConstraints.tight(new Size(kLeadingWidth, size.height));
-      layoutChild(_ToolbarSlot.leading, constraints);
-      positionChild(_ToolbarSlot.leading, Offset.zero);
-    }
-
-    if (hasChild(_ToolbarSlot.actions)) {
-      final BoxConstraints constraints = new BoxConstraints.loose(size);
-      final Size actionsSize = layoutChild(_ToolbarSlot.actions, constraints);
-      final double actionsLeft = size.width - actionsSize.width;
-      final double actionsTop = (size.height - actionsSize.height) / 2.0;
-      actionsWidth = actionsSize.width;
-      positionChild(_ToolbarSlot.actions, new Offset(actionsLeft, actionsTop));
-    }
-
-    if (hasChild(_ToolbarSlot.title)) {
-      final double titleLeftMargin =
-          hasChild(_ToolbarSlot.leading) ? kTitleLeftWithLeading : kTitleLeftWithoutLeading;
-      final double maxWidth = math.max(size.width - titleLeftMargin - actionsWidth, 0.0);
-      final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
-      final Size titleSize = layoutChild(_ToolbarSlot.title, constraints);
-      final double titleY = (size.height - titleSize.height) / 2.0;
-      double titleX = titleLeftMargin;
-
-      // If the centered title will not fit between the leading and actions
-      // widgets, then align its left or right edge with the adjacent boundary.
-      if (centerTitle) {
-        titleX = (size.width - titleSize.width) / 2.0;
-        if (titleX + titleSize.width > size.width - actionsWidth)
-          titleX = size.width - actionsWidth - titleSize.width;
-        else if (titleX < titleLeftMargin)
-          titleX = titleLeftMargin;
-      }
-
-      positionChild(_ToolbarSlot.title, new Offset(titleX, titleY));
-    }
-  }
-
-  @override
-  bool shouldRelayout(_ToolbarLayout oldDelegate) => centerTitle != oldDelegate.centerTitle;
-}
+const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 
 // Bottom justify the kToolbarHeight child which may overflow the top.
 class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
@@ -390,7 +327,6 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    final List<Widget> toolbarChildren = <Widget>[];
     Widget leading = widget.leading;
     if (leading == null) {
       if (hasDrawer) {
@@ -405,47 +341,38 @@ class _AppBarState extends State<AppBar> {
       }
     }
     if (leading != null) {
-      toolbarChildren.add(
-        new LayoutId(
-          id: _ToolbarSlot.leading,
-          child: leading
-        )
+      leading = new ConstrainedBox(
+        constraints: const BoxConstraints.tightFor(width: _kLeadingWidth),
+        child: leading,
       );
     }
 
-    if (widget.title != null) {
-      toolbarChildren.add(
-        new LayoutId(
-          id: _ToolbarSlot.title,
-          child: new DefaultTextStyle(
-            style: centerStyle,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            child: widget.title,
-          ),
-        ),
+    Widget title = widget.title;
+    if (title != null) {
+      title = new DefaultTextStyle(
+        style: centerStyle,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        child: title,
       );
     }
+
+    Widget actions;
     if (widget.actions != null && widget.actions.isNotEmpty) {
-      toolbarChildren.add(
-        new LayoutId(
-          id: _ToolbarSlot.actions,
-          child: new Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: widget.actions,
-          ),
-        ),
+      actions = new Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: widget.actions,
       );
     }
 
     final Widget toolbar = new Padding(
       padding: const EdgeInsets.only(right: 4.0),
-      child: new CustomMultiChildLayout(
-        delegate: new _ToolbarLayout(
-          centerTitle: widget._getEffectiveCenterTitle(themeData),
-        ),
-        children: toolbarChildren,
+      child: new NavigationToolbar(
+        leading: leading,
+        middle: title,
+        trailing: actions,
+        centerMiddle: widget._getEffectiveCenterTitle(themeData),
       ),
     );
 
