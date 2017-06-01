@@ -299,6 +299,7 @@ abstract class Device {
 class DebuggingOptions {
   DebuggingOptions.enabled(this.buildMode, {
     this.startPaused: false,
+    this.enableSoftwareRendering: false,
     this.useTestFonts: false,
     this.observatoryPort,
     this.diagnosticPort
@@ -308,6 +309,7 @@ class DebuggingOptions {
     debuggingEnabled = false,
     useTestFonts = false,
     startPaused = false,
+    enableSoftwareRendering = false,
     observatoryPort = null,
     diagnosticPort = null;
 
@@ -315,6 +317,7 @@ class DebuggingOptions {
 
   final BuildMode buildMode;
   final bool startPaused;
+  final bool enableSoftwareRendering;
   final bool useTestFonts;
   final int observatoryPort;
   final int diagnosticPort;

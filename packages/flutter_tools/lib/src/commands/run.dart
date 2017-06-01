@@ -88,6 +88,12 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
+    argParser.addFlag('enable-software-rendering',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Enable rendering using the Skia software backend. This is useful\n'
+              'when testing Flutter on emulators. By default, Flutter will\n'
+              'attempt to either use OpenGL or Vulkan.');
     argParser.addFlag('use-test-fonts',
         negatable: true,
         defaultsTo: false,
@@ -218,6 +224,7 @@ class RunCommand extends RunCommandBase {
         getBuildMode(),
         startPaused: argResults['start-paused'],
         useTestFonts: argResults['use-test-fonts'],
+        enableSoftwareRendering: argResults['enable-software-rendering'],
         observatoryPort: observatoryPort,
         diagnosticPort: diagnosticPort,
       );
@@ -239,6 +246,7 @@ class RunCommand extends RunCommandBase {
           notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
+        print
         app = await daemon.appDomain.startApp(
           devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
