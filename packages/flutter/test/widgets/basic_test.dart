@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,8 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   group('BlockSemantics', () {
-    testWidgets('hides semantic nodes of siblings',
-        (WidgetTester tester) async {
+    testWidgets('hides semantic nodes of siblings', (WidgetTester tester) async {
       final SemanticsTester semantics = new SemanticsTester(tester);
 
       await tester.pumpWidget(new Stack(
@@ -44,12 +42,8 @@ void main() {
 
       semantics.dispose();
     });
-  });
 
-  group('BlockSemantics', () {
-    testWidgets(
-        'does not hides semantic nodes of siblings outside the current semantic boundary',
-        (WidgetTester tester) async {
+    testWidgets('does not hides semantic nodes of siblings outside the current semantic boundary', (WidgetTester tester) async {
       final SemanticsTester semantics = new SemanticsTester(tester);
 
       await tester.pumpWidget(new Stack(
@@ -64,14 +58,17 @@ void main() {
             child: new Stack(
               children: <Widget>[
                 new Semantics(
-                  label: '#2.1',
+                  label: 'NOT#2.1',
                   child: new Container(),
                 ),
                 new Semantics(
                   label: '#2.2',
-                  child: new Semantics(
-                    label: '#2.2.1',
-                    child: new Container(),
+                  child: new BlockSemantics(
+                    child: new Semantics(
+                      container: true,
+                      label: '#2.2.1',
+                      child: new Container(),
+                    ),
                   ),
                 ),
                 new Semantics(
@@ -88,12 +85,11 @@ void main() {
         ],
       ));
 
-      print(debugDumpSemanticsTree());
-
       expect(semantics, includesNodeWithLabel('#1'));
       expect(semantics, includesNodeWithLabel('#2'));
+      expect(semantics, isNot(includesNodeWithLabel('NOT#2.1')));
       expect(semantics, includesNodeWithLabel('#2.2'));
-      expect(semantics, includesNodeWithLabel('#2.1'));
+      expect(semantics, includesNodeWithLabel('#2.2.1'));
       expect(semantics, includesNodeWithLabel('#2.3'));
       expect(semantics, includesNodeWithLabel('#3'));
 
