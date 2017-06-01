@@ -1433,6 +1433,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     super.adoptChild(child);
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
+    markNeedsSemanticsUpdate();
   }
 
   /// Called by subclasses when they decide a render object is no longer a child.
@@ -1450,6 +1451,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     super.dropChild(child);
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
+    markNeedsSemanticsUpdate();
   }
 
   /// Calls visitor for each immediate child of this render object.
