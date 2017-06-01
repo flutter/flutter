@@ -448,7 +448,7 @@ void main() {
     String executable,
     String testPath, {
     String packages,
-    bool enableObservatory: true,
+    bool enableObservatory: false,
     bool startPaused: false,
     int observatoryPort,
     int diagnosticPort,
