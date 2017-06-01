@@ -759,7 +759,7 @@ class AppInstance {
   }
 
   dynamic _runInZone(AppDomain domain, dynamic method()) {
-    _logger ??= new _AppRunLogger(domain, this, logToParent: logToStdout ? logger : null);
+    _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     final AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);
@@ -769,17 +769,17 @@ class AppInstance {
 
 /// A [Logger] which sends log messages to a listening daemon client.
 class _AppRunLogger extends Logger {
-  _AppRunLogger(this.domain, this.app, { this.logToParent });
+  _AppRunLogger(this.domain, this.app, { this.parent });
 
   AppDomain domain;
   final AppInstance app;
-  final Logger logToParent;
+  final Logger parent;
   int _nextProgressId = 0;
 
   @override
   void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
-    if (logToParent != null) {
-      logToParent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
+    if (parent != null) {
+      parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
     } else {
       if (stackTrace != null) {
         _sendLogEvent(<String, dynamic>{
@@ -801,8 +801,8 @@ class _AppRunLogger extends Logger {
     String message, {
     bool emphasis: false, bool newline: true, String ansiAlternative, int indent
   }) {
-    if (logToParent != null) {
-      logToParent.printStatus(message, emphasis: emphasis, newline: newline,
+    if (parent != null) {
+      parent.printStatus(message, emphasis: emphasis, newline: newline,
           ansiAlternative: ansiAlternative, indent: indent);
     } else {
       _sendLogEvent(<String, dynamic>{ 'log': message });
@@ -811,8 +811,8 @@ class _AppRunLogger extends Logger {
 
   @override
   void printTrace(String message) {
-    if (logToParent != null) {
-      logToParent.printTrace(message);
+    if (parent != null) {
+      parent.printTrace(message);
     } else {
       _sendLogEvent(<String, dynamic>{ 'log': message, 'trace': true });
     }
