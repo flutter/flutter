@@ -654,10 +654,10 @@ class _SemanticsGeometry {
 
 /// Describes the shape of the semantic tree.
 ///
-/// A _SemanticsFragment object is a node in a short-lived tree which is used to
-/// create the final SemanticsNode tree that is sent to the semantics server.
-/// These objects have a semantic annotator, and a list of [_SemanticsFragment]
-/// children.
+/// A [_SemanticsFragment] object is a node in a short-lived tree which is used
+/// to create the final [SemanticsNode] tree that is sent to the semantics
+/// server. These objects have a [SemanticsAnnotator], and a list of
+/// [_SemanticsFragment] children.
 abstract class _SemanticsFragment {
   _SemanticsFragment({
     @required RenderObject renderObjectOwner,
@@ -791,7 +791,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// Represents a RenderObject that has [hasSemantics] set to `true`.
+/// Represents a RenderObject that has [isSemanticBoundary] set to `true`.
 ///
 /// It returns the SemanticsNode for that [RenderObject].
 class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
@@ -822,8 +822,8 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// Represents a RenderObject that does not have [hasSemantics] set to `true`,
-/// but which does have some semantic annotators.
+/// Represents a RenderObject that does not have [isSemanticBoundary] set to
+/// `true`, but which does have some semantic annotators.
 ///
 /// When it is compiled, if the nearest ancestor [_SemanticsFragment] that isn't
 /// also an [_ImplicitSemanticsFragment] is a [_RootSemanticsFragment] or a
@@ -1205,9 +1205,9 @@ class PipelineOwner {
   final List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
 
   /// Update the semantics for render objects marked as needing a semantics
-  /// upadate.
+  /// update.
   ///
-  /// Initially, only the root node, as scheduled by [scheduleInitialSemantics].
+  /// Initially, only the root node, as scheduled by [scheduleInitialSemantics],
   /// needs a semantics update.
   ///
   /// This function is one of the core stages of the rendering pipeline. The
@@ -2575,7 +2575,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
     _semantics = null;
     if (children == null) {
-      // Introduces no semantics and has no descendants that introduce semantic
+      // Introduces no semantics and has no descendants that introduce semantics.
       return null;
     }
     if (children.length > 1)
@@ -2584,15 +2584,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     return children.single;
   }
 
-  /// Called when collecting the semantics of this node. Subclasses
-  /// that have children that are not semantically relevant (e.g.
-  /// because they are invisible) should skip those children here.
+  /// Called when collecting the semantics of this node.
+  ///
+  /// The implementation has to return the children in paint order skipping all
+  /// children that are not semantically relevant (e.g. because they are
+  /// invisible).
   ///
   /// The default implementation mirrors the behavior of
   /// [visitChildren()] (which is supposed to walk all the children).
-  ///
-  /// The implementation has to return the children in paint order skipping all
-  /// children that are not relevant for semantics.
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     visitChildren(visitor);
   }
