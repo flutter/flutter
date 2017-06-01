@@ -15,6 +15,23 @@ const double _kNavBarHeight = 44.0;
 const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
 const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
 
+/// An iOS styled navigation bar.
+///
+/// The navigation bar is a toolbar that minimally consists of a widget, normally
+/// a page title, in the [middle] of the toolbar.
+///
+/// It also supports a [leading] and [trailing] widget before and after the
+/// [middle] widget while keeping the [middle] widget centered.
+///
+/// It should be placed at top of the screen and automatically accounts for
+/// the OS's status bar.
+///
+/// If the given [backgroundColor] is translucent, it will produce a blurring
+/// effect to the content behind it.
+///
+// TODO(xster): document automatic addition of a CupertinoBackButton.
+// TODO(xster): add sample code using icons.
+// TODO(xster): document integration into a CupertinoScaffold.
 class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
   const CupertinoNavigationBar({
     Key key,
@@ -37,6 +54,8 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   /// Widget to place at the end of the nav bar. Normally additional actions
   /// taken on the page such as a search or edit function.
   final Widget trailing;
+
+  // TODO(xster): implement support for double row nav bars.
 
   /// The background color of the nav bar. If it contains transparency, the
   /// tab bar will automatically produce a blurring effect to the content
@@ -61,8 +80,8 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
       // Let the middle be black rather than `actionsForegroundColor` in case
       // it's a plain text title.
       styledMiddle = DefaultTextStyle.merge(
-        style: new TextStyle(color: CupertinoColors.black),
-        child: middle
+        style: const TextStyle(color: CupertinoColors.black),
+        child: middle,
       );
     }
 
