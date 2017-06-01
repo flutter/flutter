@@ -272,6 +272,7 @@ enum FilterQuality {
 /// Styles to use for line endings.
 ///
 /// See [Paint.strokeCap].
+// These enum values must be kept in sync with SkPaint::Cap.
 enum StrokeCap {
   /// Begin and end contours with a flat edge and no extension.
   butt,
@@ -288,6 +289,7 @@ enum StrokeCap {
 /// Strategies for painting shapes and paths on a canvas.
 ///
 /// See [Paint.style].
+// These enum values must be kept in sync with SkPaint::Style.
 enum PaintingStyle {
   // This list comes from Skia's SkPaint.h and the values (order) should be kept
   // in sync.
@@ -833,6 +835,7 @@ class Path extends NativeFieldWrapperClass2 {
 }
 
 /// Styles to use for blurs in [MaskFilter] objects.
+// These enum values must be kept in sync with SkBlurStyle.
 enum BlurStyle {
   // These mirror SkBlurStyle and must be kept in sync.
 
@@ -968,6 +971,7 @@ abstract class Shader extends NativeFieldWrapperClass2 { }
 ///  * [dart:ui.Gradient], the low-level class used when dealing with the
 ///    [Paint.shader] property directly, with its [new Gradient.linear] and [new
 ///    Gradient.radial] constructors.
+// These enum values must be kept in sync with SkShader::TileMode.
 enum TileMode {
   /// Edge is clamped to the final color.
   ///
@@ -977,6 +981,16 @@ enum TileMode {
   /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_linear.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_radial.png)
   clamp,
+
+  /// Edge is repeated from first color to last.
+  ///
+  /// This is as if the stop points from 0.0 to 1.0 were then repeated from 1.0
+  /// to 2.0, 2.0 to 3.0, and so forth (and for linear gradients, similarly from
+  /// -1.0 to 0.0, -2.0 to -1.0, etc).
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_radial.png)
+  repeated,
 
   /// Edge is mirrored from last color to first.
   ///
@@ -988,16 +1002,6 @@ enum TileMode {
   /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_linear.png)
   /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_radial.png)
   mirror,
-
-  /// Edge is repeated from first color to last.
-  ///
-  /// This is as if the stop points from 0.0 to 1.0 were then repeated from 1.0
-  /// to 2.0, 2.0 to 3.0, and so forth (and for linear gradients, similarly from
-  /// -1.0 to 0.0, -2.0 to -1.0, etc).
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_radial.png)
-  repeated,
 }
 
 Int32List _encodeColorList(List<Color> colors) {
@@ -1146,6 +1150,7 @@ class ImageShader extends Shader {
 /// Defines how a list of points is interpreted when drawing a set of triangles.
 ///
 /// Used by [Canvas.drawVertices].
+// These enum values must be kept in sync with SkVertices::VertexMode.
 enum VertexMode {
   /// Draw each sequence of three points as the vertices of a triangle.
   triangles,
@@ -1214,6 +1219,7 @@ class Vertices extends NativeFieldWrapperClass2 {
 ///
 // ignore: deprecated_member_use
 /// Used by [Canvas.drawPoints].
+// These enum values must be kept in sync with SkCanvas::PointMode.
 enum PointMode {
   /// Draw each point separately.
   ///
