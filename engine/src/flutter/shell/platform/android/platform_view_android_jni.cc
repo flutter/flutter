@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
+#include "flutter/common/settings.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
@@ -45,6 +46,17 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
                                 jobject buffer,
                                 jobjectArray strings) {
   env->CallVoidMethod(obj, g_update_semantics_method, buffer, strings);
+  FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+}
+
+static jmethodID g_handle_platform_update_software_buffer = nullptr;
+void FlutterViewUpdateSoftwareBuffer(JNIEnv* env,
+                                     jobject obj,
+                                     jobject buffer,
+                                     jint width,
+                                     jint height) {
+  env->CallVoidMethod(obj, g_handle_platform_update_software_buffer, buffer,
+                      width, height);
   FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
 }
 
@@ -179,6 +191,10 @@ static void SetSemanticsEnabled(JNIEnv* env,
   return PLATFORM_VIEW->SetSemanticsEnabled(enabled);
 }
 
+static jboolean GetIsSoftwareRendering(JNIEnv* env, jobject jcaller) {
+  return blink::Settings::Get().enable_software_rendering;
+}
+
 static void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                                   jobject jcaller,
                                                   jlong platform_view,
@@ -193,8 +209,8 @@ static void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
                                                        jobject jcaller,
                                                        jlong platform_view,
                                                        jint responseId) {
-  return PLATFORM_VIEW->InvokePlatformMessageEmptyResponseCallback(
-      env, responseId);
+  return PLATFORM_VIEW->InvokePlatformMessageEmptyResponseCallback(env,
+                                                                   responseId);
 }
 
 bool PlatformViewAndroid::Register(JNIEnv* env) {
@@ -269,7 +285,8 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       {
           .name = "nativeDispatchEmptyPlatformMessage",
           .signature = "(JLjava/lang/String;I)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::DispatchEmptyPlatformMessage),
+          .fnPtr =
+              reinterpret_cast<void*>(&shell::DispatchEmptyPlatformMessage),
       },
       {
           .name = "nativeDispatchPointerDataPacket",
@@ -297,6 +314,11 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .signature = "(JI)V",
           .fnPtr = reinterpret_cast<void*>(
               &shell::InvokePlatformMessageEmptyResponseCallback),
+      },
+      {
+          .name = "nativeGetIsSoftwareRenderingEnabled",
+          .signature = "()Z",
+          .fnPtr = reinterpret_cast<void*>(&shell::GetIsSoftwareRendering),
       },
   };
 
@@ -328,6 +350,13 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_handle_platform_update_software_buffer =
+      env->GetMethodID(g_flutter_view_class->obj(), "updateSoftwareBuffer",
+                       "(Ljava/nio/ByteBuffer;II)V");
+
+  if (g_handle_platform_update_software_buffer == nullptr) {
+    return false;
+  }
   return true;
 }
 

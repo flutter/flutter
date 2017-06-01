@@ -68,6 +68,9 @@ bool AndroidSurfaceVulkan::ResourceContextMakeCurrent() {
   return false;
 }
 
+void AndroidSurfaceVulkan::SetFlutterView(
+    const fml::jni::JavaObjectWeakGlobalRef& flutter_view) {}
+
 bool AndroidSurfaceVulkan::SetNativeWindow(
     ftl::RefPtr<AndroidNativeWindow> window,
     PlatformView::SurfaceConfig config) {

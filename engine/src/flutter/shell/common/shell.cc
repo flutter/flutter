@@ -136,14 +136,16 @@ void Shell::InitStandalone(ftl::CommandLine command_line,
     }
   }
 
-  settings.ipv6 =
-      command_line.HasOption(FlagForSwitch(Switch::IPv6));
+  settings.ipv6 = command_line.HasOption(FlagForSwitch(Switch::IPv6));
 
   settings.start_paused =
       command_line.HasOption(FlagForSwitch(Switch::StartPaused));
 
   settings.enable_dart_profiling =
       command_line.HasOption(FlagForSwitch(Switch::EnableDartProfiling));
+
+  settings.enable_software_rendering =
+      command_line.HasOption(FlagForSwitch(Switch::EnableSoftwareRendering));
 
   settings.endless_trace_buffer =
       command_line.HasOption(FlagForSwitch(Switch::EndlessTraceBuffer));

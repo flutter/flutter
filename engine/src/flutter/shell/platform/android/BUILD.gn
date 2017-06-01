@@ -23,6 +23,8 @@ shared_library("flutter_shell_native") {
     "android_surface.h",
     "android_surface_gl.cc",
     "android_surface_gl.h",
+    "android_surface_software.h",
+    "android_surface_software.cc",
     "flutter_main.cc",
     "flutter_main.h",
     "library_loader.cc",

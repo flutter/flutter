@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_VULKAN_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_VULKAN_H_
 
+#include <jni.h>
 #include <memory>
 #include "flutter/shell/platform/android/android_native_window.h"
 #include "flutter/shell/platform/android/android_surface.h"
@@ -33,6 +34,9 @@ class AndroidSurfaceVulkan : public AndroidSurface {
 
   bool SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
                        PlatformView::SurfaceConfig config) override;
+
+  void SetFlutterView(
+      const fml::jni::JavaObjectWeakGlobalRef& flutter_view) override;
 
  private:
   ftl::RefPtr<vulkan::VulkanProcTable> proc_table_;
