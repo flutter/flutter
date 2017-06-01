@@ -6,6 +6,8 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
+
 // TODO(abarth): These constants probably belong somewhere more general.
 
 const TextStyle _kCupertinoDialogTitleStyle = const TextStyle(
@@ -13,7 +15,7 @@ const TextStyle _kCupertinoDialogTitleStyle = const TextStyle(
   inherit: false,
   fontSize:  17.5,
   fontWeight: FontWeight.w600,
-  color: const Color(0xFF000000),
+  color: CupertinoColors.black,
   height: 1.25,
   textBaseline: TextBaseline.alphabetic,
 );
@@ -23,7 +25,7 @@ const TextStyle _kCupertinoDialogContentStyle = const TextStyle(
   inherit: false,
   fontSize:  12.4,
   fontWeight: FontWeight.w500,
-  color: const Color(0xFF000000),
+  color: CupertinoColors.black,
   height: 1.35,
   textBaseline: TextBaseline.alphabetic,
 );
@@ -33,7 +35,7 @@ const TextStyle _kCupertinoDialogActionStyle = const TextStyle(
   inherit: false,
   fontSize:  16.8,
   fontWeight: FontWeight.w400,
-  color: const Color(0xFF027AFF),
+  color: CupertinoColors.activeBlue,
   textBaseline: TextBaseline.alphabetic,
 );
 
@@ -180,7 +182,6 @@ class CupertinoAlertDialog extends StatelessWidget {
   }
 }
 
-const Color _kDestructiveActionColor = const Color(0xFFFF3B30);
 
 /// A button typically used in a [CupertinoAlertDialog].
 ///
@@ -228,7 +229,7 @@ class CupertinoDialogAction extends StatelessWidget {
       style = style.copyWith(fontWeight: FontWeight.w600);
 
     if (isDestructiveAction)
-      style = style.copyWith(color: _kDestructiveActionColor);
+      style = style.copyWith(color: CupertinoColors.destructiveRed);
 
     if (!enabled)
       style = style.copyWith(color: style.color.withOpacity(0.5));

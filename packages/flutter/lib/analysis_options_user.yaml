@@ -69,7 +69,7 @@ linter:
     - empty_constructor_bodies
     - implementation_imports
     - library_names
-    - library_prefixes
+    # - library_prefixes
     - non_constant_identifier_names
     # - one_member_abstracts
     # - only_throw_errors

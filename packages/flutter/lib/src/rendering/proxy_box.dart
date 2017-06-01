@@ -285,11 +285,21 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 }
 
-/// Constrains the child's maxWidth and maxHeight if they're otherwise
-/// unconstrained.
+/// Constrains the child's [BoxConstraints.maxWidth] and
+/// [BoxConstraints.maxHeight] if they're otherwise unconstrained.
+///
+/// This has the effect of giving the child a natural dimension in unbounded
+/// environments. For example, by providing a [maxHeight] to a widget that
+/// normally tries to be as big as possible, the widget will normally size
+/// itself to fit its parent, but when placed in a vertical list, it will take
+/// on the given height.
+///
+/// This is useful when composing widgets that normally try to match their
+/// parents' size, so that they behave reasonably in lists (which are
+/// unbounded).
 class RenderLimitedBox extends RenderProxyBox {
-  /// Creates a render box that imposes a maxWidth or maxHeight on its child if
-  /// the child is otherwise unconstrained.
+  /// Creates a render box that imposes a maximum width or maximum height on its
+  /// child if the child is otherwise unconstrained.
   ///
   /// The [maxWidth] and [maxHeight] arguments not be null and must be
   /// non-negative.
@@ -2891,12 +2901,41 @@ class RenderMergeSemantics extends RenderProxyBox {
 
 /// Excludes this subtree from the semantic tree.
 ///
+/// When [excluding] is true, this render object (and its subtree) is excluded
+/// from the semantic tree.
+///
 /// Useful e.g. for hiding text that is redundant with other text next
 /// to it (e.g. text included only for the visual effect).
 class RenderExcludeSemantics extends RenderProxyBox {
   /// Creates a render object that ignores the semantics of its subtree.
-  RenderExcludeSemantics({ RenderBox child }) : super(child);
+  RenderExcludeSemantics({
+    RenderBox child,
+    bool excluding: true,
+  }) : _excluding = excluding, super(child) {
+    assert(_excluding != null);
+  }
+
+  /// Whether this render object is excluded from the semantic tree.
+  bool get excluding => _excluding;
+  bool _excluding;
+  set excluding(bool value) {
+    assert(value != null);
+    if (value == _excluding)
+      return;
+    _excluding = value;
+    markNeedsSemanticsUpdate();
+  }
 
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) { }
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (excluding)
+      return;
+    super.visitChildrenForSemantics(visitor);
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('excluding: $excluding');
+  }
 }

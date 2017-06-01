@@ -61,6 +61,10 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 
   /// The current string the user is editing.
   String get text => value.text;
+  /// Setting this will notify all the listeners of this [TextEditingController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this value should only be set between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
   set text(String newText) {
     value = value.copyWith(text: newText, composing: TextRange.empty);
   }
@@ -70,6 +74,10 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// If the selection is collapsed, then this property gives the offset of the
   /// cursor within the text.
   TextSelection get selection => value.selection;
+  /// Setting this will notify all the listeners of this [TextEditingController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this value should only be set between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
   set selection(TextSelection newSelection) {
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
@@ -78,6 +86,11 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   ///
   /// After calling this function, [text] will be the empty string and the
   /// selection will be invalid.
+  ///
+  /// Calling this will notify all the listeners of this [TextEditingController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
   void clear() {
     value = TextEditingValue.empty;
   }
@@ -87,13 +100,13 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// The composing region is the range of text that is still being composed.
   /// Calling this function indicates that the user is done composing that
   /// region.
+  ///
+  /// Calling this will notify all the listeners of this [TextEditingController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this method should only be called between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
-  }
-
-  @override
-  String toString() {
-    return '$runtimeType#$hashCode($value)';
   }
 }
 
@@ -432,6 +445,21 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     _scrollController.jumpTo(_getScrollOffsetForCaret(caretRect));
   }
 
+  bool _textChangedSinceLastCaretUpdate = false;
+
+  void _handleCaretChanged(Rect caretRect) {
+    // If the caret location has changed due to an update to the text or
+    // selection, then scroll the caret into view.
+    if (_textChangedSinceLastCaretUpdate) {
+      _textChangedSinceLastCaretUpdate = false;
+      _scrollController.animateTo(
+        _getScrollOffsetForCaret(caretRect),
+        curve: Curves.fastOutSlowIn,
+        duration: const Duration(milliseconds: 50),
+      );
+    }
+  }
+
   void _formatAndSetValue(TextEditingValue value) {
     if (widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
       for (TextInputFormatter formatter in widget.inputFormatters)
@@ -480,6 +508,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
+    _textChangedSinceLastCaretUpdate = true;
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
     setState(() { /* We use widget.controller.value in build(). */ });
@@ -511,6 +540,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
           obscureText: widget.obscureText,
           offset: offset,
           onSelectionChanged: _handleSelectionChanged,
+          onCaretChanged: _handleCaretChanged,
         );
       },
     );
@@ -531,6 +561,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.obscureText,
     this.offset,
     this.onSelectionChanged,
+    this.onCaretChanged,
   }) : super(key: key);
 
   final TextEditingValue value;
@@ -544,6 +575,7 @@ class _Editable extends LeafRenderObjectWidget {
   final bool obscureText;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
+  final CaretChangedHandler onCaretChanged;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -558,6 +590,7 @@ class _Editable extends LeafRenderObjectWidget {
       selection: value.selection,
       offset: offset,
       onSelectionChanged: onSelectionChanged,
+      onCaretChanged: onCaretChanged,
     );
   }
 
@@ -573,7 +606,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..textAlign = textAlign
       ..selection = value.selection
       ..offset = offset
-      ..onSelectionChanged = onSelectionChanged;
+      ..onSelectionChanged = onSelectionChanged
+      ..onCaretChanged = onCaretChanged;
   }
 
   TextSpan get _styledTextSpan {

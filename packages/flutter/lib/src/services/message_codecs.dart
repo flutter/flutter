@@ -164,10 +164,6 @@ class JSONMethodCodec implements MethodCodec {
 
 /// [MessageCodec] using the Flutter standard binary encoding.
 ///
-/// The standard encoding is guaranteed to be compatible with the corresponding
-/// standard codec for FlutterMessageChannels on the host platform. These parts
-/// of the Flutter SDK are evolved synchronously.
-///
 /// Supported messages are acyclic values of these forms:
 ///
 ///  * null

@@ -9,13 +9,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class TestImageInfo implements ImageInfo {
-  const TestImageInfo(this.value) : image = null, scale = null;
+  const TestImageInfo(this.value, { this.image, this.scale });
 
   @override
-  final ui.Image image; // ignored in test
+  final ui.Image image;
 
   @override
-  final double scale; // ignored in test
+  final double scale;
 
   final int value;
 

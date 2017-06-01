@@ -217,7 +217,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///       ),
 ///     ),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -285,7 +285,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox]
 ///  * [SizedOverflowBox]
 ///
-/// ## Example
+/// ## Sample code
 ///
 /// For example, use a clip to show the top half of an [Image], you can use a
 /// [ClipRect] combined with an [Align]:
@@ -297,7 +297,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///     heightFactor: 0.5,
 ///     child: new Image(...),
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -752,6 +752,12 @@ class Padding extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPadding renderObject) {
     renderObject.padding = padding;
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('padding: $padding');
+  }
 }
 
 /// A widget that aligns its child within itself and optionally sizes itself
@@ -1090,7 +1096,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that sizes its child to a fraction of the total available space.
-/// For more details about the layout algorithm, see [RenderFractionallySizedOverflowBox].
+/// For more details about the layout algorithm, see
+/// [RenderFractionallySizedOverflowBox].
 ///
 /// See also:
 ///
@@ -1171,8 +1178,18 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
 /// A box that limits its size only when it's unconstrained.
 ///
 /// If this widget's maximum width is unconstrained then its child's width is
-/// limited to maxWidth. Similarly, if this widget's maximum height is unconstrained
-/// then its child's height is limited to to maxHeight.
+/// limited to [maxWidth]. Similarly, if this widget's maximum height is
+/// unconstrained then its child's height is limited to [maxHeight].
+///
+/// This has the effect of giving the child a natural dimension in unbounded
+/// environments. For example, by providing a [maxHeight] to a widget that
+/// normally tries to be as big as possible, the widget will normally size
+/// itself to fit its parent, but when placed in a vertical list, it will take
+/// on the given height.
+///
+/// This is useful when composing widgets that normally try to match their
+/// parents' size, so that they behave reasonably in lists (which are
+/// unbounded).
 class LimitedBox extends SingleChildRenderObjectWidget {
   /// Creates a box that limits its size only when it's unconstrained.
   ///
@@ -1187,10 +1204,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
        assert(maxHeight != null && maxHeight >= 0.0),
        super(key: key, child: child);
 
-  /// The maximum width limit to apply in the absence of a maxWidth constraint.
+  /// The maximum width limit to apply in the absence of a
+  /// [BoxConstraints.maxWidth] constraint.
   final double maxWidth;
 
-  /// The maximum height limit to apply in the absence of a maxHeight constraint.
+  /// The maximum height limit to apply in the absence of a
+  /// [BoxConstraints.maxHeight] constraint.
   final double maxHeight;
 
   @override
@@ -1671,7 +1690,7 @@ class ListBody extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A widget that uses the stack layout algorithm for its children.
+/// A widget that positions its children relative to the edges of its box.
 ///
 /// This class is useful if you want to overlap several children in a simple
 /// way, for example having some text and an image, overlaid with a gradient and
@@ -2005,6 +2024,8 @@ class Positioned extends ParentDataWidget<Stack> {
 ///
 /// ## Layout algorithm
 ///
+/// _This section describes how a [Flex] is rendered by the framework._
+///
 /// Layout for a [Flex] proceeds in six steps:
 ///
 /// 1. Layout each child a null or zero flex factor (e.g., those that are not
@@ -2037,6 +2058,14 @@ class Positioned extends ParentDataWidget<Stack> {
 ///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any main axis
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
+///
+/// See also:
+///
+///  * [Row], for a version of this widget that is always horizontal.
+///  * [Column], for a version of this widget that is always vertical.
+///  * [Expanded], to indicate children that should take all the remaining room.
+///  * [Flexible], to indicate children that should share the remaining room but
+///    that may be sized smaller (leaving some remaining room unused).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
   ///
@@ -2076,7 +2105,7 @@ class Flex extends MultiChildRenderObjectWidget {
   /// main axis.
   final MainAxisAlignment mainAxisAlignment;
 
-  /// How much space space should be occupied in the main axis.
+  /// How much space should be occupied in the main axis.
   ///
   /// After allocating space to children, there might be some remaining free
   /// space. This value controls whether to maximize or minimize the amount of
@@ -2134,7 +2163,34 @@ class Flex extends MultiChildRenderObjectWidget {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
+/// ## Sample code
+///
+/// This example divides the available space into three (horizontally), and
+/// places text centered in the first two cells and the Flutter logo centered in
+/// the third:
+///
+/// ```dart
+/// new Row(
+///   children: <Widget>[
+///     new Expanded(
+///       child: new Text('Deliver features faster', textAlign: TextAlign.center),
+///     ),
+///     new Expanded(
+///       child: new Text('Craft beautiful UIs', textAlign: TextAlign.center),
+///     ),
+///     new Expanded(
+///       child: new FittedBox(
+///         fit: BoxFit.contain, // otherwise the logo will be tiny
+///         child: const FlutterLogo(),
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+///
 /// ## Layout algorithm
+///
+/// _This section describes how a [Row] is rendered by the framework._
 ///
 /// Layout for a [Row] proceeds in six steps:
 ///
@@ -2166,6 +2222,15 @@ class Flex extends MultiChildRenderObjectWidget {
 ///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any horizontal
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
+///
+/// See also:
+///
+///  * [Column], for a vertical equivalent.
+///  * [Flex], if you don't know in advance if you want a horizontal or vertical
+///    arrangement.
+///  * [Expanded], to indicate children that should take all the remaining room.
+///  * [Flexible], to indicate children that should share the remaining room but
+///    that may by sized smaller (leaving some remaining room unused).
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
@@ -2205,7 +2270,51 @@ class Row extends Flex {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
+/// ## Sample code
+///
+/// This example uses a [Column] to arrange three widgets vertically, the last
+/// being made to fill all the remaining space.
+///
+/// ```dart
+/// new Column(
+///   children: <Widget>[
+///     new Text('Deliver features faster'),
+///     new Text('Craft beautiful UIs'),
+///     new Expanded(
+///       child: new FittedBox(
+///         fit: BoxFit.contain, // otherwise the logo will be tiny
+///         child: const FlutterLogo(),
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+///
+/// In the sample above, the text and the logo are centered on each line. In the
+/// following example, the [crossAxisAlignment] is set to
+/// [CrossAxisAlignment.start], so that the children are left-aligned. The
+/// [mainAxisSize] is set to [MainAxisSize.min], so that the column shrinks to
+/// fit the children.
+///
+/// ```dart
+/// new Column(
+///   crossAxisAlignment: CrossAxisAlignment.start,
+///   mainAxisSize: MainAxisSize.min,
+///   children: <Widget>[
+///     new Text('We move under cover and we move as one'),
+///     new Text('Through the night, we have one shot to live another day'),
+///     new Text('We cannot let a stray gunshot give us away'),
+///     new Text('We will fight up close, seize the moment and stay in it'),
+///     new Text('It’s either that or meet the business end of a bayonet'),
+///     new Text('The code word is ‘Rochambeau,’ dig me?'),
+///     new Text('Rochambeau!', style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0)),
+///   ],
+/// )
+/// ```
+///
 /// ## Layout algorithm
+///
+/// _This section describes how a [Column] is rendered by the framework._
 ///
 /// Layout for a [Column] proceeds in six steps:
 ///
@@ -2239,6 +2348,15 @@ class Row extends Flex {
 ///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any vertical
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
+///
+/// See also:
+///
+///  * [Row], for a horizontal equivalent.
+///  * [Flex], if you don't know in advance if you want a horizontal or vertical
+///    arrangement.
+///  * [Expanded], to indicate children that should take all the remaining room.
+///  * [Flexible], to indicate children that should share the remaining room but
+///    that may size smaller (leaving some remaining room unused).
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
@@ -2374,6 +2492,41 @@ class Expanded extends Flexible {
 ///
 /// The runs themselves are then positioned in the cross axis according to the
 /// [runSpacing] and [runAlignment].
+///
+/// ## Sample code
+///
+/// This example renders some [Chip]s representing four contacts in a [Wrap] so
+/// that they flow across lines as necessary.
+///
+/// ```dart
+/// new Wrap(
+///   spacing: 8.0, // gap between adjacent chips
+///   runSpacing: 4.0, // gap between lines
+///   children: <Widget>[
+///     new Chip(
+///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('AH')),
+///       label: new Text('Hamilton'),
+///     ),
+///     new Chip(
+///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('ML')),
+///       label: new Text('Lafayette'),
+///     ),
+///     new Chip(
+///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('HM')),
+///       label: new Text('Mulligan'),
+///     ),
+///     new Chip(
+///       avatar: new CircleAvatar(backgroundColor: Colors.blue.shade900, child: new Text('JL')),
+///       label: new Text('Laurens'),
+///     ),
+///   ],
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [Row], which places children in one line, and gives control over their
+///    alignment and spacing.
 class Wrap extends MultiChildRenderObjectWidget {
   /// Creates a wrap layout.
   ///
@@ -2494,7 +2647,8 @@ class Wrap extends MultiChildRenderObjectWidget {
   }
 }
 
-/// A widget that implements the flow layout algorithm.
+/// A widget that sizes and positions children efficiently, according to the
+/// logic in a [FlowDelegate].
 ///
 /// Flow layouts are optimized for repositioning children using transformation
 /// matrices.
@@ -2507,15 +2661,19 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// Rather than positioning the children during layout, the children are
 /// positioned using transformation matrices during the paint phase using the
 /// matrices from the [FlowDelegate.paintChildren] function. The children can be
-/// repositioned efficiently by simply repainting the flow.
+/// repositioned efficiently by simply repainting the flow, which happens
+/// without the children being laid out again (contrast this with a [Stack],
+/// which does the sizing and positioning together during layout).
 ///
-/// The most efficient way to trigger a repaint of the flow is to supply a
-/// repaint argument to the constructor of the [FlowDelegate]. The flow will
-/// listen to this animation and repaint whenever the animation ticks, avoiding
-/// both the build and layout phases of the pipeline.
+/// The most efficient way to trigger a repaint of the flow is to supply an
+/// animation to the constructor of the [FlowDelegate]. The flow will listen to
+/// this animation and repaint whenever the animation ticks, avoiding both the
+/// build and layout phases of the pipeline.
 ///
 /// See also:
 ///
+///  * [Wrap], which provides the layout model that some other frameworks call
+///    "flow", and is otherwise unrelated to [Flow].
 ///  * [FlowDelegate], which controls the visual presentation of the children.
 ///  * [Stack], which arranges children relative to the edges of the container.
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
@@ -2593,7 +2751,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///       new TextSpan(text: ' world!'),
 ///     ],
 ///   ),
-/// ),
+/// )
 /// ```
 ///
 /// See also:
@@ -3266,16 +3424,38 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 
 /// A widget that drops all the semantics of its descendants.
 ///
+/// When [excluding] is true, this widget (and its subtree) is excluded from
+/// the semantics tree.
+///
 /// This can be used to hide subwidgets that would otherwise be
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
 /// redundant with the chip label.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that drops all the semantics of its descendants.
-  const ExcludeSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const ExcludeSemantics({
+    Key key,
+    this.excluding: true,
+    Widget child,
+  }) : assert(excluding != null),
+        super(key: key, child: child);
+
+  /// Whether this widget is excluded in the semantics tree.
+  final bool excluding;
 
   @override
-  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics();
+  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics(excluding: excluding);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderExcludeSemantics renderObject) {
+    renderObject.excluding = excluding;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('excluding: $excluding');
+  }
 }
 
 /// A widget that builds its child.

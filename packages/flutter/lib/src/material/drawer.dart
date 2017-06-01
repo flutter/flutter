@@ -72,7 +72,8 @@ class Drawer extends StatelessWidget {
     this.child
   }) : super(key: key);
 
-  /// The z-coordinate at which to place this drawer.
+  /// The z-coordinate at which to place this drawer. This controls the size of
+  /// the shadow below the drawer.
   ///
   /// Defaults to 16, the appropriate elevation for drawers.
   final double elevation;

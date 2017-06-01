@@ -178,6 +178,7 @@ class BufferLogger extends Logger {
 
 class VerboseLogger extends Logger {
   VerboseLogger(this.parent) {
+    assert(terminal != null);
     stopwatch.start();
   }
 
