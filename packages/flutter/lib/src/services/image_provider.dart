@@ -19,6 +19,13 @@ import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
+///
+/// See also:
+///
+///  * [createLocalImageConfiguration], which creates an [ImageConfiguration]
+///    based on ambient configuration in a [Widget] environment.
+///  * [ImageProvider], which uses [ImageConfiguration] objects to determine
+///    which image to obtain.
 @immutable
 class ImageConfiguration {
   /// Creates an object holding the configuration information for an [ImageProvider].
@@ -149,6 +156,80 @@ class ImageConfiguration {
 ///
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
+///
+/// ## Sample code
+///
+/// The following shows the code required to write a widget that fully conforms
+/// to the [ImageProvider] and [Widget] protocols.
+///
+/// ```dart
+/// class Picture extends StatefulWidget {
+///   const Picture({
+///     Key key,
+///     @required this.imageProvider,
+///   }) : assert(imageProvider != null),
+///        super(key: key);
+///
+///   final ImageProvider imageProvider;
+///
+///   @override
+///   _PictureState createState() => new _PictureState();
+/// }
+///
+/// class _PictureState extends State<Picture> {
+///   ImageStream _imageStream;
+///   ImageInfo _imageInfo;
+///
+///   @override
+///   void didChangeDependencies() {
+///     super.didChangeDependencies();
+///     // We call _getImage here because createLocalImageConfiguration() needs to
+///     // be called again if the dependencies changed, in case the changes relate
+///     // to the DefaultAssetBundle, MediaQuery, etc, which that method uses.
+///     _getImage();
+///   }
+///
+///   @override
+///   void didUpdateWidget(Picture oldWidget) {
+///     super.didUpdateWidget(oldWidget);
+///     if (widget.imageProvider != oldWidget.imageProvider)
+///       _getImage();
+///   }
+///
+///   void _getImage() {
+///     final ImageStream oldImageStream = _imageStream;
+///     _imageStream = widget.imageProvider.resolve(createLocalImageConfiguration(context));
+///     if (_imageStream.key != oldImageStream?.key) {
+///       // If the keys are the same, then we got the same image back, and so we don't
+///       // need to update the listeners. If the key changed, though, we must make sure
+///       // to switch our listeners to the new image stream.
+///       oldImageStream?.removeListener(_updateImage);
+///       _imageStream.addListener(_updateImage);
+///     }
+///   }
+///
+///   void _updateImage(ImageInfo imageInfo, bool synchronousCall) {
+///     setState(() {
+///       // Trigger a build whenever the image changes.
+///       _imageInfo = imageInfo;
+///     });
+///   }
+///
+///   @override
+///   void dispose() {
+///     _imageStream.removeListener(_updateImage);
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new RawImage(
+///       image: _imageInfo?.image, // this is a dart:ui Image object
+///       scale: _imageInfo?.scale ?? 1.0,
+///     );
+///   }
+/// }
+/// ```
 @optionalTypeArgs
 abstract class ImageProvider<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide

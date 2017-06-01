@@ -1509,7 +1509,7 @@ class RenderTransform extends RenderProxyBox {
   /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
   ///
-  /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
+  /// [applyPaintTransform], and therefore [localToGlobal] and [globalToLocal],
   /// always honor the transformation, regardless of the value of this property.
   bool transformHitTests;
 
@@ -2890,12 +2890,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 }
 
-/// Causes the semantics of all siblings and cousins painted before it in the
-/// same semantic container to be dropped.
+/// Causes the semantics of all earlier render objects below the same semantic
+/// boundary to be dropped.
 ///
-/// This is useful in a stack where an overlay should prevent interactions
-/// with the underlying layers.
+/// This is useful in a stack where an opaque mask should prevent interactions
+/// with the render objects painted below the mask.
 class RenderBlockSemantics extends RenderProxyBox {
+  /// Create a render object that blocks semantics for nodes below it in paint
+  /// order.
   RenderBlockSemantics({ RenderBox child }) : super(child);
 
   @override

@@ -34,6 +34,9 @@ import 'theme.dart';
 /// [secondary] widget is placed on the opposite side. This maps to the
 /// [ListTile.leading] and [ListTile.trailing] properties of [ListTile].
 ///
+/// To show the [RadioListTile] as disabled, pass null as the [onChanged]
+/// callback.
+///
 /// ## Sample code
 ///
 /// This widget shows a pair of radio buttons that control the `_character`

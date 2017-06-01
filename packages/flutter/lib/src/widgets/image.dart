@@ -25,6 +25,15 @@ export 'package:flutter/services.dart' show
 ///
 /// This is the object that must be passed to [BoxPainter.paint] and to
 /// [ImageProvider.resolve].
+///
+/// If this is not called from a build method, then it should be reinvoked
+/// whenever the dependencies change, e.g. by calling it from
+/// [State.didChangeDependencies], so that any changes in the environement are
+/// picked up (e.g. if the device pixel ratio changes).
+///
+/// See also:
+///
+///  * [ImageProvider], which has an example showing how this might be used.
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size size }) {
   return new ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),

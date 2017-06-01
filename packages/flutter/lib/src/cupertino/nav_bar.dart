@@ -15,7 +15,7 @@ const double _kNavBarHeight = 44.0;
 const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
 const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
 
-/// An iOS styled navigation bar.
+/// An iOS-styled navigation bar.
 ///
 /// The navigation bar is a toolbar that minimally consists of a widget, normally
 /// a page title, in the [middle] of the toolbar.
@@ -28,11 +28,12 @@ const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
 ///
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
-///
+//
 // TODO(xster): document automatic addition of a CupertinoBackButton.
 // TODO(xster): add sample code using icons.
 // TODO(xster): document integration into a CupertinoScaffold.
 class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
     Key key,
     this.leading,

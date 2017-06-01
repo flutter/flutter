@@ -13,7 +13,7 @@ import 'framework.dart';
 /// widgets along a horizontal axis that's sensible for an application's
 /// navigation bar such as in Material Design and in iOS.
 ///
-/// [leading] and [trailing] widgets occupy the edges of the widget with
+/// The [leading] and [trailing] widgets occupy the edges of the widget with
 /// reasonable size constraints while the [middle] widget occupies the remaining
 /// space in either a center aligned or start aligned fashion.
 ///
@@ -21,6 +21,8 @@ import 'framework.dart';
 /// the iOS [CupertinoNavigationBar] or wrap this widget with more theming
 /// specifications for your own custom app bar.
 class NavigationToolbar extends StatelessWidget {
+  /// Creates a widget that lays out its children in a manner suitable for a
+  /// toolbar.
   const NavigationToolbar({
     Key key,
     this.leading,
