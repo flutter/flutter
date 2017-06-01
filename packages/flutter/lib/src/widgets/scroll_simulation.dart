@@ -35,14 +35,13 @@ class BouncingScrollSimulation extends Simulation {
     @required this.trailingExtent,
     @required this.spring,
     Tolerance tolerance: Tolerance.defaultTolerance,
-  }) : super(tolerance: tolerance) {
-    assert(position != null);
-    assert(velocity != null);
-    assert(leadingExtent != null);
-    assert(trailingExtent != null);
-    assert(leadingExtent <= trailingExtent);
-    assert(spring != null);
-
+  }) : assert(position != null),
+       assert(velocity != null),
+       assert(leadingExtent != null),
+       assert(trailingExtent != null),
+       assert(leadingExtent <= trailingExtent),
+       assert(spring != null),
+       super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.NEGATIVE_INFINITY;

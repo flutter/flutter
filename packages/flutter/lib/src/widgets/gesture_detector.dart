@@ -98,32 +98,31 @@ class GestureDetector extends StatelessWidget {
     this.onScaleEnd,
     this.behavior,
     this.excludeFromSemantics: false
-  }) : super(key: key) {
-    assert(excludeFromSemantics != null);
-    assert(() {
-      final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
-      final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
-      final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
-      final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
-      if (havePan || haveScale) {
-        if (havePan && haveScale) {
-          throw new FlutterError(
-            'Incorrect GestureDetector arguments.\n'
-            'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.'
-          );
-        }
-        final String recognizer = havePan ? 'pan' : 'scale';
-        if (haveVerticalDrag && haveHorizontalDrag) {
-          throw new FlutterError(
-            'Incorrect GestureDetector arguments.\n'
-            'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
-            'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
-          );
-        }
-      }
-      return true;
-    });
-  }
+  }) : assert(excludeFromSemantics != null),
+       assert(() {
+         final bool haveVerticalDrag = onVerticalDragStart != null || onVerticalDragUpdate != null || onVerticalDragEnd != null;
+         final bool haveHorizontalDrag = onHorizontalDragStart != null || onHorizontalDragUpdate != null || onHorizontalDragEnd != null;
+         final bool havePan = onPanStart != null || onPanUpdate != null || onPanEnd != null;
+         final bool haveScale = onScaleStart != null || onScaleUpdate != null || onScaleEnd != null;
+         if (havePan || haveScale) {
+           if (havePan && haveScale) {
+             throw new FlutterError(
+               'Incorrect GestureDetector arguments.\n'
+               'Having both a pan gesture recognizer and a scale gesture recognizer is redundant; scale is a superset of pan. Just use the scale gesture recognizer.'
+             );
+           }
+           final String recognizer = havePan ? 'pan' : 'scale';
+           if (haveVerticalDrag && haveHorizontalDrag) {
+             throw new FlutterError(
+               'Incorrect GestureDetector arguments.\n'
+               'Simultaneously having a vertical drag gesture recognizer, a horizontal drag gesture recognizer, and a $recognizer gesture recognizer '
+               'will result in the $recognizer gesture recognizer being ignored, since the other two will catch all drags.'
+             );
+           }
+         }
+         return true;
+       }),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;

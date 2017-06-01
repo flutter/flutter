@@ -444,10 +444,9 @@ class _DragAvatar<T> extends Drag {
     this.feedback,
     this.feedbackOffset: Offset.zero,
     this.onDragEnd
-  }) {
-    assert(overlayState != null);
-    assert(dragStartPoint != null);
-    assert(feedbackOffset != null);
+  }) : assert(overlayState != null),
+       assert(dragStartPoint != null),
+       assert(feedbackOffset != null) {
     _entry = new OverlayEntry(builder: _build);
     overlayState.insert(_entry);
     _position = initialPosition;

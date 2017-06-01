@@ -198,22 +198,21 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-  }) : decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+  }) : assert(margin == null || margin.isNonNegative),
+       assert(padding == null || padding.isNonNegative),
+       assert(decoration == null || decoration.debugAssertIsValid()),
+       assert(constraints == null || constraints.debugAssertIsValid()),
+       assert(color == null || decoration == null,
+         'Cannot provide both a color and a decoration\n'
+         'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
+       ),
+       decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key) {
-    assert(margin == null || margin.isNonNegative);
-    assert(padding == null || padding.isNonNegative);
-    assert(decoration == null || decoration.debugAssertIsValid());
-    assert(constraints == null || constraints.debugAssertIsValid());
-    assert(color == null || decoration == null,
-      'Cannot provide both a color and a decoration\n'
-      'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
-    );
-  }
+       super(key: key);
 
   /// The [child] contained by the container.
   ///

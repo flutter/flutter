@@ -171,12 +171,11 @@ class OverscrollNotification extends ScrollNotification {
     this.dragDetails,
     @required this.overscroll,
     this.velocity: 0.0,
-  }) : super(metrics: metrics, context: context) {
-    assert(overscroll != null);
-    assert(overscroll.isFinite);
-    assert(overscroll != 0.0);
-    assert(velocity != null);
-  }
+  }) : assert(overscroll != null),
+       assert(overscroll.isFinite),
+       assert(overscroll != 0.0),
+       assert(velocity != null),
+       super(metrics: metrics, context: context);
 
   /// If the [Scrollable] overscrolled because of a drag, the details about that
   /// drag update.
