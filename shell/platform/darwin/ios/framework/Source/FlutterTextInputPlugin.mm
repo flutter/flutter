@@ -16,6 +16,8 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
     return UIKeyboardTypeDecimalPad;
   if ([inputType isEqualToString:@"TextInputType.phone"])
     return UIKeyboardTypePhonePad;
+  if ([inputType isEqualToString:@"TextInputType.emailAddress"])
+    return UIKeyboardTypeEmailAddress;
   return UIKeyboardTypeDefault;
 }
 
