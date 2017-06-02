@@ -221,6 +221,7 @@ AccessibilityBridge::AccessibilityBridge(UIView* view, PlatformViewIOS* platform
     : view_(view), platform_view_(platform_view) {}
 
 AccessibilityBridge::~AccessibilityBridge() {
+  view_.accessibilityElements = nil;
   ReleaseObjects(objects_);
   objects_.clear();
 }
