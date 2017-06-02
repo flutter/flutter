@@ -12,6 +12,11 @@ import 'binding.dart';
 import 'framework.dart';
 import 'overlay.dart';
 
+/// Signature for delivering the last drag offset.
+///
+/// Used by [DragTarget.onDrag].
+typedef void DragTargetDrag<T>(T data, Offset lastOffset);
+
 /// Signature for determining whether the given data will be accepted by a [DragTarget].
 ///
 /// Used by [DragTarget.onWillAccept].
@@ -367,6 +372,7 @@ class DragTarget<T> extends StatefulWidget {
   const DragTarget({
     Key key,
     @required this.builder,
+    this.onDrag,
     this.onWillAccept,
     this.onAccept
   }) : super(key: key);
@@ -376,6 +382,12 @@ class DragTarget<T> extends StatefulWidget {
   /// The builder can build different widgets depending on what is being dragged
   /// into this drag target.
   final DragTargetBuilder<T> builder;
+
+  /// Called when the drag position changed. Receives the latest drag offset,
+  /// which is the pointer position if [DragAnchor.pointer] has been used
+  /// and the position of the dragged widget if [DragAnchor.child] has been
+  /// used.
+  final DragTargetDrag<T> onDrag;
 
   /// Called to determine whether this widget is interested in receiving a given
   /// piece of data being dragged over this drag target.
@@ -395,6 +407,12 @@ List<T> _mapAvatarsToData<T>(List<_DragAvatar<T>> avatars) {
 class _DragTargetState<T> extends State<DragTarget<T>> {
   final List<_DragAvatar<T>> _candidateAvatars = <_DragAvatar<T>>[];
   final List<_DragAvatar<dynamic>> _rejectedAvatars = <_DragAvatar<dynamic>>[];
+
+  void onDrag(_DragAvatar<dynamic> avatar, Offset lastOffset) {
+    if (widget.onDrag != null) {
+      widget.onDrag(avatar.data, lastOffset);
+    }
+  }
 
   bool didEnter(_DragAvatar<dynamic> avatar) {
     assert(!_candidateAvatars.contains(avatar));
@@ -502,6 +520,11 @@ class _DragAvatar<T> extends Drag {
     WidgetsBinding.instance.hitTest(result, globalPosition + feedbackOffset);
 
     final List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
+
+    // Inform targets that want to know about drag updates.
+    for (_DragTargetState<T> target in targets) {
+      target.onDrag(this, _lastOffset);
+    }
 
     bool listsMatch = false;
     if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
