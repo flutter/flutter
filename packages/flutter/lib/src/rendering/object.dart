@@ -703,11 +703,11 @@ abstract class _SemanticsFragment {
 class _EmptySemanticsFragment extends _SemanticsFragment {
   _EmptySemanticsFragment({
     @required RenderObject renderObjectOwner,
-    bool dropSemanticsOfPreviousSiblings
+    bool dropSemanticsOfPreviousSiblings,
   }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
   @override
-  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {}
+  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* { }
 
   @override
   bool get producesSemanticNodes => false;
@@ -720,10 +720,10 @@ class _EmptySemanticsFragment extends _SemanticsFragment {
 /// the matrix, since that comes from the (dirty) ancestors.)
 class _CleanSemanticsFragment extends _SemanticsFragment {
   _CleanSemanticsFragment({
-    @required RenderObject renderObjectOwner
-  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfPreviousSiblings: false) {
+    @required RenderObject renderObjectOwner,
+    bool dropSemanticsOfPreviousSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings) {
     assert(renderObjectOwner != null);
-    assert(renderObjectOwner.isSemanticBoundary);  // required for dropSemanticsOfPreviousSiblings: false.
     assert(renderObjectOwner._semantics != null);
   }
 
@@ -2435,11 +2435,16 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool get isSemanticBoundary => false;
 
   /// Whether this [RenderObject] makes other [RenderObject]s previously painted
-  /// in the same semantics container unreachable for accessibility purposes.
+  /// within the same semantic boundary unreachable for accessibility purposes.
   ///
   /// If `true` is returned, the [SemanticsNode]s for all siblings and cousins
-  /// of this node, that were painted before this node, are dropped from the
-  /// semantics tree up until a semantic boundary is reached.
+  /// of this node, that are earlier in a depth-first pre-order traversal, are
+  /// dropped from the semantics tree up until a semantic boundary (as defined
+  /// by [isSemanticBoundary]) is reached.
+  ///
+  /// If [isSemanticBoundary] and [isBlockingSemanticsOfPreviouslyPaintedNodes]
+  /// is set on the same node, all previously painted siblings and cousins
+  /// up until the next semantic boundary are dropped.
   ///
   /// Paint order as established by [visitChildrenForSemantics] is used to
   /// determine if a node is previous to this one.
@@ -2582,7 +2587,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     // early-exit if we're not dirty and have our own semantics
     if (!_needsSemanticsUpdate && isSemanticBoundary) {
       assert(_semantics != null);
-      return new _CleanSemanticsFragment(renderObjectOwner: this);
+      return new _CleanSemanticsFragment(renderObjectOwner: this, dropSemanticsOfPreviousSiblings: isBlockingSemanticsOfPreviouslyPaintedNodes);
     }
     List<_SemanticsFragment> children;
     bool dropSemanticsOfPreviousSiblings = isBlockingSemanticsOfPreviouslyPaintedNodes;
@@ -2607,8 +2612,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         children.add(fragment);
       }
     });
-    if (isSemanticBoundary) {
-      // Don't propagate [dropSemanticsOfPreviousSiblings] past a semantic boundary.
+    if (isSemanticBoundary && !isBlockingSemanticsOfPreviouslyPaintedNodes) {
+      // Don't propagate [dropSemanticsOfPreviousSiblings] up through a semantic boundary.
       dropSemanticsOfPreviousSiblings = false;
     }
     _needsSemanticsUpdate = false;
@@ -2774,7 +2779,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       description.add('layer: $_layer');
     if (_semantics != null)
       description.add('semantics: $_semantics');
-    description.add('isSemanticBoundary: $isSemanticBoundary');
+    if (isBlockingSemanticsOfPreviouslyPaintedNodes)
+      description.add('blocks semantics of earlier render objects below the common boundary');
+    if (isSemanticBoundary)
+      description.add('semantic boundary');
   }
 
   /// Returns a string describing the current node's descendants. Each line of

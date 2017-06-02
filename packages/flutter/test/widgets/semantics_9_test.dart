@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -95,5 +96,54 @@ void main() {
 
       semantics.dispose();
     });
+
+    testWidgets('node is semantic boundary and blocking previously painted nodes', (WidgetTester tester) async {
+      final SemanticsTester semantics = new SemanticsTester(tester);
+      final GlobalKey stackKey = new GlobalKey();
+
+      await tester.pumpWidget(new Stack(
+        key: stackKey,
+        children: <Widget>[
+          new Semantics(
+            label: 'NOT#1',
+            child: new Container(),
+          ),
+          new BoundaryBlockSemantics(
+            child: new Semantics(
+              label: '#2.1',
+              child: new Container(),
+            )
+          ),
+          new Semantics(
+            label: '#3',
+            child: new Container(),
+          ),
+        ],
+      ));
+
+      expect(semantics, isNot(includesNodeWithLabel('NOT#1')));
+      expect(semantics, includesNodeWithLabel('#2.1'));
+      expect(semantics, includesNodeWithLabel('#3'));
+
+      semantics.dispose();
+    });
   });
 }
+
+class BoundaryBlockSemantics extends SingleChildRenderObjectWidget {
+  const BoundaryBlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
+  RenderBoundaryBlockSemantics createRenderObject(BuildContext context) => new RenderBoundaryBlockSemantics();
+}
+
+class RenderBoundaryBlockSemantics extends RenderProxyBox {
+  RenderBoundaryBlockSemantics({ RenderBox child }) : super(child);
+
+  @override
+  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => true;
+
+  @override
+  bool get isSemanticBoundary => true;
+}
+
