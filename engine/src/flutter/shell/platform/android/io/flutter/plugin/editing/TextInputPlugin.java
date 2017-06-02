@@ -84,6 +84,8 @@ public class TextInputPlugin implements MethodCallHandler {
         int textType = InputType.TYPE_CLASS_TEXT;
         if (inputType.equals("TextInputType.emailAddress"))
             textType |= InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+        else if (inputType.equals("TextInputType.url"))
+            textType |= InputType.TYPE_TEXT_VARIATION_URI;
         if (obscureText)
             textType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
         return textType;
