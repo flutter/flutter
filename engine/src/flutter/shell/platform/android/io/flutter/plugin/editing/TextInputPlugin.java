@@ -80,9 +80,13 @@ public class TextInputPlugin implements MethodCallHandler {
             return InputType.TYPE_CLASS_NUMBER;
         if (inputType.equals("TextInputType.phone"))
             return InputType.TYPE_CLASS_PHONE;
-        return obscureText
-          ? InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-          : InputType.TYPE_CLASS_TEXT;
+
+        int textType = InputType.TYPE_CLASS_TEXT;
+        if (inputType.equals("TextInputType.emailAddress"))
+            textType |= InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+        if (obscureText)
+            textType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+        return textType;
     }
 
     public InputConnection createInputConnection(FlutterView view, EditorInfo outAttrs)
