@@ -368,7 +368,6 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;
-    final bool enableSoftwareRendering = platformArgs['enable-software-rendering'];
     final AndroidApk apk = package;
     printTrace('$this startApp');
 
