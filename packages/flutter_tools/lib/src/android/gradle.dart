@@ -114,10 +114,10 @@ String locateSystemGradle({ bool ensureExecutable: true }) {
   return gradle;
 }
 
+String get _gradleWrapperName => platform.isWindows ? 'gradlew.bat' : 'gradlew';
+
 String locateProjectGradlew({ bool ensureExecutable: true }) {
-  final String path = fs.path.join(
-      'android', platform.isWindows ? 'gradlew.bat' : 'gradlew'
-  );
+  final String path = fs.path.join('android', _gradleWrapperName);
 
   if (fs.isFileSync(path)) {
     final File gradle = fs.file(path);
@@ -214,10 +214,23 @@ Future<Null> buildGradleProjectV1(String gradle) async {
 Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String target, String kernelPath) async {
   final String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
+  // Generate the Gradle wrapper script if it does not already exist.
+  final String wrapperPath = fs.path.join('android', _gradleWrapperName);
+  if (!fs.isFileSync(wrapperPath)) {
+    final int wrapperExitCode = await runCommandAndStreamOutput(
+      <String>[fs.file(gradle).absolute.path, 'wrapper'],
+      workingDirectory: 'android',
+      environment: _gradleEnv,
+    );
+    if (wrapperExitCode != 0)
+      throwToolExit('Gradle wrapper task failed: $wrapperExitCode', exitCode: wrapperExitCode);
+    if (!fs.isFileSync(wrapperPath))
+      throwToolExit('Unable to create Gradle wrapper script at: $wrapperPath');
+  }
+
   // Run 'gradle assemble<BuildMode>'.
   final Status status = logger.startProgress('Running \'gradle $assembleTask\'...', expectSlowOperation: true);
-  final String gradlePath = fs.file(gradle).absolute.path;
-  final List<String> command = <String>[gradlePath];
+  final List<String> command = <String>[fs.file(wrapperPath).absolute.path];
   if (!logger.isVerbose) {
     command.add('-q');
   }
