@@ -93,7 +93,8 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'Enable rendering using the Skia software backend. This is useful\n'
               'when testing Flutter on emulators. By default, Flutter will\n'
-              'attempt to either use OpenGL or Vulkan.');
+              'attempt to either use OpenGL or Vulkan and fall back to software\n'
+              'when neither is available.');
     argParser.addFlag('use-test-fonts',
         negatable: true,
         defaultsTo: false,
