@@ -834,8 +834,8 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      final Rect rect = Offset.zero & size;
-      context.pushShaderMask(offset, _shaderCallback(rect), rect, _blendMode, super.paint);
+      final Shader shader = _shaderCallback(offset & size);
+      context.pushShaderMask(offset, shader, Offset.zero & size, _blendMode, super.paint);
     }
   }
 }
