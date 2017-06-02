@@ -38,7 +38,7 @@ class AndroidStudioValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
-    final String studioVersionText = Version.unknown == _studio.version
+    final String studioVersionText = _studio.version == Version.unknown
         ? null
         : 'version ${_studio.version}';
     messages

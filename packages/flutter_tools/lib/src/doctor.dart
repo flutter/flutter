@@ -337,8 +337,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     final Version version = new Version.parse(versionText);
     if (version != null && minVersion != null && version < minVersion) {
         messages.add(new ValidationMessage.error(
-          '$title plugin ${version != null ? "version $versionText" : "installed"}'
-          ' - the recommended minimum version is $minVersion'
+          '$title plugin version $versionText - the recommended minimum version is $minVersion'
         ));
     } else {
       messages.add(new ValidationMessage(
