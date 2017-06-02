@@ -30,16 +30,16 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     @required Color inactiveColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }) : _value = value,
+  }) : assert(value != null),
+       assert(activeColor != null),
+       assert(inactiveColor != null),
+       assert(vsync != null),
+       _value = value,
        _activeColor = activeColor,
        _inactiveColor = inactiveColor,
        _onChanged = onChanged,
        _vsync = vsync,
        super(additionalConstraints: new BoxConstraints.tight(size)) {
-    assert(value != null);
-    assert(activeColor != null);
-    assert(inactiveColor != null);
-    assert(vsync != null);
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap

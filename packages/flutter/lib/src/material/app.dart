@@ -63,12 +63,11 @@ class MaterialApp extends StatefulWidget {
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
-  }) : super(key: key) {
-    assert(debugShowMaterialGrid != null);
-    assert(routes != null);
-    assert(!routes.containsKey(Navigator.defaultRouteName) || (home == null));
-    assert(routes.containsKey(Navigator.defaultRouteName) || (home != null) || (onGenerateRoute != null));
- }
+  }) : assert(debugShowMaterialGrid != null),
+       assert(routes != null),
+       assert(!routes.containsKey(Navigator.defaultRouteName) || (home == null)),
+       assert(routes.containsKey(Navigator.defaultRouteName) || (home != null) || (onGenerateRoute != null)),
+       super(key: key);
 
   /// A one-line description of this app for use in the window manager.
   final String title;

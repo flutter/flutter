@@ -366,10 +366,9 @@ abstract class InkFeature {
     @required MaterialInkController controller,
     @required this.referenceBox,
     this.onRemoved
-  }) : _controller = controller {
-    assert(_controller != null);
-    assert(referenceBox != null);
-  }
+  }) : assert(controller != null),
+       assert(referenceBox != null),
+       _controller = controller;
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
