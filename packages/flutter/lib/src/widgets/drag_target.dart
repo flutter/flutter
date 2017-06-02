@@ -94,7 +94,8 @@ class Draggable<T> extends StatefulWidget {
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
-    this.onDraggableCanceled
+    this.onDraggableCanceled,
+    this.onDragCompleted,
   }) : assert(child != null),
        assert(feedback != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
@@ -181,6 +182,16 @@ class Draggable<T> extends StatefulWidget {
   /// need to check [State.mounted] to check whether the state receiving the
   /// callback is still in the tree.
   final DraggableCanceledCallback onDraggableCanceled;
+
+  /// Called when the draggable is dropped and accepted by a [DragTarget].
+  ///
+  /// This function might be called after this widget has been removed from the
+  /// tree. For example, if a drag was in progress when this widget was removed
+  /// from the tree and the drag ended up completing, this callback will
+  /// still be called. For this reason, implementations of this callback might
+  /// need to check [State.mounted] to check whether the state receiving the
+  /// callback is still in the tree.
+  final VoidCallback onDragCompleted;
 
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
@@ -313,6 +324,8 @@ class _DraggableState<T> extends State<Draggable<T>> {
           _activeCount -= 1;
           _disposeRecognizerIfInactive();
         }
+        if (wasAccepted && widget.onDragCompleted != null)
+          widget.onDragCompleted();
         if (!wasAccepted && widget.onDraggableCanceled != null)
           widget.onDraggableCanceled(velocity, offset);
       }
