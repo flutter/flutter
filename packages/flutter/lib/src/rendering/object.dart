@@ -416,7 +416,7 @@ class PaintingContext {
     _stopRecordingIfNeeded();
     final ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
       shader: shader,
-      maskRect: maskRect,
+      maskRect: maskRect.shift(offset),
       blendMode: blendMode,
     );
     _appendLayer(shaderLayer);
