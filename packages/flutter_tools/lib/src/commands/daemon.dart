@@ -774,7 +774,7 @@ class AppInstance {
 ///   1) Log messages to stdout and send progress events to the client IDE
 ///
 /// TODO(devoncarew): To simplify this code a bit, we could choose to specialize
-/// this class into two, one that covers each of the above use cases.
+/// this class into two, one for each of the above use cases.
 class _AppRunLogger extends Logger {
   _AppRunLogger(this.domain, this.app, { this.parent });
 
