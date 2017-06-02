@@ -18,6 +18,8 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
     return UIKeyboardTypePhonePad;
   if ([inputType isEqualToString:@"TextInputType.emailAddress"])
     return UIKeyboardTypeEmailAddress;
+  if ([inputType isEqualToString:@"TextInputType.url"])
+    return UIKeyboardTypeURL;
   return UIKeyboardTypeDefault;
 }
 
