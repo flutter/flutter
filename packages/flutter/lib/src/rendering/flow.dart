@@ -143,7 +143,7 @@ int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();
 /// transformation matrix, which is private to the [RenderFlow]. To set the
 /// matrix, use the [FlowPaintingContext.paintChild] function from an override
 /// of the [FlowDelegate.paintChildren] function.
-class FlowParentData extends ContainerBoxParentDataMixin<RenderBox> {
+class FlowParentData extends ContainerBoxParentData<RenderBox> {
   Matrix4 _transform;
 }
 

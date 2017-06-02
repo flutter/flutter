@@ -15,6 +15,10 @@ import 'scroll_metrics.dart';
 ///
 /// This is used by [ScrollNotification] and [OverscrollIndicatorNotification].
 abstract class ViewportNotificationMixin extends Notification {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory ViewportNotificationMixin._() => null;
+
   /// The number of viewports that this notification has bubbled through.
   ///
   /// Typically listeners only respond to notifications with a [depth] of zero.

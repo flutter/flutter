@@ -9,12 +9,20 @@ import 'package:flutter/foundation.dart';
 import 'animation.dart';
 
 abstract class _ListenerMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory _ListenerMixin._() => null;
+
   void didRegisterListener();
   void didUnregisterListener();
 }
 
 /// A mixin that helps listen to another object only when this object has registered listeners.
-abstract class AnimationLazyListenerMixin implements _ListenerMixin {
+abstract class AnimationLazyListenerMixin extends _ListenerMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationLazyListenerMixin._() => null;
+
   int _listenerCounter = 0;
 
   @override
@@ -47,7 +55,11 @@ abstract class AnimationLazyListenerMixin implements _ListenerMixin {
 
 /// A mixin that replaces the didRegisterListener/didUnregisterListener contract
 /// with a dispose contract.
-abstract class AnimationEagerListenerMixin implements _ListenerMixin {
+abstract class AnimationEagerListenerMixin extends _ListenerMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationEagerListenerMixin._() => null;
+
   @override
   void didRegisterListener() { }
 
@@ -60,9 +72,13 @@ abstract class AnimationEagerListenerMixin implements _ListenerMixin {
   void dispose() { }
 }
 
-/// A mixin that implements the addListener/removeListener protocol and notifies
-/// all the registered listeners when notifyListeners is called.
+/// A mixin that implements the [addListener]/[removeListener] protocol and notifies
+/// all the registered listeners when [notifyListeners] is called.
 abstract class AnimationLocalListenersMixin extends _ListenerMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationLocalListenersMixin._() => null;
+
   final ObserverList<VoidCallback> _listeners = new ObserverList<VoidCallback>();
 
   /// Calls the listener every time the value of the animation changes.
@@ -111,6 +127,10 @@ abstract class AnimationLocalListenersMixin extends _ListenerMixin {
 /// and notifies all the registered listeners when notifyStatusListeners is
 /// called.
 abstract class AnimationLocalStatusListenersMixin extends _ListenerMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationLocalStatusListenersMixin._() => null;
+
   final ObserverList<AnimationStatusListener> _statusListeners = new ObserverList<AnimationStatusListener>();
 
   /// Calls listener every time the status of the animation changes.

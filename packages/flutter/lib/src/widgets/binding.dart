@@ -22,6 +22,11 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
+///
+/// This class can be extended directly, to get default behaviors for all of the
+/// handlers, or can used with the `implements` keyword, in which case all the
+/// handlers must be implemented (and the analyzer will list those that have
+/// been omitted).
 abstract class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
@@ -63,7 +68,11 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-abstract class WidgetsBinding extends BindingBase implements GestureBinding, RendererBinding {
+abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererBinding {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory WidgetsBinding._() => null;
+
   @override
   void initInstances() {
     super.initInstances();
