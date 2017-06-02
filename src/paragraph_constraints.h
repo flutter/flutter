@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2017 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,35 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef LIB_TXT_SRC_FONT_COLLECTION_H_
-#define LIB_TXT_SRC_FONT_COLLECTION_H_
-
-#include <memory>
-#include <string>
-#include <vector>
+#ifndef LIB_TXT_SRC_PARAGRAPH_CONSTRAINTS_H_
+#define LIB_TXT_SRC_PARAGRAPH_CONSTRAINTS_H_
 
 #include "lib/ftl/macros.h"
-#include "lib/txt/include/minikin/FontCollection.h"
-#include "lib/txt/include/minikin/FontFamily.h"
 
 namespace txt {
 
-class FontProvider {
+class ParagraphConstraints {
  public:
-  static FontProvider& GetDefault();
+  explicit ParagraphConstraints(double width);
 
-  FontProvider();
-
-  ~FontProvider();
-
-  std::shared_ptr<minikin::FontCollection> GetFontCollectionForFamily(
-      const std::string& family);
+  double width() const { return width_; }
 
  private:
-  // TODO(chinmaygarde): Caches go here.
-  FTL_DISALLOW_COPY_AND_ASSIGN(FontProvider);
+  double width_;
+
+  FTL_DISALLOW_COPY_AND_ASSIGN(ParagraphConstraints);
 };
 
 }  // namespace txt
 
-#endif  // LIB_TXT_SRC_FONT_COLLECTION_H_
+#endif  // LIB_TXT_SRC_PARAGRAPH_CONSTRAINTS_H_

@@ -42,8 +42,8 @@ void ParagraphBuilder::Pop() {
   runs_.StartRun(style_index, text_index);
 }
 
-void ParagraphBuilder::AddText(const uint16_t* text, size_t length) {
-  text_.insert(text_.end(), text, text + length);
+void ParagraphBuilder::AddText(const std::u16string& text) {
+  text_.insert(text_.end(), text.begin(), text.end());
 }
 
 std::unique_ptr<Paragraph> ParagraphBuilder::Build() {

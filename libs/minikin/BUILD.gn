@@ -17,6 +17,8 @@ config("minikin_config") {
 }
 
 static_library("minikin") {
+  defines = [ "WIP_NEEDS_ICU_UPDATE" ]
+
   sources = [
     "CmapCoverage.cpp",
     "Emoji.cpp",

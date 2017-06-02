@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-static_library("src") {
+source_set("src") {
   sources = [
-    "font_provider.cc",
-    "font_provider.h",
+    "font_collection.cc",
+    "font_collection.h",
     "font_skia.cc",
     "font_skia.h",
     "font_style.h",
@@ -26,15 +26,18 @@ static_library("src") {
     "paragraph.h",
     "paragraph_builder.cc",
     "paragraph_builder.h",
+    "paragraph_constraints.cc",
+    "paragraph_constraints.h",
+    "paragraph_style.cc",
     "paragraph_style.h",
     "styled_runs.cc",
     "styled_runs.h",
     "text_align.h",
+    "text_style.cc",
     "text_style.h",
   ]
 
-  public_deps = [
-    "//lib/ftl",
+  deps = [
     "//lib/txt/libs/minikin",
     "//third_party/skia",
   ]

@@ -18,6 +18,10 @@
  * An implementation of Liang's hyphenation algorithm.
  */
 
+#ifndef U_USING_ICU_NAMESPACE
+#define U_USING_ICU_NAMESPACE 0
+#endif //  U_USING_ICU_NAMESPACE
+
 #include "unicode/locid.h"
 #include <memory>
 #include <unordered_map>

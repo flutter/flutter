@@ -16,9 +16,9 @@ group("txt") {
   testonly = true
 
   deps = [
-    "libs/minikin",
-    "src",
-    "tests/unittest($host_toolchain)",
     "examples:txt_example($host_toolchain)",
+    "src",
+    "tests/txt($host_toolchain)",  # txt_unittests
+    "tests/unittest($host_toolchain)",  # minikin_unittest
   ]
 }
