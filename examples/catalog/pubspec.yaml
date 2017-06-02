@@ -4,6 +4,7 @@ dependencies:
   flutter:
     sdk: flutter
   image:
+  googleapis_auth:
 
 dev_dependencies:
   flutter_test:

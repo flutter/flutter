@@ -161,6 +161,8 @@ void generate() {
     }
   });
 
+  // Causes the generated imports to appear in alphabetical order.
+  // Avoid complaints from flutter lint.
   samples.sort((SampleGenerator a, SampleGenerator b) {
     return a.sourceName.compareTo(b.sourceName);
   });
@@ -184,12 +186,6 @@ void generate() {
     <String, String>{
       'paths': samples.map((SampleGenerator sample) {
         return "'${outputFile('\${prefix}' + sample.sourceName + '.png').path}'";
-      }).toList().join(',\n'),
-      'largeNames': samples.map((SampleGenerator sample) {
-        return "'\${prefix}${sample.sourceName}.png'";
-      }).toList().join(',\n'),
-      'smallNames': samples.map((SampleGenerator sample) {
-        return "'\${prefix}${sample.sourceName}_small.png'";
       }).toList().join(',\n'),
     },
   );

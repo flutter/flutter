@@ -5,12 +5,16 @@ import 'dart:math' as math;
 
 import 'package:image/image.dart';
 
+String authorizationToken;
+
 class UploadError extends Error {
   UploadError(this.message);
   final String message;
   @override
   String toString() => message;
 }
+
+void logMessage(String s) { print(s); }
 
 class Upload {
   Upload(this.fromPath, this.largeName, this.smallName);
@@ -29,10 +33,6 @@ class Upload {
   int retryCount = 0;
   bool isComplete = false;
 
-  String get authorizationToken {
-    return 'ya29.GltbBPbYSY0dwggdk0vCOSzWExNF37SbkjCfZt3XxkJktabF2rS9_Ui1taYBGtU9LdPuoRRXXVKczC-ohbjqn8zJdfL2MyhvDwFTd9FOZu3nrhBU5Bx-5q8O4MXL';
-  }
-
   Duration get timeLimit {
     if (retryCount == 0)
       return const Duration(milliseconds: 1000);
@@ -42,29 +42,34 @@ class Upload {
 
   Future<bool> save(HttpClient client, String name, List<int> content) async {
     try {
-      final Uri uri = new Uri.https(uriAuthority, uriPath, {
+      final Uri uri = new Uri.https(uriAuthority, uriPath, <String, String>{
         'uploadType': 'media',
         'name': name,
       });
       final HttpClientRequest request = await client.postUrl(uri);
       request
-        ..headers.contentType = 'image/png'
+        ..headers.contentType = new ContentType('image', 'png')
         ..headers.add('Authorization', 'Bearer $authorizationToken')
         ..add(content);
 
       final HttpClientResponse response = await request.close().timeout(timeLimit);
-      await response.drain<Null>();
+      if (response.statusCode == HttpStatus.OK) {
+        await response.drain<Null>();
+      } else {
+        logMessage('Request to save "$name" (length ${content.length}) failed, will retry');
+        logMessage(await response.transform(UTF8.decoder).join());
+      }
       return response.statusCode == HttpStatus.OK;
     } on TimeoutException catch (_) {
-      // TBD log a message about timing out
+      logMessage('Request to save "$name" (length ${content.length}) timed out, will retry');
       return false;
     }
   }
 
   Future<bool> run(HttpClient client) async {
     assert(!isComplete);
-    if (retryCount > 4)
-      throw new UploadError('upload of "$fromPath" to "$largeName" and "$smallName" failed after 4 retries');
+    if (retryCount > 2)
+      throw new UploadError('upload of "$fromPath" to "$largeName" and "$smallName" failed after 2 retries');
 
     largeImage ??= await new File(fromPath).readAsBytes();
     smallImage ??= encodePng(copyResize(decodePng(largeImage), 400));
@@ -81,7 +86,8 @@ class Upload {
 }
 
 Future<Null> saveScreenshots(List<String> fromPaths, List<String> largeNames, List<String> smallNames) async {
-  assert(fromPaths.length == toPaths.length);
+  assert(fromPaths.length == largeNames.length);
+  assert(fromPaths.length == smallNames.length);
 
   List<Upload> uploads = new List<Upload>(fromPaths.length);
   for (int index = 0; index < uploads.length; index += 1)
@@ -92,6 +98,42 @@ Future<Null> saveScreenshots(List<String> fromPaths, List<String> largeNames, Li
     uploads = uploads.where(Upload.isNotComplete).toList();
     await Future.wait(uploads.map((Upload upload) => upload.run(client)));
   }
-
   client.close();
+}
+
+
+// If path is lib/foo.png then screenshotName is foo.
+String screenshotName(String path) {
+  // In /foo/bar/baz.dart, matches baz.dart, match[1] == 'baz'
+  final RegExp nameRE = new RegExp(r'(\w+)\.png$');
+  final Match nameMatch = nameRE.firstMatch(path);
+  if (nameMatch.groupCount != 1)
+      throw new UploadError('bad screenshot file name $path');
+  return nameMatch[1];
+}
+
+Future<Null> main(List<String> args) async {
+  if (args.length != 2)
+    throw new UploadError('Usage: dart bin/save_screenshots.dart commit authorization');
+
+  final Directory outputDirectory = new Directory('.generated');
+  final List<String> screenshots = <String>[];
+  outputDirectory.listSync().forEach((FileSystemEntity entity) {
+    if (entity is File && entity.path.endsWith('.png')) {
+      final File file = entity;
+      screenshots.add(file.path);
+    }
+  });
+
+  final String commit = args[0];
+  final List<String> largeNames = <String>[]; // Cloud storage names for the full res screenshots.
+  final List<String> smallNames = <String>[]; // Likewise for the scaled down screenshots.
+  for (String path in screenshots) {
+    final String name = screenshotName(path);
+    largeNames.add('$commit/$name.png');
+    smallNames.add('$commit/${name}_small.png');
+  }
+
+  authorizationToken = args[1];
+  await saveScreenshots(screenshots, largeNames, smallNames);
 }

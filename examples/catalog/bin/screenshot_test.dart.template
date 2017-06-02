@@ -6,8 +6,6 @@ import 'dart:io';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
-import 'save_screenshots.dart';
-
 void main() {
   group('sample screenshots', () {
     final String prefix = Platform.isMacOS ? 'ios_' : "";
@@ -33,19 +31,6 @@ void main() {
         await driver.tap(find.byValueKey('screenshotGestureDetector'));
         await driver.waitUntilNoTransientCallbacks();
       }
-    });
-
-    test('save sample screenshots', () async {
-      final List<String> paths = <String>[
-        @(paths)
-      ];
-      final List<String> largeNames = <String>[
-        @(largeNames)
-      ];
-      final List<String> smallNames = <String>[
-        @(smallNames)
-      ];
-      await saveScreenshots(paths, largeNames, smallNames);
     });
   });
 }

@@ -30,6 +30,11 @@ Future<TaskResult> samplePageCatalogGenerator() async {
       '--device-id',
       deviceId,
     ]);
+
+    await dart(<String>[
+      'bin/save_screenshots.dart',
+      await getCurrentFlutterRepoCommit(),
+    ]);
   });
 
   return new TaskResult.success(null);
