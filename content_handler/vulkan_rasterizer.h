@@ -39,6 +39,7 @@ class VulkanRasterizer : public Rasterizer {
         private mtl::MessageLoopHandler {
    public:
     VulkanSurfaceProducer();
+    ~VulkanSurfaceProducer() override;
     sk_sp<SkSurface> ProduceSurface(SkISize size,
                                     mozart::ImagePtr* out_image) override;
 

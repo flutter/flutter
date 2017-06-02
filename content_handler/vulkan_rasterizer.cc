@@ -52,6 +52,12 @@ VulkanRasterizer::VulkanSurfaceProducer::VulkanSurfaceProducer() {
     FTL_LOG(ERROR) << "VulkanSurfaceProducer failed to initialize";
 }
 
+VulkanRasterizer::VulkanSurfaceProducer::~VulkanSurfaceProducer() {
+  for (auto &surface_info : pending_surfaces_)
+    mtl::MessageLoop::GetCurrent()->RemoveHandler(
+        surface_info.second.handler_key);
+}
+
 std::unique_ptr<VulkanRasterizer::VulkanSurfaceProducer::Surface>
 VulkanRasterizer::VulkanSurfaceProducer::CreateSurface(uint32_t width,
                                                        uint32_t height) {
