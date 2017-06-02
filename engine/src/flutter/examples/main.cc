@@ -31,7 +31,9 @@ int runTest() {
       "I can tell. Rock, rock on. "
       "\xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5"
       "\x87";
-  icu::UnicodeString text = icu::UnicodeString::fromUTF8(utf8_text);
+  icu::UnicodeString icu_text = icu::UnicodeString::fromUTF8(utf8_text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
 
   ParagraphStyle paragraph_style;
   ParagraphBuilder builder(paragraph_style);
@@ -39,18 +41,18 @@ int runTest() {
   style.color = SK_ColorBLUE;
   style.font_size = 32.0;
   builder.PushStyle(style);
-  builder.AddText(text.getBuffer(), text.length());
+  builder.AddText(u16_text);
   style.color = SK_ColorYELLOW;
   builder.PushStyle(style);
-  builder.AddText(text.getBuffer(), text.length());
+  builder.AddText(u16_text);
   builder.Pop();
-  builder.AddText(text.getBuffer(), text.length());
+  builder.AddText(u16_text);
   builder.Pop();
   auto paragraph = builder.Build();
 
   int width = 800;
   int height = 600;
-  paragraph->Layout(width);
+  paragraph->Layout(ParagraphConstraints(width));
 
   SkAutoGraphics ag;
   SkBitmap bitmap;

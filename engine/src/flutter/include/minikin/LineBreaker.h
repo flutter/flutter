@@ -22,6 +22,10 @@
 #ifndef MINIKIN_LINE_BREAKER_H
 #define MINIKIN_LINE_BREAKER_H
 
+#ifndef U_USING_ICU_NAMESPACE
+#define U_USING_ICU_NAMESPACE 0
+#endif //  U_USING_ICU_NAMESPACE
+
 #include "unicode/brkiter.h"
 #include "unicode/locid.h"
 #include <cmath>

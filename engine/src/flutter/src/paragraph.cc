@@ -26,7 +26,7 @@
 
 #include "lib/ftl/logging.h"
 
-#include "lib/txt/src/font_provider.h"
+#include "lib/txt/src/font_collection.h"
 #include "lib/txt/src/font_skia.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPaint.h"
@@ -114,7 +114,8 @@ void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
 }
 
 void Paragraph::AddRunsToLineBreaker() {
-  auto collection = FontProvider::GetDefault().GetFontCollectionForFamily("");
+  auto collection = FontCollection::GetDefaultFontCollection()
+                        .GetMinikinFontCollectionForFamily("");
   minikin::FontStyle font;
   minikin::MinikinPaint paint;
   for (size_t i = 0; i < runs_.size(); ++i) {
@@ -124,8 +125,8 @@ void Paragraph::AddRunsToLineBreaker() {
   }
 }
 
-void Paragraph::Layout(double width) {
-  breaker_.setLineWidths(0.0f, 0, width);
+void Paragraph::Layout(const ParagraphConstraints& constraints) {
+  breaker_.setLineWidths(0.0f, 0, constraints.width());
   AddRunsToLineBreaker();
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
@@ -138,7 +139,8 @@ void Paragraph::Layout(double width) {
   minikin::MinikinPaint minikin_paint;
 
   SkTextBlobBuilder builder;
-  auto collection = FontProvider::GetDefault().GetFontCollectionForFamily("");
+  auto collection = FontCollection::GetDefaultFontCollection()
+                        .GetMinikinFontCollectionForFamily("");
   minikin::Layout layout;
   SkScalar x = 0.0f;
   SkScalar y = 0.0f;

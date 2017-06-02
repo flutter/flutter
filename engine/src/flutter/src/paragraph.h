@@ -19,11 +19,11 @@
 
 #include <vector>
 
-#include <minikin/LineBreaker.h>
-
 #include "lib/ftl/macros.h"
 #include "lib/txt/src/paint_record.h"
+#include "lib/txt/src/paragraph_constraints.h"
 #include "lib/txt/src/styled_runs.h"
+#include "minikin/LineBreaker.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 class SkCanvas;
@@ -36,7 +36,7 @@ class Paragraph {
 
   ~Paragraph();
 
-  void Layout(double width);
+  void Layout(const ParagraphConstraints& constraints);
 
   void Paint(SkCanvas* canvas, double x, double y);
 

@@ -14,42 +14,35 @@
  * limitations under the License.
  */
 
-#ifndef LIB_TXT_SRC_PARAGRAPH_BUILDER_H_
-#define LIB_TXT_SRC_PARAGRAPH_BUILDER_H_
+#ifndef LIB_TXT_SRC_FONT_COLLECTION_H_
+#define LIB_TXT_SRC_FONT_COLLECTION_H_
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "lib/ftl/macros.h"
-#include "lib/txt/src/paragraph.h"
-#include "lib/txt/src/paragraph_style.h"
-#include "lib/txt/src/styled_runs.h"
-#include "lib/txt/src/text_style.h"
+#include "minikin/FontCollection.h"
+#include "minikin/FontFamily.h"
 
 namespace txt {
 
-class ParagraphBuilder {
+class FontCollection {
  public:
-  explicit ParagraphBuilder(ParagraphStyle style);
+  static FontCollection& GetDefaultFontCollection();
 
-  ~ParagraphBuilder();
+  FontCollection();
 
-  void PushStyle(const TextStyle& style);
+  ~FontCollection();
 
-  void Pop();
-
-  void AddText(const std::u16string& text);
-
-  std::unique_ptr<Paragraph> Build();
+  std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
+      const std::string& family);
 
  private:
-  std::vector<uint16_t> text_;
-  std::vector<size_t> style_stack_;
-  StyledRuns runs_;
-
-  FTL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
+  // TODO(chinmaygarde): Caches go here.
+  FTL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
 
 }  // namespace txt
 
-#endif  // LIB_TXT_SRC_PARAGRAPH_BUILDER_H_
+#endif  // LIB_TXT_SRC_FONT_COLLECTION_H_
