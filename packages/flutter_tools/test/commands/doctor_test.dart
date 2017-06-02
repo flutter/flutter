@@ -12,9 +12,9 @@ void main() {
   group('doctor', () {
     testUsingContext('intellij validator', () async {
       final ValidationResult result = await new IntelliJValidatorTestTarget('Test').validate();
-      expect(result.type, ValidationType.installed);
+      expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version test.test.test');
-      expect(result.messages, hasLength(2));
+      expect(result.messages, hasLength(3));
 
       ValidationMessage message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
@@ -22,7 +22,8 @@ void main() {
 
       message = result.messages
           .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
-      expect(message.message, 'Flutter plugin version 0.1.3');
+      expect(message.message, contains('Flutter plugin version 0.1.3'));
+      expect(message.message, contains('recommended minimum version'));
     });
   });
 }
