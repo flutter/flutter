@@ -29,6 +29,9 @@ enum TextInputType {
 
   /// Optimize for email addresses.
   emailAddress,
+
+  /// Optimize for URLs.
+  url,
 }
 
 /// An action the user has requested the text input control to perform.
