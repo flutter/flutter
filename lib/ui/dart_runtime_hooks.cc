@@ -142,12 +142,12 @@ void Logger_PrintString(Dart_NativeArguments args) {
 #if defined(OS_ANDROID)
     // Write to the logcat on Android.
     const char* tag = Settings::Get().log_tag.c_str();
-    __android_log_print(ANDROID_LOG_INFO, tag, "%.*s", (int)length,
-                        chars);
-#elif __APPLE__
-    // Write directly to stdout on iOS, which is redirected to ASL via
+    __android_log_print(ANDROID_LOG_INFO, tag, "%.*s", (int)length, chars);
+#elif defined(__APPLE__) || defined(OS_LINUX)
+    // On iOS and in flutter_tester (on both macOS and Linux, write directly to
+    // stdout. On iOS, this is redirected to ASL via
     // RedirectIOConnectionsToSyslog in platform_mac.mm.
-    // TODO(cbracken) replace with dedicated (non-stdout) logging.
+    // TODO(cbracken) replace with dedicated (non-stdout) logging on iOS.
     fwrite(chars, 1, length, stdout);
     fputs("\n", stdout);
     fflush(stdout);
