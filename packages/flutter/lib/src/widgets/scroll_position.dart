@@ -66,10 +66,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     @required this.context,
     ScrollPosition oldPosition,
     this.debugLabel,
-  }) {
-    assert(physics != null);
-    assert(context != null);
-    assert(context.vsync != null);
+  }) : assert(physics != null),
+       assert(context != null),
+       assert(context.vsync != null) {
     if (oldPosition != null)
       absorb(oldPosition);
     restoreScrollOffset();

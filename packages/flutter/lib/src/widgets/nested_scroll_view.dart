@@ -38,12 +38,11 @@ class NestedScrollView extends StatefulWidget {
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
-  }) : super(key: key) {
-    assert(scrollDirection != null);
-    assert(reverse != null);
-    assert(headerSliverBuilder != null);
-    assert(body != null);
-  }
+  }) : assert(scrollDirection != null),
+       assert(reverse != null),
+       assert(headerSliverBuilder != null),
+       assert(body != null),
+       super(key: key);
 
   // TODO(ianh): we should expose a controller so you can call animateTo, etc.
 
@@ -782,10 +781,9 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
     this.metrics,
     Simulation simulation,
     TickerProvider vsync,
-  ) : super(position, simulation, vsync) {
-    assert(metrics.minRange != metrics.maxRange);
-    assert(metrics.maxRange > metrics.minRange);
-  }
+  ) : assert(metrics.minRange != metrics.maxRange),
+      assert(metrics.maxRange > metrics.minRange),
+      super(position, simulation, vsync);
 
   final _NestedScrollCoordinator coordinator;
   final _NestedScrollMetrics metrics;

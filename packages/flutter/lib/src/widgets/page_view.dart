@@ -42,11 +42,9 @@ class PageController extends ScrollController {
   PageController({
     this.initialPage: 0,
     this.viewportFraction: 1.0,
-  }) {
-    assert(initialPage != null);
-    assert(viewportFraction != null);
-    assert(viewportFraction > 0.0);
-  }
+  }) : assert(initialPage != null),
+       assert(viewportFraction != null),
+       assert(viewportFraction > 0.0);
 
   /// The page to show when first creating the [PageView].
   final int initialPage;
@@ -154,18 +152,17 @@ class _PagePosition extends ScrollPositionWithSingleContext {
     this.initialPage: 0,
     double viewportFraction: 1.0,
     ScrollPosition oldPosition,
-  }) : _viewportFraction = viewportFraction,
+  }) : assert(initialPage != null),
+       assert(viewportFraction != null),
+       assert(viewportFraction > 0.0),
+       _viewportFraction = viewportFraction,
        _pageToUseOnStartup = initialPage.toDouble(),
        super(
-    physics: physics,
-    context: context,
-    initialPixels: null,
-    oldPosition: oldPosition,
-  ) {
-    assert(initialPage != null);
-    assert(viewportFraction != null);
-    assert(viewportFraction > 0.0);
-  }
+         physics: physics,
+         context: context,
+         initialPixels: null,
+         oldPosition: oldPosition,
+       );
 
   final int initialPage;
   double _pageToUseOnStartup;
@@ -358,9 +355,9 @@ class PageView extends StatefulWidget {
     this.physics,
     this.onPageChanged,
     @required this.childrenDelegate,
-  }) : controller = controller ?? _defaultPageController, super(key: key) {
-    assert(childrenDelegate != null);
-  }
+  }) : assert(childrenDelegate != null),
+       controller = controller ?? _defaultPageController,
+       super(key: key);
 
   /// The axis along which the page view scrolls.
   ///

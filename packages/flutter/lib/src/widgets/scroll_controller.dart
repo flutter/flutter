@@ -43,9 +43,7 @@ class ScrollController extends ChangeNotifier {
   ScrollController({
     this.initialScrollOffset: 0.0,
     this.debugLabel,
-  }) {
-    assert(initialScrollOffset != null);
-  }
+  }) : assert(initialScrollOffset != null);
 
   /// The initial value to use for [offset].
   ///

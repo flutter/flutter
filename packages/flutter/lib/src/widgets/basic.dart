@@ -1202,9 +1202,8 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
     @required this.constraints,
     Widget child
   }) : assert(constraints != null),
-       super(key: key, child: child) {
-    assert(constraints.debugAssertIsValid());
-  }
+       assert(constraints.debugAssertIsValid()),
+       super(key: key, child: child);
 
   /// The additional constraints to impose on the child.
   final BoxConstraints constraints;
@@ -2222,9 +2221,8 @@ class Flex extends MultiChildRenderObjectWidget {
        assert(mainAxisAlignment != null),
        assert(mainAxisSize != null),
        assert(crossAxisAlignment != null),
-       super(key: key, children: children) {
-    assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null); // https://github.com/dart-lang/sdk/issues/29278
-  }
+       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),// https://github.com/dart-lang/sdk/issues/29278
+       super(key: key, children: children);
 
   /// The direction to use as the main axis.
   ///
@@ -2900,9 +2898,8 @@ class Flow extends MultiChildRenderObjectWidget {
     Key key,
     @required this.delegate,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, children: children) {
-    assert(delegate != null);
-  }
+  }) : assert(delegate != null),
+       super(key: key, children: children);
 
   /// The delegate that controls the transformation matrices of the children.
   final FlowDelegate delegate;

@@ -225,11 +225,11 @@ class _GlowController extends ChangeNotifier {
     @required TickerProvider vsync,
     @required Color color,
     @required Axis axis,
-  }) : _color = color,
+  }) : assert(vsync != null),
+       assert(color != null),
+       assert(axis != null),
+       _color = color,
        _axis = axis {
-    assert(vsync != null);
-    assert(color != null);
-    assert(axis != null);
     _glowController = new AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
     final Animation<double> decelerator = new CurvedAnimation(
