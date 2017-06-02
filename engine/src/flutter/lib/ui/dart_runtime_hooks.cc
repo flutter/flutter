@@ -27,13 +27,6 @@
 #include <android/log.h>
 #endif
 
-#if __APPLE__
-extern "C" {
-// Cannot import the syslog.h header directly because of macro collision
-extern void syslog(int, const char*, ...);
-}
-#endif
-
 using tonic::LogIfError;
 using tonic::ToDart;
 
@@ -146,18 +139,18 @@ void Logger_PrintString(Dart_NativeArguments args) {
   if (Dart_IsError(result)) {
     Dart_PropagateError(result);
   } else {
-    // Uses fwrite to support printing NUL bytes.
-    fwrite(chars, 1, length, stdout);
-    fputs("\n", stdout);
-    fflush(stdout);
 #if defined(OS_ANDROID)
-    // In addition to writing to the stdout, write to the logcat so that the
-    // message is discoverable when running on an unrooted device.
+    // Write to the logcat on Android.
     const char* tag = Settings::Get().log_tag.c_str();
     __android_log_print(ANDROID_LOG_INFO, tag, "%.*s", (int)length,
                         chars);
 #elif __APPLE__
-    syslog(1 /* LOG_ALERT */, "%.*s", (int)length, chars);
+    // Write directly to stdout on iOS, which is redirected to ASL via
+    // RedirectIOConnectionsToSyslog in platform_mac.mm.
+    // TODO(cbracken) replace with dedicated (non-stdout) logging.
+    fwrite(chars, 1, length, stdout);
+    fputs("\n", stdout);
+    fflush(stdout);
 #endif
   }
   if (dart::bin::ShouldCaptureStdout()) {
