@@ -57,7 +57,8 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.center,
     List<Widget> slivers: const <Widget>[],
   }) : assert(offset != null),
-       assert(center == null || children.where((Widget child) => child.key == center).length == 1),
+       assert(slivers != null),
+       assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
        super(key: key, children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
