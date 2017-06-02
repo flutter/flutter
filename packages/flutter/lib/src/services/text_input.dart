@@ -26,6 +26,9 @@ enum TextInputType {
 
   /// Optimize for date and time information.
   datetime,
+
+  /// Optimize for email addresses.
+  emailAddress,
 }
 
 /// An action the user has requested the text input control to perform.
