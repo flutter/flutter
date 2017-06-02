@@ -2444,7 +2444,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// If [isSemanticBoundary] and [isBlockingSemanticsOfPreviouslyPaintedNodes]
   /// is set on the same node, all previously painted siblings and cousins
-  /// up until the next semantic boundary are dropped.
+  /// up until the next ancestor that is a semantic boundary are dropped.
   ///
   /// Paint order as established by [visitChildrenForSemantics] is used to
   /// determine if a node is previous to this one.
