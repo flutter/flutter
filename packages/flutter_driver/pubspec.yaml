@@ -1,5 +1,5 @@
 name: flutter_driver
-version: 0.0.5
+version: 0.0.6-dev
 description: Integration and performance test API for Flutter applications
 homepage: http://flutter.io
 author: Flutter Authors <flutter-dev@googlegroups.com>
