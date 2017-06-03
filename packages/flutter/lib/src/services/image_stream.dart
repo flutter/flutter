@@ -237,8 +237,8 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
   /// message is only dumped to the console in debug mode (see [new
   /// FlutterErrorDetails]).
-  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector }) {
-    assert(image != null);
+  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
+    : assert(image != null) {
     image.then<Null>(setImage, onError: (dynamic error, StackTrace stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: error,
