@@ -210,6 +210,10 @@ class _FlutterValidator extends DoctorValidator {
     final FlutterVersion version = FlutterVersion.instance;
 
     messages.add(new ValidationMessage('Flutter at ${Cache.flutterRoot}'));
+    if (Cache.flutterRoot.contains(' '))
+      messages.add(new ValidationMessage.error(
+        'Flutter SDK install paths with spaces are not yet supported. (https://github.com/flutter/flutter/issues/10461)\n'
+        'Please move the SDK to a path that does not include spaces.'));
     messages.add(new ValidationMessage(
       'Framework revision ${version.frameworkRevisionShort} '
       '(${version.frameworkAge}), ${version.frameworkDate}'
