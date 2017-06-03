@@ -247,6 +247,20 @@ Future<XcodeBuildResult> buildXcodeProject({
 }
 
 Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
+  if (result.xcodeBuildExecution != null &&
+      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      result.stdout?.contains('BCEROR') == true) {
+    printError(noProvisioningProfileInstruction, emphasis: true);
+    return;
+  }
+  if (result.xcodeBuildExecution != null &&
+      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
+      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
+      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+    printError(noDevelopmentTeamInstruction, emphasis: true);
+    return;
+  }
   if (app.id?.contains('com.yourcompany') ?? false) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
@@ -263,18 +277,6 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp 
     printError('');
     printError("Also try selecting 'Product > Build' to fix the problem:");
     return;
-  }
-  if (result.xcodeBuildExecution != null &&
-      result.xcodeBuildExecution.buildForPhysicalDevice &&
-      result.stdout?.contains('BCEROR') == true) {
-    printError(noProvisioningProfileInstruction, emphasis: true);
-  }
-  if (result.xcodeBuildExecution != null &&
-      result.xcodeBuildExecution.buildForPhysicalDevice &&
-      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
-      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
-    printError(noDevelopmentTeamInstruction, emphasis: true);
   }
 }
 
