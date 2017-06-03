@@ -410,7 +410,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   final List<_DragAvatar<T>> _candidateAvatars = <_DragAvatar<T>>[];
   final List<_DragAvatar<dynamic>> _rejectedAvatars = <_DragAvatar<dynamic>>[];
 
-  void handleDrag(_DragAvatar<T> avatar, Offset lastOffset) {
+  void handleDrag(_DragAvatar<dynamic> avatar, Offset lastOffset) {
     if (widget.onDrag != null)
       widget.onDrag(avatar.data, lastOffset);
   }
