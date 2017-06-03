@@ -3613,6 +3613,27 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
   RenderMergeSemantics createRenderObject(BuildContext context) => new RenderMergeSemantics();
 }
 
+/// A widget that drops the semantics of all widget that were painted before it
+/// in the same semantic container.
+///
+/// This is useful to hide widgets from accessibility tools that are painted
+/// behind a certain widget, e.g. an alert should usually disallow interaction
+/// with any widget located "behind" the alert (even when they are still
+/// partially visible). Similarly, an open [Drawer] blocks interactions with
+/// any widget outside the drawer.
+///
+/// See also:
+///
+/// * [ExcludeSemantics] which drops all semantics of its descendants.
+class BlockSemantics extends SingleChildRenderObjectWidget {
+  /// Creates a widget that excludes the semantics of all widgets painted before
+  /// it in the same semantic container.
+  const BlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
+  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics();
+}
+
 /// A widget that drops all the semantics of its descendants.
 ///
 /// When [excluding] is true, this widget (and its subtree) is excluded from
@@ -3622,6 +3643,10 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
 /// redundant with the chip label.
+///
+/// See also:
+///
+/// * [BlockSemantics] which drops semantics of widgets earlier in the tree.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that drops all the semantics of its descendants.
   const ExcludeSemantics({

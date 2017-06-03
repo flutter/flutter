@@ -194,6 +194,8 @@ class SemanticsTester {
   String toString() => 'SemanticsTester';
 }
 
+const String _matcherHelp = 'Try dumping the semantics with debugDumpSemanticsTree() from the rendering library to see what the semantics tree looks like.';
+
 class _HasSemantics extends Matcher {
   const _HasSemantics(this._semantics) : assert(_semantics != null);
 
@@ -211,30 +213,65 @@ class _HasSemantics extends Matcher {
 
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    const String help = 'Try dumping the semantics with debugDumpSemanticsTree() from the rendering library to see what the semantics tree looks like.';
     final TestSemantics testNode = matchState[TestSemantics];
     final SemanticsNode node = matchState[SemanticsNode];
     if (node == null)
-      return mismatchDescription.add('could not find node with id ${testNode.id}.\n$help');
+      return mismatchDescription.add('could not find node with id ${testNode.id}.\n$_matcherHelp');
     if (testNode.id != node.id)
-      return mismatchDescription.add('expected node id ${testNode.id} but found id ${node.id}.\n$help');
+      return mismatchDescription.add('expected node id ${testNode.id} but found id ${node.id}.\n$_matcherHelp');
     final SemanticsData data = node.getSemanticsData();
     if (testNode.flags != data.flags)
-      return mismatchDescription.add('expected node id ${testNode.id} to have flags ${testNode.flags} but found flags ${data.flags}.\n$help');
+      return mismatchDescription.add('expected node id ${testNode.id} to have flags ${testNode.flags} but found flags ${data.flags}.\n$_matcherHelp');
     if (testNode.actions != data.actions)
-      return mismatchDescription.add('expected node id ${testNode.id} to have actions ${testNode.actions} but found actions ${data.actions}.\n$help');
+      return mismatchDescription.add('expected node id ${testNode.id} to have actions ${testNode.actions} but found actions ${data.actions}.\n$_matcherHelp');
     if (testNode.label != data.label)
-      return mismatchDescription.add('expected node id ${testNode.id} to have label "${testNode.label}" but found label "${data.label}".\n$help');
+      return mismatchDescription.add('expected node id ${testNode.id} to have label "${testNode.label}" but found label "${data.label}".\n$_matcherHelp');
     if (testNode.rect != data.rect)
-      return mismatchDescription.add('expected node id ${testNode.id} to have rect ${testNode.rect} but found rect ${data.rect}.\n$help');
+      return mismatchDescription.add('expected node id ${testNode.id} to have rect ${testNode.rect} but found rect ${data.rect}.\n$_matcherHelp');
     if (testNode.transform != data.transform)
-      return mismatchDescription.add('expected node id ${testNode.id} to have transform ${testNode.transform} but found transform:.\n${data.transform}.\n$help');
+      return mismatchDescription.add('expected node id ${testNode.id} to have transform ${testNode.transform} but found transform:.\n${data.transform}.\n$_matcherHelp');
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (testNode.children.length != childrenCount)
-      return mismatchDescription.add('expected node id ${testNode.id} to have ${testNode.children.length} children but found $childrenCount.\n$help');
+      return mismatchDescription.add('expected node id ${testNode.id} to have ${testNode.children.length} children but found $childrenCount.\n$_matcherHelp');
     return mismatchDescription;
   }
 }
 
 /// Asserts that a [SemanticsTester] has a semantics tree that exactly matches the given semantics.
 Matcher hasSemantics(TestSemantics semantics) => new _HasSemantics(semantics);
+
+class _IncludesNodeWithLabel extends Matcher {
+  const _IncludesNodeWithLabel(this._label) : assert(_label != null);
+
+  final String _label;
+
+  @override
+  bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
+    bool result = false;
+    SemanticsNodeVisitor visitor;
+    visitor = (SemanticsNode node) {
+      if (node.label == _label) {
+        result = true;
+      } else {
+        node.visitChildren(visitor);
+      }
+      return !result;
+    };
+    final SemanticsNode root = item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    visitor(root);
+    return result;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('includes node with label "$_label"');
+  }
+
+  @override
+  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    return mismatchDescription.add('could not find node with label "$_label".\n$_matcherHelp');
+  }
+}
+
+/// Asserts that a node in the semantics tree of [SemanticsTester] has [label].
+Matcher includesNodeWithLabel(String label) => new _IncludesNodeWithLabel(label);

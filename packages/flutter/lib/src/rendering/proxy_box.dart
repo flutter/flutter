@@ -2891,6 +2891,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 }
 
+/// Causes the semantics of all siblings and cousins painted before it in the
+/// same semantic container to be dropped.
+///
+/// This is useful in a stack where an overlay should prevent interactions
+/// with the underlying layers.
+class RenderBlockSemantics extends RenderProxyBox {
+  RenderBlockSemantics({ RenderBox child }) : super(child);
+
+  @override
+  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => true;
+}
+
 /// Causes the semantics of all descendants to be merged into this
 /// node such that the entire subtree becomes a single leaf in the
 /// semantics tree.
