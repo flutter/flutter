@@ -247,9 +247,8 @@ class ReverseAnimation extends Animation<double>
   /// Creates a reverse animation.
   ///
   /// The parent argument must not be null.
-  ReverseAnimation(this.parent) {
-    assert(parent != null);
-  }
+  ReverseAnimation(this.parent)
+    : assert(parent != null);
 
   /// The animation whose value and direction this animation is reversing.
   final Animation<double> parent;
@@ -331,9 +330,8 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     @required this.parent,
     @required this.curve,
     this.reverseCurve
-  }) {
-    assert(parent != null);
-    assert(curve != null);
+  }) : assert(parent != null),
+       assert(curve != null) {
     _updateCurveDirection(parent.status);
     parent.addStatusListener(_updateCurveDirection);
   }
@@ -441,8 +439,8 @@ class TrainHoppingAnimation extends Animation<double>
   ///
   /// The current train argument must not be null but the next train argument
   /// can be null.
-  TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain }) {
-    assert(_currentTrain != null);
+  TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain })
+    : assert(_currentTrain != null) {
     if (_nextTrain != null) {
       if (_currentTrain.value > _nextTrain.value) {
         _mode = _TrainHoppingMode.maximize;
@@ -552,10 +550,8 @@ abstract class CompoundAnimation<T> extends Animation<T>
   CompoundAnimation({
     @required this.first,
     @required this.next,
-  }) {
-    assert(first != null);
-    assert(next != null);
-  }
+  }) : assert(first != null),
+       assert(next != null);
 
   /// The first sub-animation. Its status takes precedence if neither are
   /// animating.

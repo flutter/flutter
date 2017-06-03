@@ -25,7 +25,7 @@ final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
   end: FractionalOffset.topLeft,
 );
 
-// Custom decoration from no shadow to page shadow mimicking iOS page 
+// Custom decoration from no shadow to page shadow mimicking iOS page
 // transitions using gradients.
 final DecorationTween _kGradientShadowTween = new DecorationTween(
   begin: _CupertinoEdgeShadowDecoration.none, // No decoration initially.
@@ -36,27 +36,27 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
       end: FractionalOffset.topRight,
       // Eyeballed gradient used to mimic a drop shadow on the left side only.
       colors: const <Color>[
-        const Color(0x00000000), 
+        const Color(0x00000000),
         const Color(0x04000000),
         const Color(0x12000000),
         const Color(0x38000000)
       ],
       stops: const <double>[0.0, 0.3, 0.6, 1.0],
-    ), 
+    ),
   ),
 );
 
-/// A custom [Decoration] used to paint an extra shadow on the left edge of the 
-/// box it's decorating. It's like a [BoxDecoration] with only a gradient except 
+/// A custom [Decoration] used to paint an extra shadow on the left edge of the
+/// box it's decorating. It's like a [BoxDecoration] with only a gradient except
 /// it paints to the left of the box instead of behind the box.
 class _CupertinoEdgeShadowDecoration extends Decoration {
   const _CupertinoEdgeShadowDecoration({ this.edgeGradient });
 
   /// A Decoration with no decorating properties.
-  static const _CupertinoEdgeShadowDecoration none = 
+  static const _CupertinoEdgeShadowDecoration none =
       const _CupertinoEdgeShadowDecoration();
 
-  /// A gradient to draw to the left of the box being decorated. 
+  /// A gradient to draw to the left of the box being decorated.
   /// FractionalOffsets are relative to the original box translated one box
   /// width to the left.
   final LinearGradient edgeGradient;
@@ -65,8 +65,8 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   ///
   /// See also [Decoration.lerp].
   static _CupertinoEdgeShadowDecoration lerp(
-    _CupertinoEdgeShadowDecoration a, 
-    _CupertinoEdgeShadowDecoration b, 
+    _CupertinoEdgeShadowDecoration a,
+    _CupertinoEdgeShadowDecoration b,
     double t
   ) {
     if (a == null && b == null)
@@ -89,7 +89,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
     return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
   }
-  
+
   @override
   _CupertinoEdgeShadowPainter createBoxPainter([VoidCallback onChanged]) {
     return new _CupertinoEdgeShadowPainter(this, onChanged);
@@ -114,7 +114,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 /// A [BoxPainter] used to draw the page transition shadow using gradients.
 class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
-    @required this._decoration, 
+    @required this._decoration,
     VoidCallback onChange
   ) : assert(_decoration != null),
       super(onChange);
@@ -126,9 +126,9 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     final LinearGradient gradient = _decoration.edgeGradient;
     if (gradient == null)
       return;
-    // The drawable space for the gradient is a rect with the same size as 
+    // The drawable space for the gradient is a rect with the same size as
     // its parent box one box width to the left of the box.
-    final Rect rect = 
+    final Rect rect =
         (offset & configuration.size).translate(-configuration.size.width, 0.0);
     final Paint paint = new Paint()
       ..shader = gradient.createShader(rect);
@@ -249,9 +249,8 @@ class CupertinoBackGestureController extends NavigationGestureController {
   CupertinoBackGestureController({
     @required NavigatorState navigator,
     @required this.controller,
-  }) : super(navigator) {
-    assert(controller != null);
-  }
+  }) : assert(controller != null),
+       super(navigator);
 
   /// The animation controller that the route uses to drive its transition
   /// animation.

@@ -75,10 +75,9 @@ class LeastSquaresSolver {
   /// Creates a least-squares solver.
   ///
   /// The [x], [y], and [w] arguments must not be null.
-  LeastSquaresSolver(this.x, this.y, this.w) {
-    assert(x.length == y.length);
-    assert(y.length == w.length);
-  }
+  LeastSquaresSolver(this.x, this.y, this.w)
+    : assert(x.length == y.length),
+      assert(y.length == w.length);
 
   /// The x-coordinates of each data point.
   final List<double> x;
