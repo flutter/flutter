@@ -63,16 +63,15 @@ import 'constants.dart';
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
-    : _index = initialIndex,
+    : assert(length != null && length > 1),
+      assert(initialIndex != null && initialIndex >= 0 && initialIndex < length),
+      _index = initialIndex,
       _previousIndex = initialIndex,
       _animationController = new AnimationController(
         value: initialIndex.toDouble(),
         upperBound: (length - 1).toDouble(),
         vsync: vsync
-   ) {
-    assert(length != null && length > 1);
-    assert(initialIndex != null && initialIndex >= 0 && initialIndex < length);
-  }
+      );
 
   /// An animation whose value represents the current position of the [TabBar]'s
   /// selected tab indicator as well as the scrollOffsets of the [TabBar]

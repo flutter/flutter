@@ -138,13 +138,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.centerTitle,
     this.toolbarOpacity: 1.0,
     this.bottomOpacity: 1.0,
-  }) : preferredSize = new Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
-       super(key: key) {
-    assert(elevation != null);
-    assert(primary != null);
-    assert(toolbarOpacity != null);
-    assert(bottomOpacity != null);
-  }
+  }) : assert(elevation != null),
+       assert(primary != null),
+       assert(toolbarOpacity != null),
+       assert(bottomOpacity != null),
+       preferredSize = new Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
+       super(key: key);
 
   /// A widget to display before the [title].
   ///
@@ -513,9 +512,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.floating,
     @required this.pinned,
     @required this.snapConfiguration,
-  }) : _bottomHeight = bottom?.preferredSize?.height ?? 0.0 {
-    assert(primary || topPadding == 0.0);
-  }
+  }) : assert(primary || topPadding == 0.0),
+       _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
   final Widget leading;
   final Widget title;
