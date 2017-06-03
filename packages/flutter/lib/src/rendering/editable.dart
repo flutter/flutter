@@ -71,16 +71,16 @@ class RenderEditable extends RenderBox {
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
-  }) : _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
+  }) : assert(maxLines != null),
+       assert(textScaleFactor != null),
+       assert(offset != null),
+       _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
        _maxLines = maxLines,
        _selection = selection,
        _offset = offset {
     assert(_showCursor != null);
-    assert(maxLines != null);
-    assert(textScaleFactor != null);
-    assert(offset != null);
     assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown

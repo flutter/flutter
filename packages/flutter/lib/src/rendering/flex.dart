@@ -201,15 +201,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline
-  }) : _direction = direction,
+  }) : assert(direction != null),
+       assert(mainAxisAlignment != null),
+       assert(mainAxisSize != null),
+       assert(crossAxisAlignment != null),
+       _direction = direction,
        _mainAxisAlignment = mainAxisAlignment,
        _mainAxisSize = mainAxisSize,
        _crossAxisAlignment = crossAxisAlignment,
        _textBaseline = textBaseline {
-    assert(direction != null);
-    assert(mainAxisAlignment != null);
-    assert(mainAxisSize != null);
-    assert(crossAxisAlignment != null);
     addAll(children);
   }
 

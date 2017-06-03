@@ -182,8 +182,8 @@ class RenderFlow extends RenderBox
   RenderFlow({
     List<RenderBox> children,
     @required FlowDelegate delegate
-  }) : _delegate = delegate {
-    assert(delegate != null);
+  }) : assert(delegate != null),
+       _delegate = delegate {
     addAll(children);
   }
 

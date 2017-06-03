@@ -39,10 +39,11 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     Curve curve: Curves.linear,
     FractionalOffset alignment: FractionalOffset.center,
     RenderBox child,
-  }) : _vsync = vsync, super(child: child, alignment: alignment) {
-    assert(vsync != null);
-    assert(duration != null);
-    assert(curve != null);
+  }) : assert(vsync != null),
+       assert(duration != null),
+       assert(curve != null),
+       _vsync = vsync,
+       super(child: child, alignment: alignment) {
     _controller = new AnimationController(
       vsync: vsync,
       duration: duration,
