@@ -14,23 +14,41 @@ import 'text_editing.dart';
 export 'dart:ui' show TextAffinity;
 
 /// The type of information for which to optimize the text input control.
+///
+/// On Android, behavior may vary across device and keyboard provider.
 enum TextInputType {
   /// Optimize for textual information.
+  ///
+  /// Requests the default platform keyboard.
   text,
 
   /// Optimize for numerical information.
+  ///
+  /// Requests a keyboard with ready access to the decimal point and number
+  /// keys.
   number,
 
   /// Optimize for telephone numbers.
+  ///
+  /// Requests a keyboard with ready access to the number keys, "*", and "#".
   phone,
 
   /// Optimize for date and time information.
+  ///
+  /// On iOS, requests the default keyboard.
+  ///
+  /// On Android, requests a keyboard with ready access to the number keys,
+  /// ":", and "-".
   datetime,
 
   /// Optimize for email addresses.
+  ///
+  /// Requests a keyboard with ready access to the "@" and "." keys.
   emailAddress,
 
   /// Optimize for URLs.
+  ///
+  /// Requests a keyboard with ready access to the "/" and "." keys.
   url,
 }
 
