@@ -7,14 +7,14 @@ import 'dart:io';
 import 'package:args/args.dart';
 
 String extractCloudAuthTokenArg(List<String> rawArgs) {
-  final ArgParser _argParser = new ArgParser()..addOption('cloud-auth-token');
+  final ArgParser argParser = new ArgParser()..addOption('cloud-auth-token');
   ArgResults args;
   try {
-    args = _argParser.parse(rawArgs);
+    args = argParser.parse(rawArgs);
   } on FormatException catch(error) {
     stderr.writeln('${error.message}\n');
     stderr.writeln('Usage:\n');
-    stderr.writeln(_argParser.usage);
+    stderr.writeln(argParser.usage);
     return null;
   }
 
