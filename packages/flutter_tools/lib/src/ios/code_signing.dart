@@ -22,6 +22,9 @@ No valid code signing certificates were found
 You can connect to your Apple Developer account by signing in with your Apple ID in Xcode
 and create an iOS Development Certificate as well as a Provisioning Profile for your project by:
 $setDevelopmentTeamInstruction
+  5- Trust your newly created Development Certificate on your iOS device
+     via Settings > General > Device Management > [your new certificate] > Trust
+
 For more information, please visit:
   https://developer.apple.com/library/content/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
 
@@ -35,6 +38,7 @@ No Provisioning Profile was found for your project's Bundle Identifier.
 You can create a new Provisioning Profile for your project in Xcode for your
 team by:
 $setDevelopmentTeamInstruction
+
 For more information, please visit:
   https://flutter.io/setup/#deploy-to-ios-devices
 
@@ -47,6 +51,7 @@ const String noDevelopmentTeamInstruction = '''
 Building a deployable iOS app requires a selected Development Team with a Provisioning Profile
 Please ensure that a Development Team is selected by:
 $setDevelopmentTeamInstruction
+
 For more information, please visit:
   https://flutter.io/setup/#deploy-to-ios-devices
 
@@ -59,7 +64,7 @@ const String setDevelopmentTeamInstruction = '''
      in the project settings
   3- In the 'General' tab, make sure a 'Development Team' is selected. You may need to add
      your Apple ID first.
-''';
+  4- Build or run your project again''';
 
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
     new RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
