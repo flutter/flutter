@@ -356,10 +356,12 @@ class _DraggableState<T> extends State<Draggable<T>> {
 /// A widget that receives data when a [Draggable] widget is dropped.
 ///
 /// When a draggable is dragged on top of a drag target, the drag target is
-/// asked whether it will accept the data the draggable is carrying. If the user
-/// does drop the draggable on top of the drag target (and the drag target has
-/// indicated that it will accept the draggable's data), then the drag target is
-/// asked to accept the draggable's data.
+/// asked whether it will accept the data the draggable is carrying
+/// (see [onWillAccept]). If the user does drop the draggable on top of the
+/// drag target (and the drag target has indicated that it will accept the
+/// draggable's data), then the drag target is asked to accept the draggable's
+/// data (see [onAccept]). While a draggable is moved on top of a drag target,
+/// the drag target is informed about the draggable position (see [onDrag]).
 ///
 /// See also:
 ///
@@ -408,10 +410,9 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   final List<_DragAvatar<T>> _candidateAvatars = <_DragAvatar<T>>[];
   final List<_DragAvatar<dynamic>> _rejectedAvatars = <_DragAvatar<dynamic>>[];
 
-  void onDrag(_DragAvatar<dynamic> avatar, Offset lastOffset) {
-    if (widget.onDrag != null) {
+  void handleDrag(_DragAvatar<T> avatar, Offset lastOffset) {
+    if (widget.onDrag != null)
       widget.onDrag(avatar.data, lastOffset);
-    }
   }
 
   bool didEnter(_DragAvatar<dynamic> avatar) {
@@ -522,9 +523,8 @@ class _DragAvatar<T> extends Drag {
     final List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
 
     // Inform targets that want to know about drag updates.
-    for (_DragTargetState<T> target in targets) {
-      target.onDrag(this, _lastOffset);
-    }
+    for (_DragTargetState<T> target in targets)
+      target.handleDrag(this, _lastOffset);
 
     bool listsMatch = false;
     if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
