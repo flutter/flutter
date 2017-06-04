@@ -172,6 +172,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
           left: 0.0,
           top: 0.0,
           right: 0.0,
+          bottom: 0.0,
           child: new FadeTransition(
             opacity: _firstAnimation,
             child: widget.firstChild,
@@ -190,6 +191,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
           left: 0.0,
           top: 0.0,
           right: 0.0,
+          bottom: 0.0,
           child: new FadeTransition(
             opacity: _secondAnimation,
             child: widget.secondChild,
