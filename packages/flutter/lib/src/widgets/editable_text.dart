@@ -520,9 +520,15 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     _updateOrDisposeSelectionOverlayIfNeeded();
   }
 
+  void _handleScrollChange() {
+    _selectionOverlay?.hide();
+  }
+
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
+    Scrollable.of(context)?.widget?.controller?.removeListener(_handleScrollChange);
+    Scrollable.of(context)?.widget?.controller?.addListener(_handleScrollChange);
     return new Scrollable(
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
