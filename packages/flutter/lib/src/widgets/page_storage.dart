@@ -26,9 +26,9 @@ import 'framework.dart';
 ///
 /// ```dart
 /// new TabBarView(
-///   children: myTabs.map((MyTab tab) {
+///   children: myTabs.map((Tab tab) {
 ///     new MyScrollableTabView(
-///       key: new PageStorageKey<MyTab>(tab.label), // like 'Tab 1'
+///       key: new PageStorageKey<String>(tab.text), // like 'Tab 1'
 ///       tab: tab
 ///    ),
 ///  }),
