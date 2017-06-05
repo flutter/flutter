@@ -21,6 +21,7 @@
 #include "lib/ftl/logging.h"
 #include "lib/txt/src/font_skia.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
+#include "third_party/skia/include/ports/SkFontMgr_directory.h"
 
 namespace txt {
 
@@ -36,17 +37,21 @@ FontCollection::FontCollection() = default;
 FontCollection::~FontCollection() = default;
 
 std::shared_ptr<minikin::FontCollection>
-FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
+FontCollection::GetMinikinFontCollectionForFamily(const std::string& family,
+                                                  const std::string& dir) {
   // Get the Skia font manager.
-  auto skia_font_manager = SkFontMgr::RefDefault();
+  auto skia_font_manager = dir.length() != 0
+                               ? SkFontMgr_New_Custom_Directory(dir.c_str())
+                               : SkFontMgr::RefDefault();
+
   FTL_DCHECK(skia_font_manager != nullptr);
 
   // Ask Skia to resolve a font style set for a font family name.
-  // FIXME(chinmaygarde): The name "Hevetica" is hardcoded because CoreText
+  // FIXME(chinmaygarde): The name "Sample Font" is hardcoded because CoreText
   // crashes when passed a null string. This seems to be a bug in Skia as
   // SkFontMgr explicitly says passing in nullptr gives the default font.
   auto font_style_set = skia_font_manager->matchFamily(
-      family.length() == 0 ? "Helvetica" : family.c_str());
+      family.length() == 0 ? "Sample Font" : family.c_str());
   FTL_DCHECK(font_style_set != nullptr);
 
   std::vector<minikin::Font> minikin_fonts;
@@ -56,7 +61,6 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
     // Create the skia typeface
     auto skia_typeface =
         sk_ref_sp<SkTypeface>(font_style_set->createTypeface(i));
-
     if (skia_typeface == nullptr) {
       continue;
     }

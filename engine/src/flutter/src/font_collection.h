@@ -36,7 +36,8 @@ class FontCollection {
   ~FontCollection();
 
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
-      const std::string& family);
+      const std::string& family,
+      const std::string& dir = "");
 
  private:
   // TODO(chinmaygarde): Caches go here.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright 2017 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,30 @@
  * limitations under the License.
  */
 
-#include <log/log.h>
-
-#include <stdio.h>
-#include <sys/stat.h>
-
 #include <string>
-#include <vector>
 
-std::vector<uint8_t> readWholeFile(const std::string& filePath) {
-  FILE* fp = fopen(filePath.c_str(), "r");
-  LOG_ALWAYS_FATAL_IF(fp == nullptr);
-  struct stat st;
-  LOG_ALWAYS_FATAL_IF(fstat(fileno(fp), &st) != 0);
+#include "lib/ftl/command_line.h"
+#include "lib/txt/tests/txt/utils.h"
 
-  std::vector<uint8_t> result(st.st_size);
-  LOG_ALWAYS_FATAL_IF(fread(result.data(), 1, st.st_size, fp) !=
-                      static_cast<size_t>(st.st_size));
-  fclose(fp);
-  return result;
+namespace txt {
+
+static std::string gFontdir;
+static ftl::CommandLine gCommandLine;
+
+const std::string GetFontDir() {
+  return gFontdir;
 }
+
+void SetFontDir(std::string& dir) {
+  gFontdir = dir;
+}
+
+const ftl::CommandLine& GetCommandLineForProcess() {
+  return gCommandLine;
+}
+
+void SetCommandLine(ftl::CommandLine cmd) {
+  gCommandLine = std::move(cmd);
+}
+
+}  // namespace txt

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include "lib/ftl/logging.h"
+#include "lib/txt/tests/txt/utils.h"
 #include "paragraph.h"
 #include "paragraph_builder.h"
 #include "render_test.h"
@@ -38,8 +40,8 @@ TEST_F(RenderTest, SimpleParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-
-  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()});
+  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
+                    txt::GetFontDir());
 
   paragraph->Paint(GetCanvas(), 10.0, 10.0);
 
