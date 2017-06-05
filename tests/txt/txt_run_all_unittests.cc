@@ -16,9 +16,26 @@
 
 #include "flutter/fml/icu_util.h"
 #include "gtest/gtest.h"
+#include "lib/ftl/command_line.h"
+#include "lib/ftl/logging.h"
+#include "lib/txt/tests/txt/utils.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 
+#include <cassert>
+
 int main(int argc, char** argv) {
+  ftl::CommandLine cmd = ftl::CommandLineFromArgcArgv(argc, argv);
+  txt::SetCommandLine(cmd);
+  std::string dir = txt::GetCommandLineForProcess().GetOptionValueWithDefault(
+      "font-directory", "");
+  txt::SetFontDir(dir);
+  if (txt::GetFontDir().length() <= 0) {
+    FTL_LOG(ERROR) << "Font directory must be specified with "
+                      "--font-directoy=\"<directoy>\" to run this test.";
+    return EXIT_FAILURE;
+  }
+  FTL_DCHECK(txt::GetFontDir().length() > 0);
+
   fml::icu::InitializeICU();
   SkGraphics::Init();
   testing::InitGoogleTest(&argc, argv);

@@ -36,7 +36,8 @@ class Paragraph {
 
   ~Paragraph();
 
-  void Layout(const ParagraphConstraints& constraints);
+  void Layout(const ParagraphConstraints& constraints,
+              const std::string& rootdir = "");
 
   void Paint(SkCanvas* canvas, double x, double y);
 
@@ -50,7 +51,7 @@ class Paragraph {
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 
-  void AddRunsToLineBreaker();
+  void AddRunsToLineBreaker(const std::string& rootdir = "");
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };

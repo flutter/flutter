@@ -113,9 +113,9 @@ void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
   breaker_.setText();
 }
 
-void Paragraph::AddRunsToLineBreaker() {
+void Paragraph::AddRunsToLineBreaker(const std::string& rootdir) {
   auto collection = FontCollection::GetDefaultFontCollection()
-                        .GetMinikinFontCollectionForFamily("");
+                        .GetMinikinFontCollectionForFamily("", rootdir);
   minikin::FontStyle font;
   minikin::MinikinPaint paint;
   for (size_t i = 0; i < runs_.size(); ++i) {
@@ -125,9 +125,10 @@ void Paragraph::AddRunsToLineBreaker() {
   }
 }
 
-void Paragraph::Layout(const ParagraphConstraints& constraints) {
+void Paragraph::Layout(const ParagraphConstraints& constraints,
+                       const std::string& rootdir) {
   breaker_.setLineWidths(0.0f, 0, constraints.width());
-  AddRunsToLineBreaker();
+  AddRunsToLineBreaker(rootdir);
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
 
@@ -140,7 +141,7 @@ void Paragraph::Layout(const ParagraphConstraints& constraints) {
 
   SkTextBlobBuilder builder;
   auto collection = FontCollection::GetDefaultFontCollection()
-                        .GetMinikinFontCollectionForFamily("");
+                        .GetMinikinFontCollectionForFamily("", rootdir);
   minikin::Layout layout;
   SkScalar x = 0.0f;
   SkScalar y = 0.0f;

@@ -16,10 +16,14 @@
 
 #include "font_collection.h"
 #include "gtest/gtest.h"
+#include "lib/ftl/command_line.h"
+#include "lib/ftl/logging.h"
+#include "lib/txt/tests/txt/utils.h"
 
 TEST(FontCollection, HasDefaultRegistrations) {
-  auto collection = txt::FontCollection::GetDefaultFontCollection()
-                        .GetMinikinFontCollectionForFamily("");
+  auto collection =
+      txt::FontCollection::GetDefaultFontCollection()
+          .GetMinikinFontCollectionForFamily("", txt::GetFontDir());
 
   ASSERT_NE(collection.get(), nullptr);
 }

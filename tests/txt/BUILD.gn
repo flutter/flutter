@@ -25,7 +25,10 @@ executable("txt") {
     "font_collection_unittests.cc",
     "paragraph_unittests.cc",
     "render_test.cc",
+    "render_test.h",
     "txt_run_all_unittests.cc",
+    "utils.cc",
+    "utils.h",
   ]
 
   deps = [
