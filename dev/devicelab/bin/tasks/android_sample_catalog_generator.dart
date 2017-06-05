@@ -6,9 +6,8 @@ import 'dart:async';
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:flutter_devicelab/tasks/sample_catalog_generator.dart';
-
-import 'sample_catalog_generator_args.dart';
 
 Future<Null> main(List<String> args) async {
   deviceOperatingSystem = DeviceOperatingSystem.android;

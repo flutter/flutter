@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:image/image.dart';
+import 'package:path/path.dart';
 
 String authorizationToken;
 
@@ -11,7 +12,7 @@ class UploadError extends Error {
   UploadError(this.message);
   final String message;
   @override
-  String toString() => message;
+  String toString() => 'UploadError($message)';
 }
 
 void logMessage(String s) { print(s); }
@@ -20,8 +21,8 @@ class Upload {
   Upload(this.fromPath, this.largeName, this.smallName);
 
   static math.Random random;
-  static final String uriAuthority = 'www.googleapis.com';
-  static final String uriPath = 'upload/storage/v1/b/flutter-catalog/o';
+  static const String uriAuthority = 'www.googleapis.com';
+  static const String uriPath = 'upload/storage/v1/b/flutter-catalog/o';
 
   final String fromPath;
   final String largeName;
@@ -33,6 +34,7 @@ class Upload {
   int retryCount = 0;
   bool isComplete = false;
 
+  // Exponential backoff per https://cloud.google.com/storage/docs/exponential-backoff
   Duration get timeLimit {
     if (retryCount == 0)
       return const Duration(milliseconds: 1000);
@@ -56,7 +58,8 @@ class Upload {
       if (response.statusCode == HttpStatus.OK) {
         await response.drain<Null>();
       } else {
-        logMessage('Request to save "$name" (length ${content.length}) failed, will retry');
+        // TODO(hansmuller): only retry on 5xx and 429 responses
+        logMessage('Request to save "$name" (length ${content.length}) failed with status ${response.statusCode}, will retry');
         logMessage(await response.transform(UTF8.decoder).join());
       }
       return response.statusCode == HttpStatus.OK;
@@ -103,14 +106,7 @@ Future<Null> saveScreenshots(List<String> fromPaths, List<String> largeNames, Li
 
 
 // If path is lib/foo.png then screenshotName is foo.
-String screenshotName(String path) {
-  // In /foo/bar/baz.dart, matches baz.dart, match[1] == 'baz'
-  final RegExp nameRE = new RegExp(r'(\w+)\.png$');
-  final Match nameMatch = nameRE.firstMatch(path);
-  if (nameMatch.groupCount != 1)
-      throw new UploadError('bad screenshot file name $path');
-  return nameMatch[1];
-}
+String screenshotName(String path) => basenameWithoutExtension(path);
 
 Future<Null> main(List<String> args) async {
   if (args.length != 2)
