@@ -2,41 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, hashValues;
+import 'dart:ui' show Color;
 
-/// A color that has a small table of related colors called a "swatch".
-///
-/// See also:
-///
-///  * [MaterialColor] and [MaterialAccentColor], which define material design
-///    primary and accent color swatches.
-///  * [Colors], which defines all of the standard material design colors.
-class ColorSwatch extends Color {
-  /// Creates a color that has a small table of related colors called a "swatch".
-  const ColorSwatch(int primary, this._swatch) : super(primary);
-
-  final Map<int, Color> _swatch;
-
-  /// Returns an element of the swatch table.
-  Color operator [](int index) => _swatch[index];
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    final ColorSwatch typedOther = other;
-    return super==(other) && _swatch == typedOther._swatch;
-  }
-
-  @override
-  int get hashCode => hashValues(runtimeType, value, _swatch);
-
-  @override
-  String toString() => '$runtimeType(primary value: ${super.toString()})';
-
-}
+import 'package:flutter/painting.dart';
 
 /// Defines a single color as well a color swatch with ten shades of the color.
 ///
@@ -47,39 +15,39 @@ class ColorSwatch extends Color {
 /// See also:
 ///
 ///  * [Colors], which defines all of the standard material colors.
-class MaterialColor extends ColorSwatch {
+class MaterialColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades.
   const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
 
   /// The lightest shade.
-  Color get shade50 => _swatch[50];
+  Color get shade50 => this[50];
 
   /// The second lightest shade.
-  Color get shade100 => _swatch[100];
+  Color get shade100 => this[100];
 
   /// The third lightest shade.
-  Color get shade200 => _swatch[200];
+  Color get shade200 => this[200];
 
   /// The fourth lightest shade.
-  Color get shade300 => _swatch[300];
+  Color get shade300 => this[300];
 
   /// The fifth lightest shade.
-  Color get shade400 => _swatch[400];
+  Color get shade400 => this[400];
 
   /// The default shade.
-  Color get shade500 => _swatch[500];
+  Color get shade500 => this[500];
 
   /// The fourth darkest shade.
-  Color get shade600 => _swatch[600];
+  Color get shade600 => this[600];
 
   /// The third darkest shade.
-  Color get shade700 => _swatch[700];
+  Color get shade700 => this[700];
 
   /// The second darkest shade.
-  Color get shade800 => _swatch[800];
+  Color get shade800 => this[800];
 
   /// The darkest shade.
-  Color get shade900 => _swatch[900];
+  Color get shade900 => this[900];
 }
 
 /// Defines a single accent color as well a swatch of four shades of the
@@ -94,25 +62,25 @@ class MaterialColor extends ColorSwatch {
 ///
 ///  * [Colors], which defines all of the standard material colors.
 ///  * <https://material.io/guidelines/style/color.html#color-color-schemes>
-class MaterialAccentColor extends ColorSwatch {
+class MaterialAccentColor extends ColorSwatch<int> {
   /// Creates a color swatch with a variety of shades appropriate for accent
   /// colors.
   const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
 
   /// The lightest shade.
-  Color get shade50 => _swatch[50];
+  Color get shade50 => this[50];
 
   /// The second lightest shade.
-  Color get shade100 => _swatch[100];
+  Color get shade100 => this[100];
 
   /// The default shade.
-  Color get shade200 => _swatch[200];
+  Color get shade200 => this[200];
 
   /// The second darkest shade.
-  Color get shade400 => _swatch[400];
+  Color get shade400 => this[400];
 
   /// The darkest shade.
-  Color get shade700 => _swatch[700];
+  Color get shade700 => this[700];
 }
 
 /// [Color] and [ColorSwatch] constants which represent Material design's
@@ -130,7 +98,7 @@ class MaterialAccentColor extends ColorSwatch {
 /// Colors.green[400]  // Selects a mid-range green.
 /// ```
 ///
-/// Each ColorSwatch constant is a color and can used directly. For example
+/// Each [ColorSwatch] constant is a color and can used directly. For example
 ///
 /// ```dart
 /// new Container(
