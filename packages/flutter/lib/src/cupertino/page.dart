@@ -114,7 +114,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 /// A [BoxPainter] used to draw the page transition shadow using gradients.
 class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
-    @required this._decoration,
+    this._decoration,
     VoidCallback onChange
   ) : assert(_decoration != null),
       super(onChange);
