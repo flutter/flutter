@@ -23,6 +23,12 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   return UIKeyboardTypeDefault;
 }
 
+static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inputType) {
+  if ([inputType isEqualToString:@"TextInputType.text"])
+    return UITextAutocapitalizationTypeSentences;
+  return UITextAutocapitalizationTypeNone;
+}
+
 #pragma mark - FlutterTextPosition
 
 /** An indexed position in the buffer of a Flutter text editing widget. */
@@ -559,6 +565,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
   _view.keyboardType = ToUIKeyboardType(configuration[@"inputType"]);
+  _view.autocapitalizationType = ToUITextAutocapitalizationType(configuration[@"inputType"]);
   _view.secureTextEntry = [configuration[@"obscureText"] boolValue];
   [_view setTextInputClient:client];
   [_view reloadInputViews];
