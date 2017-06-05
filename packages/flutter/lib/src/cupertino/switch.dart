@@ -141,14 +141,14 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     @required Color activeColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }) : _value = value,
-        _activeColor = activeColor,
-        _onChanged = onChanged,
-        _vsync = vsync,
-        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-    assert(value != null);
-    assert(activeColor != null);
-    assert(vsync != null);
+  }) : assert(value != null),
+       assert(activeColor != null),
+       assert(vsync != null),
+       _value = value,
+       _activeColor = activeColor,
+       _onChanged = onChanged,
+       _vsync = vsync,
+       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap

@@ -41,12 +41,11 @@ class CupertinoTabBar extends StatelessWidget {
     this.activeColor: CupertinoColors.activeBlue,
     this.inactiveColor: CupertinoColors.inactiveGray,
     this.iconSize: 24.0,
-  }) : super(key: key) {
-    assert(items != null);
-    assert(items.length >= 2);
-    assert(0 <= currentIndex && currentIndex < items.length);
-    assert(iconSize != null);
-  }
+  }) : assert(items != null),
+       assert(items.length >= 2),
+       assert(0 <= currentIndex && currentIndex < items.length),
+       assert(iconSize != null),
+       super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
   final List<BottomNavigationBarItem> items;

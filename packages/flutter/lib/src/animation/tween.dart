@@ -291,9 +291,8 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ @required this.curve }) {
-    assert(curve != null);
-  }
+  CurveTween({ @required this.curve })
+    : assert(curve != null);
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;
