@@ -135,8 +135,8 @@ class ClampingScrollSimulation extends Simulation {
     @required this.velocity,
     this.friction: 0.015,
     Tolerance tolerance: Tolerance.defaultTolerance,
-  }) : super(tolerance: tolerance) {
-    assert(_flingVelocityPenetration(0.0) == _kInitialVelocityPenetration);
+  }) : assert(_flingVelocityPenetration(0.0) == _kInitialVelocityPenetration),
+       super(tolerance: tolerance) {
     _duration = _flingDuration(velocity);
     _distance = (velocity * _duration / _kInitialVelocityPenetration).abs();
   }

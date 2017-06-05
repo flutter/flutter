@@ -31,9 +31,8 @@ final EnumIndex<HealthStatus> _healthStatusIndex =
 /// Application health status.
 class Health extends Result {
   /// Creates a [Health] object with the given [status].
-  Health(this.status) {
-    assert(status != null);
-  }
+  Health(this.status)
+    : assert(status != null);
 
   /// Deserializes the result from JSON.
   static Health fromJson(Map<String, dynamic> json) {

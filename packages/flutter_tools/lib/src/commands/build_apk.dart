@@ -21,9 +21,7 @@ class ApkKeystoreInfo {
     this.password,
     this.keyAlias,
     @required this.keyPassword,
-  }) {
-    assert(keystore != null);
-  }
+  }) : assert(keystore != null);
 
   final String keystore;
   final String password;
