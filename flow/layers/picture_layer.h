@@ -6,6 +6,7 @@
 #define FLUTTER_FLOW_LAYERS_PICTURE_LAYER_H_
 
 #include "flutter/flow/layers/layer.h"
+#include "flutter/flow/raster_cache.h"
 
 namespace flow {
 
@@ -30,9 +31,7 @@ class PictureLayer : public Layer {
   sk_sp<SkPicture> picture_;
   bool is_complex_ = false;
   bool will_change_ = false;
-
-  // If we rasterized the picture separately, image_ holds the pixels.
-  sk_sp<SkImage> image_;
+  RasterCacheResult raster_cache_result_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PictureLayer);
 };
