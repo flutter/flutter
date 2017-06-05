@@ -98,6 +98,10 @@ RuntimeHolder::~RuntimeHolder() {
       ftl::MakeCopyable([rasterizer = std::move(rasterizer_)](){
           // Deletes rasterizer.
       }));
+  if (deferred_invalidation_callback_) {
+    // Must be called before being destroyed.
+    deferred_invalidation_callback_();
+  }
 }
 
 void RuntimeHolder::Init(
