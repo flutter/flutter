@@ -57,10 +57,9 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 /// not hold a reference to the canvas across operations that might paint
 /// child render objects.
 class PaintingContext {
-  PaintingContext._(this._containerLayer, this._paintBounds) {
-    assert(_containerLayer != null);
-    assert(_paintBounds != null);
-  }
+  PaintingContext._(this._containerLayer, this._paintBounds)
+    : assert(_containerLayer != null),
+      assert(_paintBounds != null);
 
   final ContainerLayer _containerLayer;
   final Rect _paintBounds;
@@ -664,19 +663,17 @@ abstract class _SemanticsFragment {
     this.annotator,
     List<_SemanticsFragment> children,
     this.dropSemanticsOfPreviousSiblings,
-  }) {
-    assert(renderObjectOwner != null);
-    _ancestorChain = <RenderObject>[renderObjectOwner];
-    assert(() {
-      if (children == null)
-        return true;
-      final Set<_SemanticsFragment> seenChildren = new Set<_SemanticsFragment>();
-      for (_SemanticsFragment child in children)
-        assert(seenChildren.add(child)); // check for duplicate adds
-      return true;
-    });
-    _children = children ?? const <_SemanticsFragment>[];
-  }
+  }) : assert(renderObjectOwner != null),
+       assert(() {
+         if (children == null)
+           return true;
+         final Set<_SemanticsFragment> seenChildren = new Set<_SemanticsFragment>();
+         for (_SemanticsFragment child in children)
+           assert(seenChildren.add(child)); // check for duplicate adds
+         return true;
+       }),
+       _ancestorChain = <RenderObject>[renderObjectOwner],
+       _children = children ?? const <_SemanticsFragment>[];
 
   final SemanticsAnnotator annotator;
   bool dropSemanticsOfPreviousSiblings;
@@ -722,10 +719,12 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
   _CleanSemanticsFragment({
     @required RenderObject renderObjectOwner,
     bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings) {
-    assert(renderObjectOwner != null);
-    assert(renderObjectOwner._semantics != null);
-  }
+  }) : assert(renderObjectOwner != null),
+       assert(renderObjectOwner._semantics != null),
+       super(
+         renderObjectOwner: renderObjectOwner,
+         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings
+       );
 
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
@@ -903,10 +902,13 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
     RenderObject renderObjectOwner,
     @required Iterable<_SemanticsFragment> children,
     bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings) {
-    assert(children != null);
-    assert(children.length > 1);
-  }
+  }) : assert(children != null),
+       assert(children.length > 1),
+       super(
+         renderObjectOwner: renderObjectOwner,
+         children: children,
+         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings
+       );
 
   @override
   Iterable<SemanticsNode> compile({
@@ -946,8 +948,8 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
 /// [PipelineOwner] for the render tree from which you wish to read semantics.
 /// You can obtain the [PipelineOwner] using the [RenderObject.owner] property.
 class SemanticsHandle {
-  SemanticsHandle._(this._owner, this.listener) {
-    assert(_owner != null);
+  SemanticsHandle._(this._owner, this.listener)
+    : assert(_owner != null) {
     if (listener != null)
       _owner.semanticsOwner.addListener(listener);
   }

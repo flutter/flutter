@@ -300,12 +300,12 @@ class RenderStack extends RenderBox
     FractionalOffset alignment: FractionalOffset.topLeft,
     StackFit fit: StackFit.loose,
     Overflow overflow: Overflow.clip
-  }) : _alignment = alignment,
+  }) : assert(alignment != null),
+       assert(fit != null),
+       assert(overflow != null),
+       _alignment = alignment,
        _fit = fit,
        _overflow = overflow {
-    assert(alignment != null);
-    assert(fit != null);
-    assert(overflow != null);
     addAll(children);
   }
 

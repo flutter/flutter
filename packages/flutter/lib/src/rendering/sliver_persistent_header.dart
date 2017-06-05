@@ -270,11 +270,9 @@ class FloatingHeaderSnapConfiguration {
     @required this.vsync,
     this.curve: Curves.ease,
     this.duration: const Duration(milliseconds: 300),
-  }) {
-    assert(vsync != null);
-    assert(curve != null);
-    assert(duration != null);
-  }
+  }) : assert(vsync != null),
+       assert(curve != null),
+       assert(duration != null);
 
   /// The [TickerProvider] for the [AnimationController] that causes a
   /// floating header to snap in or out of view.

@@ -91,18 +91,18 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     WrapAlignment runAlignment: WrapAlignment.start,
     double runSpacing: 0.0,
     WrapCrossAlignment crossAxisAlignment: WrapCrossAlignment.start,
-  }) : _direction = direction,
+  }) : assert(direction != null),
+       assert(alignment != null),
+       assert(spacing != null),
+       assert(runAlignment != null),
+       assert(runSpacing != null),
+       assert(crossAxisAlignment != null),
+       _direction = direction,
        _alignment = alignment,
        _spacing = spacing,
        _runAlignment = runAlignment,
        _runSpacing = runSpacing,
        _crossAxisAlignment = crossAxisAlignment {
-    assert(direction != null);
-    assert(alignment != null);
-    assert(spacing != null);
-    assert(runAlignment != null);
-    assert(runSpacing != null);
-    assert(crossAxisAlignment != null);
     addAll(children);
   }
 

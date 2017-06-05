@@ -149,9 +149,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// The [childManager] argument must not be null.
   RenderSliverMultiBoxAdaptor({
     @required RenderSliverBoxChildManager childManager
-  }) : _childManager = childManager {
-    assert(childManager != null);
-  }
+  }) : assert(childManager != null),
+       _childManager = childManager;
 
   @override
   void setupParentData(RenderObject child) {
