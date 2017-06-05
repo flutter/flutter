@@ -1,4 +1,4 @@
-Signature: 5e59e7d0835dccae00597237ea4490a5
+Signature: 73a9e0e8b98aa087fb5565862107ec16
 
 UNUSED LICENSES:
 
@@ -1242,7 +1242,6 @@ FILE: ../../../dart/runtime/observatory/web/favicon.ico
 FILE: ../../../dart/runtime/observatory/web/index.html
 FILE: ../../../dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../dart/runtime/observatory/web/timeline.html
-FILE: ../../../dart/runtime/vm/libraries.json
 FILE: ../../../dart/runtime/vm/snapshot_test_in.dat
 FILE: ../../../dart/samples/build_dart/test.foo
 FILE: ../../../dart/samples/build_dart_simple/test.foo
@@ -1576,8 +1575,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../dart/runtime/bin/error_exit.cc + ../../../dart/LICENSE
+ORIGIN: ../../../dart/runtime/bin/dfe.cc + ../../../dart/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../dart/runtime/bin/dfe.cc
+FILE: ../../../dart/runtime/bin/dfe.h
 FILE: ../../../dart/runtime/bin/error_exit.cc
 FILE: ../../../dart/runtime/bin/error_exit.h
 FILE: ../../../dart/runtime/bin/isolate_data.cc
@@ -1629,6 +1630,8 @@ FILE: ../../../dart/runtime/vm/malloc_hooks_tcmalloc.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_test.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_unsupported.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_x64.cc
+FILE: ../../../dart/runtime/vm/optimizer.cc
+FILE: ../../../dart/runtime/vm/optimizer.h
 FILE: ../../../dart/runtime/vm/stack_trace.cc
 FILE: ../../../dart/runtime/vm/stack_trace.h
 FILE: ../../../dart/runtime/vm/zone_text_buffer.cc

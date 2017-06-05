@@ -28,7 +28,7 @@ vars = {
   # dependencies of Dart are also updated to match the entries in the
   # Dart SDK's DEPS file for that revision of Dart. The DEPS file for
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS
-  'dart_revision': 'ae57eca5040cc32e97c9f4728842127f8ca5f742',
+  'dart_revision': '64ce51ce4bc3aa4248dba87c44775c9b84bd2b5d',
   # Dart calls the next one "boringssl_gen_rev"
   'dart_boringssl_gen_revision': '753224969dbe43dad29343146529727b5066c0f3',
   # Dart calls the next one "boringssl_rev"
