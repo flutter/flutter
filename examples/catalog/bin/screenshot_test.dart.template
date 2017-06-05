@@ -8,6 +8,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('sample screenshots', () {
+    final String prefix = Platform.isMacOS ? 'ios_' : "";
     FlutterDriver driver;
 
     setUpAll(() async {
@@ -19,7 +20,6 @@ void main() {
     });
 
     test('take sample screenshots', () async {
-      final String prefix = Platform.isMacOS ? 'ios_' : "";
       final List<String> paths = <String>[
         @(paths)
       ];

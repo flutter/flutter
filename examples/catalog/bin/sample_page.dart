@@ -7,11 +7,13 @@
 
 import 'dart:io';
 
+import 'package:path/path.dart';
+
 class SampleError extends Error {
   SampleError(this.message);
   final String message;
   @override
-  String toString() => message;
+  String toString() => 'SampleError($message)';
 }
 
 // Sample apps are .dart files in the lib directory which contain a block
@@ -83,14 +85,7 @@ class SampleGenerator {
 
   // If sourceFile is lib/foo.dart then sourceName is foo. The sourceName
   // is used to create derived filenames like foo.md or foo.png.
-  String get sourceName {
-    // In /foo/bar/baz.dart, matches baz.dart, match[1] == 'baz'
-    final RegExp nameRE = new RegExp(r'(\w+)\.dart$');
-    final Match nameMatch = nameRE.firstMatch(sourceFile.path);
-    if (nameMatch.groupCount != 1)
-      throw new SampleError('bad source file name ${sourceFile.path}');
-    return nameMatch[1];
-  }
+  String get sourceName => basenameWithoutExtension(sourceFile.path);
 
   // The name of the widget class that defines this sample app, like 'FooSample'.
   String get sampleClass => commentValues["sample"];
@@ -161,6 +156,8 @@ void generate() {
     }
   });
 
+  // Causes the generated imports to appear in alphabetical order.
+  // Avoid complaints from flutter lint.
   samples.sort((SampleGenerator a, SampleGenerator b) {
     return a.sourceName.compareTo(b.sourceName);
   });
