@@ -86,8 +86,6 @@ public class FlutterView extends SurfaceView
     private long mNativePlatformView;
     private boolean mIsSoftwareRenderingEnabled = false; // using the software renderer or not
 
-    private volatile Bitmap mSoftwareRenderingBitmap;
-
     public FlutterView(Context context) {
         this(context, null);
     }
@@ -206,19 +204,16 @@ public class FlutterView extends SurfaceView
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        if (mSoftwareRenderingBitmap != null) {
-            canvas.drawBitmap(mSoftwareRenderingBitmap, new Matrix(), new Paint());
-        }
-    }
-
     // This method will be called on the GPU Thread.
     public void updateSoftwareBuffer(ByteBuffer buffer, int width, int height) {
-        Bitmap newBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        newBitmap.copyPixelsFromBuffer(buffer);
-        mSoftwareRenderingBitmap = newBitmap;
-        postInvalidate();
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.copyPixelsFromBuffer(buffer);
+
+        Canvas canvas = getHolder().lockCanvas();
+        if (canvas != null) {
+            canvas.drawBitmap(bitmap, new Matrix(), null);
+            getHolder().unlockCanvasAndPost(canvas);
+        }
     }
 
     public void addActivityLifecycleListener(ActivityLifecycleListener listener) {
