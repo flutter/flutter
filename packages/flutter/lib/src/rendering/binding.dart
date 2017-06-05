@@ -262,8 +262,17 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
   /// likely to be quite expensive) gets a few extra milliseconds to run.
   void scheduleWarmUpFrame() {
     // We use timers here to ensure that microtasks flush in between.
+    //
+    // We call resetEpoch after this frame so that, in the hot reload case, the
+    // very next frame pretends to have occurred immediately after this warm-up
+    // frame. The warm-up frame's timestamp will typically be far in the past
+    // (the time of the last real frame), so if we didn't reset the epoch we
+    // would see a sudden jump from the old time in the warm-up frame to the new
+    // time in the "real" frame. The biggest problem with this is that implicit
+    // animations end up being triggered at the old time and then skipping every
+    // frame and finishing in the new time.
     Timer.run(() { handleBeginFrame(null); });
-    Timer.run(() { handleDrawFrame(); });
+    Timer.run(() { handleDrawFrame(); resetEpoch(); });
   }
 
   @override
