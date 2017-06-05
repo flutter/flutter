@@ -275,7 +275,7 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
 }
 
 String _createAndroidIdentifier(String organization, String name) {
-  return '$organization.$name';
+  return '$organization.$name'.replaceAll('_', '');
 }
 
 String _createPluginClassName(String name) {
