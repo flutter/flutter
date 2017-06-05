@@ -28,16 +28,15 @@ class GravitySimulation extends Simulation {
     double distance,
     double endDistance,
     double velocity
-  ) : _a = acceleration,
+  ) : assert(acceleration != null),
+      assert(distance != null),
+      assert(velocity != null),
+      assert(endDistance != null),
+      assert(endDistance >= 0),
+      _a = acceleration,
       _x = distance,
       _v = velocity,
-      _end = endDistance {
-    assert(acceleration != null);
-    assert(distance != null);
-    assert(velocity != null);
-    assert(endDistance != null);
-    assert(endDistance >= 0);
-  }
+      _end = endDistance;
 
   final double _x;
   final double _v;
