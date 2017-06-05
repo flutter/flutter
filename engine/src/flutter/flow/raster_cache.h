@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "flutter/flow/instrumentation.h"
+#include "flutter/flow/raster_cache_key.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -16,16 +17,44 @@
 
 namespace flow {
 
+class RasterCacheResult {
+ public:
+  RasterCacheResult()
+      : source_rect_(SkRect::MakeEmpty()),
+        destination_rect_(SkRect::MakeEmpty()) {}
+
+  RasterCacheResult(sk_sp<SkImage> image, SkRect source, SkRect destination)
+      : image_(std::move(image)),
+        source_rect_(source),
+        destination_rect_(destination) {}
+
+  operator bool() const { return static_cast<bool>(image_); }
+
+  bool is_valid() const { return static_cast<bool>(image_); };
+
+  sk_sp<SkImage> image() const { return image_; }
+
+  const SkRect& source_rect() const { return source_rect_; }
+
+  const SkRect& destination_rect() const { return destination_rect_; }
+
+ private:
+  sk_sp<SkImage> image_;
+  SkRect source_rect_;
+  SkRect destination_rect_;
+};
+
 class RasterCache {
  public:
-  RasterCache();
+  explicit RasterCache(size_t threshold = 3);
+
   ~RasterCache();
 
-  sk_sp<SkImage> GetPrerolledImage(GrContext* context,
-                                   SkPicture* picture,
-                                   const SkMatrix& ctm,
-                                   bool is_complex,
-                                   bool will_change);
+  RasterCacheResult GetPrerolledImage(GrContext* context,
+                                      SkPicture* picture,
+                                      const SkMatrix& transformation_matrix,
+                                      bool is_complex,
+                                      bool will_change);
   void SweepAfterFrame();
 
   void Clear();
@@ -34,18 +63,13 @@ class RasterCache {
 
  private:
   struct Entry {
-    Entry();
-    ~Entry();
-
     bool used_this_frame = false;
-    int access_count = 0;
-    SkISize physical_size;
-    sk_sp<SkImage> image;
+    size_t access_count = 0;
+    RasterCacheResult image;
   };
 
-  using Cache = std::unordered_map<uint32_t, Entry>;
-
-  Cache cache_;
+  const size_t threshold_;
+  RasterCacheKey::Map<Entry> cache_;
   bool checkerboard_images_;
   ftl::WeakPtrFactory<RasterCache> weak_factory_;
 

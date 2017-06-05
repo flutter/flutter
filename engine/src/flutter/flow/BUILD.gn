@@ -6,6 +6,8 @@ source_set("flow") {
   sources = [
     "compositor_context.cc",
     "compositor_context.h",
+    "debug_print.cc",
+    "debug_print.h",
     "instrumentation.cc",
     "instrumentation.h",
     "layers/backdrop_filter_layer.cc",
@@ -36,11 +38,15 @@ source_set("flow") {
     "layers/shader_mask_layer.h",
     "layers/transform_layer.cc",
     "layers/transform_layer.h",
+    "matrix_decomposition.cc",
+    "matrix_decomposition.h",
     "paint_utils.cc",
     "paint_utils.h",
     "process_info.h",
     "raster_cache.cc",
     "raster_cache.h",
+    "raster_cache_key.cc",
+    "raster_cache_key.h",
     "scene_update_context.cc",
     "scene_update_context.h",
   ]
@@ -64,4 +70,20 @@ source_set("flow") {
       "//apps/mozart/services/composition",
     ]
   }
+}
+
+executable("flow_unittests") {
+  testonly = true
+
+  sources = [
+    "matrix_decomposition_unittests.cc",
+    "raster_cache_unittests.cc",
+  ]
+
+  deps = [
+    ":flow",
+    "//dart/runtime:libdart_jit",  # for tracing
+    "//flutter/testing",
+    "//third_party/skia",
+  ]
 }

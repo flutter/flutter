@@ -25,6 +25,7 @@ group("flutter") {
       deps += [ "//flutter/shell/platform/darwin:flutter_channels_unittests" ]
     }
     deps += [
+      "//flutter/flow:flow_unittests",
       "//flutter/fml:fml_unittests",
       "//flutter/sky/engine/wtf:wtf_unittests",
       "//flutter/synchronization:synchronization_unittests",
