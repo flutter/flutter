@@ -16,7 +16,26 @@
 
 namespace shell {
 
-AndroidSurfaceSoftware::AndroidSurfaceSoftware() : AndroidSurface() {}
+namespace {
+
+bool GetSkColorType(int32_t buffer_format, SkColorType* color_type) {
+  switch (buffer_format) {
+    case WINDOW_FORMAT_RGB_565:
+      *color_type = kRGB_565_SkColorType;
+      return true;
+    case WINDOW_FORMAT_RGBA_8888:
+      *color_type = kRGBA_8888_SkColorType;
+      return true;
+    default:
+      return false;
+  }
+}
+
+}  // anonymous namespace
+
+AndroidSurfaceSoftware::AndroidSurfaceSoftware()
+    : AndroidSurface(),
+      target_color_type_(kRGBA_8888_SkColorType) {}
 
 AndroidSurfaceSoftware::~AndroidSurfaceSoftware() = default;
 
@@ -56,8 +75,11 @@ sk_sp<SkSurface> AndroidSurfaceSoftware::AcquireBackingStore(
     return sk_surface_;
   }
 
-  sk_surface_ = SkSurface::MakeRasterN32Premul(
-      size.fWidth, size.fHeight, nullptr /* SkSurfaceProps as out */);
+  SkImageInfo image_info = SkImageInfo::Make(
+      size.fWidth, size.fHeight, target_color_type_, kPremul_SkAlphaType);
+
+  sk_surface_ = SkSurface::MakeRaster(image_info);
+
   return sk_surface_;
 }
 
@@ -73,24 +95,33 @@ bool AndroidSurfaceSoftware::PresentBackingStore(
     return false;
   }
 
-  // Some basic sanity checking.
-  uint64_t expected_pixmap_data_size = pixmap.width() * pixmap.height() * 4;
-
-  if (expected_pixmap_data_size != pixmap.getSize64()) {
+  ANativeWindow_Buffer native_buffer;
+  if (ANativeWindow_lock(native_window_->handle(), &native_buffer, nullptr)) {
     return false;
   }
 
-  // Pass the sk_surface buffer to the android FlutterView.
-  JNIEnv* env = fml::jni::AttachCurrentThread();
+  SkColorType color_type;
+  if (GetSkColorType(native_buffer.format, &color_type)) {
+    SkImageInfo native_image_info = SkImageInfo::Make(
+        native_buffer.width, native_buffer.height, color_type, kPremul_SkAlphaType);
 
-  // Buffer will be copied into a Bitmap Java-side.
-  fml::jni::ScopedJavaLocalRef<jobject> direct_buffer(
-      env,
-      env->NewDirectByteBuffer(pixmap.writable_addr(), pixmap.getSize64()));
+    std::unique_ptr<SkCanvas> canvas = SkCanvas::MakeRasterDirect(
+        native_image_info,
+        native_buffer.bits,
+        native_buffer.stride * SkColorTypeBytesPerPixel(color_type));
 
-  FlutterViewUpdateSoftwareBuffer(env, flutter_view_.get(env).obj(),
-                                  direct_buffer.obj(), pixmap.width(),
-                                  pixmap.height());
+    if (canvas) {
+      SkBitmap bitmap;
+      if (bitmap.installPixels(pixmap)) {
+        canvas->drawBitmapRect(
+            bitmap,
+            SkRect::MakeIWH(native_buffer.width, native_buffer.height),
+            nullptr);
+      }
+    }
+  }
+
+  ANativeWindow_unlockAndPost(native_window_->handle());
 
   return true;
 }
@@ -108,6 +139,14 @@ bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) const {
 bool AndroidSurfaceSoftware::SetNativeWindow(
     ftl::RefPtr<AndroidNativeWindow> window,
     PlatformView::SurfaceConfig config) {
+  native_window_ = std::move(window);
+  if (!(native_window_ && native_window_->IsValid()))
+    return false;
+  int32_t window_format = ANativeWindow_getFormat(native_window_->handle());
+  if (window_format < 0)
+    return false;
+  if (!GetSkColorType(window_format, &target_color_type_))
+    return false;
   return true;
 }
 

@@ -204,18 +204,6 @@ public class FlutterView extends SurfaceView
         return super.onKeyDown(keyCode, event);
     }
 
-    // This method will be called on the GPU Thread.
-    public void updateSoftwareBuffer(ByteBuffer buffer, int width, int height) {
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.copyPixelsFromBuffer(buffer);
-
-        Canvas canvas = getHolder().lockCanvas();
-        if (canvas != null) {
-            canvas.drawBitmap(bitmap, new Matrix(), null);
-            getHolder().unlockCanvasAndPost(canvas);
-        }
-    }
-
     public void addActivityLifecycleListener(ActivityLifecycleListener listener) {
         mActivityLifecycleListeners.add(listener);
     }

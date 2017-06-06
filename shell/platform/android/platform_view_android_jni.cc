@@ -49,17 +49,6 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
   FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
 }
 
-static jmethodID g_handle_platform_update_software_buffer = nullptr;
-void FlutterViewUpdateSoftwareBuffer(JNIEnv* env,
-                                     jobject obj,
-                                     jobject buffer,
-                                     jint width,
-                                     jint height) {
-  env->CallVoidMethod(obj, g_handle_platform_update_software_buffer, buffer,
-                      width, height);
-  FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
-}
-
 // Called By Java
 
 static jlong Attach(JNIEnv* env, jclass clazz, jobject flutterView) {
@@ -350,13 +339,6 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
-  g_handle_platform_update_software_buffer =
-      env->GetMethodID(g_flutter_view_class->obj(), "updateSoftwareBuffer",
-                       "(Ljava/nio/ByteBuffer;II)V");
-
-  if (g_handle_platform_update_software_buffer == nullptr) {
-    return false;
-  }
   return true;
 }
 
