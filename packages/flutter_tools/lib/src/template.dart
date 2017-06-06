@@ -84,6 +84,7 @@ class Template {
           return null;
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
+      final String projectName = context['projectName'];
       final String androidIdentifier = context['androidIdentifier'];
       final String pluginClass = context['pluginClass'];
       final String destinationDirPath = destination.absolute.path;
@@ -97,6 +98,8 @@ class Template {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
+      if (projectName != null)
+        finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       if (pluginClass != null)
         finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
       return finalDestinationPath;
