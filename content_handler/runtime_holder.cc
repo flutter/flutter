@@ -254,6 +254,10 @@ std::string RuntimeHolder::GetUIIsolateName() {
   return runtime_->GetIsolateName();
 }
 
+std::string RuntimeHolder::DefaultRouteName() {
+  return "/";
+}
+
 void RuntimeHolder::ScheduleFrame() {
   if (pending_invalidation_ || deferred_invalidation_callback_)
     return;

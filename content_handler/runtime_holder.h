@@ -51,6 +51,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
  private:
   // |blink::RuntimeDelegate| implementation:
+  std::string DefaultRouteName() override;
   void ScheduleFrame() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
