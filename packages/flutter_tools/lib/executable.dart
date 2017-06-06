@@ -83,7 +83,7 @@ Future<Null> main(List<String> args) async {
     new RunCommand(verboseHelp: verboseHelp),
     new ScreenshotCommand(),
     new StopCommand(),
-    new TestCommand(),
+    new TestCommand(verboseHelp: verboseHelp),
     new TraceCommand(),
     new UpdatePackagesCommand(hidden: !verboseHelp),
     new UpgradeCommand(),
