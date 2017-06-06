@@ -32,6 +32,11 @@ typedef void PlatformMessageCallback(String name, ByteData data, PlatformMessage
 /// notifications. For example, if the users pulls out the battery from the
 /// device, no notification will be sent before the application is suddenly
 /// terminated, along with the rest of the operating system.
+///
+/// See also:
+///
+///  * [WidgetsBindingObserver], for a mechanism to observe the lifecycle state
+///    from the widgets layer.
 enum AppLifecycleState {
   /// The application is visible and responding to user input.
   resumed,
@@ -71,6 +76,14 @@ enum AppLifecycleState {
 ///
 /// For a generic class that represents distances around a rectangle, see the
 /// [EdgeInsets] class.
+///
+/// See also:
+///
+///  * [WidgetsBindingObserver], for a widgets layer mechanism to receive
+///    notifications when the padding changes.
+///  * [MediaQuery.of], a simpler mechanism for the same.
+///  * [Scaffold], which automatically applies the padding in material design
+///    applications.
 class WindowPadding {
   const WindowPadding._({ this.left, this.top, this.right, this.bottom });
 
@@ -93,14 +106,21 @@ class WindowPadding {
 /// An identifier used to select a user's language and formatting preferences,
 /// consisting of a language and a country. This is a subset of locale
 /// identifiers as defined by BCP 47.
+///
+/// See also:
+///
+///  * [Window.locale], which specifies the system's currently selected
+///    [Locale].
 class Locale {
   /// Creates a new Locale object. The first argument is the
   /// primary language subtag, the second is the region subtag.
   ///
   /// For example:
   ///
-  ///     const Locale swissFrench = const Locale('fr', 'CH');
-  ///     const Locale canadianFrench = const Locale('fr', 'CA');
+  /// ```dart
+  /// const Locale swissFrench = const Locale('fr', 'CH');
+  /// const Locale canadianFrench = const Locale('fr', 'CA');
+  /// ```
   const Locale(this.languageCode, this.countryCode);
 
   /// The primary language subtag for the locale.
@@ -149,11 +169,24 @@ class Window {
   /// hardware itself, the device drivers, or a hard-coded value stored in the
   /// operating system or firmware, and may be inaccurate, sometimes by a
   /// significant margin.
+  ///
+  /// The Flutter framework operates in logical pixels, so it is rarely
+  /// necessary to directly deal with this property.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
   double get devicePixelRatio => _devicePixelRatio;
   double _devicePixelRatio = 1.0;
 
   /// The dimensions of the rectangle into which the application will be drawn,
   /// in physical pixels.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
   Size get physicalSize => _physicalSize;
   Size _physicalSize = Size.zero;
 
@@ -162,6 +195,14 @@ class Window {
   /// likely place system UI (such as the Android system notification area), or
   /// which might be rendered outside of the physical display (e.g. overscan
   /// regions on television screens).
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
+  ///  * [MediaQuery.of], a simpler mechanism for the same.
+  ///  * [Scaffold], which automatically applies the padding in material design
+  ///    applications.
   WindowPadding get padding => _padding;
   WindowPadding _padding = WindowPadding.zero;
 
@@ -177,10 +218,20 @@ class Window {
   /// should, if possible, use to render their user interface.
   ///
   /// The [onLocaleChanged] callback is called whenever this value changes.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
   Locale get locale => _locale;
   Locale _locale;
 
   /// A callback that is invoked whenever [locale] changes value.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
   VoidCallback onLocaleChanged;
 
   /// A callback that is invoked to notify the application that it is an
@@ -192,15 +243,34 @@ class Window {
   /// The [onDrawFrame] callback is invoked immediately after [onBeginFrame],
   /// after draining any microtasks (e.g. completions of any [Future]s) queued
   /// by the [onBeginFrame] handler.
+  ///
+  /// See also:
+  ///
+  ///  * [SchedulerBinding], the Flutter framework class which manages the
+  ///    scheduling of frames.
+  ///  * [RendererBinding], the Flutter framework class which manages layout and
+  ///    painting.
   FrameCallback onBeginFrame;
 
   /// A callback that is invoked for each frame after [onBeginFrame] has
   /// completed and after the microtask queue has been drained. This can be
   /// used to implement a second phase of frame rendering that happens
   /// after any deferred work queued by the [onBeginFrame] phase.
+  ///
+  /// See also:
+  ///
+  ///  * [SchedulerBinding], the Flutter framework class which manages the
+  ///    scheduling of frames.
+  ///  * [RendererBinding], the Flutter framework class which manages layout and
+  ///    painting.
   VoidCallback onDrawFrame;
 
   /// A callback that is invoked when pointer data is available.
+  ///
+  /// See also:
+  ///
+  ///  * [GestureBinding], the Flutter framework class which manages pointer
+  ///    events.
   PointerDataPacketCallback onPointerDataPacket;
 
   /// The route or path that the operating system requested when the application
@@ -210,6 +280,11 @@ class Window {
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
   /// and [onDrawFrame] callbacks be invoked.
+  ///
+  /// See also:
+  ///
+  ///  * [SchedulerBinding], the Flutter framework class which manages the
+  ///    scheduling of frames.
   void scheduleFrame() native "Window_scheduleFrame";
 
   /// Updates the application's rendering on the GPU with the newly provided
@@ -229,6 +304,13 @@ class Window {
   /// [SceneBuilder.addPicture]. With the [SceneBuilder.build] method you can
   /// then obtain a [Scene] object, which you can display to the user via this
   /// [render] function.
+  ///
+  /// See also:
+  ///
+  ///  * [SchedulerBinding], the Flutter framework class which manages the
+  ///    scheduling of frames.
+  ///  * [RendererBinding], the Flutter framework class which manages layout and
+  ///    painting.
   void render(Scene scene) native "Window_render";
 
   /// Whether the user has requested that [updateSemantics] be called when
