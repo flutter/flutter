@@ -196,6 +196,21 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///
 /// This effect is relatively expensive, especially if the filter is non-local,
 /// such as a blur.
+///
+/// The effect is applied to all existing painted content. To constrain
+/// the effect to the size of its child, use in combination with ClipRect
+/// such as:
+///
+/// ```dart
+/// new ClipRect(
+///   child: BackdropFilter(
+///     filter: ...
+///     child: new SizedBox(
+///       ...
+///     ),
+///   ),
+/// ),
+/// ```
 class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
