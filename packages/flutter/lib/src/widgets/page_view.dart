@@ -38,7 +38,7 @@ import 'viewport.dart';
 class PageController extends ScrollController {
   /// Creates a page controller.
   ///
-  /// The [initialPage] and [viewportFraction] arguments must not be null.
+  /// The [initialPage], [keepPage], and [viewportFraction] arguments must not be null.
   PageController({
     this.initialPage: 0,
     this.keepPage: true,
@@ -52,7 +52,7 @@ class PageController extends ScrollController {
   final int initialPage;
 
   /// Save the current [page] with [PageStorage] and restore it if
-  /// this controller's scrollabe is recreated.
+  /// this controller's scrollable is recreated.
   ///
   /// If this property is set to false, the current [page] is never saved
   /// and [initialPage] is always used to initialize the scroll offset.

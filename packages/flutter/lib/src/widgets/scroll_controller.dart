@@ -39,12 +39,13 @@ import 'scroll_position_with_single_context.dart';
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
   ///
-  /// The [initialScrollOffset] must not be null.
+  /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
     this.initialScrollOffset: 0.0,
     this.keepScrollOffset: true,
     this.debugLabel,
-  }) : assert(initialScrollOffset != null);
+  }) : assert(initialScrollOffset != null),
+       assert(keepScrollOffset != null);
 
   /// The initial value to use for [offset].
   ///

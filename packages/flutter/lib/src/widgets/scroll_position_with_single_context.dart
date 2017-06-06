@@ -47,7 +47,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// [applyNewDimensions] is invoked, before calling the inherited
   /// implementation of that method.
   ///
-  /// If `keepScrollOffset` is true (the default), the current scroll offset is
+  /// If [keepScrollOffset] is true (the default), the current scroll offset is
   /// saved with [PageStorage] and restored it if this scroll position's scrollable
   /// is recreated.
   ScrollPositionWithSingleContext({
@@ -62,7 +62,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
          context: context,
          keepScrollOffset: keepScrollOffset,
          oldPosition: oldPosition,
-         debugLabel: debugLabel
+         debugLabel: debugLabel,
        ) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.

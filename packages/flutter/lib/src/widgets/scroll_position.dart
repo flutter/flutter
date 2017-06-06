@@ -61,6 +61,8 @@ export 'scroll_activity.dart' show ScrollHoldController;
 abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Creates an object that determines which portion of the content is visible
   /// in a scroll view.
+  ///
+  /// The [physics], [context], and [keepScrollOffset] parameters must not be null.
   ScrollPosition({
     @required this.physics,
     @required this.context,
@@ -93,8 +95,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// See also:
   ///
-  ///  * [ScrollController.keepScrollOffset], [PageController.keepPage], which
-  ////   create scroll positions and initialize this property.
+  ///  * [ScrollController.keepScrollOffset] and [PageController.keepPage], which
+  ///    create scroll positions and initialize this property.
   final bool keepScrollOffset;
 
   /// A label that is used in the [toString] output. Intended to aid with

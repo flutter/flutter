@@ -325,7 +325,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
     final String label = _debugLabel != null ? ' $_debugLabel' : '';
     if (runtimeType == LabeledGlobalKey)
       return '[GlobalKey#$hashCode$label]';
-    return '[$runtimeType$hashCode$label]';
+    return '[$runtimeType#$hashCode$label]';
   }
 }
 
