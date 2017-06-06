@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// A one logical pixel thick horizontal line, with padding on either
+/// A one device pixel thick horizontal line, with padding on either
 /// side.
 ///
 /// In the material design language, this represents a divider.
@@ -26,18 +26,18 @@ import 'theme.dart';
 class Divider extends StatelessWidget {
   /// Creates a material design divider.
   ///
-  /// The height must be at least 1.0 logical pixels.
+  /// The height must be positive.
   const Divider({
     Key key,
     this.height: 16.0,
     this.indent: 0.0,
     this.color
-  }) : assert(height >= 1.0),
+  }) : assert(height >= 0.0),
        super(key: key);
 
   /// The divider's vertical extent.
   ///
-  /// The divider itself is always drawn as one logical pixel thick horizontal
+  /// The divider itself is always drawn as one device pixel thick horizontal
   /// line that is centered within the height specified by this value.
   final double height;
 
@@ -58,19 +58,22 @@ class Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double bottom = (height ~/ 2.0).toDouble();
-    return new Container(
-      height: 0.0,
-      margin: new EdgeInsets.only(
-        top: height - bottom - 1.0,
-        left: indent,
-        bottom: bottom
+    return new SizedBox(
+      height: height,
+      child: new Center(
+        child: new Container(
+          height: 0.0,
+          margin: new EdgeInsets.only(left: indent),
+          decoration: new BoxDecoration(
+            border: new Border(
+              bottom: new BorderSide(
+                color: color ?? Theme.of(context).dividerColor,
+                width: 0.0,
+              ),
+            ),
+          ),
+        ),
       ),
-      decoration: new BoxDecoration(
-        border: new Border(
-          bottom: new BorderSide(color: color ?? Theme.of(context).dividerColor)
-        )
-      )
     );
   }
 }
