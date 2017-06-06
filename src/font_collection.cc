@@ -47,11 +47,12 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family,
   FTL_DCHECK(skia_font_manager != nullptr);
 
   // Ask Skia to resolve a font style set for a font family name.
-  // FIXME(chinmaygarde): The name "Sample Font" is hardcoded because CoreText
+  // FIXME(chinmaygarde): The name "Coolvetica" is hardcoded because CoreText
   // crashes when passed a null string. This seems to be a bug in Skia as
   // SkFontMgr explicitly says passing in nullptr gives the default font.
+
   auto font_style_set = skia_font_manager->matchFamily(
-      family.length() == 0 ? "Sample Font" : family.c_str());
+      family.length() == 0 ? "Roboto" : family.c_str());
   FTL_DCHECK(font_style_set != nullptr);
 
   std::vector<minikin::Font> minikin_fonts;
