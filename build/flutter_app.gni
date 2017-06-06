@@ -226,7 +226,12 @@ template("flutter_aot_app") {
   action(assembly_label) {
     depfile = assembly_depfile
 
-    inputs = [ main_dart ] + fidl_dart_sdk_ext_files + mozart_dart_sdk_ext_files
+    inputs = fidl_dart_sdk_ext_files + mozart_dart_sdk_ext_files + [
+      main_dart,
+      "//flutter/runtime/dart_vm_entry_points.txt",
+      "//flutter/runtime/dart_vm_entry_points_fuchsia.txt",
+      "//dart/runtime/bin/dart_io_entries.txt",
+    ]
 
     outputs = [
       assembly_path,

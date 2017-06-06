@@ -56,6 +56,7 @@ App::App() {
 
   blink::Settings settings;
   settings.enable_observatory = true;
+  settings.enable_dart_profiling = true;
   blink::Settings::Set(settings);
 
   blink::SetFontProvider(
