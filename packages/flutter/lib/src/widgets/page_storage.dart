@@ -12,12 +12,11 @@ import 'framework.dart';
 /// scroll offset. Each time a scroll completes, the scrollable's page
 /// storage is updated.
 ///
-/// PageStorage is used to save and restore values that can outlive the widget
-/// and even the Route that contains the widget. The values are stored in a per-route
-/// Map whose keys are defined by the [PageStorageKey]s for the widget
-/// and its ancestors. To make it possible for a saved value to
-/// be found when a widget is recreated, the key's values must not be
-/// objects whose identity will change each time the widget is created.
+/// PageStorage is used to save and restore values that can outlive the widget.
+/// The values are stored in a per-route Map whose keys are defined by the
+/// [PageStorageKey]s for the widget and its ancestors. To make it possible
+/// for a saved value to be found when a widget is recreated, the key's values
+/// must not be objects whose identity will change each time the widget is created.
 ///
 /// For example, to ensure that the scroll offsets for the scrollable within
 /// each `MyScrollableTabView` below are restored  when the `TabBarView`

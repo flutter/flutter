@@ -55,8 +55,8 @@ class ScrollController extends ChangeNotifier {
   /// Defaults to 0.0.
   final double initialScrollOffset;
 
-  /// Save the current scroll [offset] with [PageStorage] and restore it if
-  /// this controller's scrollable is recreated.
+  /// Each time a scroll completes, save the current scroll [offset] with
+  /// [PageStorage] and restore it if this controller's scrollable is recreated.
   ///
   /// If this property is set to false, the scroll offset is never saved
   /// and [initialScrollOffset] is always used to initialize the scroll
