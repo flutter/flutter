@@ -408,10 +408,10 @@ class GestureDetector extends StatelessWidget {
 ///       () => new TapGestureRecognizer(),
 ///       (TapGestureRecognizer instance) {
 ///         instance
-///           ..onTapDown = (TapDownDetails details) { setState(() { _last = 'down'; }); },
-///           ..onTapUp = (TapUpDetails details) { setState(() { _last = 'up'; }); },
-///           ..onTap = () { setState(() { _last = 'tap'; }); },
-///           ..onTapCancel = () { setState(() { _last = 'cancel'; }); },
+///           ..onTapDown = (TapDownDetails details) { setState(() { _last = 'down'; }); }
+///           ..onTapUp = (TapUpDetails details) { setState(() { _last = 'up'; }); }
+///           ..onTap = () { setState(() { _last = 'tap'; }); }
+///           ..onTapCancel = () { setState(() { _last = 'cancel'; }); };
 ///       },
 ///     ),
 ///   },

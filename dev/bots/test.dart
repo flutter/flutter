@@ -1,3 +1,7 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -35,6 +39,11 @@ Future<Null> main() async {
     // Analyze all the Dart code in the repo.
     await _runFlutterAnalyze(flutterRoot,
       options: <String>['--flutter-repo'],
+    );
+
+    // Analyze all the sample code in the repo
+    await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+      workingDirectory: flutterRoot,
     );
 
     // Try with the --watch analyzer, to make sure it returns success also.
