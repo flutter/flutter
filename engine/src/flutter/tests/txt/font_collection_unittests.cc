@@ -21,9 +21,43 @@
 #include "lib/txt/tests/txt/utils.h"
 
 TEST(FontCollection, HasDefaultRegistrations) {
+  std::string defaultFamilyName = txt::FontCollection::GetDefaultFamilyName();
+
   auto collection =
       txt::FontCollection::GetDefaultFontCollection()
           .GetMinikinFontCollectionForFamily("", txt::GetFontDir());
-
+  ASSERT_EQ(
+      defaultFamilyName,
+      txt::FontCollection::GetDefaultFontCollection().ProcessFamilyName(""));
+  ASSERT_NE(defaultFamilyName,
+            txt::FontCollection::GetDefaultFontCollection().ProcessFamilyName(
+                "NotARealFont!"));
+  ASSERT_EQ("NotARealFont!",
+            txt::FontCollection::GetDefaultFontCollection().ProcessFamilyName(
+                "NotARealFont!"));
   ASSERT_NE(collection.get(), nullptr);
+}
+
+TEST(FontCollection, GetMinikinFontCollections) {
+  std::string defaultFamilyName = txt::FontCollection::GetDefaultFamilyName();
+
+  auto collectionDef =
+      txt::FontCollection::GetDefaultFontCollection()
+          .GetMinikinFontCollectionForFamily("", txt::GetFontDir());
+  auto collectionRoboto =
+      txt::FontCollection::GetDefaultFontCollection()
+          .GetMinikinFontCollectionForFamily("Roboto", txt::GetFontDir());
+  auto collectionHomemadeApple = txt::FontCollection::GetDefaultFontCollection()
+                                     .GetMinikinFontCollectionForFamily(
+                                         "Homemade Apple", txt::GetFontDir());
+  for (size_t base = 0; base < 50; base++) {
+    for (size_t variation = 0; variation < 50; variation++) {
+      ASSERT_EQ(collectionDef->hasVariationSelector(base, variation),
+                collectionRoboto->hasVariationSelector(base, variation));
+    }
+  }
+
+  ASSERT_NE(collectionDef, collectionHomemadeApple);
+  ASSERT_NE(collectionHomemadeApple, collectionRoboto);
+  ASSERT_NE(collectionDef.get(), nullptr);
 }

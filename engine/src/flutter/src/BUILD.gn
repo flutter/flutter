@@ -40,5 +40,6 @@ source_set("src") {
   deps = [
     "//lib/txt/libs/minikin",
     "//third_party/skia",
+    "//third_party/gtest",
   ]
 }

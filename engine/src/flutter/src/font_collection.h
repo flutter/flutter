@@ -17,11 +17,14 @@
 #ifndef LIB_TXT_SRC_FONT_COLLECTION_H_
 #define LIB_TXT_SRC_FONT_COLLECTION_H_
 
+#define DEFAULT_FAMILY_NAME "Roboto"
+
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "lib/ftl/macros.h"
+#include "lib/txt/tests/txt/render_test.h"
 #include "minikin/FontCollection.h"
 #include "minikin/FontFamily.h"
 
@@ -38,8 +41,17 @@ class FontCollection {
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family,
       const std::string& dir = "");
+  // Temporarily public.
+  const std::string ProcessFamilyName(const std::string& family);
+
+  // For Testing. Temporarily public.
+  static const std::string GetDefaultFamilyName() {
+    return DEFAULT_FAMILY_NAME;
+  };
 
  private:
+  friend RenderTest;
+
   // TODO(chinmaygarde): Caches go here.
   FTL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };

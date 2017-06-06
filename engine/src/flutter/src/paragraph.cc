@@ -90,11 +90,12 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   *font = minikin::FontStyle(GetWeight(style), GetItalic(style));
   paint->size = style.font_size;
   paint->letterSpacing = style.letter_spacing;
-  // TODO(abarth): font_family, word_spacing.
+  // TODO(abarth):  word_spacing.
 }
 
 void GetPaint(const TextStyle& style, SkPaint* paint) {
   paint->setTextSize(style.font_size);
+  paint->setFakeBoldText(style.fake_bold);
 }
 
 }  // namespace
