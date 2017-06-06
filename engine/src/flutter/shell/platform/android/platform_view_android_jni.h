@@ -27,12 +27,6 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
                                 jobject buffer,
                                 jobjectArray strings);
 
-void FlutterViewUpdateSoftwareBuffer(JNIEnv* env,
-                                     jobject obj,
-                                     jobject buffer,
-                                     jint width,
-                                     jint height);
-
 }  // namespace shell
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_H_

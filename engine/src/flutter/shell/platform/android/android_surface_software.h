@@ -47,6 +47,9 @@ class AndroidSurfaceSoftware : public AndroidSurface,
 
   fml::jni::JavaObjectWeakGlobalRef flutter_view_;
 
+  ftl::RefPtr<AndroidNativeWindow> native_window_;
+  SkColorType target_color_type_;
+
   FTL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceSoftware);
 };
 
