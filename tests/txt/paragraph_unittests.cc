@@ -15,6 +15,8 @@
  */
 
 #include "lib/ftl/logging.h"
+#include "lib/txt/src/font_style.h"
+#include "lib/txt/src/font_weight.h"
 #include "lib/txt/tests/txt/utils.h"
 #include "paragraph.h"
 #include "paragraph_builder.h"
@@ -42,7 +44,7 @@ TEST_F(RenderTest, SimpleParagraph) {
   paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
                     txt::GetFontDir());
 
-  paragraph->Paint(GetCanvas(), 10.0, 10.0);
+  paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
   ASSERT_TRUE(Snapshot());
 }
@@ -68,25 +70,25 @@ TEST_F(RenderTest, SimpleRedParagraph) {
   paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
                     txt::GetFontDir());
 
-  paragraph->Paint(GetCanvas(), 10.0, 10.0);
+  paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, LongParagraph) {
-  const char* text1 = "RedRoboto";
+TEST_F(RenderTest, RainbowParagraph) {
+  const char* text1 = "RedRoboto ";
   auto icu_text1 = icu::UnicodeString::fromUTF8(text1);
   std::u16string u16_text1(icu_text1.getBuffer(),
                            icu_text1.getBuffer() + icu_text1.length());
-  const char* text2 = "BigGreenDefault";
+  const char* text2 = "BigGreenDefault ";
   auto icu_text2 = icu::UnicodeString::fromUTF8(text2);
   std::u16string u16_text2(icu_text2.getBuffer(),
                            icu_text2.getBuffer() + icu_text2.length());
-  const char* text3 = "DefcolorHomemadeApple";
+  const char* text3 = "DefcolorHomemadeApple ";
   auto icu_text3 = icu::UnicodeString::fromUTF8(text3);
   std::u16string u16_text3(icu_text3.getBuffer(),
                            icu_text3.getBuffer() + icu_text3.length());
-  const char* text4 = "SmallBlueRoboto";
+  const char* text4 = "SmallBlueRoboto ";
   auto icu_text4 = icu::UnicodeString::fromUTF8(text4);
   std::u16string u16_text4(icu_text4.getBuffer(),
                            icu_text4.getBuffer() + icu_text4.length());
@@ -108,7 +110,9 @@ TEST_F(RenderTest, LongParagraph) {
   txt::TextStyle text_style2;
   text_style2.font_size = 30;
   // Letter spacing not yet implemented
-  text_style2.letter_spacing = 10;
+  text_style2.letter_spacing = 100;
+  text_style2.font_weight = txt::FontWeight::w600;
+  text_style2.fake_bold = true;
   text_style2.color = SK_ColorGREEN;
   builder.PushStyle(text_style2);
 
@@ -128,7 +132,8 @@ TEST_F(RenderTest, LongParagraph) {
 
   builder.AddText(u16_text4);
 
-  // extra text to see if it goes to default
+  // Extra text to see if it goes to default when there is more text chunks than
+  // styles.
   builder.AddText(u16_text5);
 
   builder.Pop();
@@ -142,6 +147,7 @@ TEST_F(RenderTest, LongParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
+// Currently, this should render nothing without a supplied TextStyle.
 TEST_F(RenderTest, DefaultStyleParagraph) {
   const char* text = "No TextStyle! Uh Oh!";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
@@ -162,7 +168,94 @@ TEST_F(RenderTest, DefaultStyleParagraph) {
   paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
                     txt::GetFontDir());
 
-  paragraph->Paint(GetCanvas(), 10.0, 10.0);
+  paragraph->Paint(GetCanvas(), 10.0, 15.0);
+
+  ASSERT_TRUE(Snapshot());
+}
+
+TEST_F(RenderTest, BoldParagraph) {
+  const char* text = "This is Red max bold text!";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  txt::ParagraphBuilder builder(paragraph_style);
+
+  txt::TextStyle text_style;
+  text_style.font_size = 60;
+  // Letter spacing not yet implemented
+  text_style.letter_spacing = 10;
+  text_style.font_weight = txt::FontWeight::w900;
+  text_style.fake_bold = true;
+  text_style.color = SK_ColorRED;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
+                    txt::GetFontDir());
+
+  paragraph->Paint(GetCanvas(), 10.0, 60.0);
+
+  ASSERT_TRUE(Snapshot());
+}
+
+TEST_F(RenderTest, LinebreakParagraph) {
+  const char* text =
+      "This is a very long sentence to test if the text will properly wrap "
+      "around and go to the next line. Sometimes, short sentence. Longer "
+      "sentences are okay too because they are nessecary. Very short."
+      "This is a very long sentence to test if the text will properly wrap "
+      "around and go to the next line. Sometimes, short sentence. Longer "
+      "sentences are okay too because they are nessecary. Very short."
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
+      "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
+      "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea "
+      "commodo consequat. Duis aute irure dolor in reprehenderit in voluptate "
+      "velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint "
+      "occaecat cupidatat non proident, sunt in culpa qui officia deserunt "
+      "mollit anim id est laborum."
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
+      "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
+      "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea "
+      "commodo consequat. Duis aute irure dolor in reprehenderit in voluptate "
+      "velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint "
+      "occaecat cupidatat non proident, sunt in culpa qui officia deserunt "
+      "mollit anim id est laborum."
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
+      "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
+      "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea "
+      "commodo consequat. Duis aute irure dolor in reprehenderit in voluptate "
+      "velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint "
+      "occaecat cupidatat non proident, sunt in culpa qui officia deserunt "
+      "mollit anim id est laborum.";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  txt::ParagraphBuilder builder(paragraph_style);
+
+  txt::TextStyle text_style;
+  text_style.font_size = 26;
+  // Letter spacing not yet implemented
+  text_style.letter_spacing = 10;
+  text_style.color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
+                    txt::GetFontDir());
+
+  paragraph->Paint(GetCanvas(), 5.0, 30.0);
 
   ASSERT_TRUE(Snapshot());
 }

@@ -36,6 +36,10 @@ FontCollection::FontCollection() = default;
 
 FontCollection::~FontCollection() = default;
 
+const std::string FontCollection::ProcessFamilyName(const std::string& family) {
+  return family.length() == 0 ? DEFAULT_FAMILY_NAME : family;
+}
+
 std::shared_ptr<minikin::FontCollection>
 FontCollection::GetMinikinFontCollectionForFamily(const std::string& family,
                                                   const std::string& dir) {
@@ -51,8 +55,8 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family,
   // crashes when passed a null string. This seems to be a bug in Skia as
   // SkFontMgr explicitly says passing in nullptr gives the default font.
 
-  auto font_style_set = skia_font_manager->matchFamily(
-      family.length() == 0 ? "Roboto" : family.c_str());
+  auto font_style_set =
+      skia_font_manager->matchFamily(ProcessFamilyName(family).c_str());
   FTL_DCHECK(font_style_set != nullptr);
 
   std::vector<minikin::Font> minikin_fonts;
