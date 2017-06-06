@@ -52,6 +52,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
 
   Window* GetWindow();
 
+  std::string DefaultRouteName() override;
   void ScheduleFrame() override;
   void Render(Scene* scene) override;
   void UpdateSemantics(SemanticsUpdate* update) override;

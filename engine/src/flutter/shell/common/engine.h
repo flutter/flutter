@@ -71,6 +71,7 @@ class Engine : public blink::RuntimeDelegate {
 
  private:
   // RuntimeDelegate methods:
+  std::string DefaultRouteName() override;
   void ScheduleFrame() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
@@ -98,7 +99,7 @@ class Engine : public blink::RuntimeDelegate {
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<blink::RuntimeController> runtime_;
   tonic::DartErrorHandleType load_script_error_;
-  ftl::RefPtr<blink::PlatformMessage> pending_push_route_message_;
+  std::string initial_route_;
   blink::ViewportMetrics viewport_metrics_;
   std::string language_code_;
   std::string country_code_;

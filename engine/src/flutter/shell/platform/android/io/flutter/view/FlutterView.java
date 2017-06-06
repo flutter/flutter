@@ -241,6 +241,10 @@ public class FlutterView extends SurfaceView
         mFlutterSystemChannel.send(message);
     }
 
+    public void setInitialRoute(String route) {
+        mFlutterNavigationChannel.invokeMethod("setInitialRoute", route);
+    }
+
     public void pushRoute(String route) {
         mFlutterNavigationChannel.invokeMethod("pushRoute", route);
     }
