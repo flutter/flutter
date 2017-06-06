@@ -17,9 +17,12 @@
 #include "lib/txt/src/font_collection.h"
 
 #include <mutex>
+#include <set>
+#include <string>
 
 #include "lib/ftl/logging.h"
 #include "lib/txt/src/font_skia.h"
+#include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
 #include "third_party/skia/include/ports/SkFontMgr_directory.h"
 
@@ -35,6 +38,19 @@ FontCollection& FontCollection::GetDefaultFontCollection() {
 FontCollection::FontCollection() = default;
 
 FontCollection::~FontCollection() = default;
+
+std::set<std::string> FontCollection::GetFamilyNames(const std::string& dir) {
+  auto skia_font_manager = dir.length() != 0
+                               ? SkFontMgr_New_Custom_Directory(dir.c_str())
+                               : SkFontMgr::RefDefault();
+  std::set<std::string> names;
+  SkString str;
+  for (int i = 0; i < skia_font_manager->countFamilies(); i++) {
+    skia_font_manager->getFamilyName(i, &str);
+    names.insert(std::string{str.writable_str()});
+  }
+  return names;
+}
 
 const std::string FontCollection::ProcessFamilyName(const std::string& family) {
   return family.length() == 0 ? DEFAULT_FAMILY_NAME : family;

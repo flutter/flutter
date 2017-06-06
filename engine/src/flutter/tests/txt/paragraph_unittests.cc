@@ -17,12 +17,14 @@
 #include "lib/ftl/logging.h"
 #include "lib/txt/src/font_style.h"
 #include "lib/txt/src/font_weight.h"
+#include "lib/txt/src/paragraph.h"
 #include "lib/txt/tests/txt/utils.h"
-#include "paragraph.h"
 #include "paragraph_builder.h"
 #include "render_test.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkColor.h"
+
+namespace txt {
 
 TEST_F(RenderTest, SimpleParagraph) {
   const char* text = "Hello World";
@@ -46,6 +48,10 @@ TEST_F(RenderTest, SimpleParagraph) {
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
+  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
   ASSERT_TRUE(Snapshot());
 }
 
@@ -72,6 +78,10 @@ TEST_F(RenderTest, SimpleRedParagraph) {
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
+  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
   ASSERT_TRUE(Snapshot());
 }
 
@@ -108,7 +118,7 @@ TEST_F(RenderTest, RainbowParagraph) {
   builder.AddText(u16_text1);
 
   txt::TextStyle text_style2;
-  text_style2.font_size = 30;
+  text_style2.font_size = 50;
   // Letter spacing not yet implemented
   text_style2.letter_spacing = 100;
   text_style2.font_weight = txt::FontWeight::w600;
@@ -142,8 +152,12 @@ TEST_F(RenderTest, RainbowParagraph) {
   paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
                     txt::GetFontDir());
 
-  paragraph->Paint(GetCanvas(), 10.0, 30.0);
+  paragraph->Paint(GetCanvas(), 10.0, 50.0);
 
+  u16_text1 += u16_text2 + u16_text3 + u16_text4;
+  for (size_t i = 0; i < u16_text1.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text1[i]);
+  }
   ASSERT_TRUE(Snapshot());
 }
 
@@ -170,6 +184,10 @@ TEST_F(RenderTest, DefaultStyleParagraph) {
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
+  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
   ASSERT_TRUE(Snapshot());
 }
 
@@ -186,7 +204,7 @@ TEST_F(RenderTest, BoldParagraph) {
   text_style.font_size = 60;
   // Letter spacing not yet implemented
   text_style.letter_spacing = 10;
-  text_style.font_weight = txt::FontWeight::w900;
+  text_style.font_weight = txt::FontWeight::w700;
   text_style.fake_bold = true;
   text_style.color = SK_ColorRED;
   builder.PushStyle(text_style);
@@ -201,6 +219,10 @@ TEST_F(RenderTest, BoldParagraph) {
 
   paragraph->Paint(GetCanvas(), 10.0, 60.0);
 
+  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
   ASSERT_TRUE(Snapshot());
 }
 
@@ -257,5 +279,43 @@ TEST_F(RenderTest, LinebreakParagraph) {
 
   paragraph->Paint(GetCanvas(), 5.0, 30.0);
 
+  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
   ASSERT_TRUE(Snapshot());
 }
+
+TEST_F(RenderTest, ItalicsParagraph) {
+  const char* text = "I am Italicized!";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  txt::ParagraphBuilder builder(paragraph_style);
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorRED;
+  text_style.font_style = txt::FontStyle::italic;
+  text_style.font_size = 35;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
+                    txt::GetFontDir());
+
+  paragraph->Paint(GetCanvas(), 10.0, 35.0);
+
+  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
+  ASSERT_TRUE(Snapshot());
+}
+
+}  // namespace txt

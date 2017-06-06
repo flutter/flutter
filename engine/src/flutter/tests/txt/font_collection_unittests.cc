@@ -20,6 +20,8 @@
 #include "lib/ftl/logging.h"
 #include "lib/txt/tests/txt/utils.h"
 
+namespace txt {
+
 TEST(FontCollection, HasDefaultRegistrations) {
   std::string defaultFamilyName = txt::FontCollection::GetDefaultFamilyName();
 
@@ -61,3 +63,12 @@ TEST(FontCollection, GetMinikinFontCollections) {
   ASSERT_NE(collectionHomemadeApple, collectionRoboto);
   ASSERT_NE(collectionDef.get(), nullptr);
 }
+
+TEST(FontCollection, GetFamilyNames) {
+  std::set<std::string> names =
+      txt::FontCollection::GetFamilyNames(txt::GetFontDir());
+
+  ASSERT_EQ(names.size(), 19ull);
+}
+
+}  // namespace txt
