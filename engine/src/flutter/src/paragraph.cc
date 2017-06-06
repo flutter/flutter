@@ -114,12 +114,13 @@ void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
 }
 
 void Paragraph::AddRunsToLineBreaker(const std::string& rootdir) {
-  auto collection = FontCollection::GetDefaultFontCollection()
-                        .GetMinikinFontCollectionForFamily("", rootdir);
   minikin::FontStyle font;
   minikin::MinikinPaint paint;
   for (size_t i = 0; i < runs_.size(); ++i) {
     auto run = runs_.GetRun(i);
+    auto collection =
+        FontCollection::GetDefaultFontCollection()
+            .GetMinikinFontCollectionForFamily(run.style.font_family, rootdir);
     GetFontAndMinikinPaint(run.style, &font, &paint);
     breaker_.addStyleRun(&paint, collection, font, run.start, run.end, false);
   }
@@ -140,14 +141,16 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
   minikin::MinikinPaint minikin_paint;
 
   SkTextBlobBuilder builder;
-  auto collection = FontCollection::GetDefaultFontCollection()
-                        .GetMinikinFontCollectionForFamily("", rootdir);
+
   minikin::Layout layout;
   SkScalar x = 0.0f;
   SkScalar y = 0.0f;
   size_t break_index = 0;
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
+    auto collection =
+        FontCollection::GetDefaultFontCollection()
+            .GetMinikinFontCollectionForFamily(run.style.font_family, rootdir);
     GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
     GetPaint(run.style, &paint);
 
