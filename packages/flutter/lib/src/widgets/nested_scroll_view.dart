@@ -25,6 +25,11 @@ import 'sliver.dart';
 import 'ticker_provider.dart';
 
 /// Signature used by [NestedScrollView] for building its header.
+///
+/// The `innerBoxIsScrolled` argument is typically used to control the
+/// [SliverAppBar.forceElevated] property to ensure that the app bar shows a
+/// shadow, since it would otherwise not necessarily be aware that it had
+/// content ostensibly below it.
 typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
 
 // TODO(abarth): Make this configurable with a controller.
@@ -73,8 +78,18 @@ class NestedScrollView extends StatefulWidget {
   /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
+  /// A builder for any widgets that are to precede the inner scroll views (as
+  /// given by [body]).
+  ///
+  /// Typically this is used to create a [SliverAppBar] with a [TabBar].
   final NestedScrollViewHeaderSliversBuilder headerSliverBuilder;
 
+  /// The widget to show inside the [NestedScrollView].
+  ///
+  /// Typically this will be [TabBarView].
+  ///
+  /// The [body] is built in a context that provides a [PrimaryScrollController]
+  /// that interacts with the [NestedScrollView]'s scroll controller.
   final Widget body;
 
   List<Widget> _buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {

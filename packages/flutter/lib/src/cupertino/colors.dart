@@ -4,6 +4,7 @@
 
 import 'dart:ui' show Color;
 
+/// [Color] constants that describe colors commonly used in iOS applications.
 class CupertinoColors {
   CupertinoColors._();
 

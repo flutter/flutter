@@ -38,6 +38,26 @@ enum CrossFadeState {
 /// width. In the case where the two children have different heights, the
 /// animation crops overflowing children during the animation by aligning their
 /// top edge, which means that the bottom will be clipped.
+///
+/// ## Sample code
+///
+/// This code fades between two representations of the Flutter logo. It depends
+/// on a global boolean `_on`; when `_on` is true, the first logo is shown,
+/// otherwise the second logo is shown.
+///
+/// ```dart
+/// new AnimatedCrossFade(
+///   duration: const Duration(seconds: 3),
+///   firstChild: const FlutterLogo(style: FlutterLogoStyle.horizontal, size: 100.0),
+///   secondChild: const FlutterLogo(style: FlutterLogoStyle.stacked, size: 100.0),
+///   crossFadeState: _on ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [AnimatedSize], the lower-level widget which [AnimatedCrossFade] uses to
+///    automatically change size.
 class AnimatedCrossFade extends StatefulWidget {
   /// Creates a cross-fade animation widget.
   ///
@@ -99,6 +119,14 @@ class AnimatedCrossFade extends StatefulWidget {
 
   @override
   _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$crossFadeState');
+    if (alignment != FractionalOffset.topCenter)
+      description.add('alignment: $alignment');
+  }
 }
 
 class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProviderStateMixin {
@@ -211,5 +239,14 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('${widget.crossFadeState}');
+    description.add('$_controller');
+    if (widget.alignment != FractionalOffset.topCenter)
+      description.add('alignment: ${widget.alignment}');
   }
 }

@@ -146,7 +146,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// The [constraints] are set to fit the font size plus ample headroom
 /// vertically, while expanding horizontally to fit the parent. The [padding] is
 /// used to make sure there is space between the contents and the text. The
-/// [color] makes the box teal. The [alignment] causes the [child] to be
+/// `color` makes the box teal. The [alignment] causes the [child] to be
 /// centered in the box. The [foregroundDecoration] overlays a nine-patch image
 /// onto the text. Finally, the [transform] applies a slight rotation to the
 /// entire contraption to complete the effect.

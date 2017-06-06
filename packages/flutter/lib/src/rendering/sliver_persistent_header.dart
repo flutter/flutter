@@ -35,6 +35,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// child changes its intrinsic dimensions.
   double get minExtent;
 
+  /// The dimension of the child in the main axis.
   @protected
   double get childExtent {
     if (child == null)

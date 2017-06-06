@@ -1233,8 +1233,8 @@ class PipelineOwner {
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
   ///
-  /// Initially, only the root node, as scheduled by [scheduleInitialSemantics],
-  /// needs a semantics update.
+  /// Initially, only the root node, as scheduled by
+  /// [RenderObjectscheduleInitialSemantics], needs a semantics update.
   ///
   /// This function is one of the core stages of the rendering pipeline. The
   /// semantics are compiled after painting and only after

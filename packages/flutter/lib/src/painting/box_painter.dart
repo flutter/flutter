@@ -1411,7 +1411,7 @@ class DecorationImage {
 ///
 /// The [BoxDecoration] class provides a variety of ways to draw a box.
 ///
-/// The box has a [border], a body, and may cast a [shadow].
+/// The box has a [border], a body, and may cast a [boxShadow].
 ///
 /// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
 /// then the [borderRadius] property controls the roundness of the corners.
@@ -1421,7 +1421,7 @@ class DecorationImage {
 /// the box. Finally there is the [image], the precise alignment of which is
 /// controlled by the [DecorationImage] class.
 ///
-/// The [border] paints over the body; the [shadow], naturally, paints below it.
+/// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
 /// ## Sample code
 ///

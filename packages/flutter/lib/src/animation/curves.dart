@@ -448,6 +448,25 @@ class ElasticInOutCurve extends Curve {
 // PREDEFINED CURVES
 
 /// A collection of common animation curves.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_bounce_in.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_bounce_in_out.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_bounce_out.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_decelerate.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_ease.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_ease_in.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_ease_in_out.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_ease_out.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_elastic_in.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_elastic_in_out.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_elastic_out.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_fast_out_slow_in.png)
+/// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_linear.png)
+///
+/// See also:
+///
+///  * [Curve], the interface implemented by the constants available from the
+///    [Curves] class.
 class Curves {
   Curves._();
 
