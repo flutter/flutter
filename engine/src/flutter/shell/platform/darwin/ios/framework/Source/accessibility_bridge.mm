@@ -79,10 +79,11 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   return &_children;
 }
 
-- (void)neuter {
+- (void)dealloc {
   _bridge = nullptr;
   _children.clear();
-  self.parent = nil;
+  [_parent release];
+  [super dealloc];
 }
 
 #pragma mark - UIAccessibility overrides
@@ -218,12 +219,10 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 namespace shell {
 
 AccessibilityBridge::AccessibilityBridge(UIView* view, PlatformViewIOS* platform_view)
-    : view_(view), platform_view_(platform_view) {}
+    : view_(view), platform_view_(platform_view), objects_([[NSMutableDictionary alloc] init]) {}
 
 AccessibilityBridge::~AccessibilityBridge() {
   view_.accessibilityElements = nil;
-  ReleaseObjects(objects_);
-  objects_.clear();
 }
 
 void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> nodes) {
@@ -240,7 +239,7 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
     }
   }
 
-  SemanticsObject* root = objects_[kRootNodeId];
+  SemanticsObject* root = objects_.get()[@(kRootNodeId)];
 
   if (root) {
     if (!view_.accessibilityElements) {
@@ -249,30 +248,24 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
   } else {
     view_.accessibilityElements = nil;
   }
-
-  std::unordered_set<int> visited_objects;
+    
+  NSMutableArray<NSNumber*>* doomed_uids =
+    [NSMutableArray arrayWithArray: [objects_.get() allKeys]];
   if (root)
-    VisitObjectsRecursively(root, &visited_objects);
+    VisitObjectsRecursivelyAndRemove(root, doomed_uids);
 
-  std::unordered_map<int, SemanticsObject*> doomed_objects;
-  doomed_objects.swap(objects_);
-  for (int uid : visited_objects) {
-    auto it = doomed_objects.find(uid);
-    objects_.insert(*it);
-    doomed_objects.erase(it);
-    // TODO(abarth): Use extract once we're at C++17.
-  }
-
-  SemanticsObject* doomed_focused_object = nil;
-  for (const auto& entry : doomed_objects) {
-    SemanticsObject* object = entry.second;
+  bool focused_object_doomed = false;
+  for (NSNumber* uid in doomed_uids) {
+    SemanticsObject* object = objects_.get()[uid];
     if ([object accessibilityElementIsFocused]) {
-      doomed_focused_object = object;
+      focused_object_doomed = true;
       break;
     }
   }
 
-  if (doomed_focused_object != nil) {
+  [objects_ removeObjectsForKeys: doomed_uids];
+
+  if (focused_object_doomed) {
     // Previously focused element is no longer in the tree.
     // Passing `nil` as argument to let iOS figure out what to focus next.
     // TODO(goderbauer): Figure out which element should be focused next and post
@@ -282,8 +275,6 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
     // Passing `nil` as argument to keep focus where it is.
     UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
   }
-
-  ReleaseObjects(doomed_objects);
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, blink::SemanticsAction action) {
@@ -291,28 +282,19 @@ void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, blink::SemanticsA
 }
 
 SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid) {
-  SemanticsObject* object = objects_[uid];
+  SemanticsObject* object = objects_.get()[@(uid)];
   if (!object) {
-    object = [[SemanticsObject alloc] initWithBridge:this uid:uid];
-    objects_[uid] = object;
+    object = [[[SemanticsObject alloc] initWithBridge:this uid:uid] autorelease];
+    objects_.get()[@(uid)] = object;
   }
   return object;
 }
 
-void AccessibilityBridge::VisitObjectsRecursively(SemanticsObject* object,
-                                                  std::unordered_set<int>* visited_objects) {
-  visited_objects->insert(object.uid);
+void AccessibilityBridge::VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
+                                                  NSMutableArray<NSNumber*>* doomed_uids) {
+  [doomed_uids removeObject: @(object.uid)];
   for (SemanticsObject* child : *[object children])
-    VisitObjectsRecursively(child, visited_objects);
-}
-
-void AccessibilityBridge::ReleaseObjects(std::unordered_map<int, SemanticsObject*>& objects) {
-  for (const auto& entry : objects) {
-    SemanticsObject* object = entry.second;
-    [object neuter];
-    [object release];
-  }
-  objects.clear();
+    VisitObjectsRecursivelyAndRemove(child, doomed_uids);
 }
 
 }  // namespace shell

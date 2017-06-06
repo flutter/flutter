@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "lib/ftl/macros.h"
@@ -31,7 +32,7 @@ class AccessibilityBridge;
  * The parent of this node in the node tree. Will be nil for the root node and
  * during transient state changes.
  */
-@property(nonatomic, assign) SemanticsObject* parent;
+@property(nonatomic, strong) SemanticsObject* parent;
 
 - (instancetype)init __attribute__((unavailable("Use initWithBridge instead")));
 - (instancetype)initWithBridge:(shell::AccessibilityBridge*)bridge
@@ -54,12 +55,12 @@ class AccessibilityBridge final {
 
  private:
   SemanticsObject* GetOrCreateObject(int32_t id);
-  void VisitObjectsRecursively(SemanticsObject* object, std::unordered_set<int>* visited_objects);
+  void VisitObjectsRecursivelyAndRemove(SemanticsObject* object, NSMutableArray<NSNumber*>* doomed_uids);
   void ReleaseObjects(std::unordered_map<int, SemanticsObject*>& objects);
 
   UIView* view_;
   PlatformViewIOS* platform_view_;
-  std::unordered_map<int, SemanticsObject*> objects_;
+  fml::scoped_nsobject<NSMutableDictionary<NSNumber*, SemanticsObject*>> objects_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridge);
 };
