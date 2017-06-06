@@ -34,7 +34,7 @@ Or run on an iOS simulator without code signing
 /// The user did iOS development but never on this project.
 const String noProvisioningProfileInstruction = '''
 ═══════════════════════════════════════════════════════════════════════════════════
-No Provisioning Profile was found for your project's Bundle Identifier.
+No Provisioning Profile was found for your project's Bundle Identifier or your device.
 You can create a new Provisioning Profile for your project in Xcode for your
 team by:
 $setDevelopmentTeamInstruction
@@ -44,7 +44,7 @@ For more information, please visit:
 
 Or run on an iOS simulator without code signing
 ═══════════════════════════════════════════════════════════════════════════════════''';
-/// Fallback message for signing issues that's likely solved by retracing the
+/// Fallback error message for signing issues that's likely solved by retracing the
 /// signing flow in Xcode.
 const String noDevelopmentTeamInstruction = '''
 ═══════════════════════════════════════════════════════════════════════════════════

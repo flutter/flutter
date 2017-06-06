@@ -147,7 +147,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   String developmentTeam;
-  if (codesign && mode != BuildMode.release && buildForDevice)
+  if (codesign && buildForDevice)
     developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
 
   // Before the build, all service definitions must be updated and the dylibs
@@ -249,7 +249,9 @@ Future<XcodeBuildResult> buildXcodeProject({
 Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      result.stdout?.contains('BCEROR') == true) {
+      result.stdout?.contains('BCEROR') == true &&
+      // May need updating if Xcode changes its outputs.
+      result.stdout?.contains('Xcode couldn\'t find a provisioning profile matching') == true) {
     printError(noProvisioningProfileInstruction, emphasis: true);
     return;
   }
