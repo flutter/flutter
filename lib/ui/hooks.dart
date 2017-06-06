@@ -40,25 +40,7 @@ void _updateSemanticsEnabled(bool enabled) {
     window.onSemanticsEnabledChanged();
 }
 
-void _handleNavigationMessage(ByteData data) {
-  if (window._defaultRouteName != null)
-    return;
-  try {
-    final dynamic message = _decodeJSON(_decodeUTF8(data));
-    final dynamic method = message['method'];
-    if (method != 'pushRoute')
-      return;
-    final dynamic args = message['args'];
-    window._defaultRouteName = args[0];
-  } catch (e) {
-    // We ignore any exception and just let the message be dispatched as usual.
-  }
-}
-
 void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
-  if (name == 'flutter/navigation')
-    _handleNavigationMessage(data);
-
   if (window.onPlatformMessage != null) {
     window.onPlatformMessage(name, data, (ByteData responseData) {
       window._respondToPlatformMessage(responseId, responseData);

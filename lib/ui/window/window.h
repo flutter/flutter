@@ -23,6 +23,7 @@ class Scene;
 
 class WindowClient {
  public:
+  virtual std::string DefaultRouteName() = 0;
   virtual void ScheduleFrame() = 0;
   virtual void Render(Scene* scene) = 0;
   virtual void UpdateSemantics(SemanticsUpdate* update) = 0;

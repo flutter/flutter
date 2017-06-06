@@ -98,6 +98,10 @@ Window* RuntimeController::GetWindow() {
   return dart_controller_->dart_state()->window();
 }
 
+std::string RuntimeController::DefaultRouteName() {
+  return client_->DefaultRouteName();
+}
+
 void RuntimeController::ScheduleFrame() {
   client_->ScheduleFrame();
 }

@@ -39,6 +39,11 @@ Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
   return data_handle;
 }
 
+void DefaultRouteName(Dart_NativeArguments args) {
+  std::string routeName = UIDartState::Current()->window()->client()->DefaultRouteName();
+  Dart_SetReturnValue(args, StdStringToDart(routeName));
+}
+
 void ScheduleFrame(Dart_NativeArguments args) {
   UIDartState::Current()->window()->client()->ScheduleFrame();
 }
@@ -253,6 +258,7 @@ void Window::CompletePlatformMessageResponse(int response_id,
 
 void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
   natives->Register({
+      {"Window_defaultRouteName", DefaultRouteName, 1, true},
       {"Window_scheduleFrame", ScheduleFrame, 1, true},
       {"Window_sendPlatformMessage", _SendPlatformMessage, 4, true},
       {"Window_respondToPlatformMessage", _RespondToPlatformMessage, 3, true},

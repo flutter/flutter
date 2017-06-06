@@ -275,8 +275,8 @@ class Window {
 
   /// The route or path that the operating system requested when the application
   /// was launched.
-  String get defaultRouteName => _defaultRouteName;
-  String _defaultRouteName;
+  String get defaultRouteName => _defaultRouteName();
+  String _defaultRouteName() native "Window_defaultRouteName";
 
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
   /// and [onDrawFrame] callbacks be invoked.

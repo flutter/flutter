@@ -17,6 +17,7 @@ namespace blink {
 
 class RuntimeDelegate {
  public:
+  virtual std::string DefaultRouteName() = 0;
   virtual void ScheduleFrame() = 0;
   virtual void Render(std::unique_ptr<flow::LayerTree> layer_tree) = 0;
   virtual void UpdateSemantics(std::vector<SemanticsNode> update) = 0;
