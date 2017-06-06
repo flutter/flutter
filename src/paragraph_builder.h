@@ -40,6 +40,10 @@ class ParagraphBuilder {
 
   void AddText(const std::u16string& text);
 
+  void AddText(const std::string& text);
+
+  void AddText(const char* text);
+
   std::unique_ptr<Paragraph> Build();
 
  private:

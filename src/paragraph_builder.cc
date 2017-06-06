@@ -15,6 +15,7 @@
  */
 
 #include "lib/txt/src/paragraph_builder.h"
+#include "third_party/icu/source/common/unicode/unistr.h"
 
 namespace txt {
 
@@ -44,6 +45,20 @@ void ParagraphBuilder::Pop() {
 
 void ParagraphBuilder::AddText(const std::u16string& text) {
   text_.insert(text_.end(), text.begin(), text.end());
+}
+
+void ParagraphBuilder::AddText(const std::string& text) {
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+  AddText(u16_text);
+}
+
+void ParagraphBuilder::AddText(const char* text) {
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+  AddText(u16_text);
 }
 
 std::unique_ptr<Paragraph> ParagraphBuilder::Build() {

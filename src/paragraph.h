@@ -24,6 +24,7 @@
 #include "lib/txt/src/paragraph_constraints.h"
 #include "lib/txt/src/styled_runs.h"
 #include "minikin/LineBreaker.h"
+#include "third_party/gtest/include/gtest/gtest_prod.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 class SkCanvas;
@@ -43,6 +44,13 @@ class Paragraph {
 
  private:
   friend class ParagraphBuilder;
+  FRIEND_TEST(RenderTest, SimpleParagraph);
+  FRIEND_TEST(RenderTest, SimpleRedParagraph);
+  FRIEND_TEST(RenderTest, RainbowParagraph);
+  FRIEND_TEST(RenderTest, DefaultStyleParagraph);
+  FRIEND_TEST(RenderTest, BoldParagraph);
+  FRIEND_TEST(RenderTest, LinebreakParagraph);
+  FRIEND_TEST(RenderTest, ItalicsParagraph);
 
   std::vector<uint16_t> text_;
   StyledRuns runs_;

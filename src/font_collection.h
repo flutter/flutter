@@ -20,13 +20,14 @@
 #define DEFAULT_FAMILY_NAME "Roboto"
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
 #include "lib/ftl/macros.h"
-#include "lib/txt/tests/txt/render_test.h"
 #include "minikin/FontCollection.h"
 #include "minikin/FontFamily.h"
+#include "third_party/gtest/include/gtest/gtest_prod.h"
 
 namespace txt {
 
@@ -41,16 +42,20 @@ class FontCollection {
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family,
       const std::string& dir = "");
-  // Temporarily public.
+
+  // Provides a vector of all available family names.
+  static std::set<std::string> GetFamilyNames(const std::string& dir = "");
+
+ private:
+  FRIEND_TEST(FontCollection, HasDefaultRegistrations);
+  FRIEND_TEST(FontCollection, GetMinikinFontCollections);
+  FRIEND_TEST(FontCollection, GetFamilyNames);
+
   const std::string ProcessFamilyName(const std::string& family);
 
-  // For Testing. Temporarily public.
   static const std::string GetDefaultFamilyName() {
     return DEFAULT_FAMILY_NAME;
   };
-
- private:
-  friend RenderTest;
 
   // TODO(chinmaygarde): Caches go here.
   FTL_DISALLOW_COPY_AND_ASSIGN(FontCollection);

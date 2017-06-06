@@ -60,13 +60,13 @@ int GetWeight(const TextStyle& style) {
       return 2;
     case FontWeight::w300:
       return 3;
-    case FontWeight::w400:
+    case FontWeight::w400:  // Normal.
       return 4;
     case FontWeight::w500:
       return 5;
     case FontWeight::w600:
       return 6;
-    case FontWeight::w700:
+    case FontWeight::w700:  // Bold.
       return 7;
     case FontWeight::w800:
       return 8;
