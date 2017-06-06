@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "application/lib/svc/service_provider_bridge.h"
 #include "application/services/application_controller.fidl.h"
 #include "application/services/application_runner.fidl.h"
 #include "application/services/service_provider.fidl.h"
@@ -22,7 +23,6 @@ class App;
 class RuntimeHolder;
 
 class ApplicationControllerImpl : public app::ApplicationController,
-                                  public app::ServiceProvider,
                                   public mozart::ViewProvider {
  public:
   ApplicationControllerImpl(
@@ -37,11 +37,6 @@ class ApplicationControllerImpl : public app::ApplicationController,
 
   void Kill() override;
   void Detach() override;
-
-  // |app::ServiceProvider| implementation
-
-  void ConnectToService(const fidl::String& service_name,
-                        mx::channel channel) override;
 
   // |mozart::ViewProvider| implementation
 
@@ -58,8 +53,7 @@ class ApplicationControllerImpl : public app::ApplicationController,
   App* app_;
   fidl::Binding<app::ApplicationController> binding_;
 
-  fidl::BindingSet<app::ServiceProvider> service_provider_bindings_;
-  app::ServiceProviderPtr dart_service_provider_;
+  app::ServiceProviderBridge service_provider_bridge_;
 
   fidl::BindingSet<mozart::ViewProvider> view_provider_bindings_;
 

@@ -38,15 +38,29 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   // startup handles.
 
   if (startup_info->launch_info->services) {
-    service_provider_bindings_.AddBinding(
-        this, std::move(startup_info->launch_info->services));
+    service_provider_bridge_.AddBinding(
+        std::move(startup_info->launch_info->services));
   }
+
+  if (startup_info->launch_info->service_request.is_valid()) {
+    service_provider_bridge_.ServeDirectory(
+        std::move(startup_info->launch_info->service_request));
+  }
+
+  service_provider_bridge_.AddService<mozart::ViewProvider>(
+      [this](fidl::InterfaceRequest<mozart::ViewProvider> request) {
+    view_provider_bindings_.AddBinding(this, std::move(request));
+  });
+
+  app::ServiceProviderPtr service_provider;
+  auto request = service_provider.NewRequest();
+  service_provider_bridge_.set_backend(std::move(service_provider));
 
   url_ = startup_info->launch_info->url;
   runtime_holder_.reset(new RuntimeHolder());
   runtime_holder_->Init(
       app::ApplicationContext::CreateFrom(std::move(startup_info)),
-      fidl::GetProxy(&dart_service_provider_), std::move(bundle));
+      std::move(request), std::move(bundle));
 }
 
 ApplicationControllerImpl::~ApplicationControllerImpl() = default;
@@ -59,17 +73,6 @@ void ApplicationControllerImpl::Kill() {
 
 void ApplicationControllerImpl::Detach() {
   binding_.set_connection_error_handler(ftl::Closure());
-}
-
-void ApplicationControllerImpl::ConnectToService(
-    const fidl::String& service_name,
-    mx::channel channel) {
-  if (service_name == mozart::ViewProvider::Name_) {
-    view_provider_bindings_.AddBinding(
-        this, fidl::InterfaceRequest<mozart::ViewProvider>(std::move(channel)));
-  } else {
-    dart_service_provider_->ConnectToService(service_name, std::move(channel));
-  }
 }
 
 void ApplicationControllerImpl::CreateView(
