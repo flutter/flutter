@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -452,3 +453,23 @@ Future<int> findAvailablePort() async {
 }
 
 bool canRun(String path) => _processManager.canRun(path);
+
+String extractCloudAuthTokenArg(List<String> rawArgs) {
+  final ArgParser argParser = new ArgParser()..addOption('cloud-auth-token');
+  ArgResults args;
+  try {
+    args = argParser.parse(rawArgs);
+  } on FormatException catch(error) {
+    stderr.writeln('${error.message}\n');
+    stderr.writeln('Usage:\n');
+    stderr.writeln(argParser.usage);
+    return null;
+  }
+
+  final String token = args['cloud-auth-token'];
+  if (token == null) {
+    stderr.writeln('Required option --cloud-auth-token not found');
+    return null;
+  }
+  return token;
+}

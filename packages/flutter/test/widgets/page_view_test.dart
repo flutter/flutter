@@ -441,12 +441,14 @@ void main() {
       ),
     );
     expect(controller.page, 2);
+
+    final PageController controller2 = new PageController(keepPage: false);
     await tester.pumpWidget(
       new PageStorage(
         bucket: bucket,
         child: new PageView(
           key: const Key('Check it again against your list and see consistency!'),
-          controller: controller,
+          controller: controller2,
           children: <Widget>[
             const Placeholder(),
             const Placeholder(),
@@ -455,6 +457,6 @@ void main() {
         ),
       ),
     );
-    expect(controller.page, 0);
+    expect(controller2.page, 0);
   });
 }

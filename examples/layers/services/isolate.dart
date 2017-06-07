@@ -18,12 +18,11 @@ typedef void OnResultListener(String result);
 // in real-world applications.
 class Calculator {
   Calculator({ @required this.onProgressListener, @required this.onResultListener, String data })
-  // In order to keep the example files smaller, we "cheat" a little and
-  // replicate our small json string into a 10,000-element array.
-  : _data = _replicateJson(data, 10000) {
-    assert(onProgressListener != null);
-    assert(onResultListener != null);
-  }
+    : assert(onProgressListener != null),
+      assert(onResultListener != null),
+      // In order to keep the example files smaller, we "cheat" a little and
+      // replicate our small json string into a 10,000-element array.
+      _data = _replicateJson(data, 10000);
 
   final OnProgressListener onProgressListener;
   final OnResultListener onResultListener;
@@ -87,9 +86,9 @@ class CalculationMessage {
 // progress of the background computation.
 class CalculationManager {
   CalculationManager({ @required this.onProgressListener, @required this.onResultListener })
-  : _receivePort = new ReceivePort() {
-    assert(onProgressListener != null);
-    assert(onResultListener != null);
+    : assert(onProgressListener != null),
+      assert(onResultListener != null),
+      _receivePort = new ReceivePort() {
     _receivePort.listen(_handleMessage);
   }
 

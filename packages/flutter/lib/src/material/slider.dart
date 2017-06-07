@@ -280,12 +280,12 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     TextTheme textTheme,
     this.onChanged,
     TickerProvider vsync,
-  }) : _value = value,
+  }) : assert(value != null && value >= 0.0 && value <= 1.0),
+       _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
        _thumbOpenAtMin = thumbOpenAtMin,
        _textTheme = textTheme {
-    assert(value != null && value >= 0.0 && value <= 1.0);
     this.label = label;
     final GestureArenaTeam team = new GestureArenaTeam();
     _drag = new HorizontalDragGestureRecognizer()

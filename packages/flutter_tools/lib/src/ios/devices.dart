@@ -242,6 +242,9 @@ class IOSDevice extends Device {
       // the port picked and scrape that later.
     }
 
+    if (debuggingOptions.enableSoftwareRendering) 
+      launchArguments.add('--enable-software-rendering');
+
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 

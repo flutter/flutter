@@ -38,7 +38,12 @@ class RenderParagraph extends RenderBox {
     TextOverflow overflow: TextOverflow.clip,
     double textScaleFactor: 1.0,
     int maxLines,
-  }) : _softWrap = softWrap,
+  }) : assert(text != null),
+       assert(text.debugAssertIsValid()),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(textScaleFactor != null),
+       _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = new TextPainter(
          text: text,
@@ -46,13 +51,7 @@ class RenderParagraph extends RenderBox {
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
-       ) {
-    assert(text != null);
-    assert(text.debugAssertIsValid());
-    assert(softWrap != null);
-    assert(overflow != null);
-    assert(textScaleFactor != null);
-  }
+       );
 
   final TextPainter _textPainter;
 

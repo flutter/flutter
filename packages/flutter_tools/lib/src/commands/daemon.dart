@@ -759,7 +759,7 @@ class AppInstance {
   }
 
   dynamic _runInZone(AppDomain domain, dynamic method()) {
-    _logger ??= new _AppRunLogger(domain, this, logToStdout: logToStdout);
+    _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     final AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);
@@ -768,20 +768,25 @@ class AppInstance {
 }
 
 /// A [Logger] which sends log messages to a listening daemon client.
+///
+/// This class can either:
+///   1) Send stdout messages and progress events to the client IDE
+///   1) Log messages to stdout and send progress events to the client IDE
+///
+/// TODO(devoncarew): To simplify this code a bit, we could choose to specialize
+/// this class into two, one for each of the above use cases.
 class _AppRunLogger extends Logger {
-  _AppRunLogger(this.domain, this.app, { this.logToStdout: false });
+  _AppRunLogger(this.domain, this.app, { this.parent });
 
   AppDomain domain;
   final AppInstance app;
-  final bool logToStdout;
+  final Logger parent;
   int _nextProgressId = 0;
 
   @override
   void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
-    if (logToStdout) {
-      stderr.writeln(message);
-      if (stackTrace != null)
-        stderr.writeln(stackTrace.toString().trimRight());
+    if (parent != null) {
+      parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
     } else {
       if (stackTrace != null) {
         _sendLogEvent(<String, dynamic>{
@@ -800,18 +805,25 @@ class _AppRunLogger extends Logger {
 
   @override
   void printStatus(
-    String message,
-    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
-  ) {
-    if (logToStdout) {
-      print(message);
+    String message, {
+    bool emphasis: false, bool newline: true, String ansiAlternative, int indent
+  }) {
+    if (parent != null) {
+      parent.printStatus(message, emphasis: emphasis, newline: newline,
+          ansiAlternative: ansiAlternative, indent: indent);
     } else {
       _sendLogEvent(<String, dynamic>{ 'log': message });
     }
   }
 
   @override
-  void printTrace(String message) { }
+  void printTrace(String message) {
+    if (parent != null) {
+      parent.printTrace(message);
+    } else {
+      _sendLogEvent(<String, dynamic>{ 'log': message, 'trace': true });
+    }
+  }
 
   Status _status;
 

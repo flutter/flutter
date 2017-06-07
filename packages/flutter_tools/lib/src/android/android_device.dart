@@ -397,6 +397,8 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
+    if (debuggingOptions.enableSoftwareRendering)
+      cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildMode == BuildMode.debug)
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);

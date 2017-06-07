@@ -88,6 +88,13 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
+    argParser.addFlag('enable-software-rendering',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Enable rendering using the Skia software backend. This is useful\n'
+              'when testing Flutter on emulators. By default, Flutter will\n'
+              'attempt to either use OpenGL or Vulkan and fall back to software\n'
+              'when neither is available.');
     argParser.addFlag('use-test-fonts',
         negatable: true,
         defaultsTo: false,
@@ -218,6 +225,7 @@ class RunCommand extends RunCommandBase {
         getBuildMode(),
         startPaused: argResults['start-paused'],
         useTestFonts: argResults['use-test-fonts'],
+        enableSoftwareRendering: argResults['enable-software-rendering'],
         observatoryPort: observatoryPort,
         diagnosticPort: diagnosticPort,
       );

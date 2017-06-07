@@ -1,0 +1,11 @@
+name: platform_view
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/flutter-mark-square-64.png

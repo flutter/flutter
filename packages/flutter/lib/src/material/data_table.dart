@@ -259,14 +259,14 @@ class DataTable extends StatelessWidget {
     this.sortAscending: true,
     this.onSelectAll,
     @required this.rows
-  }) : _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
-    assert(columns != null);
-    assert(columns.isNotEmpty);
-    assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
-    assert(sortAscending != null);
-    assert(rows != null);
-    assert(!rows.any((DataRow row) => row.cells.length != columns.length));
-  }
+  }) : assert(columns != null),
+       assert(columns.isNotEmpty),
+       assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
+       assert(sortAscending != null),
+       assert(rows != null),
+       assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
+       _onlyTextColumn = _initOnlyTextColumn(columns),
+       super(key: key);
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;

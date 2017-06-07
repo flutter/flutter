@@ -132,7 +132,9 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         messages.add(new ValidationMessage.error(
             'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
             'Download at: https://developer.apple.com/xcode/download/\n'
-            'Once installed, run \'sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\'.'
+            'Or install Xcode via the App Store.\n'
+            'Once installed, run:\n'
+            '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer'
         ));
       }
     }
@@ -152,14 +154,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       if (!await hasWorkingLibimobiledevice) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-            'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
-                '  brew update\n'
-                '  brew uninstall --ignore-dependencies libimobiledevice\n'
-                '  brew install --HEAD libimobiledevice'
+            'libimobiledevice and ideviceinstaller are not installed or require updating. To update, run:\n'
+            '  brew update\n'
+            '  brew uninstall --ignore-dependencies libimobiledevice\n'
+            '  brew install --HEAD libimobiledevice\n'
+            '  brew install ideviceinstaller'
         ));
-      }
-
-      if (!await hasIDeviceInstaller) {
+      } else if (!await hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'

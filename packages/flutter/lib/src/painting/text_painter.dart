@@ -41,10 +41,13 @@ class TextPainter {
     double textScaleFactor: 1.0,
     int maxLines,
     String ellipsis,
-  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor, _maxLines = maxLines, _ellipsis = ellipsis {
-    assert(text == null || text.debugAssertIsValid());
-    assert(textScaleFactor != null);
-  }
+  }) : assert(text == null || text.debugAssertIsValid()),
+       assert(textScaleFactor != null),
+       _text = text,
+       _textAlign = textAlign,
+       _textScaleFactor = textScaleFactor,
+       _maxLines = maxLines,
+       _ellipsis = ellipsis;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;

@@ -265,4 +265,72 @@ void main() {
     expect(glyphText.text.style.color, Colors.orange);
     expect(glyphText.text.style.fontSize, 20.0);
   });
+
+  testWidgets(
+    'Same ThemeData reapplied does not trigger descendents rebuilds',
+    (WidgetTester tester) async {
+      testBuildCalled = 0;
+      ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));
+
+      await tester.pumpWidget(
+        new Theme(
+          data: themeData,
+          child: const Test(),
+        ),
+      );
+      expect(testBuildCalled, 1);
+
+      // Pump the same widgets again.
+      await tester.pumpWidget(
+        new Theme(
+          data: themeData,
+          child: const Test(),
+        ),
+      );
+      // No repeated build calls to the child since it's the same theme data.
+      expect(testBuildCalled, 1);
+
+      // New instance of theme data but still the same content.
+      themeData = new ThemeData(primaryColor: const Color(0xFF000000));
+      await tester.pumpWidget(
+        new Theme(
+          data: themeData,
+          child: const Test(),
+        ),
+      );
+      // Still no repeated calls.
+      expect(testBuildCalled, 1);
+
+      // Different now.
+      themeData = new ThemeData(primaryColor: const Color(0xFF222222));
+      await tester.pumpWidget(
+        new Theme(
+          data: themeData,
+          child: const Test(),
+        ),
+      );
+      // Should call build again.
+      expect(testBuildCalled, 2);
+    },
+  );
+}
+
+int testBuildCalled;
+class Test extends StatefulWidget {
+  const Test();
+
+  @override
+  _TestState createState() => new _TestState();
+}
+
+class _TestState extends State<Test> {
+  @override
+  Widget build(BuildContext context) {
+    testBuildCalled += 1;
+    return new Container(
+      decoration: new BoxDecoration(
+        color: Theme.of(context).primaryColor,
+      ),
+    );
+  }
 }

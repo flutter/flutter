@@ -17,11 +17,10 @@ class _ProductItem extends StatelessWidget {
     @required this.product,
     @required this.quantity,
     @required this.onChanged,
-  }) : super(key: key) {
-    assert(product != null);
-    assert(quantity != null);
-    assert(onChanged != null);
-  }
+  }) : assert(product != null),
+       assert(quantity != null),
+       assert(onChanged != null),
+       super(key: key);
 
   final Product product;
   final int quantity;
@@ -70,9 +69,9 @@ class _ProductItem extends StatelessWidget {
 
 // Vendor name and description
 class _VendorItem extends StatelessWidget {
-  _VendorItem({ Key key, @required this.vendor }) : super(key: key) {
-    assert(vendor != null);
-  }
+  _VendorItem({ Key key, @required this.vendor })
+    : assert(vendor != null),
+      super(key: key);
 
   final Vendor vendor;
 
@@ -146,10 +145,9 @@ class _Heading extends StatelessWidget {
     @required this.product,
     @required this.quantity,
     this.quantityChanged,
-  }) : super(key: key) {
-    assert(product != null);
-    assert(quantity != null && quantity >= 0 && quantity <= 5);
-  }
+  }) : assert(product != null),
+       assert(quantity != null && quantity >= 0 && quantity <= 5),
+       super(key: key);
 
   final Product product;
   final int quantity;
@@ -213,11 +211,10 @@ class OrderPage extends StatefulWidget {
     @required this.order,
     @required this.products,
     @required this.shoppingCart,
-  }) : super(key: key) {
-    assert(order != null);
-    assert(products != null && products.isNotEmpty);
-    assert(shoppingCart != null);
-  }
+  }) : assert(order != null),
+       assert(products != null && products.isNotEmpty),
+       assert(shoppingCart != null),
+       super(key: key);
 
   final Order order;
   final List<Product> products;
@@ -328,9 +325,8 @@ class ShrineOrderRoute extends ShrinePageRoute<Order> {
     @required this.order,
     WidgetBuilder builder,
     RouteSettings settings: const RouteSettings(),
-  }) : super(builder: builder, settings: settings) {
-    assert(order != null);
-  }
+  }) : assert(order != null),
+       super(builder: builder, settings: settings);
 
   Order order;
 

@@ -46,6 +46,7 @@ export 'src/widgets/layout_builder.dart';
 export 'src/widgets/locale_query.dart';
 export 'src/widgets/media_query.dart';
 export 'src/widgets/modal_barrier.dart';
+export 'src/widgets/navigation_toolbar.dart';
 export 'src/widgets/navigator.dart';
 export 'src/widgets/nested_scroll_view.dart';
 export 'src/widgets/notification_listener.dart';

@@ -84,8 +84,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
 }
 
 class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
-  _ScrollbarPainter(TickerProvider vsync) {
-    assert(vsync != null);
+  _ScrollbarPainter(TickerProvider vsync)
+    : assert(vsync != null) {
     _fadeController = new AnimationController(duration: _kThumbFadeDuration, vsync: vsync);
     _opacity = new CurvedAnimation(parent: _fadeController, curve: Curves.fastOutSlowIn)
       ..addListener(notifyListeners);

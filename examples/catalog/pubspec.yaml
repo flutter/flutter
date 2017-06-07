@@ -1,8 +1,10 @@
-name: animated_list
-description: A sample app for AnimatedList
+name: sample_catalog
+description: A collection of Flutter sample apps
 dependencies:
   flutter:
     sdk: flutter
+  image:
+  path: ^1.4.0
 
 dev_dependencies:
   flutter_test:

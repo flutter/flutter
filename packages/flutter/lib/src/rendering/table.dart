@@ -489,12 +489,11 @@ class RenderTable extends RenderBox {
     TableCellVerticalAlignment defaultVerticalAlignment: TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
     List<List<RenderBox>> children
-  }) {
-    assert(columns == null || columns >= 0);
-    assert(rows == null || rows >= 0);
-    assert(rows == null || children == null);
-    assert(defaultColumnWidth != null);
-    assert(configuration != null);
+  }) : assert(columns == null || columns >= 0),
+       assert(rows == null || rows >= 0),
+       assert(rows == null || children == null),
+       assert(defaultColumnWidth != null),
+       assert(configuration != null) {
     _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0);
     _rows = rows ?? 0;
     _children = <RenderBox>[]..length = _columns * _rows;

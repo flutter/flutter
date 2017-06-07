@@ -643,11 +643,9 @@ class PhysicalModelLayer extends ContainerLayer {
     @required this.clipRRect,
     @required this.elevation,
     @required this.color,
-  }) {
-    assert(clipRRect != null);
-    assert(elevation != null);
-    assert(color != null);
-  }
+  }) : assert(clipRRect != null),
+       assert(elevation != null),
+       assert(color != null);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///

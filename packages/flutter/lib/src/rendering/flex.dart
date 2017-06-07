@@ -29,7 +29,7 @@ enum FlexFit {
 }
 
 /// Parent data for use with [RenderFlex].
-class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
+class FlexParentData extends ContainerBoxParentData<RenderBox> {
   /// The flex factor to use for this child
   ///
   /// If null or zero, the child is inflexible and determines its own size. If
@@ -48,7 +48,7 @@ class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   FlexFit fit;
 
   @override
-  String toString() => '${super.toString()}; flex=$flex';
+  String toString() => '${super.toString()}; flex=$flex; fit=$fit';
 }
 
 /// How much space should be occupied in the main axis.
@@ -201,15 +201,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline
-  }) : _direction = direction,
+  }) : assert(direction != null),
+       assert(mainAxisAlignment != null),
+       assert(mainAxisSize != null),
+       assert(crossAxisAlignment != null),
+       _direction = direction,
        _mainAxisAlignment = mainAxisAlignment,
        _mainAxisSize = mainAxisSize,
        _crossAxisAlignment = crossAxisAlignment,
        _textBaseline = textBaseline {
-    assert(direction != null);
-    assert(mainAxisAlignment != null);
-    assert(mainAxisSize != null);
-    assert(crossAxisAlignment != null);
     addAll(children);
   }
 

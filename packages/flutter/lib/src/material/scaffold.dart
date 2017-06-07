@@ -867,6 +867,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         child: new GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _handleStatusBarTap,
+          // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
+          excludeFromSemantics: true,
         )
       ));
     }
