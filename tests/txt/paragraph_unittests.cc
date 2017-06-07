@@ -52,6 +52,10 @@ TEST_F(RenderTest, SimpleParagraph) {
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -82,6 +86,10 @@ TEST_F(RenderTest, SimpleRedParagraph) {
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -158,6 +166,16 @@ TEST_F(RenderTest, RainbowParagraph) {
   for (size_t i = 0; i < u16_text1.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text1[i]);
   }
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 4ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 4ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style1));
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style2));
+  ASSERT_TRUE(paragraph->runs_.styles_[2].equals(text_style3));
+  ASSERT_TRUE(paragraph->runs_.styles_[3].equals(text_style4));
+  ASSERT_EQ(paragraph->records_[0].color(), text_style1.color);
+  ASSERT_EQ(paragraph->records_[1].color(), text_style2.color);
+  ASSERT_EQ(paragraph->records_[2].color(), text_style3.color);
+  ASSERT_EQ(paragraph->records_[3].color(), text_style4.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -188,6 +206,8 @@ TEST_F(RenderTest, DefaultStyleParagraph) {
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 0ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 0ull);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -223,6 +243,10 @@ TEST_F(RenderTest, BoldParagraph) {
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -283,6 +307,10 @@ TEST_F(RenderTest, LinebreakParagraph) {
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -315,6 +343,10 @@ TEST_F(RenderTest, ItalicsParagraph) {
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 

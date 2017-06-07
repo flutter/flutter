@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "lib/txt/src/text_style.h"
+#include "third_party/gtest/include/gtest/gtest_prod.h"
 
 namespace txt {
 
@@ -54,6 +55,14 @@ class StyledRuns {
   Run GetRun(size_t index) const;
 
  private:
+  FRIEND_TEST(RenderTest, SimpleParagraph);
+  FRIEND_TEST(RenderTest, SimpleRedParagraph);
+  FRIEND_TEST(RenderTest, RainbowParagraph);
+  FRIEND_TEST(RenderTest, DefaultStyleParagraph);
+  FRIEND_TEST(RenderTest, BoldParagraph);
+  FRIEND_TEST(RenderTest, LinebreakParagraph);
+  FRIEND_TEST(RenderTest, ItalicsParagraph);
+
   struct IndexedRun {
     size_t style_index = 0;
     size_t start = 0;
