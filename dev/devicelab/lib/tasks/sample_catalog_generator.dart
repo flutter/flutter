@@ -10,7 +10,7 @@ import '../framework/framework.dart';
 import '../framework/ios.dart';
 import '../framework/utils.dart';
 
-Future<TaskResult> samplePageCatalogGenerator() async {
+Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
   final Device device = await devices.workingDevice;
   await device.unlock();
   final String deviceId = device.deviceId;
@@ -29,6 +29,12 @@ Future<TaskResult> samplePageCatalogGenerator() async {
       'test_driver/screenshot.dart',
       '--device-id',
       deviceId,
+    ]);
+
+    await dart(<String>[
+      'bin/save_screenshots.dart',
+      await getCurrentFlutterRepoCommit(),
+      authorizationToken,
     ]);
   });
 

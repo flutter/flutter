@@ -57,10 +57,9 @@ class AnimatedList extends StatefulWidget {
     this.physics,
     this.shrinkWrap: false,
     this.padding,
-  }) : super(key: key) {
-    assert(itemBuilder != null);
-    assert(initialItemCount != null && initialItemCount >= 0);
-  }
+  }) : assert(itemBuilder != null),
+       assert(initialItemCount != null && initialItemCount >= 0),
+       super(key: key);
 
   /// Called, as needed, to build list item widgets.
   ///

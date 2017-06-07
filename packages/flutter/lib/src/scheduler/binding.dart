@@ -159,6 +159,9 @@ enum SchedulerPhase {
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
 abstract class SchedulerBinding extends BindingBase {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory SchedulerBinding._() => null;
 
   @override
   void initInstances() {

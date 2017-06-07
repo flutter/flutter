@@ -117,10 +117,9 @@ class ListModel<E> {
     @required this.listKey,
     @required this.removedItemBuilder,
     Iterable<E> initialItems,
-  }) : _items =  new List<E>.from(initialItems ?? <E>[]) {
-    assert(listKey != null);
-    assert(removedItemBuilder != null);
-  }
+  }) : assert(listKey != null),
+       assert(removedItemBuilder != null),
+       _items = new List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<AnimatedListState> listKey;
   final dynamic removedItemBuilder;
@@ -159,11 +158,10 @@ class CardItem extends StatelessWidget {
     this.onTap,
     @required this.item,
     this.selected: false
-  }) : super(key: key) {
-    assert(animation != null);
-    assert(item != null && item >= 0);
-    assert(selected != null);
-  }
+  }) : assert(animation != null),
+       assert(item != null && item >= 0),
+       assert(selected != null),
+       super(key: key);
 
   final Animation<double> animation;
   final VoidCallback onTap;

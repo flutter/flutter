@@ -155,16 +155,15 @@ class _TabLabelBarRenderer extends RenderFlex {
     CrossAxisAlignment crossAxisAlignment,
     TextBaseline textBaseline,
     @required this.onPerformLayout,
-  }) : super(
-    children: children,
-    direction: direction,
-    mainAxisSize: mainAxisSize,
-    mainAxisAlignment: mainAxisAlignment,
-    crossAxisAlignment: crossAxisAlignment,
-    textBaseline: textBaseline,
-  ) {
-    assert(onPerformLayout != null);
-  }
+  }) : assert(onPerformLayout != null),
+       super(
+         children: children,
+         direction: direction,
+         mainAxisSize: mainAxisSize,
+         mainAxisAlignment: mainAxisAlignment,
+         crossAxisAlignment: crossAxisAlignment,
+         textBaseline: textBaseline,
+       );
 
   ValueChanged<List<double>> onPerformLayout;
 
@@ -411,10 +410,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelStyle,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-  }) : super(key: key) {
-    assert(tabs != null && tabs.length > 1);
-    assert(isScrollable != null);
-  }
+  }) : assert(tabs != null && tabs.length > 1),
+       assert(isScrollable != null),
+       super(key: key);
 
   /// Typically a list of [Tab] widgets.
   final List<Widget> tabs;
@@ -741,9 +739,8 @@ class TabBarView extends StatefulWidget {
     Key key,
     @required this.children,
     this.controller,
-  }) : super(key: key) {
-    assert(children != null && children.length > 1);
-  }
+  }) : assert(children != null && children.length > 1),
+       super(key: key);
 
   /// This widget's selection and animation state.
   ///

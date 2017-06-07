@@ -275,9 +275,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
 
 class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
-  _RenderInkFeatures({ RenderBox child, @required this.vsync, this.color }) : super(child) {
-    assert(vsync != null);
-  }
+  _RenderInkFeatures({
+    RenderBox child,
+    @required this.vsync,
+    this.color,
+  }) : assert(vsync != null),
+       super(child);
 
   // This class should exist in a 1:1 relationship with a MaterialState object,
   // since there's no current support for dynamically changing the ticker
@@ -366,10 +369,9 @@ abstract class InkFeature {
     @required MaterialInkController controller,
     @required this.referenceBox,
     this.onRemoved
-  }) : _controller = controller {
-    assert(_controller != null);
-    assert(referenceBox != null);
-  }
+  }) : assert(controller != null),
+       assert(referenceBox != null),
+       _controller = controller;
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///

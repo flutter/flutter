@@ -20,7 +20,11 @@ import 'viewport_offset.dart';
 /// content, which can be controlled by a [ViewportOffset]. This interface lets
 /// the framework recognize such render objects and interact with them without
 /// having specific knowledge of all the various types of viewports.
-abstract class RenderAbstractViewport implements RenderObject {
+abstract class RenderAbstractViewport extends RenderObject {
+  // This class is intended to be used as an interface with the implements
+  // keyword, and should not be extended directly.
+  factory RenderAbstractViewport._() => null;
+
   /// Returns the [RenderAbstractViewport] that most tightly encloses the given
   /// render object.
   ///
@@ -76,11 +80,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   RenderViewportBase({
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
-  }) : _axisDirection = axisDirection,
-       _offset = offset {
-    assert(axisDirection != null);
-    assert(offset != null);
-  }
+  }) : assert(axisDirection != null),
+       assert(offset != null),
+       _axisDirection = axisDirection,
+       _offset = offset;
 
   /// The direction in which the [SliverConstraints.scrollOffset] increases.
   ///
@@ -635,11 +638,11 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     double anchor: 0.0,
     List<RenderSliver> children,
     RenderSliver center,
-  }) : _anchor = anchor,
+  }) : assert(anchor != null),
+       assert(anchor >= 0.0 && anchor <= 1.0),
+       _anchor = anchor,
        _center = center,
        super(axisDirection: axisDirection, offset: offset) {
-    assert(anchor != null);
-    assert(anchor >= 0.0 && anchor <= 1.0);
     addAll(children);
     if (center == null && firstChild != null)
       _center = firstChild;

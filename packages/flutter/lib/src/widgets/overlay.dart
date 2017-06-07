@@ -62,11 +62,11 @@ class OverlayEntry {
     @required this.builder,
     bool opaque: false,
     bool maintainState: false,
-  }) : _opaque = opaque, _maintainState = maintainState {
-    assert(builder != null);
-    assert(opaque != null);
-    assert(maintainState != null);
-  }
+  }) : assert(builder != null),
+       assert(opaque != null),
+       assert(maintainState != null),
+       _opaque = opaque,
+       _maintainState = maintainState;
 
   /// This entry will include the widget built by this builder in the overlay at
   /// the entry's position.
@@ -154,9 +154,9 @@ class OverlayEntry {
 }
 
 class _OverlayEntry extends StatefulWidget {
-  _OverlayEntry(this.entry) : super(key: entry._key) {
-    assert(entry != null);
-  }
+  _OverlayEntry(this.entry)
+    : assert(entry != null),
+      super(key: entry._key);
 
   final OverlayEntry entry;
 
@@ -388,10 +388,8 @@ class _Theatre extends RenderObjectWidget {
   _Theatre({
     this.onstage,
     @required this.offstage,
-  }) {
-    assert(offstage != null);
-    assert(!offstage.any((Widget child) => child == null));
-  }
+  }) : assert(offstage != null),
+       assert(!offstage.any((Widget child) => child == null));
 
   final Stack onstage;
 
@@ -405,9 +403,9 @@ class _Theatre extends RenderObjectWidget {
 }
 
 class _TheatreElement extends RenderObjectElement {
-  _TheatreElement(_Theatre widget) : super(widget) {
-    assert(!debugChildrenHaveDuplicateKeys(widget, widget.offstage));
-  }
+  _TheatreElement(_Theatre widget)
+    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.offstage)),
+      super(widget);
 
   @override
   _Theatre get widget => super.widget;

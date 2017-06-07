@@ -146,7 +146,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// The [constraints] are set to fit the font size plus ample headroom
 /// vertically, while expanding horizontally to fit the parent. The [padding] is
 /// used to make sure there is space between the contents and the text. The
-/// [color] makes the box teal. The [alignment] causes the [child] to be
+/// `color` makes the box teal. The [alignment] causes the [child] to be
 /// centered in the box. The [foregroundDecoration] overlays a nine-patch image
 /// onto the text. Finally, the [transform] applies a slight rotation to the
 /// entire contraption to complete the effect.
@@ -198,22 +198,21 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-  }) : decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+  }) : assert(margin == null || margin.isNonNegative),
+       assert(padding == null || padding.isNonNegative),
+       assert(decoration == null || decoration.debugAssertIsValid()),
+       assert(constraints == null || constraints.debugAssertIsValid()),
+       assert(color == null || decoration == null,
+         'Cannot provide both a color and a decoration\n'
+         'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
+       ),
+       decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key) {
-    assert(margin == null || margin.isNonNegative);
-    assert(padding == null || padding.isNonNegative);
-    assert(decoration == null || decoration.debugAssertIsValid());
-    assert(constraints == null || constraints.debugAssertIsValid());
-    assert(color == null || decoration == null,
-      'Cannot provide both a color and a decoration\n'
-      'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
-    );
-  }
+       super(key: key);
 
   /// The [child] contained by the container.
   ///

@@ -291,7 +291,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       if (result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-        _validationMessages.add('Java version: $javaVersion');
+        _validationMessages.add('Java version $javaVersion');
         _javaPath = javaPath;
       } else {
         _validationMessages.add('Unable to determine bundled Java version.');

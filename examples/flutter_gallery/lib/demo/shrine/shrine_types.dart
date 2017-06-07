@@ -66,11 +66,10 @@ class Product {
 }
 
 class Order {
-  Order({ @required this.product, this.quantity: 1, this.inCart: false }) {
-    assert(product != null);
-    assert(quantity != null && quantity >= 0);
-    assert(inCart != null);
-  }
+  Order({ @required this.product, this.quantity: 1, this.inCart: false })
+    : assert(product != null),
+      assert(quantity != null && quantity >= 0),
+      assert(inCart != null);
 
   final Product product;
   final int quantity;

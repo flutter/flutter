@@ -82,6 +82,15 @@ class FlutterVersion {
     return '$flutterText\n$frameworkText\n$engineText\n$toolsText';
   }
 
+  Map<String, Object> toJson() => <String, Object>{
+        'channel': channel,
+        'repositoryUrl': repositoryUrl ?? 'unknown source',
+        'frameworkRevision': frameworkRevision,
+        'frameworkCommitDate': frameworkCommitDate,
+        'engineRevision': engineRevision,
+        'dartSdkVersion': dartSdkVersion,
+      };
+
   /// A date String describing the last framework commit.
   String get frameworkCommitDate => _latestGitCommitDate();
 

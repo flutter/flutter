@@ -37,9 +37,9 @@ class _ContactCategory extends StatelessWidget {
 }
 
 class _ContactItem extends StatelessWidget {
-  _ContactItem({ Key key, this.icon, this.lines, this.tooltip, this.onPressed }) : super(key: key) {
-    assert(lines.length > 1);
-  }
+  _ContactItem({ Key key, this.icon, this.lines, this.tooltip, this.onPressed })
+    : assert(lines.length > 1),
+      super(key: key);
 
   final IconData icon;
   final List<String> lines;

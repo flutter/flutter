@@ -25,6 +25,11 @@ import 'sliver.dart';
 import 'ticker_provider.dart';
 
 /// Signature used by [NestedScrollView] for building its header.
+///
+/// The `innerBoxIsScrolled` argument is typically used to control the
+/// [SliverAppBar.forceElevated] property to ensure that the app bar shows a
+/// shadow, since it would otherwise not necessarily be aware that it had
+/// content ostensibly below it.
 typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
 
 // TODO(abarth): Make this configurable with a controller.
@@ -38,12 +43,11 @@ class NestedScrollView extends StatefulWidget {
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
-  }) : super(key: key) {
-    assert(scrollDirection != null);
-    assert(reverse != null);
-    assert(headerSliverBuilder != null);
-    assert(body != null);
-  }
+  }) : assert(scrollDirection != null),
+       assert(reverse != null),
+       assert(headerSliverBuilder != null),
+       assert(body != null),
+       super(key: key);
 
   // TODO(ianh): we should expose a controller so you can call animateTo, etc.
 
@@ -74,8 +78,18 @@ class NestedScrollView extends StatefulWidget {
   /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
+  /// A builder for any widgets that are to precede the inner scroll views (as
+  /// given by [body]).
+  ///
+  /// Typically this is used to create a [SliverAppBar] with a [TabBar].
   final NestedScrollViewHeaderSliversBuilder headerSliverBuilder;
 
+  /// The widget to show inside the [NestedScrollView].
+  ///
+  /// Typically this will be [TabBarView].
+  ///
+  /// The [body] is built in a context that provides a [PrimaryScrollController]
+  /// that interacts with the [NestedScrollView]'s scroll controller.
   final Widget body;
 
   List<Widget> _buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
@@ -782,10 +796,9 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
     this.metrics,
     Simulation simulation,
     TickerProvider vsync,
-  ) : super(position, simulation, vsync) {
-    assert(metrics.minRange != metrics.maxRange);
-    assert(metrics.maxRange > metrics.minRange);
-  }
+  ) : assert(metrics.minRange != metrics.maxRange),
+      assert(metrics.maxRange > metrics.minRange),
+      super(position, simulation, vsync);
 
   final _NestedScrollCoordinator coordinator;
   final _NestedScrollMetrics metrics;

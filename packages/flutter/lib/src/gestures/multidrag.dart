@@ -27,9 +27,8 @@ abstract class MultiDragPointerState {
   /// Creates per-pointer state for a [MultiDragGestureRecognizer].
   ///
   /// The [initialPosition] argument must not be null.
-  MultiDragPointerState(this.initialPosition) {
-    assert(initialPosition != null);
-  }
+  MultiDragPointerState(this.initialPosition)
+    : assert(initialPosition != null);
 
   /// The global coordinates of the pointer when the pointer contacted the screen.
   final Offset initialPosition;
@@ -396,8 +395,9 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(Offset initialPosition, Duration delay) : super(initialPosition) {
-    assert(delay != null);
+  _DelayedPointerState(Offset initialPosition, Duration delay)
+    : assert(delay != null),
+      super(initialPosition) {
     _timer = new Timer(delay, _delayPassed);
   }
 
@@ -481,9 +481,7 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
   /// can be changed for specific behaviors.
   DelayedMultiDragGestureRecognizer({
     this.delay: kLongPressTimeout
-  }) {
-    assert(delay != null);
-  }
+  }) : assert(delay != null);
 
   /// The amount of time the pointer must remain in the same place for the drag
   /// to be recognized.
