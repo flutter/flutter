@@ -252,6 +252,7 @@ void _paintMessage(Canvas canvas, SemanticsNode node) {
   canvas.clipRect(rect);
   final TextPainter textPainter = new TextPainter()
     ..text = new TextSpan(style: _messageStyle, text: message)
+    ..textAlign = TextAlign.center
     ..layout(maxWidth: rect.width);
 
   textPainter.paint(canvas, FractionalOffset.center.inscribe(textPainter.size, rect).topLeft);
