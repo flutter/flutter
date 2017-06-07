@@ -2103,6 +2103,7 @@ class RepositoryRoot extends RepositoryDirectory {
     return entry.name != 'testing' // only used by tests
         && entry.name != 'build' // only used by build
         && entry.name != 'buildtools' // only used by build
+        && entry.name != 'ios_tools' // only used by build
         && entry.name != 'tools' // not distributed in binary
         && entry.name != 'out' // output of build
         && super.shouldRecurse(entry);
