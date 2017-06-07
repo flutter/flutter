@@ -69,6 +69,33 @@ TEST(FontCollection, GetFamilyNames) {
       txt::FontCollection::GetFamilyNames(txt::GetFontDir());
 
   ASSERT_EQ(names.size(), 19ull);
+
+  ASSERT_EQ(names.count("Roboto"), 1ull);
+  ASSERT_EQ(names.count("Homemade Apple"), 1ull);
+
+  ASSERT_EQ(names.count("KoreanFont Test"), 1ull);
+  ASSERT_EQ(names.count("JapaneseFont Test"), 1ull);
+  ASSERT_EQ(names.count("EmojiFont Test"), 1ull);
+  ASSERT_EQ(names.count("ItalicFont Test"), 1ull);
+  ASSERT_EQ(names.count("VariationSelector Test"), 1ull);
+  ASSERT_EQ(names.count("ColorEmojiFont Test"), 1ull);
+  ASSERT_EQ(names.count("TraditionalChinese Test"), 1ull);
+  ASSERT_EQ(names.count("Sample Font"), 1ull);
+  ASSERT_EQ(names.count("MultiAxisFont Test"), 1ull);
+  ASSERT_EQ(names.count("TextEmojiFont Test"), 1ull);
+  ASSERT_EQ(names.count("No Cmap Format 14 Subtable Test"), 1ull);
+  ASSERT_EQ(names.count("ColorTextMixedEmojiFont Test"), 1ull);
+  ASSERT_EQ(names.count("BoldFont Test"), 1ull);
+  ASSERT_EQ(names.count("EmptyFont Test"), 1ull);
+  ASSERT_EQ(names.count("SimplifiedChinese Test"), 1ull);
+  ASSERT_EQ(names.count("BoldItalicFont Test"), 1ull);
+  ASSERT_EQ(names.count("RegularFont Test"), 1ull);
+
+  ASSERT_EQ(names.count("Not a real font!"), 0ull);
+  ASSERT_EQ(names.count(""), 0ull);
+  ASSERT_EQ(names.count("Helvetica"), 0ull);
+  ASSERT_EQ(names.count("TimesNewRoman"), 0ull);
+  ASSERT_EQ(names.count("Arial"), 0ull);
 }
 
 }  // namespace txt

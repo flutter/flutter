@@ -15,3 +15,31 @@
  */
 
 #include "lib/txt/src/text_style.h"
+#include "lib/txt/src/font_style.h"
+#include "lib/txt/src/font_weight.h"
+#include "third_party/skia/include/core/SkColor.h"
+
+namespace txt {
+
+bool TextStyle::equals(TextStyle& other) {
+  if (color != other.color)
+    return false;
+  if (font_weight != other.font_weight)
+    return false;
+  if (font_style != other.font_style)
+    return false;
+  if (fake_bold != other.fake_bold)
+    return false;
+  if (font_family != other.font_family)
+    return false;
+  if (letter_spacing != other.letter_spacing)
+    return false;
+  if (word_spacing != other.word_spacing)
+    return false;
+  if (height != other.height)
+    return false;
+
+  return true;
+}
+
+}  // namespace txt
