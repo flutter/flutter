@@ -80,10 +80,9 @@ class GalleryHome extends StatefulWidget {
     this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
     this.onSendFeedback,
-  }) : super(key: key) {
-    assert(onThemeChanged != null);
-    assert(onTimeDilationChanged != null);
-  }
+  }) : assert(onThemeChanged != null),
+       assert(onTimeDilationChanged != null),
+       super(key: key);
 
   final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;
