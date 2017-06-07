@@ -180,10 +180,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
-  CupertinoTabBar clone(
-    int withCurrentIndex,
-    ValueChanged<int> withOnTap,
-  ) {
+  CupertinoTabBar clone({
+    @required int withCurrentIndex,
+    @required ValueChanged<int> withOnTap,
+  }) {
     assert(withCurrentIndex != null);
     assert(withOnTap != null);
     return new CupertinoTabBar(
