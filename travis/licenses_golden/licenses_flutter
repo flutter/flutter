@@ -1528,7 +1528,6 @@ FILE: ../../../flutter/flow/layers/picture_layer.cc
 FILE: ../../../flutter/flow/layers/picture_layer.h
 FILE: ../../../flutter/flow/layers/transform_layer.cc
 FILE: ../../../flutter/flow/layers/transform_layer.h
-FILE: ../../../flutter/lib/snapshot/snapshot.c.tmpl
 FILE: ../../../flutter/lib/snapshot/snapshot.dart
 FILE: ../../../flutter/lib/snapshot/snapshot.h
 FILE: ../../../flutter/lib/snapshot/snapshot_fuchsia.dart

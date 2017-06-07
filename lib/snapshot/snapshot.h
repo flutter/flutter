@@ -7,8 +7,8 @@
 #include <stdint.h>
 
 extern "C" {
-extern const uint8_t* kDartVmSnapshotData;
-extern const uint8_t* kDartVmSnapshotInstructions;
-extern const uint8_t* kDartIsolateCoreSnapshotData;
-extern const uint8_t* kDartIsolateCoreSnapshotInstructions;
+extern const uint8_t kDartVmSnapshotData[];
+extern const uint8_t kDartVmSnapshotInstructions[];
+extern const uint8_t kDartIsolateCoreSnapshotData[];
+extern const uint8_t kDartIsolateCoreSnapshotInstructions[];
 }
