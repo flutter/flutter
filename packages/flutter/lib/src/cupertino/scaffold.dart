@@ -58,7 +58,7 @@ class CupertinoScaffold extends StatefulWidget {
   ///
   /// When provided, [CupertinoTabBar.currentIndex] will be ignored and and will
   /// be managed by the [CupertinoScaffold] to show the currently selected page
-  /// as the active index. [CupertinoTabBar.onTap] will still be called but
+  /// as the active item index. [CupertinoTabBar.onTap] will still be called but
   /// chained after an automatic handler from [CupertinoScaffold] to change
   /// the current tab in the main content area.
   ///

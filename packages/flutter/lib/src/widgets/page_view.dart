@@ -76,6 +76,8 @@ class PageController extends ScrollController {
 
   /// The current page displayed in the controlled [PageView].
   double get page {
+    // If no [PageView]s are connected to this controller yet, return its
+    // initial value.
     if (positions.isEmpty)
       return initialPage.toDouble();
 

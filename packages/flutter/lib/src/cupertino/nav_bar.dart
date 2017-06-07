@@ -69,6 +69,7 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   /// The [title] remains black if it's a text as per iOS standard design.
   final Color actionsForegroundColor;
 
+  /// True if the nav bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
   @override

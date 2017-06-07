@@ -81,6 +81,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// should configure itself to match the icon theme's size and color.
   final double iconSize;
 
+  /// True if the tab bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
   @override
@@ -180,6 +181,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  /// Clone the current [CupertinoTabBar] with the [currentIndex] overridden
+  /// by `withCurrentIndex` and the [onTap] chained after `withOnTap` if present.
   CupertinoTabBar clone({
     @required int withCurrentIndex,
     @required ValueChanged<int> withOnTap,
