@@ -423,8 +423,7 @@ config("compiler") {
     defines += [ "HAVE_SYS_UIO_H" ]
 
     # Use gold for Android for most CPU architectures.
-    if (current_cpu == "x86" || current_cpu == "x64" || current_cpu == "arm" ||
-        current_cpu == "arm64") {
+    if (current_cpu == "x86" || current_cpu == "x64" || current_cpu == "arm" || current_cpu == "arm64") {
       ldflags += [ "-fuse-ld=gold" ]
       if (is_clang) {
         # Let clang find the ld.gold in the NDK.
@@ -435,7 +434,7 @@ config("compiler") {
 
     ldflags += [
       "-Wl,--no-undefined",
-      "-Wl,--exclude-libs,ALL",
+      "-Wl,--exclude-libs,ALL"
     ]
     if (current_cpu == "arm") {
       ldflags += [
@@ -574,16 +573,15 @@ config("runtime_library") {
   # also require C++14.
   # Tracked in https://fuchsia.atlassian.net/browse/TO-61
   if (is_linux && current_cpu != "x86") {
-    cflags_cc += [ "-stdlib=libc++" ]
+    cflags_cc += [
+      "-stdlib=libc++"
+    ]
     ldflags += [
       "-stdlib=libc++",
       "-static-libstdc++",
-
       # Remove one the toolchain distribution is fixed
       # https://github.com/flutter/flutter/issues/6145
-      "-Wl,-Bstatic",
-      "-lc++abi",
-      "-Wl,-Bdynamic",
+      "-Wl,-Bstatic", "-lc++abi", "-Wl,-Bdynamic",
       "-fuse-ld=lld",
     ]
   }
@@ -604,7 +602,6 @@ if (is_win) {
   default_warning_flags += [
     # Permanent.
     "/wd4091",  # typedef warning from dbghelp.h
-
     # Investigate.
     "/wd4312",  # int to pointer of greater size conversion.
     "/wd4838",  # Narrowing conversion required.
@@ -798,6 +795,25 @@ config("no_chromium_code") {
   }
   cflags += default_warning_flags
   cflags_cc += default_warning_flags_cc
+}
+
+# rtti ------------------------------------------------------------------------
+#
+# Allows turning Run-Time Type Identification on or off.
+
+config("rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR" ]
+  }
+}
+config("no_rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR-" ]
+  } else {
+    rtti_flags = [ "-fno-rtti" ]
+    cflags_cc = rtti_flags
+    cflags_objcc = rtti_flags
+  }
 }
 
 # Warnings ---------------------------------------------------------------------
