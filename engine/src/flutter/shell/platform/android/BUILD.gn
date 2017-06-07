@@ -78,6 +78,8 @@ java_library("flutter_shell_java") {
 
   java_files = [
     "io/flutter/app/FlutterActivity.java",
+    "io/flutter/app/FlutterActivityDelegate.java",
+    "io/flutter/app/FlutterActivityEvents.java",
     "io/flutter/app/FlutterApplication.java",
     "io/flutter/plugin/common/ActivityLifecycleListener.java",
     "io/flutter/plugin/common/BasicMessageChannel.java",
@@ -100,6 +102,7 @@ java_library("flutter_shell_java") {
     "io/flutter/plugin/editing/TextInputPlugin.java",
     "io/flutter/plugin/platform/PlatformPlugin.java",
     "io/flutter/util/PathUtils.java",
+    "io/flutter/util/Preconditions.java",
     "io/flutter/view/AccessibilityBridge.java",
     "io/flutter/view/FlutterMain.java",
     "io/flutter/view/FlutterView.java",
