@@ -31,8 +31,8 @@ const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 /// default), it will produce a blurring effect to the content behind it.
 //
 // TODO(xster): document using with a CupertinoScaffold.
-class CupertinoTabBar extends StatelessWidget {
   /// Creates a tab bar in the iOS style.
+class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   CupertinoTabBar({
     Key key,
     @required this.items,
@@ -81,10 +81,13 @@ class CupertinoTabBar extends StatelessWidget {
   /// should configure itself to match the icon theme's size and color.
   final double iconSize;
 
+  bool get opaque => backgroundColor.alpha == 0xFF;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(_kTabBarHeight);
+
   @override
   Widget build(BuildContext context) {
-    final bool addBlur = backgroundColor.alpha != 0xFF;
-
     Widget result = new DecoratedBox(
       decoration: new BoxDecoration(
         border: const Border(
@@ -120,7 +123,7 @@ class CupertinoTabBar extends StatelessWidget {
       ),
     );
 
-    if (addBlur) {
+    if (!opaque) {
       // For non-opaque backgrounds, apply a blur effect.
       result = new ClipRect(
         child: new BackdropFilter(
@@ -141,6 +144,7 @@ class CupertinoTabBar extends StatelessWidget {
         _wrapActiveItem(
           new Expanded(
             child: new GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: onTap == null ? null : () { onTap(index); },
               child: new Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
@@ -173,6 +177,30 @@ class CupertinoTabBar extends StatelessWidget {
         style: new TextStyle(color: activeColor),
         child: item,
       ),
+    );
+  }
+
+  CupertinoTabBar clone(
+    int withCurrentIndex,
+    ValueChanged<int> withOnTap,
+  ) {
+    assert(withCurrentIndex != null);
+    assert(withOnTap != null);
+    return new CupertinoTabBar(
+       key: key,
+       items: items,
+       backgroundColor: backgroundColor,
+       activeColor: activeColor,
+       inactiveColor: inactiveColor,
+       iconSize: iconSize,
+       // Directly override the index.
+       currentIndex: withCurrentIndex,
+       // Concatenate the 2 callback functions.
+       onTap: (int newIndex) {
+         withOnTap(newIndex);
+         if (onTap != null)
+           onTap(newIndex);
+       }
     );
   }
 }

@@ -14,6 +14,7 @@ export 'src/cupertino/colors.dart';
 export 'src/cupertino/dialog.dart';
 export 'src/cupertino/nav_bar.dart';
 export 'src/cupertino/page.dart';
+export 'src/cupertino/scaffold.dart';
 export 'src/cupertino/slider.dart';
 export 'src/cupertino/switch.dart';
 export 'src/cupertino/thumb_painter.dart';

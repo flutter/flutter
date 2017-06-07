@@ -1914,12 +1914,13 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// placed relative to the stack according to their top, right, bottom, and left
 /// properties.
 ///
-/// The stack paints its children in order. If you want to change the order in
-/// which the children paint, you can rebuild the stack with the children in
-/// the new order. If you reorder the children in this way, consider giving the
-/// children non-null keys. These keys will cause the framework to move the
-/// underlying objects for the children to their new locations rather than
-/// recreate them at their new location.
+/// The stack paints its children in order with the first child being at the
+/// bottom. If you want to change the order in which the children paint, you
+/// can rebuild the stack with the children in the new order. If you reorder
+/// the children in this way, consider giving the children non-null keys.
+/// These keys will cause the framework to move the underlying objects for
+/// the children to their new locations rather than recreate them at their
+/// new location.
 ///
 /// For more details about the stack layout algorithm, see [RenderStack].
 ///
