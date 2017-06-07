@@ -42,7 +42,7 @@ final List<Palette> allPalettes = <Palette>[
 
 
 class ColorItem extends StatelessWidget {
-  ColorItem({
+  const ColorItem({
     Key key,
     @required this.index,
     @required this.color,

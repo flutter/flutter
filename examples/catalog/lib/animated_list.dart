@@ -152,7 +152,7 @@ class ListModel<E> {
 /// This widget's height is based on the animation parameter, it varies
 /// from 0 to 128 as the animation varies from 0.0 to 1.0.
 class CardItem extends StatelessWidget {
-  CardItem({
+  const CardItem({
     Key key,
     @required this.animation,
     this.onTap,

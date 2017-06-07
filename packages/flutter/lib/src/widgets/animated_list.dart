@@ -46,7 +46,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// This widget is similar to one created by [ListView.builder].
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted or removed.
-  AnimatedList({
+  const AnimatedList({
     Key key,
     @required this.itemBuilder,
     this.initialItemCount: 0,

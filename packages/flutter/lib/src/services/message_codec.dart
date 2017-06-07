@@ -35,7 +35,7 @@ abstract class MessageCodec<T> {
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].
-  MethodCall(this.method, [this.arguments])
+  const MethodCall(this.method, [this.arguments])
     : assert(method != null);
 
   /// The name of the method to be called.

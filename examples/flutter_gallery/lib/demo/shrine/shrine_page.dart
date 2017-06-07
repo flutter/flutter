@@ -15,7 +15,7 @@ enum ShrineAction {
 }
 
 class ShrinePage extends StatefulWidget {
-  ShrinePage({
+  const ShrinePage({
     Key key,
     @required this.scaffoldKey,
     @required this.body,
