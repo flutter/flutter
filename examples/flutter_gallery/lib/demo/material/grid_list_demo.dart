@@ -143,10 +143,11 @@ class GridDemoPhotoItem extends StatelessWidget {
     @required this.photo,
     @required this.tileStyle,
     @required this.onBannerTap
-  }) : assert(photo != null && photo.isValid),
-       assert(tileStyle != null),
-       assert(onBannerTap != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(photo != null && photo.isValid);
+    assert(tileStyle != null);
+    assert(onBannerTap != null);
+  }
 
   final Photo photo;
   final GridDemoTileStyle tileStyle;
