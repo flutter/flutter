@@ -17,7 +17,7 @@ class MySliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => 150.0;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => new Placeholder(color: Colors.teal);
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => const Placeholder(color: Colors.teal);
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
