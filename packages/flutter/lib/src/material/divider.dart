@@ -39,6 +39,9 @@ class Divider extends StatelessWidget {
   ///
   /// The divider itself is always drawn as one device pixel thick horizontal
   /// line that is centered within the height specified by this value.
+  ///
+  /// Divider of 0.0 height is drawn as one device pixel line without any
+  /// padding around it.
   final double height;
 
   /// The amount of empty space to the left of the divider.
