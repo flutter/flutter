@@ -14,14 +14,15 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../globals.dart';
 
-/// When there are no development certificates at all. The user likely never
-/// did any iOS development.
+/// User message when no development certificates are found in the keychain.
+///
+/// The user likely never did any iOS development.
 const String noCertificatesInstruction = '''
 ═══════════════════════════════════════════════════════════════════════════════════
 No valid code signing certificates were found
 You can connect to your Apple Developer account by signing in with your Apple ID in Xcode
 and create an iOS Development Certificate as well as a Provisioning Profile for your project by:
-$setDevelopmentTeamInstruction
+$fixWithDevelopmentTeamInstruction
   5- Trust your newly created Development Certificate on your iOS device
      via Settings > General > Device Management > [your new certificate] > Trust
 
@@ -30,35 +31,37 @@ For more information, please visit:
 
 Or run on an iOS simulator without code signing
 ═══════════════════════════════════════════════════════════════════════════════════''';
-/// When there are no provisioning profile for the current app bundle identifier.
-/// The user did iOS development but never on this project.
+/// User message when there are no provisioning profile for the current app bundle identifier.
+///
+/// The user did iOS development but never on this project and/or device.
 const String noProvisioningProfileInstruction = '''
 ═══════════════════════════════════════════════════════════════════════════════════
 No Provisioning Profile was found for your project's Bundle Identifier or your device.
 You can create a new Provisioning Profile for your project in Xcode for your
 team by:
-$setDevelopmentTeamInstruction
+$fixWithDevelopmentTeamInstruction
 
 For more information, please visit:
   https://flutter.io/setup/#deploy-to-ios-devices
 
 Or run on an iOS simulator without code signing
 ═══════════════════════════════════════════════════════════════════════════════════''';
-/// Fallback error message for signing issues that's likely solved by retracing the
-/// signing flow in Xcode.
+/// Fallback error message for signing issues.
+///
+/// Couldn't auto sign the app but can likely solved by retracing the signing flow in Xcode.
 const String noDevelopmentTeamInstruction = '''
 ═══════════════════════════════════════════════════════════════════════════════════
 Building a deployable iOS app requires a selected Development Team with a Provisioning Profile
 Please ensure that a Development Team is selected by:
-$setDevelopmentTeamInstruction
+$fixWithDevelopmentTeamInstruction
 
 For more information, please visit:
   https://flutter.io/setup/#deploy-to-ios-devices
 
 Or run on an iOS simulator without code signing
 ═══════════════════════════════════════════════════════════════════════════════════''';
-const String setDevelopmentTeamInstruction = '''
-  1- Opening the Flutter project's Xcode target with
+const String fixWithDevelopmentTeamInstruction = '''
+  1- Open the Flutter project's Xcode target with
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
