@@ -40,7 +40,8 @@ REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
 REM To debug the tool, you can uncomment the following line to enable checked mode and set an observatory port:
-REM SET FLUTTER_TOOL_ARGS="--observe=65432 --checked"
+REM SET FLUTTER_TOOL_DEBUG_ARGS="--observe=65432 --checked"
+SET FLUTTER_TOOL_ARGS="--assert_initializer" %FLUTTER_TOOL_DEBUG_ARGS%
 
 :acquire_lock
 2>NUL (

@@ -18,9 +18,9 @@ class ProtocolDiscovery {
     this.portForwarder,
     this.hostPort,
     this.defaultHostPort,
-  }) : _prefix = '$serviceName listening on ' {
-    assert(logReader != null);
-    assert(portForwarder == null || defaultHostPort != null);
+  }) : assert(logReader != null),
+       assert(portForwarder == null || defaultHostPort != null),
+       _prefix = '$serviceName listening on ' {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
     _timer = new Timer(const Duration(seconds: 60), () {
       _stopScrapingLogs();
