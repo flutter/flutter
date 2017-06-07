@@ -75,8 +75,12 @@ template("flutter_app") {
       get_label_info(flutter_core_snapshot_label, "target_gen_dir")
   flutter_core_snapshot_vm_data =
       "$flutter_core_snapshot_gen_dir/vm_isolate_snapshot.bin"
+  flutter_core_snapshot_vm_instructions =
+      "$flutter_core_snapshot_gen_dir/vm_snapshot_instructions.bin"
   flutter_core_snapshot_isolate_data =
       "$flutter_core_snapshot_gen_dir/isolate_snapshot.bin"
+  flutter_core_snapshot_isolate_instructions =
+      "$flutter_core_snapshot_gen_dir/isolate_snapshot_instructions.bin"
 
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
   bundle_path = "$target_gen_dir/$bundle_name"
@@ -93,6 +97,10 @@ template("flutter_app") {
 
     inputs = [
       main_dart,
+      flutter_core_snapshot_vm_data,
+      flutter_core_snapshot_vm_instructions,
+      flutter_core_snapshot_isolate_data,
+      flutter_core_snapshot_isolate_instructions,
     ]
 
     outputs = [
@@ -110,8 +118,12 @@ template("flutter_app") {
       rebase_path(gen_snapshot),
       "--vm-snapshot-data",
       rebase_path(flutter_core_snapshot_vm_data),
+      "--vm-snapshot-instructions",
+      rebase_path(flutter_core_snapshot_vm_instructions),
       "--isolate-snapshot-data",
       rebase_path(flutter_core_snapshot_isolate_data),
+      "--isolate-snapshot-instructions",
+      rebase_path(flutter_core_snapshot_isolate_instructions),
       "--main-dart",
       rebase_path(main_dart),
       "--packages",

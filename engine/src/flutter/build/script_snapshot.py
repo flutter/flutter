@@ -16,7 +16,11 @@ def main():
                       help='The Flutter snapshotter')
   parser.add_argument('--vm-snapshot-data', type=str, required=True,
                       help='Path to vm_isolate_snapshot.bin')
+  parser.add_argument('--vm-snapshot-instructions', type=str, required=True,
+                      help='Path to vm_isolate_snapshot.bin')
   parser.add_argument('--isolate-snapshot-data', type=str, required=True,
+                      help='Path to isolate_snapshot.bin')
+  parser.add_argument('--isolate-snapshot-instructions', type=str, required=True,
                       help='Path to isolate_snapshot.bin')
   parser.add_argument('--main-dart', type=str, required=True,
                       help='The main.dart file to use')
@@ -35,11 +39,13 @@ def main():
     args.snapshotter_path,
     '--snapshot_kind=script',
     '--vm_snapshot_data=%s' % args.vm_snapshot_data,
+    '--vm_snapshot_instructions=%s' % args.vm_snapshot_instructions,
     '--isolate_snapshot_data=%s' % args.isolate_snapshot_data,
+    '--isolate_snapshot_instructions=%s' % args.isolate_snapshot_instructions,
     '--packages=%s' % args.packages,
     '--script_snapshot=%s' % args.snapshot,
     '--dependencies=%s' % args.depfile,
-    args.main_dart,
+    args.main_dart
   ]
 
   result = subprocess.call(cmd, cwd=args.root_build_dir)
