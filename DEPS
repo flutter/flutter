@@ -38,6 +38,9 @@ vars = {
   # Dart calls the next one "root_certificates_rev"
   'dart_root_certificates_revision': 'a4c7c6f23a664a37bc1b6f15a819e3f2a292791a',
 
+  # Build bot tooling for iOS
+  'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
+
   'buildtools_revision': 'c8db819853bcf8ce1635a8b7a395820f39b5a9fc',
 }
 
@@ -81,6 +84,9 @@ deps = {
 
   'src/buildtools':
    Var('fuchsia_git') + '/buildtools' + '@' +  Var('buildtools_revision'),
+
+   'src/ios_tools':
+   Var('chromium_git') + '/chromium/src/ios.git' + '@' + Var('ios_tools_revision'),
 
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'c3f79166089e5360c09e3053fce50e6e296c3204',
