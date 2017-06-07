@@ -76,6 +76,8 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         });
       }
     });
+    // addPostFrameCallback does *not* schedule a frame.
+    SchedulerBinding.instance.scheduleFrame();
   }
 
   Offset _lastPointerDownLocation;
