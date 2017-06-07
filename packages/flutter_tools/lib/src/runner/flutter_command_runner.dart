@@ -60,9 +60,8 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
-    argParser.addFlag('version-json',
+    argParser.addFlag('--json',
         negatable: false,
-        help: 'Reports the version of this tool is JSON format.',
         hide: true);
     argParser.addFlag('color',
         negatable: true,
@@ -260,14 +259,19 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
-      printStatus(FlutterVersion.instance.toString());
+      String status;
+      if (globalResults['json']) {
+        status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
+      } else {
+        status = FlutterVersion.instance.toString();
+      }
+      printStatus(status);
       return;
     }
 
     if (globalResults['version-json']) {
-      flutterUsage.sendCommand('version-json');
-      printStatus(const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson()));
-      return;
+      printError('The --json flag is only valid with the --version flag.');
+      throw new ProcessExit(2);
     }
 
     await super.runCommand(globalResults);

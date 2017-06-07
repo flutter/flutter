@@ -88,7 +88,7 @@ class FlutterVersion {
         'frameworkRevision': frameworkRevision,
         'frameworkCommitDate': frameworkCommitDate,
         'engineRevision': engineRevision,
-        'dartSdkVersion': dartSdkVersion
+        'dartSdkVersion': dartSdkVersion,
       };
 
   /// A date String describing the last framework commit.
