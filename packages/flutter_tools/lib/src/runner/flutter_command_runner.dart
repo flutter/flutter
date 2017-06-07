@@ -60,7 +60,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
-    argParser.addFlag('--json',
+    argParser.addFlag('json',
         negatable: false,
         hide: true);
     argParser.addFlag('color',
@@ -269,7 +269,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       return;
     }
 
-    if (globalResults['version-json']) {
+    if (globalResults['json']) {
       printError('The --json flag is only valid with the --version flag.');
       throw new ProcessExit(2);
     }
