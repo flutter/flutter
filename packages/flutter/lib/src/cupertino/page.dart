@@ -46,95 +46,128 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
   ),
 );
 
-/// A custom [Decoration] used to paint an extra shadow on the left edge of the
-/// box it's decorating. It's like a [BoxDecoration] with only a gradient except
-/// it paints to the left of the box instead of behind the box.
-class _CupertinoEdgeShadowDecoration extends Decoration {
-  const _CupertinoEdgeShadowDecoration({ this.edgeGradient });
+class CupertinoPageRoute<T> extends PageRoute<T> {
+  /// Creates a page route for use in an iOS designed app.
+  CupertinoPageRoute({
+    @required this.builder,
+    RouteSettings settings: const RouteSettings(),
+    this.maintainState: true,
+    bool fullscreenDialog: false,
+  }) : assert(builder != null),
+       assert(opaque),
+       super(settings: settings, fullscreenDialog: fullscreenDialog);
 
-  /// A Decoration with no decorating properties.
-  static const _CupertinoEdgeShadowDecoration none =
-      const _CupertinoEdgeShadowDecoration();
+  /// Builds the primary contents of the route.
+  final WidgetBuilder builder;
 
-  /// A gradient to draw to the left of the box being decorated.
-  /// FractionalOffsets are relative to the original box translated one box
-  /// width to the left.
-  final LinearGradient edgeGradient;
+  @override
+  final bool maintainState;
 
-  /// Linearly interpolate between two edge shadow decorations decorations.
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  Color get barrierColor => null;
+
+  @override
+  bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) {
+    return nextRoute is CupertinoPageRoute<dynamic>;
+  }
+
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    // Don't perform outgoing animation if the next route is a fullscreen dialog.
+    return nextRoute is CupertinoPageRoute && !nextRoute.fullscreenDialog;
+  }
+
+  @override
+  void dispose() {
+    _backGestureController?.dispose();
+    super.dispose();
+  }
+
+  CupertinoBackGestureController _backGestureController;
+
+  /// Support for dismissing this route with a horizontal swipe is enabled
+  /// for [TargetPlatform.iOS]. If attempts to dismiss this route might be
+  /// vetoed because a [WillPopCallback] was defined for the route then the
+  /// platform-specific back gesture is disabled.
   ///
-  /// See also [Decoration.lerp].
-  static _CupertinoEdgeShadowDecoration lerp(
-    _CupertinoEdgeShadowDecoration a,
-    _CupertinoEdgeShadowDecoration b,
-    double t
-  ) {
-    if (a == null && b == null)
+  /// See also:
+  ///
+  ///  * [hasScopedWillPopCallback], which is true if a `willPop` callback
+  ///    is defined for this route.
+  @override
+  NavigationGestureController startPopGesture() {
+    // If attempts to dismiss this route might be vetoed, then do not
+    // allow the user to dismiss the route with a swipe.
+    if (hasScopedWillPopCallback)
       return null;
-    return new _CupertinoEdgeShadowDecoration(
-      edgeGradient: LinearGradient.lerp(a?.edgeGradient, b?.edgeGradient, t),
+    // Fullscreen dialogs aren't dismissable by back swipe.
+    if (fullscreenDialog)
+      return null;
+    if (controller.status != AnimationStatus.completed)
+      return null;
+    assert(_backGestureController == null);
+    _backGestureController = new CupertinoBackGestureController(
+      navigator: navigator,
+      controller: controller,
     );
+
+    controller.addStatusListener(_handleBackGestureEnded);
+    return _backGestureController;
+  }
+
+  void _handleBackGestureEnded(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _backGestureController?.dispose();
+      _backGestureController = null;
+      controller.removeStatusListener(_handleBackGestureEnded);
+    }
   }
 
   @override
-  _CupertinoEdgeShadowDecoration lerpFrom(Decoration a, double t) {
-    if (a is! _CupertinoEdgeShadowDecoration)
-      return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
-    return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
-  }
-
-  @override
-  _CupertinoEdgeShadowDecoration lerpTo(Decoration b, double t) {
-    if (b is! _CupertinoEdgeShadowDecoration)
-      return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
-    return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
-  }
-
-  @override
-  _CupertinoEdgeShadowPainter createBoxPainter([VoidCallback onChanged]) {
-    return new _CupertinoEdgeShadowPainter(this, onChanged);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    final Widget result = builder(context);
+    assert(() {
+      if (result == null) {
+        throw new FlutterError(
+          'The builder for route "${settings.name}" returned null.\n'
+          'Route builders must never return null.'
+        );
+      }
       return true;
-    if (other.runtimeType != _CupertinoEdgeShadowDecoration)
-      return false;
-    final _CupertinoEdgeShadowDecoration typedOther = other;
-    return edgeGradient == typedOther.edgeGradient;
+    });
+    return result;
   }
 
   @override
-  int get hashCode {
-    return edgeGradient.hashCode;
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      if (fullscreenDialog)
+        return new CupertinoFullscreenDialogTransition(
+          animation: animation,
+          child: child,
+        );
+      else
+        return new CupertinoPageTransition(
+          primaryRouteAnimation: animation,
+          secondaryRouteAnimation: secondaryAnimation,
+          child: child,
+          // In the middle of a back gesture drag, let the transition be linear to match finger
+          // motions.
+          linearTransition: _backGestureController != null,
+        );
+    } else {
+      return new _MountainViewPageTransition(
+        routeAnimation: animation,
+        child: child
+      );
+    }
   }
-}
-
-/// A [BoxPainter] used to draw the page transition shadow using gradients.
-class _CupertinoEdgeShadowPainter extends BoxPainter {
-  _CupertinoEdgeShadowPainter(
-    this._decoration,
-    VoidCallback onChange
-  ) : assert(_decoration != null),
-      super(onChange);
-
-  final _CupertinoEdgeShadowDecoration _decoration;
 
   @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
-    final LinearGradient gradient = _decoration.edgeGradient;
-    if (gradient == null)
-      return;
-    // The drawable space for the gradient is a rect with the same size as
-    // its parent box one box width to the left of the box.
-    final Rect rect =
-        (offset & configuration.size).translate(-configuration.size.width, 0.0);
-    final Paint paint = new Paint()
-      ..shader = gradient.createShader(rect);
-
-    canvas.drawRect(rect, paint);
-  }
+  String get debugLabel => '${super.debugLabel}(${settings.name})';
 }
 
 /// Provides an iOS-style page transition animation.
@@ -301,5 +334,96 @@ class CupertinoBackGestureController extends NavigationGestureController {
   void _handleStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.dismissed)
       navigator.pop();
+  }
+}
+
+/// A custom [Decoration] used to paint an extra shadow on the left edge of the
+/// box it's decorating. It's like a [BoxDecoration] with only a gradient except
+/// it paints to the left of the box instead of behind the box.
+class _CupertinoEdgeShadowDecoration extends Decoration {
+  const _CupertinoEdgeShadowDecoration({ this.edgeGradient });
+
+  /// A Decoration with no decorating properties.
+  static const _CupertinoEdgeShadowDecoration none =
+      const _CupertinoEdgeShadowDecoration();
+
+  /// A gradient to draw to the left of the box being decorated.
+  /// FractionalOffsets are relative to the original box translated one box
+  /// width to the left.
+  final LinearGradient edgeGradient;
+
+  /// Linearly interpolate between two edge shadow decorations decorations.
+  ///
+  /// See also [Decoration.lerp].
+  static _CupertinoEdgeShadowDecoration lerp(
+    _CupertinoEdgeShadowDecoration a,
+    _CupertinoEdgeShadowDecoration b,
+    double t
+  ) {
+    if (a == null && b == null)
+      return null;
+    return new _CupertinoEdgeShadowDecoration(
+      edgeGradient: LinearGradient.lerp(a?.edgeGradient, b?.edgeGradient, t),
+    );
+  }
+
+  @override
+  _CupertinoEdgeShadowDecoration lerpFrom(Decoration a, double t) {
+    if (a is! _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
+    return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
+  }
+
+  @override
+  _CupertinoEdgeShadowDecoration lerpTo(Decoration b, double t) {
+    if (b is! _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
+    return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
+  }
+
+  @override
+  _CupertinoEdgeShadowPainter createBoxPainter([VoidCallback onChanged]) {
+    return new _CupertinoEdgeShadowPainter(this, onChanged);
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != _CupertinoEdgeShadowDecoration)
+      return false;
+    final _CupertinoEdgeShadowDecoration typedOther = other;
+    return edgeGradient == typedOther.edgeGradient;
+  }
+
+  @override
+  int get hashCode {
+    return edgeGradient.hashCode;
+  }
+}
+
+/// A [BoxPainter] used to draw the page transition shadow using gradients.
+class _CupertinoEdgeShadowPainter extends BoxPainter {
+  _CupertinoEdgeShadowPainter(
+    this._decoration,
+    VoidCallback onChange
+  ) : assert(_decoration != null),
+      super(onChange);
+
+  final _CupertinoEdgeShadowDecoration _decoration;
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final LinearGradient gradient = _decoration.edgeGradient;
+    if (gradient == null)
+      return;
+    // The drawable space for the gradient is a rect with the same size as
+    // its parent box one box width to the left of the box.
+    final Rect rect =
+        (offset & configuration.size).translate(-configuration.size.width, 0.0);
+    final Paint paint = new Paint()
+      ..shader = gradient.createShader(rect);
+
+    canvas.drawRect(rect, paint);
   }
 }
