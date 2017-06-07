@@ -3028,7 +3028,11 @@ class Flow extends MultiChildRenderObjectWidget {
 class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [softWrap], and [overflow] arguments must not be null.
+  /// The [text], [softWrap], [overflow], nad [textScaleFactor] arguments must
+  /// not be null.
+  ///
+  /// The [maxLines] property may be null (and indeed defaults to null), but if
+  /// it is not null, it must be greater than zero.
   const RichText({
     Key key,
     @required this.text,
@@ -3041,6 +3045,7 @@ class RichText extends LeafRenderObjectWidget {
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
+       assert(maxLines == null || maxLines > 0),
        super(key: key);
 
   /// The text to display in this widget.
@@ -3066,6 +3071,9 @@ class RichText extends LeafRenderObjectWidget {
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
+  ///
+  /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
+  /// edge of the box.
   final int maxLines;
 
   @override

@@ -62,6 +62,12 @@ class TextField extends StatefulWidget {
   /// To remove the decoration entirely (including the extra padding introduced
   /// by the decoration to save space for the labels), set the [decoration] to
   /// null.
+  ///
+  /// The [maxLines] property can be set to null to remove the restriction on
+  /// the number of lines. By default, it is 1, meaning this is a single-line
+  /// text field. If it is not null, it must be greater than zero.
+  ///
+  /// The [keyboardType], [autofocus], and [obscureText] arguments must not be null.
   const TextField({
     Key key,
     this.controller,
@@ -76,7 +82,11 @@ class TextField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
-  }) : super(key: key);
+  }) : assert(keyboardType != null),
+       assert(autofocus != null),
+       assert(obscureText != null),
+       assert(maxLines == null || maxLines > 0),
+       super(key: key);
 
   /// Controls the text being edited.
   ///
@@ -98,6 +108,8 @@ class TextField extends StatefulWidget {
   final InputDecoration decoration;
 
   /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text]. Cannot be null.
   final TextInputType keyboardType;
 
   /// The style to use for the text being edited.
@@ -116,7 +128,7 @@ class TextField extends StatefulWidget {
   /// If true, the keyboard will open as soon as this text field obtains focus.
   /// Otherwise, the keyboard is only shown after the user taps the text field.
   ///
-  /// Defaults to false.
+  /// Defaults to false. Cannot be null.
   // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
   // keyboard behavior.
   final bool autofocus;
@@ -126,13 +138,16 @@ class TextField extends StatefulWidget {
   /// When this is set to true, all the characters in the text field are
   /// replaced by U+2022 BULLET characters (•).
   ///
-  /// Defaults to false.
+  /// Defaults to false. Cannot be null.
   final bool obscureText;
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
+  ///
+  /// If this is null, there is no limit to the number of lines. If it is not
+  /// null, the value must be greater than zero.
   final int maxLines;
 
   /// Called when the text being edited changes.
