@@ -14,7 +14,7 @@ declare_args() {
   use_ios_simulator = true
 
   # Version of iOS that we're targeting.
-  ios_deployment_target = "6.0"
+  ios_deployment_target = "8.0"
 
   # The iOS Code signing identity to use
   ios_code_signing_identity = ""
