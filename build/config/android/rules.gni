@@ -1059,6 +1059,9 @@ template("java_prebuilt") {
     if (defined(invoker.proguard_preprocess)) {
       proguard_preprocess = invoker.proguard_preprocess
     }
+    if (defined(invoker.supports_android) && invoker.supports_android) {
+      supports_android = true
+    }
   }
 }
 
