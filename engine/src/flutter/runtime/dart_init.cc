@@ -391,7 +391,10 @@ static std::vector<const char*> ProfilingFlags(bool enable_profiling) {
         // Raspberry Pi devices but quite low for current smartphones.
         "--profile_period=1000",
         // This is the default. But just be explicit.
-        "--profiler"};
+        "--profiler",
+        // This instructs the profiler to walk C++ frames, and to include
+        // them in the profile.
+        "--profile-vm"};
   } else {
     return {"--no-profiler"};
   }
