@@ -1323,6 +1323,85 @@ void main() {
     expect(events, equals(<String>['tap']));
   });
 
+  testWidgets('DragTarget receives position updates via onDrag', (WidgetTester tester) async {
+    for (DragAnchor dragAnchor in DragAnchor.values) {
+      final List<Offset> offsets = <Offset>[];
+
+      await tester.pumpWidget(new MaterialApp(
+          home: new Column(
+              children: <Widget>[
+                new Container(
+                  height: 100.0,
+                  child: new Draggable<int>(
+                    data: 1,
+                    child: const Text('Source'),
+                    feedback: const Text('Dragging'),
+                    dragAnchor: dragAnchor,
+                  ),
+                ),
+                new DragTarget<int>(
+                  builder: (BuildContext context, List<int> data,
+                      List<dynamic> rejects) {
+                    return new Container(
+                        height: 100.0, child: const Text('Target'));
+                  },
+                  onDrag: (int target, Offset lastOffset) {
+                    expect(target, 1);
+                    offsets.add(lastOffset);
+                  },
+                ),
+              ]
+          )
+      ));
+
+      Offset dragOffset;
+      switch (dragAnchor) {
+        case DragAnchor.child:
+          // The position reported to onDrag should be the top left corner
+          // of the dragged widget, and in this test, we click on the center
+          // of the widget.
+          dragOffset = tester.getSize(find.text('Source')).center(Offset.zero);
+          break;
+        case DragAnchor.pointer:
+          dragOffset = Offset.zero;
+          break;
+      }
+
+      expect(offsets, isEmpty);
+      expect(find.text('Source'), findsOneWidget);
+      expect(find.text('Dragging'), findsNothing);
+      expect(find.text('Target'), findsOneWidget);
+
+      final Offset dragStart = tester.getCenter(find.text('Source'));
+      final TestGesture gesture = await tester.startGesture(
+          dragStart, pointer: 7);
+      await tester.pump();
+
+      await gesture.moveTo(dragStart.translate(1.0, 1.0));
+      await tester.pump();
+
+      // Start of the drag and moves outside drag targets are not delivered.
+      expect(offsets, isEmpty);
+
+      final Offset onTargetPointer1 = tester.getCenter(find.text('Target'));
+      await gesture.moveTo(onTargetPointer1);
+      await tester.pump();
+
+      expect(offsets, equals([onTargetPointer1 - dragOffset]));
+
+      final Offset onTargetPointer2 = onTargetPointer1.translate(1.0, -1.0);
+      await gesture.moveTo(onTargetPointer2);
+      await tester.pump();
+
+      expect(offsets, equals([onTargetPointer1 - dragOffset, onTargetPointer2 - dragOffset]));
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(offsets, equals([onTargetPointer1 - dragOffset, onTargetPointer2 - dragOffset]));
+    }
+  });
+
   testWidgets('Drag feedback with child anchor positions correctly', (WidgetTester tester) async {
     await _testChildAnchorFeedbackPosition(tester: tester);
   });
