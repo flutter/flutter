@@ -65,8 +65,13 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
   void _update() {
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      // We want the update to take effect next frame, so to make that
-      // explicit we call setState() in a post-frame callback.
+      // Semantic information are only available at the end of a frame and our
+      // only chance to paint them on the screen is the next frame. To achieve
+      // this, we call setState() in a post-frame callback. THIS PATTERN SHOULD
+      // NOT BE COPIED. Calling setState() in a post-frame callback is a bad
+      // idea as it will not schedule a frame and your app may be lagging behind
+      // by one frame. We manually call scheduleFrame() to force a frame and
+      // ensure that the semantic information are always painted on the screen.
       if (mounted) {
         // If we got disposed this frame, we will still get an update,
         // because the inactive list is flushed after the semantics updates
@@ -74,6 +79,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         setState(() {
           // The generation of the _SemanticsDebuggerListener has changed.
         });
+        SchedulerBinding.instance.scheduleFrame();
       }
     });
   }
