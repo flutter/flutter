@@ -485,13 +485,13 @@ class SliverGeometry {
     double hitTestExtent,
     bool visible,
     this.hasVisualOverflow: false,
-    this.scrollOffsetCorrection: 0.0
+    this.scrollOffsetCorrection,
   }) : assert(scrollExtent != null),
        assert(paintExtent != null),
        assert(paintOrigin != null),
        assert(maxPaintExtent != null),
        assert(hasVisualOverflow != null),
-       assert(scrollOffsetCorrection != null),
+       assert(scrollOffsetCorrection != 0.0),
        layoutExtent = layoutExtent ?? paintExtent,
        hitTestExtent = hitTestExtent ?? paintExtent,
        visible = visible ?? paintExtent > 0.0;
@@ -613,7 +613,7 @@ class SliverGeometry {
       verify(hitTestExtent >= 0.0, 'The "hitTestExtent" is negative.');
       verify(visible != null, 'The "visible" property is null.');
       verify(hasVisualOverflow != null, 'The "hasVisualOverflow" is null.');
-      verify(scrollOffsetCorrection != null, 'The "scrollOffsetCorrection" is null.');
+      verify(scrollOffsetCorrection != 0.0, 'The "scrollOffsetCorrection" is zero.');
       return true;
     });
     return true;
@@ -648,7 +648,8 @@ class SliverGeometry {
         buffer.write('hitTestExtent: ${hitTestExtent.toStringAsFixed(1)}, ');
       if (hasVisualOverflow)
         buffer.write('hasVisualOverflow: true, ');
-      buffer.write('scrollOffsetCorrection: ${scrollOffsetCorrection.toStringAsFixed(1)}');
+      if (scrollOffsetCorrection != null)
+        buffer.write('scrollOffsetCorrection: ${scrollOffsetCorrection.toStringAsFixed(1)}');
     buffer.write(')');
     return buffer.toString();
   }
