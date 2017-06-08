@@ -38,35 +38,16 @@ import 'viewport.dart';
 class PageController extends ScrollController {
   /// Creates a page controller.
   ///
-  /// The [initialPage], [keepPage], and [viewportFraction] arguments must not be null.
+  /// The [initialPage] and [viewportFraction] arguments must not be null.
   PageController({
     this.initialPage: 0,
-    this.keepPage: true,
     this.viewportFraction: 1.0,
   }) : assert(initialPage != null),
-       assert(keepPage != null),
        assert(viewportFraction != null),
        assert(viewportFraction > 0.0);
 
   /// The page to show when first creating the [PageView].
   final int initialPage;
-
-  /// Save the current [page] with [PageStorage] and restore it if
-  /// this controller's scrollable is recreated.
-  ///
-  /// If this property is set to false, the current [page] is never saved
-  /// and [initialPage] is always used to initialize the scroll offset.
-  /// If true (the default), the initial page is used the first time the
-  /// controller's scrollable is created, since there's isn't a page to
-  /// restore yet. Subsequently the saved page is restored and
-  /// [initialPage] is ignored.
-  ///
-  /// See also:
-  ///
-  ///  * [PageStorageKey], which should be used when more than one
-  ////   scrollable appears in the same route, to distinguish the [PageStorage]
-  ///    locations used to save scroll offsets.
-  final bool keepPage;
 
   /// The fraction of the viewport that each page should occupy.
   ///
@@ -135,7 +116,6 @@ class PageController extends ScrollController {
       physics: physics,
       context: context,
       initialPage: initialPage,
-      keepPage: keepPage,
       viewportFraction: viewportFraction,
       oldPosition: oldPosition,
     );
@@ -170,11 +150,9 @@ class _PagePosition extends ScrollPositionWithSingleContext {
     ScrollPhysics physics,
     ScrollContext context,
     this.initialPage: 0,
-    bool keepPage: true,
     double viewportFraction: 1.0,
     ScrollPosition oldPosition,
   }) : assert(initialPage != null),
-       assert(keepPage != null),
        assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
        _viewportFraction = viewportFraction,
@@ -183,7 +161,6 @@ class _PagePosition extends ScrollPositionWithSingleContext {
          physics: physics,
          context: context,
          initialPixels: null,
-         keepScrollOffset: keepPage,
          oldPosition: oldPosition,
        );
 
