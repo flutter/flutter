@@ -7,6 +7,7 @@ package io.flutter.app;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -153,13 +154,19 @@ public final class FlutterActivityDelegate
 
     @Override
     public void onNewIntent(Intent intent) {
-        if (!loadIntent(intent)) {
+        // Only attempt to reload the Flutter Dart code during development. Use
+        // the debuggable flag as an indicator that we are in development mode.
+        if (!isDebuggable() || !loadIntent(intent)) {
             for (NewIntentListener listener : newIntentListeners) {
                 if (listener.onNewIntent(intent)) {
                     return;
                 }
             }
         }
+    }
+
+    private boolean isDebuggable() {
+        return (activity.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
     }
 
     @Override
