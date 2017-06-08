@@ -17,4 +17,4 @@ dependencies:
 
 dev_dependencies:
   # See packages/flutter_test/pubspec.yaml for why we're pinning this version.
-  test: 0.12.20
+  test: 0.12.21
