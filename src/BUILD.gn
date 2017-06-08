@@ -33,6 +33,9 @@ source_set("src") {
     "styled_runs.cc",
     "styled_runs.h",
     "text_align.h",
+    "text_baseline.h",
+    "text_decoration.cc",
+    "text_decoration.h",
     "text_style.cc",
     "text_style.h",
   ]

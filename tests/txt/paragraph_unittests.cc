@@ -291,6 +291,7 @@ TEST_F(RenderTest, LinebreakParagraph) {
   // Letter spacing not yet implemented
   text_style.letter_spacing = 10;
   text_style.color = SK_ColorBLACK;
+  text_style.height = 1.15;
   builder.PushStyle(text_style);
 
   builder.AddText(u16_text);

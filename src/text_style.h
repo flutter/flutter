@@ -21,6 +21,8 @@
 
 #include "lib/txt/src/font_style.h"
 #include "lib/txt/src/font_weight.h"
+#include "lib/txt/src/text_baseline.h"
+#include "lib/txt/src/text_decoration.h"
 #include "third_party/skia/include/core/SkColor.h"
 
 namespace txt {
@@ -28,13 +30,13 @@ namespace txt {
 class TextStyle {
  public:
   SkColor color = SK_ColorWHITE;
-  // TextDecoration decoration,
-  // SkColor decoration_color;
-  // TextDecorationStyle decoration_style
+  TextDecoration decoration = TextDecoration::kNone;
+  SkColor decoration_color = SK_ColorWHITE;
+  TextDecorationStyle decoration_style = TextDecorationStyle::kSolid;
   FontWeight font_weight = FontWeight::w400;
   FontStyle font_style = FontStyle::normal;
   bool fake_bold = false;
-  // TextBaseline text_baseline;
+  TextBaseline text_baseline = TextBaseline::kAlphabetic;
   std::string font_family = "";
   double font_size = 14.0;
   double letter_spacing = 0.0;

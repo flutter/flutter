@@ -194,7 +194,7 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
         x = 0.0f;
         // TODO(abarth): Use the line height, which is something like the max
         // font_size for runs in this line times the paragraph's line height.
-        y += run.style.font_size;
+        y += run.style.font_size * run.style.height;
         break_index += 1;
       } else {
         x += layout.getAdvance();
