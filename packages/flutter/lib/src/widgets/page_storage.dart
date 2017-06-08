@@ -6,67 +6,43 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 
-/// A [ValueKey] that defines where [PageStorage] values will be saved.
-///
-/// [Scrollable]s ([ScrollPosition]s really) use [PageStorage] to save their
-/// scroll offset. Each time a scroll completes, the scrollable's page
-/// storage is updated.
-///
-/// [PageStorage] is used to save and restore values that can outlive the widget.
-/// The values are stored in a per-route [Map] whose keys are defined by the
-/// [PageStorageKey]s for the widget and its ancestors. To make it possible
-/// for a saved value to be found when a widget is recreated, the key's values
-/// must not be objects whose identity will change each time the widget is created.
-///
-/// For example, to ensure that the scroll offsets for the scrollable within
-/// each `MyScrollableTabView` below are restored when the [TabBarView]
-/// is recreated, we've specified [PageStorageKey]s whose values are the the
-/// tabs' string labels.
-///
-/// ```dart
-/// new TabBarView(
-///   children: myTabs.map((Tab tab) {
-///     new MyScrollableTabView(
-///       key: new PageStorageKey<String>(tab.text), // like 'Tab 1'
-///       tab: tab,
-///    ),
-///  }),
-///)
-/// ```
-class PageStorageKey<T> extends ValueKey<T> {
-  /// Creates a [ValueKey] that defines where [PageStorage] values will be saved.
-  const PageStorageKey(T value) : super(value);
-}
-
 class _StorageEntryIdentifier {
-  _StorageEntryIdentifier(this.clientType, this.keys) {
-    assert(clientType != null);
-    assert(keys != null);
+  Type clientType;
+  List<Key> keys;
+
+  void addKey(Key key) {
+    assert(key != null);
+    assert(key is! GlobalKey);
+    keys ??= <Key>[];
+    keys.add(key);
   }
 
-  final Type clientType;
-  final List<PageStorageKey<dynamic>> keys;
+  GlobalKey scopeKey;
 
   @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
+    if (other is! _StorageEntryIdentifier)
       return false;
     final _StorageEntryIdentifier typedOther = other;
-    if (clientType != typedOther.clientType || keys.length != typedOther.keys.length)
+    if (clientType != typedOther.clientType ||
+        scopeKey != typedOther.scopeKey ||
+        keys?.length != typedOther.keys?.length)
       return false;
-    for (int index = 0; index < keys.length; index += 1) {
-      if (keys[index] != typedOther.keys[index])
-        return false;
+    if (keys != null) {
+      for (int index = 0; index < keys.length; index += 1) {
+        if (keys[index] != typedOther.keys[index])
+          return false;
+      }
     }
     return true;
   }
 
   @override
-  int get hashCode => hashValues(clientType, hashList(keys));
+  int get hashCode => hashValues(clientType, scopeKey, hashList(keys));
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier($clientType, ${keys?.join(":")})';
+    return 'StorageEntryIdentifier($clientType, $scopeKey, ${keys?.join(":")})';
   }
 }
 
@@ -75,26 +51,27 @@ class _StorageEntryIdentifier {
 /// Useful for storing per-page state that persists across navigations from one
 /// page to another.
 class PageStorageBucket {
-  bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
-    final Widget widget = context.widget;
-    final Key key = widget.key;
-    if (key is PageStorageKey)
-      keys.add(key);
-    return widget is! PageStorage;
-  }
-
-  List<PageStorageKey<dynamic>> _allKeys(BuildContext context) {
-    final List<PageStorageKey<dynamic>> keys = <PageStorageKey<dynamic>>[];
-    if (_maybeAddKey(context, keys)) {
+  _StorageEntryIdentifier _computeStorageIdentifier(BuildContext context) {
+    final _StorageEntryIdentifier result = new _StorageEntryIdentifier();
+    result.clientType = context.widget.runtimeType;
+    Key lastKey = context.widget.key;
+    if (lastKey is! GlobalKey) {
+      if (lastKey != null)
+        result.addKey(lastKey);
       context.visitAncestorElements((Element element) {
-        return _maybeAddKey(element, keys);
+        if (element.widget.key is GlobalKey) {
+          lastKey = element.widget.key;
+          return false;
+        } else if (element.widget.key != null) {
+          result.addKey(element.widget.key);
+        }
+        return true;
       });
+      return result;
     }
-    return keys;
-  }
-
-  _StorageEntryIdentifier _computeIdentifier(BuildContext context) {
-    return new _StorageEntryIdentifier(context.widget.runtimeType, _allKeys(context));
+    assert(lastKey is GlobalKey);
+    result.scopeKey = lastKey;
+    return result;
   }
 
   Map<Object, dynamic> _storage;
@@ -112,13 +89,13 @@ class PageStorageBucket {
   /// identifier will change.
   void writeState(BuildContext context, dynamic data, { Object identifier }) {
     _storage ??= <Object, dynamic>{};
-    _storage[identifier ?? _computeIdentifier(context)] = data;
+    _storage[identifier ?? _computeStorageIdentifier(context)] = data;
   }
 
   /// Read given data from into this page storage bucket using an identifier
   /// computed from the given context. More about [identifier] in [writeState].
   dynamic readState(BuildContext context, { Object identifier }) {
-    return _storage != null ? _storage[identifier ?? _computeIdentifier(context)] : null;
+    return _storage != null ? _storage[identifier ?? _computeStorageIdentifier(context)] : null;
   }
 }
 
