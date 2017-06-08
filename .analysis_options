@@ -16,6 +16,9 @@
 # It is very similar to the .analysis_options_repo file in this same directory;
 # the only difference (currently) is the public_member_api_docs option,
 # which triggers too many messages to be used in editors.
+#
+# NOTE: Please keep this file in sync with
+# https://github.com/flutter/plugins/blob/master/.analysis_options
 
 analyzer:
   language:
