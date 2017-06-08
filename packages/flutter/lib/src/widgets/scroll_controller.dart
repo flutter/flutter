@@ -39,19 +39,39 @@ import 'scroll_position_with_single_context.dart';
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
   ///
-  /// The [initialScrollOffset] must not be null.
+  /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
     this.initialScrollOffset: 0.0,
+    this.keepScrollOffset: true,
     this.debugLabel,
-  }) : assert(initialScrollOffset != null);
+  }) : assert(initialScrollOffset != null),
+       assert(keepScrollOffset != null);
 
   /// The initial value to use for [offset].
   ///
   /// New [ScrollPosition] objects that are created and attached to this
-  /// controller will have their offset initialized to this value.
+  /// controller will have their offset initialized to this value
+  /// if [keepScrollOffset] is false or a scroll offset hasn't been saved yet.
   ///
   /// Defaults to 0.0.
   final double initialScrollOffset;
+
+  /// Each time a scroll completes, save the current scroll [offset] with
+  /// [PageStorage] and restore it if this controller's scrollable is recreated.
+  ///
+  /// If this property is set to false, the scroll offset is never saved
+  /// and [initialScrollOffset] is always used to initialize the scroll
+  /// offset. If true (the default), the initial scroll offset is used the
+  /// first time the controller's scrollable is created, since there's no
+  /// scroll offset to restore yet. Subsequently the saved offset is
+  /// restored and [initialScrollOffset] is ignored.
+  ///
+  /// See also:
+  ///
+  ///  * [PageStorageKey], which should be used when more than one
+  ////   scrollable appears in the same route, to distinguish the [PageStorage]
+  ///    locations used to save scroll offsets.
+  final bool keepScrollOffset;
 
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying scroll controller instances in debug output.
@@ -204,6 +224,7 @@ class ScrollController extends ChangeNotifier {
       physics: physics,
       context: context,
       initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
       oldPosition: oldPosition,
       debugLabel: debugLabel,
     );

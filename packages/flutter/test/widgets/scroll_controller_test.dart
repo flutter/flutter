@@ -259,4 +259,51 @@ void main() {
     await tester.drag(find.byType(ListView), const Offset(0.0, -130.0));
     expect(log, isEmpty);
   });
+
+  testWidgets('keepScrollOffset', (WidgetTester tester) async {
+    final PageStorageBucket bucket = new PageStorageBucket();
+
+    Widget buildFrame(ScrollController controller) {
+      return new PageStorage(
+        bucket: bucket,
+        child: new ListView(
+          key: new UniqueKey(), // it's a different ListView every time
+          controller: controller,
+          children: new List<Widget>.generate(50, (int index) {
+            return new Container(height: 100.0, child: new Text('Item $index'));
+          }).toList(),
+        ),
+      );
+    }
+
+    // keepScrollOffset: true (the default). The scroll offset is restored
+    // when the ListView is recreated with a new ScrollController.
+
+    // The initialScrollOffset is used in this case, because there's no saved
+    // scroll offset.
+    ScrollController controller = new ScrollController(initialScrollOffset: 200.0);
+    await tester.pumpWidget(buildFrame(controller));
+    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 2')), Offset.zero);
+
+    controller.jumpTo(2000.0);
+    await tester.pump();
+    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
+
+    // The initialScrollOffset isn't used in this case, because the scrolloffset
+    // can be restored.
+    controller = new ScrollController(initialScrollOffset: 25.0);
+    await tester.pumpWidget(buildFrame(controller));
+    expect(controller.offset, 2000.0);
+    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
+
+    // keepScrollOffset: false. The scroll offset is -not- restored
+    // when the ListView is recreated with a new ScrollController and
+    // the initialScrollOffset is used.
+
+    controller = new ScrollController(keepScrollOffset: false, initialScrollOffset: 100.0);
+    await tester.pumpWidget(buildFrame(controller));
+    expect(controller.offset, 100.0);
+    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 1')), Offset.zero);
+
+  });
 }
