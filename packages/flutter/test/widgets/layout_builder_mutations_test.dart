@@ -9,7 +9,7 @@ import 'package:flutter/src/widgets/layout_builder.dart';
 import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 
 class Wrapper extends StatelessWidget {
-  Wrapper({
+  const Wrapper({
     Key key,
     @required this.child
   }) : assert(child != null),

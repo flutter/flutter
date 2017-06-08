@@ -12,7 +12,7 @@ import 'shrine_types.dart';
 
 // Displays the product title's, description, and order quantity dropdown.
 class _ProductItem extends StatelessWidget {
-  _ProductItem({
+  const _ProductItem({
     Key key,
     @required this.product,
     @required this.quantity,
@@ -69,7 +69,7 @@ class _ProductItem extends StatelessWidget {
 
 // Vendor name and description
 class _VendorItem extends StatelessWidget {
-  _VendorItem({ Key key, @required this.vendor })
+  const _VendorItem({ Key key, @required this.vendor })
     : assert(vendor != null),
       super(key: key);
 
@@ -140,7 +140,7 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 // Describes a product and vendor in detail, supports specifying
 // a order quantity (0-5). Appears at the top of the OrderPage.
 class _Heading extends StatelessWidget {
-  _Heading({
+  const _Heading({
     Key key,
     @required this.product,
     @required this.quantity,

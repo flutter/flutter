@@ -11,7 +11,7 @@ const double kSectionIndicatorWidth = 32.0;
 
 // The card for a single section. Displays the section's gradient and background image.
 class SectionCard extends StatelessWidget {
-  SectionCard({ Key key, @required this.section })
+  const SectionCard({ Key key, @required this.section })
     : assert(section != null),
       super(key: key);
 
@@ -60,7 +60,7 @@ class SectionTitle extends StatelessWidget {
     color: const Color(0x19000000),
   );
 
-  SectionTitle({
+  const SectionTitle({
     Key key,
     @required this.section,
     @required this.scale,
