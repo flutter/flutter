@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2017 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-#ifndef LIB_TXT_SRC_TEXT_ALIGN_H_
-#define LIB_TXT_SRC_TEXT_ALIGN_H_
+#ifndef LIB_TXT_SRC_TEXT_DECORATION_H_
+#define LIB_TXT_SRC_TEXT_DECORATION_H_
 
 namespace txt {
 
-enum class TextAlign {
-  left,
-  right,
-  center,
-  justify,
+enum TextDecoration {
+  kNone = 0x0,
+  kUnderline = 0x1,
+  kOverline = 0x2,
+  kLineThrough = 0x4,
+};
+
+enum TextDecorationStyle {
+  kSolid,
+  kDouble,  // "double" is reserved.
+  kDotted,
+  kDashed,
+  kWavy
 };
 
 }  // namespace txt
 
-#endif  // LIB_TXT_SRC_TEXT_ALIGN_H_
+#endif  // LIB_TXT_SRC_TEXT_DECORATION_H_

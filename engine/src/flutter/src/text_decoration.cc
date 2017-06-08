@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Google Inc.
+ * Copyright 2017 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef LIB_TXT_SRC_TEXT_ALIGN_H_
-#define LIB_TXT_SRC_TEXT_ALIGN_H_
+#include <algorithm>
+#include <vector>
 
-namespace txt {
+#include "lib/txt/src/text_decoration.h"
 
-enum class TextAlign {
-  left,
-  right,
-  center,
-  justify,
-};
-
-}  // namespace txt
-
-#endif  // LIB_TXT_SRC_TEXT_ALIGN_H_
+namespace txt {}  // namespace txt

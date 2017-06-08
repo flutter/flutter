@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef LIB_TXT_SRC_TEXT_ALIGN_H_
-#define LIB_TXT_SRC_TEXT_ALIGN_H_
+#ifndef LIB_TXT_SRC_TEXT_BASELINE_H_
+#define LIB_TXT_SRC_TEXT_BASELINE_H_
 
 namespace txt {
 
-enum class TextAlign {
-  left,
-  right,
-  center,
-  justify,
+enum TextBaseline {
+  kAlphabetic,
+  kIdeographic,
 };
 
 }  // namespace txt
 
-#endif  // LIB_TXT_SRC_TEXT_ALIGN_H_
+#endif  // LIB_TXT_SRC_TEXT_BASELINE_H_
