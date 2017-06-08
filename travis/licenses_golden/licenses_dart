@@ -1,4 +1,4 @@
-Signature: 73a9e0e8b98aa087fb5565862107ec16
+Signature: 657c3d706e3adb5b15dd38a37cd0e2b8
 
 UNUSED LICENSES:
 
@@ -119,9 +119,6 @@ FILE: ../../../dart/runtime/bin/process_linux.cc
 FILE: ../../../dart/runtime/bin/process_macos.cc
 FILE: ../../../dart/runtime/bin/process_win.cc
 FILE: ../../../dart/runtime/bin/run_vm_tests.cc
-FILE: ../../../dart/runtime/bin/secure_socket.h
-FILE: ../../../dart/runtime/bin/secure_socket_boringssl.cc
-FILE: ../../../dart/runtime/bin/secure_socket_boringssl.h
 FILE: ../../../dart/runtime/bin/secure_socket_patch.dart
 FILE: ../../../dart/runtime/bin/secure_socket_unsupported.cc
 FILE: ../../../dart/runtime/bin/socket_android.cc
@@ -1309,10 +1306,6 @@ FILE: ../../../dart/runtime/bin/process_fuchsia.cc
 FILE: ../../../dart/runtime/bin/process_unsupported.cc
 FILE: ../../../dart/runtime/bin/reference_counting.h
 FILE: ../../../dart/runtime/bin/root_certificates_unsupported.cc
-FILE: ../../../dart/runtime/bin/secure_socket_ios.cc
-FILE: ../../../dart/runtime/bin/secure_socket_ios.h
-FILE: ../../../dart/runtime/bin/secure_socket_macos.cc
-FILE: ../../../dart/runtime/bin/secure_socket_macos.h
 FILE: ../../../dart/runtime/bin/socket_base_fuchsia.cc
 FILE: ../../../dart/runtime/bin/socket_base_fuchsia.h
 FILE: ../../../dart/runtime/bin/socket_fuchsia.cc
@@ -1582,6 +1575,17 @@ FILE: ../../../dart/runtime/bin/dfe.h
 FILE: ../../../dart/runtime/bin/error_exit.cc
 FILE: ../../../dart/runtime/bin/error_exit.h
 FILE: ../../../dart/runtime/bin/isolate_data.cc
+FILE: ../../../dart/runtime/bin/secure_socket_filter.cc
+FILE: ../../../dart/runtime/bin/secure_socket_filter.h
+FILE: ../../../dart/runtime/bin/secure_socket_utils.cc
+FILE: ../../../dart/runtime/bin/secure_socket_utils.h
+FILE: ../../../dart/runtime/bin/security_context.cc
+FILE: ../../../dart/runtime/bin/security_context.h
+FILE: ../../../dart/runtime/bin/security_context_android.cc
+FILE: ../../../dart/runtime/bin/security_context_fuchsia.cc
+FILE: ../../../dart/runtime/bin/security_context_linux.cc
+FILE: ../../../dart/runtime/bin/security_context_macos.cc
+FILE: ../../../dart/runtime/bin/security_context_win.cc
 FILE: ../../../dart/runtime/bin/snapshot_utils.cc
 FILE: ../../../dart/runtime/bin/snapshot_utils.h
 FILE: ../../../dart/runtime/bin/socket_base.cc
@@ -1614,6 +1618,8 @@ FILE: ../../../dart/runtime/observatory/lib/src/repositories/subtype_test_cache.
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/unlinked_call.dart
 FILE: ../../../dart/runtime/platform/allocation.h
 FILE: ../../../dart/runtime/platform/growable_array.h
+FILE: ../../../dart/runtime/vm/compilation_trace.cc
+FILE: ../../../dart/runtime/vm/compilation_trace.h
 FILE: ../../../dart/runtime/vm/dwarf.cc
 FILE: ../../../dart/runtime/vm/dwarf.h
 FILE: ../../../dart/runtime/vm/fixed_cache.h
