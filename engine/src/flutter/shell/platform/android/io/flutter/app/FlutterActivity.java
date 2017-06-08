@@ -137,6 +137,7 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
         eventDelegate.onConfigurationChanged(newConfig);
     }
 }
