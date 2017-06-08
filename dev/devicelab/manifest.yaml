@@ -130,7 +130,7 @@ tasks:
     description: >
       Builds sample catalog markdown pages and Android screenshots
     stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
+    required_agent_capabilities: ["linux/android"]
     flaky: true
 
   # iOS on-device tests
