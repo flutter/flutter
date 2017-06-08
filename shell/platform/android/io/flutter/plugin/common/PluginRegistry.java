@@ -58,6 +58,12 @@ public interface PluginRegistry {
     interface Registrar {
         /**
          * Returns the {@link Activity} that forms the plugin's operating context.
+         * <p/>
+         * Plugin authors should not assume the type returned by this method
+         * is any specific subclass of {@code Activity} (such as
+         * {@link io.flutter.app.FlutterActivity} or
+         * {@link io.flutter.app.FlutterFragmentActivity}), as applications
+         * are free to use any activity subclass.
          */
         Activity activity();
 
