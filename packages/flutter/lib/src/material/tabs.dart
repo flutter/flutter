@@ -286,7 +286,6 @@ class _IndicatorPainter extends CustomPainter {
         currentRect = right == null ? middle : Rect.lerp(middle, right, value - index);
     }
     assert(currentRect != null);
-    print("DRAW $currentRect");
     canvas.drawRect(currentRect, new Paint()..color = color);
   }
 
