@@ -139,10 +139,34 @@ class DefaultTextStyle extends InheritedWidget {
 /// To display text that uses multiple styles (e.g., a paragraph with some bold
 /// words), use [RichText].
 ///
+/// ## Sample code
+///
+/// ```dart
+/// new Text(
+///   'Hello, $name! How are you?',
+///   textAlign: TextAlign.center,
+///   overflow: TextOverflow.ellipsis,
+///   style: new TextStyle(fontWeight: FontWeight.bold),
+/// )
+/// ```
+///
+/// ## Interactivity
+///
+/// To make [Text] react to touch events, wrap it in a [GestureDetector] widget
+/// with a [GestureDetector.onTap] handler.
+///
+/// In a material design application, consider using a [FlatButton] instead, or
+/// if that isn't appropriate, at least using an [InkWell] instead of
+/// [GestureDetector].
+///
+/// To make sections of the text interactive, use [RichText] and specify a
+/// [TapGestureRecognizer] as the [TextSpan.recognizer] of the relevant part of
+/// the text.
+///
 /// See also:
 ///
-///  * [RichText]
-///  * [DefaultTextStyle]
+///  * [RichText], which gives you more control over the text styles.
+///  * [DefaultTextStyle], which sets default styles for [Text] widgets.
 class Text extends StatelessWidget {
   /// Creates a text widget.
   ///

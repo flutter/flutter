@@ -80,15 +80,33 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   }
 }
 
-/// A group of [GestureArenaMember] objects that are competing as a unit in the [GestureArenaManager].
+/// A group of [GestureArenaMember] objects that are competing as a unit in the
+/// [GestureArenaManager].
 ///
 /// Normally, a recognizer competes directly in the [GestureArenaManager] to
 /// recognize a sequence of pointer events as a gesture. With a
 /// [GestureArenaTeam], recognizers can compete in the arena in a group with
 /// other recognizers.
 ///
-/// To assign a gesture recognizer to a team, see
-/// [OneSequenceGestureRecognizer.team].
+/// When gesture recognizers are in a team together, then once there are no
+/// other competing gestures in the arena, the first gesture to have been added
+/// to the team automatically wins, instead of the gestures continuing to
+/// compete against each other.
+///
+/// For example, [Slider] uses this to support both a
+/// [HorizontalDragGestureRecognizer] and a [TapGestureRecognizer], but without
+/// the drag recognizer having to wait until the user has dragged outside the
+/// slop region of the tap gesture before triggering. Since they compete as a
+/// team, as soon as any other recognizers are out of the arena, the drag
+/// recognizer wins, even if the user has not actually dragged yet. On the other
+/// hand, if the tap can win outright, before the other recognizers are taken
+/// out of the arena (e.g. if the slider is in a vertical scrolling list and the
+/// user places their finger on the touch surface then lifts it, so that neither
+/// the horizontal nor vertical drag recognizers can claim victory) the tap
+/// recognizer still actually wins, despite being in the team.
+///
+/// To assign a gesture recognizer to a team, set
+/// [OneSequenceGestureRecognizer.team] to an instance of [GestureArenaTeam].
 class GestureArenaTeam {
   final Map<int, _CombiningGestureArenaMember> _combiners = <int, _CombiningGestureArenaMember>{};
 

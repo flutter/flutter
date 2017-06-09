@@ -11,13 +11,13 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'text_style.dart';
 
-// TODO(abarth): Should this be somewhere more general?
+// TODO(ianh): This should be on List itself.
 bool _deepEquals(List<Object> a, List<Object> b) {
   if (a == null)
     return b == null;
   if (b == null || a.length != b.length)
     return false;
-  for (int i = 0; i < a.length; ++i) {
+  for (int i = 0; i < a.length; i += 1) {
     if (a[i] != b[i])
       return false;
   }
@@ -40,11 +40,25 @@ bool _deepEquals(List<Object> a, List<Object> b) {
 /// span in a widget, use a [RichText]. For text with a single style, consider
 /// using the [Text] widget.
 ///
+/// ## Sample code
+///
+/// The text "Hello world!", in black:
+///
+/// ```dart
+/// new TextSpan(
+///   text: 'Hello world!',
+///   style: new TextStyle(color: Colors.black),
+/// )
+/// ```
+///
+/// _There is some more detailed sample code in the documentation for the
+/// [recognizer] property._
+///
 /// See also:
 ///
-///  * [Text]
-///  * [RichText]
-///  * [TextPainter]
+///  * [Text], a widget for showing uniformly-styled text.
+///  * [RichText], a widget for finer control of text rendering.
+///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
 class TextSpan {
   /// Creates a [TextSpan] with the given values.
@@ -55,7 +69,7 @@ class TextSpan {
     this.style,
     this.text,
     this.children,
-    this.recognizer
+    this.recognizer,
   });
 
   /// The style to apply to the [text] and the [children].
@@ -80,11 +94,75 @@ class TextSpan {
 
   /// A gesture recognizer that will receive events that hit this text span.
   ///
-  /// [TextSpan] itself does not implement hit testing or event
-  /// dispatch. The owner of the [TextSpan] tree to which the object
-  /// belongs is responsible for dispatching events.
+  /// [TextSpan] itself does not implement hit testing or event dispatch. The
+  /// object that manages the [TextSpan] painting is also responsible for
+  /// dispatching events. In the rendering library, that is the
+  /// [RenderParagraph] object, which corresponds to the [RichText] widget in
+  /// the widgets layer.
   ///
-  /// For an example, see [RenderParagraph] in the Flutter rendering library.
+  /// [TextSpan] also does not manage the lifetime of the gesture recognizer.
+  /// The code that owns the [GestureRecognizer] object must call
+  /// [GestureRecognizer.dispose] when the [TextSpan] object is no longer used.
+  ///
+  /// ## Sample code
+  ///
+  /// This example shows how to manage the lifetime of a gesture recognizer
+  /// provided to a [TextSpan] object. It defines a [BuzzingText] widget which
+  /// uses the [HapticFeedback] class to vibrate the device when the user
+  /// long-presses the "find the" span, which is underlined in wavy green. The
+  /// hit-testing is handled by the [RichText] widget.
+  ///
+  /// ```dart
+  /// class BuzzingText extends StatefulWidget {
+  ///   @override
+  ///   _BuzzingTextState createState() => new _BuzzingTextState();
+  /// }
+  ///
+  /// class _BuzzingTextState extends State<BuzzingText> {
+  ///   LongPressGestureRecognizer _longPressRecognizer;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     _longPressRecognizer = new LongPressGestureRecognizer()
+  ///       ..onLongPress = _handlePress;
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     _longPressRecognizer.dispose();
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   void _handlePress() {
+  ///     HapticFeedback.vibrate();
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new RichText(
+  ///       text: new TextSpan(
+  ///         text: 'Can you ',
+  ///         style: new TextStyle(color: Colors.black),
+  ///         children: <TextSpan>[
+  ///           new TextSpan(
+  ///             text: 'find the',
+  ///             style: new TextStyle(
+  ///               color: Colors.green,
+  ///               decoration: TextDecoration.underline,
+  ///               decorationStyle: TextDecorationStyle.wavy,
+  ///             ),
+  ///             recognizer: _longPressRecognizer,
+  ///           ),
+  ///           new TextSpan(
+  ///             text: ' secret?',
+  ///           ),
+  ///         ],
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  /// ```
   final GestureRecognizer recognizer;
 
   /// Apply the [style], [text], and [children] of this object to the
@@ -111,7 +189,8 @@ class TextSpan {
       builder.pop();
   }
 
-  /// Walks this text span and its decendants in pre-order and calls [visitor] for each span that has text.
+  /// Walks this text span and its decendants in pre-order and calls [visitor]
+  /// for each span that has text.
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {
       if (!visitor(this))
@@ -162,6 +241,7 @@ class TextSpan {
   }
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
+  ///
   /// Returns null if the index is out of bounds.
   int codeUnitAt(int index) {
     if (index < 0)
@@ -208,8 +288,9 @@ class TextSpan {
   /// valid configuration. Otherwise, returns true.
   ///
   /// This is intended to be used as follows:
+  ///
   /// ```dart
-  ///   assert(myTextSpan.debugAssertIsValid());
+  /// assert(myTextSpan.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid() {
     assert(() {
@@ -238,7 +319,7 @@ class TextSpan {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextSpan)
+    if (other.runtimeType != runtimeType)
       return false;
     final TextSpan typedOther = other;
     return typedOther.text == text

@@ -92,7 +92,7 @@ abstract class MultiDragPointerState {
 
   /// Called when the gesture was rejected.
   ///
-  /// [dispose()] will be called immediately following this.
+  /// The [dispose] method will be called immediately following this.
   @protected
   @mustCallSuper
   void rejected() {
