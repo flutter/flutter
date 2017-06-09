@@ -32,14 +32,15 @@ TEST(RasterCache, ThresholdIsRespected) {
 
   sk_sp<SkImage> image;
 
+  sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 1
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 1
   cache.SweepAfterFrame();
   ASSERT_FALSE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 2
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 2
   cache.SweepAfterFrame();
   ASSERT_TRUE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 3
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 3
   cache.SweepAfterFrame();
 }
 
@@ -53,14 +54,15 @@ TEST(RasterCache, ThresholdIsRespectedWhenZero) {
 
   sk_sp<SkImage> image;
 
+  sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 1
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 1
   cache.SweepAfterFrame();
   ASSERT_FALSE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 2
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 2
   cache.SweepAfterFrame();
   ASSERT_FALSE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 3
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 3
   cache.SweepAfterFrame();
 }
 
@@ -74,19 +76,20 @@ TEST(RasterCache, SweepsRemoveUnusedFrames) {
 
   sk_sp<SkImage> image;
 
+  sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
   ASSERT_FALSE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 1
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 1
   cache.SweepAfterFrame();
   ASSERT_FALSE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 2
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 2
   cache.SweepAfterFrame();
   ASSERT_TRUE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 3
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 3
   cache.SweepAfterFrame();
   ASSERT_TRUE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 4
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 4
   cache.SweepAfterFrame();
   cache.SweepAfterFrame();  // Extra frame without a preroll image access.
   ASSERT_FALSE(
-      cache.GetPrerolledImage(NULL, picture.get(), matrix, true, false));  // 5
+      cache.GetPrerolledImage(NULL, picture.get(), matrix, srgb, true, false));  // 5
 }
