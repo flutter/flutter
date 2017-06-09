@@ -22,6 +22,7 @@
 #include "lib/ftl/macros.h"
 #include "lib/txt/src/paint_record.h"
 #include "lib/txt/src/paragraph_constraints.h"
+#include "lib/txt/src/paragraph_style.h"
 #include "lib/txt/src/styled_runs.h"
 #include "minikin/LineBreaker.h"
 #include "third_party/gtest/include/gtest/gtest_prod.h"
@@ -42,6 +43,12 @@ class Paragraph {
 
   void Paint(SkCanvas* canvas, double x, double y);
 
+  const ParagraphStyle& GetParagraphStyle() const;
+
+  double GetHeight() const;
+
+  bool DidExceedMaxLines() const;
+
  private:
   friend class ParagraphBuilder;
   FRIEND_TEST(RenderTest, SimpleParagraph);
@@ -56,8 +63,13 @@ class Paragraph {
   StyledRuns runs_;
   minikin::LineBreaker breaker_;
   std::vector<PaintRecord> records_;
+  ParagraphStyle paragraph_style_;
+  int lines_ = 1;      // Number of lines after Layout().
+  SkScalar y_ = 0.0f;  // Height of the paragraph after Layout().
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
+
+  void SetParagraphStyle(const ParagraphStyle& style);
 
   void AddRunsToLineBreaker(const std::string& rootdir = "");
 

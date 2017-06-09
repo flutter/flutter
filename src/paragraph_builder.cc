@@ -15,11 +15,13 @@
  */
 
 #include "lib/txt/src/paragraph_builder.h"
+#include "lib/txt/src/paragraph_style.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 
 namespace txt {
 
-ParagraphBuilder::ParagraphBuilder(ParagraphStyle style) {}
+ParagraphBuilder::ParagraphBuilder(ParagraphStyle style)
+    : paragraph_style_(style) {}
 
 ParagraphBuilder::~ParagraphBuilder() = default;
 
@@ -65,6 +67,7 @@ std::unique_ptr<Paragraph> ParagraphBuilder::Build() {
   runs_.EndRunIfNeeded(text_.size());
   std::unique_ptr<Paragraph> paragraph = std::make_unique<Paragraph>();
   paragraph->SetText(std::move(text_), std::move(runs_));
+  paragraph->SetParagraphStyle(paragraph_style_);
   return paragraph;
 }
 

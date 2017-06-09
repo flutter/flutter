@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <minikin/Layout.h>
-#include <minikin/LineBreaker.h>
+#include "minikin/LineBreaker.h"
 
 #include "lib/ftl/logging.h"
 
@@ -145,7 +145,6 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
 
   minikin::Layout layout;
   SkScalar x = 0.0f;
-  SkScalar y = 0.0f;
   size_t break_index = 0;
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
@@ -188,13 +187,14 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
       // color stayed the same.
       records_.push_back(
-          PaintRecord(run.style.color, SkPoint::Make(x, y), builder.make()));
+          PaintRecord(run.style.color, SkPoint::Make(x, y_), builder.make()));
 
       if (layout_end == next_break) {
         x = 0.0f;
         // TODO(abarth): Use the line height, which is something like the max
         // font_size for runs in this line times the paragraph's line height.
-        y += run.style.font_size * run.style.height;
+        y_ += run.style.font_size * run.style.height;
+        lines_++;
         break_index += 1;
       } else {
         x += layout.getAdvance();
@@ -205,6 +205,18 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
   }
 }
 
+const ParagraphStyle& Paragraph::GetParagraphStyle() const {
+  return paragraph_style_;
+}
+
+double Paragraph::GetHeight() const {
+  return y_;
+}
+
+void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
+  paragraph_style_ = style;
+}
+
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   SkPaint paint;
   for (const auto& record : records_) {
@@ -212,6 +224,12 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
     const SkPoint& offset = record.offset();
     canvas->drawTextBlob(record.text(), x + offset.x(), y + offset.y(), paint);
   }
+}
+
+bool Paragraph::DidExceedMaxLines() const {
+  if (lines_ > paragraph_style_.max_lines)
+    return true;
+  return false;
 }
 
 }  // namespace txt

@@ -50,6 +50,7 @@ class ParagraphBuilder {
   std::vector<uint16_t> text_;
   std::vector<size_t> style_stack_;
   StyledRuns runs_;
+  ParagraphStyle paragraph_style_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
 };

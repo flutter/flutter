@@ -35,7 +35,7 @@ executable("txt") {
     "//dart/runtime:libdart_jit",  # Logging
     "//flutter/fml",
     "//lib/txt/shims",
-    "//lib/txt/src",
+    "//lib/txt",
     "//third_party/gtest",
     "//third_party/harfbuzz",
     "//third_party/skia",
