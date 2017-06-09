@@ -611,7 +611,7 @@ class GalleryDrawer extends StatelessWidget {
     final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
     return new Drawer(
       child: new ListView(
-        key: new PageStorageKey<String>('gallery-drawer'),
+        key: const PageStorageKey<String>('gallery-drawer'),
         children: <Widget>[
           new FancyDrawerHeader(),
           new ListTile(
