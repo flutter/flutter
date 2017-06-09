@@ -61,17 +61,22 @@ export 'scroll_activity.dart' show ScrollHoldController;
 abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Creates an object that determines which portion of the content is visible
   /// in a scroll view.
+  ///
+  /// The [physics], [context], and [keepScrollOffset] parameters must not be null.
   ScrollPosition({
     @required this.physics,
     @required this.context,
+    this.keepScrollOffset: true,
     ScrollPosition oldPosition,
     this.debugLabel,
   }) : assert(physics != null),
        assert(context != null),
-       assert(context.vsync != null) {
+       assert(context.vsync != null),
+       assert(keepScrollOffset != null) {
     if (oldPosition != null)
       absorb(oldPosition);
-    restoreScrollOffset();
+    if (keepScrollOffset)
+      restoreScrollOffset();
   }
 
   /// How the scroll position should respond to user input.
@@ -84,6 +89,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Typically implemented by [ScrollableState].
   final ScrollContext context;
+
+  /// Save the current scroll [offset] with [PageStorage] and restore it if
+  /// this scroll position's scrollable is recreated.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollController.keepScrollOffset] and [PageController.keepPage], which
+  ///    create scroll positions and initialize this property.
+  final bool keepScrollOffset;
 
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying animation controller instances in debug output.
@@ -539,7 +553,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// This also saves the scroll offset using [saveScrollOffset].
   void didEndScroll() {
     activity.dispatchScrollEndNotification(cloneMetrics(), context.notificationContext);
-    saveScrollOffset();
+    if (keepScrollOffset)
+      saveScrollOffset();
   }
 
   /// Called by [setPixels] to report overscroll when an attempt is made to

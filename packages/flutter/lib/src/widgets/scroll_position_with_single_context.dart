@@ -46,13 +46,24 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// imperative that the value be set, using [correctPixels], as soon as
   /// [applyNewDimensions] is invoked, before calling the inherited
   /// implementation of that method.
+  ///
+  /// If [keepScrollOffset] is true (the default), the current scroll offset is
+  /// saved with [PageStorage] and restored it if this scroll position's scrollable
+  /// is recreated.
   ScrollPositionWithSingleContext({
     @required ScrollPhysics physics,
     @required ScrollContext context,
     double initialPixels: 0.0,
+    bool keepScrollOffset: true,
     ScrollPosition oldPosition,
     String debugLabel,
-  }) : super(physics: physics, context: context, oldPosition: oldPosition, debugLabel: debugLabel) {
+  }) : super(
+         physics: physics,
+         context: context,
+         keepScrollOffset: keepScrollOffset,
+         oldPosition: oldPosition,
+         debugLabel: debugLabel,
+       ) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.
     if (pixels == null && initialPixels != null)
