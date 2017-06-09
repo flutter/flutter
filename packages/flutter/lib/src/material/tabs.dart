@@ -237,24 +237,28 @@ double _indexChangeProgress(TabController controller) {
 }
 
 class _IndicatorPainter extends CustomPainter {
-  _IndicatorPainter(this.controller, this.indicatorWeight, this.indicatorPadding)
-    : super(repaint: controller.animation);
+  _IndicatorPainter({
+    this.controller,
+    this.indicatorWeight,
+    this.indicatorPadding,
+    List<double> initialTabOffsets,
+  }) : _tabOffsets = initialTabOffsets, super(repaint: controller.animation);
 
   final TabController controller;
   final double indicatorWeight;
   final EdgeInsets indicatorPadding;
-  List<double> tabOffsets;
-  Color color;
-  Rect currentRect;
+  List<double> _tabOffsets;
+  Color _color;
+  Rect _currentRect;
 
-  // tabOffsets[index] is the offset of the left edge of the tab at index, and
-  // tabOffsets[tabOffsets.length] is the right edge of the last tab.
-  int get maxTabIndex => tabOffsets.length - 2;
+  // _tabOffsets[index] is the offset of the left edge of the tab at index, and
+  // _tabOffsets[_tabOffsets.length] is the right edge of the last tab.
+  int get maxTabIndex => _tabOffsets.length - 2;
 
   Rect indicatorRect(Size tabBarSize, int tabIndex) {
-    assert(tabOffsets != null && tabIndex >= 0 && tabIndex <= maxTabIndex);
-    double tabLeft = tabOffsets[tabIndex];
-    double tabRight = tabOffsets[tabIndex + 1];
+    assert(_tabOffsets != null && tabIndex >= 0 && tabIndex <= maxTabIndex);
+    double tabLeft = _tabOffsets[tabIndex];
+    double tabRight = _tabOffsets[tabIndex + 1];
     tabLeft = math.min(tabLeft + indicatorPadding.left, tabRight);
     tabRight = math.max(tabRight - indicatorPadding.right, tabLeft);
     final double tabTop = tabBarSize.height - indicatorWeight;
@@ -265,7 +269,7 @@ class _IndicatorPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (controller.indexIsChanging) {
       final Rect targetRect = indicatorRect(size, controller.index);
-      currentRect = Rect.lerp(targetRect, currentRect ?? targetRect, _indexChangeProgress(controller));
+      _currentRect = Rect.lerp(targetRect, _currentRect ?? targetRect, _indexChangeProgress(controller));
     } else {
       final int currentIndex = controller.index;
       final Rect left = currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null;
@@ -275,21 +279,21 @@ class _IndicatorPainter extends CustomPainter {
       final double index = controller.index.toDouble();
       final double value = controller.animation.value;
       if (value == index - 1.0)
-        currentRect = left ?? middle;
+        _currentRect = left ?? middle;
       else if (value == index + 1.0)
-        currentRect = right ?? middle;
+        _currentRect = right ?? middle;
       else if (value == index)
-         currentRect = middle;
+         _currentRect = middle;
       else if (value < index)
-        currentRect = left == null ? middle : Rect.lerp(middle, left, index - value);
+        _currentRect = left == null ? middle : Rect.lerp(middle, left, index - value);
       else
-        currentRect = right == null ? middle : Rect.lerp(middle, right, value - index);
+        _currentRect = right == null ? middle : Rect.lerp(middle, right, value - index);
     }
-    assert(currentRect != null);
-    canvas.drawRect(currentRect, new Paint()..color = color);
+    assert(_currentRect != null);
+    canvas.drawRect(_currentRect, new Paint()..color = _color);
   }
 
-  static bool tabOffsetsNotEqual(List<double> a, List<double> b) {
+  static bool _tabOffsetsNotEqual(List<double> a, List<double> b) {
     assert(a != null && b != null && a.length == b.length);
     for(int i = 0; i < a.length; i++) {
       if (a[i] != b[i])
@@ -301,9 +305,9 @@ class _IndicatorPainter extends CustomPainter {
   @override
   bool shouldRepaint(_IndicatorPainter old) {
     return controller != old.controller ||
-      tabOffsets?.length != old.tabOffsets?.length ||
-      tabOffsetsNotEqual(tabOffsets, old.tabOffsets) ||
-      currentRect != old.currentRect;
+      _tabOffsets?.length != old._tabOffsets?.length ||
+      _tabOffsetsNotEqual(_tabOffsets, old._tabOffsets) ||
+      _currentRect != old._currentRect;
   }
 }
 
@@ -404,6 +408,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// If a [TabController] is not provided, then there must be a
   /// [DefaultTabController] ancestor.
+  ///
+  /// The [indicatorWeight] parameter defaults to 2, and cannot be null.
+  ///
+  /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and cannot be null.
   TabBar({
     Key key,
     @required this.tabs,
@@ -418,7 +426,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.unselectedLabelStyle,
   }) : assert(tabs != null && tabs.length > 1),
        assert(isScrollable != null),
-       assert(indicatorWeight > 0.0),
+       assert(indicatorWeight != null && indicatorWeight > 0.0),
        assert(indicatorPadding != null),
        super(key: key);
 
@@ -537,9 +545,13 @@ class _TabBarState extends State<TabBar> {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
       _controller.addListener(_handleTabControllerTick);
       _currentIndex = _controller.index;
-      final List<double> offsets = _indicatorPainter?.tabOffsets;
-      _indicatorPainter = new _IndicatorPainter(_controller, widget.indicatorWeight, widget.indicatorPadding)
-        ..tabOffsets = offsets;
+      final List<double> offsets = _indicatorPainter?._tabOffsets;
+      _indicatorPainter = new _IndicatorPainter(
+        controller: _controller,
+        indicatorWeight: widget.indicatorWeight,
+        indicatorPadding: widget.indicatorPadding,
+        initialTabOffsets: offsets,
+      );
     }
   }
 
@@ -566,14 +578,14 @@ class _TabBarState extends State<TabBar> {
     super.dispose();
   }
 
-  // tabOffsets[index] is the offset of the left edge of the tab at index, and
-  // tabOffsets[tabOffsets.length] is the right edge of the last tab.
-  int get maxTabIndex => _indicatorPainter.tabOffsets.length - 2;
+  // _tabOffsets[index] is the offset of the left edge of the tab at index, and
+  // _tabOffsets[_tabOffsets.length] is the right edge of the last tab.
+  int get maxTabIndex => _indicatorPainter._tabOffsets.length - 2;
 
   double _tabScrollOffset(int index, double viewportWidth, double minExtent, double maxExtent) {
     if (!widget.isScrollable)
       return 0.0;
-    final List<double> tabOffsets = _indicatorPainter.tabOffsets;
+    final List<double> tabOffsets = _indicatorPainter._tabOffsets;
     assert(tabOffsets != null && index >= 0 && index <= maxTabIndex);
     final double tabCenter = (tabOffsets[index] + tabOffsets[index + 1]) / 2.0;
     return (tabCenter - viewportWidth / 2.0).clamp(minExtent, maxExtent);
@@ -633,7 +645,7 @@ class _TabBarState extends State<TabBar> {
 
   // Called each time layout completes.
   void _saveTabOffsets(List<double> tabOffsets) {
-    _indicatorPainter?.tabOffsets = tabOffsets;
+    _indicatorPainter?._tabOffsets = tabOffsets;
   }
 
   void _handleTap(int index) {
@@ -661,8 +673,8 @@ class _TabBarState extends State<TabBar> {
     // of a Hero (typically the AppBar), then we will not be able to find the
     // controller during a Hero transition. See https://github.com/flutter/flutter/issues/213.
     if (_controller != null) {
-      _indicatorPainter.color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
-      if (_indicatorPainter.color == Material.of(context).color) {
+      _indicatorPainter._color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
+      if (_indicatorPainter._color == Material.of(context).color) {
         // ThemeData tries to avoid this by having indicatorColor avoid being the
         // primaryColor. However, it's possible that the tab bar is on a
         // Material that isn't the primaryColor. In that case, if the indicator
@@ -670,7 +682,7 @@ class _TabBarState extends State<TabBar> {
         // automatic transitions of the theme will likely look ugly as the
         // indicator color suddenly snaps to white at one end, but it's not clear
         // how to avoid that any further.
-        _indicatorPainter.color = Colors.white;
+        _indicatorPainter._color = Colors.white;
       }
 
       if (_controller.index != _currentIndex) {

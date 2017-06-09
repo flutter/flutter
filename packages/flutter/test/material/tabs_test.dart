@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../rendering/recording_canvas.dart';
 import '../rendering/mock_canvas.dart';
+import '../rendering/recording_canvas.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ Key key, this.child }) : super(key: key);
@@ -876,8 +876,8 @@ void main() {
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
 
     // Selected tab dimensions
-    double tabWidth = tester.getSize(find.byKey(new ValueKey<int>(0))).width;
-    double tabLeft = tester.getTopLeft(find.byKey(new ValueKey<int>(0))).dx;
+    double tabWidth = tester.getSize(find.byKey(const ValueKey<int>(0))).width;
+    double tabLeft = tester.getTopLeft(find.byKey(const ValueKey<int>(0))).dx;
     double tabRight = tabLeft + tabWidth;
 
     expect(tabBarBox, paints..rect(
@@ -890,8 +890,8 @@ void main() {
     controller.index = 3;
     await tester.pumpAndSettle();
 
-    tabWidth = tester.getSize(find.byKey(new ValueKey<int>(3))).width;
-    tabLeft = tester.getTopLeft(find.byKey(new ValueKey<int>(3))).dx;
+    tabWidth = tester.getSize(find.byKey(const ValueKey<int>(3))).width;
+    tabLeft = tester.getTopLeft(find.byKey(const ValueKey<int>(3))).dx;
     tabRight = tabLeft + tabWidth;
 
     expect(tabBarBox, paints..rect(
