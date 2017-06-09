@@ -32,17 +32,22 @@ def main():
   ]
   packages = [
     'io.flutter.app',
-    'io.flutter.view',
-    'io.flutter.plugin.editing',
     'io.flutter.plugin.common',
+    'io.flutter.plugin.editing',
     'io.flutter.plugin.platform',
+    'io.flutter.util',
+    'io.flutter.view',
   ]
 
-  return subprocess.call([
+  command = [
     'javadoc',
     '-classpath', ':'.join(classpath),
     '-d', args.out_dir,
-  ] + packages)
+    '-link', 'https://developer.android.com/reference/',
+  ] + packages
+  print(' '.join(command))
+
+  return subprocess.call(command)
 
 
 if __name__ == '__main__':

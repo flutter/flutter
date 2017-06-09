@@ -32,19 +32,19 @@ import java.util.Map;
 /**
  * Class that performs the actual work of tying Android {@link Activity}
  * instances to Flutter.
- * <p/>
- * This exists as a dedicated class (as opposed to being integrated directly
+ *
+ * <p>This exists as a dedicated class (as opposed to being integrated directly
  * into {@link FlutterActivity}) to facilitate applications that don't wish
  * to subclass {@code FlutterActivity}. The most obvious example of when this
  * may come in handy is if an application wishes to subclass the Android v4
- * support library's {@code FragmentActivity}.
- * <p/>
+ * support library's {@code FragmentActivity}.</p>
+ *
  * <h3>Usage:</h3>
- * To wire this class up to your activity, simply forward the events defined
+ * <p>To wire this class up to your activity, simply forward the events defined
  * in {@link FlutterActivityEvents} from your activity to an instance of this
  * class. Optionally, you can make your activity implement
- * {@link PluginRegistry} and/or {@link FlutterView.Provider} and forward those
- * methods to this class as well.
+ * {@link PluginRegistry} and/or {@link io.flutter.view.FlutterView.Provider}
+ * and forward those methods to this class as well.</p>
  */
 public final class FlutterActivityDelegate
         implements FlutterActivityEvents,
@@ -53,10 +53,10 @@ public final class FlutterActivityDelegate
     /**
      * Specifies the mechanism by which Flutter views are created during the
      * operation of a {@code FlutterActivityDelegate}.
-     * <p/>
-     * A delegate's view factory will be consulted during
+     *
+     * <p>A delegate's view factory will be consulted during
      * {@link #onCreate(Bundle)}. If it returns {@code null}, then the delegate
-     * will fall back to instantiating a new full-screen {@code FlutterView}.
+     * will fall back to instantiating a new full-screen {@code FlutterView}.</p>
      */
     public interface ViewFactory {
         FlutterView createFlutterView(Context context);
