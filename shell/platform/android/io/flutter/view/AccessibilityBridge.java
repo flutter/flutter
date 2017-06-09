@@ -48,6 +48,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
 
     private static final int SEMANTICS_FLAG_HAS_CHECKED_STATE = 1 << 0;
     private static final int SEMANTICS_FLAG_IS_CHECKED = 1 << 1;
+    private static final int SEMANTICS_FLAG_IS_SELECTED = 1 << 2;
 
     AccessibilityBridge(FlutterView owner) {
         assert owner != null;
@@ -119,6 +120,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
 
         result.setCheckable((object.flags & SEMANTICS_FLAG_HAS_CHECKED_STATE) != 0);
         result.setChecked((object.flags & SEMANTICS_FLAG_IS_CHECKED) != 0);
+        result.setSelected((object.flags & SEMANTICS_FLAG_IS_SELECTED) != 0);
         result.setText(object.label);
 
         // TODO(ianh): use setTraversalBefore/setTraversalAfter to set

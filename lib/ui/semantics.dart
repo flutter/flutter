@@ -112,6 +112,7 @@ class SemanticsAction {
 class SemanticsFlags {
   static const int _kHasCheckedStateIndex = 1 << 0;
   static const int _kIsCheckedIndex = 1 << 1;
+  static const int _kIsSelectedIndex = 1 << 2;
 
   const SemanticsFlags._(this.index);
 
@@ -133,12 +134,22 @@ class SemanticsFlags {
   /// For example, if a checkbox has a visible checkmark, [isChecked] is true.
   static const SemanticsFlags isChecked = const SemanticsFlags._(_kIsCheckedIndex);
 
+
+  /// Whether a semantics node is selected.
+  ///
+  /// If true, the semantics node is "selected". If false, the semantics node is
+  /// "unselected".
+  ///
+  /// For example, the active tab in a tab bar has [isSelected] set to true.
+  static const SemanticsFlags isSelected = const SemanticsFlags._(_kIsSelectedIndex);
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
   static final Map<int, SemanticsFlags> values = const <int, SemanticsFlags>{
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
+    _kIsSelectedIndex: isSelected,
   };
 
   @override
@@ -148,6 +159,8 @@ class SemanticsFlags {
         return 'SemanticsFlags.hasCheckedState';
       case _kIsCheckedIndex:
         return 'SemanticsFlags.isChecked';
+      case _kIsSelectedIndex:
+        return 'SemanticsFlags.isSelected';
     }
     return null;
   }

@@ -116,6 +116,10 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
       _node.HasAction(blink::SemanticsAction::kDecrease)) {
     traits |= UIAccessibilityTraitAdjustable;
   }
+  if (_node.HasFlag(blink::SemanticsFlags::kIsSelected) ||
+      _node.HasFlag(blink::SemanticsFlags::kIsChecked)) {
+    traits |= UIAccessibilityTraitSelected;
+  }
   return traits;
 }
 
