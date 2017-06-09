@@ -31,8 +31,8 @@ const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 /// default), it will produce a blurring effect to the content behind it.
 //
 // TODO(xster): document using with a CupertinoScaffold.
-  /// Creates a tab bar in the iOS style.
 class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates a tab bar in the iOS style.
   CupertinoTabBar({
     Key key,
     @required this.items,
@@ -183,27 +183,25 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// Clone the current [CupertinoTabBar] with the [currentIndex] overridden
   /// by `withCurrentIndex` and the [onTap] chained after `withOnTap` if present.
-  CupertinoTabBar clone({
-    @required int withCurrentIndex,
-    @required ValueChanged<int> withOnTap,
+  CupertinoTabBar copyWith({
+    Key key,
+    List<BottomNavigationBarItem> items,
+    Color backgroundColor,
+    Color activeColor,
+    Color inactiveColor,
+    Size iconSize,
+    int currentIndex,
+    ValueChanged<int> onTap,
   }) {
-    assert(withCurrentIndex != null);
-    assert(withOnTap != null);
     return new CupertinoTabBar(
-       key: key,
-       items: items,
-       backgroundColor: backgroundColor,
-       activeColor: activeColor,
-       inactiveColor: inactiveColor,
-       iconSize: iconSize,
-       // Directly override the index.
-       currentIndex: withCurrentIndex,
-       // Concatenate the 2 callback functions.
-       onTap: (int newIndex) {
-         withOnTap(newIndex);
-         if (onTap != null)
-           onTap(newIndex);
-       }
+       key: key ?? this.key,
+       items: items ?? this.items,
+       backgroundColor: backgroundColor ?? this.backgroundColor,
+       activeColor: activeColor ?? this.activeColor,
+       inactiveColor: inactiveColor ?? this.inactiveColor,
+       iconSize: iconSize ?? this.iconSize,
+       currentIndex: currentIndex ?? this.currentIndex,
+       onTap: onTap ?? this.onTap,
     );
   }
 }

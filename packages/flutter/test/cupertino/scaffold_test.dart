@@ -59,7 +59,7 @@ void main() {
                   middle: const Text('Title'),
                 ),
                 tabBar: _buildTabBar(),
-                rootPageBuilder: (BuildContext context, int index) {
+                rootTabPageBuilder: (BuildContext context, int index) {
                    return index == 0 ? page1Center : new Stack();
                 }
               );
@@ -89,7 +89,7 @@ void main() {
                   middle: const Text('Title'),
                 ),
                 tabBar: _buildTabBar(),
-                rootPageBuilder: (BuildContext context, int index) {
+                rootTabPageBuilder: (BuildContext context, int index) {
                   return new CustomPaint(
                     child: new Text('Page ${index + 1}'),
                     painter: new TestCallbackPainter(
