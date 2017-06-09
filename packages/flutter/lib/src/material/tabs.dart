@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -20,10 +21,8 @@ import 'theme.dart';
 
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;
-const double _kTabIndicatorHeight = 2.0;
 const double _kMinTabWidth = 72.0;
 const double _kMaxTabWidth = 264.0;
-const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0);
 
 /// A material design [TabBar] tab. If both [icon] and [text] are
 /// provided, the text is displayed below the icon.
@@ -82,7 +81,7 @@ class Tab extends StatelessWidget {
     }
 
     return new Container(
-      padding: _kTabLabelPadding,
+      padding: kTabLabelPadding,
       height: height,
       constraints: const BoxConstraints(minWidth: _kMinTabWidth),
       child: new Center(child: label),
@@ -238,9 +237,12 @@ double _indexChangeProgress(TabController controller) {
 }
 
 class _IndicatorPainter extends CustomPainter {
-  _IndicatorPainter(this.controller) : super(repaint: controller.animation);
+  _IndicatorPainter(this.controller, this.indicatorWeight, this.indicatorPadding)
+    : super(repaint: controller.animation);
 
-  TabController controller;
+  final TabController controller;
+  final double indicatorWeight;
+  final EdgeInsets indicatorPadding;
   List<double> tabOffsets;
   Color color;
   Rect currentRect;
@@ -251,10 +253,12 @@ class _IndicatorPainter extends CustomPainter {
 
   Rect indicatorRect(Size tabBarSize, int tabIndex) {
     assert(tabOffsets != null && tabIndex >= 0 && tabIndex <= maxTabIndex);
-    final double tabLeft = tabOffsets[tabIndex];
-    final double tabRight = tabOffsets[tabIndex + 1];
-    final double tabTop = tabBarSize.height - _kTabIndicatorHeight;
-    return new Rect.fromLTWH(tabLeft, tabTop, tabRight - tabLeft, _kTabIndicatorHeight);
+    double tabLeft = tabOffsets[tabIndex];
+    double tabRight = tabOffsets[tabIndex + 1];
+    tabLeft = math.min(tabLeft + indicatorPadding.left, tabRight);
+    tabRight = math.max(tabRight - indicatorPadding.right, tabLeft);
+    final double tabTop = tabBarSize.height - indicatorWeight;
+    return new Rect.fromLTWH(tabLeft, tabTop, tabRight - tabLeft, indicatorWeight);
   }
 
   @override
@@ -282,6 +286,7 @@ class _IndicatorPainter extends CustomPainter {
         currentRect = right == null ? middle : Rect.lerp(middle, right, value - index);
     }
     assert(currentRect != null);
+    print("DRAW $currentRect");
     canvas.drawRect(currentRect, new Paint()..color = color);
   }
 
@@ -406,12 +411,16 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.controller,
     this.isScrollable: false,
     this.indicatorColor,
+    this.indicatorWeight: 2.0,
+    this.indicatorPadding: EdgeInsets.zero,
     this.labelColor,
     this.labelStyle,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
   }) : assert(tabs != null && tabs.length > 1),
        assert(isScrollable != null),
+       assert(indicatorWeight > 0.0),
+       assert(indicatorPadding != null),
        super(key: key);
 
   /// Typically a list of [Tab] widgets.
@@ -433,6 +442,20 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The color of the line that appears below the selected tab. If this parameter
   /// is null then the value of the Theme's indicatorColor property is used.
   final Color indicatorColor;
+
+  /// The thickness of the line that appears below the selected tab. The value
+  /// of this parameter must be greater than zero.
+  ///
+  /// The default value of [indicatorWeight] is 2.0.
+  final double indicatorWeight;
+
+  /// The horizontal padding for the line that appears below the selected tab.
+  /// For [isScrollable] tab bars, specifying [kDefaultTabLabelPadding] will align
+  /// the indicator with the tab's text for [Tab] widgets and all but the
+  /// shortest [Tab.text] values.
+  ///
+  /// The default value of [indicatorPadding] is [EdgeInsets.zero].
+  final EdgeInsets indicatorPadding;
 
   /// The color of selected tab labels.
   ///
@@ -472,10 +495,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
       if (item is Tab) {
         final Tab tab = item;
         if (tab.text != null && tab.icon != null)
-          return const Size.fromHeight(_kTextAndIconTabHeight + _kTabIndicatorHeight);
+          return new Size.fromHeight(_kTextAndIconTabHeight + indicatorWeight);
       }
     }
-    return const Size.fromHeight(_kTabHeight + _kTabIndicatorHeight);
+    return new Size.fromHeight(_kTabHeight + indicatorWeight);
   }
 
   @override
@@ -516,7 +539,8 @@ class _TabBarState extends State<TabBar> {
       _controller.addListener(_handleTabControllerTick);
       _currentIndex = _controller.index;
       final List<double> offsets = _indicatorPainter?.tabOffsets;
-      _indicatorPainter = new _IndicatorPainter(_controller)..tabOffsets = offsets;
+      _indicatorPainter = new _IndicatorPainter(_controller, widget.indicatorWeight, widget.indicatorPadding)
+        ..tabOffsets = offsets;
     }
   }
 
@@ -697,7 +721,7 @@ class _TabBarState extends State<TabBar> {
     Widget tabBar = new CustomPaint(
       painter: _indicatorPainter,
       child: new Padding(
-        padding: const EdgeInsets.only(bottom: _kTabIndicatorHeight),
+        padding: new EdgeInsets.only(bottom: widget.indicatorWeight),
         child: new _TabStyle(
           animation: kAlwaysDismissedAnimation,
           selected: false,
