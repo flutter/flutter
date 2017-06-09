@@ -72,6 +72,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _lifecycleChannel;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _systemChannel;
   BOOL _initialized;
+  BOOL _connected;
 }
 
 + (void)initialize {
@@ -164,7 +165,6 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 
   [self setupNotificationCenterObservers];
 
-  [self connectToEngineAndLoad];
 }
 
 - (void)setupNotificationCenterObservers {
@@ -225,6 +225,11 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
                object:nil];
 }
 
+
+- (void)setInitialRoute:(NSString*)route {
+  [_navigationChannel.get() invokeMethod:@"setInitialRoute"
+                               arguments:route];
+}
 #pragma mark - Initializing the engine
 
 - (void)alertView:(UIAlertView*)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
@@ -232,6 +237,10 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 }
 
 - (void)connectToEngineAndLoad {
+  if (_connected)
+    return;
+  _connected = YES;
+
   TRACE_EVENT0("flutter", "connectToEngineAndLoad");
 
   // We ask the VM to check what it supports.
@@ -262,6 +271,11 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
   [view release];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [self connectToEngineAndLoad];
+  [super viewWillAppear:animated];
 }
 
 #pragma mark - Application lifecycle notifications
