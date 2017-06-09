@@ -58,12 +58,12 @@ public interface PluginRegistry {
     interface Registrar {
         /**
          * Returns the {@link Activity} that forms the plugin's operating context.
-         * <p/>
-         * Plugin authors should not assume the type returned by this method
+         *
+         * <p>Plugin authors should not assume the type returned by this method
          * is any specific subclass of {@code Activity} (such as
          * {@link io.flutter.app.FlutterActivity} or
          * {@link io.flutter.app.FlutterFragmentActivity}), as applications
-         * are free to use any activity subclass.
+         * are free to use any activity subclass.</p>
          */
         Activity activity();
 
@@ -92,7 +92,7 @@ public interface PluginRegistry {
 
         /**
          * Adds a callback allowing the plugin to take part in handling incoming
-         * calls to {@Activity#onRequestPermissionsResult(int, String[], int[])}
+         * calls to {@link Activity#onRequestPermissionsResult(int, String[], int[])}
          * or {android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback#onRequestPermissionsResult(int, String[], int[])}.
          *
          * @param listener a {@link RequestPermissionResultListener} callback.
@@ -102,7 +102,7 @@ public interface PluginRegistry {
 
         /**
          * Adds a callback allowing the plugin to take part in handling incoming
-         * calls to {@Activity#onActivityResult(int, int, Intent)}.
+         * calls to {@link Activity#onActivityResult(int, int, Intent)}.
          *
          * @param listener an {@link ActivityResultListener} callback.
          * @return this {@link Registrar}.
@@ -111,7 +111,7 @@ public interface PluginRegistry {
 
         /**
          * Adds a callback allowing the plugin to take part in handling incoming
-         * calls to {@Activity#onNewIntent(Intent)}.
+         * calls to {@link Activity#onNewIntent(Intent)}.
          *
          * @param listener a {@link NewIntentListener} callback.
          * @return this {@link Registrar}.
@@ -120,7 +120,7 @@ public interface PluginRegistry {
 
         /**
          * Adds a callback allowing the plugin to take part in handling incoming
-         * calls to {@Activity#onUserLeaveHint()}.
+         * calls to {@link Activity#onUserLeaveHint()}.
          *
          * @param listener a {@link UserLeaveHintListener} callback.
          * @return this {@link Registrar}.

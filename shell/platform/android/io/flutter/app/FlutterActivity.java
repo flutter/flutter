@@ -47,9 +47,9 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
     /**
      * Hook for subclasses to customize the creation of the
      * {@code FlutterView}.
-     * <p/>
-     * The default implementation returns {@code null}, which will cause the
-     * activity to use a newly instantiated full-screen view.
+     *
+     * <p>The default implementation returns {@code null}, which will cause the
+     * activity to use a newly instantiated full-screen view.</p>
      */
     @Override
     public FlutterView createFlutterView(Context context) {

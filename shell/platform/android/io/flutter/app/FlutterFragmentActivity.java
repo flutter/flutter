@@ -18,14 +18,14 @@ import io.flutter.view.FlutterView;
  * Base class for activities that use Flutter who also require the use of the
  * Android v4 Support library's {@link FragmentActivity}. Applications that
  * don't have this need will likely want to use {@link FlutterActivity} instead.
- * <p/>
- * <strong>Important!</strong> Flutter does not bundle the necessary Android
+ *
+ * <p><strong>Important!</strong> Flutter does not bundle the necessary Android
  * v4 Support library classes for this class to work at runtime. It is the
  * responsibility of the app developer using this class to ensure that they
  * link against the v4 support library .jar file when creating their app to
- * ensure that {@link FragmentActivity} is available at runtime.
+ * ensure that {@link FragmentActivity} is available at runtime.</p>
  *
- * @see https://developer.android.com/topic/libraries/support-library/setup.html
+ * @see <a target="_new" href="https://developer.android.com/topic/libraries/support-library/setup.html">https://developer.android.com/topic/libraries/support-library/setup.html</a>
  */
 public class FlutterFragmentActivity
         extends FragmentActivity implements FlutterView.Provider, PluginRegistry, ViewFactory {
@@ -49,9 +49,9 @@ public class FlutterFragmentActivity
     /**
      * Hook for subclasses to customize the creation of the
      * {@code FlutterView}.
-     * <p/>
-     * The default implementation returns {@code null}, which will cause the
-     * activity to use a newly instantiated full-screen view.
+     *
+     * <p>The default implementation returns {@code null}, which will cause the
+     * activity to use a newly instantiated full-screen view.</p>
      */
     @Override
     public FlutterView createFlutterView(Context context) {
