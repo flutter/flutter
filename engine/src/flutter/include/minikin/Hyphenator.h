@@ -25,6 +25,7 @@
 #include "unicode/locid.h"
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 #ifndef MINIKIN_HYPHENATOR_H
 #define MINIKIN_HYPHENATOR_H
