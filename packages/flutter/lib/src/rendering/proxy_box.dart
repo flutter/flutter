@@ -12,6 +12,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'debug.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'semantics.dart';
 
@@ -837,8 +838,15 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      final Shader shader = _shaderCallback(offset & size);
-      context.pushShaderMask(offset, shader, Offset.zero & size, _blendMode, super.paint);
+      context.pushLayer(
+        new ShaderMaskLayer(
+          shader: _shaderCallback(offset & size),
+          maskRect: offset & size,
+          blendMode: _blendMode,
+        ),
+        super.paint,
+        offset,
+      );
     }
   }
 }
@@ -878,7 +886,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushBackdropFilter(offset, _filter, super.paint);
+      context.pushLayer(new BackdropFilterLayer(filter: _filter), super.paint, offset);
     }
   }
 }
@@ -1308,11 +1316,47 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     return super.hitTest(result, position: position);
   }
 
+  static final Paint _defaultPaint = new Paint();
+  static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushPhysicalModel(needsCompositing, offset, _clip.outerRect, _clip, elevation, color, super.paint);
+      final RRect offsetClipRRect = _clip.shift(offset);
+      final Rect offsetBounds = offsetClipRRect.outerRect;
+      if (needsCompositing) {
+        final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
+          clipRRect: offsetClipRRect,
+          elevation: elevation,
+          color: color,
+        );
+        context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+      } else {
+        final Canvas canvas = context.canvas;
+        if (elevation != 0.0) {
+          // The drawShadow call doesn't add the region of the shadow to the
+          // picture's bounds, so we draw a hardcoded amount of extra space to
+          // account for the maximum potential area of the shadow.
+          // TODO(jsimmons): remove this when Skia does it for us.
+          canvas.drawRect(
+            offsetBounds.inflate(20.0),
+            _transparentPaint,
+          );
+          canvas.drawShadow(
+            new Path()..addRRect(offsetClipRRect),
+            const Color(0xFF000000),
+            elevation,
+            color.alpha != 0xFF,
+          );
+        }
+        canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
+        canvas.saveLayer(offsetBounds, _defaultPaint);
+        canvas.clipRRect(offsetClipRRect);
+        super.paint(context, offset);
+        canvas.restore();
+        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
+      }
     }
   }
 
