@@ -2401,7 +2401,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// the approximate bounding box of the clip rect that would be
   /// applied to the given child during the paint phase, if any.
   ///
-  /// Returns `null` if the child would not be clipped.
+  /// Returns null if the child would not be clipped.
   ///
   /// This is used in the semantics phase to avoid including children
   /// that are not physically visible.

@@ -476,7 +476,7 @@ class AndroidDevice extends Device {
 
   static final RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
-  /// Return the most recent timestamp in the Android log or `null` if there is
+  /// Return the most recent timestamp in the Android log or null if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
     final String output = runCheckedSync(adbCommandForDevice(<String>[

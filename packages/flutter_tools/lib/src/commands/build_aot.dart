@@ -82,7 +82,7 @@ String _getPackagePath(PackageMap packageMap, String package) {
   return fs.path.dirname(packageMap.map[package].toFilePath());
 }
 
-/// Build an AOT snapshot. Return `null` (and log to `printError`) if the method
+/// Build an AOT snapshot. Return null (and log to `printError`) if the method
 /// fails.
 Future<String> buildAotSnapshot(
   String mainPath,

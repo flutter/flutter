@@ -49,13 +49,14 @@ void enableFlutterDriverExtension() {
   assert(WidgetsBinding.instance is _DriverBinding);
 }
 
-/// Handles a command and returns a result.
+/// Signature for functions that handle a command and return a result.
 typedef Future<Result> CommandHandlerCallback(Command c);
 
-/// Deserializes JSON map to a command object.
+/// Signature for functions that deserialize a JSON map to a command object.
 typedef Command CommandDeserializerCallback(Map<String, String> params);
 
-/// Runs the finder and returns the [Element] found, or `null`.
+/// Signature for functions that run the given finder and return the [Element]
+/// found, if any, or null otherwise.
 typedef Finder FinderConstructor(SerializableFinder finder);
 
 @visibleForTesting

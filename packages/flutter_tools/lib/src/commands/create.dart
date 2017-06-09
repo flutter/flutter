@@ -311,7 +311,7 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
   'yaml'
 ]);
 
-/// Return `null` if the project name is legal. Return a validation message if
+/// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
   if (!package_names.isValidPackageName(projectName))
@@ -324,7 +324,7 @@ String _validateProjectName(String projectName) {
   return null;
 }
 
-/// Return `null` if the project directory is legal. Return a validation message
+/// Return null if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
 String _validateProjectDir(String dirPath, { String flutterRoot }) {
   if (fs.path.isWithin(flutterRoot, dirPath)) {
