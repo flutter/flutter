@@ -27,7 +27,7 @@ class MockClipboard {
 
 Widget overlay(Widget child) {
   return new MediaQuery(
-    data: const MediaQueryData(),
+    data: const MediaQueryData(size: const Size(800.0, 600.0)),
     child: new Overlay(
       initialEntries: <OverlayEntry>[
         new OverlayEntry(
@@ -73,10 +73,22 @@ void main() {
     return renderEditable;
   }
 
+  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+    return points.map((TextSelectionPoint point) {
+      return new TextSelectionPoint(
+        box.localToGlobal(point.point),
+        point.direction,
+      );
+    }).toList();
+  }
+
   Offset textOffsetToPosition(WidgetTester tester, int offset) {
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-      new TextSelection.collapsed(offset: offset),
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(
+        new TextSelection.collapsed(offset: offset),
+      ),
+      renderEditable,
     );
     expect(endpoints.length, 1);
     return endpoints[0].point + const Offset(0.0, -2.0);
@@ -309,15 +321,19 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     final TextSelection selection = controller.selection;
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the right handle 2 letters to the right.
-    // Note: use a small offset because the endpoint is on the very corner
+    // We use a small offset because the endpoint is on the very corner
     // of the handle.
     Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
     Offset newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
@@ -368,10 +384,15 @@ void main() {
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     RenderEditable renderEditable = findRenderEditable(tester);
-    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     // SELECT ALL should select all the text.
     await tester.tap(find.text('SELECT ALL'));
@@ -388,10 +409,15 @@ void main() {
     // Tap again to bring back the menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     renderEditable = findRenderEditable(tester);
-    endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     // PASTE right before the 'e'.
     await tester.tap(find.text('PASTE'));
@@ -422,8 +448,12 @@ void main() {
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
@@ -547,12 +577,16 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     expect(controller.selection.baseOffset, 39);
     expect(controller.selection.extentOffset, 44);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the right handle to the third line, just after 'Third'.
@@ -653,7 +687,10 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
@@ -1341,11 +1378,15 @@ void main() {
 
       await tester.tapAt(textOffsetToPosition(tester, '123'.indexOf('2')));
       await tester.pumpWidget(builder());
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
       final RenderEditable renderEditable = findRenderEditable(tester);
-      final List<TextSelectionPoint> endpoints =
-          renderEditable.getEndpointsForSelection(textController.selection);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(textController.selection),
+        renderEditable,
+      );
       await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
       await tester.pumpWidget(builder());
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
       Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('PASTE'));

@@ -123,8 +123,13 @@ bool debugCheckIntrinsicSizes = false;
 bool debugProfilePaintsEnabled = false;
 
 
-/// Returns a list of strings representing the given transform in a format useful for [RenderObject.debugFillDescription].
+/// Returns a list of strings representing the given transform in a format
+/// useful for [RenderObject.debugFillDescription].
+///
+/// If the argument is null, returns a list with the single string "null".
 List<String> debugDescribeTransform(Matrix4 transform) {
+  if (transform == null)
+    return const <String>['null'];
   final List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;

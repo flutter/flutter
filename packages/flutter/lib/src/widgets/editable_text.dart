@@ -263,6 +263,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   TextSelectionOverlay _selectionOverlay;
 
   final ScrollController _scrollController = new ScrollController();
+  final LayerLink _layerLink = new LayerLink();
   bool _didAutoFocus = false;
 
   // State lifecycle:
@@ -272,6 +273,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     super.initState();
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
+    _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
   }
 
   @override
@@ -436,6 +438,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
         context: context,
         value: _value,
         debugRequiredFor: widget,
+        layerLink: _layerLink,
         renderObject: renderObject,
         onSelectionOverlayChanged: _handleSelectionOverlayChanged,
         selectionControls: widget.selectionControls,
@@ -538,19 +541,22 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       controller: _scrollController,
       physics: const ClampingScrollPhysics(),
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
-        return new _Editable(
-          value: _value,
-          style: widget.style,
-          cursorColor: widget.cursorColor,
-          showCursor: _showCursor,
-          maxLines: widget.maxLines,
-          selectionColor: widget.selectionColor,
-          textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
-          textAlign: widget.textAlign,
-          obscureText: widget.obscureText,
-          offset: offset,
-          onSelectionChanged: _handleSelectionChanged,
-          onCaretChanged: _handleCaretChanged,
+        return new CompositedTransformTarget(
+          link: _layerLink,
+          child: new _Editable(
+            value: _value,
+            style: widget.style,
+            cursorColor: widget.cursorColor,
+            showCursor: _showCursor,
+            maxLines: widget.maxLines,
+            selectionColor: widget.selectionColor,
+            textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
+            textAlign: widget.textAlign,
+            obscureText: widget.obscureText,
+            offset: offset,
+            onSelectionChanged: _handleSelectionChanged,
+            onCaretChanged: _handleCaretChanged,
+          ),
         );
       },
     );
