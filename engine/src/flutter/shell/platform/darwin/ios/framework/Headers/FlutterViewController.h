@@ -20,6 +20,14 @@ FLUTTER_EXPORT
                          bundle:(NSBundle*)nibBundleOrNil NS_DESIGNATED_INITIALIZER;
 
 - (void)handleStatusBarTouches:(UIEvent*)event;
+
+/**
+ Sets the first route that the Flutter app shows. The default is "/".
+
+ - Parameter route: The name of the first route to show.
+ */
+- (void)setInitialRoute:(NSString*)route;
+
 @end
 
 #endif  // FLUTTER_FLUTTERVIEWCONTROLLER_H_
