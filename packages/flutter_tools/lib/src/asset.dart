@@ -316,7 +316,7 @@ DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
 /// Given an assetBase location and a pubspec.yaml Flutter manifest, return a
 /// map of assets to asset variants.
 ///
-/// Returns `null` on missing assets.
+/// Returns null on missing assets.
 Map<_Asset, List<_Asset>> _parseAssets(
   PackageMap packageMap,
   Map<String, dynamic> manifestDescriptor,

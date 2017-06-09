@@ -42,7 +42,7 @@ class ConfigCommand extends FlutterCommand {
       'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 
-  /// Return `null` to disable tracking of the `config` command.
+  /// Return null to disable tracking of the `config` command.
   @override
   Future<String> get usagePath => null;
 

@@ -15,7 +15,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 
 /// A widget that rebuilds when the given [Listenable] changes value.
 ///
-/// [AnimatedWidget] is most common used with [Animation] objects, which are
+/// [AnimatedWidget] is most commonly used with [Animation] objects, which are
 /// [Listenable], but it can be used with any [Listenable], including
 /// [ChangeNotifier] and [ValueNotifier].
 ///
@@ -450,6 +450,11 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// an animation as part of a larger build function. To use AnimatedBuilder,
 /// simply construct the widget and pass it a builder function.
 ///
+/// For simple cases without additional state, consider using
+/// [AnimatedWidget].
+///
+/// ## Performance optimisations
+///
 /// If your [builder] function contains a subtree that does not depend on the
 /// animation, it's more efficient to build that subtree once instead of
 /// rebuilding it on every animation tick.
@@ -461,8 +466,51 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// For simple cases without additional state, consider using
-/// [AnimatedWidget].
+/// ## Sample code
+///
+/// This code defines a widget called `Spinner` that spins a green square
+/// continually. It is built with an [AnimatedBuilder] and makes use of the
+/// [child] feature to avoid having to rebuild the [Container] each time.
+///
+/// ```dart
+/// class Spinner extends StatefulWidget {
+///   @override
+///   _SpinnerState createState() => new _SpinnerState();
+/// }
+///
+/// class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
+///   AnimationController _controller;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _controller = new AnimationController(
+///       duration: const Duration(seconds: 10),
+///       vsync: this,
+///     )..repeat();
+///   }
+///
+///   @override
+///   void dispose() {
+///     _controller.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new AnimatedBuilder(
+///       animation: _controller,
+///       child: new Container(width: 200.0, height: 200.0, color: Colors.green),
+///       builder: (BuildContext context, Widget child) {
+///         return new Transform.rotate(
+///           angle: _controller.value * 2.0 * math.PI,
+///           child: child,
+///         );
+///       },
+///     );
+///   }
+/// }
+/// ```
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///

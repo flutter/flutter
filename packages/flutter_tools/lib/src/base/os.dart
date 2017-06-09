@@ -27,7 +27,7 @@ abstract class OperatingSystemUtils {
   /// Make the given file executable. This may be a no-op on some platforms.
   ProcessResult makeExecutable(File file);
 
-  /// Return the path (with symlinks resolved) to the given executable, or `null`
+  /// Return the path (with symlinks resolved) to the given executable, or null
   /// if `which` was not able to locate the binary.
   File which(String execName) {
     final List<File> result = _which(execName);
@@ -206,7 +206,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
 /// Find and return the project root directory relative to the specified
 /// directory or the current working directory if none specified.
-/// Return `null` if the project root could not be found
+/// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
 String findProjectRoot([String directory]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
