@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 
 class StateMarker extends StatefulWidget {
@@ -834,5 +835,69 @@ void main() {
     // The initialIndex tab should be visible and right justified
     expect(find.text('TAB #19'), findsOneWidget);
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, 800.0);
+  });
+
+  testWidgets('TabBar with indicatorWeight, indicatorPadding', (WidgetTester tester) async {
+    const Color color = const Color(0xFF00FF00);
+    const double height = 100.0;
+    const double weight = 8.0;
+    const double padLeft = 8.0;
+    const double padRight = 4.0;
+
+    final List<Widget> tabs = new List<Widget>.generate(4, (int index) {
+      return new Container(
+        key: new ValueKey<int>(index),
+        height: height,
+      );
+    });
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Column(
+          children: <Widget>[
+            new TabBar(
+              indicatorWeight: 8.0,
+              indicatorColor: color,
+              indicatorPadding: const EdgeInsets.only(left: padLeft, right: padRight),
+              controller: controller,
+              tabs: tabs,
+            ),
+            new Flexible(child: new Container()),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+
+    // Selected tab dimensions
+    double tabWidth = tester.getSize(find.byKey(const ValueKey<int>(0))).width;
+    double tabLeft = tester.getTopLeft(find.byKey(const ValueKey<int>(0))).dx;
+    double tabRight = tabLeft + tabWidth;
+
+    expect(tabBarBox, paints..rect(
+      style: PaintingStyle.fill,
+      color: color,
+      rect: new Rect.fromLTRB(tabLeft + padLeft, height, tabRight - padRight, height + weight)
+    ));
+
+    // Select tab 3
+    controller.index = 3;
+    await tester.pumpAndSettle();
+
+    tabWidth = tester.getSize(find.byKey(const ValueKey<int>(3))).width;
+    tabLeft = tester.getTopLeft(find.byKey(const ValueKey<int>(3))).dx;
+    tabRight = tabLeft + tabWidth;
+
+    expect(tabBarBox, paints..rect(
+      style: PaintingStyle.fill,
+      color: color,
+      rect: new Rect.fromLTRB(tabLeft + padLeft, height, tabRight - padRight, height + weight)
+    ));
   });
 }
