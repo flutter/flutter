@@ -96,10 +96,10 @@ void main() {
     expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is coming in from the right.
     expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
-    // The shadow should be drawn to one screen width to the left of where 
+    // The shadow should be drawn to one screen width to the left of where
     // the page 2 box is. `paints` tests relative to the painter's given canvas
     // rather than relative to the screen so assert that it's one screen
-    // width to the left of 0 offset box rect and nothing is drawn inside the 
+    // width to the left of 0 offset box rect and nothing is drawn inside the
     // box's rect.
     expect(box, paints..rect(
       rect: new Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)

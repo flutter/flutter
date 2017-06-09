@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show ImageFilter, PictureRecorder;
+import 'dart:ui' as ui show PictureRecorder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -46,8 +46,8 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 
 /// A place to paint.
 ///
-/// Rather than holding a canvas directly, render objects paint using a painting
-/// context. The painting context has a canvas, which receives the
+/// Rather than holding a canvas directly, [RenderObject]s paint using a painting
+/// context. The painting context has a [Canvas], which receives the
 /// individual draw operations, and also has functions for painting child
 /// render objects.
 ///
@@ -242,7 +242,7 @@ class PaintingContext {
     _currentLayer?.willChangeHint = true;
   }
 
-  /// Adds a composited layer to the recording.
+  /// Adds a composited leaf layer to the recording.
   ///
   /// After calling this function, the [canvas] property will change to refer to
   /// a new [Canvas] that draws on top of the given layer.
@@ -250,10 +250,44 @@ class PaintingContext {
   /// A [RenderObject] that uses this function is very likely to require its
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
-  /// layer, which causes them to use composited clips, for example.
+  /// layer, which, for example, causes them to use composited clips.
+  ///
+  /// See also:
+  ///
+  ///  * [pushLayer], for adding a layer and using its canvas to paint with that
+  ///    layer.
   void addLayer(Layer layer) {
     _stopRecordingIfNeeded();
     _appendLayer(layer);
+  }
+
+  /// Appends the given layer to the recording, and calls the `painter` callback
+  /// with that layer, providing the [childPaintBounds] as the paint bounds of
+  /// the child. Canvas recording commands are not guaranteed to be stored
+  /// outside of the paint bounds.
+  ///
+  /// The given layer must be an unattached orphan. (Providing a newly created
+  /// object, rather than reusing an existing layer, satisfies that
+  /// requirement.)
+  ///
+  /// The `offset` is the offset to pass to the `painter`.
+  ///
+  /// If the `childPaintBounds` are not specified then the current layer's
+  /// bounds are used. This is appropriate if the child layer does not apply any
+  /// transformation or clipping to its contents.
+  ///
+  /// See also:
+  ///
+  ///  * [addLayer], for pushing a leaf layer whose canvas is not used.
+  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+    assert(!childLayer.attached);
+    assert(childLayer.parent == null);
+    assert(painter != null);
+    _stopRecordingIfNeeded();
+    _appendLayer(childLayer);
+    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? _paintBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
   }
 
   /// Clip further painting using a rectangle.
@@ -269,12 +303,7 @@ class PaintingContext {
   void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
-      _stopRecordingIfNeeded();
-      final ClipRectLayer clipLayer = new ClipRectLayer(clipRect: offsetClipRect);
-      _appendLayer(clipLayer);
-      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetClipRect);
-      painter(childContext, offset);
-      childContext._stopRecordingIfNeeded();
+      pushLayer(new ClipRectLayer(clipRect: offsetClipRect), painter, offset, childPaintBounds: offsetClipRect);
     } else {
       canvas.save();
       canvas.clipRect(offsetClipRect);
@@ -299,12 +328,7 @@ class PaintingContext {
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
-      _stopRecordingIfNeeded();
-      final ClipRRectLayer clipLayer = new ClipRRectLayer(clipRRect: offsetClipRRect);
-      _appendLayer(clipLayer);
-      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
-      painter(childContext, offset);
-      childContext._stopRecordingIfNeeded();
+      pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect), painter, offset, childPaintBounds: offsetBounds);
     } else {
       canvas.saveLayer(offsetBounds, _defaultPaint);
       canvas.clipRRect(offsetClipRRect);
@@ -329,12 +353,7 @@ class PaintingContext {
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
-      _stopRecordingIfNeeded();
-      final ClipPathLayer clipLayer = new ClipPathLayer(clipPath: offsetClipPath);
-      _appendLayer(clipLayer);
-      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
-      painter(childContext, offset);
-      childContext._stopRecordingIfNeeded();
+      pushLayer(new ClipPathLayer(clipPath: offsetClipPath), painter, offset, childPaintBounds: offsetBounds);
     } else {
       canvas.saveLayer(bounds.shift(offset), _defaultPaint);
       canvas.clipPath(clipPath.shift(offset));
@@ -356,13 +375,12 @@ class PaintingContext {
     final Matrix4 effectiveTransform = new Matrix4.translationValues(offset.dx, offset.dy, 0.0)
       ..multiply(transform)..translate(-offset.dx, -offset.dy);
     if (needsCompositing) {
-      _stopRecordingIfNeeded();
-      final TransformLayer transformLayer = new TransformLayer(transform: effectiveTransform);
-      _appendLayer(transformLayer);
-      final Rect transformedPaintBounds = MatrixUtils.inverseTransformRect(effectiveTransform, _paintBounds);
-      final PaintingContext childContext = new PaintingContext._(transformLayer, transformedPaintBounds);
-      painter(childContext, offset);
-      childContext._stopRecordingIfNeeded();
+      pushLayer(
+        new TransformLayer(transform: effectiveTransform),
+        painter,
+        offset,
+        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, _paintBounds),
+      );
     } else {
       canvas.save();
       canvas.transform(effectiveTransform.storage);
@@ -384,112 +402,9 @@ class PaintingContext {
   /// A [RenderObject] that uses this function is very likely to require its
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
-  /// layer, which causes them to use composited clips, for example.
+  /// layer, which, for example, causes them to use composited clips.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
-    _stopRecordingIfNeeded();
-    final OpacityLayer opacityLayer = new OpacityLayer(alpha: alpha);
-    _appendLayer(opacityLayer);
-    final PaintingContext childContext = new PaintingContext._(opacityLayer, _paintBounds);
-    painter(childContext, offset);
-    childContext._stopRecordingIfNeeded();
-  }
-
-  /// Apply a mask derived from a shader to further painting.
-  ///
-  /// * `offset` is the offset from the origin of the canvas' coordinate system
-  ///   to the origin of the caller's coordinate system.
-  /// * `shader` is the shader that will generate the mask. The shader operates
-  ///   in the coordinate system of the caller.
-  /// * `maskRect` is the region of the canvas (in the coodinate system of the
-  ///   caller) in which to apply the mask.
-  /// * `blendMode` is the [BlendMode] to use when applying the shader to
-  ///   the painting done by `painter`.
-  /// * `painter` is a callback that will paint with the mask applied. This
-  ///   function calls the `painter` synchronously.
-  ///
-  /// A [RenderObject] that uses this function is very likely to require its
-  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
-  /// ancestor render objects that this render object will include a composited
-  /// layer, which causes them to use composited clips, for example.
-  void pushShaderMask(Offset offset, Shader shader, Rect maskRect, BlendMode blendMode, PaintingContextCallback painter) {
-    _stopRecordingIfNeeded();
-    final ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
-      shader: shader,
-      maskRect: maskRect.shift(offset),
-      blendMode: blendMode,
-    );
-    _appendLayer(shaderLayer);
-    final PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
-    painter(childContext, offset);
-    childContext._stopRecordingIfNeeded();
-  }
-
-  /// Push a backdrop filter.
-  ///
-  /// This function applies a filter to the existing painted content and then
-  /// synchronously calls the painter to paint on top of the filtered backdrop.
-  ///
-  /// A [RenderObject] that uses this function is very likely to require its
-  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
-  /// ancestor render objects that this render object will include a composited
-  /// layer, which causes them to use composited clips, for example.
-  // TODO(abarth): I don't quite understand how this API is supposed to work.
-  void pushBackdropFilter(Offset offset, ui.ImageFilter filter, PaintingContextCallback painter) {
-    _stopRecordingIfNeeded();
-    final BackdropFilterLayer backdropFilterLayer = new BackdropFilterLayer(filter: filter);
-    _appendLayer(backdropFilterLayer);
-    final PaintingContext childContext = new PaintingContext._(backdropFilterLayer, _paintBounds);
-    painter(childContext, offset);
-    childContext._stopRecordingIfNeeded();
-  }
-
-  /// Clip using a physical model layer.
-  ///
-  /// * `offset` is the offset from the origin of the canvas' coordinate system
-  ///   to the origin of the caller's coordinate system.
-  /// * `bounds` is the region of the canvas (in the caller's coodinate system)
-  ///   into which `painter` will paint in.
-  /// * `clipRRect` is the rounded-rectangle (in the caller's coodinate system)
-  ///   to use to clip the painting done by `painter`.
-  /// * `elevation` is the z-coordinate at which to place this material.
-  /// * `color` is the background color.
-  /// * `painter` is a callback that will paint with the `clipRRect` applied. This
-  ///   function calls the `painter` synchronously.
-  void pushPhysicalModel(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, double elevation, Color color, PaintingContextCallback painter) {
-    final Rect offsetBounds = bounds.shift(offset);
-    final RRect offsetClipRRect = clipRRect.shift(offset);
-    if (needsCompositing) {
-      _stopRecordingIfNeeded();
-      final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
-        clipRRect: offsetClipRRect,
-        elevation: elevation,
-        color: color,
-      );
-      _appendLayer(physicalModel);
-      final PaintingContext childContext = new PaintingContext._(physicalModel, offsetBounds);
-      painter(childContext, offset);
-      childContext._stopRecordingIfNeeded();
-    } else {
-      if (elevation != 0) {
-        // The drawShadow call doesn't add the region of the shadow to the
-        // picture's bounds, so we draw a hardcoded amount of extra space to
-        // account for the maximum potential area of the shadow.
-        // TODO(jsimmons): remove this when Skia does it for us.
-        canvas.drawRect(offsetBounds.inflate(20.0),
-                        new Paint()..color=const Color(0));
-        canvas.drawShadow(
-          new Path()..addRRect(offsetClipRRect),
-          const Color(0xFF000000),
-          elevation.toDouble(),
-          color.alpha != 0xFF,
-        );
-      }
-      canvas.drawRRect(offsetClipRRect, new Paint()..color=color);
-      canvas.saveLayer(offsetBounds, _defaultPaint);
-      canvas.clipRRect(offsetClipRRect);
-      painter(this, offset);
-      canvas.restore();
-    }
+    pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
   }
 }
 
@@ -2082,8 +1997,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// creates at least one composited layer. For example, videos should return
   /// true if they use hardware decoders.
   ///
-  /// You must call markNeedsCompositingBitsUpdate() if the value of this
-  /// getter changes.
+  /// You must call [markNeedsCompositingBitsUpdate] if the value of this getter
+  /// changes. (This is implied when [adoptChild] or [dropChild] are called.)
   @protected
   bool get alwaysNeedsCompositing => false;
 
