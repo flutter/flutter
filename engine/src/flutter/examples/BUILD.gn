@@ -21,7 +21,7 @@ executable("txt_example") {
     "//dart/runtime:libdart_jit",
     "//flutter/fml",
     "//lib/txt/libs/minikin",
-    "//lib/txt/src",
+    "//lib/txt",
     "//third_party/icu:icuuc",
     "//third_party/skia",
   ]

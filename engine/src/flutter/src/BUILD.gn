@@ -13,36 +13,5 @@
 # limitations under the License.
 
 source_set("src") {
-  sources = [
-    "font_collection.cc",
-    "font_collection.h",
-    "font_skia.cc",
-    "font_skia.h",
-    "font_style.h",
-    "font_weight.h",
-    "paint_record.cc",
-    "paint_record.h",
-    "paragraph.cc",
-    "paragraph.h",
-    "paragraph_builder.cc",
-    "paragraph_builder.h",
-    "paragraph_constraints.cc",
-    "paragraph_constraints.h",
-    "paragraph_style.cc",
-    "paragraph_style.h",
-    "styled_runs.cc",
-    "styled_runs.h",
-    "text_align.h",
-    "text_baseline.h",
-    "text_decoration.cc",
-    "text_decoration.h",
-    "text_style.cc",
-    "text_style.h",
-  ]
-
-  deps = [
-    "//lib/txt/libs/minikin",
-    "//third_party/skia",
-    "//third_party/gtest",
-  ]
+  
 }

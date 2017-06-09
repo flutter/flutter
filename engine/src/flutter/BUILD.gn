@@ -12,13 +12,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-group("txt") {
-  testonly = true
+config("txt_config") {
+  include_dirs = [
+    "//lib/txt/include",
+    "//third_party/harfbuzz/src",
+    "//lib/txt/shims",
+  ]
+}
+
+static_library("txt") {
+  sources = [
+    "src/font_collection.cc",
+    "src/font_collection.h",
+    "src/font_skia.cc",
+    "src/font_skia.h",
+    "src/font_style.h",
+    "src/font_weight.h",
+    "src/paint_record.cc",
+    "src/paint_record.h",
+    "src/paragraph.cc",
+    "src/paragraph.h",
+    "src/paragraph_builder.cc",
+    "src/paragraph_builder.h",
+    "src/paragraph_constraints.cc",
+    "src/paragraph_constraints.h",
+    "src/paragraph_style.cc",
+    "src/paragraph_style.h",
+    "src/styled_runs.cc",
+    "src/styled_runs.h",
+    "src/text_align.h",
+    "src/text_baseline.h",
+    "src/text_decoration.cc",
+    "src/text_decoration.h",
+    "src/text_style.cc",
+    "src/text_style.h",
+  ]
+
+  public_configs = [ ":txt_config" ]
 
   deps = [
-    "examples:txt_example($host_toolchain)",
-    "src",
-    "tests/txt($host_toolchain)",  # txt_unittests
-    "tests/unittest($host_toolchain)",  # minikin_unittest
+    "//lib/txt/libs/minikin",
+    "//third_party/skia",
+    "//third_party/gtest",
   ]
+
 }
