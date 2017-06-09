@@ -130,6 +130,60 @@ void main() {
       matching: find.byType(RichText),
     ));
     expect(tab2.text.style.color, CupertinoColors.activeBlue);
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pump();
+
+    expect(tabsPainted, <int>[0, 1, 0]);
+  });
+
+  testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
+    final List<int> tabsBuilt = <int>[];
+
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          // TODO(xster): change to a CupertinoPageRoute.
+          return new PageRouteBuilder<Null>(
+            settings: settings,
+            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+              return new CupertinoScaffold.tabbed(
+                  navigationBar: const CupertinoNavigationBar(
+                    backgroundColor: CupertinoColors.white,
+                    middle: const Text('Title'),
+                  ),
+                  tabBar: _buildTabBar(),
+                  rootTabPageBuilder: (BuildContext context, int index) {
+                    tabsBuilt.add(index);
+                    return new Text('Page ${index + 1}');
+                  }
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(tabsBuilt, <int>[0]);
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+
+    await tester.tap(find.text('Tab 2'));
+    await tester.pump();
+
+    // Don't re-build the first offstage tab again.
+    expect(tabsBuilt, <int>[0, 1]);
+    // Built tabs are still in the tree but offstage.
+    expect(find.text('Page 1', skipOffstage: false), isOffstage);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    await tester.tap(find.text('Tab 1'));
+    await tester.pump();
+
+    expect(tabsBuilt, <int>[0, 1, 0]);
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2', skipOffstage: false), isOffstage);
   });
 }
 
