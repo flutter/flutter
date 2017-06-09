@@ -190,7 +190,7 @@ class _TabViewState extends State<_TabView> {
   @override
   Widget build(BuildContext context) {
     return new CustomMultiChildLayout(
-      delegate: new _TabViewLayout(activeTab: widget.currentTabIndex),
+      delegate: new _TabViewLayout(tabNumber: widget.tabNumber),
       children: new List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
         // If the tab is being shown re-build and cache it.
@@ -213,18 +213,19 @@ class _TabViewState extends State<_TabView> {
 }
 
 class _TabViewLayout extends MultiChildLayoutDelegate {
-  _TabViewLayout({ @required this.activeTab }) : assert(activeTab != null);
+  _TabViewLayout({ @required this.tabNumber }) : assert(tabNumber != null);
 
-  final int activeTab;
+  final int tabNumber;
 
   @override
   void performLayout(Size size) {
     final BoxConstraints constraints = new BoxConstraints.loose(size);
-    layoutChild(activeTab, constraints);
-
-    positionChild(activeTab, Offset.zero);
+    for (int tabIndex = 0; tabIndex < tabNumber; ++tabIndex) {
+      layoutChild(tabIndex, constraints);
+      positionChild(tabIndex, Offset.zero);
+    }
   }
 
   @override
-  bool shouldRelayout(_TabViewLayout oldDelegate) => activeTab != oldDelegate.activeTab;
+  bool shouldRelayout(_TabViewLayout oldDelegate) => tabNumber != oldDelegate.tabNumber;
 }
