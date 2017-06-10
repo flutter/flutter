@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' show SemanticsFlags, SemanticsAction;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -903,9 +903,8 @@ void main() {
       rect: new Rect.fromLTRB(tabLeft + padLeft, height, tabRight - padRight, height + weight)
     ));
   });
-
   
-    testWidgets('correct semantics', (WidgetTester tester) async {
+  testWidgets('correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     final List<Tab> tabs = new List<Tab>.generate(2, (int index) {
