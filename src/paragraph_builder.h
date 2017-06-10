@@ -32,6 +32,8 @@ class ParagraphBuilder {
  public:
   explicit ParagraphBuilder(ParagraphStyle style);
 
+  ParagraphBuilder();
+
   ~ParagraphBuilder();
 
   void PushStyle(const TextStyle& style);
@@ -43,6 +45,8 @@ class ParagraphBuilder {
   void AddText(const std::string& text);
 
   void AddText(const char* text);
+
+  void SetParagraphStyle(const ParagraphStyle& style);
 
   std::unique_ptr<Paragraph> Build();
 

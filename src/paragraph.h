@@ -39,13 +39,19 @@ class Paragraph {
   ~Paragraph();
 
   void Layout(const ParagraphConstraints& constraints,
-              const std::string& rootdir = "");
+              const std::string& rootdir = "",
+              const double x_offset = 0.0,
+              const double y_offset = 0.0);
 
   void Paint(SkCanvas* canvas, double x, double y);
 
   const ParagraphStyle& GetParagraphStyle() const;
 
   double GetHeight() const;
+
+  double GetAlphabeticBaseline() const;
+
+  double GetIdeographicBaseline() const;
 
   bool DidExceedMaxLines() const;
 
@@ -64,8 +70,9 @@ class Paragraph {
   minikin::LineBreaker breaker_;
   std::vector<PaintRecord> records_;
   ParagraphStyle paragraph_style_;
-  int lines_ = 1;      // Number of lines after Layout().
   SkScalar y_ = 0.0f;  // Height of the paragraph after Layout().
+  double width_ = 0.0f;
+  int lines_ = 0;
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 

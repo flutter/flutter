@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "lib/ftl/logging.h"
 
 #include "lib/txt/src/paragraph_builder.h"
 #include "lib/txt/src/paragraph_style.h"
@@ -22,6 +23,12 @@ namespace txt {
 
 ParagraphBuilder::ParagraphBuilder(ParagraphStyle style)
     : paragraph_style_(style) {}
+
+ParagraphBuilder::ParagraphBuilder() {}
+
+void ParagraphBuilder::SetParagraphStyle(const ParagraphStyle& style) {
+  paragraph_style_ = style;
+}
 
 ParagraphBuilder::~ParagraphBuilder() = default;
 

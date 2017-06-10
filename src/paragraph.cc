@@ -90,6 +90,7 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   *font = minikin::FontStyle(GetWeight(style), GetItalic(style));
   paint->size = style.font_size;
   paint->letterSpacing = style.letter_spacing;
+  paint->wordSpacing = style.word_spacing;  // Likely not working yet.
   // TODO(abarth):  word_spacing.
 }
 
@@ -128,8 +129,11 @@ void Paragraph::AddRunsToLineBreaker(const std::string& rootdir) {
 }
 
 void Paragraph::Layout(const ParagraphConstraints& constraints,
-                       const std::string& rootdir) {
+                       const std::string& rootdir,
+                       const double x_offset,
+                       const double y_offset) {
   breaker_.setLineWidths(0.0f, 0, constraints.width());
+  width_ = constraints.width();
   AddRunsToLineBreaker(rootdir);
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
@@ -144,7 +148,8 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
   SkTextBlobBuilder builder;
 
   minikin::Layout layout;
-  SkScalar x = 0.0f;
+  SkScalar x = x_offset;
+  y_ = y_offset;
   size_t break_index = 0;
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
@@ -155,7 +160,7 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
     GetPaint(run.style, &paint);
 
     size_t layout_start = run.start;
-    while (layout_start < run.end) {
+    while (layout_start < run.end && !DidExceedMaxLines()) {
       const size_t next_break = (break_index > breaks_count - 1)
                                     ? std::numeric_limits<size_t>::max()
                                     : breaks[break_index];
@@ -194,8 +199,8 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
         // TODO(abarth): Use the line height, which is something like the max
         // font_size for runs in this line times the paragraph's line height.
         y_ += run.style.font_size * run.style.height;
-        lines_++;
         break_index += 1;
+        lines_++;
       } else {
         x += layout.getAdvance();
       }
@@ -209,8 +214,17 @@ const ParagraphStyle& Paragraph::GetParagraphStyle() const {
   return paragraph_style_;
 }
 
+double Paragraph::GetAlphabeticBaseline() const {
+  return FLT_MAX;
+}
+
+double Paragraph::GetIdeographicBaseline() const {
+  return FLT_MAX;
+}
+
 double Paragraph::GetHeight() const {
-  return y_;
+  return paragraph_style_.font_size * paragraph_style_.line_height *
+         paragraph_style_.max_lines;
 }
 
 void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
@@ -227,7 +241,9 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
 }
 
 bool Paragraph::DidExceedMaxLines() const {
-  if (lines_ > paragraph_style_.max_lines)
+  if (y_ / (paragraph_style_.font_size * paragraph_style_.line_height) >
+      paragraph_style_.max_lines)
+    // if (lines_ > paragraph_style_.max_lines)
     return true;
   return false;
 }
