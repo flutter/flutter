@@ -2902,8 +2902,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the "hasCheckedState" semantic to true and the
-  /// "isChecked" semantic to the given value.
+  /// If non-null, sets the [hasCheckedState] semantic to true and the
+  /// [isChecked] semantic to the given value.
   bool get checked => _checked;
   bool _checked;
   set checked(bool value) {
@@ -2914,7 +2914,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
   }
 
-  /// If non-null, sets the "isSelected" semantic to the given value.
+  /// If non-null, sets the [isSelected] semantic to the given value.
   bool get selected => _selected;
   bool _selected;
   set selected(bool value) {
@@ -2925,7 +2925,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
   }
 
-  /// If non-null, sets the "label" semantic to the given value.
+  /// If non-null, sets the [label] semantic to the given value.
   String get label => _label;
   String _label;
   set label(String value) {
@@ -2948,9 +2948,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
         ..hasCheckedState = true
         ..isChecked = checked;
     }
-    if (selected != null) {
+    if (selected != null)
       node.isSelected = selected;
-    }
     if (label != null)
       node.label = label;
   }
