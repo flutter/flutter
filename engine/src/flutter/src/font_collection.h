@@ -28,6 +28,8 @@
 #include "minikin/FontCollection.h"
 #include "minikin/FontFamily.h"
 #include "third_party/gtest/include/gtest/gtest_prod.h"
+#include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/include/ports/SkFontMgr.h"
 
 namespace txt {
 
@@ -35,18 +37,16 @@ class FontCollection {
  public:
   static FontCollection& GetDefaultFontCollection();
 
-  FontCollection();
-
-  ~FontCollection();
-
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family,
       const std::string& dir = "");
 
-  // Provides a vector of all available family names.
-  static std::set<std::string> GetFamilyNames(const std::string& dir = "");
+  // Provides a set of all available family names.
+  std::set<std::string> GetFamilyNames(const std::string& dir = "");
 
  private:
+  sk_sp<SkFontMgr> skia_font_manager_;
+
   FRIEND_TEST(FontCollection, HasDefaultRegistrations);
   FRIEND_TEST(FontCollection, GetMinikinFontCollections);
   FRIEND_TEST(FontCollection, GetFamilyNames);
@@ -56,6 +56,10 @@ class FontCollection {
   static const std::string GetDefaultFamilyName() {
     return DEFAULT_FAMILY_NAME;
   };
+
+  FontCollection();
+
+  ~FontCollection();
 
   // TODO(chinmaygarde): Caches go here.
   FTL_DISALLOW_COPY_AND_ASSIGN(FontCollection);

@@ -21,6 +21,10 @@ config("txt_config") {
 }
 
 static_library("txt") {
+  if (current_toolchain == host_toolchain) {
+    defines = [ "DIRECTORY_FONT_MANAGER_AVAILABLE" ]
+  }
+
   sources = [
     "src/font_collection.cc",
     "src/font_collection.h",
@@ -52,8 +56,7 @@ static_library("txt") {
 
   deps = [
     "//lib/txt/libs/minikin",
-    "//third_party/skia",
     "//third_party/gtest",
+    "//third_party/skia",
   ]
-
 }

@@ -28,7 +28,11 @@ namespace txt {
 class ParagraphStyle {
  public:
   TextAlign text_align = TextAlign::left;
-  int max_lines = 0;
+  FontWeight font_weight = FontWeight::w400;
+  FontStyle font_style = FontStyle::normal;
+  std::string font_family = "";
+  double font_size = 14;
+  int max_lines = 1;
   double line_height = 1.0;
   std::string ellipsis;
 };

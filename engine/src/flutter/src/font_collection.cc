@@ -35,36 +35,46 @@ FontCollection& FontCollection::GetDefaultFontCollection() {
   return *collection;
 }
 
-FontCollection::FontCollection() = default;
+FontCollection::FontCollection() {
+#ifdef DIRECTORY_FONT_MANAGER_AVAILABLE
+  skia_font_manager_ = dir.length() != 0
+                           ? SkFontMgr_New_Custom_Directory(dir.c_str())
+                           : SkFontMgr::RefDefault();
+#else
+  skia_font_manager_ = SkFontMgr::RefDefault();
+#endif
+}
 
 FontCollection::~FontCollection() = default;
 
 std::set<std::string> FontCollection::GetFamilyNames(const std::string& dir) {
-  auto skia_font_manager = dir.length() != 0
-                               ? SkFontMgr_New_Custom_Directory(dir.c_str())
-                               : SkFontMgr::RefDefault();
   std::set<std::string> names;
   SkString str;
-  for (int i = 0; i < skia_font_manager->countFamilies(); i++) {
-    skia_font_manager->getFamilyName(i, &str);
+  for (int i = 0; i < skia_font_manager_->countFamilies(); i++) {
+    skia_font_manager_->getFamilyName(i, &str);
     names.insert(std::string{str.writable_str()});
   }
   return names;
 }
 
 const std::string FontCollection::ProcessFamilyName(const std::string& family) {
+#ifdef DIRECTORY_FONT_MANAGER_AVAILABLE
   return family.length() == 0 ? DEFAULT_FAMILY_NAME : family;
+#else
+  if (family.length() == 0) {
+    return *GetFamilyNames().begin();
+  } else if (GetFamilyNames().count(family) > 0) {  // Ensure family exists.
+    return family;
+  } else {
+    return *GetFamilyNames().begin();  // First family available.
+  }
+#endif
 }
 
 std::shared_ptr<minikin::FontCollection>
 FontCollection::GetMinikinFontCollectionForFamily(const std::string& family,
                                                   const std::string& dir) {
-  // Get the Skia font manager.
-  auto skia_font_manager = dir.length() != 0
-                               ? SkFontMgr_New_Custom_Directory(dir.c_str())
-                               : SkFontMgr::RefDefault();
-
-  FTL_DCHECK(skia_font_manager != nullptr);
+  FTL_DCHECK(skia_font_manager_ != nullptr);
 
   // Ask Skia to resolve a font style set for a font family name.
   // FIXME(chinmaygarde): The name "Coolvetica" is hardcoded because CoreText
@@ -72,7 +82,7 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family,
   // SkFontMgr explicitly says passing in nullptr gives the default font.
 
   auto font_style_set =
-      skia_font_manager->matchFamily(ProcessFamilyName(family).c_str());
+      skia_font_manager_->matchFamily(ProcessFamilyName(family).c_str());
   FTL_DCHECK(font_style_set != nullptr);
 
   std::vector<minikin::Font> minikin_fonts;
