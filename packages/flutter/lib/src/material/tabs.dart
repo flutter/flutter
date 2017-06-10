@@ -730,9 +730,14 @@ class _TabBarState extends State<TabBar> {
     // then give all of the tabs equal flexibility so that their widths
     // reflect the intrinsic width of their labels.
     for (int index = 0; index < widget.tabs.length; index++) {
-      wrappedTabs[index] = new InkWell(
-        onTap: () { _handleTap(index); },
-        child: wrappedTabs[index],
+      wrappedTabs[index] = new MergeSemantics(
+        child: new Semantics(
+          selected: index == _currentIndex,
+          child: new InkWell(
+            onTap: () { _handleTap(index); },
+            child: wrappedTabs[index],
+          ),
+        ),
       );
       if (!widget.isScrollable)
         wrappedTabs[index] = new Expanded(child: wrappedTabs[index]);

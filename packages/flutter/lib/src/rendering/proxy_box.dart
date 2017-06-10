@@ -2873,10 +2873,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     RenderBox child,
     bool container: false,
     bool checked,
-    String label
+    bool selected,
+    String label,
   }) : assert(container != null),
        _container = container,
        _checked = checked,
+       _selected = selected,
        _label = label,
        super(child);
 
@@ -2912,6 +2914,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
   }
 
+  /// If non-null, sets the "isSelected" semantic to the given value.
+  bool get selected => _selected;
+  bool _selected;
+  set selected(bool value) {
+    if (selected == value)
+      return;
+    final bool hadValue = selected != null;
+    _selected = value;
+    markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
+  }
+
   /// If non-null, sets the "label" semantic to the given value.
   String get label => _label;
   String _label;
@@ -2927,13 +2940,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   bool get isSemanticBoundary => container;
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => checked != null || label != null ? _annotate : null;
+  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
     if (checked != null) {
       node
         ..hasCheckedState = true
         ..isChecked = checked;
+    }
+    if (selected != null) {
+      node.isSelected = selected;
     }
     if (label != null)
       node.label = label;
