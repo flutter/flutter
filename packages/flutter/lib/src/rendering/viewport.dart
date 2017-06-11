@@ -260,7 +260,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       assert(childLayoutGeometry.debugAssertIsValid);
 
       // If there is a correction to apply, we'll have to start over.
-      if (childLayoutGeometry.scrollOffsetCorrection != 0.0)
+      if (childLayoutGeometry.scrollOffsetCorrection != null)
         return childLayoutGeometry.scrollOffsetCorrection;
 
       // We use the child's paint origin in our coordinate system as the

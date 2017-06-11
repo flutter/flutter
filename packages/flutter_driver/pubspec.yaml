@@ -21,6 +21,6 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  test: 0.12.20
+  test: 0.12.21
   mockito: ^2.0.2
   quiver: ^0.24.0

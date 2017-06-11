@@ -39,6 +39,12 @@ class TestRecordingCanvas implements Canvas {
   }
 
   @override
+  void saveLayer(Rect bounds, Paint paint) {
+    _saveCount += 1;
+    invocations.add(new _MethodCall(#saveLayer, <dynamic>[bounds, paint]));
+  }
+
+  @override
   void restore() {
     _saveCount -= 1;
     assert(_saveCount >= 0);
@@ -77,8 +83,9 @@ class TestRecordingPaintingContext implements PaintingContext {
 }
 
 class _MethodCall implements Invocation {
-  _MethodCall(this._name);
+  _MethodCall(this._name, [ this._arguments = const <dynamic>[] ]);
   final Symbol _name;
+  final List<dynamic> _arguments;
   @override
   bool get isAccessor => false;
   @override
@@ -92,5 +99,5 @@ class _MethodCall implements Invocation {
   @override
   Map<Symbol, dynamic> get namedArguments => <Symbol, dynamic>{};
   @override
-  List<dynamic> get positionalArguments => <dynamic>[];
+  List<dynamic> get positionalArguments => _arguments;
 }

@@ -313,10 +313,10 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
   /// The label does not affect the key's identity.
-  const LabeledGlobalKey(this._debugLabel) : super.constructor();
+  LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   // Used for forwarding the constructor from GlobalKey.
-  const LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
+  LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
 
   final String _debugLabel;
 

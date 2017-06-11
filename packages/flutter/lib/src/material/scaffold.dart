@@ -721,18 +721,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   NavigationGestureController _backGestureController;
 
   bool _shouldHandleBackGesture() {
+    assert(mounted);
     return Theme.of(context).platform == TargetPlatform.iOS && Navigator.canPop(context);
   }
 
   void _handleDragStart(DragStartDetails details) {
+    assert(mounted);
     _backGestureController = Navigator.of(context).startPopGesture();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
+    assert(mounted);
     _backGestureController?.dragUpdate(details.primaryDelta / context.size.width);
   }
 
   void _handleDragEnd(DragEndDetails details) {
+    assert(mounted);
     final bool willPop = _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width) ?? false;
     if (willPop)
       _currentBottomSheet?.close();
@@ -740,6 +744,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   void _handleDragCancel() {
+    assert(mounted);
     final bool willPop = _backGestureController?.dragEnd(0.0) ?? false;
     if (willPop)
       _currentBottomSheet?.close();

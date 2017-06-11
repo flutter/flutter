@@ -116,7 +116,7 @@ class _ShrineGridDelegate extends SliverGridDelegate {
 
 // Displays the Vendor's name and avatar.
 class _VendorItem extends StatelessWidget {
-  _VendorItem({ Key key, @required this.vendor })
+  const _VendorItem({ Key key, @required this.vendor })
     : assert(vendor != null),
       super(key: key);
 
@@ -294,7 +294,7 @@ class _Heading extends StatelessWidget {
 // A card that displays a product's image, price, and vendor. The _ProductItem
 // cards appear in a grid below the heading.
 class _ProductItem extends StatelessWidget {
-  _ProductItem({ Key key, @required this.product, this.onPressed })
+  const _ProductItem({ Key key, @required this.product, this.onPressed })
     : assert(product != null),
       super(key: key);
 

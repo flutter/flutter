@@ -36,7 +36,7 @@ typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, 
 const double _kInitialScrollOffset = 0.0;
 
 class NestedScrollView extends StatefulWidget {
-  NestedScrollView({
+  const NestedScrollView({
     Key key,
     this.scrollDirection: Axis.vertical,
     this.reverse: false,

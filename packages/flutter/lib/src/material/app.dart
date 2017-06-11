@@ -42,8 +42,9 @@ class MaterialApp extends StatefulWidget {
   /// Creates a MaterialApp.
   ///
   /// At least one of [home], [routes], or [onGenerateRoute] must be
-  /// given. If only [routes] is given, it must include an entry for
-  /// the [Navigator.defaultRouteName] (`'/'`).
+  /// given. If only [routes] is given, it must include an entry for the
+  /// [initialRoute], which defaults to [Navigator.defaultRouteName]
+  /// (`'/'`).
   ///
   /// This class creates an instance of [WidgetsApp].
   MaterialApp({
@@ -53,7 +54,7 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
-    this.initialRoute,
+    this.initialRoute: Navigator.defaultRouteName,
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.navigatorObservers: const <NavigatorObserver>[],
@@ -65,8 +66,8 @@ class MaterialApp extends StatefulWidget {
     this.debugShowCheckedModeBanner: true
   }) : assert(debugShowMaterialGrid != null),
        assert(routes != null),
-       assert(!routes.containsKey(Navigator.defaultRouteName) || (home == null)),
-       assert(routes.containsKey(Navigator.defaultRouteName) || (home != null) || (onGenerateRoute != null)),
+       assert(!routes.containsKey(initialRoute) || (home == null)),
+       assert(routes.containsKey(initialRoute) || (home != null) || (onGenerateRoute != null)),
        super(key: key);
 
   /// A one-line description of this app for use in the window manager.

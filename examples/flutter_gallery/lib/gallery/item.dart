@@ -12,7 +12,7 @@ import '../demo/all.dart';
 typedef Widget GalleryDemoBuilder();
 
 class GalleryItem extends StatelessWidget {
-  GalleryItem({
+  const GalleryItem({
     @required this.title,
     this.subtitle,
     @required this.category,

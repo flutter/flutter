@@ -16,6 +16,7 @@ void main() {
   runApp(new MyApp());
 }
 
+{{^withPluginHook}}
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -57,7 +58,6 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
-{{^withPluginHook}}
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
@@ -129,7 +129,12 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 {{/withPluginHook}}
 {{#withPluginHook}}
-class _MyHomePageState extends State<MyHomePage> {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => new _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
 
   @override
@@ -161,11 +166,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Plugin example app'),
+    return new MaterialApp(
+      home: new Scaffold(
+        appBar: new AppBar(
+          title: new Text('Plugin example app'),
+        ),
+        body: new Center(
+          child: new Text('Running on: $_platformVersion\n'),
+        ),
       ),
-      body: new Center(child: new Text('Running on: $_platformVersion\n')),
     );
   }
 }

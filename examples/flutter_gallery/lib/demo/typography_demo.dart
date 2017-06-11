@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class TextStyleItem extends StatelessWidget {
-  TextStyleItem({
+  const TextStyleItem({
     Key key,
     @required this.name,
     @required this.style,

@@ -75,7 +75,7 @@ class _StorageEntryIdentifier {
 /// Useful for storing per-page state that persists across navigations from one
 /// page to another.
 class PageStorageBucket {
-  bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
+  static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
     final Key key = widget.key;
     if (key is PageStorageKey)
@@ -142,7 +142,7 @@ class PageStorage extends StatelessWidget {
 
   /// The bucket from the closest instance of this class that encloses the given context.
   ///
-  /// Returns `null` if none exists.
+  /// Returns null if none exists.
   ///
   /// Typical usage is as follows:
   ///

@@ -7,15 +7,19 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
-# There are three similar analysis options files in the flutter repo:
+# There are four similar analysis options files in the flutter repos:
 #   - .analysis_options (this file)
 #   - .analysis_options_repo
 #   - packages/flutter/lib/analysis_options_user.yaml
+#   - https://github.com/flutter/plugins/blob/master/.analysis_options
 #
 # This file contains the analysis options used by Flutter editors, such as Atom.
 # It is very similar to the .analysis_options_repo file in this same directory;
 # the only difference (currently) is the public_member_api_docs option,
 # which triggers too many messages to be used in editors.
+#
+# The flutter/plugins repo contains a copy of this file, which should be kept
+# in sync with this file.
 
 analyzer:
   language:

@@ -524,7 +524,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Returns the modal route most closely associated with the given context.
   ///
-  /// Returns `null` if the given context is not associated with a modal route.
+  /// Returns null if the given context is not associated with a modal route.
   ///
   /// Typical usage is as follows:
   ///

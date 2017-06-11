@@ -31,6 +31,9 @@ class AnalyzeOnce extends AnalyzeBase {
   /// The working directory for testing analysis using dartanalyzer
   final Directory workingDirectory;
 
+  /// Packages whose source is defined in the vended SDK. 
+  static const List<String> _vendedSdkPackages = const <String>['analyzer', 'front_end', 'kernel'];
+
   @override
   Future<Null> analyze() async {
     final Stopwatch stopwatch = new Stopwatch()..start();
@@ -158,10 +161,10 @@ class AnalyzeOnce extends AnalyzeBase {
             if (colon > 0) {
               final String packageName = line.substring(0, colon);
               final String packagePath = fs.path.fromUri(line.substring(colon+1));
-              // Ensure that we only add the `analyzer` package defined in the vended SDK (and referred to with a local fs.path. directive).
-              // Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored since they would produce
-              // spurious conflicts.
-              if (packageName != 'analyzer' || packagePath.startsWith('..'))
+              // Ensure that we only add `analyzer` and dependent packages defined in the vended SDK (and referred to with a local 
+              // fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored 
+              // since they would produce spurious conflicts.
+              if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..'))
                 dependencies.add(packageName, fs.path.normalize(fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
             }
         });

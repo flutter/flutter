@@ -8,13 +8,13 @@ import 'package:test/test.dart';
 void main() {
   test('System sound control test', () async {
     final List<MethodCall> log = <MethodCall>[];
-  
+
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
-  
+
     await SystemSound.play(SystemSoundType.click);
 
-    expect(log, equals(<MethodCall>[new MethodCall('SystemSound.play', "SystemSoundType.click")]));
+    expect(log, equals(<MethodCall>[const MethodCall('SystemSound.play', "SystemSoundType.click")]));
   });
 }

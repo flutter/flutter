@@ -158,8 +158,8 @@ class FlutterDriver {
     VMIsolate isolate = await vm.isolates.first.loadRunnable();
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
-    // It is currently reported as `null`, but we cannot rely on it because
-    // eventually the event will be reported as a non-`null` object. For now,
+    // It is currently reported as null, but we cannot rely on it because
+    // eventually the event will be reported as a non-null object. For now,
     // list all the events we know about. Later we'll check for "None" event
     // explicitly.
     //
