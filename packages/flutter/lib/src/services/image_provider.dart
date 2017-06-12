@@ -160,12 +160,11 @@ class ImageConfiguration {
 /// ## Sample code
 ///
 /// The following shows the code required to write a widget that fully conforms
-/// to the [ImageProvider] and [Widget] protocols. (It is essentially a
-/// bare-bones version of the [Image] widget.)
+/// to the [ImageProvider] and [Widget] protocols.
 ///
 /// ```dart
-/// class MyImage extends StatefulWidget {
-///   const MyImage({
+/// class Picture extends StatefulWidget {
+///   const Picture({
 ///     Key key,
 ///     @required this.imageProvider,
 ///   }) : assert(imageProvider != null),
@@ -174,10 +173,10 @@ class ImageConfiguration {
 ///   final ImageProvider imageProvider;
 ///
 ///   @override
-///   _MyImageState createState() => new _MyImageState();
+///   _PictureState createState() => new _PictureState();
 /// }
 ///
-/// class _MyImageState extends State<MyImage> {
+/// class _PictureState extends State<Picture> {
 ///   ImageStream _imageStream;
 ///   ImageInfo _imageInfo;
 ///
@@ -191,7 +190,7 @@ class ImageConfiguration {
 ///   }
 ///
 ///   @override
-///   void didUpdateWidget(MyImage oldWidget) {
+///   void didUpdateWidget(Picture oldWidget) {
 ///     super.didUpdateWidget(oldWidget);
 ///     if (widget.imageProvider != oldWidget.imageProvider)
 ///       _getImage();

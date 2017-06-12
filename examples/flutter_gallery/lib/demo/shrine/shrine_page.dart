@@ -15,16 +15,17 @@ enum ShrineAction {
 }
 
 class ShrinePage extends StatefulWidget {
-  const ShrinePage({
+  ShrinePage({
     Key key,
     @required this.scaffoldKey,
     @required this.body,
     this.floatingActionButton,
     this.products,
     this.shoppingCart
-  }) : assert(body != null),
-       assert(scaffoldKey != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(body != null);
+    assert(scaffoldKey != null);
+  }
 
   final GlobalKey<ScaffoldState> scaffoldKey;
   final Widget body;
