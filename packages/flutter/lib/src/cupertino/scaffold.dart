@@ -203,7 +203,7 @@ class _TabViewState extends State<_TabView> {
   @override
   void initState() {
     super.initState();
-    tabs = new List<Widget>.filled(widget.tabNumber, new Container());
+    tabs = new List<Widget>(widget.tabNumber);
   }
 
   @override
@@ -211,15 +211,16 @@ class _TabViewState extends State<_TabView> {
     return new Stack(
       children: new List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
-        // If the tab is being shown re-build and cache it.
-        if (active)
+
+        // TODO(xster): lazily replace empty tabs with Navigators instead.
+        if (active || tabs[index] != null)
           tabs[index] = widget.rootTabPageBuilder(context, index);
 
         return new Offstage(
           offstage: !active,
           child: new TickerMode(
             enabled: active,
-            child: tabs[index],
+            child: tabs[index] ?? new Container(),
           ),
         );
       }),

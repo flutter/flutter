@@ -171,16 +171,15 @@ void main() {
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
 
-    // Don't re-build the first offstage tab again.
-    expect(tabsBuilt, <int>[0, 1]);
-    // Built tabs are still in the tree but offstage.
+    // Both tabs are built but only one is onstage.
+    expect(tabsBuilt, <int>[0, 0, 1]);
     expect(find.text('Page 1', skipOffstage: false), isOffstage);
     expect(find.text('Page 2'), findsOneWidget);
 
     await tester.tap(find.text('Tab 1'));
     await tester.pump();
 
-    expect(tabsBuilt, <int>[0, 1, 0]);
+    expect(tabsBuilt, <int>[0, 0, 1, 0, 1]);
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
   });
