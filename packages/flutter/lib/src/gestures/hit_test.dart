@@ -6,10 +6,6 @@ import 'events.dart';
 
 /// An object that can hit-test pointers.
 abstract class HitTestable { // ignore: one_member_abstracts
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
-  factory HitTestable._() => null;
-
   /// Check whether the given position hits this object.
   ///
   /// If this given position hits this object, consider adding a [HitTestEntry]
@@ -19,20 +15,12 @@ abstract class HitTestable { // ignore: one_member_abstracts
 
 /// An object that can dispatch events.
 abstract class HitTestDispatcher { // ignore: one_member_abstracts
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
-  factory HitTestDispatcher._() => null;
-
   /// Override this method to dispatch events.
   void dispatchEvent(PointerEvent event, HitTestResult result);
 }
 
 /// An object that can handle events.
 abstract class HitTestTarget { // ignore: one_member_abstracts
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
-  factory HitTestTarget._() => null;
-
   /// Override this method to receive events.
   void handleEvent(PointerEvent event, HitTestEntry entry);
 }

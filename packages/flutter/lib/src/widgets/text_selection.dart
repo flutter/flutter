@@ -95,9 +95,9 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     this.renderObject,
     this.onSelectionOverlayChanged,
     this.selectionControls,
-  }): assert(value != null),
-      assert(context != null),
-      _value = value {
+  }): _value  = value {
+    assert(value != null);
+    assert(context != null);
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
     _handleController = new AnimationController(duration: _kFadeDuration, vsync: overlay);

@@ -140,8 +140,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (child != null)
-      visitor(child);
+    visitor(child);
   }
 }
 
@@ -167,11 +166,7 @@ abstract class _SliverPersistentHeaderRenderObjectWidget extends RenderObjectWid
   }
 }
 
-abstract class _RenderSliverPersistentHeaderForWidgetsMixin extends RenderSliverPersistentHeader {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory _RenderSliverPersistentHeaderForWidgetsMixin._() => null;
-
+abstract class _RenderSliverPersistentHeaderForWidgetsMixin implements RenderSliverPersistentHeader {
   _SliverPersistentHeaderElement _element;
 
   @override

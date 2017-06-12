@@ -208,7 +208,7 @@ class IOSDevice extends Device {
       final XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, app);
+        await diagnoseXcodeBuildFailure(buildResult);
         printError('');
         return new LaunchResult.failed();
       }
@@ -241,9 +241,6 @@ class IOSDevice extends Device {
       // be setup on the device. Let it pick a port automatically. We will check
       // the port picked and scrape that later.
     }
-
-    if (debuggingOptions.enableSoftwareRendering)
-      launchArguments.add('--enable-software-rendering');
 
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');

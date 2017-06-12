@@ -49,13 +49,15 @@ class SingleChildScrollView extends StatelessWidget {
     this.physics,
     this.controller,
     this.child,
-  }) : assert(scrollDirection != null),
-       assert(!(controller != null && primary == true),
-          'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
-          'You cannot both set primary to true and pass an explicit controller.'
-       ),
-       primary = primary ?? controller == null && scrollDirection == Axis.vertical,
-       super(key: key);
+  }) : primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       super(key: key) {
+    assert(scrollDirection != null);
+    assert(this.primary != null);
+    assert(controller == null || !this.primary,
+       'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
+       'You cannot both set primary to true and pass an explicit controller.'
+    );
+  }
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -178,10 +180,10 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
     RenderBox child,
-  }) : assert(axisDirection != null),
-       assert(offset != null),
-       _axisDirection = axisDirection,
+  }) : _axisDirection = axisDirection,
        _offset = offset {
+    assert(axisDirection != null);
+    assert(offset != null);
     this.child = child;
   }
 

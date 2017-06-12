@@ -31,9 +31,9 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   RenderSliverPadding({
     @required EdgeInsets padding,
     RenderSliver child,
-  }) : assert(padding != null),
-       assert(padding.isNonNegative),
-       _padding = padding {
+  }) : _padding = padding {
+    assert(padding != null);
+    assert(padding.isNonNegative);
     this.child = child;
   }
 
