@@ -407,6 +407,7 @@ void main() {
       new PageStorage(
         bucket: bucket,
         child: new PageView(
+          key: const PageStorageKey<String>('PageView'),
           controller: controller,
           children: <Widget>[
             const Placeholder(),
@@ -431,6 +432,7 @@ void main() {
       new PageStorage(
         bucket: bucket,
         child: new PageView(
+          key: const PageStorageKey<String>('PageView'),
           controller: controller,
           children: <Widget>[
             const Placeholder(),
@@ -447,7 +449,7 @@ void main() {
       new PageStorage(
         bucket: bucket,
         child: new PageView(
-          key: const Key('Check it again against your list and see consistency!'),
+          key: const PageStorageKey<String>('Check it again against your list and see consistency!'),
           controller: controller2,
           children: <Widget>[
             const Placeholder(),
