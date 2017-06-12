@@ -313,19 +313,19 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
   /// The label does not affect the key's identity.
-  LabeledGlobalKey(this._debugLabel) : super.constructor();
+  const LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   // Used for forwarding the constructor from GlobalKey.
-  LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
+  const LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
 
   final String _debugLabel;
 
   @override
   String toString() {
-    final String label = _debugLabel != null ? ' $_debugLabel' : '';
+    final String tag = _debugLabel != null ? ' $_debugLabel' : '#$hashCode';
     if (runtimeType == LabeledGlobalKey)
-      return '[GlobalKey#$hashCode$label]';
-    return '[$runtimeType#$hashCode$label]';
+      return '[GlobalKey$tag]';
+    return '[$runtimeType$tag]';
   }
 }
 
@@ -1452,7 +1452,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// Sometimes, the `of` method returns the data rather than the inherited
 /// widget; for example, in this case it could have returned a [Color] instead
-/// of the `FrogColor` widget.
+/// of the [FrogColor] widget.
 ///
 /// Occasionally, the inherited widget is an implementation detail of another
 /// class, and is therefore private. The `of` method in that case is typically
@@ -1573,8 +1573,9 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// objects.
   MultiChildRenderObjectWidget({ Key key, this.children: const <Widget>[] })
     : assert(children != null),
-      assert(!children.any((Widget child) => child == null)), // https://github.com/dart-lang/sdk/issues/29276
-      super(key: key);
+      super(key: key) {
+    assert(!children.any((Widget child) => child == null)); // https://github.com/dart-lang/sdk/issues/29276
+  }
 
   /// The widgets below this widget in the tree.
   ///
@@ -2374,9 +2375,9 @@ abstract class Element implements BuildContext {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
-  Element(Widget widget)
-    : assert(widget != null),
-      _widget = widget;
+  Element(Widget widget) : _widget = widget {
+    assert(widget != null);
+  }
 
   Element _parent;
 
@@ -4362,9 +4363,9 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 /// are expected to inherit from [MultiChildRenderObjectWidget].
 class MultiChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
-    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
-      super(widget);
+  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget) : super(widget) {
+    assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
+  }
 
   @override
   MultiChildRenderObjectWidget get widget => super.widget;

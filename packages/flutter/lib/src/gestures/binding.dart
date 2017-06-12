@@ -15,10 +15,7 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 
 /// A binding for the gesture subsystem.
-abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispatcher, HitTestTarget {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory GestureBinding._() => null;
+abstract class GestureBinding extends BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
 
   @override
   void initInstances() {

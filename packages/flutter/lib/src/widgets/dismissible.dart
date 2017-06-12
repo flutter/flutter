@@ -129,9 +129,10 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({
     @required this.axis,
     @required this.moveAnimation
-  }) : assert(axis != null),
-       assert(moveAnimation != null),
-       super(reclip: moveAnimation);
+  }) : super(reclip: moveAnimation) {
+    assert(axis != null);
+    assert(moveAnimation != null);
+  }
 
   final Axis axis;
   final Animation<FractionalOffset> moveAnimation;
