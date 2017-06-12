@@ -601,7 +601,8 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 /// Animated version of [Opacity] which automatically transitions the child's
 /// opacity over a given duration whenever the given opacity changes.
 ///
-/// Animating an opacity is relatively expensive.
+/// Animating an opacity is relatively expensive because it requires painting
+/// the child into an intermediate buffer.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.
   ///
@@ -654,10 +655,10 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
   }
 }
 
-/// Animated version of [DefaultTextStyle] which automatically
-/// transitions the default text style (the text style to apply to
-/// descendant [Text] widgets without explicit style) over a given
-/// duration whenever the given style changes.
+/// Animated version of [DefaultTextStyle] which automatically transitions the
+/// default text style (the text style to apply to descendant [Text] widgets
+/// without explicit style) over a given duration whenever the given style
+/// changes.
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///
@@ -708,6 +709,15 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 }
 
 /// Animated version of [PhysicalModel].
+///
+/// The [borderRadius] and [elevation] are animated.
+///
+/// The [color] is animated if the [animateColor] property is set; otherwise,
+/// the color changes immediately at the start of the animation for the other
+/// two properties. This allows the color to be animated independently (e.g.
+/// because it is being driven by an [AnimatedTheme]).
+///
+/// The [shape] is not animated.
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///

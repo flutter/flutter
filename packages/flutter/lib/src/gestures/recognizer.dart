@@ -147,7 +147,9 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// is shortly after creating the recognizer.
   GestureArenaTeam get team => _team;
   GestureArenaTeam _team;
+  /// The [team] can only be set once.
   set team(GestureArenaTeam value) {
+    assert(value != null);
     assert(_entries.isEmpty);
     assert(_trackedPointers.isEmpty);
     assert(_team == null);

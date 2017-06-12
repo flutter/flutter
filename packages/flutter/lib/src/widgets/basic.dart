@@ -3005,7 +3005,7 @@ class Flow extends MultiChildRenderObjectWidget {
 /// which is less verbose and integrates with [DefaultTextStyle] for default
 /// styling.
 ///
-/// Example:
+/// ## Sample code
 ///
 /// ```dart
 /// new RichText(
@@ -3022,9 +3022,9 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Text]
-///  * [TextSpan]
-///  * [DefaultTextStyle]
+///  * [TextSpan], which is used to describe the text in a paragraph.
+///  * [Text], which automatically applies the ambient styles described by a
+///    [DefaultTextStyle] to a single string.
 class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
