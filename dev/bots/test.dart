@@ -118,7 +118,7 @@ Future<Null> _pubRunTest(
   String workingDirectory, {
   String testPath,
 }) {
-  final List<String> args = <String>['run', 'test', '-rexpanded'];
+  final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
   return _runCommand(pub, args, workingDirectory: workingDirectory);
