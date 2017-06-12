@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -23,12 +22,6 @@ import 'ticker_provider.dart';
 /// "routes" that are pushed on and popped off the navigator. Most routes have
 /// visual affordances, which they place in the navigators [Overlay] using one
 /// or more [OverlayEntry] objects.
-///
-/// See [Navigator] for more explanation of how to use a Route
-/// with navigation, including code examples.
-///
-/// See [MaterialPageRoute] for a route that replaces the
-/// entire screen with a platform-adaptive transition.
 abstract class Route<T> {
   /// The navigator that the route is in, if any.
   NavigatorState get navigator => _navigator;
@@ -59,7 +52,7 @@ abstract class Route<T> {
   ///
   /// The returned value resolves when the push transition is complete.
   @protected
-  TickerFuture didPush() => new TickerFuture.complete();
+  Future<Null> didPush() => new Future<Null>.value();
 
   /// When this route is popped (see [Navigator.pop]) if the result isn't
   /// specified or if it's null, this value will be used instead.
@@ -71,7 +64,7 @@ abstract class Route<T> {
   void didReplace(Route<dynamic> oldRoute) { }
 
   /// Returns false if this route wants to veto a [Navigator.pop]. This method is
-  /// called by [Navigator.maybePop].
+  /// called by [Naviagtor.willPop].
   ///
   /// By default, routes veto a pop if they're the first route in the history
   /// (i.e., if [isFirst]). This behavior prevents the user from popping the
@@ -79,7 +72,7 @@ abstract class Route<T> {
   ///
   /// See also:
   ///
-  /// * [Form], which provides a [Form.onWillPop] callback that uses this mechanism.
+  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
   Future<RoutePopDisposition> willPop() async {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
@@ -163,7 +156,7 @@ abstract class Route<T> {
   /// If attempts to dismiss this route might be vetoed, for example because
   /// a [WillPopCallback] was defined for the route, then it may make sense
   /// to disable the pop gesture. For example, the iOS back gesture is disabled
-  /// when [ModalRoute.hasScopedWillPopCallback] is true.
+  /// when [ModalRoute.hasScopedWillCallback] is true.
   NavigationGestureController startPopGesture() => null;
 
   /// Whether this route is the top-most route on the navigator.
@@ -232,14 +225,11 @@ class NavigatorObserver {
   NavigatorState get navigator => _navigator;
   NavigatorState _navigator;
 
-  /// The [Navigator] pushed `route`.
+  /// The [Navigator] pushed the given route.
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// The [Navigator] popped `route`.
+  /// The [Navigator] popped the given route.
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
-
-  /// The [Navigator] removed `route`.
-  void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
   /// The [Navigator] is being controlled by a user gesture.
   ///
@@ -256,8 +246,8 @@ class NavigatorObserver {
 abstract class NavigationGestureController {
   /// Configures the NavigationGestureController and tells the given [Navigator] that
   /// a gesture has started.
-  NavigationGestureController(this._navigator)
-    : assert(_navigator != null) {
+  NavigationGestureController(this._navigator) {
+    assert(_navigator != null);
     // Disable Hero transitions until the gesture is complete.
     _navigator.didStartUserGesture();
   }
@@ -361,7 +351,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ```
 ///
 /// It usually isn't necessary to provide a widget that pops the Navigator
-/// in a route with a [Scaffold] because the Scaffold automatically adds a
+/// in a route with a Scaffold because the Scaffold automatically adds a
 /// 'back' button to its AppBar. Pressing the back button causes
 /// [Navigator.pop] to be called. On Android, pressing the system back
 /// button does the same thing.
@@ -369,11 +359,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ### Using named navigator routes
 ///
 /// Mobile apps often manage a large number of routes and it's often
-/// easiest to refer to them by name. Route names, by convention,
-/// use a path-like structure (for example, '/a/b/c').
-/// The app's home page route is named '/' by default.
-///
-/// The [MaterialApp] can be created
+/// easiest to refer to them by name. The [MaterialApp] can be created
 /// with a `Map<String, WidgetBuilder>` which maps from a route's name to
 /// a builder function that will create it. The [MaterialApp] uses this
 /// map to create a value for its navigator's [onGenerateRoute] callback.
@@ -396,6 +382,9 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ```dart
 /// Navigator.of(context).pushNamed('/b');
 /// ```
+///
+/// The app's home page route is named '/' by default and other routes are
+/// given pathnames by convention.
 ///
 /// ### Routes can return a value
 ///
@@ -437,7 +426,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// because they block input to the widgets below.
 ///
 /// There are functions which create and show popup routes. For
-/// example: [showDialog], [showMenu], and [showModalBottomSheet]. These
+/// example: [showDialog], [showMenu], and [showBottomSheet]. These
 /// functions return their pushed route's Future as described above.
 /// Callers can await the returned value to take an action when the
 /// route is popped, or to discover the route's value.
@@ -538,8 +527,8 @@ class Navigator extends StatefulWidget {
   /// encloses the given context, and transitions to it.
   ///
   /// The new route and the previous route (if any) are notified (see
-  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has any
-  /// [Navigator.observers], they will be notified as well (see
+  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has an
+  /// [Navigator.observer], it will be notified as well (see
   /// [NavigatorObserver.didPush]).
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
@@ -551,9 +540,9 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).push(route);
   }
 
-  /// Returns the value of the current route's [Route.willPop] method. This
-  /// method is typically called before a user-initiated [pop]. For example on
-  /// Android it's called by the binding for the system's back button.
+  /// Returns the value of the current route's `willPop` method. This method is
+  /// typically called before a user-initiated [pop]. For example on Android it's
+  /// called by the binding for the system's back button.
   ///
   /// See also:
   ///
@@ -590,7 +579,7 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pop(result);
   }
 
-  /// Calls [pop] repeatedly until the predicate returns true.
+  /// Calls [pop()] repeatedly until the predicate returns true.
   ///
   /// The predicate may be applied to the same route more than once if
   /// [Route.willHandlePopInternally] is true.
@@ -675,22 +664,6 @@ class Navigator extends StatefulWidget {
   /// when the pushed route is popped off the navigator.
   static Future<dynamic> pushReplacement(BuildContext context, Route<dynamic> route, { dynamic result }) {
     return Navigator.of(context).pushReplacement(route, result: result);
-  }
-
-  /// Immediately remove `route` and [Route.dispose] it.
-  ///
-  /// The route's animation does not run and the future returned from pushing
-  /// the route will not complete. Ongoing input gestures are cancelled. If
-  /// the [Navigator] has any [Navigator.observers], they will be notified with
-  /// [NavigatorObserver.didRemove].
-  ///
-  /// The routes before and after the removed route, if any, are notified with
-  /// [Route.didChangeNext] and [Route.didChangePrevious].
-  ///
-  /// This method is used to dismiss dropdown menus that are up when the screen's
-  /// orientation changes.
-  static void removeRoute(BuildContext context, Route<dynamic> route) {
-    return Navigator.of(context).removeRoute(route);
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -818,8 +791,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Adds the given route to the navigator's history, and transitions to it.
   ///
   /// The new route and the previous route (if any) are notified (see
-  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has any
-  /// [Navigator.observers], they will be notified as well (see
+  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has an
+  /// [Navigator.observer], it will be notified as well (see
   /// [NavigatorObserver.didPush]).
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
@@ -914,7 +887,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute._navigator = this;
       newRoute.install(_currentOverlayEntry);
       _history[index] = newRoute;
-      newRoute.didPush().whenCompleteOrCancel(() {
+      newRoute.didPush().then<Null>((Null value) {
         // The old route's exit is not animated. We're assuming that the
         // new route completely obscures the old one.
         if (mounted) {
@@ -988,66 +961,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; });
   }
 
-  /// Push the given route and then remove all the previous routes until the
-  /// `predicate` returns true.
-  ///
-  /// The predicate may be applied to the same route more than once if
-  /// [Route.willHandlePopInternally] is true.
-  ///
-  /// To remove routes until a route with a certain name, use the
-  /// [RoutePredicate] returned from [ModalRoute.withName].
-  ///
-  /// To remove all the routes before the pushed route, use a [RoutePredicate]
-  /// that always returns false.
-  Future<dynamic> pushAndRemoveUntil(Route<dynamic> newRoute, RoutePredicate predicate) {
-    assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
-    final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
-    while (_history.isNotEmpty && !predicate(_history.last)) {
-      final Route<dynamic> removedRoute = _history.removeLast();
-      assert(removedRoute != null && removedRoute._navigator == this);
-      assert(removedRoute.overlayEntries.isNotEmpty);
-      removedRoutes.add(removedRoute);
-    }
-    assert(newRoute._navigator == null);
-    assert(newRoute.overlayEntries.isEmpty);
-    setState(() {
-      final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
-      newRoute._navigator = this;
-      newRoute.install(_currentOverlayEntry);
-      _history.add(newRoute);
-      newRoute.didPush().whenCompleteOrCancel(() {
-        if (mounted) {
-          for (Route<dynamic> route in removedRoutes)
-            route.dispose();
-        }
-      });
-      newRoute.didChangeNext(null);
-      if (oldRoute != null)
-        oldRoute.didChangeNext(newRoute);
-      for (NavigatorObserver observer in widget.observers)
-        observer.didPush(newRoute, oldRoute);
-    });
-    assert(() { _debugLocked = false; return true; });
-    _cancelActivePointers();
-    return newRoute.popped;
-  }
-
-  /// Push the route with the given name and then remove all the previous routes
-  /// until the `predicate` returns true.
-  ///
-  /// The predicate may be applied to the same route more than once if
-  /// [Route.willHandlePopInternally] is true.
-  ///
-  /// To remove routes until a route with a certain name, use the
-  /// [RoutePredicate] returned from [ModalRoute.withName].
-  ///
-  /// To remove all the routes before the pushed route, use a [RoutePredicate]
-  /// that always returns false.
-  Future<dynamic> pushNamedAndRemoveUntil(String routeName, RoutePredicate predicate) {
-    return pushAndRemoveUntil(_routeNamed(routeName), predicate);
-  }
-
   /// Tries to pop the current route, first giving the active route the chance
   /// to veto the operation using [Route.willPop]. This method is typically
   /// called instead of [pop] when the user uses a back button. For example on
@@ -1078,7 +991,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// If there are any routes left on the history, the top remaining route is
   /// notified (see [Route.didPopNext]), and the method returns true. In that
-  /// case, if the [Navigator] has any [Navigator.observers], they will be notified
+  /// case, if the [Navigator] has an [Navigator.observer], it will be notified
   /// as well (see [NavigatorObserver.didPop]). Otherwise, if the popped route
   /// was the last route, the method returns false.
   ///
@@ -1118,36 +1031,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(() { _debugLocked = false; return true; });
     _cancelActivePointers();
     return true;
-  }
-
-  /// Immediately remove `route` and [Route.dispose] it.
-  ///
-  /// The route's animation does not run and the future returned from pushing
-  /// the route will not complete. Ongoing input gestures are cancelled. If
-  /// the [Navigator] has any [Navigator.observers], they will be notified with
-  /// [NavigatorObserver.didRemove].
-  ///
-  /// This method is used to dismiss dropdown menus that are up when the screen's
-  /// orientation changes.
-  void removeRoute(Route<dynamic> route) {
-    assert(route != null);
-    assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
-    assert(route._navigator == this);
-    final int index = _history.indexOf(route);
-    assert(index != -1);
-    final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
-    final Route<dynamic> nextRoute = (index + 1 < _history.length) ? _history[index + 1] : null;
-    setState(() {
-      _history.removeAt(index);
-      previousRoute?.didChangeNext(nextRoute);
-      nextRoute?.didChangePrevious(previousRoute);
-      for (NavigatorObserver observer in widget.observers)
-        observer.didRemove(route, previousRoute);
-      route.dispose();
-    });
-    assert(() { _debugLocked = false; return true; });
-    _cancelActivePointers();
   }
 
   /// Complete the lifecycle for a route that has been popped off the navigator.
@@ -1228,15 +1111,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
-    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
-      // If we're between frames (SchedulerPhase.idle) then absorb any
-      // subsequent pointers from this frame. The absorbing flag will be
-      // reset in the next frame, see build().
-      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
-      setState(() {
-        absorber?.absorbing = true;
-      });
-    }
+    final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+    setState(() {
+      absorber?.absorbing = true;
+    });
     for (int pointer in _activePointers.toList())
       WidgetsBinding.instance.cancelPointer(pointer);
   }

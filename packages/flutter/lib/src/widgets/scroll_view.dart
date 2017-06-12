@@ -49,17 +49,18 @@ abstract class ScrollView extends StatelessWidget {
     this.reverse: false,
     this.controller,
     bool primary,
-    ScrollPhysics physics,
+    this.physics,
     this.shrinkWrap: false,
-  }) : assert(reverse != null),
-       assert(shrinkWrap != null),
-       assert(!(controller != null && primary == true),
+  }) : primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       super(key: key) {
+    assert(reverse != null);
+    assert(shrinkWrap != null);
+    assert(this.primary != null);
+    assert(controller == null || !this.primary,
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.'
-       ),
-       primary = primary ?? controller == null && scrollDirection == Axis.vertical,
-       physics = physics ?? (primary == true || (primary == null && controller == null && scrollDirection == Axis.vertical) ? const AlwaysScrollableScrollPhysics() : null),
-       super(key: key);
+    );
+  }
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -89,11 +90,7 @@ abstract class ScrollView extends StatelessWidget {
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
   ///
-  /// When this is true, the scroll view is scrollable even if it does not have
-  /// sufficient content to actually scroll. Otherwise, by default the user can
-  /// only scroll the view if it has sufficient content. See [physics].
-  ///
-  /// On iOS, this also identifies the scroll view that will scroll to top in
+  /// On iOS, this identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
   ///
   /// Defaults to true when [scrollDirection] is [Axis.vertical] and
@@ -105,35 +102,7 @@ abstract class ScrollView extends StatelessWidget {
   /// For example, determines how the scroll view continues to animate after the
   /// user stops dragging the scroll view.
   ///
-  /// Defaults to matching platform conventions. Furthermore, if [primary] is
-  /// false, then the user cannot scroll if there is insufficient content to
-  /// scroll, while if [primary] is true, they can always attempt to scroll.
-  ///
-  /// To force the scroll view to always be scrollable even if there is
-  /// insufficient content, as if [primary] was true but without necessarily
-  /// setting it to true, provide an [AlwaysScrollableScrollPhysics] physics
-  /// object, as in:
-  ///
-  /// ```dart
-  ///   physics: const AlwaysScrollableScrollPhysics(),
-  /// ```
-  ///
-  /// To force the scroll view to use the default platform conventions and not
-  /// be scrollable if there is insufficient content, regardless of the value of
-  /// [primary], provide an explicit [ScrollPhysics] object, as in:
-  ///
-  /// ```dart
-  ///   physics: const ScrollPhysics(),
-  /// ```
-  ///
-  /// The physics can be changed dynamically (by providing a new object in a
-  /// subsequent build), but new physics will only take effect if the _class_ of
-  /// the provided object changes. Merely constructing a new instance with a
-  /// different configuration is insufficient to cause the physics to be
-  /// reapplied. (This is because the final object used is generated
-  /// dynamically, which can be relatively expensive, and it would be
-  /// inefficient to speculatively create this object each frame to see if the
-  /// physics should be updated.)
+  /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
   /// Whether the extent of the scroll view in the [scrollDirection] should be
@@ -233,55 +202,6 @@ abstract class ScrollView extends StatelessWidget {
 /// list and a grid, use a list of three slivers: [SliverAppBar], [SliverList],
 /// and [SliverGrid].
 ///
-/// ## Sample code
-///
-/// This sample code shows a scroll view that contains a flexible pinned app
-/// bar, a grid, and an infinite list.
-///
-/// ```dart
-/// new CustomScrollView(
-///   slivers: <Widget>[
-///     const SliverAppBar(
-///       pinned: true,
-///       expandedHeight: 250.0,
-///       flexibleSpace: const FlexibleSpaceBar(
-///         title: const Text('Demo'),
-///       ),
-///     ),
-///     new SliverGrid(
-///       gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
-///         maxCrossAxisExtent: 200.0,
-///         mainAxisSpacing: 10.0,
-///         crossAxisSpacing: 10.0,
-///         childAspectRatio: 4.0,
-///       ),
-///       delegate: new SliverChildBuilderDelegate(
-///         (BuildContext context, int index) {
-///           return new Container(
-///             alignment: FractionalOffset.center,
-///             color: Colors.teal[100 * (index % 9)],
-///             child: new Text('grid item $index'),
-///           );
-///         },
-///         childCount: 20,
-///       ),
-///     ),
-///     new SliverFixedExtentList(
-///       itemExtent: 50.0,
-///       delegate: new SliverChildBuilderDelegate(
-///         (BuildContext context, int index) {
-///           return new Container(
-///             alignment: FractionalOffset.center,
-///             color: Colors.lightBlue[100 * (index % 9)],
-///             child: new Text('list item $index'),
-///           );
-///         },
-///       ),
-///     ),
-///   ],
-/// )
-/// ```
-///
 /// See also:
 ///
 ///  * [SliverList], which is a sliver that displays linear list of children.
@@ -376,7 +296,7 @@ abstract class BoxScrollView extends ScrollView {
   }
 }
 
-/// A scrollable list of widgets arranged linearly.
+/// A scrollable, linear list of widgets.
 ///
 /// [ListView] is the most commonly used scrolling widget. It displays its
 /// children one after another in the scroll direction. In the cross axis, the
@@ -406,20 +326,6 @@ abstract class BoxScrollView extends ScrollView {
 ///     a [SliverChildDelegate] can control the algorithm used to estimate the
 ///     size of children that are not actually visible.
 ///
-/// ## Sample code
-///
-/// An infinite list of children:
-///
-/// ```dart
-/// new ListView.builder(
-///   padding: new EdgeInsets.all(8.0),
-///   itemExtent: 20.0,
-///   itemBuilder: (BuildContext context, int index) {
-///     return new Text('entry $index');
-///   },
-/// )
-/// ```
-///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -429,8 +335,6 @@ abstract class BoxScrollView extends ScrollView {
 ///  * [GridView], which is scrollable, 2D array of widgets.
 ///  * [CustomScrollView], which is a scrollable widget that creates custom
 ///    scroll effects using slivers.
-///  * [ListBody], which arranges its children in a similar manner, but without
-///    scrolling.
 class ListView extends BoxScrollView {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
   ///
@@ -509,17 +413,18 @@ class ListView extends BoxScrollView {
     EdgeInsets padding,
     this.itemExtent,
     @required this.childrenDelegate,
-  }) : assert(childrenDelegate != null),
-       super(
-         key: key,
-         scrollDirection: scrollDirection,
-         reverse: reverse,
-         controller: controller,
-         primary: primary,
-         physics: physics,
-         shrinkWrap: shrinkWrap,
-         padding: padding,
-       );
+  }) : super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    controller: controller,
+    primary: primary,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(childrenDelegate != null);
+  }
 
   /// If non-null, forces the children to have the given extent in the scroll
   /// direction.
@@ -604,18 +509,18 @@ class GridView extends BoxScrollView {
     EdgeInsets padding,
     @required this.gridDelegate,
     List<Widget> children: const <Widget>[],
-  }) : assert(gridDelegate != null),
-       childrenDelegate = new SliverChildListDelegate(children),
-       super(
-         key: key,
-         scrollDirection: scrollDirection,
-         reverse: reverse,
-         controller: controller,
-         primary: primary,
-         physics: physics,
-         shrinkWrap: shrinkWrap,
-         padding: padding,
-       );
+  }) : childrenDelegate = new SliverChildListDelegate(children), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    controller: controller,
+    primary: primary,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(gridDelegate != null);
+  }
 
   /// Creates a scrollable, 2D array of widgets that are created on demand.
   ///
@@ -642,18 +547,18 @@ class GridView extends BoxScrollView {
     @required this.gridDelegate,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
-  }) : assert(gridDelegate != null),
-       childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
-       super(
-         key: key,
-         scrollDirection: scrollDirection,
-         reverse: reverse,
-         controller: controller,
-         primary: primary,
-         physics: physics,
-         shrinkWrap: shrinkWrap,
-         padding: padding,
-       );
+  }) : childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    controller: controller,
+    primary: primary,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(gridDelegate != null);
+  }
 
   /// Creates a scrollable, 2D array of widgets with both a custom
   /// [SliverGridDelegate] and a custom [SliverChildDelegate].
@@ -673,18 +578,19 @@ class GridView extends BoxScrollView {
     EdgeInsets padding,
     @required this.gridDelegate,
     @required this.childrenDelegate,
-  }) : assert(gridDelegate != null),
-       assert(childrenDelegate != null),
-       super(
-         key: key,
-         scrollDirection: scrollDirection,
-         reverse: reverse,
-         controller: controller,
-         primary: primary,
-         physics: physics,
-         shrinkWrap: shrinkWrap,
-         padding: padding,
-       );
+  }) : super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    controller: controller,
+    primary: primary,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(gridDelegate != null);
+    assert(childrenDelegate != null);
+  }
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
   /// the cross axis.

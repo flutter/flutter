@@ -14,7 +14,7 @@ void main() {
   group('AsyncSnapshot', () {
     test('requiring data succeeds if data is present', () {
       expect(
-        const AsyncSnapshot<String>.withData(ConnectionState.done, 'hello').requireData,
+        new AsyncSnapshot<String>.withData(ConnectionState.done, 'hello').requireData,
         'hello',
       );
     });

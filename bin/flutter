@@ -46,12 +46,13 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART="$DART_SDK_PATH/bin/dart"
 PUB="$DART_SDK_PATH/bin/pub"
 
-# Test if running as superuser – but don't warn if running within Docker
-if [[ "$EUID" == "0" ]] && ! [[ -f /.dockerenv ]]; then
+# Test if running as superuser
+if [[ "$EUID" == "0" ]]; then
   echo "   Woah! You appear to be trying to run flutter as root."
   echo "   We strongly recommend running the flutter tool without superuser privileges."
   echo "  /"
   echo "📎"
+  exit 1
 fi
 
 # Test if Git is available on the Host
@@ -80,12 +81,7 @@ fi
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
     echo Building flutter tool...
-    LOCAL_PUB_ENV="$PUB_ENVIRONMENT"
-    if [ "$TRAVIS" == "true" ] || [ "$BOT" == "true" ] || [ "$CONTINUOUS_INTEGRATION" == "true" ] || [ "$CHROME_HEADLESS" == "1" ] || [ "$APPVEYOR" == "true" ] || [ "$CI" == "true" ]; then
-      LOCAL_PUB_ENV="$LOCAL_PUB_ENV:flutter_bot"
-    fi
-    LOCAL_PUB_ENV="$LOCAL_PUB_ENV:flutter_install"
-    (cd "$FLUTTER_TOOLS_DIR"; PUB_ENVIRONMENT=$LOCAL_PUB_ENV "$PUB" upgrade --verbosity=error --no-packages-dir)
+    (cd "$FLUTTER_TOOLS_DIR"; "$PUB" upgrade --verbosity=error --no-packages-dir)
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo $REVISION > "$STAMP_PATH"
   fi

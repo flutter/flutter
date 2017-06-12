@@ -27,7 +27,7 @@ abstract class OperatingSystemUtils {
   /// Make the given file executable. This may be a no-op on some platforms.
   ProcessResult makeExecutable(File file);
 
-  /// Return the path (with symlinks resolved) to the given executable, or null
+  /// Return the path (with symlinks resolved) to the given executable, or `null`
   /// if `which` was not able to locate the binary.
   File which(String execName) {
     final List<File> result = _which(execName);
@@ -61,9 +61,6 @@ abstract class OperatingSystemUtils {
   }
 
   List<File> _which(String execName, {bool all: false});
-
-  /// Returns the separator between items in the PATH environment variable.
-  String get pathVarSeparator;
 }
 
 class _PosixUtils extends OperatingSystemUtils {
@@ -123,9 +120,6 @@ class _PosixUtils extends OperatingSystemUtils {
     }
     return _name;
   }
-
-  @override
-  String get pathVarSeparator => ':';
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
@@ -199,14 +193,11 @@ class _WindowsUtils extends OperatingSystemUtils {
     }
     return _name;
   }
-
-  @override
-  String get pathVarSeparator => ';';
 }
 
 /// Find and return the project root directory relative to the specified
 /// directory or the current working directory if none specified.
-/// Return null if the project root could not be found
+/// Return `null` if the project root could not be found
 /// or if the project root is the flutter repository root.
 String findProjectRoot([String directory]) {
   const String kProjectRootSentinel = 'pubspec.yaml';

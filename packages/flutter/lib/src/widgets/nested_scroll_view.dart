@@ -25,74 +25,39 @@ import 'sliver.dart';
 import 'ticker_provider.dart';
 
 /// Signature used by [NestedScrollView] for building its header.
-///
-/// The `innerBoxIsScrolled` argument is typically used to control the
-/// [SliverAppBar.forceElevated] property to ensure that the app bar shows a
-/// shadow, since it would otherwise not necessarily be aware that it had
-/// content ostensibly below it.
 typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
 
-// TODO(abarth): Make this configurable with a controller.
-const double _kInitialScrollOffset = 0.0;
-
 class NestedScrollView extends StatefulWidget {
-  const NestedScrollView({
+  NestedScrollView({
     Key key,
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
-  }) : assert(scrollDirection != null),
-       assert(reverse != null),
-       assert(headerSliverBuilder != null),
-       assert(body != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(scrollDirection != null);
+    assert(reverse != null);
+    assert(headerSliverBuilder != null);
+    assert(body != null);
+  }
 
   // TODO(ianh): we should expose a controller so you can call animateTo, etc.
 
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Defaults to [Axis.vertical].
   final Axis scrollDirection;
 
-  /// Whether the scroll view scrolls in the reading direction.
-  ///
-  /// For example, if the reading direction is left-to-right and
-  /// [scrollDirection] is [Axis.horizontal], then the scroll view scrolls from
-  /// left to right when [reverse] is false and from right to left when
-  /// [reverse] is true.
-  ///
-  /// Similarly, if [scrollDirection] is [Axis.vertical], then the scroll view
-  /// scrolls from top to bottom when [reverse] is false and from bottom to top
-  /// when [reverse] is true.
-  ///
-  /// Defaults to false.
   final bool reverse;
 
-  /// How the scroll view should respond to user input.
-  ///
-  /// For example, determines how the scroll view continues to animate after the
-  /// user stops dragging the scroll view.
-  ///
-  /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
-  /// A builder for any widgets that are to precede the inner scroll views (as
-  /// given by [body]).
-  ///
-  /// Typically this is used to create a [SliverAppBar] with a [TabBar].
   final NestedScrollViewHeaderSliversBuilder headerSliverBuilder;
 
-  /// The widget to show inside the [NestedScrollView].
-  ///
-  /// Typically this will be [TabBarView].
-  ///
-  /// The [body] is built in a context that provides a [PrimaryScrollController]
-  /// that interacts with the [NestedScrollView]'s scroll controller.
   final Widget body;
 
-  List<Widget> _buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
+  double get initialScrollOffset => 0.0;
+
+  @protected
+  List<Widget> buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
     final List<Widget> slivers = <Widget>[];
     slivers.addAll(headerSliverBuilder(context, bodyIsScrolled));
     slivers.add(new SliverFillRemaining(
@@ -109,12 +74,12 @@ class NestedScrollView extends StatefulWidget {
 }
 
 class _NestedScrollViewState extends State<NestedScrollView> {
-  _NestedScrollCoordinator _coordinator;
+  _NestedScrollCoorindator _coordinator;
 
   @override
   void initState() {
     super.initState();
-    _coordinator = new _NestedScrollCoordinator(context, _kInitialScrollOffset);
+    _coordinator = new _NestedScrollCoorindator(context, widget.initialScrollOffset);
   }
 
   @override
@@ -137,7 +102,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
       reverse: widget.reverse,
       physics: new ClampingScrollPhysics(parent: widget.physics),
       controller: _coordinator._outerController,
-      slivers: widget._buildSlivers(context, _coordinator._innerController, _coordinator.hasScrolledBody),
+      slivers: widget.buildSlivers(context, _coordinator._innerController, _coordinator.hasScrolledBody),
     );
   }
 }
@@ -169,8 +134,8 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
 
 typedef ScrollActivity _NestedScrollActivityGetter(_NestedScrollPosition position);
 
-class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
-  _NestedScrollCoordinator(this._context, double initialScrollOffset) {
+class _NestedScrollCoorindator implements ScrollActivityDelegate {
+  _NestedScrollCoorindator(this._context, double initialScrollOffset) {
     _outerController = new _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'outer');
     _innerController = new _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'inner');
   }
@@ -443,17 +408,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     return 0.0;
   }
 
-  ScrollHoldController hold(VoidCallback holdCancelCallback) {
-    beginActivity(
-      new HoldScrollActivity(delegate: _outerPosition, onHoldCanceled: holdCancelCallback),
-      (_NestedScrollPosition position) => new HoldScrollActivity(delegate: position),
-    );
-    return this;
-  }
-
-  @override
-  void cancel() {
-    goBallistic(0.0);
+  void didTouch() {
+    _outerPosition._propagateTouched();
+    for (_NestedScrollPosition position in _innerPositions)
+      position._propagateTouched();
   }
 
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
@@ -526,12 +484,12 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 }
 
 class _NestedScrollController extends ScrollController {
-  _NestedScrollController(this.coordinator, {
+  _NestedScrollController(this.coorindator, {
     double initialScrollOffset: 0.0,
     String debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset, debugLabel: debugLabel);
 
-  final _NestedScrollCoordinator coordinator;
+  final _NestedScrollCoorindator coorindator;
 
   @override
   ScrollPosition createScrollPosition(
@@ -540,7 +498,7 @@ class _NestedScrollController extends ScrollController {
     ScrollPosition oldPosition,
   ) {
     return new _NestedScrollPosition(
-      coordinator: coordinator,
+      coorindator: coorindator,
       physics: physics,
       context: context,
       initialPixels: initialScrollOffset,
@@ -553,8 +511,8 @@ class _NestedScrollController extends ScrollController {
   void attach(ScrollPosition position) {
     assert(position is _NestedScrollPosition);
     super.attach(position);
-    coordinator.updateParent();
-    coordinator.updateCanDrag();
+    coorindator.updateParent();
+    coorindator.updateCanDrag();
   }
 
   Iterable<_NestedScrollPosition> get nestedPositions sync* {
@@ -569,7 +527,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     double initialPixels: 0.0,
     ScrollPosition oldPosition,
     String debugLabel,
-    @required this.coordinator,
+    @required this.coorindator,
   }) : super(
     physics: physics,
     context: context,
@@ -583,7 +541,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     assert(activity != null);
   }
 
-  final _NestedScrollCoordinator coordinator;
+  final _NestedScrollCoorindator coorindator;
 
   TickerProvider get vsync => context.vsync;
 
@@ -645,7 +603,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
-  ScrollDirection get userScrollDirection => coordinator.userScrollDirection;
+  ScrollDirection get userScrollDirection => coorindator.userScrollDirection;
 
   DrivenScrollActivity createDrivenScrollActivity(double to, Duration duration, Curve curve) {
     return new DrivenScrollActivity(
@@ -694,9 +652,9 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
         assert(metrics != null);
         if (metrics.minRange == metrics.maxRange)
           return new IdleScrollActivity(this);
-        return new _NestedOuterBallisticScrollActivity(coordinator, this, metrics, simulation, context.vsync);
+        return new _NestedOuterBallisticScrollActivity(coorindator, this, metrics, simulation, context.vsync);
       case _NestedBallisticScrollActivityMode.inner:
-        return new _NestedInnerBallisticScrollActivity(coordinator, this, simulation, context.vsync);
+        return new _NestedInnerBallisticScrollActivity(coorindator, this, simulation, context.vsync);
       case _NestedBallisticScrollActivityMode.independent:
         return new BallisticScrollActivity(this, simulation, context.vsync);
     }
@@ -708,12 +666,12 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     @required Duration duration,
     @required Curve curve,
   }) {
-    return coordinator.animateTo(coordinator.unnestOffset(to, this), duration: duration, curve: curve);
+    return coorindator.animateTo(coorindator.unnestOffset(to, this), duration: duration, curve: curve);
   }
 
   @override
   void jumpTo(double value) {
-    return coordinator.jumpTo(coordinator.unnestOffset(value, this));
+    return coorindator.jumpTo(coorindator.unnestOffset(value, this));
   }
 
   @override
@@ -734,7 +692,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   @override
   void applyNewDimensions() {
     super.applyNewDimensions();
-    coordinator.updateCanDrag();
+    coorindator.updateCanDrag();
   }
 
   void updateCanDrag(double totalExtent) {
@@ -742,13 +700,17 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
-  ScrollHoldController hold(VoidCallback holdCancelCallback) {
-    return coordinator.hold(holdCancelCallback);
+  void didTouch() {
+    coorindator.didTouch();
+  }
+
+  void _propagateTouched() {
+    activity.didTouch();
   }
 
   @override
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
-    return coordinator.drag(details, dragCancelCallback);
+    return coorindator.drag(details, dragCancelCallback);
   }
 
   @override
@@ -762,45 +724,46 @@ enum _NestedBallisticScrollActivityMode { outer, inner, independent }
 
 class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
   _NestedInnerBallisticScrollActivity(
-    this.coordinator,
+    this.coorindator,
     _NestedScrollPosition position,
     Simulation simulation,
     TickerProvider vsync,
   ) : super(position, simulation, vsync);
 
-  final _NestedScrollCoordinator coordinator;
+  final _NestedScrollCoorindator coorindator;
 
   @override
   _NestedScrollPosition get delegate => super.delegate;
 
   @override
   void resetActivity() {
-    delegate.beginActivity(coordinator.createInnerBallisticScrollActivity(delegate, velocity));
+    delegate.beginActivity(coorindator.createInnerBallisticScrollActivity(delegate, velocity));
   }
 
   @override
   void applyNewDimensions() {
-    delegate.beginActivity(coordinator.createInnerBallisticScrollActivity(delegate, velocity));
+    delegate.beginActivity(coorindator.createInnerBallisticScrollActivity(delegate, velocity));
   }
 
   @override
   bool applyMoveTo(double value) {
-    return super.applyMoveTo(coordinator.nestOffset(value, delegate));
+    return super.applyMoveTo(coorindator.nestOffset(value, delegate));
   }
 }
 
 class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
   _NestedOuterBallisticScrollActivity(
-    this.coordinator,
+    this.coorindator,
     _NestedScrollPosition position,
     this.metrics,
     Simulation simulation,
     TickerProvider vsync,
-  ) : assert(metrics.minRange != metrics.maxRange),
-      assert(metrics.maxRange > metrics.minRange),
-      super(position, simulation, vsync);
+  ) : super(position, simulation, vsync) {
+    assert(metrics.minRange != metrics.maxRange);
+    assert(metrics.maxRange > metrics.minRange);
+  }
 
-  final _NestedScrollCoordinator coordinator;
+  final _NestedScrollCoorindator coorindator;
   final _NestedScrollMetrics metrics;
 
   @override
@@ -808,12 +771,12 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 
   @override
   void resetActivity() {
-    delegate.beginActivity(coordinator.createOuterBallisticScrollActivity(velocity));
+    delegate.beginActivity(coorindator.createOuterBallisticScrollActivity(velocity));
   }
 
   @override
   void applyNewDimensions() {
-    delegate.beginActivity(coordinator.createOuterBallisticScrollActivity(velocity));
+    delegate.beginActivity(coorindator.createOuterBallisticScrollActivity(velocity));
   }
 
   @override

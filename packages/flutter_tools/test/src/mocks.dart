@@ -42,9 +42,6 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   @override
   bool get supportsPlatform => true;
 
-  @override
-  bool get canListAnything => true;
-
   void addDevice(MockAndroidDevice device) {
     _devices.add(device);
 

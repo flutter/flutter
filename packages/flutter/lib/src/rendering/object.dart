@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui' as ui show ImageFilter, PictureRecorder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -46,8 +46,8 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 
 /// A place to paint.
 ///
-/// Rather than holding a canvas directly, [RenderObject]s paint using a painting
-/// context. The painting context has a [Canvas], which receives the
+/// Rather than holding a canvas directly, render objects paint using a painting
+/// context. The painting context has a canvas, which receives the
 /// individual draw operations, and also has functions for painting child
 /// render objects.
 ///
@@ -57,9 +57,10 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 /// not hold a reference to the canvas across operations that might paint
 /// child render objects.
 class PaintingContext {
-  PaintingContext._(this._containerLayer, this._paintBounds)
-    : assert(_containerLayer != null),
-      assert(_paintBounds != null);
+  PaintingContext._(this._containerLayer, this._paintBounds) {
+    assert(_containerLayer != null);
+    assert(_paintBounds != null);
+  }
 
   final ContainerLayer _containerLayer;
   final Rect _paintBounds;
@@ -242,7 +243,7 @@ class PaintingContext {
     _currentLayer?.willChangeHint = true;
   }
 
-  /// Adds a composited leaf layer to the recording.
+  /// Adds a composited layer to the recording.
   ///
   /// After calling this function, the [canvas] property will change to refer to
   /// a new [Canvas] that draws on top of the given layer.
@@ -250,44 +251,10 @@ class PaintingContext {
   /// A [RenderObject] that uses this function is very likely to require its
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
-  /// layer, which, for example, causes them to use composited clips.
-  ///
-  /// See also:
-  ///
-  ///  * [pushLayer], for adding a layer and using its canvas to paint with that
-  ///    layer.
+  /// layer, which causes them to use composited clips, for example.
   void addLayer(Layer layer) {
     _stopRecordingIfNeeded();
     _appendLayer(layer);
-  }
-
-  /// Appends the given layer to the recording, and calls the `painter` callback
-  /// with that layer, providing the [childPaintBounds] as the paint bounds of
-  /// the child. Canvas recording commands are not guaranteed to be stored
-  /// outside of the paint bounds.
-  ///
-  /// The given layer must be an unattached orphan. (Providing a newly created
-  /// object, rather than reusing an existing layer, satisfies that
-  /// requirement.)
-  ///
-  /// The `offset` is the offset to pass to the `painter`.
-  ///
-  /// If the `childPaintBounds` are not specified then the current layer's
-  /// bounds are used. This is appropriate if the child layer does not apply any
-  /// transformation or clipping to its contents.
-  ///
-  /// See also:
-  ///
-  ///  * [addLayer], for pushing a leaf layer whose canvas is not used.
-  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
-    assert(!childLayer.attached);
-    assert(childLayer.parent == null);
-    assert(painter != null);
-    _stopRecordingIfNeeded();
-    _appendLayer(childLayer);
-    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? _paintBounds);
-    painter(childContext, offset);
-    childContext._stopRecordingIfNeeded();
   }
 
   /// Clip further painting using a rectangle.
@@ -303,7 +270,12 @@ class PaintingContext {
   void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipRectLayer(clipRect: offsetClipRect), painter, offset, childPaintBounds: offsetClipRect);
+      _stopRecordingIfNeeded();
+      final ClipRectLayer clipLayer = new ClipRectLayer(clipRect: offsetClipRect);
+      _appendLayer(clipLayer);
+      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetClipRect);
+      painter(childContext, offset);
+      childContext._stopRecordingIfNeeded();
     } else {
       canvas.save();
       canvas.clipRect(offsetClipRect);
@@ -328,7 +300,12 @@ class PaintingContext {
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect), painter, offset, childPaintBounds: offsetBounds);
+      _stopRecordingIfNeeded();
+      final ClipRRectLayer clipLayer = new ClipRRectLayer(clipRRect: offsetClipRRect);
+      _appendLayer(clipLayer);
+      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
+      painter(childContext, offset);
+      childContext._stopRecordingIfNeeded();
     } else {
       canvas.saveLayer(offsetBounds, _defaultPaint);
       canvas.clipRRect(offsetClipRRect);
@@ -353,7 +330,12 @@ class PaintingContext {
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
-      pushLayer(new ClipPathLayer(clipPath: offsetClipPath), painter, offset, childPaintBounds: offsetBounds);
+      _stopRecordingIfNeeded();
+      final ClipPathLayer clipLayer = new ClipPathLayer(clipPath: offsetClipPath);
+      _appendLayer(clipLayer);
+      final PaintingContext childContext = new PaintingContext._(clipLayer, offsetBounds);
+      painter(childContext, offset);
+      childContext._stopRecordingIfNeeded();
     } else {
       canvas.saveLayer(bounds.shift(offset), _defaultPaint);
       canvas.clipPath(clipPath.shift(offset));
@@ -375,12 +357,13 @@ class PaintingContext {
     final Matrix4 effectiveTransform = new Matrix4.translationValues(offset.dx, offset.dy, 0.0)
       ..multiply(transform)..translate(-offset.dx, -offset.dy);
     if (needsCompositing) {
-      pushLayer(
-        new TransformLayer(transform: effectiveTransform),
-        painter,
-        offset,
-        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, _paintBounds),
-      );
+      _stopRecordingIfNeeded();
+      final TransformLayer transformLayer = new TransformLayer(transform: effectiveTransform);
+      _appendLayer(transformLayer);
+      final Rect transformedPaintBounds = MatrixUtils.inverseTransformRect(effectiveTransform, _paintBounds);
+      final PaintingContext childContext = new PaintingContext._(transformLayer, transformedPaintBounds);
+      painter(childContext, offset);
+      childContext._stopRecordingIfNeeded();
     } else {
       canvas.save();
       canvas.transform(effectiveTransform.storage);
@@ -402,9 +385,106 @@ class PaintingContext {
   /// A [RenderObject] that uses this function is very likely to require its
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
-  /// layer, which, for example, causes them to use composited clips.
+  /// layer, which causes them to use composited clips, for example.
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
-    pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
+    _stopRecordingIfNeeded();
+    final OpacityLayer opacityLayer = new OpacityLayer(alpha: alpha);
+    _appendLayer(opacityLayer);
+    final PaintingContext childContext = new PaintingContext._(opacityLayer, _paintBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
+  }
+
+  /// Apply a mask derived from a shader to further painting.
+  ///
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `shader` is the shader that will generate the mask. The shader operates
+  ///   in the coordinate system of the caller.
+  /// * `maskRect` is the region of the canvas (in the coodinate system of the
+  ///   caller) in which to apply the mask.
+  /// * `blendMode` is the [BlendMode] to use when applying the shader to
+  ///   the painting done by `painter`.
+  /// * `painter` is a callback that will paint with the mask applied. This
+  ///   function calls the `painter` synchronously.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which causes them to use composited clips, for example.
+  void pushShaderMask(Offset offset, Shader shader, Rect maskRect, BlendMode blendMode, PaintingContextCallback painter) {
+    _stopRecordingIfNeeded();
+    final ShaderMaskLayer shaderLayer = new ShaderMaskLayer(
+      shader: shader,
+      maskRect: maskRect,
+      blendMode: blendMode,
+    );
+    _appendLayer(shaderLayer);
+    final PaintingContext childContext = new PaintingContext._(shaderLayer, _paintBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
+  }
+
+  /// Push a backdrop filter.
+  ///
+  /// This function applies a filter to the existing painted content and then
+  /// synchronously calls the painter to paint on top of the filtered backdrop.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which causes them to use composited clips, for example.
+  // TODO(abarth): I don't quite understand how this API is supposed to work.
+  void pushBackdropFilter(Offset offset, ui.ImageFilter filter, PaintingContextCallback painter) {
+    _stopRecordingIfNeeded();
+    final BackdropFilterLayer backdropFilterLayer = new BackdropFilterLayer(filter: filter);
+    _appendLayer(backdropFilterLayer);
+    final PaintingContext childContext = new PaintingContext._(backdropFilterLayer, _paintBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
+  }
+
+  /// Clip using a physical model layer.
+  ///
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `bounds` is the region of the canvas (in the caller's coodinate system)
+  ///   into which `painter` will paint in.
+  /// * `clipRRect` is the rounded-rectangle (in the caller's coodinate system)
+  ///   to use to clip the painting done by `painter`.
+  /// * `elevation` is the z-coordinate at which to place this material.
+  /// * `color` is the background color.
+  /// * `painter` is a callback that will paint with the `clipRRect` applied. This
+  ///   function calls the `painter` synchronously.
+  void pushPhysicalModel(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, int elevation, Color color, PaintingContextCallback painter) {
+    final Rect offsetBounds = bounds.shift(offset);
+    final RRect offsetClipRRect = clipRRect.shift(offset);
+    if (needsCompositing) {
+      _stopRecordingIfNeeded();
+      final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
+        clipRRect: offsetClipRRect,
+        elevation: elevation,
+        color: color,
+      );
+      _appendLayer(physicalModel);
+      final PaintingContext childContext = new PaintingContext._(physicalModel, offsetBounds);
+      painter(childContext, offset);
+      childContext._stopRecordingIfNeeded();
+    } else {
+      if (elevation != 0) {
+        canvas.drawShadow(
+          new Path()..addRRect(offsetClipRRect),
+          const Color(0xFF000000),
+          elevation.toDouble(),
+          color.alpha != 0xFF,
+        );
+      }
+      canvas.drawRRect(offsetClipRRect, new Paint()..color=color);
+      canvas.saveLayer(offsetBounds, _defaultPaint);
+      canvas.clipRRect(offsetClipRRect);
+      painter(this, offset);
+      canvas.restore();
+    }
   }
 }
 
@@ -447,7 +527,7 @@ class PaintingContext {
 ///   [BoxConstraints.debugAssertIsValid] for an example of the detailed checks
 ///   that can be made.
 ///
-/// * The [==] operator and the [hashCode] getter, so that constraints can be
+/// * The [operator ==] and [hashCode] members, so that constraints can be
 ///   compared for equality. If a render object is given constraints that are
 ///   equal, then the rendering library will avoid laying the object out again
 ///   if it is not dirty.
@@ -470,21 +550,23 @@ abstract class Constraints {
   ///
   /// This might involve checks more detailed than [isNormalized].
   ///
-  /// For example, the [BoxConstraints] subclass verifies that the constraints
-  /// are not [double.NAN].
+  /// For example, the [BoxConstraints] subclass verifies that the
+  /// constraints are not [NaN].
   ///
-  /// If the `isAppliedConstraint` argument is true, then even stricter rules
-  /// are enforced. This argument is set to true when checking constraints that
-  /// are about to be applied to a [RenderObject] during layout, as opposed to
-  /// constraints that may be further affected by other constraints. For
-  /// example, the asserts for verifying the validity of
-  /// [RenderConstrainedBox.additionalConstraints] do not set this argument, but
-  /// the asserts for verifying the argument passed to the [RenderObject.layout]
-  /// method do.
+  /// If the `isAppliedConstraint` argument is true, then even
+  /// stricter rules are enforced. This argument is set to true when
+  /// checking constraints that are about to be applied to a
+  /// [RenderObject] during layout, as opposed to constraints that may
+  /// be further affected by other constraints. For example, the
+  /// asserts for verifying the validity of
+  /// [RenderConstrainedBox.additionalConstraints] do not set this
+  /// argument, but the asserts for verifying the argument passed to
+  /// the [layout] method do.
   ///
-  /// The `informationCollector` argument takes an optional callback which is
-  /// called when an exception is to be thrown. The collected information is
-  /// then included in the message after the error line.
+  /// The `informationCollector` argument takes an optional callback
+  /// which is called when an exception is to be thrown. The collected
+  /// information is then included in the message after the error
+  /// line.
   ///
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
@@ -566,34 +648,26 @@ class _SemanticsGeometry {
   }
 }
 
-/// Describes the shape of the semantic tree.
-///
-/// A [_SemanticsFragment] object is a node in a short-lived tree which is used
-/// to create the final [SemanticsNode] tree that is sent to the semantics
-/// server. These objects have a [SemanticsAnnotator], and a list of
-/// [_SemanticsFragment] children.
 abstract class _SemanticsFragment {
   _SemanticsFragment({
     @required RenderObject renderObjectOwner,
     this.annotator,
-    List<_SemanticsFragment> children,
-    this.dropSemanticsOfPreviousSiblings,
-  }) : assert(renderObjectOwner != null),
-       assert(() {
-         if (children == null)
-           return true;
-         final Set<_SemanticsFragment> seenChildren = new Set<_SemanticsFragment>();
-         for (_SemanticsFragment child in children)
-           assert(seenChildren.add(child)); // check for duplicate adds
-         return true;
-       }),
-       _ancestorChain = <RenderObject>[renderObjectOwner],
-       _children = children ?? const <_SemanticsFragment>[];
+    List<_SemanticsFragment> children
+  }) {
+    assert(renderObjectOwner != null);
+    _ancestorChain = <RenderObject>[renderObjectOwner];
+    assert(() {
+      if (children == null)
+        return true;
+      final Set<_SemanticsFragment> seenChildren = new Set<_SemanticsFragment>();
+      for (_SemanticsFragment child in children)
+        assert(seenChildren.add(child)); // check for duplicate adds
+      return true;
+    });
+    _children = children ?? const <_SemanticsFragment>[];
+  }
 
   final SemanticsAnnotator annotator;
-  bool dropSemanticsOfPreviousSiblings;
-
-  bool get producesSemanticNodes => true;
 
   List<RenderObject> _ancestorChain;
   void addAncestor(RenderObject ancestor) {
@@ -611,35 +685,16 @@ abstract class _SemanticsFragment {
   String toString() => '$runtimeType#$hashCode';
 }
 
-/// A SemanticsFragment that doesn't produce any [SemanticsNode]s when compiled.
-class _EmptySemanticsFragment extends _SemanticsFragment {
-  _EmptySemanticsFragment({
-    @required RenderObject renderObjectOwner,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
-
-  @override
-  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* { }
-
-  @override
-  bool get producesSemanticNodes => false;
-}
-
-/// Represents a [RenderObject] which is in no way dirty.
-///
-/// This class has no children and no annotators, and when compiled, it returns
-/// the [SemanticsNode] that the [RenderObject] already has. (We still update
-/// the matrix, since that comes from the (dirty) ancestors.)
+/// Represents a subtree that doesn't need updating, it already has a
+/// SemanticsNode and isn't dirty. (We still update the matrix, since
+/// that comes from the (dirty) ancestors.)
 class _CleanSemanticsFragment extends _SemanticsFragment {
   _CleanSemanticsFragment({
-    @required RenderObject renderObjectOwner,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : assert(renderObjectOwner != null),
-       assert(renderObjectOwner._semantics != null),
-       super(
-         renderObjectOwner: renderObjectOwner,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings
-       );
+    @required RenderObject renderObjectOwner
+  }) : super(renderObjectOwner: renderObjectOwner) {
+    assert(renderObjectOwner != null);
+    assert(renderObjectOwner._semantics != null);
+  }
 
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
@@ -661,9 +716,8 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+    Iterable<_SemanticsFragment> children
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
 
   bool get haveConcreteNode => true;
 
@@ -692,16 +746,12 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry);
 }
 
-/// Represents the [RenderObject] found at the top of the render tree.
-///
-/// This class always compiles to a [SemanticsNode] with ID 0.
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   _RootSemanticsFragment({
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+    Iterable<_SemanticsFragment> children
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -726,16 +776,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// Represents a RenderObject that has [isSemanticBoundary] set to `true`.
-///
-/// It returns the SemanticsNode for that [RenderObject].
 class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   _ConcreteSemanticsFragment({
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+    Iterable<_SemanticsFragment> children
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -758,20 +804,12 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// Represents a RenderObject that does not have [isSemanticBoundary] set to
-/// `true`, but which does have some semantic annotators.
-///
-/// When it is compiled, if the nearest ancestor [_SemanticsFragment] that isn't
-/// also an [_ImplicitSemanticsFragment] is a [_RootSemanticsFragment] or a
-/// [_ConcreteSemanticsFragment], then the [SemanticsNode] from that object is
-/// reused. Otherwise, a new one is created.
 class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
   _ImplicitSemanticsFragment({
     RenderObject renderObjectOwner,
     SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+    Iterable<_SemanticsFragment> children
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children);
 
   @override
   bool get haveConcreteNode => _haveConcreteNode;
@@ -809,21 +847,14 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// Represents a [RenderObject] that introduces no semantics of its own, but
-/// which has two or more descendants that do introduce semantics
-/// (and which are not ancestors or descendants of each other).
 class _ForkingSemanticsFragment extends _SemanticsFragment {
   _ForkingSemanticsFragment({
     RenderObject renderObjectOwner,
-    @required Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : assert(children != null),
-       assert(children.length > 1),
-       super(
-         renderObjectOwner: renderObjectOwner,
-         children: children,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings
-       );
+    @required Iterable<_SemanticsFragment> children
+  }) : super(renderObjectOwner: renderObjectOwner, children: children) {
+    assert(children != null);
+    assert(children.length > 1);
+  }
 
   @override
   Iterable<SemanticsNode> compile({
@@ -863,8 +894,8 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
 /// [PipelineOwner] for the render tree from which you wish to read semantics.
 /// You can obtain the [PipelineOwner] using the [RenderObject.owner] property.
 class SemanticsHandle {
-  SemanticsHandle._(this._owner, this.listener)
-    : assert(_owner != null) {
+  SemanticsHandle._(this._owner, this.listener) {
+    assert(_owner != null);
     if (listener != null)
       _owner.semanticsOwner.addListener(listener);
   }
@@ -1039,7 +1070,7 @@ class PipelineOwner {
   }
 
   final List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
-  /// Updates the [RenderObject.needsCompositing] bits.
+  /// Updates the [needsCompositing] bits.
   ///
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
@@ -1145,11 +1176,7 @@ class PipelineOwner {
   bool _debugDoingSemantics = false;
   final List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
 
-  /// Update the semantics for render objects marked as needing a semantics
-  /// update.
-  ///
-  /// Initially, only the root node, as scheduled by
-  /// [RenderObjectscheduleInitialSemantics], needs a semantics update.
+  /// Update the semantics for all render objects.
   ///
   /// This function is one of the core stages of the rendering pipeline. The
   /// semantics are compiled after painting and only after
@@ -1323,14 +1350,14 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// relevant to itself and to any other nodes who happen to know exactly what
   /// the data means. The parent data is opaque to the child.
   ///
-  ///  * The parent data field must not be directly set, except by calling
-  ///    [setupParentData] on the parent node.
-  ///  * The parent data can be set before the child is added to the parent, by
-  ///    calling [setupParentData] on the future parent node.
-  ///  * The conventions for using the parent data depend on the layout protocol
-  ///    used between the parent and child. For example, in box layout, the
-  ///    parent data is completely opaque but in sector layout the child is
-  ///    permitted to read some fields of the parent data.
+  /// - The parent data field must not be directly set, except by calling
+  ///   [setupParentData] on the parent node.
+  /// - The parent data can be set before the child is added to the parent, by
+  ///   calling [setupParentData] on the future parent node.
+  /// - The conventions for using the parent data depend on the layout protocol
+  ///   used between the parent and child. For example, in box layout, the
+  ///   parent data is completely opaque but in sector layout the child is
+  ///   permitted to read some fields of the parent data.
   ParentData parentData;
 
   /// Override to setup parent data correctly for your children.
@@ -1355,7 +1382,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     super.adoptChild(child);
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
-    markNeedsSemanticsUpdate();
   }
 
   /// Called by subclasses when they decide a render object is no longer a child.
@@ -1373,7 +1399,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     super.dropChild(child);
     markNeedsLayout();
     markNeedsCompositingBitsUpdate();
-    markNeedsSemanticsUpdate();
   }
 
   /// Calls visitor for each immediate child of this render object.
@@ -1997,8 +2022,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// creates at least one composited layer. For example, videos should return
   /// true if they use hardware decoders.
   ///
-  /// You must call [markNeedsCompositingBitsUpdate] if the value of this getter
-  /// changes. (This is implied when [adoptChild] or [dropChild] are called.)
+  /// You must call markNeedsCompositingBitsUpdate() if the value of this
+  /// getter changes.
   @protected
   bool get alwaysNeedsCompositing => false;
 
@@ -2071,8 +2096,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsCompositing; // initialised in the constructor
   /// Whether we or one of our descendants has a compositing layer.
   ///
-  /// Only legal to call after [PipelineOwner.flushLayout] and
-  /// [PipelineOwner.flushCompositingBits] have been called.
+  /// Only legal to call after [flushLayout] and [flushCompositingBits] have
+  /// been called.
   bool get needsCompositing {
     assert(!_needsCompositingBitsUpdate); // make sure we don't use this bit when it is dirty
     return _needsCompositing;
@@ -2294,8 +2319,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// Do not call this function directly. If you wish to paint yourself, call
   /// [markNeedsPaint] instead to schedule a call to this function. If you wish
-  /// to paint one of your children, call [PaintingContext.paintChild] on the
-  /// given `context`.
+  /// to paint one of your children, call one of the paint child functions on
+  /// the given context, such as [paintChild] or [paintChildWithClipRect].
   ///
   /// When painting one of your children (via a paint child function on the
   /// given context), the current canvas held by the context might change
@@ -2316,7 +2341,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// the approximate bounding box of the clip rect that would be
   /// applied to the given child during the paint phase, if any.
   ///
-  /// Returns null if the child would not be clipped.
+  /// Returns `null` if the child would not be clipped.
   ///
   /// This is used in the semantics phase to avoid including children
   /// that are not physically visible.
@@ -2343,29 +2368,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     owner.requestVisualUpdate();
   }
 
-  /// Whether this [RenderObject] introduces a new box for accessibility purposes.
-  ///
-  /// See also:
-  ///
-  ///  * [semanticsAnnotator], which fills in the [SemanticsNode] implied by
-  ///    setting [isSemanticBoundary] to true.
+  /// Whether this RenderObject introduces a new box for accessibility purposes.
   bool get isSemanticBoundary => false;
-
-  /// Whether this [RenderObject] makes other [RenderObject]s previously painted
-  /// within the same semantic boundary unreachable for accessibility purposes.
-  ///
-  /// If `true` is returned, the [SemanticsNode]s for all siblings and cousins
-  /// of this node, that are earlier in a depth-first pre-order traversal, are
-  /// dropped from the semantics tree up until a semantic boundary (as defined
-  /// by [isSemanticBoundary]) is reached.
-  ///
-  /// If [isSemanticBoundary] and [isBlockingSemanticsOfPreviouslyPaintedNodes]
-  /// is set on the same node, all previously painted siblings and cousins
-  /// up until the next ancestor that is a semantic boundary are dropped.
-  ///
-  /// Paint order as established by [visitChildrenForSemantics] is used to
-  /// determine if a node is previous to this one.
-  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => false;
 
   /// The bounding box, in the local coordinate system, of this
   /// object, for accessibility purposes.
@@ -2378,8 +2382,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// The semantics of this render object.
   ///
   /// Exposed only for testing and debugging. To learn about the semantics of
-  /// render objects in production, obtain a [SemanticsHandle] from
-  /// [PipelineOwner.ensureSemantics].
+  /// render objects in production, register as a listener using
+  /// [SemanticsNode.addListener].
   ///
   /// Only valid when asserts are enabled. In release builds, always returns
   /// null.
@@ -2473,13 +2477,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  /// Updates the semantic information of the render object.
-  ///
-  /// This is essentially a two-pass walk of the render tree. The first pass
-  /// determines the shape of the output tree (captured in
-  /// [_SemanticsFragment]s), and the second creates the nodes of this tree and
-  /// hooks them together. The second walk is a sparse walk; it only walks the
-  /// nodes that are interesting for the purpose of semantics.
   void _updateSemantics() {
     try {
       assert(_needsSemanticsUpdate);
@@ -2494,20 +2491,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
-  /// Core function that walks the render tree to obtain the semantics.
-  ///
-  /// It collects semantic annotators for this RenderObject, then walks its
-  /// children collecting [_SemanticsFragments] for them, and then returns an
-  /// appropriate [_SemanticsFragment] object that describes the RenderObject's
-  /// semantics.
   _SemanticsFragment _getSemanticsFragment() {
     // early-exit if we're not dirty and have our own semantics
     if (!_needsSemanticsUpdate && isSemanticBoundary) {
       assert(_semantics != null);
-      return new _CleanSemanticsFragment(renderObjectOwner: this, dropSemanticsOfPreviousSiblings: isBlockingSemanticsOfPreviouslyPaintedNodes);
+      return new _CleanSemanticsFragment(renderObjectOwner: this);
     }
     List<_SemanticsFragment> children;
-    bool dropSemanticsOfPreviousSiblings = isBlockingSemanticsOfPreviouslyPaintedNodes;
     visitChildrenForSemantics((RenderObject child) {
       if (_needsSemanticsGeometryUpdate) {
         // If our geometry changed, make sure the child also does a
@@ -2517,47 +2507,34 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         child._needsSemanticsGeometryUpdate = true;
       }
       final _SemanticsFragment fragment = child._getSemanticsFragment();
-      assert(fragment != null);
-      if (fragment.dropSemanticsOfPreviousSiblings) {
-        children = null; // throw away all left siblings of [child].
-        dropSemanticsOfPreviousSiblings = true;
-      }
-      if (fragment.producesSemanticNodes) {
+      if (fragment != null) {
         fragment.addAncestor(this);
         children ??= <_SemanticsFragment>[];
         assert(!children.contains(fragment));
         children.add(fragment);
       }
     });
-    if (isSemanticBoundary && !isBlockingSemanticsOfPreviouslyPaintedNodes) {
-      // Don't propagate [dropSemanticsOfPreviousSiblings] up through a semantic boundary.
-      dropSemanticsOfPreviousSiblings = false;
-    }
     _needsSemanticsUpdate = false;
     _needsSemanticsGeometryUpdate = false;
     final SemanticsAnnotator annotator = semanticsAnnotator;
     if (parent is! RenderObject)
-      return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+      return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
     if (isSemanticBoundary)
-      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
     if (annotator != null)
-      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
     _semantics = null;
-    if (children == null) {
-      // Introduces no semantics and has no descendants that introduce semantics.
-      return new _EmptySemanticsFragment(renderObjectOwner: this, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
-    }
+    if (children == null)
+      return null;
     if (children.length > 1)
-      return new _ForkingSemanticsFragment(renderObjectOwner: this, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+      return new _ForkingSemanticsFragment(renderObjectOwner: this, children: children);
     assert(children.length == 1);
-    return children.single..dropSemanticsOfPreviousSiblings = dropSemanticsOfPreviousSiblings;
+    return children.single;
   }
 
-  /// Called when collecting the semantics of this node.
-  ///
-  /// The implementation has to return the children in paint order skipping all
-  /// children that are not semantically relevant (e.g. because they are
-  /// invisible).
+  /// Called when collecting the semantics of this node. Subclasses
+  /// that have children that are not semantically relevant (e.g.
+  /// because they are invisible) should skip those children here.
   ///
   /// The default implementation mirrors the behavior of
   /// [visitChildren()] (which is supposed to walk all the children).
@@ -2568,24 +2545,25 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a function that will annotate a [SemanticsNode] with the semantics
   /// of this [RenderObject].
   ///
-  /// To annotate a [SemanticsNode] for this node, return an annotator that adds
-  /// the annotations. When the behavior of the annotator would change (e.g. the
-  /// box is now checked rather than unchecked), call [markNeedsSemanticsUpdate]
-  /// to indicate to the rendering system that the semantics tree needs to be
-  /// rebuilt.
+  /// To annotate a SemanticsNode for this node, return an annotator that
+  /// adds the annotations. When the behavior of the annotator would
+  /// change (e.g. the box is now checked rather than unchecked), call
+  /// [markNeedsSemanticsUpdate] to indicate to the rendering system
+  /// that the semantics tree needs to be rebuilt.
   ///
-  /// To introduce a new [SemanticsNode], set [isSemanticBoundary] to true for
-  /// this object. The function returned by this function will be used to
-  /// annotate the [SemanticsNode] for this object.
+  /// To introduce a new SemanticsNode, set hasSemantics to true for
+  /// this object. The function returned by this function will be used
+  /// to annotate the SemanticsNode for this object.
   ///
-  /// Semantic annotations are persistent. Values set in one pass will still be
-  /// set in the next pass. Therefore it is important to explicitly set fields
-  /// to false once they are no longer true; setting them to true when they are
-  /// to be enabled, and not setting them at all when they are not, will mean
-  /// they remain set once enabled once and will never get unset.
+  /// Semantic annotations are persistent. Values set in one pass will
+  /// still be set in the next pass. Therefore it is important to
+  /// explicitly set fields to false once they are no longer true;
+  /// setting them to true when they are to be enabled, and not
+  /// setting them at all when they are not, will mean they remain set
+  /// once enabled once and will never get unset.
   ///
-  /// If the return value will change from null to non-null (or vice versa), and
-  /// [isSemanticBoundary] isn't true, then the associated call to
+  /// If the value return will change from null to non-null (or vice versa), and
+  /// [hasSemantics] isn't true, then the associated call to
   /// [markNeedsSemanticsUpdate] must not have `onlyChanges` set, as it is
   /// possible that the node should be entirely removed.
   SemanticsAnnotator get semanticsAnnotator => null;
@@ -2694,12 +2672,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     description.add('constraints: $constraints');
     if (_layer != null) // don't access it via the "layer" getter since that's only valid when we don't need paint
       description.add('layer: $_layer');
-    if (_semantics != null)
-      description.add('semantics: $_semantics');
-    if (isBlockingSemanticsOfPreviouslyPaintedNodes)
-      description.add('blocks semantics of earlier render objects below the common boundary');
-    if (isSemanticBoundary)
-      description.add('semantic boundary');
   }
 
   /// Returns a string describing the current node's descendants. Each line of
@@ -2712,11 +2684,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 /// Generic mixin for render objects with one child.
 ///
 /// Provides a child model for a render object subclass that has a unique child.
-abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extends RenderObject {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory RenderObjectWithChildMixin._() => null;
-
+abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implements RenderObject {
   /// Checks whether the given render object has the correct [runtimeType] to be
   /// a child of this render object.
   ///
@@ -2793,11 +2761,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extend
 }
 
 /// Parent data to support a doubly-linked list of children.
-abstract class ContainerParentDataMixin<ChildType extends RenderObject> extends ParentData {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory ContainerParentDataMixin._() => null;
-
+abstract class ContainerParentDataMixin<ChildType extends RenderObject> implements ParentData {
   /// The previous sibling in the parent's child list.
   ChildType previousSibling;
   /// The next sibling in the parent's child list.
@@ -2828,10 +2792,7 @@ abstract class ContainerParentDataMixin<ChildType extends RenderObject> extends 
 ///
 /// Provides a child model for a render object subclass that has a doubly-linked
 /// list of children.
-abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> extends RenderObject {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory ContainerRenderObjectMixin._() => null;
+abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType extends ContainerParentDataMixin<ChildType>> implements RenderObject {
 
   bool _debugUltimatePreviousSiblingOf(ChildType child, { ChildType equals }) {
     ParentDataType childParentData = child.parentData;
@@ -3090,22 +3051,20 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   @override
   String debugDescribeChildren(String prefix) {
     if (firstChild != null) {
-      final StringBuffer result = new StringBuffer()
-        ..write(prefix)
-        ..write(' \u2502\n');
+      String result = '$prefix \u2502\n';
       ChildType child = firstChild;
       int count = 1;
       while (child != lastChild) {
-        result.write(child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502"));
+        result += '${child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502")}';
         count += 1;
         final ParentDataType childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
       if (child != null) {
         assert(child == lastChild);
-        result.write(child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  "));
+        result += '${child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  ")}';
       }
-      return result.toString();
+      return result;
     }
     return '';
   }

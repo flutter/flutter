@@ -27,13 +27,10 @@ const String _kIdeviceinstallerInstructions =
 const Duration kPortForwardTimeout = const Duration(seconds: 10);
 
 class IOSDevices extends PollingDeviceDiscovery {
-  IOSDevices() : super('iOS devices');
+  IOSDevices() : super('IOSDevices');
 
   @override
   bool get supportsPlatform => platform.isMacOS;
-
-  @override
-  bool get canListAnything => doctor.iosWorkflow.canListDevices;
 
   @override
   List<Device> pollingGetDevices() => IOSDevice.getAttachedDevices();
@@ -49,11 +46,10 @@ class IOSDevice extends Device {
     _loggerPath = _checkForCommand('idevicesyslog');
     _screenshotPath = _checkForCommand('idevicescreenshot');
     _pusherPath = _checkForCommand(
-      'ios-deploy',
-      'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
-      'brew update\n'
-      'brew install ios-deploy'
-    );
+        'ios-deploy',
+        'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
+        'brew update\n'
+        'brew install ios-deploy');
   }
 
   String _installerPath;
@@ -163,7 +159,7 @@ class IOSDevice extends Device {
     final IOSApp iosApp = app;
     final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
-      printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
+      printError("Could not find application bundle at ${bundle.path}; have you run 'flutter build ios'?");
       return false;
     }
 
@@ -208,7 +204,7 @@ class IOSDevice extends Device {
       final XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
-        await diagnoseXcodeBuildFailure(buildResult, app);
+        await diagnoseXcodeBuildFailure(buildResult);
         printError('');
         return new LaunchResult.failed();
       }
@@ -226,24 +222,21 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    final List<String> launchArguments = <String>['--enable-dart-profiling'];
+    final List<String> launchArguments = <String>["--enable-dart-profiling"];
 
     if (debuggingOptions.startPaused)
-      launchArguments.add('--start-paused');
+      launchArguments.add("--start-paused");
 
     if (debuggingOptions.useTestFonts)
-      launchArguments.add('--use-test-fonts');
+      launchArguments.add("--use-test-fonts");
 
     if (debuggingOptions.debuggingEnabled) {
-      launchArguments.add('--enable-checked-mode');
+      launchArguments.add("--enable-checked-mode");
 
       // Note: We do NOT need to set the observatory port since this is going to
       // be setup on the device. Let it pick a port automatically. We will check
       // the port picked and scrape that later.
     }
-
-    if (debuggingOptions.enableSoftwareRendering)
-      launchArguments.add('--enable-software-rendering');
 
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
@@ -265,17 +258,17 @@ class IOSDevice extends Device {
     }
 
     int installationResult = -1;
-    Uri localObservatoryUri;
-    Uri localDiagnosticUri;
+    Uri localObsUri;
+    Uri localDiagUri;
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
-      printTrace('Debugging is not enabled');
+      printTrace("Debugging is not enabled");
       installationResult = await runCommandAndStreamOutput(launchCommand, trace: true);
     } else {
       // Debugging is enabled, look for the observatory and diagnostic server
       // ports post launch.
-      printTrace('Debugging is enabled, connecting to observatory and the diagnostic server');
+      printTrace("Debugging is enabled, connecting to observatory and the diagnostic server");
 
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
@@ -284,12 +277,12 @@ class IOSDevice extends Device {
       final ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
         getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
 
-      final Future<Uri> forwardObservatoryUri = observatoryDiscovery.uri;
-      Future<Uri> forwardDiagnosticUri;
+      final Future<Uri> forwardObsUri = observatoryDiscovery.nextUri();
+      Future<Uri> forwardDiagUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
-        forwardDiagnosticUri = diagnosticDiscovery.uri;
+        forwardDiagUri = diagnosticDiscovery.nextUri();
       } else {
-        forwardDiagnosticUri = new Future<Uri>.value(null);
+        forwardDiagUri = new Future<Uri>.value(null);
       }
 
       final Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
@@ -298,19 +291,19 @@ class IOSDevice extends Device {
         installationResult = result;
 
         if (result != 0) {
-          printTrace('Failed to launch the application on device.');
+          printTrace("Failed to launch the application on device.");
           return <Uri>[null, null];
         }
 
-        printTrace('Application launched on the device. Attempting to forward ports.');
-        return await Future.wait(<Future<Uri>>[forwardObservatoryUri, forwardDiagnosticUri]);
+        printTrace("Application launched on the device. Attempting to forward ports.");
+        return await Future.wait(<Future<Uri>>[forwardObsUri, forwardDiagUri]);
       }).whenComplete(() {
         observatoryDiscovery.cancel();
         diagnosticDiscovery.cancel();
       });
 
-      localObservatoryUri = uris[0];
-      localDiagnosticUri = uris[1];
+      localObsUri = uris[0];
+      localDiagUri = uris[1];
     }
 
     if (installationResult != 0) {
@@ -321,7 +314,7 @@ class IOSDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    return new LaunchResult.succeeded(observatoryUri: localObservatoryUri, diagnosticUri: localDiagnosticUri);
+    return new LaunchResult.succeeded(observatoryUri: localObsUri, diagnosticUri: localDiagUri);
   }
 
   @override
@@ -463,7 +456,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     final ForwardedPort forwardedPort = new ForwardedPort.withContext(hostPort,
         devicePort, process);
 
-    printTrace('Forwarded port $forwardedPort');
+    printTrace("Forwarded port $forwardedPort");
 
     _forwardedPorts.add(forwardedPort);
 
@@ -477,14 +470,14 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
       return null;
     }
 
-    printTrace('Unforwarding port $forwardedPort');
+    printTrace("Unforwarding port $forwardedPort");
 
     final Process process = forwardedPort.context;
 
     if (process != null) {
       processManager.killPid(process.pid);
     } else {
-      printError('Forwarded port did not have a valid process');
+      printError("Forwarded port did not have a valid process");
     }
 
     return null;

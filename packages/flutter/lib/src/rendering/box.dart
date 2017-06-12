@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'node.dart';
 import 'object.dart';
 
 // This class should only be used in debug builds.
@@ -23,7 +22,7 @@ class _DebugSize extends Size {
 
 /// Immutable layout constraints for [RenderBox] layout.
 ///
-/// A size respects a [BoxConstraints] if, and only if, all of the following
+/// A size respects a BoxConstraints if, and only if, all of the following
 /// relations hold:
 ///
 /// * `minWidth <= size.width <= maxWidth`
@@ -344,8 +343,7 @@ class BoxConstraints extends Constraints {
 
   /// Linearly interpolate between two BoxConstraints.
   ///
-  /// If either is null, this function interpolates from a [BoxConstraints]
-  /// object whose fields are all set to 0.0.
+  /// If either is null, this function interpolates from [BoxConstraints.zero].
   static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
     if (a == null && b == null)
       return null;
@@ -385,7 +383,7 @@ class BoxConstraints extends Constraints {
   @override
   bool debugAssertIsValid({
     bool isAppliedConstraint: false,
-    InformationCollector informationCollector,
+    InformationCollector informationCollector
   }) {
     assert(() {
       void throwError(String message) {
@@ -505,9 +503,7 @@ class BoxHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
-  const BoxHitTestEntry(RenderBox target, this.localPosition)
-      : assert(localPosition != null),
-        super(target);
+  const BoxHitTestEntry(RenderBox target, this.localPosition) : super(target);
 
   @override
   RenderBox get target => super.target;
@@ -530,10 +526,7 @@ class BoxParentData extends ParentData {
 
 /// Abstract ParentData subclass for RenderBox subclasses that want the
 /// ContainerRenderObjectMixin.
-///
-/// This is a convenience class that mixes in the relevant classes with
-/// the relevant type arguments.
-abstract class ContainerBoxParentData<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
+abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
 enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
 
@@ -717,13 +710,13 @@ class _IntrinsicDimensionsCacheEntry {
 /// [parentData]. The class used for [parentData] must itself have the
 /// [ContainerParentDataMixin] class mixed into it; this is where
 /// [ContainerRenderObjectMixin] stores the linked list. A [ParentData] class
-/// can extend [ContainerBoxParentData]; this is essentially
+/// can extend [ContainerBoxParentDataMixin]; this is essentially
 /// [BoxParentData] mixed with [ContainerParentDataMixin]. For example, if a
 /// `RenderFoo` class wanted to have a linked list of [RenderBox] children, one
 /// might create a `FooParentData` class as follows:
 ///
 /// ```dart
-/// class FooParentData extends ContainerBoxParentData<RenderBox> {
+/// class FooParentData extends ContainerBoxParentDataMixin<RenderBox> {
 ///   // (any fields you might need for these children)
 /// }
 /// ```
@@ -941,7 +934,7 @@ class _IntrinsicDimensionsCacheEntry {
 ///
 /// For a render box to be accessible, implement the
 /// [describeApproximatePaintClip] and [visitChildrenForSemantics] methods, and
-/// the [semanticsAnnotator] getter. The default implementations are sufficient
+/// the [semanticAnnotator] getter. The default implementations are sufficient
 /// for objects that only affect layout, but nodes that represent interactive
 /// components or information (diagrams, text, images, etc) should provide more
 /// complete implementations. For more information, see the documentation for
@@ -1095,23 +1088,11 @@ abstract class RenderBox extends RenderObject {
   /// children. It is the size that is needed to paint the box's contents (in
   /// this case, the children) _without clipping_ that matters.
   ///
-  /// ### When the intrinsic dimensions cannot be known
-  ///
-  /// There are cases where render objects do not have an efficient way to
-  /// compute their intrinsic dimensions. For example, it may be prohibitively
-  /// expensive to reify and measure every child of a lazy viewport (viewports
-  /// generally only instantiate the actually visible children), or the
-  /// dimensions may be computed by a callback about which the render object
-  /// cannot reason.
-  ///
-  /// In such cases, it may be impossible (or at least impractical) to actually
-  /// return a valid answer. In such cases, the intrinsic functions should throw
-  /// when [RenderObject.debugCheckingIntrinsics] is false and asserts are
-  /// enabled, and return 0.0 otherwise.
-  ///
-  /// See the implementations of [LayoutBuilder] or [RenderViewportBase] for
-  /// examples (in particular,
-  /// [RenderViewportBase.debugThrowIfNotCheckingIntrinsics]).
+  /// In many cases, viewports do not have efficient access to all the children,
+  /// and therefore cannot actually return a valid answer. In this case, when
+  /// [RenderObject.debugCheckingIntrinsics] is false and asserts are enabled,
+  /// the intrinsic functions should throw; in other cases, they should return
+  /// 0.0. See [RenderVirtualViewport.debugThrowIfNotCheckingIntrinsics].
   ///
   /// ### Aspect-ratio-driven boxes
   ///
@@ -1810,19 +1791,9 @@ abstract class RenderBox extends RenderObject {
   /// system of `ancestor`.
   ///
   /// If `ancestor` is null, this method returns a matrix that maps from the
-  /// local coordinate system to the coordinate system of the
-  /// [PipelineOwner.rootNode]. For the render tree owner by the
-  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
-  /// this means that this method maps to the global coordinate system in
-  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
-  /// [RenderView] to further transform the coordinate.
+  /// local coordinate system to the global coordinate system.
   Matrix4 getTransformTo(RenderObject ancestor) {
     assert(attached);
-    if (ancestor == null) {
-      final AbstractNode rootNode = owner.rootNode;
-      if (rootNode is RenderObject)
-        ancestor = rootNode;
-    }
     final List<RenderObject> renderers = <RenderObject>[];
     for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent) {
       assert(renderer != null); // Failed to find ancestor in parent chain.
@@ -1834,8 +1805,8 @@ abstract class RenderBox extends RenderObject {
     return transform;
   }
 
-  /// Convert the given point from the global coodinate system in logical pixels
-  /// to the local coordinate system for this box.
+  /// Convert the given point from the global coodinate system to the local
+  /// coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is
   /// degenerate, this function returns [Offset.zero].
@@ -1843,8 +1814,6 @@ abstract class RenderBox extends RenderObject {
   /// If `ancestor` is non-null, this function converts the given point from the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of from the global coordinate system.
-  ///
-  /// This method is implemented in terms of [getTransformTo].
   Offset globalToLocal(Offset point, { RenderObject ancestor }) {
     final Matrix4 transform = getTransformTo(ancestor);
     final double det = transform.invert();
@@ -1854,13 +1823,11 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Convert the given point from the local coordinate system for this box to
-  /// the global coordinate system in logical pixels.
+  /// the global coordinate system.
   ///
   /// If `ancestor` is non-null, this function converts the given point to the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of to the global coordinate system.
-  ///
-  /// This method is implemented in terms of [getTransformTo].
   Offset localToGlobal(Offset point, { RenderObject ancestor }) {
     return MatrixUtils.transformPoint(getTransformTo(ancestor), point);
   }
@@ -2027,10 +1994,7 @@ abstract class RenderBox extends RenderObject {
 /// By convention, this class doesn't override any members of the superclass.
 /// Instead, it provides helpful functions that subclasses can call as
 /// appropriate.
-abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory RenderBoxContainerDefaultsMixin._() => null;
+abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
 
   /// Returns the baseline of the first child with a baseline.
   ///

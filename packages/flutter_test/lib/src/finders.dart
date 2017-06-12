@@ -7,10 +7,10 @@ import 'package:meta/meta.dart';
 
 import 'all_elements.dart';
 
-/// Signature for [CommonFinders.byWidgetPredicate].
+/// Signature for [CommonFinders.byPredicate].
 typedef bool WidgetPredicate(Widget widget);
 
-/// Signature for [CommonFinders.byElementPredicate].
+/// Signature for [CommonFinders.byElement].
 typedef bool ElementPredicate(Element element);
 
 /// Some frequently used widget [Finder]s.
@@ -88,16 +88,6 @@ class CommonFinders {
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byType(Type type, { bool skipOffstage: true }) => new _WidgetTypeFinder(type, skipOffstage: skipOffstage);
-
-  /// Finds widgets by searching for widgets with a particular icon data.
-  ///
-  /// Example:
-  ///
-  ///     expect(find.byIcon(Icons.inbox), findsOneWidget);
-  ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byIcon(IconData icon, { bool skipOffstage: true }) => new _WidgetIconFinder(icon, skipOffstage: skipOffstage);
 
   /// Finds widgets by searching for elements with a particular type.
   ///
@@ -236,9 +226,6 @@ abstract class Finder {
   /// [Offstage] widgets, as well as children of inactive [Route]s.
   final bool skipOffstage;
 
-  /// Returns all the [Element]s that will be considered by this finder.
-  ///
-  /// See [collectAllElementsFrom].
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
@@ -438,21 +425,6 @@ class _WidgetTypeFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     return candidate.widget.runtimeType == widgetType;
-  }
-}
-
-class _WidgetIconFinder extends MatchFinder {
-  _WidgetIconFinder(this.icon, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
-
-  final IconData icon;
-
-  @override
-  String get description => 'icon "$icon"';
-
-  @override
-  bool matches(Element candidate) {
-    final Widget widget = candidate.widget;
-    return widget is Icon && widget.icon == icon;
   }
 }
 

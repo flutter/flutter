@@ -95,9 +95,9 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     this.renderObject,
     this.onSelectionOverlayChanged,
     this.selectionControls,
-  }): assert(value != null),
-      assert(context != null),
-      _value = value {
+  }): _value  = value {
+    assert(value != null);
+    assert(context != null);
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
     _handleController = new AnimationController(duration: _kFadeDuration, vsync: overlay);
@@ -164,11 +164,11 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     _toolbarController.forward(from: 0.0);
   }
 
-  /// Updates the overlay after the selection has changed.
+  /// Updates the overlay after the [selection] has changed.
   ///
   /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.drawFrame]), then the update is delayed
+  /// [SchedulerBinding.persistentCallbacks], i.e. during the build, layout, or
+  /// paint phases (see [WidgetsBinding.beginFrame]), then the update is delayed
   /// until the post-frame callbacks phase. Otherwise the update is done
   /// synchronously. This means that it is safe to call during builds, but also
   /// that if you do call this during a build, the UI will not update until the

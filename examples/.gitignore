@@ -7,4 +7,3 @@
 build/
 packages/
 pubspec.lock
-.flutter-plugins

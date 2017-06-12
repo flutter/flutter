@@ -15,7 +15,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 
 /// A widget that rebuilds when the given [Listenable] changes value.
 ///
-/// [AnimatedWidget] is most commonly used with [Animation] objects, which are
+/// [AnimatedWidget] is most common used with [Animation] objects, which are
 /// [Listenable], but it can be used with any [Listenable], including
 /// [ChangeNotifier] and [ValueNotifier].
 ///
@@ -293,19 +293,16 @@ class FadeTransition extends AnimatedWidget {
 
 /// An interpolation between two relative rects.
 ///
-/// This class specializes the interpolation of [Tween<RelativeRect>] to
-/// use [RelativeRect.lerp].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
+/// This class specializes the interpolation of Tween<RelativeRect> to be
+/// appropriate for rectangles that are described in terms of offsets from
+/// other rectangles.
 class RelativeRectTween extends Tween<RelativeRect> {
-  /// Creates a [RelativeRect] tween.
+  /// Creates a relative rect tween.
   ///
-  /// The [begin] and [end] properties may be null; the null value
-  /// is treated as [RelativeRect.fill].
+  /// The [begin] and [end] arguments must not be null.
   RelativeRectTween({ RelativeRect begin, RelativeRect end })
     : super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
   @override
   RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
 }
@@ -400,7 +397,7 @@ class RelativePositionedTransition extends AnimatedWidget {
 /// * [AnimatedContainer], a more full-featured container that also animates on
 ///   decoration using an internal animation.
 class DecoratedBoxTransition extends AnimatedWidget {
-  /// Creates an animated [DecoratedBox] whose [Decoration] animation updates
+  /// Creates an animated [DecorationBox] whose [Decoration] animation updates
   /// the widget.
   ///
   /// The [decoration] and [position] cannot be null.
@@ -450,11 +447,6 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// an animation as part of a larger build function. To use AnimatedBuilder,
 /// simply construct the widget and pass it a builder function.
 ///
-/// For simple cases without additional state, consider using
-/// [AnimatedWidget].
-///
-/// ## Performance optimisations
-///
 /// If your [builder] function contains a subtree that does not depend on the
 /// animation, it's more efficient to build that subtree once instead of
 /// rebuilding it on every animation tick.
@@ -466,51 +458,8 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// ## Sample code
-///
-/// This code defines a widget called `Spinner` that spins a green square
-/// continually. It is built with an [AnimatedBuilder] and makes use of the
-/// [child] feature to avoid having to rebuild the [Container] each time.
-///
-/// ```dart
-/// class Spinner extends StatefulWidget {
-///   @override
-///   _SpinnerState createState() => new _SpinnerState();
-/// }
-///
-/// class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
-///   AnimationController _controller;
-///
-///   @override
-///   void initState() {
-///     super.initState();
-///     _controller = new AnimationController(
-///       duration: const Duration(seconds: 10),
-///       vsync: this,
-///     )..repeat();
-///   }
-///
-///   @override
-///   void dispose() {
-///     _controller.dispose();
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return new AnimatedBuilder(
-///       animation: _controller,
-///       child: new Container(width: 200.0, height: 200.0, color: Colors.green),
-///       builder: (BuildContext context, Widget child) {
-///         return new Transform.rotate(
-///           angle: _controller.value * 2.0 * math.PI,
-///           child: child,
-///         );
-///       },
-///     );
-///   }
-/// }
-/// ```
+/// For simple cases without additional state, consider using
+/// [AnimatedWidget].
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///

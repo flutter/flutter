@@ -66,7 +66,7 @@ class _AppBarBackground extends StatelessWidget {
 }
 
 class GalleryHome extends StatefulWidget {
-  const GalleryHome({
+  GalleryHome({
     Key key,
     this.useLightTheme,
     @required this.onThemeChanged,
@@ -76,13 +76,12 @@ class GalleryHome extends StatefulWidget {
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,
     this.onCheckerboardRasterCacheImagesChanged,
-    this.checkerboardOffscreenLayers,
-    this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
     this.onSendFeedback,
-  }) : assert(onThemeChanged != null),
-       assert(onTimeDilationChanged != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(onThemeChanged != null);
+    assert(onTimeDilationChanged != null);
+  }
 
   final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;
@@ -95,9 +94,6 @@ class GalleryHome extends StatefulWidget {
 
   final bool checkerboardRasterCacheImages;
   final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
-
-  final bool checkerboardOffscreenLayers;
-  final ValueChanged<bool> onCheckerboardOffscreenLayersChanged;
 
   final ValueChanged<TargetPlatform> onPlatformChanged;
 
@@ -165,8 +161,6 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         onShowPerformanceOverlayChanged: widget.onShowPerformanceOverlayChanged,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         onCheckerboardRasterCacheImagesChanged: widget.onCheckerboardRasterCacheImagesChanged,
-        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-        onCheckerboardOffscreenLayersChanged: widget.onCheckerboardOffscreenLayersChanged,
         onPlatformChanged: widget.onPlatformChanged,
         onSendFeedback: widget.onSendFeedback,
       ),

@@ -25,7 +25,7 @@ const Color _kBarrierColor = Colors.black54;
 ///    supplements the primary content of the app. A persistent bottom sheet
 ///    remains visible even when the user interacts with other parts of the app.
 ///    Persistent bottom sheets can be created and displayed with the
-///    [ScaffoldState.showBottomSheet] function.
+///    [Scaffold.showBottomSheet] function.
 ///
 ///  * _Modal_. A modal bottom sheet is an alternative to a menu or a dialog and
 ///    prevents the user from interacting with the rest of the app. Modal bottom
@@ -33,19 +33,19 @@ const Color _kBarrierColor = Colors.black54;
 ///    function.
 ///
 /// The [BottomSheet] widget itself is rarely used directly. Instead, prefer to
-/// create a persistent bottom sheet with [ScaffoldState.showBottomSheet] and a modal
+/// create a persistent bottom sheet with [Scaffold.showBottomSheet] and a modal
 /// bottom sheet with [showModalBottomSheet].
 ///
 /// See also:
 ///
-///  * [ScaffoldState.showBottomSheet]
+///  * [Scaffold.showBottomSheet]
 ///  * [showModalBottomSheet]
 ///  * <https://material.google.com/components/bottom-sheets.html>
 class BottomSheet extends StatefulWidget {
   /// Creates a bottom sheet.
   ///
   /// Typically, bottom sheets are created implicitly by
-  /// [ScaffoldState.showBottomSheet], for persistent bottom sheets, or by
+  /// [Scaffold.showBottomSheet], for persistent bottom sheets, or by
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
     Key key,
@@ -246,21 +246,17 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// A closely related widget is a persistent bottom sheet, which shows
 /// information that supplements the primary content of the app without
 /// preventing the use from interacting with the app. Persistent bottom sheets
-/// can be created and displayed with the [ScaffoldState.showBottomSheet] function.
+/// can be created and displayed with the [Scaffold.showBottomSheet] function.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
 /// See also:
 ///
-///  * [BottomSheet], which is the widget normally returned by the function
-///    passed as the `builder` argument to [showModalBottomSheet].
-///  * [ScaffoldState.showBottomSheet], for showing non-modal bottom sheets.
+///  * [BottomSheet]
+///  * [Scaffold.showBottomSheet]
 ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-modal-bottom-sheets>
-Future<T> showModalBottomSheet<T>({
-  @required BuildContext context,
-  @required WidgetBuilder builder,
-}) {
+Future<T> showModalBottomSheet<T>({ @required BuildContext context, @required WidgetBuilder builder }) {
   assert(context != null);
   assert(builder != null);
   return Navigator.push(context, new _ModalBottomSheetRoute<T>(

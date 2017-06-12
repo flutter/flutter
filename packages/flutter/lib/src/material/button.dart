@@ -9,6 +9,8 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flat_button.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'raised_button.dart';
@@ -18,9 +20,9 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [ButtonTheme], which uses this enum to define the [ButtonTheme.textTheme].
-///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
-///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
+///  * [ButtonTheme]
+///  * [RaisedButton]
+///  * [FlatButton]
 enum ButtonTextTheme {
   /// The button should use the normal color (e.g., black or white depending on the [ThemeData.brightness]) for its text.
   normal,
@@ -33,9 +35,9 @@ enum ButtonTextTheme {
 ///
 /// See also:
 ///
-///  * [ButtonTextTheme], which is used by [textTheme].
-///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
-///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
+///  * [ButtonTextTheme]
+///  * [RaisedButton]
+///  * [FlatButton]
 class ButtonTheme extends InheritedWidget {
   /// Creates a button theme.
   ///
@@ -119,13 +121,6 @@ class ButtonTheme extends InheritedWidget {
 ///
 /// MaterialButtons whose [onPressed] handler is null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for onPressed.
-///
-/// If you want an ink-splash effect for taps, but don't want to use a button,
-/// consider using [InkWell] directly.
-///
-/// See also:
-///
-///  * [IconButton], to create buttons that contain icons rather than text.
 class MaterialButton extends StatefulWidget {
   /// Creates a material button.
   ///
@@ -195,28 +190,19 @@ class MaterialButton extends StatefulWidget {
   /// Defaults to the highlight color from the [Theme].
   final Color highlightColor;
 
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the button.
+  /// The z-coordinate at which to place this button.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 0.
-  ///
-  /// See also:
-  ///
-  ///  * [FlatButton], a material button specialized for the case where the
-  ///    elevation is zero.
-  ///  * [RaisedButton], a material button specialized for the case where the
-  ///    elevation is non-zero.
-  final double elevation;
+  final int elevation;
 
-  /// The z-coordinate at which to place this button when highlighted. This
-  /// controls the size of the shadow below the button.
+  /// The z-coordinate at which to place this button when highlighted.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 0.
-  ///
-  /// See also:
-  ///
-  ///  * [elevation], the default elevation.
-  final double highlightElevation;
+  final int highlightElevation;
 
   /// The smallest horizontal extent that the button will occupy.
   ///
@@ -304,7 +290,7 @@ class _MaterialButtonState extends State<MaterialButton> {
     final TextStyle style = theme.textTheme.button.copyWith(color: textColor);
     final ButtonTheme buttonTheme = ButtonTheme.of(context);
     final double height = widget.height ?? buttonTheme.height;
-    final double elevation = (_highlight ? widget.highlightElevation : widget.elevation) ?? 0.0;
+    final int elevation = (_highlight ? widget.highlightElevation : widget.elevation) ?? 0;
     final bool hasColorOrElevation = (widget.color != null || elevation > 0);
     Widget contents = IconTheme.merge(
       data: new IconThemeData(

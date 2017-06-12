@@ -155,7 +155,7 @@ abstract class IOSApp extends ApplicationPackage {
       final Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
       bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
     } on StateError catch (e, stackTrace) {
-      printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace: stackTrace);
+      printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace);
       return null;
     }
 
@@ -181,13 +181,11 @@ abstract class IOSApp extends ApplicationPackage {
     if (id == null)
       return null;
     final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
-    final Map<String, String> buildSettings = getXcodeBuildSettings(projectPath, 'Runner');
-    id = substituteXcodeVariables(id, buildSettings);
+    id = substituteXcodeVariables(id, projectPath, 'Runner');
 
     return new BuildableIOSApp(
       appDirectory: fs.path.join('ios'),
-      projectBundleId: id,
-      buildSettings: buildSettings,
+      projectBundleId: id
     );
   }
 
@@ -205,13 +203,9 @@ class BuildableIOSApp extends IOSApp {
   BuildableIOSApp({
     this.appDirectory,
     String projectBundleId,
-    this.buildSettings,
   }) : super(projectBundleId: projectBundleId);
 
   final String appDirectory;
-
-  /// Build settings of the app's XCode project.
-  final Map<String, String> buildSettings;
 
   @override
   String get name => kBundleName;

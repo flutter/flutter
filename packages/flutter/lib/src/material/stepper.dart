@@ -9,6 +9,7 @@ import 'button.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'flat_button.dart';
+import 'icon.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -140,11 +141,12 @@ class Stepper extends StatefulWidget {
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,
-  }) : assert(steps != null),
-       assert(type != null),
-       assert(currentStep != null),
-       assert(0 <= currentStep && currentStep < steps.length),
-       super(key: key);
+  }) : super(key: key) {
+    assert(steps != null);
+    assert(type != null);
+    assert(currentStep != null);
+    assert(0 <= currentStep && currentStep < steps.length);
+  }
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///
@@ -589,7 +591,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return new Column(
       children: <Widget>[
         new Material(
-          elevation: 2.0,
+          elevation: 2,
           child: new Container(
             margin: const EdgeInsets.symmetric(horizontal: 24.0),
             child: new Row(

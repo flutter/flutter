@@ -314,7 +314,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// If you have a column of widgets that should normally fit on the screen,
   /// but may overflow and would in such cases need to scroll, consider using a
-  /// [ListView] as the body of the scaffold. This is also a good choice for
+  /// [ScrollList] as the body of the scaffold. This is also a good choice for
   /// the case where your body is a scrollable list.
   final Widget body;
 
@@ -721,22 +721,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   NavigationGestureController _backGestureController;
 
   bool _shouldHandleBackGesture() {
-    assert(mounted);
     return Theme.of(context).platform == TargetPlatform.iOS && Navigator.canPop(context);
   }
 
   void _handleDragStart(DragStartDetails details) {
-    assert(mounted);
     _backGestureController = Navigator.of(context).startPopGesture();
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    assert(mounted);
     _backGestureController?.dragUpdate(details.primaryDelta / context.size.width);
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    assert(mounted);
     final bool willPop = _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width) ?? false;
     if (willPop)
       _currentBottomSheet?.close();
@@ -744,7 +740,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   void _handleDragCancel() {
-    assert(mounted);
     final bool willPop = _backGestureController?.dragEnd(0.0) ?? false;
     if (willPop)
       _currentBottomSheet?.close();
@@ -872,8 +867,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         child: new GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _handleStatusBarTap,
-          // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
-          excludeFromSemantics: true,
         )
       ));
     }
@@ -929,7 +922,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
 /// An interface for controlling a feature of a [Scaffold].
 ///
-/// Commonly obtained from [ScaffoldState.showSnackBar] or [ScaffoldState.showBottomSheet].
+/// Commonly obtained from [Scaffold.showSnackBar] or [Scaffold.showBottomSheet].
 class ScaffoldFeatureController<T extends Widget, U> {
   const ScaffoldFeatureController._(this._widget, this._completer, this.close, this.setState);
   final T _widget;
@@ -1012,7 +1005,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
 
 /// A [ScaffoldFeatureController] for persistent bottom sheets.
 ///
-/// This is the type of objects returned by [ScaffoldState.showBottomSheet].
+/// This is the type of objects returned by [Scaffold.showBottomSheet].
 class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_PersistentBottomSheet, T> {
   const PersistentBottomSheetController._(
     _PersistentBottomSheet widget,

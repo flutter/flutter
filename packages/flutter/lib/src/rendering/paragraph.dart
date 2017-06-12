@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox;
+import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -38,12 +38,7 @@ class RenderParagraph extends RenderBox {
     TextOverflow overflow: TextOverflow.clip,
     double textScaleFactor: 1.0,
     int maxLines,
-  }) : assert(text != null),
-       assert(text.debugAssertIsValid()),
-       assert(softWrap != null),
-       assert(overflow != null),
-       assert(textScaleFactor != null),
-       _softWrap = softWrap,
+  }) : _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = new TextPainter(
          text: text,
@@ -51,7 +46,13 @@ class RenderParagraph extends RenderBox {
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
-       );
+       ) {
+    assert(text != null);
+    assert(text.debugAssertIsValid());
+    assert(softWrap != null);
+    assert(overflow != null);
+    assert(textScaleFactor != null);
+  }
 
   final TextPainter _textPainter;
 
@@ -189,8 +190,7 @@ class RenderParagraph extends RenderBox {
   bool _hasVisualOverflow = false;
   ui.Shader _overflowShader;
 
-  /// Whether this paragraph currently has a [ui.Shader] for its overflow
-  /// effect.
+  /// Whether this paragraph currently has a [ui.Shader] for its overflow effect.
   ///
   /// Used to test this object. Not for use in production.
   @visibleForTesting

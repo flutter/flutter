@@ -29,7 +29,8 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
         label: 'test',
       )
@@ -47,7 +48,8 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
       )
     ));
@@ -64,7 +66,8 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         label: 'test',
       )
     ));
@@ -84,7 +87,8 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
         label: 'test',
       )

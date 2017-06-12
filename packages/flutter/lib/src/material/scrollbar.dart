@@ -84,8 +84,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
 }
 
 class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
-  _ScrollbarPainter(TickerProvider vsync)
-    : assert(vsync != null) {
+  _ScrollbarPainter(TickerProvider vsync) {
+    assert(vsync != null);
     _fadeController = new AnimationController(duration: _kThumbFadeDuration, vsync: vsync);
     _opacity = new CurvedAnimation(parent: _fadeController, curve: Curves.fastOutSlowIn)
       ..addListener(notifyListeners);
@@ -156,13 +156,8 @@ class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   void _paintThumb(double before, double inside, double after, double viewport, Canvas canvas, Size size,
                    void painter(Canvas canvas, Size size, double thumbOffset, double thumbExtent)) {
-    double thumbExtent = math.min(viewport, _kMinThumbExtent);
-    if (before + inside + after > 0.0)
-      thumbExtent = math.max(thumbExtent, viewport * inside / (before + inside + after));
-
-    final double thumbOffset = (before + after > 0.0) ?
-        before * (viewport - thumbExtent) / (before + after) : 0.0;
-
+    final double thumbExtent = math.max(math.min(viewport, _kMinThumbExtent), viewport * inside / (before + inside + after));
+    final double thumbOffset = before * (viewport - thumbExtent) / (before + after);
     painter(canvas, size, thumbOffset, thumbExtent);
   }
 

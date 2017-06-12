@@ -59,7 +59,7 @@ class _RunMetrics {
 }
 
 /// Parent data for use with [RenderWrap].
-class WrapParentData extends ContainerBoxParentData<RenderBox> {
+class WrapParentData extends ContainerBoxParentDataMixin<RenderBox> {
   int _runIndex = 0;
 }
 
@@ -91,18 +91,18 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     WrapAlignment runAlignment: WrapAlignment.start,
     double runSpacing: 0.0,
     WrapCrossAlignment crossAxisAlignment: WrapCrossAlignment.start,
-  }) : assert(direction != null),
-       assert(alignment != null),
-       assert(spacing != null),
-       assert(runAlignment != null),
-       assert(runSpacing != null),
-       assert(crossAxisAlignment != null),
-       _direction = direction,
+  }) : _direction = direction,
        _alignment = alignment,
        _spacing = spacing,
        _runAlignment = runAlignment,
        _runSpacing = runSpacing,
        _crossAxisAlignment = crossAxisAlignment {
+    assert(direction != null);
+    assert(alignment != null);
+    assert(spacing != null);
+    assert(runAlignment != null);
+    assert(runSpacing != null);
+    assert(crossAxisAlignment != null);
     addAll(children);
   }
 
@@ -214,7 +214,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   /// the cross axis.
   ///
   /// For example, if this is set to [WrapCrossAlignment.end], and the
-  /// [direction] is [Axis.horizontal], then the children within each
+  /// [direction] is [WrapDirection.horizontal], then the children within each
   /// run will have their bottom edges aligned to the bottom edge of the run.
   ///
   /// Defaults to [WrapCrossAlignment.start].

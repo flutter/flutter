@@ -16,7 +16,6 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../protocol_discovery.dart';
@@ -28,13 +27,10 @@ const String _xcrunPath = '/usr/bin/xcrun';
 const String _kFlutterTestDeviceSuffix = '(Flutter)';
 
 class IOSSimulators extends PollingDeviceDiscovery {
-  IOSSimulators() : super('iOS simulators');
+  IOSSimulators() : super('IOSSimulators');
 
   @override
   bool get supportsPlatform => platform.isMacOS;
-
-  @override
-  bool get canListAnything => doctor.iosWorkflow.canListDevices;
 
   @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
@@ -489,7 +485,7 @@ class IOSSimulator extends Device {
     printTrace('Waiting for observatory port to be available...');
 
     try {
-      final Uri deviceUri = await observatoryDiscovery.uri;
+      final Uri deviceUri = await observatoryDiscovery.nextUri();
       return new LaunchResult.succeeded(observatoryUri: deviceUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');

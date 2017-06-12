@@ -12,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
-import 'page_storage.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
@@ -38,35 +37,18 @@ import 'viewport.dart';
 class PageController extends ScrollController {
   /// Creates a page controller.
   ///
-  /// The [initialPage], [keepPage], and [viewportFraction] arguments must not be null.
+  /// The [initialPage] and [viewportFraction] arguments must not be null.
   PageController({
     this.initialPage: 0,
-    this.keepPage: true,
     this.viewportFraction: 1.0,
-  }) : assert(initialPage != null),
-       assert(keepPage != null),
-       assert(viewportFraction != null),
-       assert(viewportFraction > 0.0);
+  }) {
+    assert(initialPage != null);
+    assert(viewportFraction != null);
+    assert(viewportFraction > 0.0);
+  }
 
   /// The page to show when first creating the [PageView].
   final int initialPage;
-
-  /// Save the current [page] with [PageStorage] and restore it if
-  /// this controller's scrollable is recreated.
-  ///
-  /// If this property is set to false, the current [page] is never saved
-  /// and [initialPage] is always used to initialize the scroll offset.
-  /// If true (the default), the initial page is used the first time the
-  /// controller's scrollable is created, since there's isn't a page to
-  /// restore yet. Subsequently the saved page is restored and
-  /// [initialPage] is ignored.
-  ///
-  /// See also:
-  ///
-  ///  * [PageStorageKey], which should be used when more than one
-  ////   scrollable appears in the same route, to distinguish the [PageStorage]
-  ///    locations used to save scroll offsets.
-  final bool keepPage;
 
   /// The fraction of the viewport that each page should occupy.
   ///
@@ -135,7 +117,6 @@ class PageController extends ScrollController {
       physics: physics,
       context: context,
       initialPage: initialPage,
-      keepPage: keepPage,
       viewportFraction: viewportFraction,
       oldPosition: oldPosition,
     );
@@ -170,25 +151,20 @@ class _PagePosition extends ScrollPositionWithSingleContext {
     ScrollPhysics physics,
     ScrollContext context,
     this.initialPage: 0,
-    bool keepPage: true,
     double viewportFraction: 1.0,
     ScrollPosition oldPosition,
-  }) : assert(initialPage != null),
-       assert(keepPage != null),
-       assert(viewportFraction != null),
-       assert(viewportFraction > 0.0),
-       _viewportFraction = viewportFraction,
-       _pageToUseOnStartup = initialPage.toDouble(),
-       super(
-         physics: physics,
-         context: context,
-         initialPixels: null,
-         keepScrollOffset: keepPage,
-         oldPosition: oldPosition,
-       );
+  }) : _viewportFraction = viewportFraction, super(
+    physics: physics,
+    context: context,
+    initialPixels: null,
+    oldPosition: oldPosition,
+  ) {
+    assert(initialPage != null);
+    assert(viewportFraction != null);
+    assert(viewportFraction > 0.0);
+  }
 
   final int initialPage;
-  double _pageToUseOnStartup;
 
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
@@ -212,25 +188,11 @@ class _PagePosition extends ScrollPositionWithSingleContext {
   double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
 
   @override
-  void saveScrollOffset() {
-    PageStorage.of(context.storageContext)?.writeState(context.storageContext, getPageFromPixels(pixels, viewportDimension));
-  }
-
-  @override
-  void restoreScrollOffset() {
-    if (pixels == null) {
-      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext);
-      if (value != null)
-        _pageToUseOnStartup = value;
-    }
-  }
-
-  @override
   bool applyViewportDimension(double viewportDimension) {
     final double oldViewportDimensions = this.viewportDimension;
     final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
-    final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? _pageToUseOnStartup : getPageFromPixels(oldPixels, oldViewportDimensions);
+    final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? initialPage.toDouble() : getPageFromPixels(oldPixels, oldViewportDimensions);
     final double newPixels = getPixelsFromPage(page);
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
@@ -253,12 +215,10 @@ class _PagePosition extends ScrollPositionWithSingleContext {
 /// These physics cause the page view to snap to page boundaries.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
-  const PageScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  const PageScrollPhysics({ ScrollPhysics parent }) : super(parent);
 
   @override
-  PageScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new PageScrollPhysics(parent: buildParent(ancestor));
-  }
+  PageScrollPhysics applyTo(ScrollPhysics parent) => new PageScrollPhysics(parent: parent);
 
   double _getPage(ScrollPosition position) {
     if (position is _PagePosition)
@@ -378,9 +338,9 @@ class PageView extends StatefulWidget {
     this.physics,
     this.onPageChanged,
     @required this.childrenDelegate,
-  }) : assert(childrenDelegate != null),
-       controller = controller ?? _defaultPageController,
-       super(key: key);
+  }) : controller = controller ?? _defaultPageController, super(key: key) {
+    assert(childrenDelegate != null);
+  }
 
   /// The axis along which the page view scrolls.
   ///

@@ -63,15 +63,16 @@ import 'constants.dart';
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
-    : assert(length != null && length > 1),
-      assert(initialIndex != null && initialIndex >= 0 && initialIndex < length),
-      _index = initialIndex,
+    : _index = initialIndex,
       _previousIndex = initialIndex,
       _animationController = new AnimationController(
         value: initialIndex.toDouble(),
         upperBound: (length - 1).toDouble(),
         vsync: vsync
-      );
+   ) {
+    assert(length != null && length > 1);
+    assert(initialIndex != null && initialIndex >= 0 && initialIndex < length);
+  }
 
   /// An animation whose value represents the current position of the [TabBar]'s
   /// selected tab indicator as well as the scrollOffsets of the [TabBar]
@@ -101,16 +102,19 @@ class TabController extends ChangeNotifier {
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController
         .animateTo(_index.toDouble(), duration: duration, curve: curve)
-        .whenCompleteOrCancel(() {
-          _indexIsChangingCount -= 1;
-          notifyListeners();
-        });
+        .orCancel.then<Null>(_indexChanged, onError: _indexChanged);
     } else {
       _indexIsChangingCount += 1;
       _animationController.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       notifyListeners();
     }
+  }
+
+  Null _indexChanged(dynamic value) {
+    _indexIsChangingCount -= 1;
+    notifyListeners();
+    return null;
   }
 
   /// The index of the currently selected tab. Changing the index also updates
@@ -228,8 +232,7 @@ class DefaultTabController extends StatefulWidget {
     @required this.length,
     this.initialIndex: 0,
     @required this.child,
-  }) : assert(initialIndex != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The total number of tabs. Must be greater than one.
   final int length;

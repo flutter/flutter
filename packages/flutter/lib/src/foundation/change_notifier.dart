@@ -20,7 +20,7 @@ abstract class Listenable {
   /// The list must not be changed after this method has been called. Doing so
   /// will lead to memory leaks or exceptions.
   ///
-  /// The list may contain nulls; they are ignored.
+  /// The list may contain `null`s; they are ignored.
   factory Listenable.merge(List<Listenable> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
@@ -185,5 +185,5 @@ class ValueNotifier<T> extends ChangeNotifier {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode($value)';
+  String toString() => '$runtimeType(value: $value)';
 }

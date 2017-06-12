@@ -22,10 +22,10 @@ import 'node.dart';
 /// different parents. The scene must be explicitly recomposited after such
 /// changes are made; the layer tree does not maintain its own dirty state.
 ///
-/// To composite the tree, create a [SceneBuilder] object, pass it to the
+/// To composite the tree, create a [ui.SceneBuilder] object, pass it to the
 /// root [Layer] object's [addToScene] method, and then call
-/// [SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
-/// using [Window.render].
+/// [ui.SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
+/// using [ui.window.render].
 ///
 /// See also:
 ///
@@ -163,7 +163,6 @@ class PerformanceOverlayLayer extends Layer {
     @required this.optionsMask,
     @required this.rasterizerThreshold,
     @required this.checkerboardRasterCacheImages,
-    @required this.checkerboardOffscreenLayers,
   });
 
   /// The rectangle in this layer's coordinate system that the overlay should occupy.
@@ -194,23 +193,12 @@ class PerformanceOverlayLayer extends Layer {
   /// that aid it in making better decisions about caching.
   final bool checkerboardRasterCacheImages;
 
-  /// Whether the compositor should checkerboard layers that are rendered to offscreen
-  /// bitmaps. This can be useful for debugging rendering performance.
-  ///
-  /// Render target switches are caused by using opacity layers (via a [FadeTransition] or
-  /// [Opacity] widget), clips, shader mask layers, etc. Selecting a new render target
-  /// and merging it with the rest of the scene has a performance cost. This can sometimes
-  /// be avoided by using equivalent widgets that do not require these layers (for example,
-  /// replacing an [Opacity] widget with an [widgets.Image] using a [BlendMode]).
-  final bool checkerboardOffscreenLayers;
-
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     assert(optionsMask != null);
     builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
-    builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
   }
 }
 
@@ -346,7 +334,7 @@ class ContainerLayer extends Layer {
   ///
   /// This method is typically used by [addToScene] to insert the children into
   /// the scene. Subclasses of [ContainerLayer] typically override [addToScene]
-  /// to apply effects to the scene using the [SceneBuilder] API, then insert
+  /// to apply effects to the scene using the [ui.SceneBuilder] API, then insert
   /// their children using [addChildrenToScene], then reverse the aforementioned
   /// effects before returning from [addToScene].
   void addChildrenToScene(ui.SceneBuilder builder, Offset childOffset) {
@@ -361,21 +349,19 @@ class ContainerLayer extends Layer {
   String debugDescribeChildren(String prefix) {
     if (firstChild == null)
       return '';
-    final StringBuffer result = new StringBuffer()
-      ..write(prefix)
-      ..write(' \u2502\n');
+    String result = '$prefix \u2502\n';
     Layer child = firstChild;
     int count = 1;
     while (child != lastChild) {
-      result.write(child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502"));
+      result += '${child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502")}';
       count += 1;
       child = child.nextSibling;
     }
     if (child != null) {
       assert(child == lastChild);
-      result.write(child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  "));
+      result += '${child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  ")}';
     }
-    return result.toString();
+    return result;
   }
 }
 
@@ -643,9 +629,11 @@ class PhysicalModelLayer extends ContainerLayer {
     @required this.clipRRect,
     @required this.elevation,
     @required this.color,
-  }) : assert(clipRRect != null),
-       assert(elevation != null),
-       assert(color != null);
+  }) {
+    assert(clipRRect != null);
+    assert(elevation != null);
+    assert(color != null);
+  }
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -657,7 +645,7 @@ class PhysicalModelLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  double elevation;
+  int elevation;
 
   /// The background color.
   ///
@@ -669,7 +657,7 @@ class PhysicalModelLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushPhysicalModel(
       rrect: clipRRect.shift(layerOffset),
-      elevation: elevation,
+      elevation: elevation.toDouble(),
       color: color,
     );
     addChildrenToScene(builder, layerOffset);

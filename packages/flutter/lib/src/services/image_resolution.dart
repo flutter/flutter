@@ -60,7 +60,11 @@ class AssetImage extends AssetBundleImageProvider {
   ///
   /// The [name] argument must not be null. It should name the main asset from
   /// the set of images to chose from.
-  const AssetImage(this.name, { this.bundle }) : assert(name != null);
+  AssetImage(this.name, {
+    this.bundle
+  }) {
+    assert(name != null);
+  }
 
   /// The name of the main asset from the set of images to chose from. See the
   /// documentation for the [AssetImage] class itself for details.

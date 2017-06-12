@@ -17,7 +17,7 @@ abstract class MergeableMaterialItem {
   /// const constructors so that they can be used in const expressions.
   ///
   /// The argument is the [key], which must not be null.
-  const MergeableMaterialItem(this.key) : assert(key != null);
+  const MergeableMaterialItem(this.key);
 
   /// The key for this item of the list.
   ///
@@ -60,7 +60,7 @@ class MaterialGap extends MergeableMaterialItem {
   }) : assert(key != null),
        super(key);
 
-  /// The main axis extent of this gap. For example, if the [MergeableMaterial]
+  /// The main axis extent of this gap. For example, if the [MergableMaterial]
   /// is vertical, then this is the height of the gap.
   final double size;
 
@@ -120,7 +120,7 @@ class MergeableMaterial extends StatefulWidget {
   @override
   String toString() {
     return 'MergeableMaterial('
-      'key: $key, mainAxis: $mainAxis, elevation: ${elevation.toStringAsFixed(1)}'
+      'key: $key, mainAxis: $mainAxis, elevation: $elevation'
     ')';
   }
 

@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
 
-/// Signature for the callback passed to the [Ticker] class's constructor.
+/// Signature for the [onTick] constructor argument of the [Ticker] class.
 ///
 /// The argument is the time that the object had spent enabled so far
 /// at the time of the callback being called.
@@ -54,8 +54,7 @@ abstract class TickerProvider {
 /// Tickers are driven by the [SchedulerBinding]. See
 /// [SchedulerBinding.scheduleFrameCallback].
 class Ticker {
-  /// Creates a ticker that will call the provided callback once per frame while
-  /// running.
+  /// Creates a ticker that will call [onTick] once per frame while running.
   ///
   /// An optional label can be provided for debugging purposes. That label
   /// will appear in the [toString] output in debug builds.
@@ -333,9 +332,6 @@ class Ticker {
 /// [orCancel], which returns a derivative [Future] that completes with an error
 /// if the [Ticker] that returned the [TickerFuture] was stopped with `canceled`
 /// set to true, or if it was disposed without being stopped.
-///
-/// To run a callback when either this future resolves or when the tricker is
-/// canceled, use [whenCompleteOrCancel].
 class TickerFuture implements Future<Null> {
   TickerFuture._();
 
@@ -365,16 +361,6 @@ class TickerFuture implements Future<Null> {
     assert(_completed == null);
     _completed = false;
     _secondaryCompleter?.completeError(new TickerCanceled(ticker));
-  }
-
-  /// Calls `callback` either when this future resolves or when the ticker is
-  /// canceled.
-  void whenCompleteOrCancel(VoidCallback callback) {
-    Null thunk(dynamic value) {
-      callback();
-      return null;
-    }
-    orCancel.then(thunk, onError: thunk);
   }
 
   /// A future that resolves when this future resolves or throws when the ticker

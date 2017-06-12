@@ -12,6 +12,9 @@ import 'checkbox.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dropdown.dart';
+import 'icon.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -37,7 +40,7 @@ class DataColumn {
     this.tooltip,
     this.numeric: false,
     this.onSort
-  }) : assert(label != null);
+  });
 
   /// The column heading.
   ///
@@ -88,8 +91,8 @@ class DataRow {
     this.key,
     this.selected: false,
     this.onSelectChanged,
-    @required this.cells
-  }) : assert(cells != null);
+    this.cells
+  });
 
   /// Creates the configuration for a row of a [DataTable], deriving
   /// the key from a row index.
@@ -99,9 +102,8 @@ class DataRow {
     int index,
     this.selected: false,
     this.onSelectChanged,
-    @required this.cells
-  }) : assert(cells != null),
-       key = new ValueKey<int>(index);
+    this.cells
+  }) : key = new ValueKey<int>(index);
 
   /// A [Key] that uniquely identifies this row. This is used to
   /// ensure that if a row is added or removed, any stateful widgets
@@ -155,7 +157,7 @@ class DataCell {
   /// Creates an object to hold the data for a cell in a [DataTable].
   ///
   /// The first argument is the widget to show for the cell, typically
-  /// a [Text] or [DropdownButton] widget; this becomes the [child]
+  /// a [Text] or [DropdownButton] widget; this becomes the [widget]
   /// property and must not be null.
   ///
   /// If the cell has no data, then a [Text] widget with placeholder
@@ -164,8 +166,8 @@ class DataCell {
   const DataCell(this.child, {
     this.placeholder: false,
     this.showEditIcon: false,
-    this.onTap,
-  }) : assert(child != null);
+    this.onTap
+  });
 
   /// A cell that has no content and has zero width and height.
   static final DataCell empty = new DataCell(new Container(width: 0.0, height: 0.0));
@@ -199,7 +201,7 @@ class DataCell {
   ///
   /// If non-null, tapping the cell will call this callback. If
   /// null, tapping the cell will attempt to select the row (if
-  /// [DataRow.onSelectChanged] is provided).
+  /// [TableRow.onSelectChanged] is provided).
   final VoidCallback onTap;
 
   bool get _debugInteractive => onTap != null;
@@ -259,14 +261,14 @@ class DataTable extends StatelessWidget {
     this.sortAscending: true,
     this.onSelectAll,
     @required this.rows
-  }) : assert(columns != null),
-       assert(columns.isNotEmpty),
-       assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-       assert(sortAscending != null),
-       assert(rows != null),
-       assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
-       _onlyTextColumn = _initOnlyTextColumn(columns),
-       super(key: key);
+  }) : _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
+    assert(columns != null);
+    assert(columns.isNotEmpty);
+    assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
+    assert(sortAscending != null);
+    assert(rows != null);
+    assert(!rows.any((DataRow row) => row.cells.length != columns.length));
+  }
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;

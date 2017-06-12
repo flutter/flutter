@@ -31,14 +31,12 @@ class AnalyzeOnce extends AnalyzeBase {
   /// The working directory for testing analysis using dartanalyzer
   final Directory workingDirectory;
 
-  /// Packages whose source is defined in the vended SDK. 
-  static const List<String> _vendedSdkPackages = const <String>['analyzer', 'front_end', 'kernel'];
-
   @override
   Future<Null> analyze() async {
     final Stopwatch stopwatch = new Stopwatch()..start();
     final Set<Directory> pubSpecDirectories = new HashSet<Directory>();
     final List<File> dartFiles = <File>[];
+
     for (String file in argResults.rest.toList()) {
       file = fs.path.normalize(fs.path.absolute(file));
       final String root = fs.path.rootPrefix(file);
@@ -60,9 +58,6 @@ class AnalyzeOnce extends AnalyzeBase {
     // currently supports (e.g. missing member dartdoc summary).
     // TODO(danrubel): enhance dartanalyzer to provide this type of summary
     if (!flutterRepo) {
-      if (argResults['dartdocs'])
-        throwToolExit('The --dartdocs option is currently only supported with --flutter-repo.');
-
       final List<String> arguments = <String>[];
       arguments.addAll(dartFiles.map((FileSystemEntity f) => f.path));
 
@@ -129,6 +124,8 @@ class AnalyzeOnce extends AnalyzeBase {
       return;
     }
 
+    //TODO (pq): revisit package and directory defaults
+
     for (Directory dir in repoPackages) {
       _collectDartFiles(dir, dartFiles);
       pubSpecDirectories.add(dir);
@@ -161,10 +158,10 @@ class AnalyzeOnce extends AnalyzeBase {
             if (colon > 0) {
               final String packageName = line.substring(0, colon);
               final String packagePath = fs.path.fromUri(line.substring(colon+1));
-              // Ensure that we only add `analyzer` and dependent packages defined in the vended SDK (and referred to with a local 
-              // fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored 
-              // since they would produce spurious conflicts.
-              if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..'))
+              // Ensure that we only add the `analyzer` package defined in the vended SDK (and referred to with a local fs.path. directive).
+              // Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored since they would produce
+              // spurious conflicts.
+              if (packageName != 'analyzer' || packagePath.startsWith('..'))
                 dependencies.add(packageName, fs.path.normalize(fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
             }
         });

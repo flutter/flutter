@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
+import 'icon.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -15,13 +18,12 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
-// See: <https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size>
 const double _kMinButtonSize = 48.0;
 
 /// A material design icon button.
 ///
 /// An icon button is a picture printed on a [Material] widget that reacts to
-/// touches by filling with color (ink).
+/// touches by filling with color.
 ///
 /// Icon buttons are commonly used in the [AppBar.actions] field, but they can
 /// be used in many other places as well.
@@ -31,31 +33,12 @@ const double _kMinButtonSize = 48.0;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// The hit region of an icon button will, if possible, be at least 48.0 pixels
-/// in size, regardless of the actual [iconSize], to satisfy the [touch target
-/// size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
-/// requirements in the Material Design specification. The [alignment] controls
-/// how the icon itself is positioned within the hit region.
-///
-/// ## Sample code
-///
-/// ```dart
-/// new IconButton(
-///   icon: new Icon(Icons.volume_up),
-///   tooltip: 'Increase volume by 10%',
-///   onPressed: () { setState(() { _volume *= 1.1; }); },
-/// )
-/// ```
+/// Will be automatically sized up to the recommended 48 logical pixels if smaller.
 ///
 /// See also:
 ///
-///  * [Icons], a library of predefined icons.
-///  * [BackButton], an icon button for a "back" affordance which adapts to the
-///    current platform's conventions.
-///  * [CloseButton], an icon button for closing pages.
-///  * [AppBar], to show a toolbar at the top of an application.
-///  * [RaisedButton] and [FlatButton], for buttons with text in them.
-///  * [InkResponse] and [InkWell], for the ink splash effect itself.
+///  * [Icons]
+///  * [AppBar]
 class IconButton extends StatelessWidget {
   /// Creates an icon button.
   ///
@@ -79,11 +62,7 @@ class IconButton extends StatelessWidget {
     this.disabledColor,
     @required this.onPressed,
     this.tooltip
-  }) : assert(iconSize != null),
-       assert(padding != null),
-       assert(alignment != null),
-       assert(icon != null),
-       super(key: key);
+  }) : super(key: key);
 
   /// The size of the icon inside the button.
   ///
@@ -110,10 +89,9 @@ class IconButton extends StatelessWidget {
 
   /// The icon to display inside the button.
   ///
-  /// The [Icon.size] and [Icon.color] of the icon is configured automatically
-  /// based on the [iconSize] nad [color] properties of _this_ widget using an
-  /// [IconTheme] and therefore should not be explicitly given in the icon
-  /// widget.
+  /// The [size] and [color] of the icon is configured automatically based on
+  /// the properties of _this_ widget using an [IconTheme] and therefore should
+  /// not be explicitly given in the icon widget.
   ///
   /// This property must not be null.
   ///

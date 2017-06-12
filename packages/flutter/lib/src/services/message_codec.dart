@@ -16,7 +16,7 @@ import 'platform_channel.dart';
 ///
 /// See also:
 ///
-/// * [BasicMessageChannel], which use [MessageCodec]s for communication
+/// * [PlatformMessageChannel], which use [MessageCodec]s for communication
 ///   between Flutter and platform plugins.
 abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
@@ -35,8 +35,9 @@ abstract class MessageCodec<T> {
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].
-  const MethodCall(this.method, [this.arguments])
-    : assert(method != null);
+  MethodCall(this.method, [this.arguments]) {
+    assert(method != null);
+  }
 
   /// The name of the method to be called.
   final String method;
@@ -98,9 +99,9 @@ class MethodCall {
 ///
 /// See also:
 ///
-/// * [MethodChannel], which use [MethodCodec]s for communication
+/// * [PlatformMethodChannel], which use [MethodCodec]s for communication
 ///   between Flutter and platform plugins.
-/// * [EventChannel], which use [MethodCodec]s for communication
+/// * [PlatformEventChannel], which use [MethodCodec]s for communication
 ///   between Flutter and platform plugins.
 abstract class MethodCodec {
   /// Encodes the specified [methodCall] into binary.
@@ -147,7 +148,9 @@ class PlatformException implements Exception {
     @required this.code,
     this.message,
     this.details,
-  }) : assert(code != null);
+  }) {
+    assert(code != null);
+  }
 
   /// An error code.
   final String code;

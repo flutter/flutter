@@ -5,12 +5,13 @@
 
 .DS_Store
 *.swp
+*.lock
 profile
 
 DerivedData/
 build/
-GeneratedPluginRegistrant.h
-GeneratedPluginRegistrant.m
+PluginRegistry.h
+PluginRegistry.m
 
 *.pbxuser
 *.mode1v3

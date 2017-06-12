@@ -5,9 +5,9 @@
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
-import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
@@ -39,17 +39,19 @@ void main() {
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       flutterUsage.enabled = false;
-      await createProject(temp);
+      final CreateCommand command = new CreateCommand();
+      CommandRunner<Null> runner = createTestCommandRunner(command);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
       expect(count, 0);
 
       flutterUsage.enabled = true;
-      await createProject(temp);
+      await runner.run(<String>['create', '--no-pub', temp.path]);
       expect(count, flutterUsage.isFirstRun ? 0 : 2);
 
       count = 0;
       flutterUsage.enabled = false;
       final DoctorCommand doctorCommand = new DoctorCommand();
-      final CommandRunner<Null>runner = createTestCommandRunner(doctorCommand);
+      runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
@@ -78,14 +80,12 @@ void main() {
   group('analytics with mocks', () {
     Usage mockUsage;
     Clock mockClock;
-    Doctor mockDoctor;
     List<int> mockTimes;
 
     setUp(() {
       mockUsage = new MockUsage();
       when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = new MockClock();
-      mockDoctor = new MockDoctor();
       when(mockClock.now()).thenAnswer(
         (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
@@ -93,7 +93,6 @@ void main() {
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false)).thenReturn(true);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -102,30 +101,10 @@ void main() {
 
       expect(
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), null]
       );
     }, overrides: <Type, Generator>{
       Clock: () => mockClock,
-      Doctor: () => mockDoctor,
-      Usage: () => mockUsage,
-    });
-
-    testUsingContext('doctor fail sends warning', () async {
-      mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false)).thenReturn(false);
-      final DoctorCommand command = new DoctorCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
-      await runner.run(<String>['doctor']);
-
-      verify(mockClock.now()).called(2);
-
-      expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
-      );
-    }, overrides: <Type, Generator>{
-      Clock: () => mockClock,
-      Doctor: () => mockDoctor,
       Usage: () => mockUsage,
     });
   });
@@ -147,5 +126,3 @@ void main() {
 }
 
 class MockUsage extends Mock implements Usage {}
-
-class MockDoctor extends Mock implements Doctor {}

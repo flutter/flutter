@@ -25,16 +25,11 @@ import 'theme.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// If you want an ink-splash effect for taps, but don't want to use a button,
-/// consider using [InkWell] directly.
-///
 /// See also:
 ///
-///  * [FlatButton], a material design button without a shadow.
-///  * [DropdownButton], a button that shows options to select from.
-///  * [FloatingActionButton], the round button in material applications.
-///  * [IconButton], to create buttons that just contain icons.
-///  * [InkWell], which implements the ink splash part of a flat button.
+///  * [FlatButton]
+///  * [DropdownButton]
+///  * [FloatingActionButton]
 ///  * <https://material.google.com/components/buttons.html>
 class RaisedButton extends StatelessWidget {
   /// Creates a raised button.
@@ -48,9 +43,9 @@ class RaisedButton extends StatelessWidget {
     this.highlightColor,
     this.splashColor,
     this.disabledColor,
-    this.elevation: 2.0,
-    this.highlightElevation: 8.0,
-    this.disabledElevation: 0.0,
+    this.elevation: 2,
+    this.highlightElevation: 8,
+    this.disabledElevation: 0,
     this.colorBrightness,
     this.child
   }) : super(key: key);
@@ -100,36 +95,27 @@ class RaisedButton extends StatelessWidget {
   /// value.
   final Color disabledColor;
 
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the raised button.
+  /// The z-coordinate at which to place this button.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 2, the appropriate elevation for raised buttons.
-  ///
-  /// See also:
-  ///
-  ///  * [FlatButton], a button with no elevation.
-  final double elevation;
+  final int elevation;
 
-  /// The z-coordinate at which to place this button when highlighted. This
-  /// controls the size of the shadow below the raised button.
+  /// The z-coordinate at which to place this button when highlighted.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 8, the appropriate elevation for raised buttons while they are
   /// being touched.
-  ///
-  /// See also:
-  ///
-  ///  * [elevation], the default elevation.
-  final double highlightElevation;
+  final int highlightElevation;
 
-  /// The z-coordinate at which to place this button when disabled. This
-  /// controls the size of the shadow below the raised button.
+  /// The z-coordinate at which to place this button when disabled.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 0, the appropriate elevation for disabled raised buttons.
-  ///
-  /// See also:
-  ///
-  ///  * [elevation], the default elevation.
-  final double disabledElevation;
+  final int disabledElevation;
 
   /// The theme brightness to use for this button.
   ///

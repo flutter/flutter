@@ -41,13 +41,10 @@ class TextPainter {
     double textScaleFactor: 1.0,
     int maxLines,
     String ellipsis,
-  }) : assert(text == null || text.debugAssertIsValid()),
-       assert(textScaleFactor != null),
-       _text = text,
-       _textAlign = textAlign,
-       _textScaleFactor = textScaleFactor,
-       _maxLines = maxLines,
-       _ellipsis = ellipsis;
+  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor, _maxLines = maxLines, _ellipsis = ellipsis {
+    assert(text == null || text.debugAssertIsValid());
+    assert(textScaleFactor != null);
+  }
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -98,22 +95,11 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// The string used to ellipsize overflowing text. Setting this to a non-empty
+  /// The string used to ellipsize overflowing text.  Setting this to a nonempty
   /// string will cause this string to be substituted for the remaining text
-  /// if the text can not fit within the specified maximum width.
-  ///
-  /// Specifically, the ellipsis is applied to the last line before the line
-  /// truncated by [maxLines], if [maxLines] is non-null and that line overflows
-  /// the width constraint, or to the first line that is wider than the width
-  /// constraint, if [maxLines] is null. The width constraint is the `maxWidth`
-  /// passed to [layout].
+  /// if the text can not fit within the specificed maximum width.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
-  ///
-  /// The higher layers of the system, such as the [Text] widget, represent
-  /// overflow effects using the [TextOverflow] enum. The
-  /// [TextOverflow.ellipsis] value corresponds to setting this property to
-  /// U+2026 HORIZONTAL ELLIPSIS (…).
   String get ellipsis => _ellipsis;
   String _ellipsis;
   set ellipsis(String value) {
@@ -125,11 +111,10 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// An optional maximum number of lines for the text to span, wrapping if
-  /// necessary.
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
   ///
-  /// If the text exceeds the given number of lines, it is truncated such that
-  /// subsequent lines are dropped.
+  /// If the text exceeds the given number of lines, it will be truncated according
+  /// to [overflow].
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
   int get maxLines => _maxLines;
@@ -144,30 +129,15 @@ class TextPainter {
 
   ui.Paragraph _layoutTemplate;
 
-  ui.ParagraphStyle _createParagraphStyle() {
-    return _text.style?.getParagraphStyle(
-      textAlign: textAlign,
-      textScaleFactor: textScaleFactor,
-      maxLines: _maxLines,
-      ellipsis: _ellipsis,
-    ) ?? new ui.ParagraphStyle(
-      textAlign: textAlign,
-      maxLines: maxLines,
-      ellipsis: ellipsis,
-    );
-  }
-
-  /// The height of a zero-width space in [text] in logical pixels.
+  /// The height of a zero-width space in [style] in logical pixels.
   ///
-  /// Not every line of text in [text] will have this height, but this height
-  /// is "typical" for text in [text] and useful for sizing other objects
+  /// Not every line of text in [style] will have this height, but this height
+  /// is "typical" for text in [style] and useful for sizing other objects
   /// relative a typical line of text.
-  ///
-  /// Obtaining this value does not require calling [layout].
   double get preferredLineHeight {
     assert(text != null);
     if (_layoutTemplate == null) {
-      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(_createParagraphStyle());
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle());
       if (text.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(_kZeroWidthSpace);
@@ -188,8 +158,7 @@ class TextPainter {
     return layoutValue.ceilToDouble();
   }
 
-  /// The width at which decreasing the width of the text would prevent it from
-  /// painting itself completely within its bounds.
+  /// The width at which decreasing the width of the text would prevent it from painting itself completely within its bounds.
   ///
   /// Valid only after [layout] has been called.
   double get minIntrinsicWidth {
@@ -229,8 +198,7 @@ class TextPainter {
     return new Size(width, height);
   }
 
-  /// Returns the distance from the top of the text to the first baseline of the
-  /// given type.
+  /// Returns the distance from the top of the text to the first baseline of the given type.
   ///
   /// Valid only after [layout] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
@@ -245,17 +213,10 @@ class TextPainter {
     return null;
   }
 
-  /// Whether any text was truncated or ellipsized.
+  /// Whether the previous call to [layout] attempted to produce more than
+  /// [maxLines] lines.
   ///
-  /// If [maxLines] is not null, this is true if there were more lines to be
-  /// drawn than the given [maxLines], and thus at least one line was omitted in
-  /// the output; otherwise it is false.
-  ///
-  /// If [maxLines] is null, this is true if [ellipsis] is not the empty string
-  /// and there was a line that overflowed the `maxWidth` argument passed to
-  /// [layout]; otherwise it is false.
-  ///
-  /// Valid only after [layout] has been called.
+  /// If [didExceedMaxLines] is true, then any overflow effect is operative.
   bool get didExceedMaxLines {
     assert(!_needsLayout);
     return _paragraph.didExceedMaxLines;
@@ -275,7 +236,18 @@ class TextPainter {
       return;
     _needsLayout = false;
     if (_paragraph == null) {
-      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(_createParagraphStyle());
+      ui.ParagraphStyle paragraphStyle = _text.style?.getParagraphStyle(
+        textAlign: textAlign,
+        textScaleFactor: textScaleFactor,
+        maxLines: _maxLines,
+        ellipsis: _ellipsis,
+      );
+      paragraphStyle ??= new ui.ParagraphStyle(
+        textAlign: textAlign,
+        maxLines: maxLines,
+        ellipsis: ellipsis,
+      );
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
       _text.build(builder, textScaleFactor: textScaleFactor);
       _paragraph = builder.build();
     }

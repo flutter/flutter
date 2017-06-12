@@ -43,9 +43,11 @@ class ExpansionPanel {
     @required this.headerBuilder,
     @required this.body,
     this.isExpanded: false
-  }) : assert(headerBuilder != null),
-       assert(body != null),
-       assert(isExpanded != null);
+  }) {
+    assert(headerBuilder != null);
+    assert(body != null);
+    assert(isExpanded != null);
+  }
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;

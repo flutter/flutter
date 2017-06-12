@@ -77,7 +77,8 @@ void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
 
-import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.app.FlutterActivity;
+
 {{#plugins}}
 import {{package}}.{{class}};
 {{/plugins}}
@@ -85,12 +86,17 @@ import {{package}}.{{class}};
 /**
  * Generated file. Do not edit.
  */
-public final class GeneratedPluginRegistrant {
-  public static void registerWith(PluginRegistry registry) {
+
+public class PluginRegistry {
 {{#plugins}}
-    {{class}}.registerWith(registry.registrarFor("{{package}}.{{class}}"));
+    public {{class}} {{name}};
 {{/plugins}}
-  }
+
+    public void registerAll(FlutterActivity activity) {
+{{#plugins}}
+        {{name}} = {{class}}.register(activity);
+{{/plugins}}
+    }
 }
 ''';
 
@@ -113,7 +119,7 @@ void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
   final Directory registryDirectory =
       fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins'));
   registryDirectory.createSync(recursive: true);
-  final File registryFile = registryDirectory.childFile('GeneratedPluginRegistrant.java');
+  final File registryFile = registryDirectory.childFile('PluginRegistry.java');
   registryFile.writeAsStringSync(pluginRegistry);
 }
 
@@ -121,33 +127,43 @@ const String _iosPluginRegistryHeaderTemplate = '''//
 //  Generated file. Do not edit.
 //
 
-#ifndef GeneratedPluginRegistrant_h
-#define GeneratedPluginRegistrant_h
+#ifndef PluginRegistry_h
+#define PluginRegistry_h
 
 #import <Flutter/Flutter.h>
 
-@interface GeneratedPluginRegistrant : NSObject
-+ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
+{{#plugins}}
+#import "{{class}}.h"
+{{/plugins}}
+
+@interface PluginRegistry : NSObject
+
+{{#plugins}}
+@property (readonly, nonatomic) {{class}} *{{name}};
+{{/plugins}}
+
+- (instancetype)initWithController:(FlutterViewController *)controller;
+
 @end
 
-#endif /* GeneratedPluginRegistrant_h */
+#endif /* PluginRegistry_h */
 ''';
 
 const String _iosPluginRegistryImplementationTemplate = '''//
 //  Generated file. Do not edit.
 //
 
-#import "GeneratedPluginRegistrant.h"
-{{#plugins}}
-#import <{{name}}/{{class}}.h>
-{{/plugins}}
+#import "PluginRegistry.h"
 
-@implementation GeneratedPluginRegistrant
+@implementation PluginRegistry
 
-+ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
+- (instancetype)initWithController:(FlutterViewController *)controller {
+  if (self = [super init]) {
 {{#plugins}}
-  [{{class}} registerWithRegistrar:[registry registrarForPlugin:@"{{class}}"]];
+    _{{name}} = [[{{class}} alloc] initWithController:controller];
 {{/plugins}}
+  }
+  return self;
 }
 
 @end
@@ -171,18 +187,14 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
       new mustache.Template(_iosPluginRegistryImplementationTemplate).renderString(context);
   final Directory registryDirectory = fs.directory(fs.path.join(directory, 'ios', 'Runner'));
   registryDirectory.createSync(recursive: true);
-  final File registryHeaderFile = registryDirectory.childFile('GeneratedPluginRegistrant.h');
+  final File registryHeaderFile = registryDirectory.childFile('PluginRegistry.h');
   registryHeaderFile.writeAsStringSync(pluginRegistryHeader);
-  final File registryImplementationFile = registryDirectory.childFile('GeneratedPluginRegistrant.m');
+  final File registryImplementationFile = registryDirectory.childFile('PluginRegistry.m');
   registryImplementationFile.writeAsStringSync(pluginRegistryImplementation);
 
 }
 
-/// Finds Flutter plugins in the pubspec.yaml, creates platform injection
-/// registries classes and add them to the build depedencies.
-///
-/// Returns whether any Flutter plugins are added.
-bool injectPlugins({String directory}) {
+void injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
   final List<Plugin> plugins = _findPlugins(directory);
   _writeFlutterPluginsList(directory, plugins);
@@ -190,5 +202,4 @@ bool injectPlugins({String directory}) {
     _writeAndroidPluginRegistry(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios')))
     _writeIOSPluginRegistry(directory, plugins);
-  return plugins.isNotEmpty;
 }

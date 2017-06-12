@@ -26,9 +26,11 @@ class ClampedSimulation extends Simulation {
     this.xMax: double.INFINITY,
     this.dxMin: double.NEGATIVE_INFINITY,
     this.dxMax: double.INFINITY
-  }) : assert(simulation != null),
-       assert(xMax >= xMin),
-       assert(dxMax >= dxMin);
+  }) {
+    assert(simulation != null);
+    assert(xMax >= xMin);
+    assert(dxMax >= dxMin);
+  }
 
   /// The simulation being clamped. Calls to [x], [dx], and [isDone] are
   /// forwarded to the simulation.

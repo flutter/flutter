@@ -62,7 +62,7 @@ bool debugPaintBaselinesEnabled = false;
 /// The color to use when painting alphabetic baselines.
 Color debugPaintAlphabeticBaselineColor = _kDebugPaintAlphabeticBaselineColor;
 
-/// The color to use when painting ideographic baselines.
+/// The color ot use when painting ideographic baselines.
 Color debugPaintIdeographicBaselineColor = _kDebugPaintIdeographicBaselineColor;
 
 /// Causes each Layer to paint a box around its bounds.
@@ -108,15 +108,10 @@ bool debugPrintMarkNeedsLayoutStacks = false;
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 bool debugCheckIntrinsicSizes = false;
 
-/// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
+/// Adds [Timeline] events for every RenderObject painted.
 ///
-/// This is only enabled in debug builds. The timing information this exposes is
-/// not representative of actual paints. However, it can expose unexpected
-/// painting in the timeline.
-///
-/// For details on how to use [dart:developer.Timeline] events in the Dart
-/// Observatory to optimize your app, see:
-/// <https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md>
+/// For details on how to use [Timeline] events in the Dart Observatory to
+/// optimize your app, see https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
 bool debugProfilePaintsEnabled = false;
 
 

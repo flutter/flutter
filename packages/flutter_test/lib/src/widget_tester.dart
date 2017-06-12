@@ -181,7 +181,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// this method works when the test is run with `flutter run`.
   Future<Null> pumpWidget(Widget widget, [
     Duration duration,
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    EnginePhase phase = EnginePhase.sendSemanticsTree
   ]) {
     return TestAsyncUtils.guard(() {
       binding.attachRootWidget(widget);
@@ -204,15 +204,16 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   Future<Null> pump([
     Duration duration,
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    EnginePhase phase = EnginePhase.sendSemanticsTree
   ]) {
     return TestAsyncUtils.guard(() => binding.pump(duration, phase));
   }
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
-  /// longer any frames scheduled. This will call [pump] at least once, even if
-  /// no frames are scheduled when the function is called, to flush any pending
-  /// microtasks which may themselves schedule a frame.
+  /// longer any transient callbacks scheduled. This will call [pump] at least
+  /// once, even if no transient callbacks are scheduled when the function is
+  /// called, in case there are dirty widgets to rebuild which will themselves
+  /// register new transient callbacks.
   ///
   /// This essentially waits for all animations to have completed.
   ///
@@ -235,7 +236,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// matches the expected number of pumps.
   Future<int> pumpAndSettle([
       Duration duration = const Duration(milliseconds: 100),
-      EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+      EnginePhase phase = EnginePhase.sendSemanticsTree,
       Duration timeout = const Duration(minutes: 10),
     ]) {
     assert(duration != null);
@@ -250,26 +251,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           throw new FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
-      } while (binding.hasScheduledFrame);
+      } while (hasRunningAnimations);
     }).then<int>((Null _) => count);
   }
 
-  /// Whether there are any any transient callbacks scheduled.
+  /// Whether ther are any any transient callbacks scheduled.
   ///
   /// This essentially checks whether all animations have completed.
-  ///
-  /// See also:
-  ///
-  ///  * [pumpAndSettle], which essentially calls [pump] until there are no
-  ///    scheduled frames.
-  ///
-  ///  * [SchedulerBinding.transientCallbackCount], which is the value on which
-  ///    this is based.
-  ///
-  ///  * [SchedulerBinding.hasScheduledFrame], which is true whenever a frame is
-  ///    pending. [SchedulerBinding.hasScheduledFrame] is made true when a
-  ///    widget calls [State.setState], even if there are no transient callbacks
-  ///    scheduled. This is what [pumpAndSettle] uses.
   bool get hasRunningAnimations => binding.transientCallbackCount > 0;
 
   @override
@@ -448,7 +436,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Returns the TestTextInput singleton.
   ///
   /// Typical app tests will not need to use this value. To add text to widgets
-  /// like [TextField] or [TextFormField], call [enterText].
+  /// like [TextField] or [FormTextField], call [enterText].
   TestTextInput get testTextInput => binding.testTextInput;
 
   /// Give the text input widget specified by [finder] the focus, as if the
@@ -456,10 +444,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// The widget specified by [finder] must be an [EditableText] or have
   /// an [EditableText] descendant. For example `find.byType(TextField)`
-  /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
+  /// or `find.byType(FormTextField)`, or `find.byType(EditableText)`.
   ///
   /// Tests that just need to add text to widgets like [TextField]
-  /// or [TextFormField] only need to call [enterText].
+  /// or [FormTextField] only need to call [enterText].
   Future<Null> showKeyboard(Finder finder) async {
     return TestAsyncUtils.guard(() async {
       final EditableTextState editable = state(find.descendant(
@@ -479,7 +467,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// The widget specified by [finder] must be an [EditableText] or have
   /// an [EditableText] descendant. For example `find.byType(TextField)`
-  /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
+  /// or `find.byType(FormTextField)`, or `find.byType(EditableText)`.
   ///
   /// To just give [finder] the focus without entering any text,
   /// see [showKeyboard].

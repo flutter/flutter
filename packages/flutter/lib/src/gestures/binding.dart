@@ -15,10 +15,7 @@ import 'hit_test.dart';
 import 'pointer_router.dart';
 
 /// A binding for the gesture subsystem.
-abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispatcher, HitTestTarget {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory GestureBinding._() => null;
+abstract class GestureBinding extends BindingBase implements HitTestable, HitTestDispatcher, HitTestTarget {
 
   @override
   void initInstances() {
@@ -32,8 +29,6 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
   static GestureBinding _instance;
 
   void _handlePointerDataPacket(ui.PointerDataPacket packet) {
-    // We convert pointer data to logical pixels so that e.g. the touch slop can be
-    // defined in a device-independent manner.
     _pendingPointerEvents.addAll(PointerEventConverter.expand(packet.data, ui.window.devicePixelRatio));
     _flushPointerEventQueue();
   }

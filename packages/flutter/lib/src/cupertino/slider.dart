@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'thumb_painter.dart';
 
 /// An iOS-style slider.
@@ -49,7 +48,7 @@ class CupertinoSlider extends StatefulWidget {
     this.min: 0.0,
     this.max: 1.0,
     this.divisions,
-    this.activeColor: CupertinoColors.activeBlue,
+    this.activeColor: const Color(0xFF027AFF),
   }) : assert(value != null),
        assert(min != null),
        assert(max != null),
@@ -85,7 +84,7 @@ class CupertinoSlider extends StatefulWidget {
   ///       _duelCommandment = newValue.round();
   ///     });
   ///   },
-  /// )
+  /// ),
   /// ```
   final ValueChanged<double> onChanged;
 
@@ -100,6 +99,8 @@ class CupertinoSlider extends StatefulWidget {
   final double max;
 
   /// The number of discrete divisions.
+  ///
+  /// Typically used with [label] to show the current discrete value.
   ///
   /// If null, the slider is continuous.
   final int divisions;
@@ -192,11 +193,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
     Color activeColor,
     this.onChanged,
     TickerProvider vsync,
-  }) : assert(value != null && value >= 0.0 && value <= 1.0),
-       _value = value,
+  }) : _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSliderWidth, height: _kSliderHeight)) {
+    assert(value != null && value >= 0.0 && value <= 1.0);
     _drag = new HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate

@@ -55,7 +55,7 @@ class BinaryMessages {
   /// Calls the handler registered for the given channel.
   ///
   /// Typically called by [ServicesBinding] to handle platform messages received
-  /// from [Window.onPlatformMessage].
+  /// from [ui.window.onPlatformMessage].
   ///
   /// To register a handler for a given message channel, see [setMessageHandler].
   static Future<Null> handlePlatformMessage(

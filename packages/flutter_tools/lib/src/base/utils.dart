@@ -16,15 +16,12 @@ import 'platform.dart';
 
 bool get isRunningOnBot {
   // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-  // https://www.appveyor.com/docs/environment-variables/
   // CHROME_HEADLESS is one property set on Flutter's Chrome Infra bots.
   return
     platform.environment['TRAVIS'] == 'true' ||
     platform.environment['BOT'] == 'true' ||
     platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
-    platform.environment['CHROME_HEADLESS'] == '1' ||
-    platform.environment['APPVEYOR'] == 'true' ||
-    platform.environment['CI'] == 'true';
+    platform.environment['CHROME_HEADLESS'] == '1';
 }
 
 String hex(List<int> bytes) {
@@ -151,8 +148,6 @@ class ItemListNotifier<T> {
 }
 
 class SettingsFile {
-  SettingsFile();
-
   SettingsFile.parse(String contents) {
     for (String line in contents.split('\n')) {
       line = line.trim();

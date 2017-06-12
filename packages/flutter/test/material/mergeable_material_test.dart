@@ -51,14 +51,11 @@ void matches(BorderRadius borderRadius, RadiusType top, RadiusType bottom) {
   }
 }
 
-// Returns the border radius decoration of an item within a MergeableMaterial.
-// This depends on the exact structure of objects built by the Material and
-// MergeableMaterial widgets.
 BorderRadius getBorderRadius(WidgetTester tester, int index) {
   final List<Element> containers = tester.elementList(find.byType(Container))
                                    .toList();
 
-  final Container container = containers[index].widget;
+  final Container container = containers[index + 2].widget;
   final BoxDecoration boxDecoration = container.decoration;
 
   return boxDecoration.borderRadius;
@@ -1098,7 +1095,7 @@ void main() {
     );
 
     List<Widget> boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
-    int offset = 1;
+    int offset = 3;
 
     expect(isDivider(boxes[offset], false, true), isTrue);
     expect(isDivider(boxes[offset + 1], true, true), isTrue);
@@ -1154,7 +1151,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     boxes = tester.widgetList(find.byType(DecoratedBox)).toList();
-    offset = 1;
+    offset = 3;
 
     expect(isDivider(boxes[offset], false, true), isTrue);
     expect(isDivider(boxes[offset + 1], true, false), isTrue);

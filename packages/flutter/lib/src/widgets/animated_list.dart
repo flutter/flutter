@@ -17,7 +17,7 @@ import 'ticker_provider.dart';
 /// Signature for the builder callback used by [AnimatedList].
 typedef Widget AnimatedListItemBuilder(BuildContext context, int index, Animation<double> animation);
 
-/// Signature for the builder callback used by [AnimatedListState.removeItem].
+/// Signature for the builder callback used by [AnimatedList.remove].
 typedef Widget AnimatedListRemovedItemBuilder(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
@@ -46,7 +46,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// This widget is similar to one created by [ListView.builder].
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted or removed.
-  const AnimatedList({
+  AnimatedList({
     Key key,
     @required this.itemBuilder,
     this.initialItemCount: 0,
@@ -57,27 +57,28 @@ class AnimatedList extends StatefulWidget {
     this.physics,
     this.shrinkWrap: false,
     this.padding,
-  }) : assert(itemBuilder != null),
-       assert(initialItemCount != null && initialItemCount >= 0),
-       super(key: key);
+  }) : super(key: key) {
+    assert(itemBuilder != null);
+    assert(initialItemCount != null && initialItemCount >= 0);
+  }
 
   /// Called, as needed, to build list item widgets.
   ///
   /// List items are only built when they're scrolled into view.
   ///
   /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// posiition in the list. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [AnimatedListState.insertItem] and less the total number of
-  /// items that have been removed with [AnimatedListState.removeItem].
+  /// posiition in the list. The value of the index parameter will be between 0 and
+  /// [initialItemCount] plus the total number of items that have been inserted
+  /// with [AnimatedListState.insertItem] and less the total number of items
+  /// that have been removed with [AnimatedList.removeItem].
   ///
-  /// Implementations of this callback should assume that
-  /// [AnimatedListState.removeItem] removes an item immediately.
+  /// Implementations of this callback should assume that [AnimatedList.removeItem]
+  /// removes an item immediately.
   final AnimatedListItemBuilder itemBuilder;
 
   /// The number of items the list will start with.
   ///
-  /// The appareance of the initial items is not animated. They
+  /// The appareance of the initial items is not animated. They are
   /// are created, as needed, by [itemBuilder] with an animation paramter
   /// of [kAlwaysCompleteAnimation].
   final int initialItemCount;
@@ -177,8 +178,8 @@ class AnimatedList extends StatefulWidget {
 /// The state for a scrolling container that animates items when they are
 /// inserted or removed.
 ///
-/// When an item is inserted with [insertItem] an animation begins running. The
-/// animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
+/// When an item is inserted with [insertItem] an animation begins running.
+/// The animation is passed to [itemBuilder] whenever the item's widget
 /// is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
@@ -196,8 +197,8 @@ class AnimatedList extends StatefulWidget {
 /// listKey.currentState.insert(123);
 /// ```
 ///
-/// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
-/// with the static [AnimatedList.of] method.
+/// AnimatedList item input handlers can also refer to their [AnimatedListState]
+/// with the static [of] method.
 class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin {
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
@@ -258,7 +259,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   }
 
   /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedList.itemBuilder] when the item is visible.
+  /// to [itemBuilder] when the item is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method:
   /// it increases the length of the list by one and shifts all items at or
@@ -290,7 +291,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
       _itemsCount += 1;
     });
 
-    controller.forward().then<Null>((Null value) {
+    controller.forward().then((Null value) {
       _removeActiveItemAt(_incomingItems, incomingItem.itemIndex).controller.dispose();
     });
   }
@@ -299,9 +300,9 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// to [builder] when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
-  /// item will still appear in the list for [duration] and during that time
-  /// [builder] must construct its widget as needed.
+  /// will no longer be passed to the [itemBuilder]. However the item will still
+  /// appear in the list for [duration] and during that time [builder] must
+  /// construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
@@ -325,7 +326,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
         ..sort();
     });
 
-    controller.reverse().then<Null>((Null value) {
+    controller.reverse().then((Null value) {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
       // Decrement the incoming and outgoing item indices to account

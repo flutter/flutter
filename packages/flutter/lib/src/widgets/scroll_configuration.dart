@@ -47,10 +47,10 @@ class ScrollBehavior {
     return null;
   }
 
-  /// The scroll physics to use for the platform given by [getPlatform].
+  /// The scroll physics to use for the given platform.
   ///
-  /// Defaults to [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
-  /// Android.
+  /// Used by [createScrollPosition] to get the scroll physics for newly created
+  /// scroll positions.
   ScrollPhysics getScrollPhysics(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
@@ -73,9 +73,6 @@ class ScrollBehavior {
   /// [ScrollConfiguration] will rebuild using the new [ScrollBehavior]. If this
   /// method returns false, the rebuilds might be optimized away.
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
-
-  @override
-  String toString() => '$runtimeType';
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.
@@ -96,9 +93,6 @@ class ScrollConfiguration extends InheritedWidget {
   final ScrollBehavior behavior;
 
   /// The [ScrollBehavior] for [Scrollable] widgets in the given [BuildContext].
-  ///
-  /// If no [ScrollConfiguration] widget is in scope of the given `context`,
-  /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
     final ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
     return configuration?.behavior ?? const ScrollBehavior();
@@ -109,11 +103,5 @@ class ScrollConfiguration extends InheritedWidget {
     assert(behavior != null);
     return behavior.runtimeType != oldWidget.behavior.runtimeType
         || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('behavior: $behavior');
   }
 }

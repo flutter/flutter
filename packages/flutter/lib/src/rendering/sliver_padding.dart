@@ -31,9 +31,9 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   RenderSliverPadding({
     @required EdgeInsets padding,
     RenderSliver child,
-  }) : assert(padding != null),
-       assert(padding.isNonNegative),
-       _padding = padding {
+  }) : _padding = padding {
+    assert(padding != null);
+    assert(padding.isNonNegative);
     this.child = child;
   }
 
@@ -91,9 +91,9 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     return null;
   }
 
-  /// The total padding in the [SliverConstraints.axisDirection]. (In other
-  /// words, for a vertical downwards-growing list, the sum of the padding on
-  /// the top and bottom.)
+  /// The total padding in the [constraints.axisDirection]. (In other words, for
+  /// a vertical downwards-growing list, the sum of the padding on the top and
+  /// bottom.)
   ///
   /// Only valid after layout has started, since before layout the render object
   /// doesn't know what direction it will be laid out in.
@@ -146,7 +146,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
         scrollOffset: math.max(0.0, constraints.scrollOffset - beforePadding),
         overlap: 0.0,
         remainingPaintExtent: constraints.remainingPaintExtent - calculatePaintOffset(constraints, from: 0.0, to: beforePadding),
-        crossAxisExtent: math.max(0.0, constraints.crossAxisExtent - crossAxisPadding),
+        crossAxisExtent: constraints.crossAxisExtent - crossAxisPadding,
       ),
       parentUsesSize: true,
     );
@@ -162,14 +162,16 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
       to: mainAxisPadding + childLayoutGeometry.scrollExtent,
     );
     final double mainAxisPaddingPaintExtent = beforePaddingPaintExtent + afterPaddingPaintExtent;
-    final double paintExtent = math.min(
-      beforePaddingPaintExtent + math.max(childLayoutGeometry.paintExtent, childLayoutGeometry.layoutExtent + afterPaddingPaintExtent),
-      constraints.remainingPaintExtent,
-    );
     geometry = new SliverGeometry(
       scrollExtent: mainAxisPadding + childLayoutGeometry.scrollExtent,
-      paintExtent: paintExtent,
-      layoutExtent: math.min(mainAxisPaddingPaintExtent + childLayoutGeometry.layoutExtent, paintExtent),
+      paintExtent: math.min(
+        beforePaddingPaintExtent + math.max(childLayoutGeometry.paintExtent, childLayoutGeometry.layoutExtent + afterPaddingPaintExtent),
+        constraints.remainingPaintExtent,
+      ),
+      layoutExtent: math.min(
+        mainAxisPaddingPaintExtent + childLayoutGeometry.layoutExtent,
+        constraints.remainingPaintExtent,
+      ),
       maxPaintExtent: mainAxisPadding + childLayoutGeometry.maxPaintExtent,
       hitTestExtent: math.max(
         mainAxisPaddingPaintExtent + childLayoutGeometry.paintExtent,

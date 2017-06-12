@@ -844,9 +844,6 @@ class Isolate extends ServiceObjectOwner {
   Isolate get isolate => this;
 
   DateTime startTime;
-
-  /// The last pause event delivered to the isolate. If the isolate is running,
-  /// this will be a resume event.
   ServiceEvent pauseEvent;
 
   final Map<String, ServiceObject> _cache = <String, ServiceObject>{};
@@ -996,14 +993,6 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterDebugDumpRenderTree() {
     return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpRenderTree', timeout: kLongRequestTimeout);
-  }
-
-  Future<Map<String, dynamic>> flutterDebugDumpLayerTree() {
-    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpLayerTree', timeout: kLongRequestTimeout);
-  }
-
-  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTree() {
-    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTree', timeout: kLongRequestTimeout);
   }
 
   Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() async {

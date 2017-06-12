@@ -1,7 +1,0 @@
-<resources>
-  <dimen name="edge_margin">16dp</dimen>
-  <dimen name="fab_elevation_resting">6dp</dimen>
-  <dimen name="fab_elevation_pressed">12dp</dimen>
-  <dimen name="font_size">17sp</dimen>
-  <dimen name="platform_label_font_size">30sp</dimen>
-</resources>

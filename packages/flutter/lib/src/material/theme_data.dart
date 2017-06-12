@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' show Color, hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'icon_theme_data.dart';
 import 'typography.dart';
 
 /// Describes the contrast needs of a color.
@@ -108,10 +107,10 @@ class ThemeData {
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
-    primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
+    primaryColorBrightness ??= Brightness.dark;
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
-    accentColorBrightness ??= estimateBrightnessForColor(accentColor);
+    accentColorBrightness ??= isDark ? Brightness.light : Brightness.dark;
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
     scaffoldBackgroundColor ??= canvasColor;
@@ -328,7 +327,7 @@ class ThemeData {
   // ...this should be the "50-value of secondary app color".
   final Color secondaryHeaderColor;
 
-  /// The color of text selections in text fields, such as [TextField].
+  /// The color of text selections in text fields, such as [Input].
   final Color textSelectionColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
@@ -345,10 +344,10 @@ class ThemeData {
   final Color indicatorColor;
 
   /// The color to use for hint text or placeholder text, e.g. in
-  /// [TextField] fields.
+  /// [Input] fields.
   final Color hintColor;
 
-  /// The color to use for input validation errors, e.g. in [TextField] fields.
+  /// The color to use for input validation errors, e.g. in [Input] fields.
   final Color errorColor;
 
   /// Text with a color that contrasts with the card and canvas colors.
@@ -441,43 +440,8 @@ class ThemeData {
     );
   }
 
-  // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
-  static double _linearizeColorComponent(double component) {
-    if (component <= 0.03928)
-      return component / 12.92;
-    return math.pow((component + 0.055) / 1.055, 2.4);
-  }
-
-  /// Determines whether the given [Color] is [Brightness.light] or
-  /// [Brightness.dark].
-  ///
-  /// This compares the luminosity of the given color to a threshold value that
-  /// matches the material design specification.
-  static Brightness estimateBrightnessForColor(Color color) {
-    // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
-    final double R = _linearizeColorComponent(color.red / 0xFF);
-    final double G = _linearizeColorComponent(color.green / 0xFF);
-    final double B = _linearizeColorComponent(color.blue / 0xFF);
-    final double L = 0.2126 * R + 0.7152 * G + 0.0722 * B;
-
-    // See <https://www.w3.org/TR/WCAG20/#contrast-ratiodef>
-    // The spec says to use kThreshold=0.0525, but Material Design appears to bias
-    // more towards using light text than WCAG20 recommends. Material Design spec
-    // doesn't say what value to use, but 0.15 seemed close to what the Material
-    // Design spec shows for its color palette on
-    // <https://material.io/guidelines/style/color.html#color-color-palette>.
-    const double kThreshold = 0.15;
-    if ((L + 0.05) * (L + 0.05) > kThreshold )
-      return Brightness.light;
-    return Brightness.dark;
-  }
-
   /// Linearly interpolate between two themes.
-  ///
-  /// The arguments must not be null.
   static ThemeData lerp(ThemeData begin, ThemeData end, double t) {
-    assert(begin != null);
-    assert(end != null);
     return new ThemeData.raw(
       brightness: t < 0.5 ? begin.brightness : end.brightness,
       primaryColor: Color.lerp(begin.primaryColor, end.primaryColor, t),

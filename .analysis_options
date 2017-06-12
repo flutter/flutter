@@ -7,19 +7,15 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
-# There are four similar analysis options files in the flutter repos:
+# There are three similar analysis options files in the flutter repo:
 #   - .analysis_options (this file)
 #   - .analysis_options_repo
 #   - packages/flutter/lib/analysis_options_user.yaml
-#   - https://github.com/flutter/plugins/blob/master/.analysis_options
 #
 # This file contains the analysis options used by Flutter editors, such as Atom.
 # It is very similar to the .analysis_options_repo file in this same directory;
 # the only difference (currently) is the public_member_api_docs option,
 # which triggers too many messages to be used in editors.
-#
-# The flutter/plugins repo contains a copy of this file, which should be kept
-# in sync with this file.
 
 analyzer:
   language:
@@ -70,24 +66,12 @@ linter:
 
     # === style rules ===
     - always_declare_return_types
-    - always_put_control_body_on_new_line
-    - always_require_non_null_named_parameters
     - always_specify_types
     - annotate_overrides
-    # - avoid_annotating_with_dynamic # not yet tested
     - avoid_as
-    # - avoid_catches_without_on_clauses # not yet tested
-    # - avoid_catching_errors # not yet tested
-    # - avoid_classes_with_only_static_members # not yet tested
     # - avoid_function_literals_in_foreach_calls # not yet tested
     - avoid_init_to_null
-    - avoid_null_checks_in_equality_operators
-    # - avoid_positional_boolean_parameters # not yet tested
     - avoid_return_types_on_setters
-    # - avoid_returning_null # not yet tested
-    # - avoid_returning_this # not yet tested
-    # - avoid_setters_without_getters # not yet tested
-    # - avoid_types_on_closure_parameters # not yet tested
     - await_only_futures
     - camel_case_types
     # - cascade_invocations # not yet tested
@@ -96,7 +80,6 @@ linter:
     - empty_catches
     - empty_constructor_bodies
     - implementation_imports
-    # - join_return_with_assignment # not yet tested
     - library_names
     - library_prefixes
     - non_constant_identifier_names
@@ -109,14 +92,11 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_collection_literals
-    # - prefer_conditional_assignment # not yet tested
     - prefer_const_constructors
-    # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     # - prefer_final_fields # https://github.com/dart-lang/linter/issues/506
     - prefer_final_locals
-    # - prefer_foreach # not yet tested
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_initializing_formals
     # - prefer_interpolation_to_compose_strings # not yet tested
@@ -136,12 +116,7 @@ linter:
     # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
-    # - unnecessary_overrides # https://github.com/dart-lang/linter/issues/626 and https://github.com/dart-lang/linter/issues/627
     - unnecessary_this
-    - use_rethrow_when_possible
-    # - use_setters_to_change_properties # not yet tested
-    # - use_string_buffers # https://github.com/dart-lang/linter/pull/664
-    # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
 
     # === pub rules ===
     - package_names

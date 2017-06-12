@@ -82,15 +82,6 @@ class FlutterVersion {
     return '$flutterText\n$frameworkText\n$engineText\n$toolsText';
   }
 
-  Map<String, Object> toJson() => <String, Object>{
-        'channel': channel,
-        'repositoryUrl': repositoryUrl ?? 'unknown source',
-        'frameworkRevision': frameworkRevision,
-        'frameworkCommitDate': frameworkCommitDate,
-        'engineRevision': engineRevision,
-        'dartSdkVersion': dartSdkVersion,
-      };
-
   /// A date String describing the last framework commit.
   String get frameworkCommitDate => _latestGitCommitDate();
 
@@ -236,7 +227,7 @@ class FlutterVersion {
   /// This method sends a server request if it's been more than
   /// [kCheckAgeConsideredUpToDate] since the last version check.
   ///
-  /// Returns null if the cached version is out-of-date or missing, and we are
+  /// Returns `null` if the cached version is out-of-date or missing, and we are
   /// unable to reach the server to get the latest version.
   Future<DateTime> _getLatestAvailableFlutterVersion() async {
     Cache.checkLockAcquired();
@@ -294,9 +285,8 @@ class VersionCheckStamp {
       try {
         final dynamic json = JSON.decode(versionCheckStamp);
         if (json is Map) {
-          return fromJson(json);
-        } else {
           printTrace('Warning: expected version stamp to be a Map but found: $json');
+          return fromJson(json);
         }
       } catch (error, stackTrace) {
         // Do not crash if JSON is malformed.

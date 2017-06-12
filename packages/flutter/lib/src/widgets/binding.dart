@@ -22,55 +22,6 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
-///
-/// This class can be extended directly, to get default behaviors for all of the
-/// handlers, or can used with the `implements` keyword, in which case all the
-/// handlers must be implemented (and the analyzer will list those that have
-/// been omitted).
-///
-/// ## Sample code
-///
-/// This [StatefulWidget] implements the parts of the [State] and
-/// [WidgetsBindingObserver] protocols necessary to react to application
-/// lifecycle messages. See [didChangeAppLifecycleState].
-///
-/// ```dart
-/// class Reactor extends StatefulWidget {
-///   const Reactor({ Key key }) : super(key: key);
-///
-///   @override
-///   _ReactorState createState() => new _ReactorState();
-/// }
-///
-/// class _ReactorState extends State<Reactor> with WidgetsBindingObserver {
-///   @override
-///   void initState() {
-///     super.initState();
-///     WidgetsBinding.instance.addObserver(this);
-///   }
-///
-///   @override
-///   void dispose() {
-///     WidgetsBinding.instance.removeObserver(this);
-///     super.dispose();
-///   }
-///
-///   AppLifecycleState _notification;
-///
-///   @override
-///   void didChangeAppLifecycleState(AppLifecycleState state) {
-///     setState(() { _notification = state; });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return new Text('Last notification: $_notification');
-///   }
-/// }
-/// ```
-///
-/// To respond to other notifications, replace the [didChangeAppLifecycleState]
-/// method above with other methods from this class.
 abstract class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
@@ -86,66 +37,8 @@ abstract class WidgetsBindingObserver {
   /// its current route if possible.
   Future<bool> didPopRoute() => new Future<bool>.value(false);
 
-  /// Called when the host tells the app to push a new route onto the
-  /// navigator.
-  ///
-  /// Observers are expected to return true if they were able to
-  /// handle the notification.  Observers are notified in registration
-  /// order until one returns true.
-  Future<bool> didPushRoute(String route) => new Future<bool>.value(false);
-
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
-  ///
-  /// ## Sample code
-  ///
-  /// This [StatefulWidget] implements the parts of the [State] and
-  /// [WidgetsBindingObserver] protocols necessary to react when the device is
-  /// rotated (or otherwise changes dimensions).
-  ///
-  /// ```dart
-  /// class Reactor extends StatefulWidget {
-  ///   const Reactor({ Key key }) : super(key: key);
-  ///
-  ///   @override
-  ///   _ReactorState createState() => new _ReactorState();
-  /// }
-  ///
-  /// class _ReactorState extends State<Reactor> with WidgetsBindingObserver {
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     WidgetsBinding.instance.addObserver(this);
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     WidgetsBinding.instance.removeObserver(this);
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   Size _lastSize;
-  ///
-  ///   @override
-  ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = ui.window.physicalSize; });
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return new Text('Last size: $_lastSize');
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// In general, this is unnecessary as the layout system takes care of
-  /// automatically recomputing the application geometry when the application
-  /// size changes.
-  ///
-  /// See also:
-  ///
-  ///  * [MediaQuery.of], which provides a similar service with less
-  ///    boilerplate.
   void didChangeMetrics() { }
 
   /// Called when the system tells the app that the user's locale has
@@ -155,9 +48,6 @@ abstract class WidgetsBindingObserver {
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
-  ///
-  /// An example of implementing this method is provided in the class-level
-  /// documentation for the [WidgetsBindingObserver] class.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   /// Called when the system is running low on memory.
@@ -165,11 +55,7 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererBinding {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory WidgetsBinding._() => null;
-
+abstract class WidgetsBinding extends BindingBase implements GestureBinding, RendererBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -256,21 +142,11 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   /// [MediaQuery.of] static method and (implicitly) the
   /// [InheritedWidget] mechanism to be notified whenever the screen
   /// size changes (e.g. whenever the screen rotates).
-  ///
-  /// See also:
-  ///
-  ///  * [removeObserver], to release the resources reserved by this method.
-  ///  * [WidgetsBindingObserver], which has an example of using this method.
   void addObserver(WidgetsBindingObserver observer) => _observers.add(observer);
 
   /// Unregisters the given observer. This should be used sparingly as
   /// it is relatively expensive (O(N) in the number of registered
   /// observers).
-  ///
-  /// See also:
-  ///
-  ///  * [addObserver], for the method that adds observers in the first place.
-  ///  * [WidgetsBindingObserver], which has an example of using this method.
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
 
   /// Called when the system metrics change.
@@ -278,7 +154,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeMetrics].
   ///
-  /// See [Window.onMetricsChanged].
+  /// See [ui.window.onMetricsChanged].
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
@@ -290,7 +166,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   ///
   /// Calls [dispatchLocaleChanged] to notify the binding observers.
   ///
-  /// See [Window.onLocaleChanged].
+  /// See [ui.window.onLocaleChanged].
   void handleLocaleChanged() {
     dispatchLocaleChanged(ui.window.locale);
   }
@@ -322,23 +198,10 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     SystemNavigator.pop();
   }
 
-  /// Called when the host tells the app to push a new route onto the
-  /// navigator.
-  Future<Null> handlePushRoute(String route) async {
-    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
-      if (await observer.didPushRoute(route))
-        return;
-    }
-  }
-
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
-    switch (methodCall.method) {
-      case 'popRoute':
-        return handlePopRoute();
-      case 'pushRoute':
-        return handlePushRoute(methodCall.arguments);
-    }
-    return new Future<Null>.value();
+  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) async {
+    if (methodCall.method == 'popRoute')
+      handlePopRoute();
+    // TODO(abarth): Handle 'pushRoute'.
   }
 
   /// Called when the application lifecycle state changes.
@@ -357,12 +220,6 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
         break;
       case 'AppLifecycleState.resumed':
         handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-        break;
-      case 'AppLifecycleState.inactive':
-        handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-        break;
-      case 'AppLifecycleState.suspending':
-        handleAppLifecycleStateChanged(AppLifecycleState.suspending);
         break;
     }
     return null;
@@ -415,7 +272,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
       }
       return true;
     });
-    ensureVisualUpdate();
+    scheduleFrame();
   }
 
   /// Whether we are currently in a frame. This is used to verify
@@ -429,70 +286,63 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
 
   /// Pump the build and rendering pipeline to generate a frame.
   ///
-  /// This method is called by [handleDrawFrame], which itself is called
+  /// This method is called by [handleBeginFrame], which itself is called
   /// automatically by the engine when when it is time to lay out and paint a
   /// frame.
   ///
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [Window.onBeginFrame], invokes all the transient frame callbacks
+  /// with [ui.window.onBeginFrame], invokes all the transient frame callbacks
   /// registered with [scheduleFrameCallback], in
   /// registration order. This includes all the [Ticker] instances that are
   /// driving [AnimationController] objects, which means all of the active
   /// [Animation] objects tick at this point.
   ///
-  /// 2. Microtasks: After [handleBeginFrame] returns, any microtasks that got
-  /// scheduled by transient frame callbacks get to run. This typically includes
-  /// callbacks for futures from [Ticker]s and [AnimationController]s that
-  /// completed this frame.
+  /// [handleBeginFrame] then invokes all the persistent frame callbacks, of which
+  /// the most notable is this method, [beginFrame], which proceeds as follows:
   ///
-  /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [Window.onDrawFrame], is called, which invokes all the persistent frame
-  /// callbacks, of which the most notable is this method, [drawFrame], which
-  /// proceeds as follows:
-  ///
-  /// 3. The build phase: All the dirty [Element]s in the widget tree are
+  /// 2. The build phase: All the dirty [Element]s in the widget tree are
   /// rebuilt (see [State.build]). See [State.setState] for further details on
   /// marking a widget dirty for building. See [BuildOwner] for more information
   /// on this step.
   ///
-  /// 4. The layout phase: All the dirty [RenderObject]s in the system are laid
+  /// 3. The layout phase: All the dirty [RenderObject]s in the system are laid
   /// out (see [RenderObject.performLayout]). See [RenderObject.markNeedsLayout]
   /// for further details on marking an object dirty for layout.
   ///
-  /// 5. The compositing bits phase: The compositing bits on any dirty
+  /// 4. The compositing bits phase: The compositing bits on any dirty
   /// [RenderObject] objects are updated. See
   /// [RenderObject.markNeedsCompositingBitsUpdate].
   ///
-  /// 6. The paint phase: All the dirty [RenderObject]s in the system are
+  /// 5. The paint phase: All the dirty [RenderObject]s in the system are
   /// repainted (see [RenderObject.paint]). This generates the [Layer] tree. See
   /// [RenderObject.markNeedsPaint] for further details on marking an object
   /// dirty for paint.
   ///
-  /// 7. The compositing phase: The layer tree is turned into a [Scene] and
+  /// 6. The compositing phase: The layer tree is turned into a [ui.Scene] and
   /// sent to the GPU.
   ///
-  /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
+  /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
+  /// their semantics updated (see [RenderObject.SemanticsAnnotator]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
   ///
-  /// For more details on steps 4-8, see [PipelineOwner].
+  /// For more details on steps 3-7, see [PipelineOwner].
   ///
-  /// 9. The finalization phase in the widgets layer: The widgets tree is
+  /// 8. The finalization phase in the widgets layer: The widgets tree is
   /// finalized. This causes [State.dispose] to be invoked on any objects that
   /// were removed from the widgets tree this frame. See
   /// [BuildOwner.finalizeTree] for more details.
   ///
-  /// 10. The finalization phase in the scheduler layer: After [drawFrame]
-  /// returns, [handleDrawFrame] then invokes post-frame callbacks (registered
-  /// with [addPostFrameCallback]).
+  /// 9. The finalization phase in the scheduler layer: After [beginFrame]
+  /// returns, [handleBeginFrame] then invokes post-frame callbacks (registered
+  /// with [addPostFrameCallback].
   //
   // When editing the above, also update rendering/binding.dart's copy.
   @override
-  void drawFrame() {
+  void beginFrame() {
     assert(!debugBuildingDirtyElements);
     assert(() {
       debugBuildingDirtyElements = true;
@@ -501,7 +351,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     try {
       if (renderViewElement != null)
         buildOwner.buildScope(renderViewElement);
-      super.drawFrame();
+      super.beginFrame();
       buildOwner.finalizeTree();
     } finally {
       assert(() {
@@ -579,7 +429,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
 void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
-    ..scheduleWarmUpFrame();
+    ..handleBeginFrame(null);
 }
 
 /// Print a string representation of the currently running app.

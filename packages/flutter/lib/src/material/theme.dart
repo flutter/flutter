@@ -20,9 +20,6 @@ const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 /// [Theme.of]. When a widget uses [Theme.of], it is automatically rebuilt if
 /// the theme later changes, so that the changes can be applied.
 ///
-/// The [Theme] widget implies an [IconTheme] widget, set to the value of the
-/// [ThemeData.iconTheme] of the [data] for the [Theme].
-///
 /// See also:
 ///
 ///  * [ThemeData], which describes the actual configuration of a theme.
@@ -30,7 +27,7 @@ const Duration kThemeAnimationDuration = const Duration(milliseconds: 200);
 ///    than changing the theme all at once.
 ///  * [MaterialApp], which includes an [AnimatedTheme] widget configured via
 ///    the [MaterialApp.theme] argument.
-class Theme extends StatelessWidget {
+class Theme extends InheritedWidget {
   /// Applies the given theme [data] to [child].
   ///
   /// The [data] and [child] arguments must not be null.
@@ -38,10 +35,10 @@ class Theme extends StatelessWidget {
     Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
-    @required this.child,
+    @required Widget child
   }) : assert(child != null),
        assert(data != null),
-       super(key: key);
+       super(key: key, child: child);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -56,9 +53,6 @@ class Theme extends StatelessWidget {
   /// to the class that creates a route's widgets. Material widgets that push
   /// routes, like [PopupMenuButton] and [DropdownButton], do this.
   final bool isMaterialAppTheme;
-
-  /// The widget below this widget in the tree.
-  final Widget child;
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
 
@@ -116,26 +110,17 @@ class Theme extends StatelessWidget {
   /// }
   /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly: false }) {
-    final _InheritedTheme inheritedTheme =
-        context.inheritFromWidgetOfExactType(_InheritedTheme);
+    final Theme theme = context.inheritFromWidgetOfExactType(Theme);
     if (shadowThemeOnly) {
-      if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
+      if (theme == null || theme.isMaterialAppTheme)
         return null;
-      return inheritedTheme.theme.data;
+      return theme.data;
     }
-    return (inheritedTheme != null) ? inheritedTheme.theme.data : _kFallbackTheme;
+    return (theme != null) ? theme.data : _kFallbackTheme;
   }
 
   @override
-  Widget build(BuildContext context) {
-    return new _InheritedTheme(
-      theme: this,
-      child: new IconTheme(
-        data: data.iconTheme,
-        child: child,
-      ),
-    );
-  }
+  bool updateShouldNotify(Theme old) => data != old.data;
 
   @override
   void debugFillDescription(List<String> description) {
@@ -144,32 +129,9 @@ class Theme extends StatelessWidget {
   }
 }
 
-class _InheritedTheme extends InheritedWidget {
-  const _InheritedTheme({
-    Key key,
-    @required this.theme,
-    @required Widget child
-  }) : assert(theme != null),
-       super(key: key, child: child);
-
-  final Theme theme;
-
-  @override
-  bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
-}
-
-/// An interpolation between two [ThemeData]s.
-///
-/// This class specializes the interpolation of [Tween<ThemeData>] to call the
-/// [ThemeData.lerp] method.
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
+/// An animated value that interpolates [ThemeData]s.
 class ThemeDataTween extends Tween<ThemeData> {
-  /// Creates a [ThemeData] tween.
-  ///
-  /// The [begin] and [end] properties must be non-null before the tween is
-  /// first used, but the arguments can be null if the values are going to be
-  /// filled in later.
+  /// Creates an interpolation between [begin] and [end].
   ThemeDataTween({ ThemeData begin, ThemeData end }) : super(begin: begin, end: end);
 
   @override

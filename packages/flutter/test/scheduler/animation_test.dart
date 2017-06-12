@@ -6,8 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:test/test.dart';
 
-import 'scheduler_tester.dart';
-
 class TestSchedulerBinding extends BindingBase with SchedulerBinding { }
 
 void main() {
@@ -41,7 +39,7 @@ void main() {
     scheduler.scheduleFrameCallback(firstCallback);
     secondId = scheduler.scheduleFrameCallback(secondCallback);
 
-    tick(const Duration(milliseconds: 16));
+    scheduler.handleBeginFrame(const Duration(milliseconds: 16));
 
     expect(firstCallbackRan, isTrue);
     expect(secondCallbackRan, isFalse);
@@ -49,7 +47,7 @@ void main() {
     firstCallbackRan = false;
     secondCallbackRan = false;
 
-    tick(const Duration(milliseconds: 32));
+    scheduler.handleBeginFrame(const Duration(milliseconds: 32));
 
     expect(firstCallbackRan, isFalse);
     expect(secondCallbackRan, isFalse);

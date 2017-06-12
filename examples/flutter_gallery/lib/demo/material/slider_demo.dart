@@ -19,8 +19,7 @@ class _SliderDemoState extends State<SliderDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(title: const Text('Sliders')),
-      body: new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      body: new Center(
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[

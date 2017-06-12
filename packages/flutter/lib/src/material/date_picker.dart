@@ -18,6 +18,7 @@ import 'colors.dart';
 import 'debug.dart';
 import 'dialog.dart';
 import 'flat_button.dart';
+import 'icon.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -171,7 +172,7 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = const _DayPickerGridDeleg
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
-  /// Rarely used directly. Instead, typically used as part of a [MonthPicker].
+  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   DayPicker({
     Key key,
     @required this.selectedDate,
@@ -181,13 +182,14 @@ class DayPicker extends StatelessWidget {
     @required this.lastDate,
     @required this.displayedMonth,
     this.selectableDayPredicate,
-  }) : assert(selectedDate != null),
-       assert(currentDate != null),
-       assert(onChanged != null),
-       assert(displayedMonth != null),
-       assert(!firstDate.isAfter(lastDate)),
-       assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
-       super(key: key);
+  }) : super(key: key) {
+    assert(selectedDate != null);
+    assert(currentDate != null);
+    assert(onChanged != null);
+    assert(displayedMonth != null);
+    assert(!firstDate.isAfter(lastDate));
+    assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate));
+  }
 
   /// The currently selected date.
   ///
@@ -321,8 +323,7 @@ class DayPicker extends StatelessWidget {
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
-  /// Rarely used directly. Instead, typically used as part of the dialog shown
-  /// by [showDatePicker].
+  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   MonthPicker({
     Key key,
     @required this.selectedDate,
@@ -330,11 +331,12 @@ class MonthPicker extends StatefulWidget {
     @required this.firstDate,
     @required this.lastDate,
     this.selectableDayPredicate,
-  }) : assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
-       assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
-       super(key: key);
+  }) : super(key: key) {
+    assert(selectedDate != null);
+    assert(onChanged != null);
+    assert(!firstDate.isAfter(lastDate));
+    assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate));
+  }
 
   /// The currently selected date.
   ///
@@ -509,18 +511,18 @@ class YearPicker extends StatefulWidget {
   /// The [selectedDate] and [onChanged] arguments must not be null. The
   /// [lastDate] must be after the [firstDate].
   ///
-  /// Rarely used directly. Instead, typically used as part of the dialog shown
-  /// by [showDatePicker].
+  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
   YearPicker({
     Key key,
     @required this.selectedDate,
     @required this.onChanged,
     @required this.firstDate,
     @required this.lastDate,
-  }) : assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
-       super(key: key);
+  }) : super(key: key) {
+    assert(selectedDate != null);
+    assert(onChanged != null);
+    assert(!firstDate.isAfter(lastDate));
+  }
 
   /// The currently selected date.
   ///
@@ -685,6 +687,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ],
       ),
     );
+
     return new Dialog(
       child: new OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {

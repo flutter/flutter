@@ -13,46 +13,22 @@ import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
-/// The type of information for which to optimize the text input control.
-///
-/// On Android, behavior may vary across device and keyboard provider.
+/// For which type of information to optimize the text input control.
 enum TextInputType {
   /// Optimize for textual information.
-  ///
-  /// Requests the default platform keyboard.
   text,
 
   /// Optimize for numerical information.
-  ///
-  /// Requests a keyboard with ready access to the decimal point and number
-  /// keys.
   number,
 
   /// Optimize for telephone numbers.
-  ///
-  /// Requests a keyboard with ready access to the number keys, "*", and "#".
   phone,
 
   /// Optimize for date and time information.
-  ///
-  /// On iOS, requests the default keyboard.
-  ///
-  /// On Android, requests a keyboard with ready access to the number keys,
-  /// ":", and "-".
   datetime,
-
-  /// Optimize for email addresses.
-  ///
-  /// Requests a keyboard with ready access to the "@" and "." keys.
-  emailAddress,
-
-  /// Optimize for URLs.
-  ///
-  /// Requests a keyboard with ready access to the "/" and "." keys.
-  url,
 }
 
-/// An action the user has requested the text input control to perform.
+/// A action the user has requested the text input control to perform.
 enum TextInputAction {
   /// Complete the text input operation.
   done,
@@ -67,21 +43,14 @@ enum TextInputAction {
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
-  /// The [inputType] and [obscureText] arguments must not be null.
+  /// The [inputType] argument must not be null.
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
-    this.obscureText: false,
     this.actionLabel,
-  }) : assert(inputType != null),
-       assert(obscureText != null);
+  });
 
-  /// The type of information for which to optimize the text input control.
+  /// For which type of information to optimize the text input control.
   final TextInputType inputType;
-
-  /// Whether to hide the text being edited (e.g., for passwords).
-  ///
-  /// Defaults to false.
-  final bool obscureText;
 
   /// What text to display in the text input control's action button.
   final String actionLabel;
@@ -90,7 +59,6 @@ class TextInputConfiguration {
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'inputType': inputType.toString(),
-      'obscureText': obscureText,
       'actionLabel': actionLabel,
     };
   }
@@ -119,9 +87,7 @@ class TextEditingValue {
     this.text: '',
     this.selection: const TextSelection.collapsed(offset: -1),
     this.composing: TextRange.empty
-  }) : assert(text != null),
-       assert(selection != null),
-       assert(composing != null);
+  });
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
@@ -224,9 +190,9 @@ abstract class TextInputClient {
 ///
 ///  * [TextInput.attach]
 class TextInputConnection {
-  TextInputConnection._(this._client)
-    : assert(_client != null),
-      _id = _nextId++;
+  TextInputConnection._(this._client) : _id = _nextId++ {
+    assert(_client != null);
+  }
 
   static int _nextId = 1;
   final int _id;
@@ -271,7 +237,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.done':
       return TextInputAction.done;
   }
-  throw new FlutterError('Unknown text input action: $action');
+  throw new FlutterError('Unknow text input action: $action');
 }
 
 class _TextInputClientHandler {

@@ -138,7 +138,7 @@ class RelativeRect {
 }
 
 /// Parent data for use with [RenderStack].
-class StackParentData extends ContainerBoxParentData<RenderBox> {
+class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// The distance by which the child's top edge is inset from the top of the stack.
   double top;
 
@@ -297,15 +297,15 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox> children,
-    FractionalOffset alignment: FractionalOffset.topLeft,
+    FractionalOffset alignment: FractionalOffset.center,
     StackFit fit: StackFit.loose,
     Overflow overflow: Overflow.clip
-  }) : assert(alignment != null),
-       assert(fit != null),
-       assert(overflow != null),
-       _alignment = alignment,
+  }) : _alignment = alignment,
        _fit = fit,
        _overflow = overflow {
+    assert(alignment != null);
+    assert(fit != null);
+    assert(overflow != null);
     addAll(children);
   }
 
@@ -351,7 +351,7 @@ class RenderStack extends RenderBox
   /// Whether overflowing children should be clipped. See [Overflow].
   ///
   /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clip], children cannot paint outside of the stack's box.
+  /// [Overflow.clipped], children cannot paint outside of the stack's box.
   Overflow get overflow => _overflow;
   Overflow _overflow;
   set overflow(Overflow value) {
@@ -526,9 +526,8 @@ class RenderStack extends RenderBox
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    description.add('fit: $fit');
     description.add('overflow: $overflow');
+    description.add('alignment: $alignment');
   }
 }
 

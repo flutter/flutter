@@ -22,7 +22,6 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.MethodCall;
-import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
   private static final String BATTERY_CHANNEL = "samples.flutter.io/battery";
@@ -31,7 +30,7 @@ public class MainActivity extends FlutterActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    GeneratedPluginRegistrant.registerWith(this);
+
     new EventChannel(getFlutterView(), CHARGING_CHANNEL).setStreamHandler(
         new StreamHandler() {
           private BroadcastReceiver chargingStateChangeReceiver;

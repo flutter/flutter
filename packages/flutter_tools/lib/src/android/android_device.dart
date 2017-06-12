@@ -17,7 +17,6 @@ import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 
@@ -27,25 +26,11 @@ import 'android_sdk.dart';
 
 const String _defaultAdbPath = 'adb';
 
-enum _HardwareType { emulator, physical }
-
-/// Map to help our `isLocalEmulator` detection.
-const Map<String, _HardwareType> _knownHardware = const <String, _HardwareType>{
-  'goldfish': _HardwareType.emulator,
-  'qcom': _HardwareType.physical,
-  'ranchu': _HardwareType.emulator,
-  'samsungexynos7420': _HardwareType.physical,
-  'samsungexynos8895': _HardwareType.physical,
-};
-
 class AndroidDevices extends PollingDeviceDiscovery {
-  AndroidDevices() : super('Android devices');
+  AndroidDevices() : super('AndroidDevices');
 
   @override
   bool get supportsPlatform => true;
-
-  @override
-  bool get canListAnything => doctor.androidWorkflow.canListDevices;
 
   @override
   List<Device> pollingGetDevices() => getAdbDevices();
@@ -101,17 +86,8 @@ class AndroidDevice extends Device {
   @override
   Future<bool> get isLocalEmulator async {
     if (_isLocalEmulator == null) {
-      final String hardware = await _getProperty('ro.hardware');
-      printTrace('ro.hardware = $hardware');
-      if (_knownHardware.containsKey(hardware)) {
-        // Look for known hardware models.
-        _isLocalEmulator = _knownHardware[hardware] == _HardwareType.emulator;
-      } else {
-        // Fall back to a best-effort heuristic-based approach.
-        final String characteristics = await _getProperty('ro.build.characteristics');
-        printTrace('ro.build.characteristics = $characteristics');
-        _isLocalEmulator = characteristics != null && characteristics.contains('emulator');
-      }
+      final String characteristics = await _getProperty('ro.build.characteristics');
+      _isLocalEmulator = characteristics != null && characteristics.contains('emulator');
     }
     return _isLocalEmulator;
   }
@@ -184,7 +160,7 @@ class AndroidDevice extends Device {
         return true;
       printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.32 or later.');
     } catch (error, trace) {
-      printError('Error running ADB: $error', stackTrace: trace);
+      printError('Error running ADB: $error', trace);
     }
 
     return false;
@@ -397,8 +373,6 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
-    if (debuggingOptions.enableSoftwareRendering)
-      cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildMode == BuildMode.debug)
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
@@ -429,12 +403,12 @@ class AndroidDevice extends Device {
 
       if (debuggingOptions.buildMode == BuildMode.debug) {
         final List<Uri> deviceUris = await Future.wait(
-            <Future<Uri>>[observatoryDiscovery.uri, diagnosticDiscovery.uri]
+            <Future<Uri>>[observatoryDiscovery.nextUri(), diagnosticDiscovery.nextUri()]
         );
         observatoryUri = deviceUris[0];
         diagnosticUri = deviceUris[1];
       } else if (debuggingOptions.buildMode == BuildMode.profile) {
-        observatoryUri = await observatoryDiscovery.uri;
+        observatoryUri = await observatoryDiscovery.nextUri();
       }
 
       return new LaunchResult.succeeded(
@@ -476,7 +450,7 @@ class AndroidDevice extends Device {
 
   static final RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
-  /// Return the most recent timestamp in the Android log or null if there is
+  /// Return the most recent timestamp in the Android log or `null` if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
     final String output = runCheckedSync(adbCommandForDevice(<String>[
@@ -563,7 +537,7 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
       continue;
 
     // Skip lines about adb server and client version not matching
-    if (line.startsWith(new RegExp(r'adb server (version|is out of date)'))) {
+    if (line.startsWith('adb server version')) {
       printStatus(line);
       continue;
     }

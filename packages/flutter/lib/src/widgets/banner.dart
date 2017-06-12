@@ -47,10 +47,12 @@ class BannerPainter extends CustomPainter {
     @required this.location,
     this.color: _kColor,
     this.textStyle: _kTextStyle,
-  }) : assert(message != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null);
+  }) {
+    assert(message != null);
+    assert(location != null);
+    assert(color != null);
+    assert(textStyle != null);
+  }
 
   /// The message to show in the banner.
   final String message;
@@ -205,15 +207,6 @@ class Banner extends StatelessWidget {
       child: child,
     );
   }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('"$message"');
-    description.add('$location');
-    description.add('$color');
-    '$textStyle'.split('\n').map((String value) => 'text $value').forEach(description.add);
-  }
 }
 
 /// Displays a [Banner] saying "SLOW MODE" when running in checked mode.
@@ -240,16 +233,5 @@ class CheckedModeBanner extends StatelessWidget {
       return true;
     });
     return result;
-  }
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    String message = 'disabled';
-    assert(() {
-      message = '"SLOW MODE"';
-      return true;
-    });
-    description.add(message);
   }
 }

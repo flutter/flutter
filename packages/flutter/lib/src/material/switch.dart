@@ -28,11 +28,9 @@ import 'toggleable.dart';
 ///
 /// See also:
 ///
-///  * [SwitchListTile], which combines this widget with a [ListTile] so that
-///    you can give the switch a label.
-///  * [Checkbox], another widget with similar semantics.
-///  * [Radio], for selecting among a set of explicit values.
-///  * [Slider], for selecting a value in a range.
+///  * [CheckBox]
+///  * [Radio]
+///  * [Slider]
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
 class Switch extends StatefulWidget {
   /// Creates a material design switch.
@@ -42,10 +40,8 @@ class Switch extends StatefulWidget {
   /// that use a switch will listen for the [onChanged] callback and rebuild the
   /// switch with a new [value] to update the visual appearance of the switch.
   ///
-  /// The following arguments are required:
-  ///
-  /// * [value] determines whether this switch is on or off.
-  /// * [onChanged] is called when the user toggles the switch on or off.
+  /// * [value] determines this switch is on or off.
+  /// * [onChanged] is called when the user toggles with switch on or off.
   const Switch({
     Key key,
     @required this.value,
@@ -56,11 +52,9 @@ class Switch extends StatefulWidget {
   }) : super(key: key);
 
   /// Whether this switch is on or off.
-  ///
-  /// This property must not be null.
   final bool value;
 
-  /// Called when the user toggles the switch on or off.
+  /// Called when the user toggles with switch on or off.
   ///
   /// The switch passes the new value to the callback but does not actually
   /// change state until the parent widget rebuilds the switch with the new
@@ -68,7 +62,7 @@ class Switch extends StatefulWidget {
   ///
   /// If null, the switch will be displayed as disabled.
   ///
-  /// The callback provided to [onChanged] should update the state of the parent
+  /// The callback provided to onChanged should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
   ///
@@ -80,7 +74,7 @@ class Switch extends StatefulWidget {
   ///       _giveVerse = newValue;
   ///     });
   ///   },
-  /// )
+  /// ),
   /// ```
   final ValueChanged<bool> onChanged;
 
