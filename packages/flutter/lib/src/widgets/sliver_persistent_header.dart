@@ -140,8 +140,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    if (child != null)
-      visitor(child);
+    visitor(child);
   }
 }
 

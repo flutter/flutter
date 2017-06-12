@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -60,9 +59,6 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
-    argParser.addFlag('machine',
-        negatable: false,
-        hide: true);
     argParser.addFlag('color',
         negatable: true,
         hide: !verboseHelp,
@@ -259,19 +255,8 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
-      String status;
-      if (globalResults['machine']) {
-        status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
-      } else {
-        status = FlutterVersion.instance.toString();
-      }
-      printStatus(status);
+      printStatus(FlutterVersion.instance.toString());
       return;
-    }
-
-    if (globalResults['machine']) {
-      printError('The --machine flag is only valid with the --version flag.');
-      throw new ProcessExit(2);
     }
 
     await super.runCommand(globalResults);
