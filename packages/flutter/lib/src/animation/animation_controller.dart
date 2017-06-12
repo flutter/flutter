@@ -115,11 +115,12 @@ class AnimationController extends Animation<double>
     this.lowerBound: 0.0,
     this.upperBound: 1.0,
     @required TickerProvider vsync,
-  }) : assert(lowerBound != null),
-       assert(upperBound != null),
-       assert(upperBound >= lowerBound),
-       assert(vsync != null),
-       _direction = _AnimationDirection.forward {
+  }) {
+    assert(lowerBound != null);
+    assert(upperBound != null);
+    assert(upperBound >= lowerBound);
+    assert(vsync != null);
+    _direction = _AnimationDirection.forward;
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
@@ -145,11 +146,11 @@ class AnimationController extends Animation<double>
     this.duration,
     this.debugLabel,
     @required TickerProvider vsync,
-  }) : assert(value != null),
-       assert(vsync != null),
-       lowerBound = double.NEGATIVE_INFINITY,
-       upperBound = double.INFINITY,
-       _direction = _AnimationDirection.forward {
+  }) : lowerBound = double.NEGATIVE_INFINITY,
+       upperBound = double.INFINITY {
+    assert(value != null);
+    assert(vsync != null);
+    _direction = _AnimationDirection.forward;
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
   }
@@ -495,10 +496,11 @@ class AnimationController extends Animation<double>
 
 class _InterpolationSimulation extends Simulation {
   _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve)
-    : assert(_begin != null),
-      assert(_end != null),
-      assert(duration != null && duration.inMicroseconds > 0),
-      _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND;
+    : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
+    assert(_durationInSeconds > 0.0);
+    assert(_begin != null);
+    assert(_end != null);
+  }
 
   final double _durationInSeconds;
   final double _begin;
