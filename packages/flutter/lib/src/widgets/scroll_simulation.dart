@@ -35,13 +35,14 @@ class BouncingScrollSimulation extends Simulation {
     @required this.trailingExtent,
     @required this.spring,
     Tolerance tolerance: Tolerance.defaultTolerance,
-  }) : assert(position != null),
-       assert(velocity != null),
-       assert(leadingExtent != null),
-       assert(trailingExtent != null),
-       assert(leadingExtent <= trailingExtent),
-       assert(spring != null),
-       super(tolerance: tolerance) {
+  }) : super(tolerance: tolerance) {
+    assert(position != null);
+    assert(velocity != null);
+    assert(leadingExtent != null);
+    assert(trailingExtent != null);
+    assert(leadingExtent <= trailingExtent);
+    assert(spring != null);
+
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.NEGATIVE_INFINITY;
@@ -135,8 +136,8 @@ class ClampingScrollSimulation extends Simulation {
     @required this.velocity,
     this.friction: 0.015,
     Tolerance tolerance: Tolerance.defaultTolerance,
-  }) : assert(_flingVelocityPenetration(0.0) == _kInitialVelocityPenetration),
-       super(tolerance: tolerance) {
+  }) : super(tolerance: tolerance) {
+    assert(_flingVelocityPenetration(0.0) == _kInitialVelocityPenetration);
     _duration = _flingDuration(velocity);
     _distance = (velocity * _duration / _kInitialVelocityPenetration).abs();
   }

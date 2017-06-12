@@ -105,8 +105,9 @@ class BoundedFrictionSimulation extends FrictionSimulation {
     double velocity,
     this._minX,
     this._maxX
-  ) : assert(position.clamp(_minX, _maxX) == position),
-      super(drag, position, velocity);
+  ) : super(drag, position, velocity) {
+    assert(position.clamp(_minX, _maxX) == position);
+  }
 
   final double _minX;
   final double _maxX;

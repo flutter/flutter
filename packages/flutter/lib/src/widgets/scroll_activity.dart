@@ -215,10 +215,10 @@ class ScrollDragController implements Drag {
     @required ScrollActivityDelegate delegate,
     @required DragStartDetails details,
     this.onDragCanceled,
-  }) : assert(delegate != null),
-       assert(details != null),
-       _delegate = delegate,
-       _lastDetails = details;
+  }) : _delegate = delegate, _lastDetails = details {
+    assert(delegate != null);
+    assert(details != null);
+  }
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -466,12 +466,12 @@ class DrivenScrollActivity extends ScrollActivity {
     @required Duration duration,
     @required Curve curve,
     @required TickerProvider vsync,
-  }) : assert(from != null),
-       assert(to != null),
-       assert(duration != null),
-       assert(duration > Duration.ZERO),
-       assert(curve != null),
-       super(delegate) {
+  }) : super(delegate) {
+    assert(from != null);
+    assert(to != null);
+    assert(duration != null);
+    assert(duration > Duration.ZERO);
+    assert(curve != null);
     _completer = new Completer<Null>();
     _controller = new AnimationController.unbounded(
       value: from,

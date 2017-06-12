@@ -41,13 +41,10 @@ class TextPainter {
     double textScaleFactor: 1.0,
     int maxLines,
     String ellipsis,
-  }) : assert(text == null || text.debugAssertIsValid()),
-       assert(textScaleFactor != null),
-       _text = text,
-       _textAlign = textAlign,
-       _textScaleFactor = textScaleFactor,
-       _maxLines = maxLines,
-       _ellipsis = ellipsis;
+  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor, _maxLines = maxLines, _ellipsis = ellipsis {
+    assert(text == null || text.debugAssertIsValid());
+    assert(textScaleFactor != null);
+  }
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -109,11 +106,6 @@ class TextPainter {
   /// passed to [layout].
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
-  ///
-  /// The higher layers of the system, such as the [Text] widget, represent
-  /// overflow effects using the [TextOverflow] enum. The
-  /// [TextOverflow.ellipsis] value corresponds to setting this property to
-  /// U+2026 HORIZONTAL ELLIPSIS (…).
   String get ellipsis => _ellipsis;
   String _ellipsis;
   set ellipsis(String value) {

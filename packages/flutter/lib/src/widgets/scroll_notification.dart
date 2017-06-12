@@ -15,10 +15,6 @@ import 'scroll_metrics.dart';
 ///
 /// This is used by [ScrollNotification] and [OverscrollIndicatorNotification].
 abstract class ViewportNotificationMixin extends Notification {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory ViewportNotificationMixin._() => null;
-
   /// The number of viewports that this notification has bubbled through.
   ///
   /// Typically listeners only respond to notifications with a [depth] of zero.
@@ -175,11 +171,12 @@ class OverscrollNotification extends ScrollNotification {
     this.dragDetails,
     @required this.overscroll,
     this.velocity: 0.0,
-  }) : assert(overscroll != null),
-       assert(overscroll.isFinite),
-       assert(overscroll != 0.0),
-       assert(velocity != null),
-       super(metrics: metrics, context: context);
+  }) : super(metrics: metrics, context: context) {
+    assert(overscroll != null);
+    assert(overscroll.isFinite);
+    assert(overscroll != 0.0);
+    assert(velocity != null);
+  }
 
   /// If the [Scrollable] overscrolled because of a drag, the details about that
   /// drag update.

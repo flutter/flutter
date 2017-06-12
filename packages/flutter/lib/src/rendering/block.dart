@@ -8,7 +8,7 @@ import 'box.dart';
 import 'object.dart';
 
 /// Parent data for use with [RenderListBody].
-class ListBodyParentData extends ContainerBoxParentData<RenderBox> { }
+class ListBodyParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
 typedef double _ChildSizingFunction(RenderBox child);
 

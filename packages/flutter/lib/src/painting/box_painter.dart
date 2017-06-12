@@ -1411,7 +1411,7 @@ class DecorationImage {
 ///
 /// The [BoxDecoration] class provides a variety of ways to draw a box.
 ///
-/// The box has a [border], a body, and may cast a [boxShadow].
+/// The box has a [border], a body, and may cast a [shadow].
 ///
 /// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
 /// then the [borderRadius] property controls the roundness of the corners.
@@ -1421,7 +1421,7 @@ class DecorationImage {
 /// the box. Finally there is the [image], the precise alignment of which is
 /// controlled by the [DecorationImage] class.
 ///
-/// The [border] paints over the body; the [boxShadow], naturally, paints below it.
+/// The [border] paints over the body; the [shadow], naturally, paints below it.
 ///
 /// ## Sample code
 ///
@@ -1659,9 +1659,9 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration, VoidCallback onChange)
-    : assert(_decoration != null),
-      super(onChange);
+  _BoxDecorationPainter(@required this._decoration, VoidCallback onChange) : super(onChange) {
+    assert(_decoration != null);
+  }
 
   final BoxDecoration _decoration;
 

@@ -22,55 +22,6 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
-///
-/// This class can be extended directly, to get default behaviors for all of the
-/// handlers, or can used with the `implements` keyword, in which case all the
-/// handlers must be implemented (and the analyzer will list those that have
-/// been omitted).
-///
-/// ## Sample code
-///
-/// This [StatefulWidget] implements the parts of the [State] and
-/// [WidgetsBindingObserver] protocols necessary to react to application
-/// lifecycle messages. See [didChangeAppLifecycleState].
-///
-/// ```dart
-/// class Reactor extends StatefulWidget {
-///   const Reactor({ Key key }) : super(key: key);
-///
-///   @override
-///   _ReactorState createState() => new _ReactorState();
-/// }
-///
-/// class _ReactorState extends State<Reactor> with WidgetsBindingObserver {
-///   @override
-///   void initState() {
-///     super.initState();
-///     WidgetsBinding.instance.addObserver(this);
-///   }
-///
-///   @override
-///   void dispose() {
-///     WidgetsBinding.instance.removeObserver(this);
-///     super.dispose();
-///   }
-///
-///   AppLifecycleState _notification;
-///
-///   @override
-///   void didChangeAppLifecycleState(AppLifecycleState state) {
-///     setState(() { _notification = state; });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return new Text('Last notification: $_notification');
-///   }
-/// }
-/// ```
-///
-/// To respond to other notifications, replace the [didChangeAppLifecycleState]
-/// method above with other methods from this class.
 abstract class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
@@ -96,56 +47,6 @@ abstract class WidgetsBindingObserver {
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
-  ///
-  /// ## Sample code
-  ///
-  /// This [StatefulWidget] implements the parts of the [State] and
-  /// [WidgetsBindingObserver] protocols necessary to react when the device is
-  /// rotated (or otherwise changes dimensions).
-  ///
-  /// ```dart
-  /// class Reactor extends StatefulWidget {
-  ///   const Reactor({ Key key }) : super(key: key);
-  ///
-  ///   @override
-  ///   _ReactorState createState() => new _ReactorState();
-  /// }
-  ///
-  /// class _ReactorState extends State<Reactor> with WidgetsBindingObserver {
-  ///   @override
-  ///   void initState() {
-  ///     super.initState();
-  ///     WidgetsBinding.instance.addObserver(this);
-  ///   }
-  ///
-  ///   @override
-  ///   void dispose() {
-  ///     WidgetsBinding.instance.removeObserver(this);
-  ///     super.dispose();
-  ///   }
-  ///
-  ///   Size _lastSize;
-  ///
-  ///   @override
-  ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = ui.window.physicalSize; });
-  ///   }
-  ///
-  ///   @override
-  ///   Widget build(BuildContext context) {
-  ///     return new Text('Last size: $_lastSize');
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// In general, this is unnecessary as the layout system takes care of
-  /// automatically recomputing the application geometry when the application
-  /// size changes.
-  ///
-  /// See also:
-  ///
-  ///  * [MediaQuery.of], which provides a similar service with less
-  ///    boilerplate.
   void didChangeMetrics() { }
 
   /// Called when the system tells the app that the user's locale has
@@ -155,9 +56,6 @@ abstract class WidgetsBindingObserver {
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
-  ///
-  /// An example of implementing this method is provided in the class-level
-  /// documentation for the [WidgetsBindingObserver] class.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   /// Called when the system is running low on memory.
@@ -165,11 +63,7 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererBinding {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory WidgetsBinding._() => null;
-
+abstract class WidgetsBinding extends BindingBase implements GestureBinding, RendererBinding {
   @override
   void initInstances() {
     super.initInstances();
@@ -256,21 +150,11 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   /// [MediaQuery.of] static method and (implicitly) the
   /// [InheritedWidget] mechanism to be notified whenever the screen
   /// size changes (e.g. whenever the screen rotates).
-  ///
-  /// See also:
-  ///
-  ///  * [removeObserver], to release the resources reserved by this method.
-  ///  * [WidgetsBindingObserver], which has an example of using this method.
   void addObserver(WidgetsBindingObserver observer) => _observers.add(observer);
 
   /// Unregisters the given observer. This should be used sparingly as
   /// it is relatively expensive (O(N) in the number of registered
   /// observers).
-  ///
-  /// See also:
-  ///
-  ///  * [addObserver], for the method that adds observers in the first place.
-  ///  * [WidgetsBindingObserver], which has an example of using this method.
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
 
   /// Called when the system metrics change.

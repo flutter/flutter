@@ -69,13 +69,14 @@ class BottomNavigationBar extends StatefulWidget {
     this.type: BottomNavigationBarType.fixed,
     this.fixedColor,
     this.iconSize: 24.0,
-  }) : assert(items != null),
-       assert(items.length >= 2),
-       assert(0 <= currentIndex && currentIndex < items.length),
-       assert(type != null),
-       assert(type == BottomNavigationBarType.fixed || fixedColor == null),
-       assert(iconSize != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(items != null);
+    assert(items.length >= 2);
+    assert(0 <= currentIndex && currentIndex < items.length);
+    assert(type != null);
+    assert(type == BottomNavigationBarType.fixed || fixedColor == null);
+    assert(iconSize != null);
+  }
 
   /// The interactive items laid out within the bottom navigation bar.
   final List<BottomNavigationBarItem> items;
@@ -449,9 +450,11 @@ class _Circle {
     @required this.index,
     @required this.color,
     @required TickerProvider vsync,
-  }) : assert(state != null),
-       assert(index != null),
-       assert(color != null) {
+  }) {
+    assert(state != null);
+    assert(index != null);
+    assert(color != null);
+
     controller = new AnimationController(
       duration: kThemeAnimationDuration,
       vsync: vsync,
