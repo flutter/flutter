@@ -266,15 +266,12 @@ void main() {
     Widget buildFrame(ScrollController controller) {
       return new PageStorage(
         bucket: bucket,
-        child: new KeyedSubtree(
-          key: const PageStorageKey<String>('ListView'),
-          child: new ListView(
-            key: new UniqueKey(), // it's a different ListView every time
-            controller: controller,
-            children: new List<Widget>.generate(50, (int index) {
-              return new Container(height: 100.0, child: new Text('Item $index'));
-            }).toList(),
-          ),
+        child: new ListView(
+          key: new UniqueKey(), // it's a different ListView every time
+          controller: controller,
+          children: new List<Widget>.generate(50, (int index) {
+            return new Container(height: 100.0, child: new Text('Item $index'));
+          }).toList(),
         ),
       );
     }

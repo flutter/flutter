@@ -39,19 +39,21 @@ class PageStorageKey<T> extends ValueKey<T> {
 }
 
 class _StorageEntryIdentifier {
-  _StorageEntryIdentifier(this.keys) {
+  _StorageEntryIdentifier(this.clientType, this.keys) {
+    assert(clientType != null);
     assert(keys != null);
   }
 
+  final Type clientType;
   final List<PageStorageKey<dynamic>> keys;
-
-  bool get isNotEmpty => keys.isNotEmpty;
 
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
     final _StorageEntryIdentifier typedOther = other;
+    if (clientType != typedOther.clientType || keys.length != typedOther.keys.length)
+      return false;
     for (int index = 0; index < keys.length; index += 1) {
       if (keys[index] != typedOther.keys[index])
         return false;
@@ -60,11 +62,11 @@ class _StorageEntryIdentifier {
   }
 
   @override
-  int get hashCode => hashList(keys);
+  int get hashCode => hashValues(clientType, hashList(keys));
 
   @override
   String toString() {
-    return 'StorageEntryIdentifier(${keys?.join(":")})';
+    return 'StorageEntryIdentifier($clientType, ${keys?.join(":")})';
   }
 }
 
@@ -92,45 +94,31 @@ class PageStorageBucket {
   }
 
   _StorageEntryIdentifier _computeIdentifier(BuildContext context) {
-    return new _StorageEntryIdentifier(_allKeys(context));
+    return new _StorageEntryIdentifier(context.widget.runtimeType, _allKeys(context));
   }
 
   Map<Object, dynamic> _storage;
 
-  /// Write the given data into this page storage bucket using the
-  /// specified identifier or an identifier computed from the given context.
-  /// The computed identifier is based on the [PageStorageKey]s
-  /// found in the path from context to the [PageStorage] widget that
-  /// owns this page storage bucket.
+  /// Write the given data into this page storage bucket using an identifier
+  /// computed from the given context. The identifier is based on the keys
+  /// found in the path from context to the root of the widget tree for this
+  /// page. Keys are collected until the widget tree's root is reached or
+  /// a GlobalKey is found.
   ///
-  /// If an explicit identifier is not provided and no [PageStorageKey]s
-  /// are found, then the `data` is not saved.
+  /// An explicit identifier can be used in cases where the list of keys
+  /// is not stable. For example if the path concludes with a GlobalKey
+  /// that's created by a stateful widget, if the stateful widget is
+  /// recreated when it's exposed by [Navigator.pop], then its storage
+  /// identifier will change.
   void writeState(BuildContext context, dynamic data, { Object identifier }) {
     _storage ??= <Object, dynamic>{};
-    if (identifier != null) {
-      _storage[identifier] = data;
-    } else {
-      final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
-      if (contextIdentifier.isNotEmpty)
-        _storage[contextIdentifier] = data;
-    }
+    _storage[identifier ?? _computeIdentifier(context)] = data;
   }
 
-  /// Read given data from into this page storage bucket using the specified
-  /// identifier or an identifier computed from the given context.
-  /// The computed identifier is based on the [PageStorageKey]s
-  /// found in the path from context to the [PageStorage] widget that
-  /// owns this page storage bucket.
-  ///
-  /// If an explicit identifier is not provided and no [PageStorageKey]s
-  /// are found, then null is returned.
+  /// Read given data from into this page storage bucket using an identifier
+  /// computed from the given context. More about [identifier] in [writeState].
   dynamic readState(BuildContext context, { Object identifier }) {
-    if (_storage == null)
-      return null;
-    if (identifier != null)
-      return _storage[identifier];
-    final _StorageEntryIdentifier contextIdentifier = _computeIdentifier(context);
-    return contextIdentifier.isNotEmpty ? _storage[contextIdentifier] : null;
+    return _storage != null ? _storage[identifier ?? _computeIdentifier(context)] : null;
   }
 }
 
