@@ -68,6 +68,19 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
+  /// A delegate PageRoute to which iOS themed page operations are delegated to.
+  /// It's lazily created on first use.
+  CupertinoPageRoute<Null> _cupertinoPageRoute;
+  CupertinoPageRoute<Null> get cupertinoPageRoute {
+    if (_cupertinoPageRoute == null) {
+      _cupertinoPageRoute = new CupertinoPageRoute<Null>(
+        builder: builder, // Should be never used.
+        fullscreenDialog: fullscreenDialog,
+      );
+    }
+    return _cupertinoPageRoute;
+  }
+
   @override
   final bool maintainState;
 
@@ -79,22 +92,21 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) {
-    return nextRoute is MaterialPageRoute<dynamic>;
+    return nextRoute is MaterialPageRoute<dynamic> || nextRoute is CupertinoPageRoute<dynamic>;
   }
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return nextRoute is MaterialPageRoute && !nextRoute.fullscreenDialog;
+    return (nextRoute is MaterialPageRoute && !nextRoute.fullscreenDialog)
+        || (nextRoute is CupertinoPageRoute && !nextRoute.fullscreenDialog);
   }
 
   @override
   void dispose() {
-    _backGestureController?.dispose();
+    _cupertinoPageRoute?.dispose();
     super.dispose();
   }
-
-  CupertinoBackGestureController _backGestureController;
 
   /// Support for dismissing this route with a horizontal swipe is enabled
   /// for [TargetPlatform.iOS]. If attempts to dismiss this route might be
@@ -107,31 +119,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   ///    is defined for this route.
   @override
   NavigationGestureController startPopGesture() {
-    // If attempts to dismiss this route might be vetoed, then do not
-    // allow the user to dismiss the route with a swipe.
-    if (hasScopedWillPopCallback)
-      return null;
-    // Fullscreen dialogs aren't dismissable by back swipe.
-    if (fullscreenDialog)
-      return null;
-    if (controller.status != AnimationStatus.completed)
-      return null;
-    assert(_backGestureController == null);
-    _backGestureController = new CupertinoBackGestureController(
-      navigator: navigator,
-      controller: controller,
-    );
-
-    controller.addStatusListener(_handleBackGestureEnded);
-    return _backGestureController;
-  }
-
-  void _handleBackGestureEnded(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      _backGestureController?.dispose();
-      _backGestureController = null;
-      controller.removeStatusListener(_handleBackGestureEnded);
-    }
+    return Theme.of(navigator.context).platform == TargetPlatform.iOS
+        ? cupertinoPageRoute.startPopGesture()
+        : null;
   }
 
   @override
@@ -152,20 +142,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
-      if (fullscreenDialog)
-        return new CupertinoFullscreenDialogTransition(
-          animation: animation,
-          child: child,
-        );
-      else
-        return new CupertinoPageTransition(
-          primaryRouteAnimation: animation,
-          secondaryRouteAnimation: secondaryAnimation,
-          child: child,
-          // In the middle of a back gesture drag, let the transition be linear to match finger
-          // motions.
-          linearTransition: _backGestureController != null,
-        );
+      return cupertinoPageRoute.buildTransitions(context, animation, secondaryAnimation, child);
     } else {
       return new _MountainViewPageTransition(
         routeAnimation: animation,

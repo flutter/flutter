@@ -88,10 +88,11 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   CupertinoBackGestureController _backGestureController;
 
-  /// Support for dismissing this route with a horizontal swipe is enabled
-  /// for [TargetPlatform.iOS]. If attempts to dismiss this route might be
-  /// vetoed because a [WillPopCallback] was defined for the route then the
-  /// platform-specific back gesture is disabled.
+  /// Support for dismissing this route with a horizontal swipe.
+  ///
+  /// Swiping will be disabled if the page is a fullscreen dialog or if
+  /// dismissals can be overriden because a [WillPopCallback] was
+  /// defined for the route.
   ///
   /// See also:
   ///
@@ -99,8 +100,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///    is defined for this route.
   @override
   NavigationGestureController startPopGesture() {
-    // If attempts to dismiss this route might be vetoed, then do not
-    // allow the user to dismiss the route with a swipe.
+    // If attempts to dismiss this route might be vetoed such as in a page
+    // with forms, then do not allow the user to dismiss the route with a swipe.
     if (hasScopedWillPopCallback)
       return null;
     // Fullscreen dialogs aren't dismissable by back swipe.
@@ -143,27 +144,20 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      if (fullscreenDialog)
-        return new CupertinoFullscreenDialogTransition(
-          animation: animation,
-          child: child,
-        );
-      else
-        return new CupertinoPageTransition(
-          primaryRouteAnimation: animation,
-          secondaryRouteAnimation: secondaryAnimation,
-          child: child,
-          // In the middle of a back gesture drag, let the transition be linear to match finger
-          // motions.
-          linearTransition: _backGestureController != null,
-        );
-    } else {
-      return new _MountainViewPageTransition(
-        routeAnimation: animation,
-        child: child
+    if (fullscreenDialog)
+      return new CupertinoFullscreenDialogTransition(
+        animation: animation,
+        child: child,
       );
-    }
+    else
+      return new CupertinoPageTransition(
+        primaryRouteAnimation: animation,
+        secondaryRouteAnimation: secondaryAnimation,
+        child: child,
+        // In the middle of a back gesture drag, let the transition be linear to match finger
+        // motions.
+        linearTransition: _backGestureController != null,
+      );
   }
 
   @override
