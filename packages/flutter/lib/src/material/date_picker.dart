@@ -181,13 +181,14 @@ class DayPicker extends StatelessWidget {
     @required this.lastDate,
     @required this.displayedMonth,
     this.selectableDayPredicate,
-  }) : assert(selectedDate != null),
-       assert(currentDate != null),
-       assert(onChanged != null),
-       assert(displayedMonth != null),
-       assert(!firstDate.isAfter(lastDate)),
-       assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
-       super(key: key);
+  }) : super(key: key) {
+    assert(selectedDate != null);
+    assert(currentDate != null);
+    assert(onChanged != null);
+    assert(displayedMonth != null);
+    assert(!firstDate.isAfter(lastDate));
+    assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate));
+  }
 
   /// The currently selected date.
   ///
@@ -330,11 +331,12 @@ class MonthPicker extends StatefulWidget {
     @required this.firstDate,
     @required this.lastDate,
     this.selectableDayPredicate,
-  }) : assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
-       assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
-       super(key: key);
+  }) : super(key: key) {
+    assert(selectedDate != null);
+    assert(onChanged != null);
+    assert(!firstDate.isAfter(lastDate));
+    assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate));
+  }
 
   /// The currently selected date.
   ///
@@ -517,10 +519,11 @@ class YearPicker extends StatefulWidget {
     @required this.onChanged,
     @required this.firstDate,
     @required this.lastDate,
-  }) : assert(selectedDate != null),
-       assert(onChanged != null),
-       assert(!firstDate.isAfter(lastDate)),
-       super(key: key);
+  }) : super(key: key) {
+    assert(selectedDate != null);
+    assert(onChanged != null);
+    assert(!firstDate.isAfter(lastDate));
+  }
 
   /// The currently selected date.
   ///

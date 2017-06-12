@@ -319,8 +319,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
     @required this.theme,
     bool barrierDismissible: true,
     @required this.child,
-  }) : assert(barrierDismissible != null),
-       _barrierDismissible = barrierDismissible;
+  }) : _barrierDismissible = barrierDismissible {
+    assert(barrierDismissible != null);
+  }
 
   final Widget child;
   final ThemeData theme;

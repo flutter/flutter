@@ -140,11 +140,12 @@ class Stepper extends StatefulWidget {
     this.onStepTapped,
     this.onStepContinue,
     this.onStepCancel,
-  }) : assert(steps != null),
-       assert(type != null),
-       assert(currentStep != null),
-       assert(0 <= currentStep && currentStep < steps.length),
-       super(key: key);
+  }) : super(key: key) {
+    assert(steps != null);
+    assert(type != null);
+    assert(currentStep != null);
+    assert(0 <= currentStep && currentStep < steps.length);
+  }
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
   ///

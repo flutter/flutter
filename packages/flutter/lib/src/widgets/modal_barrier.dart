@@ -26,23 +26,21 @@ class ModalBarrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new BlockSemantics(
-      child: new ExcludeSemantics(
-        excluding: !dismissible,
-        child: new Semantics(
-          container: true,
-          child: new GestureDetector(
-            onTapDown: (TapDownDetails details) {
-              if (dismissible)
-                Navigator.pop(context);
-            },
-            behavior: HitTestBehavior.opaque,
-            child: new ConstrainedBox(
-              constraints: const BoxConstraints.expand(),
-              child: color == null ? null : new DecoratedBox(
-                decoration: new BoxDecoration(
-                  color: color
-                )
+    return new ExcludeSemantics(
+      excluding: !dismissible,
+      child: new Semantics(
+        container: true,
+        child: new GestureDetector(
+          onTapDown: (TapDownDetails details) {
+            if (dismissible)
+              Navigator.pop(context);
+          },
+          behavior: HitTestBehavior.opaque,
+          child: new ConstrainedBox(
+            constraints: const BoxConstraints.expand(),
+            child: color == null ? null : new DecoratedBox(
+              decoration: new BoxDecoration(
+                color: color
               )
             )
           )

@@ -47,10 +47,12 @@ class BannerPainter extends CustomPainter {
     @required this.location,
     this.color: _kColor,
     this.textStyle: _kTextStyle,
-  }) : assert(message != null),
-       assert(location != null),
-       assert(color != null),
-       assert(textStyle != null);
+  }) {
+    assert(message != null);
+    assert(location != null);
+    assert(color != null);
+    assert(textStyle != null);
+  }
 
   /// The message to show in the banner.
   final String message;

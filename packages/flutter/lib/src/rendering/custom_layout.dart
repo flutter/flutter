@@ -10,7 +10,7 @@ import 'object.dart';
 // For SingleChildLayoutDelegate and RenderCustomSingleChildLayoutBox, see shifted_box.dart
 
 /// [ParentData] used by [RenderCustomMultiChildLayoutBox].
-class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
+class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// An object representing the identity of this child.
   Object id;
 
@@ -268,8 +268,8 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   RenderCustomMultiChildLayoutBox({
     List<RenderBox> children,
     @required MultiChildLayoutDelegate delegate
-  }) : assert(delegate != null),
-       _delegate = delegate {
+  }) : _delegate = delegate {
+    assert(delegate != null);
     addAll(children);
   }
 

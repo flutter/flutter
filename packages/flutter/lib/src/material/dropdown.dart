@@ -266,7 +266,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.elevation: 8,
     this.theme,
     @required this.style,
-  }) : assert(style != null);
+  }) {
+    assert(style != null);
+  }
 
   final List<DropdownMenuItem<T>> items;
   final Rect buttonRect;
@@ -423,9 +425,11 @@ class DropdownButton<T> extends StatefulWidget {
     this.style,
     this.iconSize: 24.0,
     this.isDense: false,
-  }) : assert(items != null),
-       assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
-      super(key: key);
+  }) : super(key: key) {
+    assert(items != null);
+    assert(value == null ||
+      items.where((DropdownMenuItem<T> item) => item.value == value).length == 1);
+  }
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;

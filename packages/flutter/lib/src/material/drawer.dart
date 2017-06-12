@@ -270,12 +270,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         child: new RepaintBoundary(
           child: new Stack(
             children: <Widget>[
-              new BlockSemantics(
-                child: new GestureDetector(
-                  onTap: close,
-                  child: new Container(
-                    color: _color.evaluate(_controller)
-                  ),
+              new GestureDetector(
+                onTap: close,
+                child: new Container(
+                  color: _color.evaluate(_controller)
                 ),
               ),
               new Align(

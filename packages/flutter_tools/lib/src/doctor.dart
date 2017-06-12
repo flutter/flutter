@@ -16,7 +16,6 @@ import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
-import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -210,10 +209,6 @@ class _FlutterValidator extends DoctorValidator {
     final FlutterVersion version = FlutterVersion.instance;
 
     messages.add(new ValidationMessage('Flutter at ${Cache.flutterRoot}'));
-    if (Cache.flutterRoot.contains(' '))
-      messages.add(new ValidationMessage.error(
-        'Flutter SDK install paths with spaces are not yet supported. (https://github.com/flutter/flutter/issues/6577)\n'
-        'Please move the SDK to a path that does not include spaces.'));
     messages.add(new ValidationMessage(
       'Framework revision ${version.frameworkRevisionShort} '
       '(${version.frameworkAge}), ${version.frameworkDate}'
@@ -266,10 +261,6 @@ abstract class IntelliJValidator extends DoctorValidator {
     'WebStorm': 'WebStorm',
   };
 
-  static final Version kMinIdeaVersion = new Version(2017, 1, 0);
-  static final Version kMinWebStormVersion = new Version(2017, 1, 0);
-  static final Version kMinFlutterPluginVersion = new Version(14, 0, 0);
-
   static Iterable<DoctorValidator> get installedValidators {
     if (platform.isLinux || platform.isWindows)
       return IntelliJValidatorOnLinuxAndWindows.installed;
@@ -282,72 +273,46 @@ abstract class IntelliJValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    _validatePackage(messages, 'flutter-intellij.jar', 'Flutter',
-        minVersion: kMinFlutterPluginVersion);
+    int installCount = 0;
 
-    // Dart is bundled with WebStorm.
-    if (!isWebStorm) {
-      _validatePackage(messages, 'Dart', 'Dart');
+    if (isWebStorm) {
+      // Dart is bundled with WebStorm.
+      installCount++;
+    } else {
+      if (_validateHasPackage(messages, 'Dart', 'Dart'))
+        installCount++;
     }
 
-    if (_hasIssues(messages)) {
+    if (_validateHasPackage(messages, 'flutter-intellij.jar', 'Flutter'))
+      installCount++;
+
+    if (installCount < 2) {
       messages.add(new ValidationMessage(
-        'For information about managing plugins, see\n'
-        'https://www.jetbrains.com/help/idea/managing-plugins.html'
+          'For information about managing plugins, see\n'
+          'https://www.jetbrains.com/help/idea/managing-plugins.html'
       ));
     }
 
-    _validateIntelliJVersion(messages, isWebStorm ? kMinWebStormVersion : kMinIdeaVersion);
-
     return new ValidationResult(
-      _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
-      messages,
-      statusInfo: 'version $version'
+        installCount == 2 ? ValidationType.installed : ValidationType.partial,
+        messages,
+        statusInfo: 'version $version'
     );
-  }
-
-  bool _hasIssues(List<ValidationMessage> messages) {
-    return messages.any((ValidationMessage message) => message.isError);
   }
 
   bool get isWebStorm => title == 'WebStorm';
 
-  void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
-    // Ignore unknown versions.
-    if (minVersion == Version.unknown)
-      return;
-
-    final Version installedVersion = new Version.parse(version);
-    if (installedVersion == null)
-      return;
-
-    if (installedVersion < minVersion) {
-      messages.add(new ValidationMessage.error(
-        'This install is older than the minimum recommended version of $minVersion.'
-      ));
-    }
-  }
-
-  void _validatePackage(List<ValidationMessage> messages, String packageName, String title, {
-    Version minVersion
-  }) {
+  bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String title) {
     if (!hasPackage(packageName)) {
-      messages.add(new ValidationMessage.error(
+      messages.add(new ValidationMessage(
         '$title plugin not installed; this adds $title specific functionality.'
       ));
-      return;
+      return false;
     }
-    final String versionText = _readPackageVersion(packageName);
-    final Version version = new Version.parse(versionText);
-    if (version != null && minVersion != null && version < minVersion) {
-        messages.add(new ValidationMessage.error(
-          '$title plugin version $versionText - the recommended minimum version is $minVersion'
-        ));
-    } else {
-      messages.add(new ValidationMessage(
-        '$title plugin ${version != null ? "version $version" : "installed"}'
-      ));
-    }
+    final String version = _readPackageVersion(packageName);
+    messages.add(new ValidationMessage('$title plugin '
+        '${version != null ? "version $version" : "installed"}'));
+    return true;
   }
 
   String _readPackageVersion(String packageName) {

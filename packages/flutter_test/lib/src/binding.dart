@@ -89,10 +89,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
        // Services binding omitted to avoid dragging in the licenses code.
        WidgetsBinding {
 
-  /// Constructor for [TestWidgetsFlutterBinding].
-  ///
-  /// This constructor overrides the [debugPrint] global hook to point to
-  /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding() {
     debugPrint = debugPrintOverride;
   }
