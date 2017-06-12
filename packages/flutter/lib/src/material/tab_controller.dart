@@ -16,6 +16,8 @@ import 'constants.dart';
 /// A stateful widget that builds a [TabBar] or a [TabBarView] can create
 /// a TabController and share it directly.
 ///
+/// ## Sample code
+///
 /// ```dart
 /// class _MyDemoState extends State<MyDemo> with SingleTickerProviderStateMixin {
 ///   final List<Tab> myTabs = <Tab>[
