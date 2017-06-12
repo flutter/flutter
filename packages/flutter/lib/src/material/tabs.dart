@@ -389,22 +389,23 @@ class _TabBarScrollController extends ScrollController {
 
 /// A material design widget that displays a horizontal row of tabs.
 ///
-/// Typically created as part of an [AppBar] and in conjuction with a
-/// [TabBarView].
+/// Typically created as the [AppBar.bottom] part of an [AppBar] and in
+/// conjuction with a [TabBarView].
 ///
 /// If a [TabController] is not provided, then there must be a
-/// [DefaultTabController] ancestor.
+/// [DefaultTabController] ancestor. The tab controller's [TabController.length]
+/// must equal the length of the [tabs] list.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
-///  * [TabBarView], which displays the contents that the tab bar is selecting
-///    between.
+///  * [TabBarView], which displays page views that correspond to each tab.
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design tab bar.
   ///
-  /// The [tabs] argument must not be null and must have more than one widget.
+  /// The [tabs] argument cannot be null and its length must match the [controller]'s
+  /// [TabController.length].
   ///
   /// If a [TabController] is not provided, then there must be a
   /// [DefaultTabController] ancestor.
@@ -424,13 +425,15 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelStyle,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-  }) : assert(tabs != null && tabs.length > 1),
+  }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(indicatorWeight != null && indicatorWeight > 0.0),
        assert(indicatorPadding != null),
        super(key: key);
 
-  /// Typically a list of [Tab] widgets.
+  /// Typically a list of two or more [Tab] widgets.
+  ///
+  /// The length of this list must match the [controller]'s [TabController.length].
   final List<Widget> tabs;
 
   /// This widget's selection and animation state.
@@ -667,6 +670,12 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
+    if (_controller.length == 0) {
+      return new Container(
+        height: _kTabHeight + widget.indicatorWeight,
+      );
+    }
+
     final List<Widget> wrappedTabs = new List<Widget>.from(widget.tabs, growable: false);
 
     // If the controller was provided by DefaultTabController and we're part
@@ -774,8 +783,7 @@ class TabBarView extends StatefulWidget {
     Key key,
     @required this.children,
     this.controller,
-  }) : assert(children != null && children.length > 1),
-       super(key: key);
+  }) : assert(children != null), super(key: key);
 
   /// This widget's selection and animation state.
   ///

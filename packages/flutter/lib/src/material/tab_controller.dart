@@ -16,6 +16,8 @@ import 'constants.dart';
 /// A stateful widget that builds a [TabBar] or a [TabBarView] can create
 /// a TabController and share it directly.
 ///
+/// ## Sample code
+///
 /// ```dart
 /// class _MyDemoState extends State<MyDemo> with SingleTickerProviderStateMixin {
 ///   final List<Tab> myTabs = <Tab>[
@@ -62,12 +64,18 @@ import 'constants.dart';
 /// inherited widget.
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
+  ///
+  /// The [length] cannot be null or negative. Typically its a value greater than one, i.e.
+  /// typically there are two or more tabs.
+  ///
+  /// The `initialIndex` must be valid given [length] and cannot be null. If [length] is
+  /// zero, then `initialIndex` must be 0 (the default).
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
-    : assert(length != null && length > 1),
-      assert(initialIndex != null && initialIndex >= 0 && initialIndex < length),
+    : assert(length != null && length >= 0),
+      assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
       _previousIndex = initialIndex,
-      _animationController = new AnimationController(
+      _animationController = length < 2 ? null : new AnimationController(
         value: initialIndex.toDouble(),
         upperBound: (length - 1).toDouble(),
         vsync: vsync
@@ -81,18 +89,21 @@ class TabController extends ChangeNotifier {
   /// selected tab is changed, the animation's value equals [index]. The
   /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
   /// drag scrolling.
-  Animation<double> get animation => _animationController.view;
+  ///
+  /// If length is zero or one, [index] animations don't happen and the value
+  /// of this property is [kAlwaysCompleteAnimation].
+  Animation<double> get animation => _animationController?.view ?? kAlwaysCompleteAnimation;
   final AnimationController _animationController;
 
-  /// The total number of tabs. Must be greater than one.
+  /// The total number of tabs. Typically greater than one.
   final int length;
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
-    assert(value >= 0 && value < length);
+    assert(value >= 0 && (value < length || length == 0));
     assert(duration == null ? curve == null : true);
     assert(_indexIsChangingCount >= 0);
-    if (value == _index)
+    if (value == _index || length < 2)
       return;
     _previousIndex = index;
     _index = value;
@@ -118,6 +129,9 @@ class TabController extends ChangeNotifier {
   /// [indexIsChanging] to false, and notifies listeners.
   ///
   /// To change the currently selected tab and play the [animation] use [animateTo].
+  ///
+  /// The value of [index] must be valid given [length]. If [length] is zero,
+  /// then [index] will also be zero.
   int get index => _index;
   int _index;
   set index(int value) {
@@ -148,8 +162,9 @@ class TabController extends ChangeNotifier {
   /// drags left or right. A value between -1.0 and 0.0 implies that the
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
-  double get offset => _animationController.value - _index.toDouble();
+  double get offset => length > 1 ? _animationController.value - _index.toDouble() : 0.0;
   set offset(double value) {
+    assert(length > 1);
     assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
@@ -160,7 +175,7 @@ class TabController extends ChangeNotifier {
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _animationController?.dispose();
     super.dispose();
   }
 }
@@ -220,7 +235,7 @@ class _TabControllerScope extends InheritedWidget {
 class DefaultTabController extends StatefulWidget {
   /// Creates a default tab controller for the given [child] widget.
   ///
-  /// The [length] argument must be great than one.
+  /// The [length] argument is typically greater than one.
   ///
   /// The [initialIndex] argument must not be null.
   const DefaultTabController({
@@ -231,7 +246,7 @@ class DefaultTabController extends StatefulWidget {
   }) : assert(initialIndex != null),
        super(key: key);
 
-  /// The total number of tabs. Must be greater than one.
+  /// The total number of tabs. Typically greater than one.
   final int length;
 
   /// The initial index of the selected tab.
