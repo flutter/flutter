@@ -18,13 +18,17 @@ import 'nav_bar.dart';
 // TODO(xster): add an example.
 class CupertinoScaffold extends StatefulWidget {
   /// Construct a [CupertinoScaffold] without tabs.
+  ///
+  /// The [tabBar] and [rootTabPageBuilder] fields are not used in a [CupertinoScaffold]
+  /// without tabs.
   // TODO(xster): document that page transitions will happen behind the navigation
   // bar.
   const CupertinoScaffold({
     Key key,
     this.navigationBar,
     @required this.child,
-  }) : tabBar = null,
+  }) : assert(child != null),
+       tabBar = null,
        rootTabPageBuilder = null,
        super(key: key);
 
@@ -38,6 +42,8 @@ class CupertinoScaffold extends StatefulWidget {
   /// tab index. [rootTabPageBuilder] must be able to build the same number of
   /// pages as the [tabBar.items.length]. Inactive tabs will be moved [Offstage]
   /// and its animations disabled.
+  ///
+  /// The [child] field is not used in a [CupertinoScaffold] with tabs.
   const CupertinoScaffold.tabbed({
     Key key,
     this.navigationBar,
@@ -60,6 +66,9 @@ class CupertinoScaffold extends StatefulWidget {
   /// that lets the user switch between different tabs in the main content area
   /// when present.
   ///
+  /// This parameter is required and must be non-null when the [new CupertinoScaffold.tabbed]
+  /// constructor is used.
+  ///
   /// When provided, [CupertinoTabBar.currentIndex] will be ignored and will
   /// be managed by the [CupertinoScaffold] to show the currently selected page
   /// as the active item index. If [CupertinoTabBar.onTap] is provided, it will
@@ -72,9 +81,10 @@ class CupertinoScaffold extends StatefulWidget {
   /// Otherwise, the main content's bottom margin will be offset by its height.
   final CupertinoTabBar tabBar;
 
-  /// An [IndexedWidgetBuilder] that's called when tabs become active. Used
-  /// when a tabbed scaffold is constructed via the [new CupertinoScaffold.tabbed]
-  /// constructor.
+  /// An [IndexedWidgetBuilder] that's called when tabs become active.
+  ///
+  /// Used when a tabbed scaffold is constructed via the [new CupertinoScaffold.tabbed]
+  /// constructor and must be non-null.
   ///
   /// When the tab becomes inactive, its content is still cached in the widget
   /// tree [Offstage] and its animations disabled.
@@ -85,6 +95,9 @@ class CupertinoScaffold extends StatefulWidget {
 
   /// Widget to show in the main content area when the scaffold is used without
   /// tabs.
+  ///
+  /// Used when the default [new CupertinoScaffold] constructor is used and must
+  /// be non-null.
   ///
   /// Content can slide under the [navigationBar] or the [tabBar] when they're
   /// translucent.
@@ -100,10 +113,7 @@ class _CupertinoScaffoldState extends State<CupertinoScaffold> {
   /// Pad the given middle widget with or without top and bottom offsets depending
   /// on whether the middle widget should slide behind translucent bars.
   Widget _padMiddle(Widget middle) {
-    double topPadding = MediaQuery
-        .of(context)
-        .padding
-        .top;
+    double topPadding = MediaQuery.of(context).padding.top;
     if (widget.navigationBar is CupertinoNavigationBar) {
       final CupertinoNavigationBar top = widget.navigationBar;
       if (top.opaque)

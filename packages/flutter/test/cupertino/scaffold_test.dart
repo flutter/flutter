@@ -12,7 +12,6 @@ import '../services/mocks_for_image_cache.dart';
 List<int> selectedTabs;
 
 void main() {
-
   setUp(() {
     selectedTabs = <int>[];
   });
