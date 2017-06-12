@@ -24,30 +24,29 @@ class CupertinoScaffold extends StatefulWidget {
     Key key,
     this.navigationBar,
     @required this.child,
-  })
-      : tabBar = null,
-        rootTabPageBuilder = null,
-        super(key: key);
+  }) : tabBar = null,
+       rootTabPageBuilder = null,
+       super(key: key);
 
   /// Construct a [CupertinoScaffold] with tabs.
   ///
   /// A [tabBar] and a [rootTabPageBuilder] are required. The [CupertinoScaffold]
-  /// will automatically listen to the provide [CupertinoTabBar]'s tap callbacks
+  /// will automatically listen to the provided [CupertinoTabBar]'s tap callbacks
   /// to change the active tab.
   ///
   /// Tabs' contents are built with the provided [rootTabPageBuilder] at the active
   /// tab index. [rootTabPageBuilder] must be able to build the same number of
-  /// pages as the [tabBar.items.length].
+  /// pages as the [tabBar.items.length]. Inactive tabs will be moved [Offstage]
+  /// and its animations disabled.
   const CupertinoScaffold.tabbed({
     Key key,
     this.navigationBar,
     @required this.tabBar,
     @required this.rootTabPageBuilder,
-  })
-      : assert(tabBar != null),
-        assert(rootTabPageBuilder != null),
-        child = null,
-        super(key: key);
+  }) : assert(tabBar != null),
+       assert(rootTabPageBuilder != null),
+       child = null,
+       super(key: key);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.
@@ -77,6 +76,9 @@ class CupertinoScaffold extends StatefulWidget {
   /// when a tabbed scaffold is constructed via the [new CupertinoScaffold.tabbed]
   /// constructor.
   ///
+  /// When the tab becomes inactive, its content is still cached in the widget
+  /// tree [Offstage] and its animations disabled.
+  ///
   /// Content can slide under the [navigationBar] or the [tabBar] when they're
   /// translucent.
   final IndexedWidgetBuilder rootTabPageBuilder;
@@ -95,6 +97,8 @@ class CupertinoScaffold extends StatefulWidget {
 class _CupertinoScaffoldState extends State<CupertinoScaffold> {
   int _currentPage = 0;
 
+  /// Pad the given middle widget with or without top and bottom offsets depending
+  /// on whether the middle widget should slide behind translucent bars.
   Widget _padMiddle(Widget middle) {
     double topPadding = MediaQuery
         .of(context)
@@ -141,13 +145,16 @@ class _CupertinoScaffoldState extends State<CupertinoScaffold> {
     if (widget.tabBar != null) {
       stacked.add(new Align(
         alignment: FractionalOffset.bottomCenter,
+        // Override the tab bar's currentIndex to the current tab and hook in
+        // our own listener to update the _currentPage on top of a possibly user
+        // provided callback.
         child: widget.tabBar.copyWith(
             currentIndex: _currentPage,
             onTap: (int newIndex) {
               setState(() {
                 _currentPage = newIndex;
               });
-              // Chain the user's original callback after the automatic scaffold behavior.
+              // Chain the user's original callback.
               if (widget.tabBar.onTap != null)
                 widget.tabBar.onTap(newIndex);
             }
@@ -161,6 +168,8 @@ class _CupertinoScaffoldState extends State<CupertinoScaffold> {
   }
 }
 
+/// An widget laying out multiple tabs with only one active tab being built
+/// at a time and on stage. Off stage tabs' animations are stopped.
 class _TabView extends StatefulWidget {
   _TabView({
     @required this.currentTabIndex,
@@ -189,43 +198,21 @@ class _TabViewState extends State<_TabView> {
 
   @override
   Widget build(BuildContext context) {
-    return new CustomMultiChildLayout(
-      delegate: new _TabViewLayout(tabNumber: widget.tabNumber),
+    return new Stack(
       children: new List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
         // If the tab is being shown re-build and cache it.
         if (active)
           tabs[index] = widget.rootTabPageBuilder(context, index);
 
-        return new LayoutId(
-          id: index,
-          child: new Offstage(
-            offstage: !active,
-            child: new TickerMode(
-              enabled: active,
-              child: tabs[index],
-            ),
+        return new Offstage(
+          offstage: !active,
+          child: new TickerMode(
+            enabled: active,
+            child: tabs[index],
           ),
         );
       }),
     );
   }
-}
-
-class _TabViewLayout extends MultiChildLayoutDelegate {
-  _TabViewLayout({ @required this.tabNumber }) : assert(tabNumber != null);
-
-  final int tabNumber;
-
-  @override
-  void performLayout(Size size) {
-    final BoxConstraints constraints = new BoxConstraints.loose(size);
-    for (int tabIndex = 0; tabIndex < tabNumber; ++tabIndex) {
-      layoutChild(tabIndex, constraints);
-      positionChild(tabIndex, Offset.zero);
-    }
-  }
-
-  @override
-  bool shouldRelayout(_TabViewLayout oldDelegate) => tabNumber != oldDelegate.tabNumber;
 }
