@@ -350,7 +350,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///   child: new Align(
 ///     alignment: FractionalOffset.topCenter,
 ///     heightFactor: 0.5,
-///     child: new Image(...),
+///     child: new Image.network(userAvatarUrl),
 ///   ),
 /// )
 /// ```

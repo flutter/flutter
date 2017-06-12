@@ -12,6 +12,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart' show required;
 
+// Examples can assume:
+// dynamic _lot;
+
 /// Base class for widgets that build themselves based on interaction with
 /// a specified [Stream].
 ///

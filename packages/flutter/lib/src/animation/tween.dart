@@ -97,7 +97,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// `_animation`:
 ///
 /// ```dart
-/// _animation = new Tween<Offset>(
+/// Animation<Offset> _animation = new Tween<Offset>(
 ///   begin: const Offset(100.0, 50.0),
 ///   end: const Offset(200.0, 300.0),
 /// ).animate(_controller);

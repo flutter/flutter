@@ -16,6 +16,10 @@ import 'list_tile.dart';
 import 'material.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// enum Commands { heroAndScholar, hurricaneCame }
+// dynamic _heroAndScholar;
+
 const Duration _kMenuDuration = const Duration(milliseconds: 300);
 const double _kBaselineOffsetFromBottom = 20.0;
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
@@ -133,7 +137,7 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 /// const PopupMenuItem<WhyFarther>(
 ///   value: WhyFarther.harder,
 ///   child: const Text('Working a lot harder'),
-/// ),
+/// )
 /// ```
 ///
 /// See the example at [PopupMenuButton] for how this example could be used in a
@@ -615,6 +619,8 @@ typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
 /// because an item was selected. The value passed to [onSelected] is the value of
 /// the selected menu item. If child is null then a standard 'navigation/more_vert'
 /// icon is created.
+///
+/// ## Sample code
 ///
 /// This example shows a menu with four items, selecting between an enum's
 /// values and setting a `_selection` field based on the selection.

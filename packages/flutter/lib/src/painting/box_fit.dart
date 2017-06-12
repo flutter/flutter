@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show Image; // to disambiguate mentions of Image in the dartdocs
 
 import 'package:flutter/foundation.dart';
 
@@ -105,16 +104,18 @@ class FittedSizes {
 ///
 /// ## Sample code
 ///
-/// This example paints an [Image] `image` onto the [Rect] `outputRect` on a
-/// [Canvas] `canvas`, using a [Paint] paint, applying the [BoxFit] algorithm
+/// This function paints a [dart:ui.Image] `image` onto the [Rect] `outputRect` on a
+/// [Canvas] `canvas`, using a [Paint] `paint`, applying the [BoxFit] algorithm
 /// `fit`:
 ///
 /// ```dart
-/// final Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
-/// final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
-/// final Rect inputSubrect = FractionalOffset.center.inscribe(sizes.source, Offset.zero & imageSize);
-/// final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
-/// canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
+/// void paintImage(ui.Image image, Rect outputRect, Canvas canvas, Paint paint, BoxFit fit) {
+///   final Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
+///   final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
+///   final Rect inputSubrect = FractionalOffset.center.inscribe(sizes.source, Offset.zero & imageSize);
+///   final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
+///   canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
+/// }
 /// ```
 ///
 /// See also:

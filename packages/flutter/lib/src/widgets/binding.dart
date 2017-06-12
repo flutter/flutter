@@ -35,14 +35,14 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// lifecycle messages. See [didChangeAppLifecycleState].
 ///
 /// ```dart
-/// class Reactor extends StatefulWidget {
-///   const Reactor({ Key key }) : super(key: key);
+/// class AppLifecycleReactor extends StatefulWidget {
+///   const AppLifecycleReactor({ Key key }) : super(key: key);
 ///
 ///   @override
-///   _ReactorState createState() => new _ReactorState();
+///   _AppLifecycleReactorState createState() => new _AppLifecycleReactorState();
 /// }
 ///
-/// class _ReactorState extends State<Reactor> with WidgetsBindingObserver {
+/// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
 ///   @override
 ///   void initState() {
 ///     super.initState();
@@ -104,14 +104,14 @@ abstract class WidgetsBindingObserver {
   /// rotated (or otherwise changes dimensions).
   ///
   /// ```dart
-  /// class Reactor extends StatefulWidget {
-  ///   const Reactor({ Key key }) : super(key: key);
+  /// class MetricsReactor extends StatefulWidget {
+  ///   const MetricsReactor({ Key key }) : super(key: key);
   ///
   ///   @override
-  ///   _ReactorState createState() => new _ReactorState();
+  ///   _MetricsReactorState createState() => new _MetricsReactorState();
   /// }
   ///
-  /// class _ReactorState extends State<Reactor> with WidgetsBindingObserver {
+  /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
   ///   @override
   ///   void initState() {
   ///     super.initState();

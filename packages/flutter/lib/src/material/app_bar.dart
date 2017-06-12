@@ -21,6 +21,11 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
+// Examples can assume:
+// void _airDress() { }
+// void _restitchDress() { }
+// void _repairDress() { }
+
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 
 // Bottom justify the kToolbarHeight child which may overflow the top.

@@ -9,6 +9,9 @@ import 'constants.dart';
 import 'theme.dart';
 import 'typography.dart';
 
+// Examples can assume:
+// String userAvatarUrl;
+
 /// A circle that represents a user.
 ///
 /// Typically used with a user's profile image, or, in the absence of

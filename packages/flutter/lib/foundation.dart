@@ -16,6 +16,15 @@ export 'package:meta/meta.dart' show
   protected,
   required;
 
+// Examples can assume:
+// bool _first;
+// bool _lights;
+// bool _visible;
+// double _volume;
+// dynamic _selection;
+// dynamic _last;
+// dynamic _calculation;
+
 export 'src/foundation/assertions.dart';
 export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
