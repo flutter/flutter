@@ -4,7 +4,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -26,10 +25,10 @@ void main() {
       log.add('a'); // t=0
       await controller1.forward(); // starts at t=0 again
       log.add('b'); // wants to end at t=100 but missed frames until t=150
-      await controller2.forward(); // starts at t=150
-      log.add('c'); // wants to end at t=750 but missed frames until t=799
-      await controller3.forward(); // starts at t=799
-      log.add('d'); // wants to end at t=1099 but missed frames until t=1200
+      await controller2.forward(); // starts at t=200
+      log.add('c'); // wants to end at t=800 but missed frames until t=850
+      await controller3.forward(); // starts at t=1200
+      log.add('d'); // wants to end at t=1500 but missed frames until t=1600
     }
     log.add('start');
     runTest().then((Null value) {
@@ -48,11 +47,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400)); // t=600
     expect(log, <String>['start', 'a', 'b']);
     await tester.pump(const Duration(milliseconds: 199)); // t=799
-    expect(log, <String>['start', 'a', 'b', 'c']);
+    expect(log, <String>['start', 'a', 'b']);
     await tester.pump(const Duration(milliseconds: 51)); // t=850
     expect(log, <String>['start', 'a', 'b', 'c']);
     await tester.pump(const Duration(milliseconds: 400)); // t=1200
-    expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
+    expect(log, <String>['start', 'a', 'b', 'c']);
     await tester.pump(const Duration(milliseconds: 400)); // t=1600
     expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
   });
@@ -75,10 +74,10 @@ void main() {
       log.add('a'); // t=0
       await controller1.forward().orCancel; // starts at t=0 again
       log.add('b'); // wants to end at t=100 but missed frames until t=150
-      await controller2.forward().orCancel; // starts at t=150
-      log.add('c'); // wants to end at t=750 but missed frames until t=799
-      await controller3.forward().orCancel; // starts at t=799
-      log.add('d'); // wants to end at t=1099 but missed frames until t=1200
+      await controller2.forward().orCancel; // starts at t=200
+      log.add('c'); // wants to end at t=800 but missed frames until t=850
+      await controller3.forward().orCancel; // starts at t=1200
+      log.add('d'); // wants to end at t=1500 but missed frames until t=1600
     }
     log.add('start');
     runTest().then((Null value) {
@@ -97,11 +96,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400)); // t=600
     expect(log, <String>['start', 'a', 'b']);
     await tester.pump(const Duration(milliseconds: 199)); // t=799
-    expect(log, <String>['start', 'a', 'b', 'c']);
+    expect(log, <String>['start', 'a', 'b']);
     await tester.pump(const Duration(milliseconds: 51)); // t=850
     expect(log, <String>['start', 'a', 'b', 'c']);
     await tester.pump(const Duration(milliseconds: 400)); // t=1200
-    expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
+    expect(log, <String>['start', 'a', 'b', 'c']);
     await tester.pump(const Duration(milliseconds: 400)); // t=1600
     expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
   });

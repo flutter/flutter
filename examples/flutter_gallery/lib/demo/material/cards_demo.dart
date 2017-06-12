@@ -37,9 +37,9 @@ final List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  TravelDestinationItem({ Key key, @required this.destination })
-    : assert(destination != null && destination.isValid),
-      super(key: key);
+  TravelDestinationItem({ Key key, @required this.destination }) : super(key: key) {
+    assert(destination != null && destination.isValid);
+  }
 
   static final double height = 366.0;
   final TravelDestination destination;
@@ -110,6 +110,7 @@ class TravelDestinationItem extends StatelessWidget {
               ),
             ),
             // share, explore buttons
+            // TODO(abarth): The theme and the bar should be part of card.
             new ButtonTheme.bar(
               child: new ButtonBar(
                 alignment: MainAxisAlignment.start,

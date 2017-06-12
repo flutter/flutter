@@ -25,7 +25,6 @@ import 'ticker_provider.dart';
 /// See also:
 ///
 ///  * [ScrollActivity], which uses this class as its delegate.
-///  * [ScrollPositionWithSingleContext], the main implementation of this interface.
 abstract class ScrollActivityDelegate {
   /// The direction in which the scroll view scrolls.
   AxisDirection get axisDirection;
@@ -105,6 +104,9 @@ abstract class ScrollActivity {
     new ScrollEndNotification(metrics: metrics, context: context).dispatch(context);
   }
 
+  /// Called when the user touches the scroll view that is performing this activity.
+  void didTouch() { }
+
   /// Called when the scroll view that is performing this activity changes its metrics.
   void applyNewDimensions() { }
 
@@ -125,15 +127,12 @@ abstract class ScrollActivity {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => '$runtimeType';
 }
 
 /// A scroll activity that does nothing.
 ///
 /// When a scroll view is not scrolling, it is performing the idle activity.
-///
-/// If the [Scrollable] changes dimensions, this activity triggers a ballistic
-/// activity to restore the view.
 class IdleScrollActivity extends ScrollActivity {
   /// Creates a scroll activity that does nothing.
   IdleScrollActivity(ScrollActivityDelegate delegate) : super(delegate);
@@ -148,56 +147,6 @@ class IdleScrollActivity extends ScrollActivity {
 
   @override
   bool get isScrolling => false;
-}
-
-/// Interface for holding a [Scrollable] stationary.
-///
-/// An object that implements this interface is returned by
-/// [ScrollPosition.hold]. It holds the scrollable stationary until an activity
-/// is started or the [cancel] method is called.
-abstract class ScrollHoldController {
-  /// Release the [Scrollable], potentially letting it go ballistic if
-  /// necessary.
-  void cancel();
-}
-
-/// A scroll activity that does nothing but can be released to resume
-/// normal idle behavior.
-///
-/// This is used while the user is touching the [Scrollable] but before the
-/// touch has become a [Drag].
-///
-/// For the purposes of [ScrollNotification]s, this activity does not constitute
-/// scrolling, and does not prevent the user from interacting with the contents
-/// of the [Scrollable] (unlike when a drag has begun or there is a scroll
-/// animation underway).
-class HoldScrollActivity extends ScrollActivity implements ScrollHoldController {
-  /// Creates a scroll activity that does nothing.
-  HoldScrollActivity({
-    @required ScrollActivityDelegate delegate,
-    this.onHoldCanceled,
-  }) : super(delegate);
-
-  /// Called when [dispose] is called.
-  final VoidCallback onHoldCanceled;
-
-  @override
-  bool get shouldIgnorePointer => false;
-
-  @override
-  bool get isScrolling => false;
-
-  @override
-  void cancel() {
-    delegate.goBallistic(0.0);
-  }
-
-  @override
-  void dispose() {
-    if (onHoldCanceled != null)
-      onHoldCanceled();
-    super.dispose();
-  }
 }
 
 /// Scrolls a scroll view as the user drags their finger across the screen.
@@ -215,10 +164,10 @@ class ScrollDragController implements Drag {
     @required ScrollActivityDelegate delegate,
     @required DragStartDetails details,
     this.onDragCanceled,
-  }) : assert(delegate != null),
-       assert(details != null),
-       _delegate = delegate,
-       _lastDetails = details;
+  }) : _delegate = delegate, _lastDetails = details {
+    assert(delegate != null);
+    assert(details != null);
+  }
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -268,7 +217,7 @@ class ScrollDragController implements Drag {
     delegate.goBallistic(0.0);
   }
 
-  /// Called by the delegate when it is no longer sending events to this object.
+  /// Called when the delegate is no longer sending events to this object.
   @mustCallSuper
   void dispose() {
     _lastDetails = null;
@@ -280,11 +229,6 @@ class ScrollDragController implements Drag {
   /// [DragEndDetails] object.
   dynamic get lastDetails => _lastDetails;
   dynamic _lastDetails;
-
-  @override
-  String toString() {
-    return '$runtimeType#$hashCode';
-  }
 }
 
 /// The activity a scroll view performs when a the user drags their finger
@@ -303,6 +247,11 @@ class DragScrollActivity extends ScrollActivity {
   ) : _controller = controller, super(delegate);
 
   ScrollDragController _controller;
+
+  @override
+  void didTouch() {
+    assert(false);
+  }
 
   @override
   void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext context) {
@@ -347,21 +296,16 @@ class DragScrollActivity extends ScrollActivity {
     _controller = null;
     super.dispose();
   }
-
-  @override
-  String toString() {
-    return '$runtimeType#$hashCode($_controller)';
-  }
 }
 
-/// An activity that animates a scroll view based on a physics [Simulation].
+/// An activity that animates a scroll view based on a physics [simulation].
 ///
 /// A [BallisticScrollActivity] is typically used when the user lifts their
 /// finger off the screen to continue the scrolling gesture with the current velocity.
 ///
 /// [BallisticScrollActivity] is also used to restore a scroll view to a valid
 /// scroll offset when the geometry of the scroll view changes. In these
-/// situations, the [Simulation] typically starts with a zero velocity.
+/// situations, the [simulation] typically starts with a zero velocity.
 ///
 /// See also:
 ///
@@ -394,6 +338,11 @@ class BallisticScrollActivity extends ScrollActivity {
   @override
   void resetActivity() {
     delegate.goBallistic(velocity);
+  }
+
+  @override
+  void didTouch() {
+    delegate.goIdle();
   }
 
   @override
@@ -441,7 +390,7 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '$runtimeType#$hashCode($_controller)';
+    return '$runtimeType($_controller)';
   }
 }
 
@@ -466,12 +415,12 @@ class DrivenScrollActivity extends ScrollActivity {
     @required Duration duration,
     @required Curve curve,
     @required TickerProvider vsync,
-  }) : assert(from != null),
-       assert(to != null),
-       assert(duration != null),
-       assert(duration > Duration.ZERO),
-       assert(curve != null),
-       super(delegate) {
+  }) : super(delegate) {
+    assert(from != null);
+    assert(to != null);
+    assert(duration != null);
+    assert(duration > Duration.ZERO);
+    assert(curve != null);
     _completer = new Completer<Null>();
     _controller = new AnimationController.unbounded(
       value: from,
@@ -496,6 +445,11 @@ class DrivenScrollActivity extends ScrollActivity {
   /// The velocity at which the scroll offset is currently changing (in logical
   /// pixels per second).
   double get velocity => _controller.velocity;
+
+  @override
+  void didTouch() {
+    delegate.goIdle();
+  }
 
   void _tick() {
     if (delegate.setPixels(_controller.value) != 0.0)
@@ -526,6 +480,6 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '$runtimeType#$hashCode($_controller)';
+    return '$runtimeType($_controller)';
   }
 }

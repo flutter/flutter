@@ -189,14 +189,7 @@ class SliverConstraints extends Constraints {
     @required this.remainingPaintExtent,
     @required this.crossAxisExtent,
     @required this.viewportMainAxisExtent,
-  }) : assert(axisDirection != null),
-       assert(growthDirection != null),
-       assert(userScrollDirection != null),
-       assert(scrollOffset != null),
-       assert(overlap != null),
-       assert(remainingPaintExtent != null),
-       assert(crossAxisExtent != null),
-       assert(viewportMainAxisExtent != null);
+  });
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -261,17 +254,8 @@ class SliverConstraints extends Constraints {
   ///
   /// For example, if [growthDirection] is [GrowthDirection.reverse] and
   /// [axisDirection] is [AxisDirection.down], then a
-  /// [ScrollDirection.forward] means that the user is scrolling up, in the
+  /// [userScrollDirection.forward] means that the user is scrolling up, in the
   /// positive [scrollOffset] direction.
-  ///
-  /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
-  /// even if there is (for example) a [ScrollActivity] currently animating the
-  /// position.
-  ///
-  /// This is used by some slivers to determine how to react to a change in
-  /// scroll offset. For example, [RenderSliverFloatingPersistentHeader] will
-  /// only expand a floating app bar when the [userScrollDirection] is in the
-  /// positive scroll offset direction.
   final ScrollDirection userScrollDirection;
 
   /// The scroll offset, in this sliver's coordinate system, that corresponds to
@@ -397,31 +381,21 @@ class SliverConstraints extends Constraints {
   @override
   bool debugAssertIsValid({
     bool isAppliedConstraint: false,
-    InformationCollector informationCollector,
+    InformationCollector informationCollector
   }) {
-    assert(() {
-      void verify(bool check, String message) {
-        if (check)
-          return;
-        final StringBuffer information = new StringBuffer();
-        if (informationCollector != null)
-          informationCollector(information);
-        throw new FlutterError('$runtimeType is not valid: $message\n${information}The offending constraints were:\n  $this');
-      }
-      verify(axis != null, 'The "axis" is null.');
-      verify(growthDirection != null, 'The "growthDirection" is null.');
-      verify(scrollOffset != null, 'The "scrollOffset" is null.');
-      verify(overlap != null, 'The "overlap" is null.');
-      verify(remainingPaintExtent != null, 'The "remainingPaintExtent" is null.');
-      verify(crossAxisExtent != null, 'The "crossAxisExtent" is null.');
-      verify(viewportMainAxisExtent != null, 'The "viewportMainAxisExtent" is null.');
-      verify(scrollOffset >= 0.0, 'The "scrollOffset" is negative.');
-      verify(crossAxisExtent >= 0.0, 'The "crossAxisExtent" is negative.');
-      verify(viewportMainAxisExtent >= 0.0, 'The "viewportMainAxisExtent" is negative.');
-      verify(remainingPaintExtent >= 0.0, 'The "remainingPaintExtent" is negative.');
-      verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
-      return true;
-    });
+    // TODO(ianh): make these show pretty errors
+    assert(axis != null);
+    assert(growthDirection != null);
+    assert(scrollOffset != null);
+    assert(overlap != null);
+    assert(remainingPaintExtent != null);
+    assert(crossAxisExtent != null);
+    assert(viewportMainAxisExtent != null);
+    assert(scrollOffset >= 0.0);
+    assert(crossAxisExtent >= 0.0);
+    assert(viewportMainAxisExtent >= 0.0);
+    assert(remainingPaintExtent >= 0.0);
+    assert(isNormalized); // should be redundant with earlier checks
     return true;
   }
 
@@ -485,14 +459,8 @@ class SliverGeometry {
     double hitTestExtent,
     bool visible,
     this.hasVisualOverflow: false,
-    this.scrollOffsetCorrection,
-  }) : assert(scrollExtent != null),
-       assert(paintExtent != null),
-       assert(paintOrigin != null),
-       assert(maxPaintExtent != null),
-       assert(hasVisualOverflow != null),
-       assert(scrollOffsetCorrection != 0.0),
-       layoutExtent = layoutExtent ?? paintExtent,
+    this.scrollOffsetCorrection: 0.0
+  }) : layoutExtent = layoutExtent ?? paintExtent,
        hitTestExtent = hitTestExtent ?? paintExtent,
        visible = visible ?? paintExtent > 0.0;
 
@@ -576,46 +544,39 @@ class SliverGeometry {
   /// Asserts that this geometry is internally consistent.
   ///
   /// Does nothing if asserts are disabled. Always returns true.
-  bool debugAssertIsValid({
-    InformationCollector informationCollector,
-  }) {
+  bool get debugAssertIsValid {
+    assert(scrollExtent != null);
+    assert(scrollExtent >= 0.0);
+    assert(paintExtent != null);
+    assert(paintExtent >= 0.0);
+    assert(paintOrigin != null);
+    assert(layoutExtent != null);
+    assert(layoutExtent >= 0.0);
     assert(() {
-      void verify(bool check, String message) {
-        if (check)
-          return;
-        final StringBuffer information = new StringBuffer();
-        if (informationCollector != null)
-          informationCollector(information);
-        throw new FlutterError('$runtimeType is not valid: $message\n$information');
-      }
-      verify(scrollExtent != null, 'The "scrollExtent" is null.');
-      verify(scrollExtent >= 0.0, 'The "scrollExtent" is negative.');
-      verify(paintExtent != null, 'The "paintExtent" is null.');
-      verify(paintExtent >= 0.0, 'The "paintExtent" is negative.');
-      verify(paintOrigin != null, 'The "paintOrigin" is null.');
-      verify(layoutExtent != null, 'The "layoutExtent" is null.');
-      verify(layoutExtent >= 0.0, 'The "layoutExtent" is negative.');
       if (layoutExtent > paintExtent) {
-        verify(false,
-          'The "layoutExtent" exceeds the "paintExtent".\n' +
-          _debugCompareFloats('paintExtent', paintExtent, 'layoutExtent', layoutExtent),
+        throw new FlutterError(
+          'SliverGeometry has a layoutExtent that exceeds its paintExtent.\n' +
+          _debugCompareFloats('paintExtent', paintExtent, 'layoutExtent', layoutExtent)
         );
       }
-      verify(maxPaintExtent != null, 'The "maxPaintExtent" is null.');
+      return true;
+    });
+    assert(maxPaintExtent != null);
+    assert(() {
       if (maxPaintExtent < paintExtent) {
-        verify(false,
-          'The "maxPaintExtent" is less than the "paintExtent".\n' +
+        throw new FlutterError(
+          'SliverGeometry has a maxPaintExtent that is less than its paintExtent.\n' +
           _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent) +
           'By definition, a sliver can\'t paint more than the maximum that it can paint!'
         );
       }
-      verify(hitTestExtent != null, 'The "hitTestExtent" is null.');
-      verify(hitTestExtent >= 0.0, 'The "hitTestExtent" is negative.');
-      verify(visible != null, 'The "visible" property is null.');
-      verify(hasVisualOverflow != null, 'The "hasVisualOverflow" is null.');
-      verify(scrollOffsetCorrection != 0.0, 'The "scrollOffsetCorrection" is zero.');
       return true;
     });
+    assert(hitTestExtent != null);
+    assert(hitTestExtent >= 0.0);
+    assert(visible != null);
+    assert(hasVisualOverflow != null);
+    assert(scrollOffsetCorrection != null);
     return true;
   }
 
@@ -648,8 +609,7 @@ class SliverGeometry {
         buffer.write('hitTestExtent: ${hitTestExtent.toStringAsFixed(1)}, ');
       if (hasVisualOverflow)
         buffer.write('hasVisualOverflow: true, ');
-      if (scrollOffsetCorrection != null)
-        buffer.write('scrollOffsetCorrection: ${scrollOffsetCorrection.toStringAsFixed(1)}');
+      buffer.write('scrollOffsetCorrection: ${scrollOffsetCorrection.toStringAsFixed(1)}');
     buffer.write(')');
     return buffer.toString();
   }
@@ -666,9 +626,7 @@ class SliverHitTestEntry extends HitTestEntry {
   const SliverHitTestEntry(RenderSliver target, {
     @required this.mainAxisPosition,
     @required this.crossAxisPosition,
-  }) : assert(mainAxisPosition != null),
-       assert(crossAxisPosition != null),
-       super(target);
+  }) : super(target);
 
   @override
   RenderSliver get target => super.target;
@@ -764,141 +722,18 @@ String _debugCompareFloats(String labelA, double valueA, String labelB, double v
          'apply the min() or max() functions, or the clamp() method, to the $labelB? ';
 }
 
-/// Base class for the render objects that implement scroll effects in viewports.
-///
-/// A [RenderViewport] has a list of child slivers. Each sliver — literally a
-/// slice of the viewport's contents — is laid out in turn, covering the
-/// viewport in the process. (Every sliver is laid out each time, including
-/// those that have zero extent because they are "scrolled off" or are beyond
-/// the end of the viewport.)
-///
-/// Slivers participate in the _sliver protocol_, wherein during [layout] each
-/// sliver receives a [SliverConstraints] object and computes a corresponding
-/// [SliverGeometry] that describes where it fits in the viewport. This is
-/// analogous to the box protocol used by [RenderBox], which gets a
-/// [BoxConstraints] as input and computes a [Size].
-///
-/// Slivers have a leading edge, which is where the position described by
-/// [SliverConstraints.scrollOffset] for this sliver begins. Slivers have
-/// several dimensions, the primary of which is [SliverGeometry.paintExtent],
-/// which describes the extent of the sliver along the main axis, starting from
-/// the leading edge, reaching either the end of the viewport or the end of the
-/// sliver, whichever comes first.
-///
-/// Slivers can change dimensions based on the changing constraints in a
-/// non-linear fashion, to achieve various scroll effects. For example, the
-/// various [RenderSliverPersistentHeader] subclasses, on which [SliverAppBar]
-/// is based, achieve effects such as staying visible despite the scroll offset,
-/// or reappearing at different offsets based on the user's scroll direction
-/// ([SliverConstraints.userScrollDirection]).
-///
-/// ## Writing a RenderSliver subclass
-///
-/// Slivers can have sliver children, or children from another coordinate
-/// system, typically box children. (For details on the box protocol, see
-/// [RenderBox].) Slivers can also have different child models, typically having
-/// either one child, or a list of children.
-///
-/// ### Examples of slivers
-///
-/// A good example of a sliver with a single child that is also itself a sliver
-/// is [RenderSliverPadding], which indents its child. A sliver-to-sliver render
-/// object such as this must construct a [SliverConstraints] object for its
-/// child, then must take its child's [SliverGeometry] and use it to form its
-/// own [geometry].
-///
-/// The other common kind of one-child sliver is a sliver that has a single
-/// [RenderBox] child. An example of that would be [RenderSliverToBoxAdapter],
-/// which lays out a single box and sizes itself around the box. Such a sliver
-/// must use its [SliverConstraints] to create a [BoxConstraints] for the
-/// child, lay the child out (using the child's [layout] method), and then use
-/// the child's [RenderBox.size] to generate the sliver's [SliverGeometry].
-///
-/// The most common kind of sliver though is one with multiple children. The
-/// most straight-forward example of this is [RenderSliverList], which arranges
-/// its children one after the other in the main axis direction. As with the
-/// one-box-child sliver case, it uses its [constraints] to create a
-/// [BoxConstraints] for the children, and then it uses the aggregate
-/// information from all its children to generate its [geometry]. Unlike the
-/// one-child cases, however, it is judicious in which children it actually lays
-/// out (and later paints). If the scroll offset is 1000 pixels, and it
-/// previously determined that the first three children are each 400 pixels
-/// tall, then it will skip the first two and start the layout with its third
-/// child.
-///
-/// ### Layout
-///
-/// As they are laid out, slivers decide their [geometry], which includes their
-/// size ([SliverGeometry.paintExtent]) and the position of the next sliver
-/// ([SliverGeometry.layoutExtent]), as well as the position of each of their
-/// children, based on the input [constraints] from the viewport such as the
-/// scroll offset ([SliverConstraints.scrollOffset]).
-///
-/// For example, a sliver that just paints a box 100 pixels high would say its
-/// [SliverGeometry.paintExtent] was 100 pixels when the scroll offset was zero,
-/// but would say its [SliverGeometry.paintExtent] was 25 pixels when the scroll
-/// offset was 75 pixels, and would say it was zero when the scroll offset was
-/// 100 pixels or more. (This is assuming that
-/// [SliverConstraints.remainingPaintExtent] was more than 100 pixels.)
-///
-/// The various dimensions that are provided as input to this system are in the
-/// [constraints]. They are described in detail in the documentation for the
-/// [SliverConstraints] class.
-///
-/// The [performLayout] function must take these [constraints] and create a
-/// [SliverGeometry] object that it must then assign to the [geometry] property.
-/// The different dimensions of the geometry that can be configured are
-/// described in detail in the documentation for the [SliverGeometry] class.
-///
-/// ### Painting
-///
-/// In addition to implementing layout, a sliver must also implement painting.
-/// This is achieved by overriding the [paint] method.
-///
-/// The [paint] method is called with an [Offset] from the [Canvas] origin to
-/// the top-left corner of the sliver, _regardless of the axis direction_.
-///
-/// Subclasses should also override [applyPaintTransform] to provide the
-/// [Matrix4] describing the position of each child relative to the sliver.
-/// (This is used by, among other things, the accessibility layer, to determine
-/// the bounds of the child.)
-///
-/// ### Hit testing
-///
-/// To implement hit testing, either override the [hitTestSelf] and
-/// [hitTestChildren] methods, or, for more complex cases, instead override the
-/// [hitTest] method directly.
-///
-/// To actually react to pointer events, the [handleEvent] method may be
-/// implemented. By default it does nothing. (Typically gestures are handled by
-/// widgets in the box protocol, not by slivers directly.)
-///
-/// ### Helper methods
-///
-/// There are a number of methods that a sliver should implement which will make
-/// the other methods easier to implement. Each method listed below has detailed
-/// documentation. In addition, the [RenderSliverHelpers] class can be used to
-/// mix in some helpful methods.
-///
-/// #### childScrollOffset
-///
-/// If the subclass positions children anywhere other than at scroll offset
-/// zero, it should override [childScrollOffset]. For example,
-/// [RenderSliverList] and [RenderSliverGrid] override this method, but
-/// [RenderSliverToBoxAdapter] does not.
-///
-/// This is used by, among other things, [Scrollable.ensureVisible].
-///
-/// #### childMainAxisPosition
-///
-/// Subclasses should implement [childMainAxisPosition] to describe where their
-/// children are positioned.
-///
-/// #### childCrossAxisPosition
-///
-/// If the subclass positions children in the cross-axis at a position other
-/// than zero, then it should override [childCrossAxisPosition]. For example
-/// [RenderSliverGrid] overrides this method.
+// ///
+// /// ## Writing a RenderSliver subclass
+// ///
+// /// ### Painting
+// ///
+// /// The [paint] method is called with an [Offset] to the top-left corner of the
+// /// sliver, _regardless of the axis direction_.
+// ///
+// /// ### childScrollOffset
+// ///
+// /// If the subclass positions children anywhere other than at scroll offset
+// /// 0.0, you need to override [childScrollOffset]...
 abstract class RenderSliver extends RenderObject {
   // layout input
   @override
@@ -978,12 +813,7 @@ abstract class RenderSliver extends RenderObject {
 
   @override
   void debugAssertDoesMeetConstraints() {
-    assert(geometry.debugAssertIsValid(
-      informationCollector: (StringBuffer information) {
-        information.writeln('The RenderSliver that returned the offending geometry was:');
-        information.writeln('  ${toStringShallow('\n  ')}');
-      },
-    ));
+    assert(geometry.debugAssertIsValid);
     assert(() {
       if (geometry.paintExtent > constraints.remainingPaintExtent) {
         throw new FlutterError(
@@ -1049,12 +879,6 @@ abstract class RenderSliver extends RenderObject {
   /// vertical (i.e. the [SliverConstraints.axisDirection] is either
   /// [AxisDirection.right] or [AxisDirection.left]), then the
   /// `crossAxisPosition` is a distance from the top edge of the sliver.
-  ///
-  /// ## Implementing hit testing for slivers
-  ///
-  /// The most straight-forward way to implement hit testing for a new sliver
-  /// render object is to override its [hitTestSelf] and [hitTestChildren]
-  /// methods.
   bool hitTest(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     if (mainAxisPosition >= 0.0 && mainAxisPosition < geometry.hitTestExtent &&
         crossAxisPosition >= 0.0 && crossAxisPosition < constraints.crossAxisExtent) {
@@ -1110,8 +934,6 @@ abstract class RenderSliver extends RenderObject {
   /// sliver always paints the same amount but consumes a scroll offset extent
   /// that is proportional to the [SliverConstraints.scrollOffset], then this
   /// function's results will not be consistent.
-  // This could be a static method but isn't, because it would be less convenient
-  // to call it from subclasses if it was.
   double calculatePaintOffset(SliverConstraints constraints, { @required double from, @required double to }) {
     assert(from <= to);
     final double a = constraints.scrollOffset;
@@ -1133,6 +955,8 @@ abstract class RenderSliver extends RenderObject {
   /// [SliverConstraints.scrollOffset] and
   /// [SliverLogicalParentData.layoutOffset].
   ///
+  /// Calling this for a child that is not visible is not valid.
+  ///
   /// For children that are [RenderSliver]s, the leading edge of the _child_
   /// will be the leading _visible_ edge of the child, not the part of the child
   /// that would locally be a scroll offset 0.0. For children that are not
@@ -1140,12 +964,14 @@ abstract class RenderSliver extends RenderObject {
   /// to the edge of the box, since those boxes do not know how to handle being
   /// scrolled.
   ///
+  /// This is used by [RenderSliverHelpers.hitTestBoxChild]. If you do not use
+  /// the [RenderSliverHelpers] mixin and do not call this method yourself, you
+  /// do not need to implement this method.
+  ///
   /// This method differs from [childScrollOffset] in that
   /// [childMainAxisPosition] gives the distance from the leading _visible_ edge
-  /// of the sliver whereas [childScrollOffset] gives the distance from the
-  /// sliver's zero scroll offset.
-  ///
-  /// Calling this for a child that is not visible is not valid.
+  /// of the sliver whereas [childScrollOffset] gives the distance from sliver's
+  /// zero scroll offset.
   @protected
   double childMainAxisPosition(covariant RenderObject child) {
     assert(() {
@@ -1155,16 +981,13 @@ abstract class RenderSliver extends RenderObject {
   }
 
   /// Returns the distance along the cross axis from the zero of the cross axis
-  /// in this sliver's [paint] coordinate space to the nearest side of the given
-  /// child.
+  /// to the nearest side of the given child.
   ///
   /// For example, if the [constraints] describe this sliver as having an axis
   /// direction of [AxisDirection.down], then this is the distance from the left
   /// of the sliver to the left of the child. Similarly, if the [constraints]
   /// describe this sliver as having an axis direction of [AxisDirection.up],
-  /// then this is value is the same. If the axis direction is
-  /// [AxisDirection.left] or [AxisDirection.right], then it is the distance
-  /// from the top of the sliver to the top of the child.
+  /// then this is value is the same.
   ///
   /// Calling this for a child that is not visible is not valid.
   @protected
@@ -1193,8 +1016,6 @@ abstract class RenderSliver extends RenderObject {
   /// This returns a [Size] with dimensions relative to the leading edge of the
   /// sliver, specifically the same offset that is given to the [paint] method.
   /// This means that the dimensions may be negative.
-  ///
-  /// This is only valid after [layout] has completed.
   @protected
   Size getAbsoluteSizeRelativeToOrigin() {
     assert(geometry != null);
@@ -1316,7 +1137,6 @@ abstract class RenderSliver extends RenderObject {
     });
   }
 
-  // This override exists only to change the type of the second argument.
   @override
   void handleEvent(PointerEvent event, SliverHitTestEntry entry) { }
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
-import 'dart:developer' show Timeline; // to disambiguate reference in dartdocs below
 
 import 'package:flutter/foundation.dart';
 
@@ -19,12 +18,10 @@ import 'table.dart';
 /// Combined with [debugPrintBuildScope] or [debugPrintBeginFrameBanner], this
 /// allows you to distinguish builds triggered by the initial mounting of a
 /// widget tree (e.g. in a call to [runApp]) from the regular builds triggered
-/// by the pipeline.
+/// by the pipeline (see [WidgetsBinding.beginFrame].
 ///
 /// Combined with [debugPrintScheduleBuildForStacks], this lets you watch a
 /// widget's dirty/clean lifecycle.
-///
-/// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintRebuildDirtyWidgets = false;
 
 /// Log all calls to [BuildOwner.buildScope].
@@ -35,9 +32,8 @@ bool debugPrintRebuildDirtyWidgets = false;
 /// Combined with [debugPrintRebuildDirtyWidgets] or
 /// [debugPrintBeginFrameBanner], this allows you to distinguish builds
 /// triggered by the initial mounting of a widget tree (e.g. in a call to
-/// [runApp]) from the regular builds triggered by the pipeline.
-///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// [runApp]) from the regular builds triggered by the pipeline (see
+/// [WidgetsBinding.beginFrame].
 bool debugPrintBuildScope = false;
 
 /// Log the call stacks that mark widgets as needing to be rebuilt.
@@ -48,9 +44,7 @@ bool debugPrintBuildScope = false;
 ///
 /// To see when a widget is rebuilt, see [debugPrintRebuildDirtyWidgets].
 ///
-/// To see when the dirty list is flushed, see [debugPrintBuildScope].
-///
-/// To see when a frame is scheduled, see [debugPrintScheduleFrameStacks].
+/// To see when the dirty list is flushed, see [debugPrintBuildDirtyElements].
 bool debugPrintScheduleBuildForStacks = false;
 
 /// Log when widgets with global keys are deactivated and log when they are
@@ -136,7 +130,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// Used by [TableRowInkWell] to make sure that it is only used in an appropriate context.
 ///
 /// To invoke this function, use the following pattern, typically in the
-/// relevant Widget's build method:
+/// relevant Widget's [build] method:
 ///
 /// ```dart
 /// assert(debugCheckHasTable(context));
@@ -167,7 +161,7 @@ bool debugCheckHasTable(BuildContext context) {
 /// appropriate context.
 ///
 /// To invoke this function, use the following pattern, typically in the
-/// relevant Widget's build method:
+/// relevant Widget's [build] method:
 ///
 /// ```dart
 /// assert(debugCheckHasMediaQuery(context));

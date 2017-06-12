@@ -17,9 +17,10 @@ export 'dart:ui' show SemanticsAction;
 /// Interface for [RenderObject]s to implement when they want to support
 /// being tapped, etc.
 ///
-/// The handler will only be called for a particular flag if that flag is set
-/// (e.g. [performAction] will only be called with [SemanticsAction.tap] if
-/// [SemanticsNode.addAction] was called for [SemanticsAction.tap].)
+/// These handlers will only be called if the relevant flag is set
+/// (e.g. [handleSemanticTap]() will only be called if
+/// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown]() will only
+/// be called if [SemanticsNode.canBeScrolledVertically] is true, etc).
 abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   /// Called when the object implementing this interface receives a
   /// [SemanticsAction]. For example, if the user of an accessibility tool
@@ -29,13 +30,13 @@ abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   void performAction(SemanticsAction action);
 }
 
-/// Signature for functions returned by [RenderObject.semanticsAnnotator].
+/// The type of function returned by [RenderObject.getSemanticsAnnotators()].
 ///
 /// These callbacks are called with the [SemanticsNode] object that
 /// corresponds to the [RenderObject]. (One [SemanticsNode] can
 /// correspond to multiple [RenderObject] objects.)
 ///
-/// See [RenderObject.semanticsAnnotator] for details on the
+/// See [RenderObject.getSemanticsAnnotators()] for details on the
 /// contract that semantic annotators must follow.
 typedef void SemanticsAnnotator(SemanticsNode semantics);
 
@@ -73,7 +74,7 @@ class SemanticsData {
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;
 
-  /// A bit field of [SemanticsAction]s that apply to this node.
+  /// A bit field of [SemanticsActions] that apply to this node.
   final int actions;
 
   /// A textual description of this node.
@@ -184,7 +185,7 @@ class SemanticsNode extends AbstractNode {
   Matrix4 _transform;
   set transform(Matrix4 value) {
     if (!MatrixUtils.matrixEquals(_transform, value)) {
-      _transform = MatrixUtils.isIdentity(value) ? null : value;
+      _transform = value;
       _markDirty();
     }
   }
@@ -569,20 +570,7 @@ class SemanticsNode extends AbstractNode {
       buffer.write(' (${ owner != null && owner._dirtyNodes.contains(this) ? "dirty" : "STALE; owner=$owner" })');
     if (_shouldMergeAllDescendantsIntoThisNode)
       buffer.write(' (leaf merge)');
-    final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
-    if (offset != null) {
-      buffer.write('; ${rect.shift(offset)}');
-    } else {
-      final double scale = transform != null ? MatrixUtils.getAsScale(transform) : null;
-      if (scale != null) {
-        buffer.write('; $rect scaled by ${scale.toStringAsFixed(1)}x');
-      } else if (transform != null && !MatrixUtils.isIdentity(transform)) {
-        final String matrix = transform.toString().split('\n').take(4).map((String line) => line.substring(4)).join('; ');
-        buffer.write('; $rect with transform [$matrix]');
-      } else {
-        buffer.write('; $rect');
-      }
-    }
+    buffer.write('; $rect');
     if (wasAffectedByClip)
       buffer.write(' (clipped)');
     for (SemanticsAction action in SemanticsAction.values.values) {
@@ -603,27 +591,23 @@ class SemanticsNode extends AbstractNode {
 
   /// Returns a string representation of this node and its descendants.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    final StringBuffer result = new StringBuffer()
-      ..write(prefixLineOne)
-      ..write(this)
-      ..write('\n');
+    String result = '$prefixLineOne$this\n';
     if (_children != null && _children.isNotEmpty) {
       for (int index = 0; index < _children.length - 1; index += 1) {
         final SemanticsNode child = _children[index];
-        result.write(child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502"));
+        result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
       }
-      result.write(_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  "));
+      result += '${_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
     }
-    return result.toString();
+    return result;
   }
 }
 
 /// Owns [SemanticsNode] objects and notifies listeners of changes to the
 /// render tree semantics.
 ///
-/// To listen for semantic updates, call [PipelineOwner.ensureSemantics] to
-/// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
-/// necessary.
+/// To listen for semantic updates, call [PipelineOwner.addSemanticsListener],
+/// which will create a [SemanticsOwner] if necessary.
 class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = new Set<SemanticsNode>();
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
@@ -642,7 +626,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [Window.updateSemantics].
+  /// Update the semantics using [ui.window.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
@@ -761,7 +745,7 @@ class SemanticsOwner extends ChangeNotifier {
     return node._canPerformAction(action) ? node._actionHandler : null;
   }
 
-  /// Asks the [SemanticsNode] at the given position to perform the given action.
+  /// Asks the [SemanticsNode] with at the given position to perform the given action.
   ///
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.

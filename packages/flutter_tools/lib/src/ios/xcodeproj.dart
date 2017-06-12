@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
@@ -18,12 +16,7 @@ String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-void updateXcodeGeneratedProperties({
-  @required String projectPath,
-  @required BuildMode mode,
-  @required String target,
-  @required bool hasPlugins,
-}) {
+void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String target) {
   final StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -52,10 +45,6 @@ void updateXcodeGeneratedProperties({
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
   }
 
-  // Add dependency to CocoaPods' generated project only if plugns are used.
-  if (hasPlugins)
-    localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
-
   final File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
@@ -77,10 +66,11 @@ Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
 
 /// Substitutes variables in [str] with their values from the specified Xcode
 /// project and target.
-String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
+String substituteXcodeVariables(String str, String xcodeProjPath, String target) {
   final Iterable<Match> matches = _varExpr.allMatches(str);
   if (matches.isEmpty)
     return str;
 
-  return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]] ?? m[0]);
+  final Map<String, String> settings = getXcodeBuildSettings(xcodeProjPath, target);
+  return str.replaceAllMapped(_varExpr, (Match m) => settings[m[1]] ?? m[0]);
 }

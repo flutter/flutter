@@ -25,11 +25,6 @@ final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 /// Used by [RenderEditable.onSelectionChanged].
 typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, bool longPress);
 
-/// Signature for the callback that reports when the caret location changes.
-///
-/// Used by [RenderEditable.onCaretChanged].
-typedef void CaretChangedHandler(Rect caretRect);
-
 /// Represents a global screen coordinate of the point in a selection, and the
 /// text direction at that point.
 @immutable
@@ -58,32 +53,9 @@ class TextSelectionPoint {
   }
 }
 
-/// Displays some text in a scrollable container with a potentially blinking
-/// cursor and with gesture recognizers.
-///
-/// This is the renderer for an editable text field. It does not directly
-/// provide affordances for editing the text, but it does handle text selection
-/// and manipulation of the text cursor.
-///
-/// The [text] is displayed, scrolled by the given [offset], aligned according
-/// to [textAlign]. The [maxLines] property controls whether the text displays
-/// on one line or many. The [selection], if it is not collapsed, is painted in
-/// the [selectionColor]. If it _is_ collapsed, then it represents the cursor
-/// position. The cursor is shown while [showCursor] is true. It is painted in
-/// the [cursorColor].
-///
-/// If, when the render object paints, the caret is found to have changed
-/// location, [onCaretChanged] is called.
-///
-/// The user may interact with the render object by tapping or long-pressing.
-/// When the user does so, the selection is updated, and [onSelectionChanged] is
-/// called.
-///
-/// Keyboard handling, IME handling, scrolling, toggling the [showCursor] value
-/// to actually blink the cursor, and other features not mentioned above are the
-/// responsibility of higher layers and not handled by this object.
+/// A single line of editable text.
 class RenderEditable extends RenderBox {
-  /// Creates a render object that implements the visual aspects of a text field.
+  /// Creates a render object for a single line of editable text.
   RenderEditable({
     TextSpan text,
     TextAlign textAlign,
@@ -95,17 +67,16 @@ class RenderEditable extends RenderBox {
     TextSelection selection,
     @required ViewportOffset offset,
     this.onSelectionChanged,
-    this.onCaretChanged,
-  }) : assert(maxLines != null),
-       assert(textScaleFactor != null),
-       assert(offset != null),
-       _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
+  }) : _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
        _maxLines = maxLines,
        _selection = selection,
        _offset = offset {
     assert(_showCursor != null);
+    assert(maxLines != null);
+    assert(textScaleFactor != null);
+    assert(offset != null);
     assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
@@ -118,23 +89,6 @@ class RenderEditable extends RenderBox {
   /// Called when the selection changes.
   SelectionChangedHandler onSelectionChanged;
 
-  double _textLayoutLastWidth;
-
-  /// Called during the paint phase when the caret location changes.
-  CaretChangedHandler onCaretChanged;
-
-  Rect _lastCaretRect;
-
-  /// Marks the render object as needing to be laid out again and have its text
-  /// metrics recomputed.
-  ///
-  /// Implies [markNeedsLayout].
-  @protected
-  void markNeedsTextLayout() {
-    _textLayoutLastWidth = null;
-    markNeedsLayout();
-  }
-
   /// The text to display
   TextSpan get text => _textPainter.text;
   final TextPainter _textPainter;
@@ -142,7 +96,7 @@ class RenderEditable extends RenderBox {
     if (_textPainter.text == value)
       return;
     _textPainter.text = value;
-    markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// How the text should be aligned horizontally.
@@ -189,7 +143,7 @@ class RenderEditable extends RenderBox {
     if (_maxLines == value)
       return;
     _maxLines = value;
-    markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   /// The color to use when painting the selection.
@@ -212,7 +166,7 @@ class RenderEditable extends RenderBox {
     if (_textPainter.textScaleFactor == value)
       return;
     _textPainter.textScaleFactor = value;
-    markNeedsTextLayout();
+    markNeedsLayout();
   }
 
   List<ui.TextBox> _selectionRects;
@@ -307,8 +261,10 @@ class RenderEditable extends RenderBox {
   /// points might actually be co-located (e.g., because of a bidirectional
   /// selection that contains some text but whose ends meet in the middle).
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
-    assert(constraints != null);
-    _layoutText(constraints.maxWidth);
+    // TODO(mpcomplete): We should be more disciplined about when we dirty the
+    // layout state of the text painter so that we can know that the layout is
+    // clean at this point.
+    _layoutText();
 
     final Offset paintOffset = _paintOffset;
 
@@ -330,7 +286,6 @@ class RenderEditable extends RenderBox {
 
   /// Returns the position in the text for the given global coordinate.
   TextPosition getPositionForPoint(Offset globalPosition) {
-    _layoutText(constraints.maxWidth);
     globalPosition += -_paintOffset;
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
   }
@@ -338,25 +293,11 @@ class RenderEditable extends RenderBox {
   /// Returns the Rect in local coordinates for the caret at the given text
   /// position.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
-    _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
     return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, _preferredLineHeight).shift(caretOffset + _paintOffset);
   }
 
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    _layoutText(double.INFINITY);
-    return _textPainter.minIntrinsicWidth;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    _layoutText(double.INFINITY);
-    return _textPainter.maxIntrinsicWidth;
-  }
-
-  // This does not required the layout to be updated.
   double get _preferredLineHeight => _textPainter.preferredLineHeight;
 
   @override
@@ -391,7 +332,6 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleTap() {
-    _layoutText(constraints.maxWidth);
     assert(_lastTapDownPosition != null);
     final Offset globalPosition = _lastTapDownPosition;
     _lastTapDownPosition = null;
@@ -408,7 +348,6 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleLongPress() {
-    _layoutText(constraints.maxWidth);
     final Offset globalPosition = _longPressPosition;
     _longPressPosition = null;
     if (onSelectionChanged != null) {
@@ -418,7 +357,6 @@ class RenderEditable extends RenderBox {
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
     final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
@@ -428,22 +366,18 @@ class RenderEditable extends RenderBox {
 
   Rect _caretPrototype;
 
-  void _layoutText(double constraintWidth) {
-    assert(constraintWidth != null);
-    if (_textLayoutLastWidth == constraintWidth)
-      return;
+  void _layoutText() {
     final double caretMargin = _kCaretGap + _kCaretWidth;
-    final double availableWidth = math.max(0.0, constraintWidth - caretMargin);
+    final double availableWidth = math.max(0.0, constraints.maxWidth - caretMargin);
     final double maxWidth = _maxLines > 1 ? availableWidth : double.INFINITY;
     _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
-    _textLayoutLastWidth = constraintWidth;
   }
 
   @override
   void performLayout() {
-    _layoutText(constraints.maxWidth);
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
+    _layoutText();
     size = new Size(constraints.maxWidth, constraints.constrainHeight(
       _textPainter.height.clamp(_preferredLineHeight, _preferredLineHeight * _maxLines)
     ));
@@ -455,20 +389,12 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
     final Paint paint = new Paint()..color = _cursorColor;
-    final Rect caretRect = _caretPrototype.shift(caretOffset + effectiveOffset);
-    canvas.drawRect(caretRect, paint);
-    if (caretRect != _lastCaretRect) {
-      _lastCaretRect = caretRect;
-      if (onCaretChanged != null)
-        onCaretChanged(caretRect);
-    }
+    canvas.drawRect(_caretPrototype.shift(caretOffset + effectiveOffset), paint);
   }
 
   void _paintSelection(Canvas canvas, Offset effectiveOffset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
     assert(_selectionRects != null);
     final Paint paint = new Paint()..color = _selectionColor;
     for (ui.TextBox box in _selectionRects)
@@ -476,7 +402,6 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset effectiveOffset = offset + _paintOffset;
 
     if (_selection != null) {
@@ -493,7 +418,6 @@ class RenderEditable extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    _layoutText(constraints.maxWidth);
     if (_hasVisualOverflow)
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
     else

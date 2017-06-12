@@ -39,7 +39,7 @@ class _MountainViewPageTransition extends StatelessWidget {
   }
 }
 
-/// A modal route that replaces the entire screen with a platform-adaptive transition.
+/// A modal route that replaces the entire screen with a material design transition.
 ///
 /// For Android, the entrance transition for the page slides the page upwards and fades it
 /// in. The exit transition is the same, but in reverse.
@@ -61,9 +61,10 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     RouteSettings settings: const RouteSettings(),
     this.maintainState: true,
     this.fullscreenDialog: false,
-  }) : assert(builder != null),
-       assert(opaque),
-       super(settings: settings);
+  }) : super(settings: settings) {
+    assert(builder != null);
+    assert(opaque);
+  }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;

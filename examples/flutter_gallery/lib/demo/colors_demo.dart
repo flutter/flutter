@@ -42,15 +42,16 @@ final List<Palette> allPalettes = <Palette>[
 
 
 class ColorItem extends StatelessWidget {
-  const ColorItem({
+  ColorItem({
     Key key,
     @required this.index,
     @required this.color,
     this.prefix: '',
-  }) : assert(index != null),
-       assert(color != null),
-       assert(prefix != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(index != null);
+    assert(color != null);
+    assert(prefix != null);
+  }
 
   final int index;
   final Color color;
@@ -83,8 +84,9 @@ class PaletteTabView extends StatelessWidget {
   PaletteTabView({
     Key key,
     @required this.colors,
-  }) : assert(colors != null && colors.isValid),
-       super(key: key);
+  }) : super(key: key) {
+    assert(colors != null && colors.isValid);
+  }
 
   final Palette colors;
 
@@ -125,7 +127,7 @@ class ColorsDemo extends StatelessWidget {
       length: allPalettes.length,
       child: new Scaffold(
         appBar: new AppBar(
-          elevation: 0.0,
+          elevation: 0,
           title: const Text('Colors'),
           bottom: new TabBar(
             isScrollable: true,

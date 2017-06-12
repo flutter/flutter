@@ -308,7 +308,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _mode = _RefreshIndicatorMode.snap;
     _positionController
       .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
-      .then<Null>((Null value) {
+      .then((Null value) {
         if (mounted && _mode == _RefreshIndicatorMode.snap) {
           assert(widget.onRefresh != null);
           setState(() {
@@ -333,8 +333,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   /// Creating the [RefreshIndicator] with a [GlobalKey<RefreshIndicatorState>]
   /// makes it possible to refer to the [RefreshIndicatorState].
   ///
-  /// The future returned from this method completes when the
-  /// [RefreshIndicator.onRefresh] callback's future completes.
+  /// The future returned from this method completes when the [onRefresh]
+  /// callback's future completes.
   ///
   /// If you await the future returned by this function from a [State], you
   /// should check that the state is still [mounted] before calling [setState].

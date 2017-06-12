@@ -115,11 +115,12 @@ class AnimationController extends Animation<double>
     this.lowerBound: 0.0,
     this.upperBound: 1.0,
     @required TickerProvider vsync,
-  }) : assert(lowerBound != null),
-       assert(upperBound != null),
-       assert(upperBound >= lowerBound),
-       assert(vsync != null),
-       _direction = _AnimationDirection.forward {
+  }) {
+    assert(lowerBound != null);
+    assert(upperBound != null);
+    assert(upperBound >= lowerBound);
+    assert(vsync != null);
+    _direction = _AnimationDirection.forward;
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
@@ -145,11 +146,11 @@ class AnimationController extends Animation<double>
     this.duration,
     this.debugLabel,
     @required TickerProvider vsync,
-  }) : assert(value != null),
-       assert(vsync != null),
-       lowerBound = double.NEGATIVE_INFINITY,
-       upperBound = double.INFINITY,
-       _direction = _AnimationDirection.forward {
+  }) : lowerBound = double.NEGATIVE_INFINITY,
+       upperBound = double.INFINITY {
+    assert(value != null);
+    assert(vsync != null);
+    _direction = _AnimationDirection.forward;
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
   }
@@ -164,9 +165,9 @@ class AnimationController extends Animation<double>
   /// identifying animation controller instances in debug output.
   final String debugLabel;
 
-  /// Returns an [Animation<double>] for this animation controller, so that a
-  /// pointer to this object can be passed around without allowing users of that
-  /// pointer to mutate the [AnimationController] state.
+  /// Returns an [Animated<double>] for this animation controller,
+  /// so that a pointer to this object can be passed around without
+  /// allowing users of that pointer to mutate the AnimationController state.
   Animation<double> get view => this;
 
   /// The length of time this animation should last.
@@ -349,7 +350,7 @@ class AnimationController extends Animation<double>
   ///
   /// Defaults to repeating between the lower and upper bounds.
   ///
-  /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
+  /// Returns a [TickerFuture] that never completes. The [TickerFuture.onCancel] future
   /// completes with an error when the animation is stopped (e.g. with [stop]).
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been
@@ -495,10 +496,11 @@ class AnimationController extends Animation<double>
 
 class _InterpolationSimulation extends Simulation {
   _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve)
-    : assert(_begin != null),
-      assert(_end != null),
-      assert(duration != null && duration.inMicroseconds > 0),
-      _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND;
+    : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
+    assert(_durationInSeconds > 0.0);
+    assert(_begin != null);
+    assert(_end != null);
+  }
 
   final double _durationInSeconds;
   final double _begin;

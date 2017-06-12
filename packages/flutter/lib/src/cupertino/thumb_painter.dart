@@ -4,8 +4,6 @@
 
 import 'package:flutter/painting.dart';
 
-import 'colors.dart';
-
 final MaskFilter _kShadowMaskFilter = new MaskFilter.blur(BlurStyle.normal, BoxShadow.convertRadiusToSigma(1.0));
 
 /// Paints an iOS-style slider thumb.
@@ -14,7 +12,7 @@ final MaskFilter _kShadowMaskFilter = new MaskFilter.blur(BlurStyle.normal, BoxS
 class CupertinoThumbPainter {
   /// Creates an object that paints an iOS-style slider thumb.
   CupertinoThumbPainter({
-    this.color: CupertinoColors.white,
+    this.color: const Color(0xFFFFFFFF),
     this.shadowColor: const Color(0x2C000000),
   });
 

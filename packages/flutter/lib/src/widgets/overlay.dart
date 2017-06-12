@@ -44,7 +44,7 @@ import 'ticker_provider.dart';
 /// overlay entry is still built even if it is not visible, set [maintainState]
 /// to true. This is more expensive, so should be done with care. In particular,
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
-/// call [State.setState], the user's battery will be drained unnecessarily.
+/// call [setState], the user's battery will be drained unnecessarily.
 ///
 /// See also:
 ///
@@ -62,11 +62,11 @@ class OverlayEntry {
     @required this.builder,
     bool opaque: false,
     bool maintainState: false,
-  }) : assert(builder != null),
-       assert(opaque != null),
-       assert(maintainState != null),
-       _opaque = opaque,
-       _maintainState = maintainState;
+  }) : _opaque = opaque, _maintainState = maintainState {
+    assert(builder != null);
+    assert(opaque != null);
+    assert(maintainState != null);
+  }
 
   /// This entry will include the widget built by this builder in the overlay at
   /// the entry's position.
@@ -99,7 +99,7 @@ class OverlayEntry {
   /// overlay entry is still built even if it is not visible, set [maintainState]
   /// to true. This is more expensive, so should be done with care. In particular,
   /// if widgets in an overlay entry with [maintainState] set to true repeatedly
-  /// call [State.setState], the user's battery will be drained unnecessarily.
+  /// call [setState], the user's battery will be drained unnecessarily.
   ///
   /// This is used by the [Navigator] and [Route] objects to ensure that routes
   /// are kept around even when in the background, so that [Future]s promised
@@ -123,8 +123,8 @@ class OverlayEntry {
   /// This should only be called once.
   ///
   /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.drawFrame]), then the removal is
+  /// [SchedulerBinding.persistentCallbacks], i.e. during the build, layout, or
+  /// paint phases (see [WidgetsBinding.beginFrame]), then the removal is
   /// delayed until the post-frame callbacks phase. Otherwise the removal is
   /// done synchronously. This means that it is safe to call during builds, but
   /// also that if you do call this during a build, the UI will not update until
@@ -154,9 +154,9 @@ class OverlayEntry {
 }
 
 class _OverlayEntry extends StatefulWidget {
-  _OverlayEntry(this.entry)
-    : assert(entry != null),
-      super(key: entry._key);
+  _OverlayEntry(this.entry) : super(key: entry._key) {
+    assert(entry != null);
+  }
 
   final OverlayEntry entry;
 
@@ -215,8 +215,8 @@ class Overlay extends StatefulWidget {
   /// To add entries to an [Overlay] that is already in the tree, use
   /// [Overlay.of] to obtain the [OverlayState] (or assign a [GlobalKey] to the
   /// [Overlay] widget and obtain the [OverlayState] via
-  /// [GlobalKey.currentState]), and then use [OverlayState.insert] or
-  /// [OverlayState.insertAll].
+  /// [GlobalKey.currentState]), and then use [OverlayState.add] or
+  /// [OverlayState.addAll].
   ///
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
@@ -388,8 +388,10 @@ class _Theatre extends RenderObjectWidget {
   _Theatre({
     this.onstage,
     @required this.offstage,
-  }) : assert(offstage != null),
-       assert(!offstage.any((Widget child) => child == null));
+  }) {
+    assert(offstage != null);
+    assert(!offstage.any((Widget child) => child == null));
+  }
 
   final Stack onstage;
 
@@ -403,9 +405,9 @@ class _Theatre extends RenderObjectWidget {
 }
 
 class _TheatreElement extends RenderObjectElement {
-  _TheatreElement(_Theatre widget)
-    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.offstage)),
-      super(widget);
+  _TheatreElement(_Theatre widget) : super(widget) {
+    assert(!debugChildrenHaveDuplicateKeys(widget, widget.offstage));
+  }
 
   @override
   _Theatre get widget => super.widget;
@@ -558,31 +560,26 @@ class _RenderTheatre extends RenderBox
 
   @override
   String debugDescribeChildren(String prefix) {
-    final StringBuffer result = new StringBuffer();
+    String result = '';
     if (child != null)
-      result
-        ..write(prefix)
-        ..write(' \u2502\n')
-        ..write(child.toStringDeep('$prefix \u251C\u2500onstage: ', '$prefix \u254E'));
+      result += '$prefix \u2502\n${child.toStringDeep('$prefix \u251C\u2500onstage: ', '$prefix \u254E')}';
     if (firstChild != null) {
       RenderBox child = firstChild;
       int count = 1;
       while (child != lastChild) {
-        result.write(child.toStringDeep("$prefix \u254E\u254Coffstage $count: ", "$prefix \u254E"));
+        result += '${child.toStringDeep("$prefix \u254E\u254Coffstage $count: ", "$prefix \u254E")}';
         count += 1;
         final StackParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
       if (child != null) {
         assert(child == lastChild);
-        result.write(child.toStringDeep("$prefix \u2514\u254Coffstage $count: ", "$prefix  "));
+        result += '${child.toStringDeep("$prefix \u2514\u254Coffstage $count: ", "$prefix  ")}';
       }
     } else {
-      result
-        ..write(prefix)
-        ..write(' \u2514\u254Cno offstage children');
+      result += '$prefix \u2514\u254Cno offstage children';
     }
-    return result.toString();
+    return result;
   }
 
   @override

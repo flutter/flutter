@@ -24,11 +24,6 @@ class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
   void handleBeginFrame(Duration rawTimeStamp) {
     stopwatch.start();
     super.handleBeginFrame(rawTimeStamp);
-  }
-
-  @override
-  void handleDrawFrame() {
-    super.handleDrawFrame();
     stopwatch.stop();
   }
 }

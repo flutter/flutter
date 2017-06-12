@@ -93,10 +93,10 @@ class RenderPadding extends RenderShiftedBox {
   RenderPadding({
     @required EdgeInsets padding,
     RenderBox child
-  }) : assert(padding != null),
-       assert(padding.isNonNegative),
-       _padding = padding,
-       super(child);
+  }) : _padding = padding, super(child) {
+    assert(padding != null);
+    assert(padding.isNonNegative);
+  }
 
   /// The amount to pad the child in each dimension.
   EdgeInsets get padding => _padding;
@@ -192,9 +192,9 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   RenderAligningShiftedBox({
     FractionalOffset alignment: FractionalOffset.center,
     RenderBox child
-  }) : assert(alignment != null && alignment.dx != null && alignment.dy != null),
-       _alignment = alignment,
-       super(child);
+  }) : _alignment = alignment, super(child) {
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
 
   /// How to align the child.
   ///
@@ -259,11 +259,12 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     double widthFactor,
     double heightFactor,
     FractionalOffset alignment: FractionalOffset.center
-  }) : assert(widthFactor == null || widthFactor >= 0.0),
-       assert(heightFactor == null || heightFactor >= 0.0),
-       _widthFactor = widthFactor,
+  }) : _widthFactor = widthFactor,
        _heightFactor = heightFactor,
-       super(child: child, alignment: alignment);
+       super(child: child, alignment: alignment) {
+    assert(widthFactor == null || widthFactor >= 0.0);
+    assert(heightFactor == null || heightFactor >= 0.0);
+  }
 
   /// If non-null, sets its width to the child's width multipled by this factor.
   ///
@@ -498,9 +499,10 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
     RenderBox child,
     @required Size requestedSize,
     FractionalOffset alignment: FractionalOffset.center
-  }) : assert(requestedSize != null),
-       _requestedSize = requestedSize,
-       super(child: child, alignment: alignment);
+  }) : _requestedSize = requestedSize,
+       super(child: child, alignment: alignment) {
+    assert(requestedSize != null);
+  }
 
   /// The size this render box should attempt to be.
   Size get requestedSize => _requestedSize;
@@ -789,9 +791,9 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   RenderCustomSingleChildLayoutBox({
     RenderBox child,
     @required SingleChildLayoutDelegate delegate
-  }) : assert(delegate != null),
-       _delegate = delegate,
-       super(child);
+  }) : _delegate = delegate, super(child) {
+    assert(delegate != null);
+  }
 
   /// A delegate that controls this object's layout.
   SingleChildLayoutDelegate get delegate => _delegate;
@@ -899,11 +901,12 @@ class RenderBaseline extends RenderShiftedBox {
     RenderBox child,
     @required double baseline,
     @required TextBaseline baselineType
-  }) : assert(baseline != null),
-       assert(baselineType != null),
-       _baseline = baseline,
+  }) : _baseline = baseline,
        _baselineType = baselineType,
-       super(child);
+       super(child) {
+    assert(baseline != null);
+    assert(baselineType != null);
+  }
 
   /// The number of logical pixels from the top of this box at which to position
   /// the child's baseline.

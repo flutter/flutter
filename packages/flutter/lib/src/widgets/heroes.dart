@@ -91,7 +91,7 @@ class Hero extends StatefulWidget {
   final Object tag;
 
   /// The widget subtree that will "fly" from one route to another during a
-  /// [Navigator] push or pop transition.
+  /// [Naviator] push or pop transition.
   ///
   /// The appearance of this subtree should be similar to the appearance of
   /// the subtrees of any other heroes in the application with the same [tag].
@@ -180,7 +180,9 @@ class _HeroFlightManifest {
     @required this.fromHero,
     @required this.toHero,
     @required this.createRectTween,
-  }) : assert(fromHero.widget.tag == toHero.widget.tag);
+  }) {
+    assert(fromHero.widget.tag == toHero.widget.tag);
+  }
 
   final _HeroFlightType type;
   final OverlayState overlay;
@@ -396,7 +398,7 @@ class _HeroFlight {
 
 /// A [Navigator] observer that manages [Hero] transitions.
 ///
-/// An instance of [HeroController] should be used in [Navigator.observers].
+/// An instance of [HeroController] should be used as the [Navigator.observer].
 /// This is done automatically by [MaterialApp].
 class HeroController extends NavigatorObserver {
   /// Creates a hero controller with the given [RectTween] constructor if any.

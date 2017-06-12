@@ -11,6 +11,8 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 import 'colors.dart';
 import 'constants.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -33,6 +35,44 @@ enum BottomNavigationBarType {
   /// The location and size of the [BottomNavigationBar] [BottomNavigationBarItem]s
   /// animate larger when they are tapped.
   shifting,
+}
+
+/// An interactive destination label within [BottomNavigationBar] with an icon
+/// and title.
+///
+/// See also:
+///
+///  * [BottomNavigationBar]
+///  * <https://material.google.com/components/bottom-navigation.html>
+class BottomNavigationBarItem {
+  /// Creates an item that is used with [BottomNavigationBar.items].
+  ///
+  /// The arguments [icon] and [title] should not be null.
+  BottomNavigationBarItem({
+    @required this.icon,
+    @required this.title,
+    this.backgroundColor
+  }) {
+    assert(icon != null);
+    assert(title != null);
+  }
+
+  /// The icon of the item.
+  ///
+  /// Typically the icon is an [Icon] or an [IconImage] widget. If another type
+  /// of widget is provided then it should configure itself to match the current
+  /// [IconTheme] size and color.
+  final Widget icon;
+
+  /// The title of the item.
+  final Widget title;
+
+  /// The color of the background radial animation.
+  ///
+  /// If the navigation bar's type is [BottomNavigationBarType.shifting], then
+  /// the entire bar is flooded with the [backgroundColor] when this item is
+  /// tapped.
+  final Color backgroundColor;
 }
 
 /// A material widget displayed at the bottom of an app for selecting among a
@@ -69,13 +109,14 @@ class BottomNavigationBar extends StatefulWidget {
     this.type: BottomNavigationBarType.fixed,
     this.fixedColor,
     this.iconSize: 24.0,
-  }) : assert(items != null),
-       assert(items.length >= 2),
-       assert(0 <= currentIndex && currentIndex < items.length),
-       assert(type != null),
-       assert(type == BottomNavigationBarType.fixed || fixedColor == null),
-       assert(iconSize != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(items != null);
+    assert(items.length >= 2);
+    assert(0 <= currentIndex && currentIndex < items.length);
+    assert(type != null);
+    assert(type == BottomNavigationBarType.fixed || fixedColor == null);
+    assert(iconSize != null);
+  }
 
   /// The interactive items laid out within the bottom navigation bar.
   final List<BottomNavigationBarItem> items;
@@ -407,7 +448,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       children: <Widget>[
         new Positioned.fill(
           child: new Material( // Casts shadow.
-            elevation: 8.0,
+            elevation: 8,
             color: widget.type == BottomNavigationBarType.shifting ? _backgroundColor : null
           )
         ),
@@ -449,9 +490,11 @@ class _Circle {
     @required this.index,
     @required this.color,
     @required TickerProvider vsync,
-  }) : assert(state != null),
-       assert(index != null),
-       assert(color != null) {
+  }) {
+    assert(state != null);
+    assert(index != null);
+    assert(color != null);
+
     controller = new AnimationController(
       duration: kThemeAnimationDuration,
       vsync: vsync,

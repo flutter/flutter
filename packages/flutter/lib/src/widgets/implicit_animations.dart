@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -12,105 +11,50 @@ import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 
-/// An interpolation between two [BoxConstraints].
-///
-/// This class specializes the interpolation of [Tween<BoxConstraints>] to use
-/// [BoxConstraints.lerp].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
+/// An interpolation between two [BoxConstraint]s.
 class BoxConstraintsTween extends Tween<BoxConstraints> {
-  /// Creates a [BoxConstraints] tween.
+  /// Creates a box constraints tween.
   ///
-  /// The [begin] and [end] properties may be null; the null value
-  /// is treated as a tight constraint of zero size.
+  /// The [begin] and [end] arguments must not be null.
   BoxConstraintsTween({ BoxConstraints begin, BoxConstraints end }) : super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
   @override
   BoxConstraints lerp(double t) => BoxConstraints.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Decoration]s.
-///
-/// This class specializes the interpolation of [Tween<BoxConstraints>] to use
-/// [Decoration.lerp].
-///
-/// Typically this will only have useful results if the [begin] and [end]
-/// decorations have the same type; decorations of differing types generally do
-/// not have a useful animation defined, and will just jump to the [end]
-/// immediately.
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
 class DecorationTween extends Tween<Decoration> {
   /// Creates a decoration tween.
   ///
-  /// The [begin] and [end] properties may be null. If both are null, then the
-  /// result is always null. If [end] is not null, then its lerping logic is
-  /// used (via [Decoration.lerpTo]). Otherwise, [begin]'s lerping logic is used
-  /// (via [Decoration.lerpFrom]).
+  /// The [begin] and [end] arguments must not be null.
   DecorationTween({ Decoration begin, Decoration end }) : super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
   @override
   Decoration lerp(double t) => Decoration.lerp(begin, end, t);
 }
 
 /// An interpolation between two [EdgeInsets]s.
-///
-/// This class specializes the interpolation of [Tween<EdgeInsets>] to use
-/// [EdgeInsets.lerp].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
 class EdgeInsetsTween extends Tween<EdgeInsets> {
-  /// Creates an [EdgeInsets] tween.
+  /// Creates an edge insets tween.
   ///
-  /// The [begin] and [end] properties may be null; the null value
-  /// is treated as an [EdgeInsets] with no inset.
+  /// The [begin] and [end] arguments must not be null.
   EdgeInsetsTween({ EdgeInsets begin, EdgeInsets end }) : super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
   @override
   EdgeInsets lerp(double t) => EdgeInsets.lerp(begin, end, t);
 }
 
-/// An interpolation between two [BorderRadius]s.
-///
-/// This class specializes the interpolation of [Tween<BorderRadius>] to use
-/// [BorderRadius.lerp].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
-class BorderRadiusTween extends Tween<BorderRadius> {
-  /// Creates a [BorderRadius] tween.
-  ///
-  /// The [begin] and [end] properties may be null; the null value
-  /// is treated as a right angle (no radius).
-  BorderRadiusTween({ BorderRadius begin, BorderRadius end }) : super(begin: begin, end: end);
-
-  /// Returns the value this variable has at the given animation clock value.
-  @override
-  BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t);
-}
-
 /// An interpolation between two [Matrix4]s.
 ///
-/// This class specializes the interpolation of [Tween<Matrix4>] to be
-/// appropriate for transformation matrices.
-///
 /// Currently this class works only for translations.
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
 class Matrix4Tween extends Tween<Matrix4> {
   /// Creates a [Matrix4] tween.
   ///
-  /// The [begin] and [end] properties must be non-null before the tween is
-  /// first used, but the arguments can be null if the values are going to be
-  /// filled in later.
+  /// The [begin] and [end] arguments must not be null.
   Matrix4Tween({ Matrix4 begin, Matrix4 end }) : super(begin: begin, end: end);
 
   @override
   Matrix4 lerp(double t) {
-    assert(begin != null);
-    assert(end != null);
     // TODO(abarth): We should use [Matrix4.decompose] and animate the
     // decomposed parameters instead of just animating the translation.
     final Vector3 beginT = begin.getTranslation();
@@ -122,21 +66,13 @@ class Matrix4Tween extends Tween<Matrix4> {
 
 /// An interpolation between two [TextStyle]s.
 ///
-/// This class specializes the interpolation of [Tween<TextStyle>] to use
-/// [TextStyle.lerp].
-///
 /// This will not work well if the styles don't set the same fields.
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
 class TextStyleTween extends Tween<TextStyle> {
   /// Creates a text style tween.
   ///
-  /// The [begin] and [end] properties must be non-null before the tween is
-  /// first used, but the arguments can be null if the values are going to be
-  /// filled in later.
+  /// The [begin] and [end] arguments must not be null.
   TextStyleTween({ TextStyle begin, TextStyle end }) : super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
   @override
   TextStyle lerp(double t) => TextStyle.lerp(begin, end, t);
 }
@@ -295,10 +231,10 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// duration. Properties that are null are not animated.
 ///
 /// This class is useful for generating simple implicit transitions between
-/// different parameters to [Container] with its internal [AnimationController].
-/// For more complex animations, you'll likely want to use a subclass of
-/// [AnimatedWidget] such as the [DecoratedBoxTransition] or use your own
-/// [AnimationController].
+/// different parameters to [Container] with its internal
+/// [AnimationController]. For more complex animations, you'll likely want to
+/// use a subclass of [Transition] such as the [DecoratedBoxTransition] or use
+/// your own [AnimationController].
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
@@ -318,21 +254,22 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve: Curves.linear,
     @required Duration duration,
-  }) : assert(margin == null || margin.isNonNegative),
-       assert(padding == null || padding.isNonNegative),
-       assert(decoration == null || decoration.debugAssertIsValid()),
-       assert(constraints == null || constraints.debugAssertIsValid()),
-       assert(color == null || decoration == null,
-         'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
-       ),
-       decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+  }) : decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration) {
+    assert(margin == null || margin.isNonNegative);
+    assert(padding == null || padding.isNonNegative);
+    assert(decoration == null || decoration.debugAssertIsValid());
+    assert(constraints == null || constraints.debugAssertIsValid());
+    assert(color == null || decoration == null,
+      'Cannot provide both a color and a decoration\n'
+      'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
+    );
+  }
 
   /// The [child] contained by the container.
   ///
@@ -703,89 +640,6 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
     return new DefaultTextStyle(
       style: _style.evaluate(animation),
       child: widget.child
-    );
-  }
-}
-
-/// Animated version of [PhysicalModel].
-class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
-  /// Creates a widget that animates the properties of a [PhysicalModel].
-  ///
-  /// The [child], [shape], [borderRadius], [elevation], [color], [curve], and
-  /// [duration] arguments must not be null.
-  ///
-  /// Animating [color] is optional and is controlled by the [animateColor] flag.
-  const AnimatedPhysicalModel({
-    Key key,
-    @required this.child,
-    @required this.shape,
-    this.borderRadius: BorderRadius.zero,
-    @required this.elevation,
-    @required this.color,
-    this.animateColor: true,
-    Curve curve: Curves.linear,
-    @required Duration duration,
-  }) : assert(child != null),
-       assert(shape != null),
-       assert(borderRadius != null),
-       assert(elevation != null),
-       assert(color != null),
-       super(key: key, curve: curve, duration: duration);
-
-  /// The widget below this widget in the tree.
-  final Widget child;
-
-  /// The type of shape.
-  ///
-  /// This property is not animated.
-  final BoxShape shape;
-
-  /// The target border radius of the rounded corners for a rectangle shape.
-  final BorderRadius borderRadius;
-
-  /// The target z-coordinate at which to place this physical object.
-  final double elevation;
-
-  /// The target background color.
-  final Color color;
-
-  /// Whether the color should be animated.
-  final bool animateColor;
-
-  @override
-  _AnimatedPhysicalModelState createState() => new _AnimatedPhysicalModelState();
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('shape: $shape');
-    description.add('borderRadius: $borderRadius');
-    description.add('elevation: ${elevation.toStringAsFixed(1)}');
-    description.add('color: $color');
-    description.add('animateColor: $animateColor');
-  }
-}
-
-class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysicalModel> {
-  BorderRadiusTween _borderRadius;
-  Tween<double> _elevation;
-  ColorTween _color;
-
-  @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    _borderRadius = visitor(_borderRadius, widget.borderRadius, (dynamic value) => new BorderRadiusTween(begin: value));
-    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => new Tween<double>(begin: value));
-    _color = visitor(_color, widget.color, (dynamic value) => new ColorTween(begin: value));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new PhysicalModel(
-      child: widget.child,
-      shape: widget.shape,
-      borderRadius: _borderRadius.evaluate(animation),
-      elevation: _elevation.evaluate(animation),
-      color: widget.animateColor ? _color.evaluate(animation) : widget.color,
     );
   }
 }

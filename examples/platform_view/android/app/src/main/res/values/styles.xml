@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="MyButton" parent="Widget.AppCompat.Button.Borderless">
-        <item name="colorControlHighlight">@color/grey</item>
-        <item name="colorButtonNormal">@color/white</item>
-        <item name="android:textColor">@color/black</item>
-    </style>
-</resources>

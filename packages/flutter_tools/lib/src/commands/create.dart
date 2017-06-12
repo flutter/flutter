@@ -4,11 +4,8 @@
 
 import 'dart:async';
 
-import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
-
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
-import '../android/gradle.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
@@ -39,30 +36,12 @@ class CreateCommand extends FlutterCommand {
       'plugin',
       negatable: true,
       defaultsTo: false,
-      help: 'Generate a Flutter plugin project.'
+      help: 'Generate a new Flutter Plugin project.'
     );
     argParser.addOption(
       'description',
-      defaultsTo: 'A new Flutter project.',
-      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.'
-    );
-    argParser.addOption(
-      'org',
-      defaultsTo: 'com.yourcompany',
-      help: 'The organization responsible for your new Flutter project, in reverse domain name notation.\n'
-            'This string is used in Java package names and as prefix in the iOS bundle identifier.'
-    );
-    argParser.addOption(
-      'ios-language',
-      abbr: 'i',
-      defaultsTo: 'objc',
-      allowed: <String>['objc', 'swift'],
-    );
-    argParser.addOption(
-      'android-language',
-      abbr: 'a',
-      defaultsTo: 'java',
-      allowed: <String>['java', 'kotlin'],
+      defaultsTo: 'A new flutter project.',
+      help: 'The description to use for your new flutter project. This string ends up in the pubspec.yaml file.'
     );
   }
 
@@ -112,12 +91,8 @@ class CreateCommand extends FlutterCommand {
     final bool generatePlugin = argResults['plugin'];
 
     final Directory projectDir = fs.directory(argResults.rest.first);
-    String dirPath = fs.path.normalize(projectDir.absolute.path);
-    // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
-    if (fs.path.basename(dirPath) == '.')
-      dirPath = fs.path.dirname(dirPath);
-    final String organization = argResults['org'];
-    final String projectName = fs.path.basename(dirPath);
+    final String dirPath = fs.path.normalize(projectDir.absolute.path);
+    final String projectName = _normalizeProjectName(fs.path.basename(dirPath));
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
     if (error != null)
@@ -128,15 +103,9 @@ class CreateCommand extends FlutterCommand {
       throwToolExit(error);
 
     final Map<String, dynamic> templateContext = _templateContext(
-      organization: organization,
-      projectName: projectName,
-      projectDescription: argResults['description'],
-      dirPath: dirPath,
-      flutterRoot: flutterRoot,
-      renderDriverTest: argResults['with-driver-test'],
-      withPluginHook: generatePlugin,
-      androidLanguage: argResults['android-language'],
-      iosLanguage: argResults['ios-language'],
+        projectName, argResults['description'], dirPath,
+        flutterRoot, renderDriverTest: argResults['with-driver-test'],
+        withPluginHook: generatePlugin,
     );
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
@@ -152,15 +121,12 @@ class CreateCommand extends FlutterCommand {
       if (argResults['pub'])
         await pubGet(directory: dirPath);
 
-      if (android_sdk.androidSdk != null)
-        gradle.updateLocalProperties(projectPath: dirPath);
-
       appPath = fs.path.join(dirPath, 'example');
       final String androidPluginIdentifier = templateContext['androidIdentifier'];
       final String exampleProjectName = projectName + '_example';
       templateContext['projectName'] = exampleProjectName;
-      templateContext['androidIdentifier'] = _createAndroidIdentifier(organization, exampleProjectName);
-      templateContext['iosIdentifier'] = _createUTIIdentifier(organization, exampleProjectName);
+      templateContext['androidIdentifier'] = _createAndroidIdentifier(exampleProjectName);
+      templateContext['iosIdentifier'] = _createUTIIdentifier(exampleProjectName);
       templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
       templateContext['pluginProjectName'] = projectName;
       templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
@@ -175,20 +141,12 @@ class CreateCommand extends FlutterCommand {
     printStatus('Wrote $generatedCount files.');
     printStatus('');
 
-    updateXcodeGeneratedProperties(
-      projectPath: appPath,
-      mode: BuildMode.debug,
-      target: flx.defaultMainPath,
-      hasPlugins: generatePlugin,
-    );
+    updateXcodeGeneratedProperties(appPath, BuildMode.debug, flx.defaultMainPath);
 
     if (argResults['pub']) {
       await pubGet(directory: appPath);
       injectPlugins(directory: appPath);
     }
-
-    if (android_sdk.androidSdk != null)
-      gradle.updateLocalProperties(projectPath: appPath);
 
     printStatus('');
 
@@ -212,7 +170,6 @@ Your main program file is lib/main.dart in the $relativeAppPath directory.
 Your plugin code is in lib/$projectName.dart in the $relativePluginPath directory.
 
 Host platform code is in the android/ and ios/ directories under $relativePluginPath.
-To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-code.
 ''');
       }
     } else {
@@ -231,17 +188,9 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
     }
   }
 
-  Map<String, dynamic> _templateContext({
-    String organization,
-    String projectName,
-    String projectDescription,
-    String androidLanguage,
-    String iosLanguage,
-    String dirPath,
-    String flutterRoot,
-    bool renderDriverTest: false,
-    bool withPluginHook: false,
-  }) {
+  Map<String, dynamic> _templateContext(String projectName,
+      String projectDescription, String dirPath, String flutterRoot,
+      { bool renderDriverTest: false, bool withPluginHook: false }) {
     flutterRoot = fs.path.normalize(flutterRoot);
 
     final String pluginDartClass = _createPluginClassName(projectName);
@@ -250,10 +199,9 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
         : pluginDartClass + 'Plugin';
 
     return <String, dynamic>{
-      'organization': organization,
       'projectName': projectName,
-      'androidIdentifier': _createAndroidIdentifier(organization, projectName),
-      'iosIdentifier': _createUTIIdentifier(organization, projectName),
+      'androidIdentifier': _createAndroidIdentifier(projectName),
+      'iosIdentifier': _createUTIIdentifier(projectName),
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android.minApiLevel,
@@ -263,8 +211,6 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
-      'androidLanguage': androidLanguage,
-      'iosLanguage': iosLanguage,
     };
   }
 
@@ -274,8 +220,16 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
   }
 }
 
-String _createAndroidIdentifier(String organization, String name) {
-  return '$organization.$name'.replaceAll('_', '');
+String _normalizeProjectName(String name) {
+  name = name.replaceAll('-', '_').replaceAll(' ', '_');
+  // Strip any extension (like .dart).
+  if (name.contains('.'))
+    name = name.substring(0, name.indexOf('.'));
+  return name;
+}
+
+String _createAndroidIdentifier(String name) {
+  return 'com.yourcompany.$name';
 }
 
 String _createPluginClassName(String name) {
@@ -283,12 +237,12 @@ String _createPluginClassName(String name) {
   return camelizedName[0].toUpperCase() + camelizedName.substring(1);
 }
 
-String _createUTIIdentifier(String organization, String name) {
+String _createUTIIdentifier(String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
   final RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-\.\u0080-\uffff]+");
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
-  return '$organization.$name';
+  return 'com.yourcompany.$name';
 }
 
 final Set<String> _packageDependencies = new Set<String>.from(<String>[
@@ -311,12 +265,9 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
   'yaml'
 ]);
 
-/// Return null if the project name is legal. Return a validation message if
+/// Return `null` if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!package_names.isValidPackageName(projectName))
-    return '"$projectName" is not a valid Dart package name.\n\n${package_names.details}';
-
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
       "package dependencies.";
@@ -324,7 +275,7 @@ String _validateProjectName(String projectName) {
   return null;
 }
 
-/// Return null if the project directory is legal. Return a validation message
+/// Return `null` if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
 String _validateProjectDir(String dirPath, { String flutterRoot }) {
   if (fs.path.isWithin(flutterRoot, dirPath)) {

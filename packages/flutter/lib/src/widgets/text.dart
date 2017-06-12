@@ -68,7 +68,7 @@ class DefaultTextStyle extends InheritedWidget {
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
-          child: child,
+          child: child
         );
       },
     );
@@ -185,8 +185,7 @@ class Text extends StatelessWidget {
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   ///
-  /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
-  /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
+  /// Defaults to [MediaQuery.textScaleFactor].
   final double textScaleFactor;
 
   /// An optional maximum number of lines the text is allowed to take up.

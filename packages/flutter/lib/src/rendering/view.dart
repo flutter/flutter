@@ -54,14 +54,11 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Creates the root of the render tree.
   ///
   /// Typically created by the binding (e.g., [RendererBinding]).
-  ///
-  /// The [configuration] must not be null.
   RenderView({
     RenderBox child,
     this.timeForRotation: const Duration(microseconds: 83333),
-    @required ViewConfiguration configuration,
-  }) : assert(configuration != null),
-       _configuration = configuration {
+    ViewConfiguration configuration
+  }) : _configuration = configuration {
     this.child = child;
   }
 
@@ -79,42 +76,24 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// The constraints used for the root layout.
   ViewConfiguration get configuration => _configuration;
   ViewConfiguration _configuration;
-  /// The configuration is initially set by the `configuration` argument
-  /// passed to the constructor.
-  ///
-  /// Always call [scheduleInitialFrame] before changing the configuration.
   set configuration(ViewConfiguration value) {
-    assert(value != null);
     if (configuration == value)
       return;
     _configuration = value;
-    replaceRootLayer(_updateMatricesAndCreateNewRootLayer());
-    assert(_rootTransform != null);
+    final ContainerLayer rootLayer = new TransformLayer(transform: configuration.toMatrix());
+    rootLayer.attach(this);
+    replaceRootLayer(rootLayer);
     markNeedsLayout();
   }
 
   /// Bootstrap the rendering pipeline by scheduling the first frame.
-  ///
-  /// This should only be called once, and must be called before changing
-  /// [configuration]. It is typically called immediately after calling the
-  /// constructor.
   void scheduleInitialFrame() {
     assert(owner != null);
-    assert(_rootTransform == null);
     scheduleInitialLayout();
-    scheduleInitialPaint(_updateMatricesAndCreateNewRootLayer());
-    assert(_rootTransform != null);
-    owner.requestVisualUpdate();
-  }
-
-  Matrix4 _rootTransform;
-
-  Layer _updateMatricesAndCreateNewRootLayer() {
-    _rootTransform = configuration.toMatrix();
-    final ContainerLayer rootLayer = new TransformLayer(transform: _rootTransform);
+    final ContainerLayer rootLayer = new TransformLayer(transform: configuration.toMatrix());
     rootLayer.attach(this);
-    assert(_rootTransform != null);
-    return rootLayer;
+    scheduleInitialPaint(rootLayer);
+    owner.requestVisualUpdate();
   }
 
   // We never call layout() on this class, so this should never get
@@ -129,7 +108,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   @override
   void performLayout() {
-    assert(_rootTransform != null);
     if (configuration.orientation != _orientation) {
       if (_orientation != null && child != null)
         child.rotate(oldAngle: _orientation, newAngle: configuration.orientation, time: timeForRotation);
@@ -153,10 +131,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// of its descendants. Adds any render objects that contain the point to the
   /// given hit test result.
   ///
-  /// The [position] argument is in the coordinate system of the render view,
-  /// which is to say, in logical pixels. This is not necessarily the same
-  /// coordinate system as that expected by the root [Layer], which will
-  /// normally be in physical (device) pixels.
+  /// The [position] argument is in the coordinate system of the render view.
   bool hitTest(HitTestResult result, { Offset position }) {
     if (child != null)
       child.hitTest(result, position: position);
@@ -171,13 +146,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.paintChild(child, offset);
-  }
-
-  @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    assert(_rootTransform != null);
-    transform.multiply(_rootTransform);
-    super.applyPaintTransform(child, transform);
   }
 
   /// Uploads the composited layer tree to the engine.
@@ -205,10 +173,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   Rect get paintBounds => Offset.zero & size;
 
   @override
-  Rect get semanticBounds {
-    assert(_rootTransform != null);
-    return MatrixUtils.transformRect(_rootTransform, Offset.zero & size);
-  }
+  Rect get semanticBounds => Offset.zero & size;
 
   @override
   void debugFillDescription(List<String> description) {

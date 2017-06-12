@@ -4,7 +4,7 @@
 
 #import "AppDelegate.h"
 #import <Flutter/Flutter.h>
-#import "GeneratedPluginRegistrant.h"
+
 
 @implementation AppDelegate {
   FlutterEventSink _eventSink;
@@ -12,7 +12,6 @@
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  [GeneratedPluginRegistrant registerWithRegistry:self];
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
 
@@ -39,7 +38,7 @@
       eventChannelWithName:@"samples.flutter.io/charging"
            binaryMessenger:controller];
   [chargingChannel setStreamHandler:self];
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  return YES;
 }
 
 - (int)getBatteryLevel {

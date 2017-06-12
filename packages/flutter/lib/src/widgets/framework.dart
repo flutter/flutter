@@ -22,13 +22,11 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// A [Key] is an identifier for [Widget]s and [Element]s.
 ///
 /// A new widget will only be used to update an existing element if its key is
-/// the same as the key of the current widget associated with the element.
+/// the same as the key of the current widget associted with the element.
 ///
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
-///
-/// See also the discussion at [Widget.key].
 @immutable
 abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
@@ -47,8 +45,6 @@ abstract class Key {
 ///
 /// Keys must be unique amongst the [Element]s with the same parent. By
 /// contrast, [GlobalKey]s must be unique across the entire app.
-///
-/// See also the discussion at [Widget.key].
 abstract class LocalKey extends Key {
   /// Default constructor, used by subclasses.
   const LocalKey() : super._();
@@ -64,8 +60,6 @@ abstract class LocalKey extends Key {
 /// private, this results in a value key type that cannot collide with keys from
 /// other sources, which could be useful, for example, if the keys are being
 /// used as fallbacks in the same scope as keys supplied from another widget.
-///
-/// See also the discussion at [Widget.key].
 class ValueKey<T> extends LocalKey {
   /// Creates a key that delgates its [operator==] to the given value.
   const ValueKey(this.value);
@@ -110,8 +104,6 @@ class UniqueKey extends LocalKey {
 ///
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
-///
-/// See also the discussions at [Key] and [Widget.key].
 class ObjectKey extends LocalKey {
   /// Creates a key that uses [identical] on [value] for its [operator==].
   const ObjectKey(this.value);
@@ -156,8 +148,6 @@ class ObjectKey extends LocalKey {
 ///
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
-///
-/// See also the discussion at [Widget.key].
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for
@@ -313,19 +303,19 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
   /// The label does not affect the key's identity.
-  LabeledGlobalKey(this._debugLabel) : super.constructor();
+  const LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   // Used for forwarding the constructor from GlobalKey.
-  LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
+  const LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
 
   final String _debugLabel;
 
   @override
   String toString() {
-    final String label = _debugLabel != null ? ' $_debugLabel' : '';
+    final String tag = _debugLabel != null ? ' $_debugLabel' : '#$hashCode';
     if (runtimeType == LabeledGlobalKey)
-      return '[GlobalKey#$hashCode$label]';
-    return '[$runtimeType#$hashCode$label]';
+      return '[GlobalKey$tag]';
+    return '[$runtimeType$tag]';
   }
 }
 
@@ -416,17 +406,12 @@ abstract class Widget {
   /// widget is inflated into an element, and the new element is inserted into the
   /// tree.
   ///
-  /// In addition, using a [GlobalKey] as the widget's [key] allows the element
-  /// to be moved around the tree (changing parent) without losing state. When a
-  /// new widget is found (its key and type do not match a previous widget in
-  /// the same location), but there was a widget with that same global key
-  /// elsewhere in the tree in the previous frame, then that widget's element is
-  /// moved to the new location.
-  ///
-  /// Generally, a widget that is the only child of another widget does not need
-  /// an explicit key.
-  ///
-  /// See also the discussions at [Key] and [GlobalKey].
+  /// Using a [GlobalKey] as the widget's [key] allows the element to be moved
+  /// around the tree (changing parent) without losing state. When a new widget
+  /// is found (its key and type do not match a previous widget in the same
+  /// location), but there was a widget with that same global key elsewhere in
+  /// the tree in the previous frame, then that widget's element is moved to the
+  /// new location.
   final Key key;
 
   /// Inflates this configuration to a concrete instance.
@@ -497,49 +482,6 @@ abstract class Widget {
 /// is inflated. For compositions that can change dynamically, e.g. due to
 /// having an internal clock-driven state, or depending on some system state,
 /// consider using [StatefulWidget].
-///
-/// ## Sample code
-///
-/// The following is a skeleton of a stateless widget subclass called `GreenFrog`:
-///
-/// ```dart
-/// class GreenFrog extends StatelessWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return new Container(color: const Color(0xFF2DBD3A));
-///   }
-/// }
-/// ```
-///
-/// Normally widgets have more constructor arguments, each of which corresponds
-/// to a `final` property. The next example shows the more generic widget `Frog`
-/// which can be given a color and a child:
-///
-/// ```dart
-/// class Frog extends StatelessWidget {
-///   const Frog({
-///     Key key,
-///     this.color: const Color(0xFF2DBD3A),
-///     this.child,
-///   }) : super(key: key);
-///
-///   final Color color;
-///
-///   final Widget child;
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return new Container(color: color, child: child);
-///   }
-/// }
-/// ```
-///
-/// By convention, widget constructors only use named arguments. Named arguments
-/// can be marked as required using [@required]. Also by convention, the first
-/// argument is [key], and the last argument is `child`, `children`, or the
-/// equivalent.
 ///
 /// See also:
 ///
@@ -640,72 +582,6 @@ abstract class StatelessWidget extends Widget {
 /// (instead of being recreated) in the new location. However, in order to be
 /// eligible for grafting, the widget might be inserted into the new location in
 /// the same animation frame in which it was removed from the old location.
-///
-/// ## Sample code
-///
-/// The following is a skeleton of a stateful widget subclass called `GreenFrog`:
-///
-/// ```dart
-/// class GreenFrog extends StatefulWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
-///
-///   @override
-///   _GreenFrogState createState() => new _GreenFrogState();
-/// }
-///
-/// class _GreenFrogState extends State<GreenFrog> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return new Container(color: const Color(0xFF2DBD3A));
-///   }
-/// }
-/// ```
-///
-/// In this example. the [State] has no actual state. State is normally
-/// represented as private member fields. Also, normally widgets have more
-/// constructor arguments, each of which corresponds to a `final` property.
-///
-/// The next example shows the more generic widget `Frog` which can be given a
-/// color and a child, and which has some internal state with a method that
-/// can be called to mutate it:
-///
-/// ```dart
-/// class Frog extends StatefulWidget {
-///   const Frog({
-///     Key key,
-///     this.color: const Color(0xFF2DBD3A),
-///     this.child,
-///   }) : super(key: key);
-///
-///   final Color color;
-///
-///   final Widget child;
-///
-///   _FrogState createState() => new _FrogState();
-/// }
-///
-/// class _FrogState extends State<Frog> {
-///   double _size = 1.0;
-///
-///   void grow() {
-///     setState(() { _size += 0.1; });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return new Container(
-///       color: widget.color,
-///       transform: new Matrix4.diagonalValues(_size, _size, 1.0),
-///       child: widget.child,
-///     );
-///   }
-/// }
-/// ```
-///
-/// By convention, widget constructors only use named arguments. Named arguments
-/// can be marked as required using [@required]. Also by convention, the first
-/// argument is [key], and the last argument is `child`, `children`, or the
-/// equivalent.
 ///
 /// See also:
 ///
@@ -812,16 +688,16 @@ typedef void StateSetter(VoidCallback fn);
 ///    subtree.
 ///  * During this time, a parent widget might rebuild and request that this
 ///    location in the tree update to display a new widget with the same
-///    [runtimeType] and [Widget.key]. When this happens, the framework will
-///    update the [widget] property to refer to the new widget and then call the
-///    [didUpdateWidget] method with the previous widget as an argument. [State]
-///    objects should override [didUpdateWidget] to respond to changes in their
-///    associated wiget (e.g., to start implicit animations). The framework
-///    always calls [build] after calling [didUpdateWidget], which means any
-///    calls to [setState] in [didUpdateWidget] are redundant.
+///    [runtimeType] and [key]. When this happens, the framework will update the
+///    [widget] property to refer to the new widget and then call the
+///    [didUpdateWidget] method with the previous widget as an argument.
+///    [State] objects should override [didUpdateWidget] to respond to changes
+///    in their associated wiget (e.g., to start implicit animations).
+///    The framework always calls [build] after calling [didUpdateWidget], which
+///    means any calls to [setState] in [didUpdateWidget] are redundant.
 ///  * If the subtree containing the [State] object is removed from the tree
 ///    (e.g., because the parent built a widget with a different [runtimeType]
-///    or [Widget.key]), the framework calls the [deactivate] method. Subclasses
+///    or [key]), the framework calls the [deactivate] method. Subclasses
 ///    should override this method to clean up any links between this object
 ///    and other elements in the tree (e.g. if you have provided an ancestor
 ///    with a pointer to a descendant's [RenderObject]).
@@ -845,13 +721,12 @@ typedef void StateSetter(VoidCallback fn);
 ///
 /// See also:
 ///
-///  * [StatefulWidget], where the current configuration of a [State] is hosted,
-///    and whose documentation has sample code for [State].
+///  * [StatefulWidget], where the current configuration of a [State] is hosted
+///    (see [Widget]).
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 ///  * [InheritedWidget], for widgets that introduce ambient state that can
 ///    be read by descendant widgets.
-///  * [Widget], for an overview of widgets in general.
 @optionalTypeArgs
 abstract class State<T extends StatefulWidget> {
   /// The current configuration.
@@ -859,10 +734,9 @@ abstract class State<T extends StatefulWidget> {
   /// A [State] object's configuration is the corresponding [StatefulWidget]
   /// instance. This property is initialized by the framework before calling
   /// [initState]. If the parent updates this location in the tree to a new
-  /// widget with the same [runtimeType] and [Widget.key] as the current
-  /// configuration, the framework will update this property to refer to the new
-  /// widget and then call [didUpdateWidget], passing the old configuration as
-  /// an argument.
+  /// widget with the same [runtimeType] and [key] as the current configuration,
+  /// the framework will update this property to refer to the new widget and
+  /// then call [didUpdateWidget], passing the old configuration as an argument.
   T get widget => _widget;
   T _widget;
 
@@ -932,10 +806,10 @@ abstract class State<T extends StatefulWidget> {
   /// Called whenever the widget configuration changes.
   ///
   /// If the parent widget rebuilds and request that this location in the tree
-  /// update to display a new widget with the same [runtimeType] and
-  /// [Widget.key], the framework will update the [widget] property of this
-  /// [State] object to refer to the new widget and then call the this method
-  /// with the previous widget as an argument.
+  /// update to display a new widget with the same [runtimeType] and [key], the
+  /// framework will update the [widget] property of this [State] object to
+  /// refer to the new widget and then call the this method with the previous
+  /// widget as an argument.
   ///
   /// Override this method to respond to changes in the [widget] widget (e.g.,
   /// to start implicit animations).
@@ -1011,8 +885,7 @@ abstract class State<T extends StatefulWidget> {
   ///   setState(() {
   ///     _counter++;
   ///   });
-  ///   Directory directory = await getApplicationDocumentsDirectory();
-  ///   final String dirName = directory.path;
+  ///   final String dir = await PathProvider.getApplicationDocumentsDirectory();
   ///   await new File('$dir/counter.txt').writeAsString('$_counter');
   ///   return null;
   /// }
@@ -1265,24 +1138,10 @@ abstract class State<T extends StatefulWidget> {
   }
 }
 
-/// A widget that has a child widget provided to it, instead of building a new
-/// widget.
+/// A widget that has exactly one child widget.
 ///
 /// Useful as a base class for other widgets, such as [InheritedWidget] and
 /// [ParentDataWidget].
-///
-/// See also:
-///
-///  * [InheritedWidget], for widgets that introduce ambient state that can
-///    be read by descendant widgets.
-///  * [ParentDataWidget], for widgets that populate the
-///    [RenderObject.parentData] slot of their child's [RenderObject] to
-///    configure the parent widget's layout.
-///  * [StatefulWidget] and [State], for widgets that can build differently
-///    several times over their lifetime.
-///  * [StatelessWidget], for widgets that always build the same way given a
-///    particular configuration and ambient state.
-///  * [Widget], for an overview of widgets in general.
 abstract class ProxyWidget extends Widget {
   /// Creates a widget that has exactly one child widget.
   const ProxyWidget({ Key key, @required this.child }) : super(key: key);
@@ -1301,46 +1160,6 @@ abstract class ProxyWidget extends Widget {
 /// A [ParentDataWidget] is specific to a particular kind of [RenderObject], and
 /// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
 /// [ParentDataWidget] type argument.
-///
-/// ## Sample code
-///
-/// This example shows how you would build a [ParentDataWidget] to configure a
-/// `FrogJar` widget's children by specifying a [Size] for each one.
-///
-/// ```dart
-/// class FrogSize extends ParentDataWidget<FrogJar> {
-///   Pond({
-///     Key key,
-///     @required this.size,
-///     @required Widget child,
-///   }) : assert(child != null),
-///        assert(size != null),
-///        super(key: key, child: child);
-///
-///   final Size size;
-///
-///   @override
-///   void applyParentData(RenderObject renderObject) {
-///     final FrogJarParentData parentData = renderObject.parentData;
-///     if (parentData.size != size) {
-///       parentData.size = size;
-///       final RenderFrogJar targetParent = renderObject.parent;
-///       targetParent.markNeedsLayout();
-///     }
-///   }
-/// }
-/// ```
-///
-/// See also:
-///
-///  * [RenderObject], the superclass for layout algorithms.
-///  * [RenderObject.parentData], the slot that this class configures.
-///  * [ParentData], the superclass of the data that will be placed in
-///    [RenderObject.parentData] slots.
-///  * [RenderObjectWidget], the class for widgets that wrap [RenderObject]s.
-///    The `T` type parameter for [ParentDataWidget] is a [RenderObjectWidget].
-///  * [StatefulWidget] and [State], for widgets that can build differently
-///    several times over their lifetime.
 abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1418,56 +1237,6 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// Inherited widgets, when referenced in this way, will cause the consumer to
 /// rebuild when the inherited widget itself changes state.
-///
-/// ## Sample code
-///
-/// The following is a skeleton of an inherited widget called `FrogColor`:
-///
-/// ```dart
-/// class FrogColor extends InheritedWidget {
-///   const FrogColor(
-///     Key key,
-///     @required this.color,
-///     @required Widget child,
-///   }) : assert(color != null),
-///        assert(child != null),
-///        super(key: key, child: child);
-///
-///   final Color color;
-///
-///   static FrogColor of(BuildContext context) {
-///     return context.inheritFromWidgetOfExactType(FrogColor);
-///   }
-///
-///   @override
-///   bool updateShouldNotify(FrogColor old) => color != old.color;
-/// }
-/// ```
-///
-/// The convention is to provide a static method `of` on the [InheritedWidget]
-/// which does the call to [BuildContext.inheritFromWidgetOfExactType]. This
-/// allows the class to define its own fallback logic in the case of there not
-/// being a widget in scope. In the example above, the value returned will be
-/// null in that case, but it could also have defaulted to a value.
-///
-/// Sometimes, the `of` method returns the data rather than the inherited
-/// widget; for example, in this case it could have returned a [Color] instead
-/// of the `FrogColor` widget.
-///
-/// Occasionally, the inherited widget is an implementation detail of another
-/// class, and is therefore private. The `of` method in that case is typically
-/// put on the public class instead. For example, [Theme] is implemented as a
-/// [StatelessWidget] that builds a private inherited widget; [Theme.of] looks
-/// for that inherited widget using [BuildContext.inheritFromWidgetOfExactType]
-/// and then returns the [ThemeData].
-///
-/// See also:
-///
-///  * [StatefulWidget] and [State], for widgets that can build differently
-///    several times over their lifetime.
-///  * [StatelessWidget], for widgets that always build the same way given a
-///    particular configuration and ambient state.
-///  * [Widget], for an overview of widgets in general.
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1573,8 +1342,9 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// objects.
   MultiChildRenderObjectWidget({ Key key, this.children: const <Widget>[] })
     : assert(children != null),
-      assert(!children.any((Widget child) => child == null)), // https://github.com/dart-lang/sdk/issues/29276
-      super(key: key);
+      super(key: key) {
+    assert(!children.any((Widget child) => child == null)); // https://github.com/dart-lang/sdk/issues/29276
+  }
 
   /// The widgets below this widget in the tree.
   ///
@@ -1747,8 +1517,8 @@ abstract class BuildContext {
   /// [RenderObjectWidget].
   ///
   /// This method will only return a valid result after the build phase is
-  /// complete. It is therefore not valid to call this from a build method.
-  /// It should only be called from interaction event handlers (e.g.
+  /// complete. It is therefore not valid to call this from the [build] function
+  /// itself. It should only be called from interaction event handlers (e.g.
   /// gesture callbacks) or layout or paint callbacks.
   ///
   /// If the render object is a [RenderBox], which is the common case, then the
@@ -1757,8 +1527,8 @@ abstract class BuildContext {
   /// from paint callbacks or interaction event handlers (e.g. gesture
   /// callbacks).
   ///
-  /// For details on the different phases of a frame, see the discussion at
-  /// [WidgetsBinding.drawFrame].
+  /// For details on the different phases of a frame, see
+  /// [WidgetsBinding.beginFrame].
   ///
   /// Calling this method is theoretically relatively expensive (O(N) in the
   /// depth of the tree), but in practice is usually cheap because the tree
@@ -1769,12 +1539,12 @@ abstract class BuildContext {
   /// The size of the [RenderBox] returned by [findRenderObject].
   ///
   /// This getter will only return a valid result after the layout phase is
-  /// complete. It is therefore not valid to call this from a build method.
-  /// It should only be called from paint callbacks or interaction event
+  /// complete. It is therefore not valid to call this from the [build] function
+  /// itself. It should only be called from paint callbacks or interaction event
   /// handlers (e.g. gesture callbacks).
   ///
-  /// For details on the different phases of a frame, see the discussion at
-  /// [WidgetsBinding.drawFrame].
+  /// For details on the different phases of a frame, see
+  /// [WidgetsBinding.beginFrame].
   ///
   /// This getter will only return a valid result if [findRenderObject] actually
   /// returns a [RenderBox]. If [findRenderObject] returns a render object that
@@ -1980,7 +1750,7 @@ class BuildOwner {
   bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
-  /// when [WidgetsBinding.drawFrame] calls [buildScope].
+  /// when [WidgetsBinding.beginFrame] calls [buildScope].
   void scheduleBuildFor(Element element) {
     assert(element != null);
     assert(element.owner == this);
@@ -2062,8 +1832,8 @@ class BuildOwner {
   /// `callback`, if any. Then, builds all the elements that were marked as
   /// dirty using [scheduleBuildFor], in depth order.
   ///
-  /// This mechanism prevents build methods from transitively requiring other
-  /// build methods to run, potentially causing infinite loops.
+  /// This mechanism prevents build functions from transitively requiring other
+  /// build functions to run, potentially causing infinite loops.
   ///
   /// The dirty list is processed after `callback` returns, building all the
   /// elements that were marked as dirty using [scheduleBuildFor], in depth
@@ -2073,16 +1843,11 @@ class BuildOwner {
   ///
   /// To flush the current dirty list without performing any other work, this
   /// function can be called with no callback. This is what the framework does
-  /// each frame, in [WidgetsBinding.drawFrame].
+  /// each frame, in [WidgetsBinding.beginFrame].
   ///
   /// Only one [buildScope] can be active at a time.
   ///
   /// A [buildScope] implies a [lockState] scope as well.
-  ///
-  /// To print a console message every time this method is called, set
-  /// [debugPrintBuildScope] to true. This is useful when debugging problems
-  /// involving widgets not getting marked dirty, or getting marked dirty too
-  /// often.
   void buildScope(Element context, [VoidCallback callback]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
@@ -2205,7 +1970,7 @@ class BuildOwner {
   /// Complete the element build pass by unmounting any elements that are no
   /// longer active.
   ///
-  /// This is called by [WidgetsBinding.drawFrame].
+  /// This is called by [WidgetsBinding.beginFrame].
   ///
   /// In debug mode, this also runs some sanity checks, for example checking for
   /// duplicate global keys.
@@ -2374,9 +2139,9 @@ abstract class Element implements BuildContext {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
-  Element(Widget widget)
-    : assert(widget != null),
-      _widget = widget;
+  Element(Widget widget) : _widget = widget {
+    assert(widget != null);
+  }
 
   Element _parent;
 
@@ -3164,19 +2929,16 @@ abstract class Element implements BuildContext {
 
   /// A detailed, textual description of this element, includings its children.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    final StringBuffer result = new StringBuffer()
-      ..write(prefixLineOne)
-      ..write(this)
-      ..write('\n');
+    String result = '$prefixLineOne$this\n';
     final List<Element> children = <Element>[];
     visitChildren(children.add);
     if (children.isNotEmpty) {
       final Element last = children.removeLast();
       for (Element child in children)
-        result.write(child.toStringDeep("$prefixOtherLines\u251C", "$prefixOtherLines\u2502"));
-      result.write(last.toStringDeep("$prefixOtherLines\u2514", "$prefixOtherLines "));
+        result += '${child.toStringDeep("$prefixOtherLines\u251C", "$prefixOtherLines\u2502")}';
+      result += '${last.toStringDeep("$prefixOtherLines\u2514", "$prefixOtherLines ")}';
     }
-    return result.toString();
+    return result;
   }
 
   /// Returns true if the element has been marked as needing rebuilding.
@@ -3296,7 +3058,7 @@ abstract class Element implements BuildContext {
 
 /// A widget that renders an exception's message.
 ///
-/// This widget is used when a build method fails, to help with determining
+/// This widget is used when a build function fails, to help with determining
 /// where the problem lies. Exceptions are also logged to the console, which you
 /// can read using `flutter logs`. The console will also include additional
 /// information such as the stack trace for the exception.
@@ -3334,7 +3096,7 @@ typedef Widget WidgetBuilder(BuildContext context);
 /// Signature for a function that creates a widget for a given index, e.g., in a
 /// list.
 ///
-/// Used by [ListView.builder] and other APIs that use lazily-generated widgets.
+/// Used by [LazyBlockBuilder.builder].
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
 /// An [Element] that composes other [Element]s.
@@ -3523,7 +3285,7 @@ class StatefulElement extends ComponentElement {
   void activate() {
     super.activate();
     // Since the State could have observed the deactivate() and thus disposed of
-    // resources allocated in the build method, we have to rebuild the widget
+    // resources allocated in the build function, we have to rebuild the widget
     // so that its State can reallocate its resources.
     assert(_active); // otherwise markNeedsBuild is a no-op
     markNeedsBuild();
@@ -3826,7 +3588,7 @@ class InheritedElement extends ProxyElement {
 /// ### Updating children
 ///
 /// Early in the lifecycle of an element, the framework calls the [mount]
-/// method. This method should call [updateChild] for each child, passing in
+/// method. This method should call [inflateChild] for each child, passing in
 /// the widget for that child, and the slot for that child, thus obtaining a
 /// list of child [Element]s.
 ///
@@ -3845,9 +3607,9 @@ class InheritedElement extends ProxyElement {
 /// method may be useful in this regard.
 ///
 /// [updateChild] should be called for children in their logical order. The
-/// order can matter; for example, if two of the children use [PageStorage]'s
-/// `writeState` feature in their build method (and neither has a [Widget.key]),
-/// then the state written by the first will be overwritten by the second.
+/// order can matter; for example, if two of the children use [Focus.at]'s
+/// `autofocus` feature in their build method, then the first one to be updated
+/// will gain the focus.
 ///
 /// #### Dynamically determining the children during the build phase
 ///
@@ -3861,9 +3623,8 @@ class InheritedElement extends ProxyElement {
 /// the [update] method won't work: layout of this element's render object
 /// hasn't started yet at that point. Instead, the [update] method can mark the
 /// render object as needing layout (see [RenderObject.markNeedsLayout]), and
-/// then the render object's [RenderObject.performLayout] method can call back
-/// to the element to have it generate the widgets and call [updateChild]
-/// accordingly.
+/// then the render object's [performLayout] method can call back to the element
+/// to have it generate the widgets and call [updateChild] accordingly.
 ///
 /// For a render object to call an element during layout, it must use
 /// [RenderObject.invokeLayoutCallback]. For an element to call [updateChild]
@@ -4250,7 +4011,7 @@ abstract class RootRenderObjectElement extends RenderObjectElement {
   /// [WidgetsBinding.buildOwner], and assigns it to the widget tree in the call
   /// to [runApp]. The binding is responsible for driving the build pipeline by
   /// calling the build owner's [BuildOwner.buildScope] method. See
-  /// [WidgetsBinding.drawFrame].
+  /// [WidgetsBinding.beginFrame].
   void assignOwner(BuildOwner owner) {
     _owner = owner;
   }
@@ -4362,9 +4123,9 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 /// are expected to inherit from [MultiChildRenderObjectWidget].
 class MultiChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
-    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
-      super(widget);
+  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget) : super(widget) {
+    assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
+  }
 
   @override
   MultiChildRenderObjectWidget get widget => super.widget;

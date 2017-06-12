@@ -122,7 +122,7 @@ class BorderRadius {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other is! BorderRadius)
       return false;
     final BorderRadius typedOther = other;
     return topLeft == typedOther.topLeft &&
@@ -136,46 +136,6 @@ class BorderRadius {
 
   @override
   String toString() {
-    if (topLeft == topRight &&
-        topRight == bottomRight &&
-        bottomRight == bottomLeft) {
-      if (topLeft == Radius.zero)
-        return 'BorderRadius.zero';
-      if (topLeft.x == topLeft.y)
-        return 'BorderRadius.circular(${topLeft.x.toStringAsFixed(1)})';
-      return 'BorderRadius.all($topLeft)';
-    }
-    if (topLeft == Radius.zero ||
-        topRight == Radius.zero ||
-        bottomLeft == Radius.zero ||
-        bottomRight == Radius.zero) {
-      final StringBuffer result = new StringBuffer();
-      result.write('BorderRadius.only(');
-      bool comma = false;
-      if (topLeft != Radius.zero) {
-        result.write('topLeft: $topLeft');
-        comma = true;
-      }
-      if (topRight != Radius.zero) {
-        if (comma)
-          result.write(', ');
-        result.write('topRight: $topRight');
-        comma = true;
-      }
-      if (bottomLeft != Radius.zero) {
-        if (comma)
-          result.write(', ');
-        result.write('bottomLeft: $bottomLeft');
-        comma = true;
-      }
-      if (bottomRight != Radius.zero) {
-        if (comma)
-          result.write(', ');
-        result.write('bottomRight: $bottomRight');
-      }
-      result.write(')');
-      return result.toString();
-    }
     return 'BorderRadius($topLeft, $topRight, $bottomRight, $bottomLeft)';
   }
 }
@@ -192,37 +152,6 @@ enum BorderStyle {
 }
 
 /// A side of a border of a box.
-///
-/// A [Border] consists of four [BorderSide] objects: [Border.top],
-/// [Border.left], [Border.right], and [Border.bottom].
-///
-/// ## Sample code
-///
-/// This sample shows how [BorderSide] objects can be used in a [Container], via
-/// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
-/// the text has a thick bar above it that is light blue, and a thick bar below
-/// it that is a darker shade of blue.
-///
-/// ```dart
-/// new Container(
-///   padding: new EdgeInsets.all(8.0),
-///   decoration: new BoxDecoration(
-///     border: new Border(
-///       top: new BorderSide(width: 16.0, color: Colors.lightBlue.shade50),
-///       bottom: new BorderSide(width: 16.0, color: Colors.lightBlue.shade900),
-///     ),
-///   ),
-///   child: new Text('Flutter in the sky', textAlign: TextAlign.center),
-/// )
-/// ```
-///
-/// See also:
-///
-///  * [Border], which uses [BorderSide] objects to represent its sides.
-///  * [BoxDecoration], which optionally takes a [Border] object.
-///  * [TableBorder], which extends [Border] to have two more sides
-///    ([TableBorder.horizontalInside] and [TableBorder.verticalInside]), both
-///    of which are also [BorderSide] objects.
 @immutable
 class BorderSide {
   /// Creates the side of a border.
@@ -299,7 +228,7 @@ class BorderSide {
     return new BorderSide(
       color: Color.lerp(colorA, colorB, t),
       width: ui.lerpDouble(a.width, b.width, t),
-      style: BorderStyle.solid,
+      style: BorderStyle.solid
     );
   }
 
@@ -307,7 +236,7 @@ class BorderSide {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other is! BorderSide)
       return false;
     final BorderSide typedOther = other;
     return color == typedOther.color &&
@@ -323,58 +252,6 @@ class BorderSide {
 }
 
 /// A border of a box, comprised of four sides.
-///
-/// The sides are represented by [BorderSide] objects.
-///
-/// ## Sample code
-///
-/// ```dart
-/// // All four borders the same, two-pixel wide solid white:
-/// new Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
-/// ```
-///
-/// ```dart
-/// // The border for a material design divider:
-/// new Border(bottom: new BorderSide(color: Theme.of(context).dividerColor))
-/// ```
-///
-/// ```dart
-/// // A 1990s-era "OK" button:
-/// new Container(
-///   decoration: const BoxDecoration(
-///     border: const Border(
-///       top: const BorderSide(width: 1.0, color: const Color(0xFFFFFFFFFF)),
-///       left: const BorderSide(width: 1.0, color: const Color(0xFFFFFFFFFF)),
-///       right: const BorderSide(width: 1.0, color: const Color(0xFFFF000000)),
-///       bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000)),
-///     ),
-///   ),
-///   child: new Container(
-///     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 2.0),
-///     decoration: const BoxDecoration(
-///       border: const Border(
-///         top: const BorderSide(width: 1.0, color: const Color(0xFFFFDFDFDF)),
-///         left: const BorderSide(width: 1.0, color: const Color(0xFFFFDFDFDF)),
-///         right: const BorderSide(width: 1.0, color: const Color(0xFFFF7F7F7F)),
-///         bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF7F7F7F)),
-///       ),
-///       color: const Color(0xFFBFBFBF),
-///     ),
-///     child: const Text(
-///       'OK',
-///       textAlign: TextAlign.center,
-///       style: const TextStyle(color: const Color(0xFF000000))
-///     ),
-///   ),
-/// )
-/// ```
-///
-/// See also:
-///
-///  * [BoxDecoration], which uses this class to describe its edge decoration.
-///  * [BorderSide], which is used to describe each side of the box.
-///  * [Theme], from the material layer, which can be queried to obtain appropriate colors
-///    to use for borders in a material app, as shown in the "divider" sample above.
 @immutable
 class Border {
   /// Creates a border.
@@ -384,16 +261,14 @@ class Border {
     this.top: BorderSide.none,
     this.right: BorderSide.none,
     this.bottom: BorderSide.none,
-    this.left: BorderSide.none,
+    this.left: BorderSide.none
   });
 
   /// A uniform border with all sides the same color and width.
-  ///
-  /// The sides default to black solid borders, one logical pixel wide.
   factory Border.all({
     Color color: const Color(0xFF000000),
     double width: 1.0,
-    BorderStyle style: BorderStyle.solid,
+    BorderStyle style: BorderStyle.solid
   }) {
     final BorderSide side = new BorderSide(color: color, width: width, style: style);
     return new Border(top: side, right: side, bottom: side, left: side);
@@ -411,16 +286,12 @@ class Border {
   /// The left side of this border.
   final BorderSide left;
 
-  /// The widths of the sides of this border represented as an [EdgeInsets].
-  ///
-  /// This can be used, for example, with a [Padding] widget to inset a box by
-  /// the size of these borders.
+  /// The widths of the sides of this border represented as an EdgeInsets.
   EdgeInsets get dimensions {
     return new EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
-  /// Whether all four sides of the border are identical. Uniform borders are
-  /// typically more efficient to paint.
+  /// Whether all four sides of the border are identical.
   bool get isUniform {
     assert(top != null);
     assert(right != null);
@@ -448,7 +319,7 @@ class Border {
     return true;
   }
 
-  /// Creates a new border with the widths of this border multiplied by `t`.
+  /// Creates a new border with the widths of this border multiplied by [t].
   Border scale(double t) {
     return new Border(
       top: top.copyWith(width: t * top.width),
@@ -459,9 +330,6 @@ class Border {
   }
 
   /// Linearly interpolate between two borders.
-  ///
-  /// If a border is null, it is treated as having four [BorderSide.none]
-  /// borders.
   static Border lerp(Border a, Border b, double t) {
     if (a == null && b == null)
       return null;
@@ -477,35 +345,24 @@ class Border {
     );
   }
 
-  /// Paints the border within the given [Rect] on the given [Canvas].
-  ///
-  /// Uniform borders are more efficient to paint than more complex borders.
-  ///
-  /// You can provide a [BoxShape] to draw the border on. If the shape in
-  /// [BoxShape.circle], there is the requirement that the border [isUniform].
-  ///
-  /// If you specify a rectangular box shape (BoxShape.rectangle), then you may
-  /// specify a [BorderRadius]. If a border radius is specified, there is the
-  /// requirement that the border [isUniform].
+  /// Paints the border within the given rect on the given canvas.
   void paint(Canvas canvas, Rect rect, {
     BoxShape shape: BoxShape.rectangle,
-    BorderRadius borderRadius: null,
+    BorderRadius borderRadius: null
   }) {
     if (isUniform) {
       if (borderRadius != null) {
-        assert(shape == BoxShape.rectangle, 'A borderRadius can only be given for rectangular boxes.');
         _paintBorderWithRadius(canvas, rect, borderRadius);
         return;
       }
       if (shape == BoxShape.circle) {
-        assert(borderRadius == null);
         _paintBorderWithCircle(canvas, rect);
         return;
       }
     }
 
-    assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.'); // TODO(abarth): Support non-uniform rounded borders.
-    assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.'); // TODO(ianh): Support non-uniform borders on circles.
+    assert(borderRadius == null); // TODO(abarth): Support non-uniform rounded borders.
+    assert(shape == BoxShape.rectangle); // TODO(ianh): Support non-uniform borders on circles.
 
     assert(top != null);
     assert(right != null);
@@ -626,7 +483,7 @@ class Border {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     final Border typedOther = other;
     return top == typedOther.top &&
@@ -741,7 +598,7 @@ class BoxShadow {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other is! BoxShadow)
       return false;
     final BoxShadow typedOther = other;
     return color == typedOther.color &&
@@ -758,9 +615,6 @@ class BoxShadow {
 }
 
 /// A 2D gradient.
-///
-/// This is an interface that allows [LinearGradient] and [RadialGradient]
-/// classes to be used interchangeably in [BoxDecoration]s.
 @immutable
 abstract class Gradient {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -772,52 +626,6 @@ abstract class Gradient {
 }
 
 /// A 2D linear gradient.
-///
-/// This class is used by [BoxDecoration] to represent gradients. This abstracts
-/// out the arguments to the [new ui.Gradient.linear] constructor from the
-/// `dart:ui` library.
-///
-/// A gradient has two anchor points, [begin] and [end]. The [begin] point
-/// corresponds to 0.0, and the [end] point corresponds to 1.0. These points are
-/// expressed in fractions, so that the same gradient can be reused with varying
-/// sized boxes without changing the parameters. (This contrasts with [new
-/// ui.Gradient.linear], whose arguments are expressed in logical pixels.)
-///
-/// The [colors] are described by a list of [Color] objects. There must be at
-/// least two colors. If there are more than two, a [stops] list must be
-/// provided. It must have the same length as [colors], and specifies the
-/// position of each color stop between 0.0 and 1.0.
-///
-/// The region of the canvas before [begin] and after [end] is colored according
-/// to [tileMode].
-///
-/// Typically this class is used with [BoxDecoration], which does the painting.
-/// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
-///
-/// ## Sample code
-///
-/// This sample draws a picture that looks like vertical window shades by having
-/// a [Container] display a [BoxDecoration] with a [LinearGradient].
-///
-/// ```dart
-/// new Container(
-///   decoration: new BoxDecoration(
-///     gradient: new LinearGradient(
-///       begin: FractionalOffset.topLeft,
-///       end: new FractionalOffset(0.1, 0.0), // 10% of the width, so there are ten blinds.
-///       colors: [const Color(0xFFFFFFEE), const Color(0xFF999999)], // whitish to gray
-///       tileMode: TileMode.repeated, // repeats the gradient over the canvas
-///     ),
-///   ),
-/// )
-/// ```
-///
-/// See also:
-///
-///  * [RadialGradient], which displays a gradient in concentric circles, and
-///    has an example which shows a different way to use [Gradient] objects.
-///  * [BoxDecoration], which can take a [LinearGradient] in its
-///    [BoxDecoration.gradient] property.
 class LinearGradient extends Gradient {
   /// Creates a linear graident.
   ///
@@ -826,9 +634,9 @@ class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin: FractionalOffset.centerLeft,
     this.end: FractionalOffset.centerRight,
-    @required this.colors,
+    this.colors,
     this.stops,
-    this.tileMode: TileMode.clamp,
+    this.tileMode: TileMode.clamp
   }) : assert(begin != null),
        assert(end != null),
        assert(colors != null),
@@ -852,38 +660,17 @@ class LinearGradient extends Gradient {
 
   /// The colors the gradient should obtain at each of the stops.
   ///
-  /// If [stops] is non-null, this list must have the same length as [stops]. If
-  /// [colors] has more than two colors, [stops] must be non-null.
-  ///
-  /// This list must have at least two colors in it (otherwise, it's not a
-  /// gradient!).
+  /// If [stops] is non-null, this list must have the same length as [stops].
   final List<Color> colors;
 
   /// A list of values from 0.0 to 1.0 that denote fractions of the vector from
   /// start to end.
   ///
-  /// If non-null, this list must have the same length as [colors]. If
-  /// [colors] has more than two colors, [stops] must be non-null.
-  ///
-  /// If the first value is not 0.0, then a stop with position 0.0 and a color
-  /// equal to the first color in [colors] is implied.
-  ///
-  /// If the last value is not 1.0, then a stop with position 1.0 and a color
-  /// equal to the last color in [colors] is implied.
-  ///
-  /// The values in the [stops] list must be in ascending order. If a value in
-  /// the [stops] list is less than an earlier value in the list, then its value
-  /// is assumed to equal the previous value.
+  /// If non-null, this list must have the same length as [colors]. Otherwise
+  /// the colors are distributed evenly between [begin] and [end].
   final List<double> stops;
 
-  /// How this gradient should tile the plane beyond in the region before
-  /// [begin] and after [end].
-  ///
-  /// For details, see [TileMode].
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_linear.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
+  /// How this gradient should tile the plane.
   final TileMode tileMode;
 
   @override
@@ -895,8 +682,7 @@ class LinearGradient extends Gradient {
     );
   }
 
-  /// Returns a new [LinearGradient] with its properties scaled by the given
-  /// factor.
+  /// Returns a new [LinearGradient] with its properties scaled by the given factor.
   LinearGradient scale(double factor) {
     return new LinearGradient(
       begin: begin,
@@ -910,10 +696,8 @@ class LinearGradient extends Gradient {
   /// Linearly interpolate between two [LinearGradient]s.
   ///
   /// If either gradient is null, this function linearly interpolates from a
-  /// a gradient that matches the other gradient in [begin], [end], [stops] and
-  /// [tileMode] and with the same [colors] but transparent.
-  ///
-  /// If neither gradient is null, they must have the same number of [colors].
+  /// a gradient that matches the other gradient in begin, end, stops and 
+  /// tileMode and with the same colors but transparent.
   static LinearGradient lerp(LinearGradient a, LinearGradient b, double t) {
     if (a == null && b == null)
       return null;
@@ -923,16 +707,16 @@ class LinearGradient extends Gradient {
       return a.scale(1.0 - t);
     // Interpolation is only possible when the lengths of colors and stops are
     // the same or stops is null for one.
-    // TODO(xster): lerp unsimilar LinearGradients in the future by scaling
-    // lists of LinearGradients.
+    // TODO(xster): lerp unsimilar LinearGradients in the future by scaling 
+    // lists of LinearGradients. 
     assert(a.colors.length == b.colors.length);
     assert(a.stops == null || b.stops == null || a.stops.length == b.stops.length);
     final List<Color> interpolatedColors = <Color>[];
-    for (int i = 0; i < a.colors.length; i += 1)
+    for (int i = 0; i < a.colors.length; i++) 
       interpolatedColors.add(Color.lerp(a.colors[i], b.colors[i], t));
     List<double> interpolatedStops;
     if (a.stops != null && b.stops != null) {
-      for (int i = 0; i < a.stops.length; i += 1)
+      for (int i = 0; i < a.stops.length; i++)
         interpolatedStops.add(ui.lerpDouble(a.stops[i], b.stops[i], t));
     } else {
       interpolatedStops = a.stops ?? b.stops;
@@ -950,7 +734,7 @@ class LinearGradient extends Gradient {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other is! LinearGradient)
       return false;
     final LinearGradient typedOther = other;
     if (begin != typedOther.begin ||
@@ -988,71 +772,18 @@ class LinearGradient extends Gradient {
 }
 
 /// A 2D radial gradient.
-///
-/// This class is used by [BoxDecoration] to represent gradients. This abstracts
-/// out the arguments to the [new ui.Gradient.radial] constructor from the
-/// `dart:ui` library.
-///
-/// A gradient has a [center] and a [radius]. The [center] point corresponds to
-/// 0.0, and the ring at [radius] from the center corresponds to 1.0. These
-/// lengths are expressed in fractions, so that the same gradient can be reused
-/// with varying sized boxes without changing the parameters. (This contrasts
-/// with [new ui.Gradient.radial], whose arguments are expressed in logical
-/// pixels.)
-///
-/// The [colors] are described by a list of [Color] objects. There must be at
-/// least two colors. If there are more than two, a [stops] list must be
-/// provided. It must have the same length as [colors], and specifies the
-/// position of each color stop between 0.0 and 1.0.
-///
-/// The region of the canvas beyond [radius] from the [center] is colored
-/// according to [tileMode].
-///
-/// Typically this class is used with [BoxDecoration], which does the painting.
-/// To use a [RadialGradient] to paint on a canvas directly, see [createShader].
-///
-/// ## Sample code
-///
-/// ```dart
-/// // This gradient looks like a sun in a blue sky.
-/// var gradient = new RadialGradient(
-///   center: const FractionalOffset(0.7, 0.2), // near the top right
-///   radius: 0.2,
-///   colors: [
-///     const Color(0xFFFFFF00), // yellow sun
-///     const Color(0xFF0099FF), // blue sky
-///   ],
-///   stops: [0.4, 1.0],
-/// );
-/// // rect is the area we are painting over
-/// var paint = new Paint()
-///   ..shader = gradient.createShader(rect);
-/// canvas.drawRect(rect, paint);
-/// ```
-///
-/// See also:
-///
-///  * [LinearGradient], which displays a gradient in parallel lines, and has an
-///    example which shows a different way to use [Gradient] objects.
-///  * [BoxDecoration], which can take a [RadialGradient] in its
-///    [BoxDecoration.gradient] property.
-///  * [CustomPainter], which shows how to use the above sample code in a custom
-///    painter.
 class RadialGradient extends Gradient {
-  /// Creates a radial gradient.
+  /// Creates a radial graident.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
   const RadialGradient({
     this.center: FractionalOffset.center,
     this.radius: 0.5,
-    @required this.colors,
+    this.colors,
     this.stops,
-    this.tileMode: TileMode.clamp,
-  }) : assert(center != null),
-       assert(radius != null),
-       assert(colors != null),
-       assert(tileMode != null);
+    this.tileMode: TileMode.clamp
+  });
 
   /// The center of the gradient, as an offset into the unit square
   /// describing the gradient which will be mapped onto the paint box.
@@ -1071,11 +802,7 @@ class RadialGradient extends Gradient {
 
   /// The colors the gradient should obtain at each of the stops.
   ///
-  /// If [stops] is non-null, this list must have the same length as [stops]. If
-  /// [colors] has more than two colors, [stops] must be non-null.
-  ///
-  /// This list must have at least two colors in it (otherwise, it's not a
-  /// gradient!).
+  /// If [stops] is non-null, this list must have the same length as [stops].
   final List<Color> colors;
 
   /// A list of values from 0.0 to 1.0 that denote concentric rings.
@@ -1083,28 +810,12 @@ class RadialGradient extends Gradient {
   /// The rings are centered at [center] and have a radius equal to the value of
   /// the stop times [radius].
   ///
-  /// If non-null, this list must have the same length as [colors]. If
-  /// [colors] has more than two colors, [stops] must be non-null.
-  ///
-  /// If the first value is not 0.0, then a stop with position 0.0 and a color
-  /// equal to the first color in [colors] is implied.
-  ///
-  /// If the last value is not 1.0, then a stop with position 1.0 and a color
-  /// equal to the last color in [colors] is implied.
-  ///
-  /// The values in the [stops] list must be in ascending order. If a value in
-  /// the [stops] list is less than an earlier value in the list, then its value
-  /// is assumed to equal the previous value.
+  /// If non-null, this list must have the same length as [colors]. Otherwise
+  /// the colors are distributed evenly between the [center] and the ring at
+  /// [radius].
   final List<double> stops;
 
-  /// How this gradient should tile the plane beyond the outer ring at [radius]
-  /// pixels from the [center].
-  ///
-  /// For details, see [TileMode].
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_radial.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_radial.png)
-  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_radial.png)
+  /// How this gradient should tile the plane.
   final TileMode tileMode;
 
   @override
@@ -1120,7 +831,7 @@ class RadialGradient extends Gradient {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other is! RadialGradient)
       return false;
     final RadialGradient typedOther = other;
     if (center != typedOther.center ||
@@ -1239,9 +950,9 @@ void paintImage({
   @required ui.Image image,
   ColorFilter colorFilter,
   BoxFit fit,
-  FractionalOffset alignment,
-  Rect centerSlice,
   ImageRepeat repeat: ImageRepeat.noRepeat,
+  Rect centerSlice,
+  FractionalOffset alignment
 }) {
   assert(canvas != null);
   assert(image != null);
@@ -1266,7 +977,7 @@ void paintImage({
     destinationSize += sliceBorder;
     // We don't have the ability to draw a subset of the image at the same time
     // as we apply a nine-patch stretch.
-    assert(sourceSize == inputSize, 'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.');
+    assert(sourceSize == inputSize);
   }
   if (repeat != ImageRepeat.noRepeat && destinationSize == outputSize) {
     // There's no need to repeat the image because we're exactly filling the
@@ -1314,30 +1025,37 @@ class DecorationImage {
   ///
   /// The [image] argument must not be null.
   const DecorationImage({
-    @required this.image,
-    this.colorFilter,
+    this.image,
     this.fit,
-    this.alignment,
-    this.centerSlice,
     this.repeat: ImageRepeat.noRepeat,
-  }) : assert(image != null);
+    this.centerSlice,
+    this.colorFilter,
+    this.alignment,
+  });
 
   /// The image to be painted into the decoration.
-  ///
-  /// Typically this will be an [AssetImage] (for an image shipped with the
-  /// application) or a [NetworkImage] (for an image obtained from the network).
   final ImageProvider image;
-
-  /// A color filter to apply to the image before painting it.
-  final ColorFilter colorFilter;
 
   /// How the image should be inscribed into the box.
   ///
-  /// The default is [BoxFit.scaleDown] if [centerSlice] is null, and
-  /// [BoxFit.fill] if [centerSlice] is not null.
-  ///
-  /// See the discussion at [paintImage] for more details.
+  /// The default varies based on the other fields. See the discussion at
+  /// [paintImage].
   final BoxFit fit;
+
+  /// How to paint any portions of the box not covered by the image.
+  final ImageRepeat repeat;
+
+  /// The center slice for a nine-patch image.
+  ///
+  /// The region of the image inside the center slice will be stretched both
+  /// horizontally and vertically to fit the image into its destination. The
+  /// region of the image above and below the center slice will be stretched
+  /// only horizontally and the region of the image to the left and right of
+  /// the center slice will be stretched only vertically.
+  final Rect centerSlice;
+
+  /// A color filter to apply to the image before painting it.
+  final ColorFilter colorFilter;
 
   /// How to align the image within its bounds.
   ///
@@ -1348,27 +1066,6 @@ class DecorationImage {
   /// Defaults to [FractionalOffset.center].
   final FractionalOffset alignment;
 
-  /// The center slice for a nine-patch image.
-  ///
-  /// The region of the image inside the center slice will be stretched both
-  /// horizontally and vertically to fit the image into its destination. The
-  /// region of the image above and below the center slice will be stretched
-  /// only horizontally and the region of the image to the left and right of
-  /// the center slice will be stretched only vertically.
-  ///
-  /// The stretching will be applied in order to make the image fit into the box
-  /// specified by [fit]. When [centerSlice] is not null, [fit] defaults to
-  /// [BoxFit.fill], which distorts the destination image size relative to the
-  /// image's original aspect ratio. Values of [BoxFit] which do not distort the
-  /// destination image size will result in [centerSlice] having no effect
-  /// (since the nine regions of the image will be rendered with the same
-  /// scaling, as if it wasn't specified).
-  final Rect centerSlice;
-
-  /// How to paint any portions of the box that would not otherwise be covered
-  /// by the image.
-  final ImageRepeat repeat;
-
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -1376,54 +1073,22 @@ class DecorationImage {
     if (runtimeType != other.runtimeType)
       return false;
     final DecorationImage typedOther = other;
-    return image == typedOther.image
-        && colorFilter == typedOther.colorFilter
-        && fit == typedOther.fit
-        && alignment == typedOther.alignment
-        && centerSlice == typedOther.centerSlice
-        && repeat == typedOther.repeat;
+    return image == typedOther.image &&
+           fit == typedOther.fit &&
+           repeat == typedOther.repeat &&
+           centerSlice == typedOther.centerSlice &&
+           colorFilter == typedOther.colorFilter &&
+           alignment == typedOther.alignment;
   }
 
   @override
-  int get hashCode => hashValues(image, colorFilter, fit, alignment, centerSlice, repeat);
+  int get hashCode => hashValues(image, fit, repeat, centerSlice, colorFilter, alignment);
 
   @override
-  String toString() {
-    final List<String> properties = <String>[];
-    properties.add('$image');
-    if (colorFilter != null)
-      properties.add('$colorFilter');
-    if (fit != null &&
-        !(fit == BoxFit.fill && centerSlice != null) &&
-        !(fit == BoxFit.scaleDown && centerSlice == null))
-      properties.add('$fit');
-    if (alignment != null)
-      properties.add('$alignment');
-    if (centerSlice != null)
-      properties.add('centerSlice: $centerSlice');
-    if (repeat != ImageRepeat.noRepeat)
-      properties.add('$repeat');
-    return '$runtimeType(${properties.join(", ")})';
-  }
+  String toString() => '$runtimeType($image, $fit, $repeat)';
 }
 
 /// An immutable description of how to paint a box.
-///
-/// The [BoxDecoration] class provides a variety of ways to draw a box.
-///
-/// The box has a [border], a body, and may cast a [boxShadow].
-///
-/// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
-/// then the [borderRadius] property controls the roundness of the corners.
-///
-/// The body of the box is painted in layers. The bottom-most layer is the
-/// [color], which fills the box. Above that is the [gradient], which also fills
-/// the box. Finally there is the [image], the precise alignment of which is
-/// controlled by the [DecorationImage] class.
-///
-/// The [border] paints over the body; the [boxShadow], naturally, paints below it.
-///
-/// ## Sample code
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw an image with a border:
@@ -1443,13 +1108,6 @@ class DecorationImage {
 ///   ),
 /// )
 /// ```
-///
-/// See also:
-///
-///  * [DecoratedBox] and [Container], widgets that can be configured with
-///    [BoxDecoration] objects.
-///  * [CustomPaint], a widget that lets you draw arbitrary graphics.
-///  * [Decoration], the base class which lets you define other decorations.
 class BoxDecoration extends Decoration {
   /// Creates a box decoration.
   ///
@@ -1468,7 +1126,7 @@ class BoxDecoration extends Decoration {
     this.borderRadius,
     this.boxShadow,
     this.gradient,
-    this.shape: BoxShape.rectangle,
+    this.shape: BoxShape.rectangle
   });
 
   @override
@@ -1521,7 +1179,7 @@ class BoxDecoration extends Decoration {
       borderRadius: BorderRadius.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
-      shape: shape,
+      shape: shape
     );
   }
 
@@ -1548,7 +1206,7 @@ class BoxDecoration extends Decoration {
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: b.gradient,
-      shape: b.shape,
+      shape: b.shape
     );
   }
 
@@ -1591,7 +1249,7 @@ class BoxDecoration extends Decoration {
       borderRadius,
       boxShadow,
       gradient,
-      shape,
+      shape
     );
   }
 
@@ -1659,9 +1317,9 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration, VoidCallback onChange)
-    : assert(_decoration != null),
-      super(onChange);
+  _BoxDecorationPainter(@required this._decoration, VoidCallback onChange) : super(onChange) {
+    assert(_decoration != null);
+  }
 
   final BoxDecoration _decoration;
 
@@ -1757,10 +1415,9 @@ class _BoxDecorationPainter extends BoxPainter {
       rect: rect,
       image: image,
       colorFilter: backgroundImage.colorFilter,
-      fit: backgroundImage.fit,
       alignment: backgroundImage.alignment,
-      centerSlice: backgroundImage.centerSlice,
-      repeat: backgroundImage.repeat,
+      fit: backgroundImage.fit,
+      repeat: backgroundImage.repeat
     );
 
     if (clipPath != null)

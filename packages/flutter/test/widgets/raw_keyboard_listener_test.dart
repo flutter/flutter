@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,8 +10,7 @@ void sendFakeKeyEvent(Map<String, dynamic> data) {
   BinaryMessages.handlePlatformMessage(
     SystemChannels.keyEvent.name,
     SystemChannels.keyEvent.codec.encodeMessage(data),
-    (ByteData data) { },
-  );
+    (_) {});
 }
 
 void main() {
@@ -28,15 +25,13 @@ void main() {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final FocusNode focusNode = new FocusNode();
+    tester.binding.focusManager.rootScope.requestFocus(focusNode);
 
     await tester.pumpWidget(new RawKeyboardListener(
       focusNode: focusNode,
       onKey: events.add,
       child: new Container(),
     ));
-
-    tester.binding.focusManager.rootScope.requestFocus(focusNode);
-    await tester.idle();
 
     sendFakeKeyEvent(<String, dynamic>{
       'type': 'keydown',
@@ -45,6 +40,7 @@ void main() {
       'codePoint': 0x64,
       'modifiers': 0x08,
     });
+
     await tester.idle();
 
     expect(events.length, 1);
@@ -64,15 +60,13 @@ void main() {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final FocusNode focusNode = new FocusNode();
+    tester.binding.focusManager.rootScope.requestFocus(focusNode);
 
     await tester.pumpWidget(new RawKeyboardListener(
       focusNode: focusNode,
       onKey: events.add,
       child: new Container(),
     ));
-
-    tester.binding.focusManager.rootScope.requestFocus(focusNode);
-    await tester.idle();
 
     sendFakeKeyEvent(<String, dynamic>{
       'type': 'keydown',
@@ -81,6 +75,7 @@ void main() {
       'codePoint': 0x64,
       'modifiers': 0x08,
     });
+
     await tester.idle();
 
     expect(events.length, 1);

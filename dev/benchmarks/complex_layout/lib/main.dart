@@ -66,7 +66,7 @@ class TileScrollLayout extends StatelessWidget {
           return new Padding(
             padding:const EdgeInsets.all(5.0),
             child: new Material(
-              elevation: (index % 5 + 1).toDouble(),
+              elevation: index % 5 + 1,
               color: Colors.white,
               child: new IconBar(),
             ),
@@ -111,9 +111,9 @@ class ComplexLayoutState extends State<ComplexLayout> {
               key: const Key('complex-scroll'), // this key is used by the driver test
               itemBuilder: (BuildContext context, int index) {
                 if (index % 2 == 0)
-                  return new FancyImageItem(index, key: new PageStorageKey<int>(index));
+                  return new FancyImageItem(index, key: new ValueKey<int>(index));
                 else
-                  return new FancyGalleryItem(index, key: new PageStorageKey<int>(index));
+                  return new FancyGalleryItem(index, key: new ValueKey<int>(index));
               },
             )
           ),
@@ -349,10 +349,10 @@ class UserHeader extends StatelessWidget {
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Padding(
+          new Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: const Image(
-              image: const AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
+            child: new Image(
+              image: new AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
               width: 32.0,
               height: 32.0
             )
@@ -407,10 +407,10 @@ class ItemImageBox extends StatelessWidget {
           children: <Widget>[
             new Stack(
               children: <Widget>[
-                const SizedBox(
+                new SizedBox(
                   height: 230.0,
-                  child: const Image(
-                    image: const AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
+                  child: new Image(
+                    image: new AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
                   )
                 ),
                 new Theme(
@@ -496,7 +496,7 @@ class ItemGalleryBox extends StatelessWidget {
               child: new TabBarView(
                 children: tabNames.map((String tabName) {
                   return new Container(
-                    key: new PageStorageKey<String>(tabName),
+                    key: new Key(tabName),
                     child: new Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: new Card(
@@ -611,7 +611,6 @@ class GalleryDrawer extends StatelessWidget {
     final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
     return new Drawer(
       child: new ListView(
-        key: const PageStorageKey<String>('gallery-drawer'),
         children: <Widget>[
           new FancyDrawerHeader(),
           new ListTile(

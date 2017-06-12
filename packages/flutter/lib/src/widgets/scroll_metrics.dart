@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-/// A description of a [Scrollable]'s contents, useful for modeling the state
+/// A description of a [Scrollable]'s contents, useful for modelling the state
 /// of its viewport.
 ///
 /// This class defines a current position, [pixels], and a range of values
@@ -88,6 +88,11 @@ abstract class ScrollMetrics {
   /// of the viewport in the scrollable. This is the content below the content
   /// described by [extentInside].
   double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
+
+  @override
+  String toString() {
+    return '$runtimeType(${extentBefore.toStringAsFixed(1)}..[${extentInside.toStringAsFixed(1)}]..${extentAfter.toStringAsFixed(1)}})';
+  }
 }
 
 /// An immutable snapshot of values associated with a [Scrollable] viewport.
@@ -126,9 +131,4 @@ class FixedScrollMetrics extends ScrollMetrics {
 
   @override
   final AxisDirection axisDirection;
-
-  @override
-  String toString() {
-    return '$runtimeType(${extentBefore.toStringAsFixed(1)}..[${extentInside.toStringAsFixed(1)}]..${extentAfter.toStringAsFixed(1)})';
-  }
 }

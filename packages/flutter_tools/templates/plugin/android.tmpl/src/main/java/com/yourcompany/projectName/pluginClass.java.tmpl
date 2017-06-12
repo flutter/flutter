@@ -1,0 +1,32 @@
+package {{androidIdentifier}};
+
+import io.flutter.app.FlutterActivity;
+import io.flutter.plugin.common.MethodChannel;
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
+import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.MethodCall;
+
+/**
+ * {{pluginClass}}
+ */
+public class {{pluginClass}} implements MethodCallHandler {
+  private FlutterActivity activity;
+
+  public static {{pluginClass}} register(FlutterActivity activity) {
+    return new {{pluginClass}}(activity);
+  }
+
+  private {{pluginClass}}(FlutterActivity activity) {
+    this.activity = activity;
+    new MethodChannel(activity.getFlutterView(), "{{projectName}}").setMethodCallHandler(this);
+  }
+
+  @Override
+  public void onMethodCall(MethodCall call, Result result) {
+    if (call.method.equals("getPlatformVersion")) {
+      result.success("Android " + android.os.Build.VERSION.RELEASE);
+    } else {
+      result.notImplemented();
+    }
+  }
+}

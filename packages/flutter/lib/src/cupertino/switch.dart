@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'thumb_painter.dart';
 
 /// An iOS-style switch.
@@ -31,7 +30,7 @@ class CupertinoSwitch extends StatefulWidget {
     Key key,
     @required this.value,
     @required this.onChanged,
-    this.activeColor: CupertinoColors.activeGreen,
+    this.activeColor: const Color(0xFF4CD964),
   }) : super(key: key);
 
   /// Whether this switch is on or off.
@@ -57,7 +56,7 @@ class CupertinoSwitch extends StatefulWidget {
   ///       _giveVerse = newValue;
   ///     });
   ///   },
-  /// )
+  /// ),
   /// ```
   final ValueChanged<bool> onChanged;
 
@@ -131,7 +130,7 @@ const double _kTrackInnerLength = _kTrackInnerEnd - _kTrackInnerStart;
 const double _kSwitchWidth = 59.0;
 const double _kSwitchHeight = 39.0;
 
-const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
+const Color _kTrackColor = const Color(0xFFE5E5E5);
 const Duration _kReactionDuration = const Duration(milliseconds: 300);
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
 
@@ -141,14 +140,14 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     @required Color activeColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }) : assert(value != null),
-       assert(activeColor != null),
-       assert(vsync != null),
-       _value = value,
-       _activeColor = activeColor,
-       _onChanged = onChanged,
-       _vsync = vsync,
-       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
+  }) : _value = value,
+        _activeColor = activeColor,
+        _onChanged = onChanged,
+        _vsync = vsync,
+        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
+    assert(value != null);
+    assert(activeColor != null);
+    assert(vsync != null);
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap

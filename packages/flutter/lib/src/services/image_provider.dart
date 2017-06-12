@@ -19,13 +19,6 @@ import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
-///
-/// See also:
-///
-///  * [createLocalImageConfiguration], which creates an [ImageConfiguration]
-///    based on ambient configuration in a [Widget] environment.
-///  * [ImageProvider], which uses [ImageConfiguration] objects to determine
-///    which image to obtain.
 @immutable
 class ImageConfiguration {
   /// Creates an object holding the configuration information for an [ImageProvider].
@@ -150,87 +143,11 @@ class ImageConfiguration {
 ///
 /// The type argument `T` is the type of the object used to represent a resolved
 /// configuration. This is also the type used for the key in the image cache. It
-/// should be immutable and implement the [==] operator and the [hashCode]
-/// getter. Subclasses should subclass a variant of [ImageProvider] with an
-/// explicit `T` type argument.
+/// should be immutable and implement [operator ==] and [hashCode]. Subclasses should
+/// subclass a variant of [ImageProvider] with an explicit `T` type argument.
 ///
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
-///
-/// ## Sample code
-///
-/// The following shows the code required to write a widget that fully conforms
-/// to the [ImageProvider] and [Widget] protocols. (It is essentially a
-/// bare-bones version of the [Image] widget.)
-///
-/// ```dart
-/// class MyImage extends StatefulWidget {
-///   const MyImage({
-///     Key key,
-///     @required this.imageProvider,
-///   }) : assert(imageProvider != null),
-///        super(key: key);
-///
-///   final ImageProvider imageProvider;
-///
-///   @override
-///   _MyImageState createState() => new _MyImageState();
-/// }
-///
-/// class _MyImageState extends State<MyImage> {
-///   ImageStream _imageStream;
-///   ImageInfo _imageInfo;
-///
-///   @override
-///   void didChangeDependencies() {
-///     super.didChangeDependencies();
-///     // We call _getImage here because createLocalImageConfiguration() needs to
-///     // be called again if the dependencies changed, in case the changes relate
-///     // to the DefaultAssetBundle, MediaQuery, etc, which that method uses.
-///     _getImage();
-///   }
-///
-///   @override
-///   void didUpdateWidget(MyImage oldWidget) {
-///     super.didUpdateWidget(oldWidget);
-///     if (widget.imageProvider != oldWidget.imageProvider)
-///       _getImage();
-///   }
-///
-///   void _getImage() {
-///     final ImageStream oldImageStream = _imageStream;
-///     _imageStream = widget.imageProvider.resolve(createLocalImageConfiguration(context));
-///     if (_imageStream.key != oldImageStream?.key) {
-///       // If the keys are the same, then we got the same image back, and so we don't
-///       // need to update the listeners. If the key changed, though, we must make sure
-///       // to switch our listeners to the new image stream.
-///       oldImageStream?.removeListener(_updateImage);
-///       _imageStream.addListener(_updateImage);
-///     }
-///   }
-///
-///   void _updateImage(ImageInfo imageInfo, bool synchronousCall) {
-///     setState(() {
-///       // Trigger a build whenever the image changes.
-///       _imageInfo = imageInfo;
-///     });
-///   }
-///
-///   @override
-///   void dispose() {
-///     _imageStream.removeListener(_updateImage);
-///     super.dispose();
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return new RawImage(
-///       image: _imageInfo?.image, // this is a dart:ui Image object
-///       scale: _imageInfo?.scale ?? 1.0,
-///     );
-///   }
-/// }
-/// ```
 @optionalTypeArgs
 abstract class ImageProvider<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -280,7 +197,7 @@ abstract class ImageProvider<T> {
   /// method will fetch. Different [ImageProvider]s given the same constructor
   /// arguments and [ImageConfiguration] objects should return keys that are
   /// '==' to each other (possibly by using a class for the key that itself
-  /// implements [==]).
+  /// implements [operator ==]).
   @protected
   Future<T> obtainKey(ImageConfiguration configuration);
 
@@ -305,9 +222,7 @@ class AssetBundleImageKey {
     @required this.bundle,
     @required this.name,
     @required this.scale
-  }) : assert(bundle != null),
-       assert(name != null),
-       assert(scale != null);
+  });
 
   /// The bundle from which the image will be obtained.
   ///
@@ -396,9 +311,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 })
-      : assert(url != null),
-        assert(scale != null);
+  const NetworkImage(this.url, { this.scale: 1.0 }) : assert(url != null);
 
   /// The URL from which the image will be fetched.
   final String url;
@@ -468,9 +381,7 @@ class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
   /// The arguments must not be null.
-  const FileImage(this.file, { this.scale: 1.0 })
-      : assert(file != null),
-        assert(scale != null);
+  const FileImage(this.file, { this.scale: 1.0 });
 
   /// The file to decode into an image.
   final File file;
@@ -532,9 +443,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
   /// The arguments must not be null.
-  const MemoryImage(this.bytes, { this.scale: 1.0 })
-      : assert(bytes != null),
-        assert(scale != null);
+  const MemoryImage(this.bytes, { this.scale: 1.0 });
 
   /// The bytes to decode into an image.
   final Uint8List bytes;
@@ -594,11 +503,13 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// defaults to 1.0. The [bundle] argument may be null, in which case the
   /// bundle provided in the [ImageConfiguration] passed to the [resolve] call
   /// will be used instead.
-  const ExactAssetImage(this.name, {
+  ExactAssetImage(this.name, {
     this.scale: 1.0,
     this.bundle
-  }) : assert(name != null),
-       assert(scale != null);
+  }) {
+    assert(name != null);
+    assert(scale != null);
+  }
 
   /// The key to use to obtain the resource from the [bundle]. This is the
   /// argument passed to [AssetBundle.load].

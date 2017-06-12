@@ -14,7 +14,10 @@ import 'card.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
 import 'dropdown.dart';
+import 'icon.dart';
 import 'icon_button.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
@@ -73,20 +76,21 @@ class PaginatedDataTable extends StatefulWidget {
     this.availableRowsPerPage: const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
     @required this.source
-  }) : assert(header != null),
-       assert(columns != null),
-       assert(columns.isNotEmpty),
-       assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-       assert(sortAscending != null),
-       assert(rowsPerPage != null),
-       assert(rowsPerPage > 0),
-       assert(() {
-         if (onRowsPerPageChanged != null)
-           assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
-         return true;
-       }),
-       assert(source != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(header != null);
+    assert(columns != null);
+    assert(columns.isNotEmpty);
+    assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
+    assert(sortAscending != null);
+    assert(rowsPerPage != null);
+    assert(rowsPerPage > 0);
+    assert(() {
+      if (onRowsPerPageChanged != null)
+        assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
+      return true;
+    });
+    assert(source != null);
+  }
 
   /// The table card's header.
   ///

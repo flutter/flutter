@@ -38,7 +38,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       parent: new ReverseAnimation(_controller),
       curve: Curves.fastOutSlowIn,
     );
-    _drawerDetailsPosition = new FractionalOffsetTween(
+    _drawerDetailsPosition = new Tween<FractionalOffset>(
       begin: const FractionalOffset(0.0, -1.0),
       end: const FractionalOffset(0.0, 0.0),
     ).animate(new CurvedAnimation(
@@ -93,10 +93,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
             new UserAccountsDrawerHeader(
               accountName: const Text('Zach Widget'),
               accountEmail: const Text('zach.widget@example.com'),
-              currentAccountPicture: const CircleAvatar(backgroundImage: const AssetImage(_kAsset0)),
-              otherAccountsPictures: const <Widget>[
-                const CircleAvatar(backgroundImage: const AssetImage(_kAsset1)),
-                const CircleAvatar(backgroundImage: const AssetImage(_kAsset2)),
+              currentAccountPicture: new CircleAvatar(backgroundImage: new AssetImage(_kAsset0)),
+              otherAccountsPictures: <Widget>[
+                new CircleAvatar(backgroundImage: new AssetImage(_kAsset1)),
+                new CircleAvatar(backgroundImage: new AssetImage(_kAsset2)),
               ],
               onDetailsPressed: () {
                 _showDrawerContents = !_showDrawerContents;
@@ -164,10 +164,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
               new Container(
                 width: 100.0,
                 height: 100.0,
-                decoration: const BoxDecoration(
+                decoration: new BoxDecoration(
                   shape: BoxShape.circle,
-                  image: const DecorationImage(
-                    image: const AssetImage(_kAsset0),
+                  image: new DecorationImage(
+                    image: new AssetImage(_kAsset0),
                   ),
                 ),
               ),

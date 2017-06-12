@@ -6,13 +6,12 @@ dependencies:
 
   flutter:
     sdk: flutter
-  url_launcher: ^0.4.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
     git:
       url: https://flutter.googlesource.com/gallery-assets
-      ref: 0b6cdb29b24ecc60781c2828086d955dacdc0152
+      ref: ef928550119411358b8b25e16aecde6ace513526
 
 dev_dependencies:
   flutter_test:

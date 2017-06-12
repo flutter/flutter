@@ -12,8 +12,9 @@ class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapDownDetails({ this.globalPosition: Offset.zero })
-    : assert(globalPosition != null);
+  TapDownDetails({ this.globalPosition: Offset.zero }) {
+    assert(globalPosition != null);
+  }
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -31,8 +32,9 @@ class TapUpDetails {
   /// Creates details for a [GestureTapUpCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapUpDetails({ this.globalPosition: Offset.zero })
-    : assert(globalPosition != null);
+  TapUpDetails({ this.globalPosition: Offset.zero }) {
+    assert(globalPosition != null);
+  }
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
@@ -96,10 +98,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void resolve(GestureDisposition disposition) {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
-      // This can happen if the superclass decides the primary pointer
-      // exceeded the touch slop, or if the recognizer is disposed.
       if (onTapCancel != null)
-        invokeCallback<Null>('spontaneous onTapCancel', onTapCancel);
+        invokeCallback<Null>('onTapCancel', onTapCancel); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
     super.resolve(disposition);
@@ -124,10 +124,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void rejectGesture(int pointer) {
     super.rejectGesture(pointer);
     if (pointer == primaryPointer) {
-      // Another gesture won the arena.
-      assert(state != GestureRecognizerState.possible);
+      assert(state == GestureRecognizerState.defunct);
       if (onTapCancel != null)
-        invokeCallback<Null>('forced onTapCancel', onTapCancel);
+        invokeCallback<Null>('onTapCancel', onTapCancel); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
   }
@@ -135,7 +134,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkDown() {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<Null>('onTapDown', () { onTapDown(new TapDownDetails(globalPosition: initialPosition)); });
+        invokeCallback<Null>('onTapDown', () => onTapDown(new TapDownDetails(globalPosition: initialPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _sentTapDown = true;
     }
   }
@@ -144,9 +143,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
       if (onTapUp != null)
-        invokeCallback<Null>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
+        invokeCallback<Null>('onTapUp', () => onTapUp(new TapUpDetails(globalPosition: _finalPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       if (onTap != null)
-        invokeCallback<Null>('onTap', onTap);
+        invokeCallback<Null>('onTap', onTap); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       _reset();
     }
   }

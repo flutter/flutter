@@ -4,8 +4,6 @@
 
 import 'dart:ui' show Offset;
 
-import 'package:flutter/foundation.dart';
-
 import 'lsq_solver.dart';
 
 export 'dart:ui' show Offset;
@@ -15,9 +13,7 @@ class Velocity {
   /// Creates a velocity.
   ///
   /// The [pixelsPerSecond] argument must not be null.
-  const Velocity({
-    @required this.pixelsPerSecond,
-  }) : assert(pixelsPerSecond != null);
+  const Velocity({ this.pixelsPerSecond });
 
   /// A velocity that isn't moving at all.
   static const Velocity zero = const Velocity(pixelsPerSecond: Offset.zero);
@@ -91,17 +87,12 @@ class Velocity {
 ///    useful velocity operations.
 class VelocityEstimate {
   /// Creates a dimensional velocity estimate.
-  ///
-  /// [pixelsPerSecond], [confidence], [duration], and [offset] must not be null.
   const VelocityEstimate({
-    @required this.pixelsPerSecond,
-    @required this.confidence,
-    @required this.duration,
-    @required this.offset,
-  }) : assert(pixelsPerSecond != null),
-       assert(confidence != null),
-       assert(duration != null),
-       assert(offset != null);
+    this.pixelsPerSecond,
+    this.confidence,
+    this.duration,
+    this.offset,
+  });
 
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;
@@ -125,9 +116,7 @@ class VelocityEstimate {
 }
 
 class _PointAtTime {
-  const _PointAtTime(this.point, this.time)
-      : assert(point != null),
-        assert(time != null);
+  const _PointAtTime(this.point, this.time);
 
   final Duration time;
   final Offset point;
@@ -136,7 +125,7 @@ class _PointAtTime {
   String toString() => '_PointAtTime($point at $time)';
 }
 
-/// Computes a pointer's velocity based on data from [PointerMoveEvent]s.
+/// Computes a pointer's velocity based on data from [PointerMove] events.
 ///
 /// The input data is provided by calling [addPosition]. Adding data is cheap.
 ///

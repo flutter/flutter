@@ -51,7 +51,7 @@ class Dialog extends StatelessWidget {
         child: new ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
           child: new Material(
-            elevation: 24.0,
+            elevation: 24,
             color: _getColor(context),
             type: MaterialType.card,
             child: child
@@ -71,7 +71,7 @@ class Dialog extends StatelessWidget {
 ///
 /// If the content is too large to fit on the screen vertically, the dialog will
 /// display the title and the actions and let the content overflow. Consider
-/// using a scrolling widget, such as [ListView], for [content] to avoid
+/// using a scrolling widget, such as [ScrollList], for [content] to avoid
 /// overflow.
 ///
 /// For dialogs that offer the user a choice between several options, consider
@@ -114,8 +114,8 @@ class AlertDialog extends StatelessWidget {
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
   ///
-  /// Typically, this is a [ListView] containing the contents of the dialog.
-  /// Using a [ListView] ensures that the contents can scroll if they are too
+  /// Typically, this is a [ScrollList] containing the contents of the dialog.
+  /// Using a [ScrollList] ensures that the contents can scroll if they are too
   /// big to fit on the display.
   final Widget content;
 
@@ -319,8 +319,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
     @required this.theme,
     bool barrierDismissible: true,
     @required this.child,
-  }) : assert(barrierDismissible != null),
-       _barrierDismissible = barrierDismissible;
+  }) : _barrierDismissible = barrierDismissible {
+    assert(barrierDismissible != null);
+  }
 
   final Widget child;
   final ThemeData theme;
@@ -357,13 +358,12 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// This function typically receives a [Dialog] widget as its child argument.
 /// Content below the dialog is dimmed with a [ModalBarrier].
 ///
-/// Returns a [Future] that resolves to the value (if any) that was passed to
+/// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
 /// See also:
-///  * [AlertDialog], for dialogs that have a row of buttons below a body.
-///  * [SimpleDialog], which handles the scrolling of the contents and does
-///    not show buttons below its body.
+///  * [SimpleDialog], which handles the scrolling of the contents but has no [actions].
+///  * [AlertDialog], for dialogs that have a row of buttons below the body.
 ///  * [Dialog], on which [SimpleDialog] and [AlertDialog] are based.
 ///  * <https://material.google.com/components/dialogs.html>
 Future<T> showDialog<T>({

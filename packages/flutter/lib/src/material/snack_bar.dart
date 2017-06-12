@@ -32,10 +32,10 @@ const Curve _snackBarFadeCurve = const Interval(0.72, 1.0, curve: Curves.fastOut
 
 /// Specify how a [SnackBar] was closed.
 ///
-/// The [ScaffoldState.showSnackBar] function returns a
-/// [ScaffoldFeatureController]. The value of the controller's closed property
-/// is a Future that resolves to a SnackBarClosedReason. Applications that need
-/// to know how a snackbar was closed can use this value.
+/// The [showSnackBar] function returns a [ScaffoldFeatureController]. The value
+/// of the controller's closed property is a Future that resolves to a
+/// SnackBarClosedReason. Applications that need to know how a snackbar
+/// was closed can use this value.
 ///
 /// Example:
 ///
@@ -54,10 +54,10 @@ enum SnackBarClosedReason {
   swipe,
 
   /// The snack bar was closed by the [ScaffoldFeatureController] close callback
-  /// or by calling [ScaffoldState.hideCurrentSnackBar] directly.
+  /// or by calling [hideCurrentSnackBar] directly.
   hide,
 
-  /// The snack bar was closed by an call to [ScaffoldState.removeCurrentSnackBar].
+  /// The snack bar was closed by an call to [removeCurrentSnackBar].
   remove,
 
   /// The snack bar was closed because its timer expired.
@@ -237,7 +237,7 @@ class SnackBar extends StatelessWidget {
               Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
             },
             child: new Material(
-              elevation: 6.0,
+              elevation: 6,
               color: backgroundColor ?? _kSnackBackground,
               child: new Theme(
                 data: darkTheme,

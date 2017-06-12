@@ -19,11 +19,6 @@ const String kDocRoot = 'dev/docs/doc';
 /// at the root of docs.flutter.io. We are keeping the files inside of
 /// docs.flutter.io/flutter for now, so we need to manipulate paths
 /// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
-///
-/// This will only work on UNIX systems, not Windows. It requires that 'git' be
-/// in your path. It requires that 'flutter' has been run previously. It uses
-/// the version of Dart downloaded by the 'flutter' tool in this repository and
-/// will crash if that is absent.
 Future<Null> main(List<String> args) async {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
@@ -55,13 +50,11 @@ dependencies:
   new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
   // Run pub.
-  Process process = await Process.start(
-    '../../bin/cache/dart-sdk/bin/pub',
-    <String>['get'],
+  Process process = await Process.start('pub', <String>['get'],
     workingDirectory: 'dev/docs',
     environment: <String, String>{
-      'FLUTTER_ROOT': Directory.current.path,
-    },
+      'FLUTTER_ROOT': Directory.current.path
+    }
   );
   printStream(process.stdout);
   printStream(process.stderr);
@@ -72,11 +65,8 @@ dependencies:
   createFooter('dev/docs/lib/footer.html');
 
   // Verify which version of dartdoc we're using.
-  final ProcessResult result = Process.runSync(
-    '../../bin/cache/dart-sdk/bin/pub',
-    <String>['global', 'run', 'dartdoc', '--version'],
-    workingDirectory: 'dev/docs',
-  );
+  final ProcessResult result = Process.runSync('pub',
+    <String>['global', 'run', 'dartdoc', '--version']);
   print('\n${result.stdout}');
 
   // Generate the documentation.
@@ -84,11 +74,10 @@ dependencies:
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
-    '--footer-text', 'lib/footer.html',
+    '--footer', 'lib/footer.html',
     '--exclude', 'temp_doc',
     '--favicon=favicon.ico',
-    '--use-categories',
-    '--category-order', 'flutter,Dart Core,flutter_test,flutter_driver',
+    '--use-categories'
   ];
 
   for (String libraryRef in libraryRefs(diskPath: true)) {
@@ -96,11 +85,7 @@ dependencies:
     args.add(libraryRef);
   }
 
-  process = await Process.start(
-    '../../bin/cache/dart-sdk/bin/pub',
-    args,
-    workingDirectory: 'dev/docs',
-  );
+  process = await Process.start('pub', args, workingDirectory: 'dev/docs');
   printStream(process.stdout);
   printStream(process.stderr);
   final int exitCode = await process.exitCode;
@@ -120,8 +105,8 @@ void createFooter(String footerPath) {
   final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
 
   new File(footerPath).writeAsStringSync(
-    '• </span class="no-break">$timestamp<span> '
-    '• </span class="no-break">$gitHead</span>'
+    '<p class="text-center" style="font-size: 10px">'
+    'Generated on $timestamp - Version $gitHead</p>'
   );
 }
 

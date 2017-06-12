@@ -19,6 +19,7 @@ import 'find.dart';
 import 'frame_sync.dart';
 import 'gesture.dart';
 import 'health.dart';
+import 'input.dart';
 import 'message.dart';
 import 'render_tree.dart';
 import 'timeline.dart';
@@ -158,8 +159,8 @@ class FlutterDriver {
     VMIsolate isolate = await vm.isolates.first.loadRunnable();
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
-    // It is currently reported as null, but we cannot rely on it because
-    // eventually the event will be reported as a non-null object. For now,
+    // It is currently reported as `null`, but we cannot rely on it because
+    // eventually the event will be reported as a non-`null` object. For now,
     // list all the events we know about. Later we'll check for "None" event
     // explicitly.
     //
@@ -212,25 +213,11 @@ class FlutterDriver {
         });
       }
 
-      /// Tells the Dart VM Service to notify us about "Isolate" events.
-      ///
-      /// This is a workaround for an issue in package:vm_service_client, which
-      /// subscribes to the "Isolate" stream lazily upon subscription, which
-      /// results in lost events.
-      ///
-      /// Details: https://github.com/dart-lang/vm_service_client/issues/17
-      Future<Null> enableIsolateStreams() async {
-        await connection.peer.sendRequest('streamListen', <String, String>{
-          'streamId': 'Isolate',
-        });
-      }
-
       // If the isolate is paused at the start, e.g. via the --start-paused
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
-      await enableIsolateStreams();
-      final Future<dynamic> whenServiceExtensionReady = waitForServiceExtension();
       final Future<dynamic> whenResumed = resumeLeniently();
+      final Future<dynamic> whenServiceExtensionReady = waitForServiceExtension();
       await whenResumed;
 
       try {
@@ -338,6 +325,24 @@ class FlutterDriver {
   Future<Null> tap(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(new Tap(finder, timeout: timeout));
     return null;
+  }
+
+  /// Sets the text value of the [TextField] widget located by [finder].
+  ///
+  /// This command invokes the `onChanged` handler of the `Input` widget with
+  /// the provided [text].
+  Future<Null> setInputText(SerializableFinder finder, String text, {Duration timeout}) async {
+    await _sendCommand(new SetInputText(finder, text, timeout: timeout));
+    return null;
+  }
+
+  /// Submits the current text value of the [TextField] widget located by [finder].
+  ///
+  /// This command invokes the `onSubmitted` handler of the [TextField] widget
+  /// and the returns the submitted text value.
+  Future<String> submitInputText(SerializableFinder finder, {Duration timeout}) async {
+    final Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder, timeout: timeout));
+    return json['text'];
   }
 
   /// Waits until [finder] locates the target.

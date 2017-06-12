@@ -8,28 +8,17 @@ import 'box.dart';
 import 'object.dart';
 
 /// How the child is inscribed into the available space.
-///
-/// See also:
-///
-///  * [RenderFlex], the flex render object.
-///  * [Column], [Row], and [Flex], the flex widgets.
-///  * [Expanded], the widget equivalent of [tight].
-///  * [Flexible], the widget equivalent of [loose].
 enum FlexFit {
   /// The child is forced to fill the available space.
-  ///
-  /// The [Expanded] widget assigns this kind of [FlexFit] to its child.
   tight,
 
   /// The child can be at most as large as the available space (but is
   /// allowed to be smaller).
-  ///
-  /// The [Flexible] widget assigns this kind of [FlexFit] to its child.
   loose,
 }
 
 /// Parent data for use with [RenderFlex].
-class FlexParentData extends ContainerBoxParentData<RenderBox> {
+class FlexParentData extends ContainerBoxParentDataMixin<RenderBox> {
   /// The flex factor to use for this child
   ///
   /// If null or zero, the child is inflexible and determines its own size. If
@@ -48,23 +37,17 @@ class FlexParentData extends ContainerBoxParentData<RenderBox> {
   FlexFit fit;
 
   @override
-  String toString() => '${super.toString()}; flex=$flex; fit=$fit';
+  String toString() => '${super.toString()}; flex=$flex';
 }
 
-/// How much space should be occupied in the main axis.
+/// How much space space should be occupied in the main axis.
 ///
 /// During a flex layout, available space along the main axis is allocated to
 /// children. After allocating space, there might be some remaining free space.
 /// This value controls whether to maximize or minimize the amount of free
 /// space, subject to the incoming layout constraints.
 ///
-/// See also:
-///
-///  * [Column], [Row], and [Flex], the flex widgets.
-///  * [Expanded] and [Flexible], the widgets that controls a flex widgets'
-///    children's flex.
-///  * [RenderFlex], the flex render object.
-///  * [MainAxisAlignment], which controls how the free space is distributed.
+/// See [Row], [Column], [MainAxisAlignment], [Flexible].
 enum MainAxisSize {
   /// Minimize the amount of free space along the main axis, subject to the
   /// incoming layout constraints.
@@ -84,11 +67,6 @@ enum MainAxisSize {
 }
 
 /// How the children should be placed along the main axis in a flex layout.
-///
-/// See also:
-///
-///  * [Column], [Row], and [Flex], the flex widgets.
-///  * [RenderFlex], the flex render object.
 enum MainAxisAlignment {
   /// Place the children as close to the start of the main axis as possible.
   start,
@@ -112,41 +90,20 @@ enum MainAxisAlignment {
 }
 
 /// How the children should be placed along the cross axis in a flex layout.
-///
-/// See also:
-///
-///  * [Column], [Row], and [Flex], the flex widgets.
-///  * [RenderFlex], the flex render object.
 enum CrossAxisAlignment {
-  /// Place the children with their start edge aligned with the start side of
-  /// the cross axis.
-  ///
-  /// For example, in a column (a flex with a vertical axis), this aligns the
-  /// left edge of the children along the left edge of the column.
+  /// Place the children as close to the start of the cross axis as possible.
   start,
 
   /// Place the children as close to the end of the cross axis as possible.
-  ///
-  /// For example, in a column (a flex with a vertical axis), this aligns the
-  /// right edge of the children along the right edge of the column.
   end,
 
-  /// Place the children so that their centers align with the middle of the
-  /// cross axis.
-  ///
-  /// This is the default cross-axis alignment.
+  /// Place the children as close to the middle of the cross axis as possible.
   center,
 
   /// Require the children to fill the cross axis.
-  ///
-  /// This causes the constraints passed to the children to be tight in the
-  /// cross axis.
   stretch,
 
   /// Place the children along the cross axis such that their baselines match.
-  ///
-  /// If the main axis is vertical, then this value is treated like [start]
-  /// (since baselines are always horizontal).
   baseline,
 }
 
@@ -201,15 +158,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
     TextBaseline textBaseline
-  }) : assert(direction != null),
-       assert(mainAxisAlignment != null),
-       assert(mainAxisSize != null),
-       assert(crossAxisAlignment != null),
-       _direction = direction,
+  }) : _direction = direction,
        _mainAxisAlignment = mainAxisAlignment,
        _mainAxisSize = mainAxisSize,
        _crossAxisAlignment = crossAxisAlignment,
        _textBaseline = textBaseline {
+    assert(direction != null);
+    assert(mainAxisAlignment != null);
+    assert(mainAxisSize != null);
+    assert(crossAxisAlignment != null);
     addAll(children);
   }
 
@@ -235,7 +192,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
   }
 
-  /// How much space should be occupied in the main axis.
+  /// How much space space should be occupied in the main axis.
   ///
   /// After allocating space to children, there might be some remaining free
   /// space. This value controls whether to maximize or minimize the amount of
@@ -272,7 +229,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
   set textBaseline(TextBaseline value) {
-    assert(_crossAxisAlignment != CrossAxisAlignment.baseline || value != null);
     if (_textBaseline != value) {
       _textBaseline = value;
       markNeedsLayout();

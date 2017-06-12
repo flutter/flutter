@@ -12,7 +12,8 @@ void main() {
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
     SemanticsTester semantics = new SemanticsTester(tester);
 
-    final TestSemantics expectedSemantics = new TestSemantics.root(
+    final TestSemantics expectedSemantics = new TestSemantics(
+      id: 0,
       label: 'test1',
     );
 
@@ -58,13 +59,13 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         label: 'test1',
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 1,
             label: 'test2a',
-            rect: TestSemantics.fullScreen,
           )
         ]
       )
@@ -89,18 +90,17 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         label: 'test1',
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 2,
             label: 'middle',
-            rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
               new TestSemantics(
                 id: 1,
                 label: 'test2b',
-                rect: TestSemantics.fullScreen,
               )
             ]
           )

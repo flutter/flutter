@@ -63,7 +63,7 @@ GOTO :after_subroutine
   IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
-  SET /P stamp_value=<"%stamp_path%"
+  SET /p stamp_value=<"%stamp_path%"
   IF !stamp_value! NEQ !revision! GOTO do_snapshot
   REM Compare "last modified" timestamps
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
@@ -80,9 +80,9 @@ GOTO :after_subroutine
   :do_sdk_update_and_snapshot
     ECHO Checking Dart SDK version...
     CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
-    IF "%ERRORLEVEL%" NEQ "0" (
-      ECHO Error: Unable to update Dart SDK. Retrying...
-      timeout /t 5 /nobreak
+    SET exit_code=%ERRORLEVEL%
+    IF %exit_code% NEQ 0 (
+      ECHO Error: Unable to update Dart SDK. Retrying... Press Ctrl+C to abort.
       GOTO :do_sdk_update_and_snapshot
     )
 
@@ -90,38 +90,9 @@ GOTO :after_subroutine
     ECHO: > "%cache_dir%\.dartignore"
     ECHO Updating flutter tool...
     PUSHD "%flutter_tools_dir%"
-
-    REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
-    SETLOCAL
-      IF "%TRAVIS%" == "true" GOTO on_bot
-      IF "%BOT%" == "true" GOTO on_bot
-      IF "%CONTINUOUS_INTEGRATION%" == "true" GOTO on_bot
-      IF "%CHROME_HEADLESS%" == "1" GOTO on_bot
-      IF "%APPVEYOR%" == "true" GOTO on_bot
-      IF "%CI%" == "true" GOTO on_bot
-      GOTO not_on_bot
-      :on_bot
-        SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
-      :not_on_bot
-      SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
-      :retry_pub_upgrade
-      CALL "%pub%" upgrade --verbosity=error --no-packages-dir
-      IF "%ERRORLEVEL%" NEQ "0" (
-        ECHO Error: Unable to 'pub upgrade' flutter tool. Retrying...
-        timeout /t 5 /nobreak
-        GOTO :retry_pub_upgrade
-      )
-    ENDLOCAL
-
+    CALL "%pub%" upgrade --verbosity=error --no-packages-dir
     POPD
-
-    :retry_dart_snapshot
     CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
-    IF "%ERRORLEVEL%" NEQ "0" (
-      ECHO Error: Unable to create dart snapshot for flutter tool. Retrying...
-      timeout /t 5 /nobreak
-      GOTO :retry_dart_snapshot
-    )
     >"%stamp_path%" ECHO %revision%
 
   REM Exit Subroutine
@@ -133,13 +104,8 @@ CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
 SET exit_code=%ERRORLEVEL%
 
 REM The VM exits with code 253 if the snapshot version is out-of-date.
-IF "%exit_code%" EQU "253" (
+IF /I "%exit_code%" EQU "253" (
   CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
-  SET exit_code=%ERRORLEVEL%
-  IF "%exit_code%" EQU "253" (
-    ECHO Error: Unable to create dart snapshot for flutter tool.
-    EXIT /B %exit_code%
-  )
   CALL "%dart%" %FLUTTER_TOOL_ARGS% "%snapshot_path%" %*
   SET exit_code=%ERRORLEVEL%
 )

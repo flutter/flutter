@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -33,61 +31,45 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
 
-  Future<bool> get hasWorkingLibimobiledevice async {
-    // Verify that libimobiledevice tools are installed.
-    if (!hasIDeviceId)
-      return false;
+  bool get hasIDeviceInstaller => exitsHappy(<String>['ideviceinstaller', '-h']);
 
-    // If a device is attached, verify that we can get its name.
-    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['idevicename']))
-      return false;
-
-    return true;
-  }
-
-  Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
-
-  Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
+  bool get hasIosDeploy => exitsHappy(<String>['ios-deploy', '--version']);
 
   String get iosDeployMinimumVersion => '1.9.0';
 
-  Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
+  String get iosDeployVersionText => runSync(<String>['ios-deploy', '--version']).replaceAll('\n', '');
 
   bool get hasHomebrew => os.which('brew') != null;
 
   bool get hasPythonSixModule => kPythonSix.isInstalled;
 
-  Future<bool> get hasCocoaPods => exitsHappyAsync(<String>['pod', '--version']);
+  bool get hasCocoaPods => exitsHappy(<String>['pod', '--version']);
 
   String get cocoaPodsMinimumVersion => '1.0.0';
 
-  Future<String> get cocoaPodsVersionText async => (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
+  String get cocoaPodsVersionText => runSync(<String>['pod', '--version']).trim();
 
-  Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
-    if (!await hasIosDeploy)
+  bool get _iosDeployIsInstalledAndMeetsVersionCheck {
+    if (!hasIosDeploy)
       return false;
     try {
-      final Version version = new Version.parse(await iosDeployVersionText);
+      final Version version = new Version.parse(iosDeployVersionText);
       return version >= new Version.parse(iosDeployMinimumVersion);
     } on FormatException catch (_) {
       return false;
     }
   }
 
-  Future<bool> get isCocoaPodsInstalledAndMeetsVersionCheck async {
-    if (!await hasCocoaPods)
+  bool get cocoaPodsInstalledAndMeetsVersionCheck {
+    if (!hasCocoaPods)
       return false;
     try {
-      final Version installedVersion = new Version.parse(await cocoaPodsVersionText);
+      final Version installedVersion = new Version.parse(cocoaPodsVersionText);
       return installedVersion >= new Version.parse(cocoaPodsMinimumVersion);
     } on FormatException {
       return false;
     }
   }
-
-  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
-  Future<bool> get isCocoaPodsInitialized => fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
 
   @override
   Future<ValidationResult> validate() async {
@@ -132,9 +114,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         messages.add(new ValidationMessage.error(
             'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
             'Download at: https://developer.apple.com/xcode/download/\n'
-            'Or install Xcode via the App Store.\n'
-            'Once installed, run:\n'
-            '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer'
+            'Once installed, run \'sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\'.'
         ));
       }
     }
@@ -151,16 +131,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (hasHomebrew) {
       brewStatus = ValidationType.installed;
 
-      if (!await hasWorkingLibimobiledevice) {
-        brewStatus = ValidationType.partial;
-        messages.add(new ValidationMessage.error(
-            'libimobiledevice and ideviceinstaller are not installed or require updating. To update, run:\n'
-            '  brew update\n'
-            '  brew uninstall --ignore-dependencies libimobiledevice\n'
-            '  brew install --HEAD libimobiledevice\n'
-            '  brew install ideviceinstaller'
-        ));
-      } else if (!await hasIDeviceInstaller) {
+      if (!hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
@@ -172,12 +143,12 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       }
 
       // Check ios-deploy is installed at meets version requirements.
-      if (await hasIosDeploy) {
-        messages.add(new ValidationMessage('ios-deploy ${await iosDeployVersionText}'));
+      if (hasIosDeploy) {
+        messages.add(new ValidationMessage('ios-deploy $iosDeployVersionText'));
       }
-      if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
+      if (!hasIDeviceId || !_iosDeployIsInstalledAndMeetsVersionCheck) {
         brewStatus = ValidationType.partial;
-        if (await hasIosDeploy) {
+        if (hasIosDeploy) {
           messages.add(new ValidationMessage.error(
             'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
             '  brew update\n'
@@ -190,36 +161,37 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
             '  brew install ios-deploy'
           ));
         }
-      }
-
-      if (await isCocoaPodsInstalledAndMeetsVersionCheck) {
-        if (await isCocoaPodsInitialized) {
-          messages.add(new ValidationMessage('CocoaPods version ${await cocoaPodsVersionText}'));
-        } else {
+      } else {
+        // Check for compatibility between libimobiledevice and Xcode.
+        // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
+        final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+        if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['ideviceName'])) {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
-            'CocoaPods installed but not initialized.\n'
-            '$noCocoaPodsConsequence\n'
-            'To initialize CocoaPods, run:\n'
-            '  pod setup\n'
-            'once to finalize CocoaPods\' installation.'
+            'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
+            '  brew update\n'
+            '  brew uninstall --ignore-dependencies libimobiledevice\n'
+            '  brew install --HEAD libimobiledevice'
           ));
         }
+      }
+      if (cocoaPodsInstalledAndMeetsVersionCheck) {
+        messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
       } else {
         brewStatus = ValidationType.partial;
-        if (!await hasCocoaPods) {
+        if (!hasCocoaPods) {
           messages.add(new ValidationMessage.error(
-            'CocoaPods not installed.\n'
-            '$noCocoaPodsConsequence\n'
-            'To install:\n'
-            '$cocoaPodsInstallInstructions'
+            'CocoaPods not installed. To install:\n'
+            '  brew update\n'
+            '  brew install cocoapods\n'
+            '  pod setup'
           ));
         } else {
           messages.add(new ValidationMessage.error(
-            'CocoaPods out of date ($cocoaPodsMinimumVersion is required).\n'
-            '$noCocoaPodsConsequence\n'
-            'To upgrade:\n'
-            '$cocoaPodsUpgradeInstructions'
+            'CocoaPods out of date ($cocoaPodsMinimumVersion is required). To upgrade:\n'
+            '  brew update\n'
+            '  brew upgrade cocoapods\n'
+            '  pod setup'
           ));
         }
       }

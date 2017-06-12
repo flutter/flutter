@@ -25,9 +25,10 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 1,
             actions: SemanticsAction.tap.index,
             label: 'ABC',

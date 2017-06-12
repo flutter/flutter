@@ -4,43 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'icon.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'theme.dart';
-
-/// A "back" icon that's appropriate for the current [TargetPlatform].
-///
-/// The current platform is determined by querying for the ambient [Theme].
-///
-/// See also:
-///
-///  * [BackButton], an [IconButton] with a [BackButtonIcon] that calls
-///    [Navigator.maybePop] to return to the previous route.
-///  * [IconButton], which is a more general widget for creating buttons
-///    with icons.
-///  * [Icon], a material design icon.
-///  * [ThemeData.platform], which specifies the current platform.
-class BackButtonIcon extends StatelessWidget {
-  /// Creates an icon that shows the appropriate "back" image for
-  /// the current platform (as obtained from the [Theme]).
-  const BackButtonIcon({ Key key }) : super(key: key);
-
-  /// Returns tha appropriate "back" icon for the given `platform`.
-  static IconData _getIconData(TargetPlatform platform) {
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return Icons.arrow_back;
-      case TargetPlatform.iOS:
-        return Icons.arrow_back_ios;
-    }
-    assert(false);
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) => new Icon(_getIconData(Theme.of(context).platform));
-}
 
 /// A material design back button.
 ///
@@ -60,8 +27,6 @@ class BackButtonIcon extends StatelessWidget {
 ///
 ///  * [AppBar], which automatically uses a [BackButton] in its
 ///    [AppBar.leading] slot when appropriate.
-///  * [BackButtonIcon], which is useful if you need to create a back button
-///    that responds differently to being pressed.
 ///  * [IconButton], which is a more general widget for creating buttons with
 ///    icons.
 ///  * [CloseButton], an alternative which may be more appropriate for leaf
@@ -71,19 +36,32 @@ class BackButton extends StatelessWidget {
   /// target platform.
   const BackButton({ Key key }) : super(key: key);
 
+  /// Returns tha appropriate "back" icon for the given `platform`.
+  static IconData getIconData(TargetPlatform platform) {
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return Icons.arrow_back;
+      case TargetPlatform.iOS:
+        return Icons.arrow_back_ios;
+    }
+    assert(false);
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new IconButton(
-      icon: const BackButtonIcon(),
+      icon: new Icon(getIconData(Theme.of(context).platform)),
       tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
       onPressed: () {
         Navigator.of(context).maybePop();
-      }
+      },
     );
   }
 }
 
-/// A material design close button.
+/// A Material Design close button.
 ///
 /// A [CloseButton] is an [IconButton] with a "close" icon. When pressed, the
 /// close button calls [Navigator.maybePop] to return to the previous route.
@@ -98,7 +76,6 @@ class BackButton extends StatelessWidget {
 ///  * [BackButton], which is more appropriate for middle nodes in the
 ///    navigation tree or where pages can be popped instantaneously with
 ///    no user data consequence.
-///  * [IconButton], to create other material design icon buttons.
 class CloseButton extends StatelessWidget {
   /// Creates a Material Design close button.
   const CloseButton({ Key key }) : super(key: key);
@@ -107,7 +84,7 @@ class CloseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return new IconButton(
       icon: const Icon(Icons.close),
-      tooltip: 'Close', // TODO(ianh): Figure out how to localize this string
+      tooltip: 'Close',
       onPressed: () {
         Navigator.of(context).maybePop();
       },

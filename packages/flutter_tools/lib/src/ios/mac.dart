@@ -22,7 +22,6 @@ import '../flx.dart' as flx;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
-import 'code_signing.dart';
 import 'xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 7;
@@ -138,6 +137,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   bool codesign: true
 }) async {
+  final String flutterProjectPath = fs.currentDirectory.path;
+  updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
+
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
 
@@ -146,25 +148,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  String developmentTeam;
-  if (codesign && buildForDevice)
-    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
-
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final bool hasFlutterPlugins = injectPlugins();
+  injectPlugins();
 
-  if (hasFlutterPlugins)
-    await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
-
-  updateXcodeGeneratedProperties(
-    projectPath: fs.currentDirectory.path,
-    mode: mode,
-    target: target,
-    hasPlugins: hasFlutterPlugins
-  );
+  await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -175,9 +165,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     '-configuration', 'Release',
     'ONLY_ACTIVE_ARCH=YES',
   ];
-
-  if (developmentTeam != null)
-    commands.add('DEVELOPMENT_TEAM=$developmentTeam');
 
   final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
@@ -246,39 +233,62 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
-  if (result.xcodeBuildExecution != null &&
-      result.xcodeBuildExecution.buildForPhysicalDevice &&
-      result.stdout?.contains('BCEROR') == true &&
-      // May need updating if Xcode changes its outputs.
-      result.stdout?.contains('Xcode couldn\'t find a provisioning profile matching') == true) {
-    printError(noProvisioningProfileInstruction, emphasis: true);
-    return;
-  }
-  if (result.xcodeBuildExecution != null &&
-      result.xcodeBuildExecution.buildForPhysicalDevice &&
-      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
-      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
-    printError(noDevelopmentTeamInstruction, emphasis: true);
-    return;
-  }
-  if (app.id?.contains('com.yourcompany') ?? false) {
-    printError('');
-    printError('It appears that your application still contains the default signing identifier.');
-    printError("Try replacing 'com.yourcompany' with your signing id in Xcode:");
-    printError('  open ios/Runner.xcworkspace');
-    return;
+Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
+  final File plistFile = fs.file('ios/Runner/Info.plist');
+  if (plistFile.existsSync()) {
+    final String plistContent = plistFile.readAsStringSync();
+    if (plistContent.contains('com.yourcompany')) {
+      printError('');
+      printError('It appears that your application still contains the default signing identifier.');
+      printError("Try replacing 'com.yourcompany' with your signing id");
+      printError('in ${plistFile.absolute.path}');
+      return;
+    }
   }
   if (result.stdout?.contains('Code Sign error') == true) {
     printError('');
     printError('It appears that there was a problem signing your application prior to installation on the device.');
     printError('');
-    printError('Verify that the Bundle Identifier in your project is your signing id in Xcode');
-    printError('  open ios/Runner.xcworkspace');
-    printError('');
-    printError("Also try selecting 'Product > Build' to fix the problem:");
+    if (plistFile.existsSync()) {
+      printError('Verify that the CFBundleIdentifier in the Info.plist file is your signing id');
+      printError('  ${plistFile.absolute.path}');
+      printError('');
+    }
+    printError("Try launching Xcode and selecting 'Product > Build' to fix the problem:");
+    printError("  open ios/Runner.xcworkspace");
     return;
+  }
+  if (result.xcodeBuildExecution != null) {
+    assert(result.xcodeBuildExecution.buildForPhysicalDevice != null);
+    assert(result.xcodeBuildExecution.buildCommands != null);
+    assert(result.xcodeBuildExecution.appDirectory != null);
+    if (result.xcodeBuildExecution.buildForPhysicalDevice &&
+        result.xcodeBuildExecution.buildCommands.contains('build')) {
+      final RunResult checkBuildSettings = await runAsync(
+        result.xcodeBuildExecution.buildCommands..add('-showBuildSettings'),
+        workingDirectory: result.xcodeBuildExecution.appDirectory,
+        allowReentrantFlutter: true
+      );
+      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
+      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
+      if (checkBuildSettings.exitCode == 0 &&
+          !checkBuildSettings.stdout?.contains(new RegExp(r'\bDEVELOPMENT_TEAM\b')) == true &&
+          !checkBuildSettings.stdout?.contains(new RegExp(r'\bPROVISIONING_PROFILE\b')) == true) {
+        printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Building an iOS app requires a selected Development Team with a Provisioning Profile
+Please ensure that a Development Team is selected by:
+  1- Opening the Flutter project's Xcode target with
+       open ios/Runner.xcworkspace
+  2- Select the 'Runner' project in the navigator then the 'Runner' target
+     in the project settings
+  3- In the 'General' tab, make sure a 'Development Team' is selected\n
+For more information, please visit:
+  https://flutter.io/setup/#deploy-to-ios-devices\n
+Or run on an iOS simulator
+═══════════════════════════════════════════════════════════════════════════════════''');
+      }
+    }
   }
 }
 
@@ -337,43 +347,11 @@ bool _checkXcodeVersion() {
   return true;
 }
 
-final String noCocoaPodsConsequence = '''
-  CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
-  Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
-  For more info, see https://flutter.io/platform-plugins''';
-
-final String cocoaPodsInstallInstructions = '''
-  brew update
-  brew install cocoapods
-  pod setup''';
-
-final String cocoaPodsUpgradeInstructions = '''
-  brew update
-  brew upgrade cocoapods
-  pod setup''';
-
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!await doctor.iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
+    if (!doctor.iosWorkflow.cocoaPodsInstalledAndMeetsVersionCheck) {
       final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
-      printError(
-        'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
-        '$noCocoaPodsConsequence\n'
-        'To install:\n'
-        '$cocoaPodsInstallInstructions\n',
-        emphasis: true,
-      );
-      return;
-    }
-    if (!await doctor.iosWorkflow.isCocoaPodsInitialized) {
-      printError(
-        'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
-        '$noCocoaPodsConsequence\n'
-        'To initialize CocoaPods, run:\n'
-        '  pod setup\n'
-        'once to finalize CocoaPods\' installation.',
-        emphasis: true,
-      );
+      printError('Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.');
       return;
     }
     try {

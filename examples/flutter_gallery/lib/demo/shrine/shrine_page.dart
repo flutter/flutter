@@ -15,16 +15,17 @@ enum ShrineAction {
 }
 
 class ShrinePage extends StatefulWidget {
-  const ShrinePage({
+  ShrinePage({
     Key key,
     @required this.scaffoldKey,
     @required this.body,
     this.floatingActionButton,
     this.products,
     this.shoppingCart
-  }) : assert(body != null),
-       assert(scaffoldKey != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(body != null);
+    assert(scaffoldKey != null);
+  }
 
   final GlobalKey<ScaffoldState> scaffoldKey;
   final Widget body;
@@ -38,10 +39,10 @@ class ShrinePage extends StatefulWidget {
 
 /// Defines the Scaffold, AppBar, etc that the demo pages have in common.
 class ShrinePageState extends State<ShrinePage> {
-  double _appBarElevation = 0.0;
+  int _appBarElevation = 0;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    final double elevation = notification.metrics.extentBefore <= 0.0 ? 0.0 : 1.0;
+    final int elevation = notification.metrics.extentBefore <= 0.0 ? 0 : 1;
     if (elevation != _appBarElevation) {
       setState(() {
         _appBarElevation = elevation;

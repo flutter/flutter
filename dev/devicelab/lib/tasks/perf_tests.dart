@@ -49,7 +49,7 @@ TaskFunction createComplexLayoutBuildTest() {
 TaskFunction createHelloWorldMemoryTest() {
   return new MemoryTest(
     '${flutterDirectory.path}/examples/hello_world',
-    'io.flutter.examples.hello_world',
+    'io.flutter.examples.HelloWorld',
   );
 }
 
@@ -65,7 +65,6 @@ TaskFunction createGalleryBackButtonMemoryTest() {
   return new AndroidBackButtonMemoryTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
     'io.flutter.examples.gallery',
-    'io.flutter.examples.gallery.MainActivity',
   );
 }
 
@@ -73,9 +72,6 @@ TaskFunction createFlutterViewStartupTest() {
   return new StartupTest(
       '${flutterDirectory.path}/examples/flutter_view',
       reportMetrics: false,
-      // This project has a non-standard CocoaPods Podfile. Run pod install
-      // before building the project.
-      runPodInstall: true,
   );
 }
 
@@ -83,14 +79,10 @@ TaskFunction createFlutterViewStartupTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  const StartupTest(this.testDirectory, { this.reportMetrics: true, this.runPodInstall: false });
+  StartupTest(this.testDirectory, { this.reportMetrics: true });
 
   final String testDirectory;
   final bool reportMetrics;
-  /// Used to trigger a `pod install` when the project has a custom Podfile and
-  /// flutter build ios won't automatically run `pod install` via the managed
-  /// plugin system.
-  final bool runPodInstall;
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
@@ -98,8 +90,6 @@ class StartupTest {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-        if (runPodInstall)
-          await runPodInstallForCustomPodfile(testDirectory);
         await prepareProvisioningCertificates(testDirectory);
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
@@ -128,7 +118,7 @@ class StartupTest {
 /// performance.
 class PerfTest {
 
-  const PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
+  PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
 
   final String testDirectory;
   final String testTarget;
@@ -177,11 +167,9 @@ class PerfTest {
   }
 }
 
-/// Measures how long it takes to build a Flutter app and how big the compiled
-/// code is.
 class BuildTest {
 
-  const BuildTest(this.testDirectory);
+  BuildTest(this.testDirectory);
 
   final String testDirectory;
 
@@ -191,58 +179,27 @@ class BuildTest {
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final Map<String, dynamic> aotResults = await _buildAot();
-      final Map<String, dynamic> debugResults = await _buildDebug();
+      final Stopwatch watch = new Stopwatch()..start();
+      final String buildLog = await evalFlutter('build', options: <String>[
+        'aot',
+        '-v',
+        '--profile',
+        '--no-pub',
+        '--target-platform', 'android-arm'  // Generate blobs instead of assembly.
+      ]);
+      watch.stop();
 
-      final Map<String, dynamic> metrics = <String, dynamic>{}
-        ..addAll(aotResults)
-        ..addAll(debugResults);
+      final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
 
-      return new TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
+      final Map<String, dynamic> data = new Map<String, dynamic>.fromIterable(
+        metricExpression.allMatches(buildLog),
+        key: (Match m) => _sdkNameToMetricName(m.group(1)),
+        value: (Match m) => int.parse(m.group(2)),
+      );
+      data['aot_snapshot_build_millis'] = watch.elapsedMilliseconds;
+
+      return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
     });
-  }
-
-  static Future<Map<String, dynamic>> _buildAot() async {
-    await flutter('build', options: <String>['clean']);
-    final Stopwatch watch = new Stopwatch()..start();
-    final String buildLog = await evalFlutter('build', options: <String>[
-      'aot',
-      '-v',
-      '--release',
-      '--no-pub',
-      '--target-platform', 'android-arm'  // Generate blobs instead of assembly.
-    ]);
-    watch.stop();
-
-    final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
-    final Map<String, dynamic> metrics = new Map<String, dynamic>.fromIterable(
-      metricExpression.allMatches(buildLog),
-      key: (Match m) => _sdkNameToMetricName(m.group(1)),
-      value: (Match m) => int.parse(m.group(2)),
-    );
-    metrics['aot_snapshot_build_millis'] = watch.elapsedMilliseconds;
-
-    return metrics;
-  }
-
-  static Future<Map<String, dynamic>> _buildDebug() async {
-    await flutter('build', options: <String>['clean']);
-
-    final Stopwatch watch = new Stopwatch();
-    if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-      await prepareProvisioningCertificates(cwd);
-      watch.start();
-      await flutter('build', options: <String>['ios', '--debug']);
-      watch.stop();
-    } else {
-      watch.start();
-      await flutter('build', options: <String>['apk', '--debug']);
-      watch.stop();
-    }
-
-    return <String, dynamic>{
-      'debug_full_build_millis': watch.elapsedMilliseconds,
-    };
   }
 
   static String _sdkNameToMetricName(String sdkName) {
@@ -263,7 +220,7 @@ class BuildTest {
 
 /// Measure application memory usage.
 class MemoryTest {
-  const MemoryTest(this.testDirectory, this.packageName, { this.testTarget });
+  MemoryTest(this.testDirectory, this.packageName, { this.testTarget });
 
   final String testDirectory;
   final String packageName;
@@ -332,11 +289,10 @@ class MemoryTest {
 /// Measure application memory usage after pausing and resuming the app
 /// with the Android back button.
 class AndroidBackButtonMemoryTest {
-  const AndroidBackButtonMemoryTest(this.testDirectory, this.packageName, this.activityName);
-
   final String testDirectory;
   final String packageName;
-  final String activityName;
+
+  AndroidBackButtonMemoryTest(this.testDirectory, this.packageName);
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
@@ -367,7 +323,7 @@ class AndroidBackButtonMemoryTest {
       for (int i = 0; i < 10; i++) {
         await device.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
         await new Future<Null>.delayed(const Duration(milliseconds: 1000));
-        final String output = await device.shellEval('am', <String>['start', '-n', '$packageName/$activityName']);
+        final String output = await device.shellEval('am', <String>['start', '-n', 'io.flutter.examples.gallery/io.flutter.app.FlutterActivity']);
         print(output);
         if (output.contains('Error'))
           return new TaskResult.failure('unable to launch activity');

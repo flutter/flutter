@@ -18,59 +18,14 @@ import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
-import 'scroll_position_with_single_context.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
-/// Signature used by [Scrollable] to build the viewport through which the
-/// scrollable content is displayed.
 typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 
-/// A widget that scrolls.
-///
-/// [Scrollable] implements the interaction model for a scrollable widget,
-/// including gesture recognition, but does not have an opinion about how the
-/// viewport, which actually displays the children, is constructed.
-///
-/// It's rare to construct a [Scrollable] directly. Instead, consider [ListView]
-/// or [GridView], which combine scrolling, viewporting, and a layout model. To
-/// combine layout models (or to use a custom layout mode), consider using
-/// [CustomScrollView].
-///
-/// The static [Scrollable.of] and [Scrollable.ensureVisible] functions are
-/// often used to interact with the [Scrollable] widget inside a [ListView] or
-/// a [GridView].
-///
-/// To further customize scrolling behavior with a [Scrollable]:
-///
-/// 1. You can provide a [viewportBuilder] to customize the child model. For
-///    example, [SingleChildScrollView] uses a viewport that displays a single
-///    box child whereas [CustomScrollView] uses a [Viewport] or a
-///    [ShrinkWrappingViewport], both of which display a list of slivers.
-///
-/// 2. You can provide a custom [ScrollController] that creates a custom
-///    [ScrollPosition] subclass. For example, [PageView] uses a
-///    [PageController], which creates a page-oriented scroll position subclass
-///    that keeps the same page visible when the [Scrollable] resizes.
-///
-/// See also:
-///
-///  * [ListView], which is a commonly used [ScrollView] that displays a
-///    scrolling, linear list of child widgets.
-///  * [PageView], which is a scrolling list of child widgets that are each the
-///    size of the viewport.
-///  * [GridView], which is a [ScrollView] that displays a scrolling, 2D array
-///    of child widgets.
-///  * [CustomScrollView], which is a [ScrollView] that creates custom scroll
-///    effects using slivers.
-///  * [SingleChildScrollView], which is a scrollable widget that has a single
-///    child.
 class Scrollable extends StatefulWidget {
-  /// Creates a widget that scrolls.
-  ///
-  /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
     Key key,
     this.axisDirection: AxisDirection.down,
@@ -81,65 +36,14 @@ class Scrollable extends StatefulWidget {
        assert(viewportBuilder != null),
        super (key: key);
 
-  /// The direction in which this widget scrolls.
-  ///
-  /// For example, if the [axisDirection] is [AxisDirection.down], increasing
-  /// the scroll position will cause content below the bottom of the viewport to
-  /// become visible through the viewport. Similarly, if [axisDirection] is
-  /// [AxisDirection.right], increasing the scroll position will cause content
-  /// beyond the right edge of the viewport to become visible through the
-  /// viewport.
-  ///
-  /// Defaults to [AxisDirection.down].
   final AxisDirection axisDirection;
 
-  /// An object that can be used to control the position to which this widget is
-  /// scrolled.
-  ///
-  /// See also:
-  ///
-  ///  * [ensureVisible], which animates the scroll position to reveal a given
-  ///    [BuildContext].
   final ScrollController controller;
 
-  /// How the widgets should respond to user input.
-  ///
-  /// For example, determines how the widget continues to animate after the
-  /// user stops dragging the scroll view.
-  ///
-  /// Defaults to matching platform conventions via the physics provided from
-  /// the ambient [ScrollConfiguration].
-  ///
-  /// The physics can be changed dynamically, but new physics will only take
-  /// effect if the _class_ of the provided object changes. Merely constructing
-  /// a new instance with a different configuration is insufficient to cause the
-  /// physics to be reapplied. (This is because the final object used is
-  /// generated dynamically, which can be relatively expensive, and it would be
-  /// inefficient to speculatively create this object each frame to see if the
-  /// physics should be updated.)
-  ///
-  /// See also:
-  ///
-  ///  * [AlwaysScrollableScrollPhysics], which can be used to indicate that the
-  ///    scrollable should react to scroll requests (and possible overscroll)
-  ///    even if the scrollable's contents fit without scrolling being necessary.
   final ScrollPhysics physics;
 
-  /// Builds the viewport through which the scrollable content is displayed.
-  ///
-  /// A typical viewport uses the given [ViewportOffset] to determine which part
-  /// of its content is actually visible through the viewport.
-  ///
-  /// See also:
-  ///
-  ///  * [Viewport], which is a viewport that displays a list of slivers.
-  ///  * [ShrinkWrappingViewport], which is a viewport that displays a list of
-  ///    slivers and sizes itself based on the size of the slivers.
   final ViewportBuilder viewportBuilder;
 
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(axisDirection);
 
   @override
@@ -258,8 +162,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     }
 
     _position = controller?.createScrollPosition(_physics, this, oldPosition)
-      ?? new ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
-
+      ?? ScrollController.createDefaultScrollPosition(_physics, this, oldPosition);
     assert(position != null);
     controller?.attach(position);
   }
@@ -271,16 +174,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   bool _shouldUpdatePosition(Scrollable oldWidget) {
-    ScrollPhysics newPhysics = widget.physics;
-    ScrollPhysics oldPhysics = oldWidget.physics;
-    do {
-      if (newPhysics?.runtimeType != oldPhysics?.runtimeType)
-        return true;
-      newPhysics = newPhysics?.parent;
-      oldPhysics = oldPhysics?.parent;
-    } while (newPhysics != null || oldPhysics != null);
-
-    return widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
+    return widget.physics?.runtimeType != oldWidget.physics?.runtimeType
+        || widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
   }
 
   @override
@@ -327,38 +222,32 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       switch (widget.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-              () => new VerticalDragGestureRecognizer(),
-              (VerticalDragGestureRecognizer instance) {
-                instance
-                  ..onDown = _handleDragDown
-                  ..onStart = _handleDragStart
-                  ..onUpdate = _handleDragUpdate
-                  ..onEnd = _handleDragEnd
-                  ..onCancel = _handleDragCancel
-                  ..minFlingDistance = _physics?.minFlingDistance
-                  ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
-              },
-            ),
+            VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {  // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/7173
+              return (recognizer ??= new VerticalDragGestureRecognizer())
+                ..onDown = _handleDragDown
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel
+                ..minFlingDistance = _physics?.minFlingDistance
+                ..minFlingVelocity = _physics?.minFlingVelocity
+                ..maxFlingVelocity = _physics?.maxFlingVelocity;
+            }
           };
           break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-              () => new HorizontalDragGestureRecognizer(),
-              (HorizontalDragGestureRecognizer instance) {
-                instance
-                  ..onDown = _handleDragDown
-                  ..onStart = _handleDragStart
-                  ..onUpdate = _handleDragUpdate
-                  ..onEnd = _handleDragEnd
-                  ..onCancel = _handleDragCancel
-                  ..minFlingDistance = _physics?.minFlingDistance
-                  ..minFlingVelocity = _physics?.minFlingVelocity
-                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
-              },
-            ),
+            HorizontalDragGestureRecognizer: (HorizontalDragGestureRecognizer recognizer) {  // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/7173
+              return (recognizer ??= new HorizontalDragGestureRecognizer())
+                ..onDown = _handleDragDown
+                ..onStart = _handleDragStart
+                ..onUpdate = _handleDragUpdate
+                ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel
+                ..minFlingDistance = _physics?.minFlingDistance
+                ..minFlingVelocity = _physics?.minFlingVelocity
+                ..maxFlingVelocity = _physics?.maxFlingVelocity;
+            }
           };
           break;
       }
@@ -387,53 +276,36 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   BuildContext get notificationContext => _gestureDetectorKey.currentContext;
 
-  @override
-  BuildContext get storageContext => context;
-
   // TOUCH HANDLERS
 
   Drag _drag;
-  ScrollHoldController _hold;
 
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
-    assert(_hold == null);
-    _hold = position.hold(_disposeHold);
+    position.didTouch();
   }
 
   void _handleDragStart(DragStartDetails details) {
     assert(_drag == null);
-    assert(_hold != null);
     _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
-    assert(_hold == null);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
-    assert(_hold == null || _drag == null);
     _drag?.update(details);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
-    assert(_hold == null || _drag == null);
     _drag?.end(details);
     assert(_drag == null);
   }
 
   void _handleDragCancel() {
-    // _hold might be null if the drag started.
     // _drag might be null if the drag activity ended and called _disposeDrag.
-    assert(_hold == null || _drag == null);
-    _hold?.cancel();
     _drag?.cancel();
-    assert(_hold == null);
     assert(_drag == null);
-  }
-
-  void _disposeHold() {
-    _hold = null;
   }
 
   void _disposeDrag() {

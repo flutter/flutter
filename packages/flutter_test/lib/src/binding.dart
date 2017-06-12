@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http;
+import 'package:meta/meta.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart' as test_package;
@@ -27,7 +28,7 @@ import 'test_text_input.dart';
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
 ///
-/// See [WidgetsBinding.drawFrame] for a more detailed description of some of
+/// See [WidgetsBinding.beginFrame] for a more detailed description of some of
 /// these phases.
 enum EnginePhase {
   /// The build phase in the widgets library. See [BuildOwner.buildScope].
@@ -53,8 +54,8 @@ enum EnginePhase {
   flushSemantics,
 
   /// The final phase in the rendering library, wherein semantics information is
-  /// sent to the embedder. See [SemanticsOwner.sendSemanticsUpdate].
-  sendSemanticsUpdate,
+  /// sent to the embedder. See [SemanticsNode.sendSemanticsTree].
+  sendSemanticsTree,
 }
 
 /// Parts of the system that can generate pointer events that reach the test
@@ -89,10 +90,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
        // Services binding omitted to avoid dragging in the licenses code.
        WidgetsBinding {
 
-  /// Constructor for [TestWidgetsFlutterBinding].
-  ///
-  /// This constructor overrides the [debugPrint] global hook to point to
-  /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding() {
     debugPrint = debugPrintOverride;
   }
@@ -165,7 +162,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]);
+  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]);
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
@@ -493,7 +490,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void initInstances() {
     super.initInstances();
     ui.window.onBeginFrame = null;
-    ui.window.onDrawFrame = null;
   }
 
   FakeAsync _fakeAsync;
@@ -515,7 +511,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   int get microtaskCount => _fakeAsync.microtaskCount;
 
   @override
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
+  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]) {
     return TestAsyncUtils.guard(() {
       assert(inTest);
       assert(_clock != null);
@@ -523,25 +519,13 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _fakeAsync.elapse(duration);
       _phase = newPhase;
       if (hasScheduledFrame) {
-        _fakeAsync.flushMicrotasks();
         handleBeginFrame(new Duration(
           milliseconds: _clock.now().millisecondsSinceEpoch,
         ));
-        _fakeAsync.flushMicrotasks();
-        handleDrawFrame();
       }
       _fakeAsync.flushMicrotasks();
       return new Future<Null>.value();
     });
-  }
-
-  @override
-  void scheduleWarmUpFrame() {
-    // We override the default version of this so that the application-startup warm-up frame
-    // does not schedule timers which we might never get around to running.
-    handleBeginFrame(null);
-    _fakeAsync.flushMicrotasks();
-    handleDrawFrame();
   }
 
   @override
@@ -551,11 +535,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return result;
   }
 
-  EnginePhase _phase = EnginePhase.sendSemanticsUpdate;
+  EnginePhase _phase = EnginePhase.sendSemanticsTree;
 
-  // Cloned from RendererBinding.drawFrame() but with early-exit semantics.
+  // Cloned from RendererBinding.beginFrame() but with early-exit semantics.
   @override
-  void drawFrame() {
+  void beginFrame() {
     assert(inTest);
     try {
       debugBuildingDirtyElements = true;
@@ -571,8 +555,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
               renderView.compositeFrame(); // this sends the bits to the GPU
               if (_phase != EnginePhase.composite) {
                 pipelineOwner.flushSemantics();
-                assert(_phase == EnginePhase.flushSemantics ||
-                       _phase == EnginePhase.sendSemanticsUpdate);
+                assert(_phase == EnginePhase.flushSemantics || _phase == EnginePhase.sendSemanticsTree);
               }
             }
           }
@@ -616,14 +599,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void _verifyInvariants() {
     super._verifyInvariants();
-    assert(
-      _fakeAsync.periodicTimerCount == 0,
-      'A periodic Timer is still running even after the widget tree was disposed.'
-    );
-    assert(
-      _fakeAsync.nonPeriodicTimerCount == 0,
-      'A Timer is still pending even after the widget tree was disposed.'
-    );
+    assert(() {
+      'A periodic Timer is still running even after the widget tree was disposed.';
+      return _fakeAsync.periodicTimerCount == 0;
+    });
+    assert(() {
+      'A Timer is still pending even after the widget tree was disposed.';
+      return _fakeAsync.nonPeriodicTimerCount == 0;
+    });
     assert(_fakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 
@@ -757,27 +740,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// ```
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
-  bool _doDrawThisFrame;
-
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
-    assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
-        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
-      _doDrawThisFrame = true;
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint))
       super.handleBeginFrame(rawTimeStamp);
-    } else {
-      _doDrawThisFrame = false;
-    }
-  }
-
-  @override
-  void handleDrawFrame() {
-    assert(_doDrawThisFrame != null);
-    if (_doDrawThisFrame)
-      super.handleDrawFrame();
-    _doDrawThisFrame = null;
     _viewNeedsPaint = false;
     if (_expectingFrame) { // set during pump
       assert(_pendingFrame != null);
@@ -841,8 +809,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
-    assert(newPhase == EnginePhase.sendSemanticsUpdate);
+  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]) {
+    assert(newPhase == EnginePhase.sendSemanticsTree);
     assert(inTest);
     assert(!_expectingFrame);
     assert(_pendingFrame == null);

@@ -57,7 +57,7 @@ enum DismissDirection {
 /// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
 ///
-/// The widget calls the [onDismissed] callback either after its size has
+/// The widget calls the [onDimissed] callback either after its size has
 /// collapsed to zero (if [resizeDuration] is non-null) or immediately after
 /// the slide animation (if [resizeDuration] is null). If the Dismissible is a
 /// list item, it must have a key that distinguishes it from the other items and
@@ -129,9 +129,10 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({
     @required this.axis,
     @required this.moveAnimation
-  }) : assert(axis != null),
-       assert(moveAnimation != null),
-       super(reclip: moveAnimation);
+  }) : super(reclip: moveAnimation) {
+    assert(axis != null);
+    assert(moveAnimation != null);
+  }
 
   final Axis axis;
   final Animation<FractionalOffset> moveAnimation;
@@ -264,7 +265,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _updateMoveAnimation() {
-    _moveAnimation = new FractionalOffsetTween(
+    _moveAnimation = new Tween<FractionalOffset>(
       begin: FractionalOffset.topLeft,
       end: _directionIsXAxis ?
              new FractionalOffset(_dragExtent.sign, 0.0) :

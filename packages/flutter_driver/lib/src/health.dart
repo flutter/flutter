@@ -16,6 +16,7 @@ class GetHealth extends Command {
   GetHealth.deserialize(Map<String, String> json) : super.deserialize(json);
 }
 
+/// Application health status.
 enum HealthStatus {
   /// Application is known to be in a good shape and should be able to respond.
   ok,
@@ -27,6 +28,7 @@ enum HealthStatus {
 final EnumIndex<HealthStatus> _healthStatusIndex =
     new EnumIndex<HealthStatus>(HealthStatus.values);
 
+/// Application health status.
 class Health extends Result {
   /// Creates a [Health] object with the given [status].
   Health(this.status) {
@@ -38,6 +40,7 @@ class Health extends Result {
     return new Health(_healthStatusIndex.lookupBySimpleName(json['status']));
   }
 
+  /// Health status
   final HealthStatus status;
 
   @override

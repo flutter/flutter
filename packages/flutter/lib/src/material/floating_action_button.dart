@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
@@ -46,8 +48,8 @@ class FloatingActionButton extends StatefulWidget {
     this.tooltip,
     this.backgroundColor,
     this.heroTag,
-    this.elevation: 6.0,
-    this.highlightElevation: 12.0,
+    this.elevation: 6,
+    this.highlightElevation: 12,
     @required this.onPressed,
     this.mini: false
   }) : super(key: key);
@@ -76,23 +78,20 @@ class FloatingActionButton extends StatefulWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The z-coordinate at which to place this button. This controls the size of
-  /// the shadow below the floating action button.
+  /// The z-coordinate at which to place this button.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 6, the appropriate elevation for floating action buttons.
-  final double elevation;
+  final int elevation;
 
-  /// The z-coordinate at which to place this button when the user is touching
-  /// the button. This controls the size of the shadow below the floating action
-  /// button.
+  /// The z-coordinate at which to place this button when the user is touching the button.
+  ///
+  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 12, the appropriate elevation for floating action buttons
   /// while they are being touched.
-  ///
-  /// See also:
-  ///
-  ///  * [elevation], the default elevation.
-  final double highlightElevation;
+  final int highlightElevation;
 
   /// Controls the size of this button.
   ///

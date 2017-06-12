@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show Image; // to disambiguate mentions of Image in the dartdocs
 
 import 'package:flutter/foundation.dart';
 
@@ -15,50 +14,31 @@ import 'basic_types.dart';
 /// (though not the alignment semantics).
 enum BoxFit {
   /// Fill the target box by distorting the source's aspect ratio.
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fill.png)
   fill,
 
   /// As large as possible while still containing the source entirely within the
   /// target box.
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_contain.png)
   contain,
 
   /// As small as possible while still covering the entire target box.
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_cover.png)
   cover,
 
   /// Make sure the full width of the source is shown, regardless of
   /// whether this means the source overflows the target box vertically.
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fitWidth.png)
   fitWidth,
 
   /// Make sure the full height of the source is shown, regardless of
   /// whether this means the source overflows the target box horizontally.
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fitHeight.png)
   fitHeight,
 
   /// Align the source within the target box (by default, centering) and discard
   /// any portions of the source that lie outside the box.
-  ///
-  /// The source image is not resized.
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_none.png)
   none,
 
   /// Align the source within the target box (by default, centering) and, if
   /// necessary, scale the source down to ensure that the source fits within the
   /// box.
-  ///
-  /// This is the same as `contain` if that would shrink the image, otherwise it
-  /// is the same as `none`.
-  ///
-  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_scaleDown.png)
-  scaleDown,
+  scaleDown
 }
 
 /// The pair of sizes returned by [applyBoxFit].
@@ -75,7 +55,7 @@ class FittedSizes {
   final Size destination;
 }
 
-/// Apply a [BoxFit] value.
+/// Apply an [BoxFit] value.
 ///
 /// The arguments to this method, in addition to the [BoxFit] value to apply,
 /// are two sizes, ostensibly the sizes of an input box and an output box.
@@ -103,7 +83,7 @@ class FittedSizes {
 /// provides a convenience function, [FractionalOffset.inscribe], for resolving
 /// the sizes to rects, as shown in the example below.
 ///
-/// ## Sample code
+/// == Example ==
 ///
 /// This example paints an [Image] `image` onto the [Rect] `outputRect` on a
 /// [Canvas] `canvas`, using a [Paint] paint, applying the [BoxFit] algorithm
@@ -116,13 +96,6 @@ class FittedSizes {
 /// final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
 /// canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
 /// ```
-///
-/// See also:
-///
-///  * [FittedBox], a widget that applies this algorithm to another widget.
-///  * [paintImage], a function that applies this algorithm to images for painting.
-///  * [DecoratedBox], [BoxDecoration], and [DecorationImage], which together
-///    provide access to [paintImage] at the widgets layer.
 FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
   Size sourceSize, destinationSize;
   switch (fit) {

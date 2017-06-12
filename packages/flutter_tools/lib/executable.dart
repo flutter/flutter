@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:intl/intl_standalone.dart' as intl;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -18,7 +19,6 @@ import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/platform.dart';
 import 'src/base/process.dart';
-import 'src/base/terminal.dart';
 import 'src/base/utils.dart';
 import 'src/cache.dart';
 import 'src/commands/analyze.dart';
@@ -53,7 +53,6 @@ import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/usage.dart';
-import 'src/version.dart';
 
 /// Main entry point for commands.
 ///
@@ -121,7 +120,6 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
-    context.putIfAbsent(AnsiTerminal, () => new AnsiTerminal());
     context.putIfAbsent(Logger, () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger());
     context.putIfAbsent(Config, () => new Config());
 

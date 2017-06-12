@@ -23,7 +23,7 @@ void main() {
       )
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(label: 'test1')));
+    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: 'test1')));
 
     // control for forking
     await tester.pumpWidget(
@@ -45,7 +45,7 @@ void main() {
       )
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(label: 'child1')));
+    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: 'child1')));
 
     // forking semantics
     await tester.pumpWidget(
@@ -68,14 +68,15 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 1,
             label: 'child1',
             rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
           ),
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 2,
             label: 'child2',
             rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
@@ -105,7 +106,7 @@ void main() {
       )
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(label: 'child1')));
+    expect(semantics, hasSemantics(new TestSemantics(id: 0, label: 'child1')));
 
     // toggle a branch back on
     await tester.pumpWidget(
@@ -128,14 +129,15 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(
+      new TestSemantics(
+        id: 0,
         children: <TestSemantics>[
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 3,
             label: 'child1',
             rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
           ),
-          new TestSemantics.rootChild(
+          new TestSemantics(
             id: 2,
             label: 'child2',
             rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),

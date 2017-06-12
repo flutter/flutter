@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Size, Rect, hashValues;
+import 'dart:ui' show Color, Size, Rect;
 
 import 'package:flutter/foundation.dart';
 
@@ -10,11 +10,7 @@ import 'animation.dart';
 import 'animations.dart';
 import 'curves.dart';
 
-/// An object that can produce a value of type `T` given an [Animation<double>]
-/// as input.
-///
-/// Typically, the values of the input animation are nominally in the range 0.0
-/// to 1.0. In principle, however, any value could be provided.
+/// An object that can produce a value of type T given an [Animation] as input.
 abstract class Animatable<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -81,33 +77,14 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// [Tween] is useful if you want to interpolate across a range.
 ///
 /// To use a [Tween] object with an animation, call the [Tween] object's
-/// [animate] method and pass it the [Animation] object that you want to
+/// `animate()` method and pass it the [Animation] object that you want to
 /// modify.
 ///
-/// You can chain [Tween] objects together using the [chain] method, so that a
+/// You can chain [Tween] objects together using the `chain()` method, so that a
 /// single [Animation] object is configured by multiple [Tween] objects called
-/// in succession. This is different than calling the [animate] method twice,
+/// in succession. This is different than calling the `animate()` method twice,
 /// which results in two [Animation] separate objects, each configured with a
 /// single [Tween].
-///
-/// ## Sample code
-///
-/// Suppose `_controller` is an [AnimationController], and we want to create an
-/// [Animation<Offset>] that is controlled by that controller, and save it in
-/// `_animation`:
-///
-/// ```dart
-/// _animation = new Tween<Offset>(
-///   begin: const Offset(100.0, 50.0),
-///   end: const Offset(200.0, 300.0),
-/// ).animate(_controller);
-/// ```
-///
-/// That would provide an `_animation` that, over the lifetime of the
-/// `_controller`'s animation, returns a value that depicts a point along the
-/// line between the two offsets above. If we used a [MaterialPointArcTween]
-/// instead of a [Tween<Offset>] in the code above, the points would follow a
-/// pleasing curve instead of a straight line, with no other changes necessary.
 class Tween<T extends dynamic> extends Animatable<T> {
   /// Creates a tween.
   ///
@@ -118,38 +95,27 @@ class Tween<T extends dynamic> extends Animatable<T> {
 
   /// The value this variable has at the beginning of the animation.
   ///
-  /// See the constructor for details about whether this property may be null
-  /// (it varies from subclass to subclass).
+  /// Must be non-null before this [Tween] is evaluated.
   T begin;
 
   /// The value this variable has at the end of the animation.
   ///
-  /// See the constructor for details about whether this property may be null
-  /// (it varies from subclass to subclass).
+  /// Must be non-null before this [Tween] is evaluated.
   T end;
 
   /// Returns the value this variable has at the given animation clock value.
   ///
-  /// The default implementation of this method uses the [+], [-], and [*]
-  /// operators on `T`. The [begin] and [end] properties must therefore be
-  /// non-null by the time this method is called.
-  T lerp(double t) {
-    assert(begin != null);
-    assert(end != null);
-    return begin + (end - begin) * t;
-  }
+  /// The [begin] and [end] properties must be non-null by the time this method
+  /// is called.
+  T lerp(double t) => begin + (end - begin) * t;
 
   /// Returns the interpolated value for the current value of the given animation.
   ///
   /// This method returns `begin` and `end` when the animation values are 0.0 or
   /// 1.0, respectively.
   ///
-  /// This function is implemented by deferring to [lerp]. Subclasses that want to
-  /// provide custom behavior should override [lerp], not [evaluate].
-  ///
-  /// See the constructor for details about whether the [begin] and [end]
-  /// properties may be null when this is called. It varies from subclass to
-  /// subclass.
+  /// The [begin] and [end] properties must be non-null by the time this method
+  /// is called with an animation that is not at 0.0 or 1.0.
   @override
   T evaluate(Animation<double> animation) {
     final double t = animation.value;
@@ -161,88 +127,66 @@ class Tween<T extends dynamic> extends Animatable<T> {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    final Tween<T> typedOther = other;
-    return begin == typedOther.begin
-        && end == typedOther.end;
-  }
-
-  @override
-  int get hashCode => hashValues(begin, end);
-
-  @override
   String toString() => '$runtimeType($begin \u2192 $end)';
 }
 
 /// An interpolation between two colors.
 ///
-/// This class specializes the interpolation of [Tween<Color>] to use
-/// [Color.lerp].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
+/// This class specializes the interpolation of Tween<Color> to be
+/// appropriate for colors.
 class ColorTween extends Tween<Color> {
-  /// Creates a [Color] tween.
+  /// Creates a color tween.
   ///
-  /// The [begin] and [end] properties may be null; the null value
-  /// is treated as transparent black.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   ColorTween({ Color begin, Color end }) : super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
   @override
   Color lerp(double t) => Color.lerp(begin, end, t);
 }
 
 /// An interpolation between two sizes.
 ///
-/// This class specializes the interpolation of [Tween<Size>] to use
-/// [Size.lerp].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
+/// This class specializes the interpolation of Tween<Size> to be
+/// appropriate for rectangles.
 class SizeTween extends Tween<Size> {
-  /// Creates a [Size] tween.
+  /// Creates a size tween.
   ///
-  /// The [begin] and [end] properties may be null; the null value
-  /// is treated as an empty size.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   SizeTween({ Size begin, Size end }) : super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
   @override
   Size lerp(double t) => Size.lerp(begin, end, t);
 }
 
 /// An interpolation between two rectangles.
 ///
-/// This class specializes the interpolation of [Tween<Rect>] to use
-/// [Rect.lerp].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
+/// This class specializes the interpolation of Tween<Rect> to be
+/// appropriate for rectangles.
 class RectTween extends Tween<Rect> {
-  /// Creates a [Rect] tween.
+  /// Creates a rect tween.
   ///
-  /// The [begin] and [end] properties may be null; the null value
-  /// is treated as an empty rect at the top left corner.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   RectTween({ Rect begin, Rect end }) : super(begin: begin, end: end);
 
-  /// Returns the value this variable has at the given animation clock value.
   @override
   Rect lerp(double t) => Rect.lerp(begin, end, t);
 }
 
 /// An interpolation between two integers that rounds.
 ///
-/// This class specializes the interpolation of [Tween<int>] to be
+/// This class specializes the interpolation of Tween<int> to be
 /// appropriate for integers by interpolating between the given begin
 /// and end values and then rounding the result to the nearest
 /// integer.
 ///
-/// This is the closest approximation to a linear tween that is possible with an
-/// integer. Compare to [StepTween] and [Tween<double>].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
+/// This is the closest approximation to a linear tween that is
+/// possible with an integer. Compare to [StepTween].
 class IntTween extends Tween<int> {
   /// Creates an int tween.
   ///
@@ -259,17 +203,15 @@ class IntTween extends Tween<int> {
 
 /// An interpolation between two integers that floors.
 ///
-/// This class specializes the interpolation of [Tween<int>] to be
+/// This class specializes the interpolation of Tween<int> to be
 /// appropriate for integers by interpolating between the given begin
-/// and end values and then using [int.floor] to return the current
+/// and end values and then using [int.floor()] to return the current
 /// integer component, dropping the fractional component.
 ///
 /// This results in a value that is never greater than the equivalent
 /// value from a linear double interpolation. Compare to [IntTween].
-///
-/// See [Tween] for a discussion on how to use interpolation objects.
 class StepTween extends Tween<int> {
-  /// Creates an [int] tween that floors.
+  /// Creates a step tween.
   ///
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
@@ -291,8 +233,9 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ @required this.curve })
-    : assert(curve != null);
+  CurveTween({ @required this.curve }) {
+    assert(curve != null);
+  }
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;

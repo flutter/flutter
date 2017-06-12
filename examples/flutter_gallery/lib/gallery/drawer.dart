@@ -7,15 +7,14 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, required;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 
 class LinkTextSpan extends TextSpan {
   LinkTextSpan({ TextStyle style, String url, String text }) : super(
     style: style,
     text: text ?? url,
     recognizer: new TapGestureRecognizer()..onTap = () {
-      launch(url);
+      UrlLauncher.launch(url);
     }
   );
 }
@@ -88,7 +87,7 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
 }
 
 class GalleryDrawer extends StatelessWidget {
-  const GalleryDrawer({
+  GalleryDrawer({
     Key key,
     this.useLightTheme,
     @required this.onThemeChanged,
@@ -98,13 +97,12 @@ class GalleryDrawer extends StatelessWidget {
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,
     this.onCheckerboardRasterCacheImagesChanged,
-    this.checkerboardOffscreenLayers,
-    this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
     this.onSendFeedback,
-  }) : assert(onThemeChanged != null),
-       assert(onTimeDilationChanged != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(onThemeChanged != null);
+    assert(onTimeDilationChanged != null);
+  }
 
   final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;
@@ -118,9 +116,6 @@ class GalleryDrawer extends StatelessWidget {
   final bool checkerboardRasterCacheImages;
   final ValueChanged<bool> onCheckerboardRasterCacheImagesChanged;
 
-  final bool checkerboardOffscreenLayers;
-  final ValueChanged<bool> onCheckerboardOffscreenLayersChanged;
-
   final ValueChanged<TargetPlatform> onPlatformChanged;
 
   final VoidCallback onSendFeedback;
@@ -131,59 +126,84 @@ class GalleryDrawer extends StatelessWidget {
     final TextStyle aboutTextStyle = themeData.textTheme.body2;
     final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
-    final Widget lightThemeItem = new RadioListTile<bool>(
-      secondary: const Icon(Icons.brightness_5),
+    final Widget lightThemeItem = new ListTile(
+      leading: const Icon(Icons.brightness_5),
       title: const Text('Light'),
-      value: true,
-      groupValue: useLightTheme,
-      onChanged: onThemeChanged,
+      trailing: new Radio<bool>(
+        value: true,
+        groupValue: useLightTheme,
+        onChanged: onThemeChanged,
+      ),
       selected: useLightTheme,
-    );
-
-    final Widget darkThemeItem = new RadioListTile<bool>(
-      secondary: const Icon(Icons.brightness_7),
-      title: const Text('Dark'),
-      value: false,
-      groupValue: useLightTheme,
-      onChanged: onThemeChanged,
-      selected: !useLightTheme,
-    );
-
-    final Widget mountainViewItem = new RadioListTile<TargetPlatform>(
-      // on iOS, we don't want to show an Android phone icon
-      secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
-      title: const Text('Android'),
-      value: TargetPlatform.android,
-      groupValue: Theme.of(context).platform,
-      onChanged: onPlatformChanged,
-      selected: Theme.of(context).platform == TargetPlatform.android,
-    );
-
-    final Widget cupertinoItem = new RadioListTile<TargetPlatform>(
-      // on iOS, we don't want to show the iPhone icon
-      secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
-      title: const Text('iOS'),
-      value: TargetPlatform.iOS,
-      groupValue: Theme.of(context).platform,
-      onChanged: onPlatformChanged,
-      selected: Theme.of(context).platform == TargetPlatform.iOS,
-    );
-
-    final Widget animateSlowlyItem = new CheckboxListTile(
-      title: const Text('Animate Slowly'),
-      value: timeDilation != 1.0,
-      onChanged: (bool value) {
-        onTimeDilationChanged(value ? 20.0 : 1.0);
+      onTap: () {
+        onThemeChanged(true);
       },
-      secondary: const Icon(Icons.hourglass_empty),
+    );
+
+    final Widget darkThemeItem = new ListTile(
+      leading: const Icon(Icons.brightness_7),
+      title: const Text('Dark'),
+      trailing: new Radio<bool>(
+        value: false,
+        groupValue: useLightTheme,
+        onChanged: onThemeChanged
+      ),
+      selected: !useLightTheme,
+      onTap: () {
+        onThemeChanged(false);
+      },
+    );
+
+    final Widget mountainViewItem = new ListTile(
+      // on iOS, we don't want to show an Android phone icon
+      leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
+      title: const Text('Android'),
+      trailing: new Radio<TargetPlatform>(
+        value: TargetPlatform.android,
+        groupValue: Theme.of(context).platform,
+        onChanged: onPlatformChanged,
+      ),
+      selected: Theme.of(context).platform == TargetPlatform.android,
+      onTap: () {
+        onPlatformChanged(TargetPlatform.android);
+      },
+    );
+
+    final Widget cupertinoItem = new ListTile(
+      // on iOS, we don't want to show the iPhone icon
+      leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
+      title: const Text('iOS'),
+      trailing: new Radio<TargetPlatform>(
+        value: TargetPlatform.iOS,
+        groupValue: Theme.of(context).platform,
+        onChanged: onPlatformChanged,
+      ),
+      selected: Theme.of(context).platform == TargetPlatform.iOS,
+      onTap: () {
+        onPlatformChanged(TargetPlatform.iOS);
+      },
+    );
+
+    final Widget animateSlowlyItem = new ListTile(
+      leading: const Icon(Icons.hourglass_empty),
+      title: const Text('Animate Slowly'),
+      trailing: new Checkbox(
+        value: timeDilation != 1.0,
+        onChanged: (bool value) {
+          onTimeDilationChanged(value ? 20.0 : 1.0);
+        },
+      ),
       selected: timeDilation != 1.0,
+      onTap: () {
+        onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0);
+      },
     );
 
     final Widget sendFeedbackItem = new ListTile(
       leading: const Icon(Icons.report),
       title: const Text('Send feedback'),
       onTap: onSendFeedback ?? () {
-        launch('https://github.com/flutter/flutter/issues/new');
+        UrlLauncher.launch('https://github.com/flutter/flutter/issues/new');
       },
     );
 
@@ -245,35 +265,39 @@ class GalleryDrawer extends StatelessWidget {
     ];
 
     if (onShowPerformanceOverlayChanged != null) {
-      allDrawerItems.insert(8, new CheckboxListTile(
+      allDrawerItems.insert(8, new ListTile(
+        leading: const Icon(Icons.assessment),
         title: const Text('Performance Overlay'),
-        value: showPerformanceOverlay,
-        onChanged: onShowPerformanceOverlayChanged,
-        secondary: const Icon(Icons.assessment),
+        trailing: new Checkbox(
+          value: showPerformanceOverlay,
+          onChanged: (bool value) {
+            onShowPerformanceOverlayChanged(!showPerformanceOverlay);
+          },
+        ),
         selected: showPerformanceOverlay,
+        onTap: () {
+          onShowPerformanceOverlayChanged(!showPerformanceOverlay);
+        },
       ));
     }
 
     if (onCheckerboardRasterCacheImagesChanged != null) {
-      allDrawerItems.insert(8, new CheckboxListTile(
+      allDrawerItems.insert(8, new ListTile(
+        leading: const Icon(Icons.assessment),
         title: const Text('Checkerboard Raster Cache Images'),
-        value: checkerboardRasterCacheImages,
-        onChanged: onCheckerboardRasterCacheImagesChanged,
-        secondary: const Icon(Icons.assessment),
+        trailing: new Checkbox(
+          value: checkerboardRasterCacheImages,
+          onChanged: (bool value) {
+            onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
+          },
+        ),
         selected: checkerboardRasterCacheImages,
+        onTap: () {
+          onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
+        },
       ));
     }
 
-    if (onCheckerboardOffscreenLayersChanged != null) {
-      allDrawerItems.insert(8, new CheckboxListTile(
-        title: const Text('Checkerboard Offscreen Layers'),
-        value: checkerboardOffscreenLayers,
-        onChanged: onCheckerboardOffscreenLayersChanged,
-        secondary: const Icon(Icons.assessment),
-        selected: checkerboardOffscreenLayers,
-      ));
-    }
-
-    return new Drawer(child: new ListView(primary: false, children: allDrawerItems));
+    return new Drawer(child: new ListView(children: allDrawerItems));
   }
 }

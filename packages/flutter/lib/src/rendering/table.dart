@@ -121,7 +121,7 @@ class FixedColumnWidth extends TableColumnWidth {
   /// Creates a column width based on a fixed number of logical pixels.
   ///
   /// The [value] argument must not be null.
-  const FixedColumnWidth(this.value) : assert(value != null);
+  const FixedColumnWidth(this.value);
 
   /// The width the column should occupy in logical pixels.
   final double value;
@@ -148,7 +148,7 @@ class FractionColumnWidth extends TableColumnWidth {
   /// maxWidth.
   ///
   /// The [value] argument must not be null.
-  const FractionColumnWidth(this.value) : assert(value != null);
+  const FractionColumnWidth(this.value);
 
   /// The fraction of the table's constraints' maxWidth that this column should
   /// occupy.
@@ -184,7 +184,7 @@ class FlexColumnWidth extends TableColumnWidth {
   /// the other columns have been laid out.
   ///
   /// The [value] argument must not be null.
-  const FlexColumnWidth([this.value = 1.0]) : assert(value != null);
+  const FlexColumnWidth([this.value = 1.0]);
 
   /// The reaction of the of the remaining space once all the other columns have
   /// been laid out that this column should occupy.
@@ -451,8 +451,8 @@ enum TableCellVerticalAlignment {
 
   /// Cells with this alignment are aligned such that they all share the same
   /// baseline. Cells with no baseline are top-aligned instead. The baseline
-  /// used is specified by [RenderTable.textBaseline]. It is not valid to use
-  /// the baseline value if [RenderTable.textBaseline] is not specified.
+  /// used is specified by [RenderTable.baseline]. It is not valid to use the
+  /// baseline value if [RenderTable.baseline] is not specified.
   ///
   /// This vertial alignment is relatively expensive because it causes the table
   /// to compute the baseline for each cell in the row.
@@ -489,11 +489,12 @@ class RenderTable extends RenderBox {
     TableCellVerticalAlignment defaultVerticalAlignment: TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
     List<List<RenderBox>> children
-  }) : assert(columns == null || columns >= 0),
-       assert(rows == null || rows >= 0),
-       assert(rows == null || children == null),
-       assert(defaultColumnWidth != null),
-       assert(configuration != null) {
+  }) {
+    assert(columns == null || columns >= 0);
+    assert(rows == null || rows >= 0);
+    assert(rows == null || children == null);
+    assert(defaultColumnWidth != null);
+    assert(configuration != null);
     _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0);
     _rows = rows ?? 0;
     _children = <RenderBox>[]..length = _columns * _rows;

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -38,13 +37,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     'flutter',
     'Manage your Flutter app development.\n'
       '\n'
-      'Common commands:\n'
+      'Common actions:\n'
       '\n'
       '  flutter create <output directory>\n'
       '    Create a new Flutter project in the specified directory.\n'
       '\n'
       '  flutter run [options]\n'
-      '    Run your Flutter application on an attached device or in an emulator.',
+      '    Run your Flutter application on an attached device\n'
+      '    or in an emulator.',
   ) {
     argParser.addFlag('verbose',
         abbr: 'v',
@@ -60,9 +60,6 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
-    argParser.addFlag('machine',
-        negatable: false,
-        hide: true);
     argParser.addFlag('color',
         negatable: true,
         hide: !verboseHelp,
@@ -75,7 +72,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         negatable: false,
         help:
             'Captures a bug report file to submit to the Flutter team '
-            '(contains local paths, device\nidentifiers, and log snippets).');
+            '(contains local paths, device identifiers, and log snippets).');
 
     String packagesHelp;
     if (fs.isFileSync(kPackagesFileName))
@@ -154,7 +151,6 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   @override
   Future<Null> run(Iterable<String> args) {
     // Have an invocation of 'build' print out it's sub-commands.
-    // TODO(ianh): Move this to the Build command itself somehow.
     if (args.length == 1 && args.first == 'build')
       args = <String>['build', '-h'];
 
@@ -166,7 +162,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     // Check for verbose.
     if (globalResults['verbose']) {
       // Override the logger.
-      context.setVariable(Logger, new VerboseLogger(context[Logger]));
+      context.setVariable(Logger, new VerboseLogger());
     }
 
     String recordTo = globalResults['record-to'];
@@ -259,19 +255,8 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
-      String status;
-      if (globalResults['machine']) {
-        status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
-      } else {
-        status = FlutterVersion.instance.toString();
-      }
-      printStatus(status);
+      printStatus(FlutterVersion.instance.toString());
       return;
-    }
-
-    if (globalResults['machine']) {
-      printError('The --machine flag is only valid with the --version flag.');
-      throw new ProcessExit(2);
     }
 
     await super.runCommand(globalResults);
