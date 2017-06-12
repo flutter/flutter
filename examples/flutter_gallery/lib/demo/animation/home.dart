@@ -75,7 +75,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
 }
 
 class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
-  const _StatusBarPaddingSliver({
+  _StatusBarPaddingSliver({
     Key key,
     @required this.maxHeight,
     this.scrollFactor: 5.0,
@@ -369,7 +369,7 @@ class _AllSectionsView extends AnimatedWidget {
 // app bar's height is _kAppBarMidHeight and only one section heading is
 // visible.
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
-  const _SnappingScrollPhysics({
+  _SnappingScrollPhysics({
     ScrollPhysics parent,
     @required this.midScrollOffset,
   }) : assert(midScrollOffset != null),

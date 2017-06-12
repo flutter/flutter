@@ -66,7 +66,7 @@ class _AppBarBackground extends StatelessWidget {
 }
 
 class GalleryHome extends StatefulWidget {
-  const GalleryHome({
+  GalleryHome({
     Key key,
     this.useLightTheme,
     @required this.onThemeChanged,

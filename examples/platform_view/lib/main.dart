@@ -19,13 +19,13 @@ class PlatformView extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.grey,
       ),
-      home: const MyHomePage(title: 'Platform View'),
+      home: new MyHomePage(title: 'Platform View'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 

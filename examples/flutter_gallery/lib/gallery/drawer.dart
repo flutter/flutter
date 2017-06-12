@@ -88,7 +88,7 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
 }
 
 class GalleryDrawer extends StatelessWidget {
-  const GalleryDrawer({
+  GalleryDrawer({
     Key key,
     this.useLightTheme,
     @required this.onThemeChanged,
