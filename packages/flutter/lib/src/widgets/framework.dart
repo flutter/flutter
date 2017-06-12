@@ -313,19 +313,19 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
   /// The label does not affect the key's identity.
-  LabeledGlobalKey(this._debugLabel) : super.constructor();
+  const LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   // Used for forwarding the constructor from GlobalKey.
-  LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
+  const LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
 
   final String _debugLabel;
 
   @override
   String toString() {
-    final String label = _debugLabel != null ? ' $_debugLabel' : '';
+    final String tag = _debugLabel != null ? ' $_debugLabel' : '#$hashCode';
     if (runtimeType == LabeledGlobalKey)
-      return '[GlobalKey#$hashCode$label]';
-    return '[$runtimeType#$hashCode$label]';
+      return '[GlobalKey$tag]';
+    return '[$runtimeType$tag]';
   }
 }
 
@@ -1452,7 +1452,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// Sometimes, the `of` method returns the data rather than the inherited
 /// widget; for example, in this case it could have returned a [Color] instead
-/// of the `FrogColor` widget.
+/// of the [FrogColor] widget.
 ///
 /// Occasionally, the inherited widget is an implementation detail of another
 /// class, and is therefore private. The `of` method in that case is typically

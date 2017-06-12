@@ -15,7 +15,7 @@ const double _kTabBarHeight = 50.0;
 const Color _kDefaultTabBarBackgroundColor = const Color(0xCCF8F8F8);
 const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 
-/// An iOS-styled bottom navigation tab bar.
+/// An iOS styled bottom navigation tab bar.
 ///
 /// Displays multiple tabs using [BottomNavigationBarItem] with one tab being
 /// active, the first tab by default.
@@ -29,10 +29,9 @@ const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 ///
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
-//
+///
 // TODO(xster): document using with a CupertinoScaffold.
 class CupertinoTabBar extends StatelessWidget {
-  /// Creates a tab bar in the iOS style.
   CupertinoTabBar({
     Key key,
     @required this.items,
@@ -42,11 +41,12 @@ class CupertinoTabBar extends StatelessWidget {
     this.activeColor: CupertinoColors.activeBlue,
     this.inactiveColor: CupertinoColors.inactiveGray,
     this.iconSize: 24.0,
-  }) : assert(items != null),
-       assert(items.length >= 2),
-       assert(0 <= currentIndex && currentIndex < items.length),
-       assert(iconSize != null),
-       super(key: key);
+  }) : super(key: key) {
+    assert(items != null);
+    assert(items.length >= 2);
+    assert(0 <= currentIndex && currentIndex < items.length);
+    assert(iconSize != null);
+  }
 
   /// The interactive items laid out within the bottom navigation bar.
   final List<BottomNavigationBarItem> items;

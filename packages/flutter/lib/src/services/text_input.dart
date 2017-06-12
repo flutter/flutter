@@ -224,9 +224,9 @@ abstract class TextInputClient {
 ///
 ///  * [TextInput.attach]
 class TextInputConnection {
-  TextInputConnection._(this._client)
-    : assert(_client != null),
-      _id = _nextId++;
+  TextInputConnection._(this._client) : _id = _nextId++ {
+    assert(_client != null);
+  }
 
   static int _nextId = 1;
   final int _id;

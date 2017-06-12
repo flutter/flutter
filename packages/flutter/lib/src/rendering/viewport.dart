@@ -80,10 +80,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   RenderViewportBase({
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
-  }) : assert(axisDirection != null),
-       assert(offset != null),
-       _axisDirection = axisDirection,
-       _offset = offset;
+  }) : _axisDirection = axisDirection,
+       _offset = offset {
+    assert(axisDirection != null);
+    assert(offset != null);
+  }
 
   /// The direction in which the [SliverConstraints.scrollOffset] increases.
   ///
@@ -260,7 +261,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       assert(childLayoutGeometry.debugAssertIsValid);
 
       // If there is a correction to apply, we'll have to start over.
-      if (childLayoutGeometry.scrollOffsetCorrection != null)
+      if (childLayoutGeometry.scrollOffsetCorrection != 0.0)
         return childLayoutGeometry.scrollOffsetCorrection;
 
       // We use the child's paint origin in our coordinate system as the
@@ -638,11 +639,11 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     double anchor: 0.0,
     List<RenderSliver> children,
     RenderSliver center,
-  }) : assert(anchor != null),
-       assert(anchor >= 0.0 && anchor <= 1.0),
-       _anchor = anchor,
+  }) : _anchor = anchor,
        _center = center,
        super(axisDirection: axisDirection, offset: offset) {
+    assert(anchor != null);
+    assert(anchor >= 0.0 && anchor <= 1.0);
     addAll(children);
     if (center == null && firstChild != null)
       _center = firstChild;

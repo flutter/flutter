@@ -12,7 +12,6 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'debug.dart';
-import 'layer.dart';
 import 'object.dart';
 import 'semantics.dart';
 
@@ -202,10 +201,10 @@ class RenderConstrainedBox extends RenderProxyBox {
   RenderConstrainedBox({
     RenderBox child,
     @required BoxConstraints additionalConstraints,
-  }) : assert(additionalConstraints != null),
-       assert(additionalConstraints.debugAssertIsValid()),
-       _additionalConstraints = additionalConstraints,
-       super(child);
+  }) : _additionalConstraints = additionalConstraints, super(child) {
+    assert(additionalConstraints != null);
+    assert(additionalConstraints.debugAssertIsValid());
+  }
 
   /// Additional constraints to apply to [child] during layout
   BoxConstraints get additionalConstraints => _additionalConstraints;
@@ -312,11 +311,10 @@ class RenderLimitedBox extends RenderProxyBox {
     RenderBox child,
     double maxWidth: double.INFINITY,
     double maxHeight: double.INFINITY
-  }) : assert(maxWidth != null && maxWidth >= 0.0),
-       assert(maxHeight != null && maxHeight >= 0.0),
-       _maxWidth = maxWidth,
-       _maxHeight = maxHeight,
-       super(child);
+  }) : _maxWidth = maxWidth, _maxHeight = maxHeight, super(child) {
+    assert(maxWidth != null && maxWidth >= 0.0);
+    assert(maxHeight != null && maxHeight >= 0.0);
+  }
 
   /// The value to use for maxWidth if the incoming maxWidth constraint is infinite.
   double get maxWidth => _maxWidth;
@@ -402,11 +400,11 @@ class RenderAspectRatio extends RenderProxyBox {
   RenderAspectRatio({
     RenderBox child,
     @required double aspectRatio,
-  }) : assert(aspectRatio != null),
-       assert(aspectRatio > 0.0),
-       assert(aspectRatio.isFinite),
-       _aspectRatio = aspectRatio,
-       super(child);
+  }) : _aspectRatio = aspectRatio, super(child) {
+    assert(aspectRatio != null);
+    assert(aspectRatio > 0.0);
+    assert(aspectRatio.isFinite);
+  }
 
   /// The aspect ratio to attempt to use.
   ///
@@ -716,11 +714,10 @@ class RenderOpacity extends RenderProxyBox {
   ///
   /// The [opacity] argument must be between 0.0 and 1.0, inclusive.
   RenderOpacity({ double opacity: 1.0, RenderBox child })
-    : assert(opacity != null),
-      assert(opacity >= 0.0 && opacity <= 1.0),
-      _opacity = opacity,
-      _alpha = _getAlphaFromOpacity(opacity),
-      super(child);
+    : _opacity = opacity, _alpha = _getAlphaFromOpacity(opacity), super(child) {
+    assert(opacity != null);
+    assert(opacity >= 0.0 && opacity <= 1.0);
+  }
 
   @override
   bool get alwaysNeedsCompositing => child != null && (_alpha != 0 && _alpha != 255);
@@ -795,11 +792,10 @@ class RenderShaderMask extends RenderProxyBox {
     RenderBox child,
     @required ShaderCallback shaderCallback,
     BlendMode blendMode: BlendMode.modulate,
-  }) : assert(shaderCallback != null),
-       assert(blendMode != null),
-       _shaderCallback = shaderCallback,
-       _blendMode = blendMode,
-       super(child);
+  }) : _shaderCallback = shaderCallback, _blendMode = blendMode, super(child) {
+    assert(shaderCallback != null);
+    assert(blendMode != null);
+  }
 
   /// Called to creates the [Shader] that generates the mask.
   ///
@@ -838,15 +834,8 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(
-        new ShaderMaskLayer(
-          shader: _shaderCallback(offset & size),
-          maskRect: offset & size,
-          blendMode: _blendMode,
-        ),
-        super.paint,
-        offset,
-      );
+      final Shader shader = _shaderCallback(offset & size);
+      context.pushShaderMask(offset, shader, Offset.zero & size, _blendMode, super.paint);
     }
   }
 }
@@ -860,9 +849,9 @@ class RenderBackdropFilter extends RenderProxyBox {
   ///
   /// The [filter] argument must not be null.
   RenderBackdropFilter({ RenderBox child, @required ui.ImageFilter filter })
-    : assert(filter != null),
-      _filter = filter,
-      super(child);
+    : _filter = filter, super(child) {
+    assert(filter != null);
+  }
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -886,7 +875,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      context.pushLayer(new BackdropFilterLayer(filter: _filter), super.paint, offset);
+      context.pushBackdropFilter(offset, _filter, super.paint);
     }
   }
 }
@@ -1232,14 +1221,15 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     BorderRadius borderRadius,
     double elevation: 0.0,
     @required Color color,
-  }) : assert(shape != null),
-       assert(elevation != null),
-       assert(color != null),
-       _shape = shape,
+  }) : _shape = shape,
        _borderRadius = borderRadius,
        _elevation = elevation,
        _color = color,
-       super(child: child);
+       super(child: child) {
+    assert(shape != null);
+    assert(elevation != null);
+    assert(color != null);
+  }
 
   /// The shape of the layer.
   ///
@@ -1316,47 +1306,11 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     return super.hitTest(result, position: position);
   }
 
-  static final Paint _defaultPaint = new Paint();
-  static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      final RRect offsetClipRRect = _clip.shift(offset);
-      final Rect offsetBounds = offsetClipRRect.outerRect;
-      if (needsCompositing) {
-        final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
-          clipRRect: offsetClipRRect,
-          elevation: elevation,
-          color: color,
-        );
-        context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
-      } else {
-        final Canvas canvas = context.canvas;
-        if (elevation != 0.0) {
-          // The drawShadow call doesn't add the region of the shadow to the
-          // picture's bounds, so we draw a hardcoded amount of extra space to
-          // account for the maximum potential area of the shadow.
-          // TODO(jsimmons): remove this when Skia does it for us.
-          canvas.drawRect(
-            offsetBounds.inflate(20.0),
-            _transparentPaint,
-          );
-          canvas.drawShadow(
-            new Path()..addRRect(offsetClipRRect),
-            const Color(0xFF000000),
-            elevation,
-            color.alpha != 0xFF,
-          );
-        }
-        canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
-        canvas.saveLayer(offsetBounds, _defaultPaint);
-        canvas.clipRRect(offsetClipRRect);
-        super.paint(context, offset);
-        canvas.restore();
-        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
-      }
+      context.pushPhysicalModel(needsCompositing, offset, _clip.outerRect, _clip, elevation, color, super.paint);
     }
   }
 
@@ -1393,13 +1347,14 @@ class RenderDecoratedBox extends RenderProxyBox {
     DecorationPosition position: DecorationPosition.background,
     ImageConfiguration configuration: ImageConfiguration.empty,
     RenderBox child
-  }) : assert(decoration != null),
-       assert(position != null),
-       assert(configuration != null),
-       _decoration = decoration,
+  }) : _decoration = decoration,
        _position = position,
        _configuration = configuration,
-       super(child);
+       super(child) {
+    assert(decoration != null);
+    assert(position != null);
+    assert(configuration != null);
+  }
 
   BoxPainter _painter;
 
@@ -1513,9 +1468,9 @@ class RenderTransform extends RenderProxyBox {
     FractionalOffset alignment,
     this.transformHitTests: true,
     RenderBox child
-  }) : assert(transform != null),
-       assert(alignment == null || (alignment.dx != null && alignment.dy != null)),
-       super(child) {
+  }) : super(child) {
+    assert(transform != null);
+    assert(alignment == null || (alignment.dx != null && alignment.dy != null));
     this.transform = transform;
     this.alignment = alignment;
     this.origin = origin;
@@ -1553,7 +1508,7 @@ class RenderTransform extends RenderProxyBox {
   /// child as it is painted. When set to false, hit tests are performed
   /// ignoring the transformation.
   ///
-  /// [applyPaintTransform], and therefore [localToGlobal] and [globalToLocal],
+  /// applyPaintTransform(), and therefore localToGlobal() and globalToLocal(),
   /// always honor the transformation, regardless of the value of this property.
   bool transformHitTests;
 
@@ -1678,11 +1633,10 @@ class RenderFittedBox extends RenderProxyBox {
     RenderBox child,
     BoxFit fit: BoxFit.contain,
     FractionalOffset alignment: FractionalOffset.center
-  }) : assert(fit != null),
-       assert(alignment != null && alignment.dx != null && alignment.dy != null),
-       _fit = fit,
-       _alignment = alignment,
-       super(child);
+  }) : _fit = fit, _alignment = alignment, super(child) {
+    assert(fit != null);
+    assert(alignment != null && alignment.dx != null && alignment.dy != null);
+  }
 
   /// How to inscribe the child into the space allocated during layout.
   BoxFit get fit => _fit;
@@ -1817,9 +1771,9 @@ class RenderFractionalTranslation extends RenderProxyBox {
     FractionalOffset translation,
     this.transformHitTests: true,
     RenderBox child
-  }) : assert(translation == null || (translation.dx != null && translation.dy != null)),
-       _translation = translation,
-       super(child);
+  }) : _translation = translation, super(child) {
+    assert(translation == null || (translation.dx != null && translation.dy != null));
+  }
 
   /// The translation to apply to the child, as a multiple of the size.
   FractionalOffset get translation => _translation;
@@ -2066,11 +2020,12 @@ class RenderCustomPaint extends RenderProxyBox {
     CustomPainter foregroundPainter,
     Size preferredSize: Size.zero,
     RenderBox child,
-  }) : assert(preferredSize != null),
-       _painter = painter,
+  }) : _painter = painter,
        _foregroundPainter = foregroundPainter,
        _preferredSize = preferredSize,
-       super(child);
+       super(child) {
+    assert(preferredSize != null);
+  }
 
   /// The background custom paint delegate.
   ///
@@ -2535,9 +2490,9 @@ class RenderOffstage extends RenderProxyBox {
   RenderOffstage({
     bool offstage: true,
     RenderBox child
-  }) : assert(offstage != null),
-       _offstage = offstage,
-       super(child);
+  }) : _offstage = offstage, super(child) {
+    assert(offstage != null);
+  }
 
   /// Whether the child is hidden from the rest of the tree.
   ///
@@ -2654,8 +2609,9 @@ class RenderAbsorbPointer extends RenderProxyBox {
   RenderAbsorbPointer({
     RenderBox child,
     this.absorbing: true
-  }) : assert(absorbing != null),
-       super(child);
+  }) : super(child) {
+    assert(absorbing != null);
+  }
 
   /// Whether this render object absorbs pointers during hit testing.
   ///
@@ -2868,11 +2824,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool container: false,
     bool checked,
     String label
-  }) : assert(container != null),
-       _container = container,
+  }) : _container = container,
        _checked = checked,
        _label = label,
-       super(child);
+       super(child) {
+    assert(container != null);
+  }
 
   /// If 'container' is true, this RenderObject will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
@@ -2934,14 +2891,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 }
 
-/// Causes the semantics of all earlier render objects below the same semantic
-/// boundary to be dropped.
+/// Causes the semantics of all siblings and cousins painted before it in the
+/// same semantic container to be dropped.
 ///
-/// This is useful in a stack where an opaque mask should prevent interactions
-/// with the render objects painted below the mask.
+/// This is useful in a stack where an overlay should prevent interactions
+/// with the underlying layers.
 class RenderBlockSemantics extends RenderProxyBox {
-  /// Create a render object that blocks semantics for nodes below it in paint
-  /// order.
   RenderBlockSemantics({ RenderBox child }) : super(child);
 
   @override

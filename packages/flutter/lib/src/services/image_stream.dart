@@ -44,14 +44,10 @@ class ImageInfo {
 
 /// Signature for callbacks reporting that an image is available.
 ///
-/// Used by [ImageStream].
+/// synchronousCall is true if the listener is being invoked during the call
+/// to addListener.
 ///
-/// The `synchronousCall` argument is true if the listener is being invoked
-/// during the call to addListener. This can be useful if, for example,
-/// [ImageStream.addListener] is invoked during a frame, so that a new rendering
-/// frame is requested if the call was asynchronous (after the current frame)
-/// and no rendering frame is requested if the call was synchronous (within the
-/// same stack frame as the call to [ImageStream.addListener]).
+/// Used by [ImageStream].
 typedef void ImageListener(ImageInfo image, bool synchronousCall);
 
 /// A handle to an image resource.
@@ -65,11 +61,6 @@ typedef void ImageListener(ImageInfo image, bool synchronousCall);
 /// loading.
 ///
 /// ImageStream objects are backed by [ImageStreamCompleter] objects.
-///
-/// See also:
-///
-///  * [ImageProvider], which has an example that includes the use of an
-///    [ImageStream] in a [Widget].
 class ImageStream {
   /// Create an initially unbound image stream.
   ///
@@ -246,8 +237,8 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
   /// argument on [FlutterErrorDetails] set to true, meaning that by default the
   /// message is only dumped to the console in debug mode (see [new
   /// FlutterErrorDetails]).
-  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector })
-    : assert(image != null) {
+  OneFrameImageStreamCompleter(Future<ImageInfo> image, { InformationCollector informationCollector }) {
+    assert(image != null);
     image.then<Null>(setImage, onError: (dynamic error, StackTrace stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: error,
