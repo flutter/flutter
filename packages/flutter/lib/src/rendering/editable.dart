@@ -84,6 +84,15 @@ class TextSelectionPoint {
 /// responsibility of higher layers and not handled by this object.
 class RenderEditable extends RenderBox {
   /// Creates a render object that implements the visual aspects of a text field.
+  ///
+  /// If [showCursor] is not specified, then it defaults to hiding the cursor.
+  ///
+  /// The [maxLines] property can be set to null to remove the restriction on
+  /// the number of lines. By default, it is 1, meaning this is a single-line
+  /// text field. If it is not null, it must be greater than zero.
+  ///
+  /// The [offset] is required and must not be null. You can use [new
+  /// ViewportOffset.zero] if you have no need for scrolling.
   RenderEditable({
     TextSpan text,
     TextAlign textAlign,
@@ -96,7 +105,7 @@ class RenderEditable extends RenderBox {
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
-  }) : assert(maxLines != null),
+  }) : assert(maxLines == null || maxLines > 0),
        assert(textScaleFactor != null),
        assert(offset != null),
        _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
@@ -180,13 +189,21 @@ class RenderEditable extends RenderBox {
   }
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
+  ///
   /// If this is 1 (the default), the text will not wrap, but will extend
   /// indefinitely instead.
+  ///
+  /// If this is null, there is no limit to the number of lines.
+  ///
+  /// When this is not null, the intrinsic height of the render object is the
+  /// height of one line of text multiplied by this value. In other words, this
+  /// also controls the height of the actual editing widget.
   int get maxLines => _maxLines;
   int _maxLines;
+  /// The value may be null. If it is not null, then it must be greater than zero.
   set maxLines(int value) {
-    assert(value != null);
-    if (_maxLines == value)
+    assert(value == null || value > 0);
+    if (maxLines == value)
       return;
     _maxLines = value;
     markNeedsTextLayout();
@@ -261,7 +278,7 @@ class RenderEditable extends RenderBox {
     super.detach();
   }
 
-  bool get _isMultiline => maxLines > 1;
+  bool get _isMultiline => maxLines != 1;
 
   Axis get _viewportAxis => _isMultiline ? Axis.vertical : Axis.horizontal;
 
@@ -359,14 +376,30 @@ class RenderEditable extends RenderBox {
   // This does not required the layout to be updated.
   double get _preferredLineHeight => _textPainter.preferredLineHeight;
 
+  double _preferredHeight(double width) {
+    if (maxLines != null)
+      return _preferredLineHeight * maxLines;
+    if (width == double.INFINITY) {
+      final String text = _textPainter.text.toPlainText();
+      int lines = 1;
+      for (int index = 0; index < text.length; index += 1) {
+        if (text.codeUnitAt(index) == 0x0A) // count explicit line breaks
+          lines += 1;
+      }
+      return _preferredLineHeight * lines;
+    }
+    _layoutText(width);
+    return math.max(_preferredLineHeight, _textPainter.height);
+  }
+
   @override
   double computeMinIntrinsicHeight(double width) {
-    return _preferredLineHeight;
+    return _preferredHeight(width);
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return _preferredLineHeight * maxLines;
+    return _preferredHeight(width);
   }
 
   @override
@@ -434,7 +467,7 @@ class RenderEditable extends RenderBox {
       return;
     final double caretMargin = _kCaretGap + _kCaretWidth;
     final double availableWidth = math.max(0.0, constraintWidth - caretMargin);
-    final double maxWidth = _maxLines > 1 ? availableWidth : double.INFINITY;
+    final double maxWidth = _isMultiline ? availableWidth : double.INFINITY;
     _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
     _textLayoutLastWidth = constraintWidth;
   }
@@ -444,9 +477,7 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
-    size = new Size(constraints.maxWidth, constraints.constrainHeight(
-      _textPainter.height.clamp(_preferredLineHeight, _preferredLineHeight * _maxLines)
-    ));
+    size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
     final Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
     final double _maxScrollExtent = _getMaxScrollExtent(contentSize);
     _hasVisualOverflow = _maxScrollExtent > 0.0;
@@ -506,13 +537,13 @@ class RenderEditable extends RenderBox {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('cursorColor: $_cursorColor');
-    description.add('showCursor: $_showCursor');
-    description.add('maxLines: $_maxLines');
-    description.add('selectionColor: $_selectionColor');
+    description.add('cursorColor: $cursorColor');
+    description.add('showCursor: $showCursor');
+    description.add('maxLines: $maxLines');
+    description.add('selectionColor: $selectionColor');
     description.add('textScaleFactor: $textScaleFactor');
-    description.add('selection: $_selection');
-    description.add('offset: $_offset');
+    description.add('selection: $selection');
+    description.add('offset: $offset');
   }
 
   @override

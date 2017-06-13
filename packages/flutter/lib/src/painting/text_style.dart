@@ -234,12 +234,18 @@ class TextStyle {
   }
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
+  ///
+  /// The `textScaleFactor` argument must not be null. If omitted, it defaults
+  /// to 1.0. The other arguments may be null. The `maxLines` argument, if
+  /// specified and non-null, must be greater than zero.
   ui.ParagraphStyle getParagraphStyle({
       TextAlign textAlign,
       double textScaleFactor: 1.0,
       String ellipsis,
       int maxLines,
-   }) {
+  }) {
+    assert(textScaleFactor != null);
+    assert(maxLines == null || maxLines > 0);
     return new ui.ParagraphStyle(
       textAlign: textAlign,
       fontWeight: fontWeight,

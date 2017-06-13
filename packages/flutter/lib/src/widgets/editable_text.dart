@@ -128,6 +128,10 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 class EditableText extends StatefulWidget {
   /// Creates a basic text input control.
   ///
+  /// The [maxLines] property can be set to null to remove the restriction on
+  /// the number of lines. By default, it is 1, meaning this is a single-line
+  /// text field. If it is not null, it must be greater than zero.
+  ///
   /// The [controller], [focusNode], [style], and [cursorColor] arguments must
   /// not be null.
   EditableText({
@@ -152,9 +156,9 @@ class EditableText extends StatefulWidget {
        assert(obscureText != null),
        assert(style != null),
        assert(cursorColor != null),
-       assert(maxLines != null),
+       assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
-       inputFormatters = maxLines == 1 
+       inputFormatters = maxLines == 1
            ? (
                <TextInputFormatter>[BlacklistingTextInputFormatter.singleLineFormatter]
                  ..addAll(inputFormatters ?? const Iterable<TextInputFormatter>.empty())
@@ -192,8 +196,12 @@ class EditableText extends StatefulWidget {
   final Color cursorColor;
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
+  ///
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
+  ///
+  /// If this is null, there is no limit to the number of lines. If it is not
+  /// null, the value must be greater than zero.
   final int maxLines;
 
   /// Whether this input field should focus itself if nothing else is already focused.
@@ -218,7 +226,7 @@ class EditableText extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides. Formatters are run 
+  /// Optional input validation and formatting overrides. Formatters are run
   /// in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
@@ -340,7 +348,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   }
 
   bool get _hasFocus => widget.focusNode.hasFocus;
-  bool get _isMultiline => widget.maxLines > 1;
+  bool get _isMultiline => widget.maxLines != 1;
 
   // Calculate the new scroll offset so the cursor remains visible.
   double _getScrollOffsetForCaret(Rect caretRect) {
@@ -417,7 +425,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, bool longPress) {
     widget.controller.selection = selection;
 
-    // Note that this will show the keyboard for all selection changes on the
+    // This will show the keyboard for all selection changes on the
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 

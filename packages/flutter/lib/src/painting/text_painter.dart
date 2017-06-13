@@ -35,6 +35,8 @@ class TextPainter {
   ///
   /// The text argument is optional but [text] must be non-null before calling
   /// [layout].
+  ///
+  /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
     TextSpan text,
     TextAlign textAlign,
@@ -43,6 +45,7 @@ class TextPainter {
     String ellipsis,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textScaleFactor != null),
+       assert(maxLines == null || maxLines > 0),
        _text = text,
        _textAlign = textAlign,
        _textScaleFactor = textScaleFactor,
@@ -134,7 +137,9 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   int get maxLines => _maxLines;
   int _maxLines;
+  /// The value may be null. If it is not null, then it must be greater than zero.
   set maxLines(int value) {
+    assert(value == null || value > 0);
     if (_maxLines == value)
       return;
     _maxLines = value;
