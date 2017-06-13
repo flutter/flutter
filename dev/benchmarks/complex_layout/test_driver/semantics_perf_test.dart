@@ -25,18 +25,18 @@ void main() {
 
     test('inital tree creation', () async {
       // Let app become fully idle.
-      await new Future<Null>.delayed(new Duration(seconds: 1));
+      await new Future<Null>.delayed(const Duration(seconds: 1));
 
       final Timeline timeline = await driver.traceAction(() async {
         expect(await driver.setSemantics(true), isTrue);
       });
 
-      Iterable<TimelineEvent> semanticsEvents = timeline.events.where((TimelineEvent event) => event.name == "Semantics");
+      final Iterable<TimelineEvent> semanticsEvents = timeline.events.where((TimelineEvent event) => event.name == "Semantics");
       if (semanticsEvents.length != 1)
         fail('Expected exactly one semantics event, got ${semanticsEvents.length}');
-      Duration semanticsTreeCreation = semanticsEvents.first.duration;
+      final Duration semanticsTreeCreation = semanticsEvents.first.duration;
 
-      String json = JSON.encode({'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
+      final String json = JSON.encode(<String, dynamic>{'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds});
       new File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json')).writeAsStringSync(json);
     });
   });

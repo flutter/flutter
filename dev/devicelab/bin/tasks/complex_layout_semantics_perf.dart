@@ -9,6 +9,8 @@ import 'package:path/path.dart' as p;
 
 void main() {
   task(() async {
+    deviceOperatingSystem = DeviceOperatingSystem.android;
+
     final Device device = await devices.workingDevice;
     await device.unlock();
     final String deviceId = device.deviceId;
@@ -16,15 +18,17 @@ void main() {
 
     String complexLayoutPath = p.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layout');
 
-    await flutter('drive', options: <String>[
-      '-v',
-      '--profile',
-      '--trace-startup', // Enables "endless" timeline event buffering.
-      '-t',
-      p.join(complexLayoutPath, 'test_driver', 'semantics_perf.dart'),
-      '-d',
-      deviceId,
-    ], workingDirectory: complexLayoutPath);
+    await inDirectory(complexLayoutPath, () async {
+      await flutter('drive', options: <String>[
+        '-v',
+        '--profile',
+        '--trace-startup', // Enables "endless" timeline event buffering.
+        '-t',
+        p.join(complexLayoutPath, 'test_driver', 'semantics_perf.dart'),
+        '-d',
+        deviceId,
+      ]);
+    });
 
     String dataPath = p.join(complexLayoutPath, 'build', 'complex_layout_semantics_perf.json');
     return new TaskResult.successFromFile(file(dataPath), benchmarkScoreKeys: <String>[

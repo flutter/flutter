@@ -276,13 +276,14 @@ class FlutterDriverExtension {
   }
 
   SemanticsHandle _semantics;
+  bool get _semanticsIsEnabled => RendererBinding.instance.pipelineOwner.semanticsOwner != null;
 
   Future<SetSemanticsResult> _setSemantics(Command command) async {
     final SetSemantics setSemanticsCommand = command;
-    final bool wasEnabled = RendererBinding.instance.pipelineOwner.semanticsOwner != null;
+    final bool semanticsWasEnabled = _semanticsIsEnabled;
     if (setSemanticsCommand.enabled && _semantics == null) {
       _semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
-      if (!wasEnabled) {
+      if (!semanticsWasEnabled) {
         // wait for the first frame where semantics is enabled.
         final Completer<Null> completer = new Completer<Null>();
         SchedulerBinding.instance.addPostFrameCallback((Duration d) {
@@ -294,7 +295,6 @@ class FlutterDriverExtension {
       _semantics.dispose();
       _semantics = null;
     }
-    final bool enabled = RendererBinding.instance.pipelineOwner.semanticsOwner != null;
-    return new SetSemanticsResult(wasEnabled != enabled);
+    return new SetSemanticsResult(semanticsWasEnabled != _semanticsIsEnabled);
   }
 }

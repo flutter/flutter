@@ -4,7 +4,7 @@
 
 import 'message.dart';
 
-/// Enables or disables Semantics.
+/// Enables or disables semantics.
 class SetSemantics extends Command {
   @override
   final String kind = 'set_semantics';

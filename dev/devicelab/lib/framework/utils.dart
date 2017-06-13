@@ -208,9 +208,8 @@ Future<int> exec(
   List<String> arguments, {
   Map<String, String> environment,
   bool canFail: false,
-  String workingDirectory,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
+  final Process process = await startProcess(executable, arguments, environment: environment);
 
   process.stdout
       .transform(UTF8.decoder)
@@ -255,11 +254,10 @@ Future<int> flutter(String command, {
   List<String> options: const <String>[],
   bool canFail: false,
   Map<String, String> environment,
-  String workingDirectory,
 }) {
   final List<String> args = <String>[command]..addAll(options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment, workingDirectory: workingDirectory);
+      canFail: canFail, environment: environment);
 }
 
 /// Runs a `flutter` command and returns the standard output as a string.
