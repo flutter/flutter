@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
-/// Run each benchmark this many times and pick the best result.
+/// Run each benchmark this many times and compute average.
 const int _kRunsPerBenchmark = 3;
 
 /// Runs a benchmark once and reports the result as a lower-is-better numeric
@@ -88,16 +88,15 @@ class _MegaGalleryBenchmark {
   }
 }
 
-/// Runs a [benchmark] several times and reports the best result.
+/// Runs a [benchmark] several times and reports the average result.
 Future<double> _run(_Benchmark benchmark) async {
-  double minValue;
+  double total = 0.0;
   for (int i = 0; i < _kRunsPerBenchmark; i++) {
     // Delete cached analysis results.
     rmTree(dir('${Platform.environment['HOME']}/.dartServer'));
 
-    final double result = await benchmark();
-    if (minValue == null || result < minValue)
-      minValue = result;
+    total += await benchmark();
   }
-  return minValue;
+  final double average = total / _kRunsPerBenchmark;
+  return average;
 }
