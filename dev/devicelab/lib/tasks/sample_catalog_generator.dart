@@ -35,6 +35,7 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
     ]);
 
     await saveCatalogScreenshots(
+      directory: dir('${flutterDirectory.path}/examples/catalog/.generated'),
       commit: await getCurrentFlutterRepoCommit(),
       token: authorizationToken,
       prefix: isIOSDevice ? 'ios_' : '',

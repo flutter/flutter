@@ -113,14 +113,18 @@ Future<Null> saveScreenshots(List<String> fromPaths, List<String> largeNames, Li
 // If path is lib/foo.png then screenshotName is foo.
 String screenshotName(String path) => basenameWithoutExtension(path);
 
-Future<Null> saveCatalogScreenshots({ @required String commit, @required String token, @required String prefix}) async {
+Future<Null> saveCatalogScreenshots({
+    @required Directory directory, // Where the *.png screenshots are.
+    @required String commit, // The commit hash to be used as a cloud storage "directory".
+    @required String token, // Cloud storage authorization token.
+    @required String prefix, // Prefix for all file names.
+  }) async {
   assert(commit != null);
   assert(token != null);
   assert(prefix != null);
 
-  final Directory outputDirectory = new Directory('/builds/dev/flutter/examples/catalog/.generated');
   final List<String> screenshots = <String>[];
-  outputDirectory.listSync().forEach((FileSystemEntity entity) {
+  directory.listSync().forEach((FileSystemEntity entity) {
     if (entity is File && entity.path.endsWith('.png')) {
       final File file = entity;
       screenshots.add(file.path);
