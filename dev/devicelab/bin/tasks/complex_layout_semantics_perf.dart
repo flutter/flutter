@@ -16,7 +16,7 @@ void main() {
     final String deviceId = device.deviceId;
     await flutter('packages', options: <String>['get']);
 
-    String complexLayoutPath = p.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layout');
+    final String complexLayoutPath = p.join(flutterDirectory.path, 'dev', 'benchmarks', 'complex_layout');
 
     await inDirectory(complexLayoutPath, () async {
       await flutter('drive', options: <String>[
@@ -30,7 +30,7 @@ void main() {
       ]);
     });
 
-    String dataPath = p.join(complexLayoutPath, 'build', 'complex_layout_semantics_perf.json');
+    final String dataPath = p.join(complexLayoutPath, 'build', 'complex_layout_semantics_perf.json');
     return new TaskResult.successFromFile(file(dataPath), benchmarkScoreKeys: <String>[
       'initialSemanticsTreeCreation',
     ]);
