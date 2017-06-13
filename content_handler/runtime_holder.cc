@@ -270,6 +270,8 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
     return;  // Only draw once per frame.
   is_ready_to_draw_ = false;
 
+  layer_tree->set_construction_time(ftl::TimePoint::Now() -
+                                    last_begin_frame_time_);
   layer_tree->set_frame_size(SkISize::Make(viewport_metrics_.physical_width,
                                            viewport_metrics_.physical_height));
   layer_tree->set_scene_version(scene_version_);
@@ -647,7 +649,8 @@ void RuntimeHolder::BeginFrame() {
 
   FTL_DCHECK(!is_ready_to_draw_);
   is_ready_to_draw_ = true;
-  runtime_->BeginFrame(ftl::TimePoint::Now());
+  last_begin_frame_time_ = ftl::TimePoint::Now();
+  runtime_->BeginFrame(last_begin_frame_time_);
   const bool was_ready_to_draw = is_ready_to_draw_;
   is_ready_to_draw_ = false;
 

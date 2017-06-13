@@ -40,6 +40,8 @@ void SoftwareRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
     return;
   }
 
+  compositor_context_.engine_time().SetLapTime(layer_tree->construction_time());
+
   const SkISize& frame_size = layer_tree->frame_size();
 
   auto update = mozart::SceneUpdate::New();
@@ -59,8 +61,8 @@ void SoftwareRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
     return;
   }
 
-  flow::CompositorContext::ScopedFrame frame =
-      compositor_context_.AcquireFrame(nullptr, nullptr);
+  flow::CompositorContext::ScopedFrame frame = compositor_context_.AcquireFrame(
+      nullptr, nullptr, true /* instrumentation enabled */);
 
   layer_tree->Preroll(frame);
 

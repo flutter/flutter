@@ -118,6 +118,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   mozart::InputMethodEditorPtr input_method_editor_;
   fidl::Binding<mozart::InputMethodEditorClient> text_input_binding_;
   int current_text_input_client_ = 0;
+  ftl::TimePoint last_begin_frame_time_;
 
   ftl::WeakPtrFactory<RuntimeHolder> weak_factory_;
 

@@ -53,7 +53,7 @@ VulkanRasterizer::VulkanSurfaceProducer::VulkanSurfaceProducer() {
 }
 
 VulkanRasterizer::VulkanSurfaceProducer::~VulkanSurfaceProducer() {
-  for (auto &surface_info : pending_surfaces_)
+  for (auto& surface_info : pending_surfaces_)
     mtl::MessageLoop::GetCurrent()->RemoveHandler(
         surface_info.second.handler_key);
 }
@@ -442,6 +442,8 @@ bool VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree) {
     return false;
   }
 
+  compositor_context_.engine_time().SetLapTime(layer_tree->construction_time());
+
   const SkISize& frame_size = layer_tree->frame_size();
 
   auto update = mozart::SceneUpdate::New();
@@ -462,8 +464,8 @@ bool VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree) {
     return false;
   }
 
-  flow::CompositorContext::ScopedFrame frame =
-      compositor_context_.AcquireFrame(nullptr, nullptr);
+  flow::CompositorContext::ScopedFrame frame = compositor_context_.AcquireFrame(
+      nullptr, nullptr, true /* instrumentation enabled */);
 
   layer_tree->Preroll(frame);
 
