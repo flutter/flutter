@@ -98,7 +98,9 @@ class TextSpan {
   /// object that manages the [TextSpan] painting is also responsible for
   /// dispatching events. In the rendering library, that is the
   /// [RenderParagraph] object, which corresponds to the [RichText] widget in
-  /// the widgets layer.
+  /// the widgets layer; these objects do not bubble events in [TextSpan]s, so a
+  /// [recognizer] is only effective for events that directly hit the [text] of
+  /// that [TextSpan], not any of its [children].
   ///
   /// [TextSpan] also does not manage the lifetime of the gesture recognizer.
   /// The code that owns the [GestureRecognizer] object must call

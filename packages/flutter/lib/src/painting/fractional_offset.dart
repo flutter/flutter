@@ -16,6 +16,12 @@ import 'basic_types.dart';
 ///
 /// `FractionalOffset(0.5, 2.0)` represents a point half way across the [Size],
 /// below the bottom of the rectangle by the height of the [Size].
+///
+/// A variety of widgets use [FractionalOffset] in their configuration, most
+/// notably:
+///
+///  * [Align] positions a child according to a [FractionalOffset].
+///  * [FractionalTranslation] moves a child according to a [FractionalOffset].
 @immutable
 class FractionalOffset {
   /// Creates a fractional offset.

@@ -23,18 +23,63 @@ class _DebugSize extends Size {
 
 /// Immutable layout constraints for [RenderBox] layout.
 ///
-/// A size respects a [BoxConstraints] if, and only if, all of the following
+/// A [Size] respects a [BoxConstraints] if, and only if, all of the following
 /// relations hold:
 ///
-/// * `minWidth <= size.width <= maxWidth`
-/// * `minHeight <= size.height <= maxHeight`
+/// * [minWidth] <= [Size.width] <= [maxWidth]
+/// * [minHeight] <= [Size.height] <= [maxHeight]
 ///
 /// The constraints themselves must satisfy these relations:
 ///
-/// * `0.0 <= minWidth <= maxWidth <= double.INFINITY`
-/// * `0.0 <= minHeight <= maxHeight <= double.INFINITY`
+/// * 0.0 <= [minWidth] <= [maxWidth] <= [double.INFINITY]
+/// * 0.0 <= [minHeight] <= [maxHeight] <= [double.INFINITY]
 ///
 /// [double.INFINITY] is a legal value for each constraint.
+///
+/// ## The box layout model
+///
+/// Render objects in the Flutter framework are laid out by a one-pass layout
+/// model which walks down the render tree passing constraints, then walks back
+/// up the render tree passing concrete geometry.
+///
+/// For boxes, the constraints are [BoxConstraints], which, as described herein,
+/// consist of four numbers: a minimum width [minWidth], a maximum width
+/// [maxWidth], a minimum height [minHeight], and a maximum height [maxHeight].
+///
+/// The geometry for boxes consists of a [Size], which must satisfy the
+/// constraints described above.
+///
+/// Each [RenderBox] (the objects that provide the layout models for box
+/// widgets) receives [BoxConstraints] from its parent, then lays out each of
+/// its children, then picks a [Size] that satisfies the [BoxConstraints].
+///
+/// Render objects position their children independently of laying them out.
+/// Frequently, the parent will use the children's sizes to determine their
+/// position. A child does not know its position and will not necessarily be
+/// laid out again, or repainted, if its position changes.
+///
+/// ## Terminology
+///
+/// When the minimum constraints and the maximum constraint in an axis are the
+/// same, that axis is _tightly_ constrained. See: [new
+/// BoxConstraints.tightFor], [new BoxConstraints.tightForFinite], [tighten],
+/// [hasTightWidth], [hasTightHeight], [isTight].
+///
+/// An axis with a minimum constraint of 0.0 is _loose_ (regardless of the
+/// maximum constraint; if it is also 0.0, then the axis is simultaneously tight
+/// and loose!). See: [new BoxConstraints.loose], [loosen].
+///
+/// An axis whose maximum constraint is not infinite is _bounded_. See:
+/// [hasBoundedWidth], [hasBoundedHeight].
+///
+/// An axis whose maximum constraint is infinite is _unbounded_. An axis is
+/// _expanding_ if it is tightly infinite (its minimum and maximum constraints
+/// are both infinite). See: [new BoxConstraints.expand].
+///
+/// A size is _constrained_ when it satisfies a [BoxConstraints] description.
+/// See: [constrain], [constrainWidth], [constrainHeight],
+/// [constrainDimensions], [constrainSizeAndAttemptToPreserveAspectRatio],
+/// [isSatisfiedBy].
 class BoxConstraints extends Constraints {
   /// Creates box constraints with the given constraints.
   const BoxConstraints({
@@ -68,6 +113,12 @@ class BoxConstraints extends Constraints {
       maxHeight = size.height;
 
   /// Creates box constraints that require the given width or height.
+  ///
+  /// See also:
+  ///
+  ///  * [new BoxConstraints.tightForFinite], which is similar but instead of
+  ///    being tight if the value is non-null, is tight if the value is not
+  ///    infinite.
   const BoxConstraints.tightFor({
     double width,
     double height
@@ -76,7 +127,13 @@ class BoxConstraints extends Constraints {
       minHeight = height != null ? height : 0.0,
       maxHeight = height != null ? height : double.INFINITY;
 
-  /// Creates box constraints that require the given width or height, except if they are infinite.
+  /// Creates box constraints that require the given width or height, except if
+  /// they are infinite.
+  ///
+  /// See also:
+  ///
+  ///  * [new BoxConstraints.tightFor], which is similar but instead of being
+  ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
     double width: double.INFINITY,
     double height: double.INFINITY
@@ -230,10 +287,10 @@ class BoxConstraints extends Constraints {
 
   /// Returns a size that attempts to meet the following conditions, in order:
   ///
-  ///  - The size must satisfy these constraints.
-  ///  - The aspect ratio of the returned size matches the aspect ratio of the
+  ///  * The size must satisfy these constraints.
+  ///  * The aspect ratio of the returned size matches the aspect ratio of the
   ///    given size.
-  ///  - The returned size as big as possible while still being equal to or
+  ///  * The returned size as big as possible while still being equal to or
   ///    smaller than the given size.
   Size constrainSizeAndAttemptToPreserveAspectRatio(Size size) {
     if (isTight) {
@@ -1698,9 +1755,10 @@ abstract class RenderBox extends RenderObject {
 
   /// Determines the set of render objects located at the given position.
   ///
-  /// Returns true if the given point is contained in this render object or one
-  /// of its descendants. Adds any render objects that contain the point to the
-  /// given hit test result.
+  /// Returns true, and adds any render objects that contain the point to the
+  /// given hit test result, if this render object or one of its descendants
+  /// absorbs the hit (preventing objects below this one from being hit).
+  /// Returns false if the hit can continue to other objects below this one.
   ///
   /// The caller is responsible for transforming [position] into the local
   /// coordinate space of the callee. The callee is responsible for checking

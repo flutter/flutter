@@ -544,7 +544,10 @@ class RenderAspectRatio extends RenderProxyBox {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable width.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this render object can result in a layout that is O(N²) in the
+/// depth of the tree.
 class RenderIntrinsicWidth extends RenderProxyBox {
   /// Creates a render object that sizes itself to its child's intrinsic width.
   RenderIntrinsicWidth({
@@ -650,7 +653,10 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable height.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this render object can result in a layout that is O(N²) in the
+/// depth of the tree.
 class RenderIntrinsicHeight extends RenderProxyBox {
   /// Creates a render object that sizes itself to its child's intrinsic height.
   RenderIntrinsicHeight({

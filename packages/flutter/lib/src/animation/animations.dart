@@ -237,10 +237,11 @@ class ProxyAnimation extends Animation<double>
 /// An animation that is the reverse of another animation.
 ///
 /// If the parent animation is running forward from 0.0 to 1.0, this animation
-/// is running in reverse from 1.0 to 0.0. Notice that using a ReverseAnimation
-/// is different from simply using a [Tween] with a begin of 1.0 and an end of
-/// 0.0 because the tween does not change the status or direction of the
-/// animation.
+/// is running in reverse from 1.0 to 0.0.
+///
+/// Using a [ReverseAnimation] is different from simply using a [Tween] with a
+/// begin of 1.0 and an end of 0.0 because the tween does not change the status
+/// or direction of the animation.
 class ReverseAnimation extends Animation<double>
   with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
 
