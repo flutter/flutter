@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags, SemanticsAction;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 class StateMarker extends StatefulWidget {
   const StateMarker({ Key key, this.child }) : super(key: key);
@@ -899,6 +902,62 @@ void main() {
       color: color,
       rect: new Rect.fromLTRB(tabLeft + padLeft, height, tabRight - padRight, height + weight)
     ));
+  });
+  
+  testWidgets('correct semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Tab> tabs = new List<Tab>.generate(2, (int index) {
+      return new Tab(text: 'TAB #$index');
+    });
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: 0,
+    );
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Semantics(
+          container: true,
+          child: new TabBar(
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 1,
+          rect: TestSemantics.fullScreen,
+          children: <TestSemantics>[
+            new TestSemantics(
+              id: 2,
+              actions: SemanticsAction.tap.index,
+              flags: SemanticsFlags.isSelected.index,
+              label: 'TAB #0',
+              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, 46.0),
+              transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
+            ),
+            new TestSemantics(
+              id: 4,
+              actions: SemanticsAction.tap.index,
+              label: 'TAB #1',
+              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, 46.0),
+              transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
+            ),
+          ]),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics));
+
+    semantics.dispose();
   });
 
   testWidgets('TabBar etc with zero tabs', (WidgetTester tester) async {

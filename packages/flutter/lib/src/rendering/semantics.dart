@@ -292,6 +292,10 @@ class SemanticsNode extends AbstractNode {
   bool get isChecked => (_flags & SemanticsFlags.isChecked.index) != 0;
   set isChecked(bool value) => _setFlag(SemanticsFlags.isChecked, value);
 
+  /// Whether the current node is selected (true) or not (false).
+  bool get isSelected => (_flags & SemanticsFlags.isSelected.index) != 0;
+  set isSelected(bool value) => _setFlag(SemanticsFlags.isSelected, value);
+
   /// A textual description of this node.
   String get label => _label;
   String _label = '';
@@ -595,6 +599,8 @@ class SemanticsNode extends AbstractNode {
       else
         buffer.write('; unchecked');
     }
+    if (isSelected)
+      buffer.write('; selected');
     if (label.isNotEmpty)
       buffer.write('; "$label"');
     buffer.write(')');

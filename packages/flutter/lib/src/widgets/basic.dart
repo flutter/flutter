@@ -3635,7 +3635,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     this.container: false,
     this.checked,
-    this.label
+    this.selected,
+    this.label,
   }) : assert(container != null),
        super(key: key, child: child);
 
@@ -3656,6 +3657,13 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// state is.
   final bool checked;
 
+  /// If non-null indicates that this subtree represents something that can be
+  /// in a selected or unselected state, and what its current state is.
+  ///
+  /// The active tab in a tab bar for example is considered "selected", whereas
+  /// all other tabs are unselected.
+  final bool selected;
+
   /// Provides a textual description of the widget.
   final String label;
 
@@ -3663,7 +3671,8 @@ class Semantics extends SingleChildRenderObjectWidget {
   RenderSemanticsAnnotations createRenderObject(BuildContext context) => new RenderSemanticsAnnotations(
     container: container,
     checked: checked,
-    label: label
+    selected: selected,
+    label: label,
   );
 
   @override
@@ -3671,6 +3680,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     renderObject
       ..container = container
       ..checked = checked
+      ..selected = selected
       ..label = label;
   }
 
@@ -3680,6 +3690,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     description.add('container: $container');
     if (checked != null)
       description.add('checked: $checked');
+    if (selected != null)
+      description.add('selected: $selected');
     if (label != null)
       description.add('label: "$label"');
   }
