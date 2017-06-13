@@ -380,35 +380,6 @@ void checkNotNull(Object o1,
     throw 'o10 is null';
 }
 
-/// Add benchmark values to a JSON results file.
-///
-/// If the file contains information about how long the benchmark took to run
-/// (a `time` field), then return that info.
-// TODO(yjbanov): move this data to __metadata__
-num addBuildInfo(File jsonFile,
-    {num expected, String sdk, String commit, DateTime timestamp}) {
-  Map<String, dynamic> json;
-
-  if (jsonFile.existsSync())
-    json = JSON.decode(jsonFile.readAsStringSync());
-  else
-    json = <String, dynamic>{};
-
-  if (expected != null)
-    json['expected'] = expected;
-  if (sdk != null)
-    json['sdk'] = sdk;
-  if (commit != null)
-    json['commit'] = commit;
-  if (timestamp != null)
-    json['timestamp'] = timestamp.millisecondsSinceEpoch;
-
-  jsonFile.writeAsStringSync(jsonEncode(json));
-
-  // Return the elapsed time of the benchmark (if any).
-  return json['time'];
-}
-
 /// Splits [from] into lines and selects those that contain [pattern].
 Iterable<String> grep(Pattern pattern, {@required String from}) {
   return from.split('\n').where((String line) {
