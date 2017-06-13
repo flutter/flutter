@@ -196,9 +196,6 @@ void main() {
   });
 
   testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
-    const Color kRed = const Color(0xFFFF0000);
-    const Color kBlue = const Color(0xFF0000FF);
-
     final TabController tabController = new TabController(
       vsync: const TestVSync(),
       initialIndex: 1,

@@ -958,9 +958,9 @@ class TabPageSelectorIndicator extends StatelessWidget {
   /// The [backgroundColor], [borderColor], and [size] parameters cannot be null.
   const TabPageSelectorIndicator({
     Key key,
-    this.backgroundColor,
-    this.borderColor,
-    this.size,
+    @required this.backgroundColor,
+    @required this.borderColor,
+    @required this.size,
   }) : assert(backgroundColor != null), assert(borderColor != null), assert(size != null), super(key: key);
 
   /// The indicator circle's background color.
