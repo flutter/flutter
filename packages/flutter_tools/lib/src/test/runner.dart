@@ -55,7 +55,7 @@ Future<int> runTests(
   );
 
   // Set the package path used for child processes.
-  // TODO: why is this global? Move to installHook?
+  // TODO(skybrian): why is this global? Move to installHook?
   PackageMap.globalPackagesPath =
       fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
 
@@ -71,7 +71,7 @@ Future<int> runTests(
     await test.main(testArgs);
 
     // test.main() sets dart:io's exitCode global.
-    // TODO: restore previous value?
+    // TODO(skybrian): restore previous value?
     printTrace('test package returned with exit code $exitCode');
 
     return exitCode;

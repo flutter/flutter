@@ -203,9 +203,8 @@ class TestCommand extends FlutterCommand {
         throwToolExit(null);
     }
 
-    if (result != 0) {
+    if (result != 0)
       throwToolExit(null);
-    }
     return const FlutterCommandResult(ExitStatus.success);
   }
 }
