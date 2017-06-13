@@ -14,12 +14,24 @@ import 'constants.dart';
 /// The selected tab's index can be changed with [animateTo].
 ///
 /// A stateful widget that builds a [TabBar] or a [TabBarView] can create
-/// a TabController and share it directly.
+/// a [TabController] and share it directly.
+///
+/// When the [TabBar] and [TabBarView] don't have a convenient stateful
+/// ancestor, a [TabController] can be shared with the [DefaultTabController]
+/// inherited widget.
 ///
 /// ## Sample code
 ///
+/// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
+///
 /// ```dart
-/// class _MyDemoState extends State<MyDemo> with SingleTickerProviderStateMixin {
+/// class MyTabbedPage extends StatefulWidget {
+///   const MyTabbedPage({ Key key }) : super(key: key);
+///   @override
+///   _MyTabbedPageState createState() => new _MyTabbedPageState();
+/// }
+///
+/// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
 ///   final List<Tab> myTabs = <Tab>[
 ///     new Tab(text: 'LEFT'),
 ///     new Tab(text: 'RIGHT'),
@@ -58,10 +70,6 @@ import 'constants.dart';
 ///   }
 /// }
 /// ```
-///
-/// When the [TabBar] and [TabBarView] don't have a convenient stateful
-/// ancestor, a TabController can be shared with the [DefaultTabController]
-/// inherited widget.
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   ///

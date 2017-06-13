@@ -143,7 +143,7 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// ```dart
 /// new Text(
-///   'Hello, $name! How are you?',
+///   'Hello, $_name! How are you?',
 ///   textAlign: TextAlign.center,
 ///   overflow: TextOverflow.ellipsis,
 ///   style: new TextStyle(fontWeight: FontWeight.bold),
