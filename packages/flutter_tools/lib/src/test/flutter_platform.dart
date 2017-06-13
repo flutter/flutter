@@ -113,7 +113,8 @@ class _FlutterPlatform extends PlatformPlugin {
 
   @override
   StreamChannel<dynamic> loadChannel(String testPath, TestPlatform platform) {
-    if (enableObservatory || explicitDiagnosticPort != null) {
+    // Fail if there will be a port conflict.
+    if (explicitObservatoryPort != null || explicitDiagnosticPort != null) {
       if (_testCount > 0)
         throwToolExit('installHook() was called with an observatory port, a diagnostic port, both, or debugger mode enabled, but then more than one test suite was run.');
     }
