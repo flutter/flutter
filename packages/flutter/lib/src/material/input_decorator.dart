@@ -457,7 +457,7 @@ class InputDecorator extends StatelessWidget {
     }
 
     Widget inputChild;
-    if (!hasInlineLabel && (!isEmpty || (hintText ?? '').isEmpty) &&
+    if (!hasInlineLabel && (!isEmpty || hintText == null) &&
         (decoration?.prefixText != null || decoration?.suffixText != null)) {
       List<Widget> rowContents = <Widget>[];
       if (decoration.prefixText != null) {
