@@ -67,11 +67,11 @@ void UnmapMemory(const void* buffer, void* context) {
 sk_sp<SkData> MakeSkDataFromVMO(const mx::vmo& vmo) {
   uint64_t size = 0;
   mx_status_t status = vmo.get_size(&size);
-  if (status != NO_ERROR || size > std::numeric_limits<size_t>::max())
+  if (status != MX_OK || size > std::numeric_limits<size_t>::max())
     return nullptr;
   uintptr_t buffer = 0;
   mx::vmar::root_self().map(0, vmo, 0, size, MX_VM_FLAG_PERM_READ, &buffer);
-  if (status != NO_ERROR)
+  if (status != MX_OK)
     return nullptr;
   return SkData::MakeWithProc(reinterpret_cast<void*>(buffer), size,
                               UnmapMemory, reinterpret_cast<void*>(size));
