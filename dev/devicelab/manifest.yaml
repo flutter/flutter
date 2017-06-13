@@ -50,12 +50,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
-  analyzer_benchmark:
-    description: >
-      Measures the speed of Dart analyzer.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
   # Android on-device tests
 
   complex_layout_scroll_perf__timeline_summary:
@@ -282,5 +276,11 @@ tasks:
   flutter_gallery__back_button_memory:
     description: >
       Measures memory usage after Android app suspend and resume.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  analyzer_benchmark:
+    description: >
+      Measures the speed of Dart analyzer.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
