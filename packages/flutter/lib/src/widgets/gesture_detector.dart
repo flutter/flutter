@@ -104,6 +104,23 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// Material design applications typically react to touches with ink splash
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
+///
+/// ## Sample code
+///
+/// This example makes a rectangle react to being tapped by setting the
+/// `_lights` field:
+///
+/// ```dart
+/// new GestureDetector(
+///   onTap: () {
+///     setState(() { _lights = true; });
+///   },
+///   child: new Container(
+///     color: Colors.yellow,
+///     child: new Text('TURN LIGHTS ON'),
+///   ),
+/// )
+/// ```
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///

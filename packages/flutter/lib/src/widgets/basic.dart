@@ -330,7 +330,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 /// custom [clipper].
 ///
 /// [ClipRect] is commonly used with these widgets, which commonly paint outside
-/// their bounds.
+/// their bounds:
 ///
 ///  * [CustomPaint]
 ///  * [CustomSingleChildLayout]
@@ -342,8 +342,8 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///
 /// ## Sample code
 ///
-/// For example, use a clip to show the top half of an [Image], you can use a
-/// [ClipRect] combined with an [Align]:
+/// For example, by combining a [ClipRect] with an [Align], one can show just
+/// the top half of an [Image]:
 ///
 /// ```dart
 /// new ClipRect(
@@ -1693,7 +1693,10 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable width.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this widget can result in a layout that is O(N²) in the depth of
+/// the tree.
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
   ///
@@ -1724,7 +1727,10 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable height.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this widget can result in a layout that is O(N²) in the depth of
+/// the tree.
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
   ///
@@ -2236,6 +2242,7 @@ class Positioned extends ParentDataWidget<Stack> {
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Flex] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Flex] proceeds in six steps:
 ///
@@ -2459,6 +2466,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Row] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Row] proceeds in six steps:
 ///
@@ -2583,6 +2591,7 @@ class Row extends Flex {
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Column] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Column] proceeds in six steps:
 ///
@@ -3000,7 +3009,8 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Text displayed in a [RichText] widget must be explicitly styled. When
 /// picking which style to use, consider using [DefaultTextStyle.of] the current
-/// [BuildContext] to provide defaults.
+/// [BuildContext] to provide defaults. For more details on how to style text in
+/// a [RichText] widget, see the documentation for [TextStyle].
 ///
 /// When all the text uses the same style, consider using the [Text] widget,
 /// which is less verbose and integrates with [DefaultTextStyle] for default
@@ -3023,6 +3033,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// See also:
 ///
+///  * [TextStyle], which discusses how to style text.
 ///  * [TextSpan], which is used to describe the text in a paragraph.
 ///  * [Text], which automatically applies the ambient styles described by a
 ///    [DefaultTextStyle] to a single string.
@@ -3322,6 +3333,10 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// Rather than listening for raw pointer events, consider listening for
 /// higher-level gestures using [GestureDetector].
+///
+/// ## Layout behavior
+///
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.

@@ -9,6 +9,127 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 
 /// An immutable style in which paint text.
+///
+/// ## Sample code
+///
+/// ### Bold
+///
+/// Here, a single line of text in a [Text] widget is given a specific style
+/// override. The style is mixed with the ambient [DefaultTextStyle] by the
+/// [Text] widget.
+///
+/// ```dart
+/// new Text(
+///   'No, we need bold strokes. We need this plan.',
+///   style: new TextStyle(fontWeight: FontWeight.bold),
+/// )
+/// ```
+///
+/// ### Italics
+///
+/// As in the previous example, the [Text] widget is given a specific style
+/// override which is implicitly mixed with the ambient [DefaultTextStyle].
+///
+/// ```dart
+/// new Text(
+///   'Welcome to the present, we\'re running a real nation.',
+///   style: new TextStyle(fontStyle: FontStyle.italic),
+/// )
+/// ```
+///
+/// ### Opacity
+///
+/// Each line here is progressively more opaque. The base color is
+/// [Colors.black], and [Color.withOpacity] is used to create a derivative color
+/// with the desired opacity. The root [TextSpan] for this [RichText] widget is
+/// explicitly given the ambient [DefaultTextStyle], since [RichText] does not
+/// do that automatically. The inner [TextStyle] objects are implicitly mixed
+/// with the parent [TextSpan]'s [TextSpan.style].
+///
+/// ```dart
+/// new RichText(
+///   text: new TextSpan(
+///     style: DefaultTextStyle.of(context).style,
+///     children: <TextSpan>[
+///       new TextSpan(
+///         text: 'You don\'t have the votes.\n',
+///         style: new TextStyle(color: Colors.black.withOpacity(0.6)),
+///       ),
+///       new TextSpan(
+///         text: 'You don\'t have the votes!\n',
+///         style: new TextStyle(color: Colors.black.withOpacity(0.8)),
+///       ),
+///       new TextSpan(
+///         text: 'You\'re gonna need congressional approval and you don\'t have the votes!\n',
+///         style: new TextStyle(color: Colors.black.withOpacity(1.0)),
+///       ),
+///     ],
+///   ),
+/// )
+/// ```
+///
+/// ### Size
+///
+/// In this example, the ambient [DefaultTextStyle] is explicitly manipulated to
+/// obtain a [TextStyle] that doubles the default font size.
+///
+/// ```dart
+/// new Text(
+///   'These are wise words, enterprising men quote \'em.',
+///   style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
+/// )
+/// ```
+///
+/// ### Line height
+///
+/// The [height] property can be used to change the line height. Here, the line
+/// height is set to 100 logical pixels, so that the text is very spaced out.
+///
+/// ```dart
+/// new Text(
+///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
+///   style: new TextStyle(height: 100.0),
+/// )
+/// ```
+///
+/// ### Wavy red underline with black text
+///
+/// Styles can be combined. In this example, the misspelt word is drawn in black
+/// text and underlined with a wavy red line to indicate a spelling error. (The
+/// remainder is styled according to the Flutter default text styles, not the
+/// ambient [DefaultTextStyle], since no explicit style is given and [RichText]
+/// does not automatically use the ambient [DefaultTextStyle].)
+///
+/// ```dart
+/// new RichText(
+///   text: new TextSpan(
+///     text: 'Don\'t tax the South ',
+///     children: <TextSpan>[
+///       new TextSpan(
+///         text: 'cuz',
+///         style: new TextStyle(
+///           color: Colors.black,
+///           decoration: TextDecoration.underline,
+///           decorationColor: Colors.red,
+///           decorationStyle: TextDecorationStyle.wavy,
+///         ),
+///       ),
+///       new TextSpan(
+///         text: ' we got it made in the shade',
+///       ),
+///     ],
+///   ),
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [Text], the widget for showing text in a single style.
+///  * [DefaultTextStyle], the widget that specifies the default text styles for
+///    [Text] widgets, configured using a [TextStyle].
+///  * [RichText], the widget for showing a paragraph of mix-style text.
+///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
+///    passing it to a [RichText].
 @immutable
 class TextStyle {
   /// Creates a text style.
@@ -25,10 +146,15 @@ class TextStyle {
     this.height,
     this.decoration,
     this.decorationColor,
-    this.decorationStyle
+    this.decorationStyle,
   }) : assert(inherit != null);
 
-  /// Whether null values are replaced with their value in an ancestor text style (e.g., in a [TextSpan] tree).
+  /// Whether null values are replaced with their value in an ancestor text
+  /// style (e.g., in a [TextSpan] tree).
+  ///
+  /// If this is false, properties that don't have explicit values will revert
+  /// to the defaults: white in color, a font size of 10 pixels, in a sans-serif
+  /// font face.
   final bool inherit;
 
   /// The color to use when painting the text.
@@ -54,11 +180,13 @@ class TextStyle {
   /// A negative value can be used to bring the letters closer.
   final double letterSpacing;
 
-  /// The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
-  /// A negative value can be used to bring the words closer.
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word). A negative value can be used to
+  /// bring the words closer.
   final double wordSpacing;
 
-  /// The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
+  /// The common baseline that should be aligned between this text span and its
+  /// parent text span, or, for the root text spans, with the line box.
   final TextBaseline textBaseline;
 
   /// The height of this text span, as a multiple of the font size.
@@ -77,7 +205,8 @@ class TextStyle {
   /// The style in which to paint the text decorations (e.g., dashed).
   final TextDecorationStyle decorationStyle;
 
-  /// Creates a copy of this text style but with the given fields replaced with the new values.
+  /// Creates a copy of this text style but with the given fields replaced with
+  /// the new values.
   TextStyle copyWith({
     Color color,
     String fontFamily,
@@ -90,7 +219,7 @@ class TextStyle {
     double height,
     TextDecoration decoration,
     Color decorationColor,
-    TextDecorationStyle decorationStyle
+    TextDecorationStyle decorationStyle,
   }) {
     return new TextStyle(
       inherit: inherit,
@@ -105,7 +234,7 @@ class TextStyle {
       height: height ?? this.height,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
-      decorationStyle: decorationStyle ?? this.decorationStyle
+      decorationStyle: decorationStyle ?? this.decorationStyle,
     );
   }
 
