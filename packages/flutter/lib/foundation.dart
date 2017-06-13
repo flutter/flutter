@@ -17,13 +17,14 @@ export 'package:meta/meta.dart' show
   required;
 
 // Examples can assume:
+// String _name;
 // bool _first;
 // bool _lights;
 // bool _visible;
 // double _volume;
-// dynamic _selection;
-// dynamic _last;
 // dynamic _calculation;
+// dynamic _last;
+// dynamic _selection;
 
 export 'src/foundation/assertions.dart';
 export 'src/foundation/basic_types.dart';
