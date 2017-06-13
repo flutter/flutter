@@ -40,7 +40,7 @@ class InputDecoration {
     this.prefixText,
     this.prefixStyle,
     this.suffixText,
-    this.suffixStyle
+    this.suffixStyle,
   }) : isCollapsed = false;
 
   /// Creates a decoration that is the same size as the input field.
@@ -143,7 +143,7 @@ class InputDecoration {
 
   /// Optional text prefix to place on the line before the input.
   ///
-  /// Uses the [prefixStyle].  Uses [hintStyle] if [prefixStyle] isn't
+  /// Uses the [prefixStyle]. Uses [hintStyle] if [prefixStyle] isn't
   /// specified. Prefix is not returned as part of the input.
   final String prefixText;
 
@@ -154,7 +154,7 @@ class InputDecoration {
 
   /// Optional text suffix to place on the line after the input.
   ///
-  /// Uses the [suffixStyle].  Uses [hintStyle] if [suffixStyle] isn't
+  /// Uses the [suffixStyle]. Uses [hintStyle] if [suffixStyle] isn't
   /// specified. Suffix is not returned as part of the input.
   final String suffixText;
 
@@ -180,7 +180,7 @@ class InputDecoration {
     String prefixText,
     TextStyle prefixStyle,
     String suffixText,
-    TextStyle suffixStyle
+    TextStyle suffixStyle,
   }) {
     return new InputDecoration(
       icon: icon ?? this.icon,
@@ -459,15 +459,19 @@ class InputDecorator extends StatelessWidget {
     Widget inputChild;
     if (!hasInlineLabel && (!isEmpty || hintText == null) &&
         (decoration?.prefixText != null || decoration?.suffixText != null)) {
-      List<Widget> rowContents = <Widget>[];
+      final List<Widget> rowContents = <Widget>[];
       if (decoration.prefixText != null) {
-        rowContents.add(new Text(decoration.prefixText,
-            style: decoration.prefixStyle ?? hintStyle));
+        rowContents.add(
+            new Text(decoration.prefixText,
+            style: decoration.prefixStyle ?? hintStyle)
+        );
       }
       rowContents.add(new Expanded(child: child));
       if (decoration.suffixText != null) {
-        rowContents.add(new Text(decoration.suffixText,
-            style: decoration.suffixStyle ?? hintStyle));
+        rowContents.add(
+            new Text(decoration.suffixText,
+            style: decoration.suffixStyle ?? hintStyle)
+        );
       }
       inputChild = new Row(children: rowContents);
     } else {
