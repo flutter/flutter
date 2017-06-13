@@ -83,7 +83,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   // If false the middle widget should be left justified within the space
   // between the leading and trailing widgets.
   // If true the middle widget is centered within the toolbar (not within the horizontal
-  // space bewteen the leading and trailing widgets).
+  // space between the leading and trailing widgets).
   // TODO(xster): document RTL once supported.
   final bool centerMiddle;
 

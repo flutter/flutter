@@ -69,13 +69,14 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   /// The [title] remains black if it's a text as per iOS standard design.
   final Color actionsForegroundColor;
 
+  /// True if the nav bar's background color has no transparency.
+  bool get opaque => backgroundColor.alpha == 0xFF;
+
   @override
   Size get preferredSize => const Size.fromHeight(_kNavBarHeight);
 
   @override
   Widget build(BuildContext context) {
-    final bool addBlur = backgroundColor.alpha != 0xFF;
-
     Widget styledMiddle = middle;
     if (styledMiddle.runtimeType == Text || styledMiddle.runtimeType == DefaultTextStyle) {
       // Let the middle be black rather than `actionsForegroundColor` in case
@@ -132,7 +133,7 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
       ),
     );
 
-    if (addBlur) {
+    if (!opaque) {
       // For non-opaque backgrounds, apply a blur effect.
       result = new ClipRect(
         child: new BackdropFilter(
