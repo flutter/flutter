@@ -32,6 +32,7 @@ Future<int> runTests(
     testArgs.addAll(<String>['--no-color', '-rexpanded']);
 
   if (enableObservatory) {
+    // (In particular, for collecting code coverage.)
     testArgs.add('--concurrency=1');
   }
 
