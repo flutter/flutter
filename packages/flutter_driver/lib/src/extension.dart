@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show RendererBinding;
+import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +20,7 @@ import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
 import 'render_tree.dart';
+import 'semantics.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
@@ -70,6 +71,7 @@ class FlutterDriverExtension {
       'tap': _tap,
       'get_text': _getText,
       'set_frame_sync': _setFrameSync,
+      'set_semantics': _setSemantics,
       'scroll': _scroll,
       'scrollIntoView': _scrollIntoView,
       'waitFor': _waitFor,
@@ -82,6 +84,7 @@ class FlutterDriverExtension {
       'tap': (Map<String, String> params) => new Tap.deserialize(params),
       'get_text': (Map<String, String> params) => new GetText.deserialize(params),
       'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
+      'set_semantics': (Map<String, String> params) => new SetSemantics.deserialize(params),
       'scroll': (Map<String, String> params) => new Scroll.deserialize(params),
       'scrollIntoView': (Map<String, String> params) => new ScrollIntoView.deserialize(params),
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
@@ -270,5 +273,28 @@ class FlutterDriverExtension {
     final SetFrameSync setFrameSyncCommand = command;
     _frameSync = setFrameSyncCommand.enabled;
     return new SetFrameSyncResult();
+  }
+
+  SemanticsHandle _semantics;
+  bool get _semanticsIsEnabled => RendererBinding.instance.pipelineOwner.semanticsOwner != null;
+
+  Future<SetSemanticsResult> _setSemantics(Command command) async {
+    final SetSemantics setSemanticsCommand = command;
+    final bool semanticsWasEnabled = _semanticsIsEnabled;
+    if (setSemanticsCommand.enabled && _semantics == null) {
+      _semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
+      if (!semanticsWasEnabled) {
+        // wait for the first frame where semantics is enabled.
+        final Completer<Null> completer = new Completer<Null>();
+        SchedulerBinding.instance.addPostFrameCallback((Duration d) {
+          completer.complete();
+        });
+        await completer.future;
+      }
+    } else if (!setSemanticsCommand.enabled && _semantics != null) {
+      _semantics.dispose();
+      _semantics = null;
+    }
+    return new SetSemanticsResult(semanticsWasEnabled != _semanticsIsEnabled);
   }
 }
