@@ -19,6 +19,7 @@ import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import 'coverage_collector.dart';
+import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
 /// once the process has entered its main method.
@@ -53,17 +54,22 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
 void installHook({
   @required String shellPath,
   CoverageCollector collector,
-  bool debuggerMode: false,
+  TestWatcher watcher,
+  bool enableObservatory: false,
+  bool startPaused: false,
   int observatoryPort,
   int diagnosticPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
+  if (startPaused || observatoryPort != null || diagnosticPort != null)
+    assert(enableObservatory);
   hack.registerPlatformPlugin(
     <TestPlatform>[TestPlatform.vm],
     () => new _FlutterPlatform(
       shellPath: shellPath,
-      collector: collector,
-      debuggerMode: debuggerMode,
+      watcher: watcher,
+      enableObservatory: enableObservatory,
+      startPaused: startPaused,
       explicitObservatoryPort: observatoryPort,
       explicitDiagnosticPort: diagnosticPort,
       host: _kHosts[serverType],
@@ -78,8 +84,9 @@ typedef Future<Null> _Finalizer();
 class _FlutterPlatform extends PlatformPlugin {
   _FlutterPlatform({
     @required this.shellPath,
-    this.collector,
-    this.debuggerMode,
+    this.watcher,
+    this.enableObservatory,
+    this.startPaused,
     this.explicitObservatoryPort,
     this.explicitDiagnosticPort,
     this.host,
@@ -88,8 +95,9 @@ class _FlutterPlatform extends PlatformPlugin {
   }
 
   final String shellPath;
-  final CoverageCollector collector;
-  final bool debuggerMode;
+  final TestWatcher watcher;
+  final bool enableObservatory;
+  final bool startPaused;
   final int explicitObservatoryPort;
   final int explicitDiagnosticPort;
   final InternetAddress host;
@@ -105,7 +113,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
   @override
   StreamChannel<dynamic> loadChannel(String testPath, TestPlatform platform) {
-    if (explicitObservatoryPort != null || explicitDiagnosticPort != null || debuggerMode) {
+    if (enableObservatory || explicitDiagnosticPort != null) {
       if (_testCount > 0)
         throwToolExit('installHook() was called with an observatory port, a diagnostic port, both, or debugger mode enabled, but then more than one test suite was run.');
     }
@@ -190,8 +198,8 @@ class _FlutterPlatform extends PlatformPlugin {
         shellPath,
         listenerFile.path,
         packages: PackageMap.globalPackagesPath,
-        enableObservatory: collector != null || debuggerMode,
-        startPaused: debuggerMode,
+        enableObservatory: enableObservatory,
+        startPaused: startPaused,
         observatoryPort: explicitObservatoryPort,
         diagnosticPort: explicitDiagnosticPort,
       );
@@ -216,19 +224,23 @@ class _FlutterPlatform extends PlatformPlugin {
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
       Uri processObservatoryUri;
+
       _pipeStandardStreamsToConsole(
         process,
         reportObservatoryUri: (Uri detectedUri) {
           assert(processObservatoryUri == null);
           assert(explicitObservatoryPort == null ||
                  explicitObservatoryPort == detectedUri.port);
-          if (debuggerMode) {
+          if (startPaused) {
             printStatus('The test process has been started.');
             printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
             printStatus('  $detectedUri');
             printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
           } else {
-            printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid} to collect coverage');
+            printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid}');
+          }
+          if (watcher != null) {
+            watcher.onStartedProcess(new ProcessEvent(ourTestCount, process, detectedUri));
           }
           processObservatoryUri = detectedUri;
         },
@@ -341,9 +353,9 @@ class _FlutterPlatform extends PlatformPlugin {
           break;
       }
 
-      if (subprocessActive && collector != null) {
-        printTrace('test $ourTestCount: collecting coverage');
-        await collector.collectCoverage(process, processObservatoryUri);
+      if (subprocessActive && watcher != null) {
+        await watcher.onFinishedTests(
+            new ProcessEvent(ourTestCount, process, processObservatoryUri));
       }
     } catch (error, stack) {
       printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');

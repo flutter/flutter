@@ -4,9 +4,6 @@
 
 import 'dart:async';
 
-import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
-
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -14,16 +11,16 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
-import '../base/terminal.dart';
 import '../cache.dart';
-import '../dart/package_map.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
-import '../test/flutter_platform.dart' as loader;
+import '../test/event_printer.dart';
+import '../test/runner.dart';
+import '../test/watcher.dart';
 
 class TestCommand extends FlutterCommand {
-  TestCommand() {
+  TestCommand({ bool verboseHelp: false }) {
     usesPubOption();
     argParser.addFlag('start-paused',
         defaultsTo: false,
@@ -53,6 +50,11 @@ class TestCommand extends FlutterCommand {
       defaultsTo: 'coverage/lcov.info',
       help: 'Where to store coverage information (if coverage is enabled).'
     );
+    argParser.addFlag('machine',
+        hide: !verboseHelp,
+        negatable: false,
+        help: 'Handle machine structured JSON command input\n'
+            'and provide output and progress in machine friendly format.');
     commandValidator = () {
       if (!fs.isFileSync('pubspec.yaml')) {
         throwToolExit(
@@ -70,35 +72,10 @@ class TestCommand extends FlutterCommand {
   @override
   String get description => 'Run Flutter unit tests for the current project.';
 
-  Iterable<String> _findTests(Directory directory) {
-    return directory.listSync(recursive: true, followLinks: false)
-                    .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
-                      fs.isFileSync(entity.path))
-                    .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
-  }
-
   Directory get _currentPackageTestDir {
     // We don't scan the entire package, only the test/ subdirectory, so that
     // files with names like like "hit_test.dart" don't get run.
     return fs.directory('test');
-  }
-
-  Future<int> _runTests(List<String> testArgs, Directory testDirectory) async {
-    final Directory currentDirectory = fs.currentDirectory;
-    try {
-      if (testDirectory != null) {
-        printTrace('switching to directory $testDirectory to run tests');
-        PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
-        fs.currentDirectory = testDirectory;
-      }
-      printTrace('running test package with arguments: $testArgs');
-      await test.main(testArgs);
-      // test.main() sets dart:io's exitCode global.
-      printTrace('test package returned with exit code $exitCode');
-      return exitCode;
-    } finally {
-      fs.currentDirectory = currentDirectory;
-    }
   }
 
   Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
@@ -161,7 +138,7 @@ class TestCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     if (platform.isWindows) {
       throwToolExit(
           'The test command is currently not supported on Windows: '
@@ -169,57 +146,57 @@ class TestCommand extends FlutterCommand {
       );
     }
 
-    final List<String> testArgs = <String>[];
-
     commandValidator();
 
-    if (!terminal.supportsColor)
-      testArgs.addAll(<String>['--no-color', '-rexpanded']);
+    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
+
+    final bool startPaused = argResults['start-paused'];
+    if (startPaused && files.length != 1) {
+      throwToolExit(
+          'When using --start-paused, you must specify a single test file to run.',
+          exitCode: 1);
+    }
+
+    Directory workDir;
+    if (files.isEmpty) {
+      workDir = _currentPackageTestDir;
+      if (!workDir.existsSync())
+        throwToolExit('Test directory "${workDir.path}" not found.');
+      files = _findTests(workDir);
+      if (files.isEmpty) {
+        throwToolExit(
+            'Test directory "${workDir.path}" does not appear to contain any test files.\n'
+                'Test files must be in that directory and end with the pattern "_test.dart".'
+        );
+      }
+    }
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
       collector = new CoverageCollector();
-      testArgs.add('--concurrency=1');
     }
 
-    testArgs.add('--');
-
-    Directory testDir;
-    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
-    if (argResults['start-paused']) {
-      if (files.length != 1)
-        throwToolExit('When using --start-paused, you must specify a single test file to run.', exitCode: 1);
-    } else if (files.isEmpty) {
-      testDir = _currentPackageTestDir;
-      if (!testDir.existsSync())
-        throwToolExit('Test directory "${testDir.path}" not found.');
-      files = _findTests(testDir);
-      if (files.isEmpty) {
-        throwToolExit(
-          'Test directory "${testDir.path}" does not appear to contain any test files.\n'
-          'Test files must be in that directory and end with the pattern "_test.dart".'
-        );
-      }
+    final bool wantEvents = argResults['machine'];
+    if (collector != null && wantEvents) {
+      throwToolExit(
+          "The test command doesn't support --machine and coverage together");
     }
-    testArgs.addAll(files);
 
-    final InternetAddressType serverType = argResults['ipv6']
-        ? InternetAddressType.IP_V6
-        : InternetAddressType.IP_V4;
-
-    final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-    if (!fs.isFileSync(shellPath))
-      throwToolExit('Cannot find Flutter shell at $shellPath');
-    loader.installHook(
-      shellPath: shellPath,
-      collector: collector,
-      debuggerMode: argResults['start-paused'],
-      serverType: serverType,
-    );
+    TestWatcher watcher;
+    if (collector != null) {
+      watcher = collector;
+    } else if (wantEvents) {
+      watcher = new EventPrinter();
+    }
 
     Cache.releaseLockEarly();
 
-    final int result = await _runTests(testArgs, testDir);
+    final int result = await runTests(files,
+        workDir: workDir,
+        watcher: watcher,
+        enableObservatory: collector != null || startPaused,
+        startPaused: startPaused,
+        ipv6: argResults['ipv6']);
 
     if (collector != null) {
       if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))
@@ -228,5 +205,13 @@ class TestCommand extends FlutterCommand {
 
     if (result != 0)
       throwToolExit(null);
+    return const FlutterCommandResult(ExitStatus.success);
   }
+}
+
+Iterable<String> _findTests(Directory directory) {
+  return directory.listSync(recursive: true, followLinks: false)
+      .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
+      fs.isFileSync(entity.path))
+      .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
 }
