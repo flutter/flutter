@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 /// An object sent from the Flutter Driver to a Flutter application to instruct
 /// the application to perform a task.
 abstract class Command {
@@ -20,6 +22,7 @@ abstract class Command {
   String get kind;
 
   /// Serializes this command to parameter name/value pairs.
+  @mustCallSuper
   Map<String, String> serialize() => <String, String>{
     'command': kind,
     'timeout': '${timeout.inMilliseconds}',

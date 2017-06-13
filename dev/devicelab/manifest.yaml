@@ -133,6 +133,13 @@ tasks:
     required_agent_capabilities: ["linux/android"]
     flaky: true
 
+  complex_layout_semantics_perf:
+    description: >
+      Measures duration of building the initial semantics tree.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   # iOS on-device tests
 
   channels_integration_test_ios:
