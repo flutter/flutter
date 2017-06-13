@@ -740,6 +740,7 @@ class _TabBarState extends State<TabBar> {
             ),
             new Semantics(
               selected: index == _currentIndex,
+              // TODO(goderbauer): I10N-ify
               label: 'Tab ${index + 1} of $tabCount',
             ),
           ],
