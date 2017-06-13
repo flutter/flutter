@@ -878,7 +878,7 @@ void main() {
     // Enter some text, and the prefix should still display.
     await tester.enterText(find.byKey(secondKey), "Hi");
     await tester.pump();
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Prefix'), findsOneWidget);
     expect(find.text('Suffix'), findsOneWidget);
@@ -937,7 +937,7 @@ void main() {
     // should appear.
     await tester.enterText(find.byKey(secondKey), "Hi");
     await tester.pump();
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Prefix'), findsOneWidget);
     expect(find.text('Suffix'), findsOneWidget);
@@ -945,7 +945,7 @@ void main() {
     // It's onstage, but animated to zero opacity.
     expect(find.text('Hint'), findsOneWidget);
     final Element target = tester.element(find.text('Hint'));
-    Opacity opacity = target.ancestorWidgetOfExactType(Opacity);
+    final Opacity opacity = target.ancestorWidgetOfExactType(Opacity);
     expect(opacity, isNotNull);
     expect(opacity.opacity, equals(0.0));
 
@@ -953,7 +953,7 @@ void main() {
     final Text prefixText = tester.widget(find.text('Prefix'));
     expect(prefixText.style, hintStyle);
     final Text suffixText = tester.widget(find.text('Suffix'));
-    expect(prefixText.style, hintStyle);
+    expect(suffixText.style, hintStyle);
   });
 
   testWidgets('TextField prefix and suffix appear correctly with label text',
@@ -1014,7 +1014,7 @@ void main() {
     // remain.
     await tester.enterText(find.byKey(secondKey), "Hi");
     await tester.pump();
-    await tester.pump(new Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.text('Prefix'), findsOneWidget);
     expect(find.text('Suffix'), findsOneWidget);
