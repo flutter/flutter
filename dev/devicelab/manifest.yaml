@@ -274,6 +274,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_gallery__transition_perf_with_semantics:
+    description: >
+      Measures the delta in performance of screen transitions without and
+      with semantics enabled.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   flutter_gallery__memory_nav:
     description: >
       Measures memory usage after repeated navigation in Gallery.

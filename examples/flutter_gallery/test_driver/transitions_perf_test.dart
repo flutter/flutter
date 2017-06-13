@@ -174,11 +174,15 @@ Future<Null> runDemos(Iterable<Demo> demos, FlutterDriver driver) async {
   }
 }
 
-void main() {
+void main(List<String> args) {
   group('flutter gallery transitions', () {
     FlutterDriver driver;
     setUpAll(() async {
       driver = await FlutterDriver.connect();
+      if (args.contains('--with_semantics')) {
+        print('Enabeling semantics...');
+        await driver.setSemantics(true);
+      }
     });
 
     tearDownAll(() async {
