@@ -7,6 +7,12 @@
       <excludeFolder url="file://$MODULE_DIR$/bin/packages" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/android/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/base/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/commands/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/asci_casing/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/asci_casing/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/asci_casing/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/bad_package/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/bad_package/build" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/bad_package/packages" />
@@ -30,16 +36,10 @@
       <excludeFolder url="file://$MODULE_DIR$/test/data/intellij/plugins/Dart/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/intellij/plugins/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/ios/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/replay/osx/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/replay/osx/simulator_application_binary/file/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/replay/osx/simulator_application_binary/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/replay/osx/simulator_application_binary/platform/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/replay/osx/simulator_application_binary/process/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/replay/osx/simulator_application_binary/vmservice/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/replay/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/src/base/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/src/ios/packages" />
+      <excludeFolder url="file://$MODULE_DIR$/test/runner/packages" />
       <excludeFolder url="file://$MODULE_DIR$/test/src/packages" />
       <excludeFolder url="file://$MODULE_DIR$/tool/packages" />
     </content>

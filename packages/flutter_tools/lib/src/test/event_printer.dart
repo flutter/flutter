@@ -1,3 +1,7 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert' show JSON;
 
 import '../base/io.dart' show stdout;
@@ -15,10 +19,10 @@ class EventPrinter extends TestWatcher {
         <String, dynamic>{"observatoryUri": event.observatoryUri.toString()});
   }
 
-  void _sendEvent(String name, [dynamic args]) {
+  void _sendEvent(String name, [dynamic params]) {
     final Map<String, dynamic> map = <String, dynamic>{ 'event': name};
-    if (args != null) {
-      map['params'] = args;
+    if (params != null) {
+      map['params'] = params;
     }
     _send(map);
   }

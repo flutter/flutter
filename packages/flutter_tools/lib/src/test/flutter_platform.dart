@@ -61,9 +61,8 @@ void installHook({
   int diagnosticPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
-  if (startPaused || observatoryPort != null || diagnosticPort != null) {
+  if (startPaused || observatoryPort != null || diagnosticPort != null)
     assert(enableObservatory);
-  }
   hack.registerPlatformPlugin(
     <TestPlatform>[TestPlatform.vm],
     () => new _FlutterPlatform(

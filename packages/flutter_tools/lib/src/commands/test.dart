@@ -20,7 +20,7 @@ import '../test/runner.dart';
 import '../test/watcher.dart';
 
 class TestCommand extends FlutterCommand {
-  TestCommand({bool verboseHelp: false}) {
+  TestCommand({ bool verboseHelp: false }) {
     usesPubOption();
     argParser.addFlag('start-paused',
         defaultsTo: false,
@@ -52,6 +52,7 @@ class TestCommand extends FlutterCommand {
     );
     argParser.addFlag('machine',
         hide: !verboseHelp,
+        negatable: false,
         help: 'Handle machine structured JSON command input\n'
             'and provide output and progress in machine friendly format.');
     commandValidator = () {
