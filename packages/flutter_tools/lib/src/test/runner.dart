@@ -31,7 +31,9 @@ Future<int> runTests(
   if (!terminal.supportsColor)
     testArgs.addAll(<String>['--no-color', '-rexpanded']);
 
-  if (enableObservatory) testArgs.add('--concurrency=1');
+  if (enableObservatory) {
+    testArgs.add('--concurrency=1');
+  }
 
   testArgs.add('--');
   testArgs.addAll(testFiles);
