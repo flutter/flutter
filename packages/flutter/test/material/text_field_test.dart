@@ -1072,7 +1072,7 @@ void main() {
     newPos = tester.getTopLeft(find.text('Second'));
     expect(newPos.dy, lessThan(pos.dy));
   });
-  
+
   testWidgets('No space between Input icon and text', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
