@@ -35,7 +35,6 @@ class Layer {
   struct PrerollContext {
     RasterCache* raster_cache;
     GrContext* gr_context;
-    sk_sp<SkColorSpace> dst_color_space;
     SkRect child_paint_bounds;
   };
 
