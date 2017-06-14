@@ -8,7 +8,6 @@
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/GrContextOptions.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace shell {
@@ -45,12 +44,9 @@ bool GPUSurfaceGL::Setup() {
   auto backend_context =
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface());
 
-  GrContextOptions options;
-  options.fRequireDecodeDisableForSRGB = false;
-
   context_ =
-      sk_sp<GrContext>(GrContext::Create(kOpenGL_GrBackend, backend_context,
-                                         options));
+      sk_sp<GrContext>(GrContext::Create(kOpenGL_GrBackend, backend_context));
+
   if (context_ == nullptr) {
     FTL_LOG(INFO) << "Failed to setup Skia Gr context.";
     return false;
@@ -108,16 +104,15 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
 }
 
 bool GPUSurfaceGL::SelectPixelConfig(GrPixelConfig* config) {
-  if (delegate_->ColorSpace() && delegate_->ColorSpace()->gammaCloseToSRGB()) {
-    FTL_DCHECK(context_->caps()->isConfigRenderable(kSRGBA_8888_GrPixelConfig,
-                                                    false));
-    *config = kSRGBA_8888_GrPixelConfig;
-    return true;
-  }
+  static const GrPixelConfig kConfigOptions[] = {
+      kSkia8888_GrPixelConfig, kRGBA_4444_GrPixelConfig,
+  };
 
-  if (context_->caps()->isConfigRenderable(kRGBA_8888_GrPixelConfig, false)) {
-    *config = kRGBA_8888_GrPixelConfig;
-    return true;
+  for (size_t i = 0; i < arraysize(kConfigOptions); i++) {
+    if (context_->caps()->isConfigRenderable(kConfigOptions[i], false)) {
+      *config = kConfigOptions[i];
+      return true;
+    }
   }
 
   return false;
@@ -129,6 +124,7 @@ sk_sp<SkSurface> GPUSurfaceGL::CreateSurface(const SkISize& size) {
   }
 
   GrBackendRenderTargetDesc desc;
+
   if (!SelectPixelConfig(&desc.fConfig)) {
     return nullptr;
   }
@@ -139,8 +135,7 @@ sk_sp<SkSurface> GPUSurfaceGL::CreateSurface(const SkISize& size) {
   desc.fOrigin = kBottomLeft_GrSurfaceOrigin;
   desc.fRenderTargetHandle = delegate_->GLContextFBO();
 
-  return SkSurface::MakeFromBackendRenderTarget(context_.get(), desc,
-                                                delegate_->ColorSpace(), nullptr);
+  return SkSurface::MakeFromBackendRenderTarget(context_.get(), desc, nullptr);
 }
 
 sk_sp<SkSurface> GPUSurfaceGL::AcquireSurface(const SkISize& size) {

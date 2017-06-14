@@ -3,10 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/ios_gl_context.h"
-#include "third_party/skia/include/gpu/GrContextOptions.h"
-#include "third_party/skia/include/gpu/gl/GrGLInterface.h"
-
-#include <UIKit/UIKit.h>
 
 namespace shell {
 
@@ -100,32 +96,14 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config, CAEAGLLayer* laye
     }
   }
 
-  // TODO:
-  // iOS displays are more variable than just P3 or sRGB.  Reading the display
-  // gamut just tells us what color space it makes sense to render into.  We
-  // should use iOS APIs to perform the final correction step based on the
-  // device properties.  Ex: We can indicate that we have rendered in P3, and
-  // the framework will do the final adjustment for us.
-  NSOperatingSystemVersion version = [[NSProcessInfo processInfo]
-      operatingSystemVersion];
-  color_space_ = SkColorSpace::MakeSRGB();
-  if (version.majorVersion >= 10) {
-    UIDisplayGamut displayGamut =
-        [UIScreen mainScreen].traitCollection.displayGamut;
-    switch (displayGamut) {
-      case UIDisplayGamutP3:
-        // Should we consider using more than 8-bits of precision given that
-        // P3 specifies a wider range of colors?
-        color_space_ = SkColorSpace::MakeRGB(
-            SkColorSpace::kSRGB_RenderTargetGamma,
-            SkColorSpace::kDCIP3_D65_Gamut);
-        break;
-      default:
-        break;
-    }
+  // The default is RGBA
+  NSString* drawableColorFormat = kEAGLColorFormatRGBA8;
+
+  if (config.red_bits <= 5 && config.green_bits <= 6 && config.blue_bits <= 5 &&
+      config.alpha_bits == 0) {
+    drawableColorFormat = kEAGLColorFormatRGB565;
   }
 
-  NSString* drawableColorFormat = kEAGLColorFormatSRGBA8;
   layer_.get().drawableProperties = @{
     kEAGLDrawablePropertyColorFormat : drawableColorFormat,
     kEAGLDrawablePropertyRetainedBacking : @(NO),
