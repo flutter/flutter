@@ -8,7 +8,6 @@ import 'package:test/test.dart';
 
 void main() {
   group('sample screenshots', () {
-    final String prefix = Platform.isMacOS ? 'ios_' : "";
     FlutterDriver driver;
 
     setUpAll(() async {

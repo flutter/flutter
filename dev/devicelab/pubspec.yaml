@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   args: ^0.13.4
+  image: ^1.1.27
   meta: ^1.0.5
   path: ^1.4.0
   process: 2.0.3

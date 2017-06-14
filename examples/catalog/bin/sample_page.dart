@@ -180,7 +180,7 @@ void generate() {
     screenshotDriverTemplate,
     <String, String>{
       'paths': samples.map((SampleGenerator sample) {
-        return "'${outputFile('\${prefix}' + sample.sourceName + '.png').path}'";
+        return "'${outputFile(sample.sourceName + '.png').path}'";
       }).toList().join(',\n'),
     },
   );

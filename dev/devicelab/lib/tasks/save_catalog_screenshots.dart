@@ -1,3 +1,7 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -56,6 +60,7 @@ class Upload {
 
       final HttpClientResponse response = await request.close().timeout(timeLimit);
       if (response.statusCode == HttpStatus.OK) {
+        logMessage('Saved $name');
         await response.drain<Null>();
       } else {
         // TODO(hansmuller): only retry on 5xx and 429 responses
@@ -96,40 +101,40 @@ Future<Null> saveScreenshots(List<String> fromPaths, List<String> largeNames, Li
   for (int index = 0; index < uploads.length; index += 1)
     uploads[index] = new Upload(fromPaths[index], largeNames[index], smallNames[index]);
 
-  final HttpClient client = new HttpClient();
   while(uploads.any(Upload.isNotComplete)) {
+    final HttpClient client = new HttpClient();
     uploads = uploads.where(Upload.isNotComplete).toList();
     await Future.wait(uploads.map((Upload upload) => upload.run(client)));
+    client.close(force: true);
   }
-  client.close();
 }
 
 
 // If path is lib/foo.png then screenshotName is foo.
 String screenshotName(String path) => basenameWithoutExtension(path);
 
-Future<Null> main(List<String> args) async {
-  if (args.length != 2)
-    throw new UploadError('Usage: dart bin/save_screenshots.dart commit authorization');
-
-  final Directory outputDirectory = new Directory('.generated');
+Future<Null> saveCatalogScreenshots({
+    Directory directory, // Where the *.png screenshots are.
+    String commit, // The commit hash to be used as a cloud storage "directory".
+    String token, // Cloud storage authorization token.
+    String prefix, // Prefix for all file names.
+  }) async {
   final List<String> screenshots = <String>[];
-  outputDirectory.listSync().forEach((FileSystemEntity entity) {
+  directory.listSync().forEach((FileSystemEntity entity) {
     if (entity is File && entity.path.endsWith('.png')) {
       final File file = entity;
       screenshots.add(file.path);
     }
   });
 
-  final String commit = args[0];
   final List<String> largeNames = <String>[]; // Cloud storage names for the full res screenshots.
   final List<String> smallNames = <String>[]; // Likewise for the scaled down screenshots.
   for (String path in screenshots) {
     final String name = screenshotName(path);
-    largeNames.add('$commit/$name.png');
-    smallNames.add('$commit/${name}_small.png');
+    largeNames.add('$commit/$prefix$name.png');
+    smallNames.add('$commit/$prefix${name}_small.png');
   }
 
-  authorizationToken = args[1];
+  authorizationToken = token;
   await saveScreenshots(screenshots, largeNames, smallNames);
 }
