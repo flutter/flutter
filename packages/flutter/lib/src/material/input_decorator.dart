@@ -37,6 +37,10 @@ class InputDecoration {
     this.errorStyle,
     this.isDense: false,
     this.hideDivider: false,
+    this.prefixText,
+    this.prefixStyle,
+    this.suffixText,
+    this.suffixStyle,
   }) : isCollapsed = false;
 
   /// Creates a decoration that is the same size as the input field.
@@ -55,7 +59,11 @@ class InputDecoration {
        errorStyle = null,
        isDense = false,
        isCollapsed = true,
-       hideDivider = true;
+       hideDivider = true,
+       prefixText = null,
+       prefixStyle = null,
+       suffixText = null,
+       suffixStyle = null;
 
   /// An icon to show before the input field.
   ///
@@ -108,7 +116,7 @@ class InputDecoration {
   /// If non-null the divider, that appears below the input field is red.
   final String errorText;
 
-  /// The style to use for the [errorText.
+  /// The style to use for the [errorText].
   ///
   /// If null, defaults of a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
@@ -133,6 +141,28 @@ class InputDecoration {
   /// Defaults to false.
   final bool hideDivider;
 
+  /// Optional text prefix to place on the line before the input.
+  ///
+  /// Uses the [prefixStyle]. Uses [hintStyle] if [prefixStyle] isn't
+  /// specified. Prefix is not returned as part of the input.
+  final String prefixText;
+
+  /// The style to use for the [prefixText].
+  ///
+  /// If null, defaults to the [hintStyle].
+  final TextStyle prefixStyle;
+
+  /// Optional text suffix to place on the line after the input.
+  ///
+  /// Uses the [suffixStyle]. Uses [hintStyle] if [suffixStyle] isn't
+  /// specified. Suffix is not returned as part of the input.
+  final String suffixText;
+
+  /// The style to use for the [suffixText].
+  ///
+  /// If null, defaults to the [hintStyle].
+  final TextStyle suffixStyle;
+
   /// Creates a copy of this input decoration but with the given fields replaced
   /// with the new values.
   ///
@@ -147,6 +177,10 @@ class InputDecoration {
     TextStyle errorStyle,
     bool isDense,
     bool hideDivider,
+    String prefixText,
+    TextStyle prefixStyle,
+    String suffixText,
+    TextStyle suffixStyle,
   }) {
     return new InputDecoration(
       icon: icon ?? this.icon,
@@ -158,6 +192,10 @@ class InputDecoration {
       errorStyle: errorStyle ?? this.errorStyle,
       isDense: isDense ?? this.isDense,
       hideDivider: hideDivider ?? this.hideDivider,
+      prefixText: prefixText ?? this.prefixText,
+      prefixStyle: prefixStyle ?? this.prefixStyle,
+      suffixText: suffixText ?? this.suffixText,
+      suffixStyle: suffixStyle ?? this.suffixStyle,
     );
   }
 
@@ -177,7 +215,11 @@ class InputDecoration {
         && typedOther.errorStyle == errorStyle
         && typedOther.isDense == isDense
         && typedOther.isCollapsed == isCollapsed
-        && typedOther.hideDivider == hideDivider;
+        && typedOther.hideDivider == hideDivider
+        && typedOther.prefixText == prefixText
+        && typedOther.prefixStyle == prefixStyle
+        && typedOther.suffixText == suffixText
+        && typedOther.suffixStyle == suffixStyle;
   }
 
   @override
@@ -193,6 +235,10 @@ class InputDecoration {
       isDense,
       isCollapsed,
       hideDivider,
+      prefixText,
+      prefixStyle,
+      suffixText,
+      suffixStyle,
     );
   }
 
@@ -213,6 +259,14 @@ class InputDecoration {
       description.add('isCollapsed: $isCollapsed');
     if (hideDivider)
       description.add('hideDivider: $hideDivider');
+    if (prefixText != null)
+      description.add('prefixText: $prefixText');
+    if (prefixStyle != null)
+      description.add('prefixStyle: $prefixStyle');
+    if (suffixText != null)
+      description.add('suffixText: $suffixText');
+    if (suffixStyle != null)
+      description.add('suffixStyle: $suffixStyle');
     return 'InputDecoration(${description.join(', ')})';
   }
 }
@@ -293,7 +347,7 @@ class InputDecorator extends StatelessWidget {
     return themeData.hintColor;
   }
 
-  Widget _buildContent(Color borderColor, double topPadding, bool isDense) {
+  Widget _buildContent(Color borderColor, double topPadding, bool isDense, Widget inputChild) {
     final double bottomPadding = isDense ? 8.0 : 1.0;
     const double bottomBorder = 2.0;
     final double bottomHeight = isDense ? 14.0 : 18.0;
@@ -305,7 +359,7 @@ class InputDecorator extends StatelessWidget {
       return new Container(
         margin: margin + const EdgeInsets.only(bottom: bottomBorder),
         padding: padding,
-        child: child,
+        child: inputChild,
       );
     }
 
@@ -322,7 +376,7 @@ class InputDecorator extends StatelessWidget {
           ),
         ),
       ),
-      child: child,
+      child: inputChild,
     );
   }
 
@@ -348,7 +402,7 @@ class InputDecorator extends StatelessWidget {
 
     final List<Widget> stackChildren = <Widget>[];
 
-    // If we're not focused, there's not value, and labelText was provided,
+    // If we're not focused, there's no value, and labelText was provided,
     // then the label appears where the hint would. And we will not show
     // the hintText.
     final bool hasInlineLabel = !isFocused && labelText != null && isEmpty;
@@ -402,11 +456,33 @@ class InputDecorator extends StatelessWidget {
       );
     }
 
+    Widget inputChild;
+    if (!hasInlineLabel && (!isEmpty || hintText == null) &&
+        (decoration?.prefixText != null || decoration?.suffixText != null)) {
+      final List<Widget> rowContents = <Widget>[];
+      if (decoration.prefixText != null) {
+        rowContents.add(
+            new Text(decoration.prefixText,
+            style: decoration.prefixStyle ?? hintStyle)
+        );
+      }
+      rowContents.add(new Expanded(child: child));
+      if (decoration.suffixText != null) {
+        rowContents.add(
+            new Text(decoration.suffixText,
+            style: decoration.suffixStyle ?? hintStyle)
+        );
+      }
+      inputChild = new Row(children: rowContents);
+    } else {
+      inputChild = child;
+    }
+
     if (isCollapsed) {
-      stackChildren.add(child);
+      stackChildren.add(inputChild);
     } else {
       final Color borderColor = errorText == null ? activeColor : themeData.errorColor;
-      stackChildren.add(_buildContent(borderColor, topPadding, isDense));
+      stackChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild));
     }
 
     if (!isDense && errorText != null) {

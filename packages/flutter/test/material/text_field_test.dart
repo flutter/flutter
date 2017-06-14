@@ -801,6 +801,248 @@ void main() {
     expect(hintText.style, hintStyle);
   });
 
+  testWidgets('TextField with specified prefixStyle', (WidgetTester tester) async {
+    final TextStyle prefixStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new TextField(
+            decoration: new InputDecoration(
+              prefixText: 'Prefix:',
+              prefixStyle: prefixStyle,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    final Text prefixText = tester.widget(find.text('Prefix:'));
+    expect(prefixText.style, prefixStyle);
+  });
+
+  testWidgets('TextField with specified suffixStyle', (WidgetTester tester) async {
+    final TextStyle suffixStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new TextField(
+            decoration: new InputDecoration(
+              suffixText: '.com',
+              suffixStyle: suffixStyle,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    final Text suffixText = tester.widget(find.text('.com'));
+    expect(suffixText.style, suffixStyle);
+  });
+
+  testWidgets('TextField prefix and suffix appear correctly with no hint or label',
+          (WidgetTester tester) async {
+    final Key secondKey = new UniqueKey();
+
+    Widget innerBuilder() {
+      return new Center(
+        child: new Material(
+          child: new Column(
+            children: <Widget>[
+              const TextField(
+                decoration: const InputDecoration(
+                  labelText: 'First',
+                ),
+              ),
+              new TextField(
+                key: secondKey,
+                decoration: const InputDecoration(
+                  prefixText: 'Prefix',
+                  suffixText: 'Suffix',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    Widget builder() => overlay(innerBuilder());
+
+    await tester.pumpWidget(builder());
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+
+    // Focus the Input. The prefix should still display.
+    await tester.tap(find.byKey(secondKey));
+    await tester.pump();
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+
+    // Enter some text, and the prefix should still display.
+    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+  });
+
+  testWidgets('TextField prefix and suffix appear correctly with hint text',
+          (WidgetTester tester) async {
+    final TextStyle hintStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+    final Key secondKey = new UniqueKey();
+
+    Widget innerBuilder() {
+      return new Center(
+        child: new Material(
+          child: new Column(
+            children: <Widget>[
+              const TextField(
+                decoration: const InputDecoration(
+                  labelText: 'First',
+                ),
+              ),
+              new TextField(
+                key: secondKey,
+                decoration: new InputDecoration(
+                  hintText: 'Hint',
+                  hintStyle: hintStyle,
+                  prefixText: 'Prefix',
+                  suffixText: 'Suffix',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    Widget builder() => overlay(innerBuilder());
+
+    await tester.pumpWidget(builder());
+
+    // Neither the prefix or the suffix should initially be visible, only the hint.
+    expect(find.text('Prefix'), findsNothing);
+    expect(find.text('Suffix'), findsNothing);
+    expect(find.text('Hint'), findsOneWidget);
+
+    await tester.tap(find.byKey(secondKey));
+    await tester.pump();
+
+    // Focus the Input. The hint should display, but not the prefix and suffix.
+    expect(find.text('Prefix'), findsNothing);
+    expect(find.text('Suffix'), findsNothing);
+    expect(find.text('Hint'), findsOneWidget);
+
+    // Enter some text, and the hint should disappear and the prefix and suffix
+    // should appear.
+    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+
+    // It's onstage, but animated to zero opacity.
+    expect(find.text('Hint'), findsOneWidget);
+    final Element target = tester.element(find.text('Hint'));
+    final Opacity opacity = target.ancestorWidgetOfExactType(Opacity);
+    expect(opacity, isNotNull);
+    expect(opacity.opacity, equals(0.0));
+
+    // Check and make sure that the right styles were applied.
+    final Text prefixText = tester.widget(find.text('Prefix'));
+    expect(prefixText.style, hintStyle);
+    final Text suffixText = tester.widget(find.text('Suffix'));
+    expect(suffixText.style, hintStyle);
+  });
+
+  testWidgets('TextField prefix and suffix appear correctly with label text',
+          (WidgetTester tester) async {
+    final TextStyle prefixStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+    final TextStyle suffixStyle = new TextStyle(
+      color: Colors.green[500],
+      fontSize: 12.0,
+    );
+    final Key secondKey = new UniqueKey();
+
+    Widget innerBuilder() {
+      return new Center(
+        child: new Material(
+          child: new Column(
+            children: <Widget>[
+              const TextField(
+                decoration: const InputDecoration(
+                  labelText: 'First',
+                ),
+              ),
+              new TextField(
+                key: secondKey,
+                decoration: new InputDecoration(
+                  labelText: 'Label',
+                  prefixText: 'Prefix',
+                  prefixStyle: prefixStyle,
+                  suffixText: 'Suffix',
+                  suffixStyle: suffixStyle,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    Widget builder() => overlay(innerBuilder());
+
+    await tester.pumpWidget(builder());
+
+    // Not focused.  The prefix should not display, but the label should.
+    expect(find.text('Prefix'), findsNothing);
+    expect(find.text('Suffix'), findsNothing);
+    expect(find.text('Label'), findsOneWidget);
+
+    await tester.tap(find.byKey(secondKey));
+    await tester.pump();
+
+    // Focus the input. The label should display, and also the prefix.
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+    expect(find.text('Label'), findsOneWidget);
+
+    // Enter some text, and the label should stay and the prefix should
+    // remain.
+    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+    expect(find.text('Label'), findsOneWidget);
+
+    // Check and make sure that the right styles were applied.
+    final Text prefixText = tester.widget(find.text('Prefix'));
+    expect(prefixText.style, prefixStyle);
+    final Text suffixText = tester.widget(find.text('Suffix'));
+    expect(suffixText.style, suffixStyle);
+  });
+
   testWidgets('TextField label text animates', (WidgetTester tester) async {
     final Key secondKey = new UniqueKey();
 
@@ -1006,7 +1248,7 @@ void main() {
   });
 
   testWidgets(
-    'Cannot enter new lines onto single line TextField', 
+    'Cannot enter new lines onto single line TextField',
     (WidgetTester tester) async {
       final TextEditingController textController = new TextEditingController();
 
@@ -1021,13 +1263,13 @@ void main() {
   );
 
   testWidgets(
-    'Injected formatters are chained', 
+    'Injected formatters are chained',
     (WidgetTester tester) async {
       final TextEditingController textController = new TextEditingController();
 
       await tester.pumpWidget(new Material(
         child: new TextField(
-          controller: textController, 
+          controller: textController,
           decoration: null,
           inputFormatters: <TextInputFormatter> [
             new BlacklistingTextInputFormatter(
@@ -1045,13 +1287,13 @@ void main() {
   );
 
   testWidgets(
-    'Chained formatters are in sequence', 
+    'Chained formatters are in sequence',
     (WidgetTester tester) async {
       final TextEditingController textController = new TextEditingController();
 
       await tester.pumpWidget(new Material(
         child: new TextField(
-          controller: textController, 
+          controller: textController,
           decoration: null,
           maxLines: 2,
           inputFormatters: <TextInputFormatter> [
@@ -1067,15 +1309,15 @@ void main() {
       await tester.enterText(find.byType(TextField), 'a1b2c3');
       // The first formatter turns it into
       // 12\n112\n212\n3
-      // The second formatter turns it into 
+      // The second formatter turns it into
       // \n1\n2\n3
-      // Multiline is allowed since maxLine != 1. 
+      // Multiline is allowed since maxLine != 1.
       expect(textController.text, '\n1\n2\n3');
     }
   );
 
   testWidgets(
-    'Pasted values are formatted', 
+    'Pasted values are formatted',
     (WidgetTester tester) async {
       final TextEditingController textController = new TextEditingController();
 
@@ -1083,7 +1325,7 @@ void main() {
         return overlay(new Center(
           child: new Material(
             child: new TextField(
-              controller: textController, 
+              controller: textController,
               decoration: null,
               inputFormatters: <TextInputFormatter> [
                 WhitelistingTextInputFormatter.digitsOnly,
@@ -1104,7 +1346,7 @@ void main() {
       await tester.tapAt(textOffsetToPosition(tester, '123'.indexOf('2')));
       await tester.pumpWidget(builder());
       final RenderEditable renderEditable = findRenderEditable(tester);
-      final List<TextSelectionPoint> endpoints = 
+      final List<TextSelectionPoint> endpoints =
           renderEditable.getEndpointsForSelection(textController.selection);
       await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
       await tester.pumpWidget(builder());
