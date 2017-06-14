@@ -18,3 +18,4 @@ export 'src/cupertino/scaffold.dart';
 export 'src/cupertino/slider.dart';
 export 'src/cupertino/switch.dart';
 export 'src/cupertino/thumb_painter.dart';
+export 'widgets.dart';

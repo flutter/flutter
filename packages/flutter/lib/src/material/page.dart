@@ -54,6 +54,10 @@ class _MountainViewPageTransition extends StatelessWidget {
 ///
 /// Specify whether the incoming page is a fullscreen modal dialog. On iOS, those
 /// pages animate bottom->up rather than right->left.
+///
+/// See also:
+///
+///  * [CupertinoPageRoute], that this [PageRoute] delegates transition animations to for iOS.
 class MaterialPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in a material design app.
   MaterialPageRoute({
@@ -73,8 +77,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   CupertinoPageRoute<T> _cupertinoPageRoute;
   CupertinoPageRoute<T> get cupertinoPageRoute {
     if (_cupertinoPageRoute == null) {
-      _cupertinoPageRoute = new CupertinoPageRoute<T>.delegate(
-        hostPageRoute: this,
+      _cupertinoPageRoute = new CupertinoPageRoute<T>(
+        builder: builder, // Not used.
         fullscreenDialog: fullscreenDialog,
       );
     }
@@ -115,12 +119,13 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   ///
   /// See also:
   ///
+  ///  * [CupertinoPageRoute] that backs the gesture for iOS.
   ///  * [hasScopedWillPopCallback], which is true if a `willPop` callback
   ///    is defined for this route.
   @override
   NavigationGestureController startPopGesture() {
     return Theme.of(navigator.context).platform == TargetPlatform.iOS
-        ? cupertinoPageRoute.startPopGesture()
+        ? cupertinoPageRoute.startPopGestureForRoute(this)
         : null;
   }
 

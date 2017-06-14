@@ -46,6 +46,21 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
   ),
 );
 
+/// A modal route that replaces the entire screen with an iOS transition.
+///
+/// The page slides in from the right and exits in reverse.
+/// The page also shifts to the left in parallax when another page enters to cover it.
+///
+/// The page slides in from the bottom and exits in reverse with no parallax effect
+/// for fullscreen dialogs.
+///
+/// By default, when a modal route is replaced by another, the previous route
+/// remains in memory. To free all the resources when this is not necessary, set
+/// [maintainState] to false.
+///
+/// See also:
+///
+///  * [MaterialPageRoute] for an adaptive [PageRoute] that uses a platform appropriate transition.
 class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in an iOS designed app.
   CupertinoPageRoute({
@@ -55,37 +70,16 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     bool fullscreenDialog: false,
   }) : assert(builder != null),
        assert(opaque),
-       _hostPageRoute = null,
        super(settings: settings, fullscreenDialog: fullscreenDialog);
-
-  CupertinoPageRoute.delegate({
-    @required PageRoute<T> hostPageRoute,
-    bool fullscreenDialog,
-  }) : assert(hostPageRoute != null),
-       _hostPageRoute = hostPageRoute,
-       builder = null,
-       maintainState = null,
-       super(fullscreenDialog: fullscreenDialog);
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
-
-  final PageRoute<T> _hostPageRoute;
 
   @override
   final bool maintainState;
 
   @override
-  NavigatorState get navigator => _hostPageRoute?.navigator ?? super.navigator;
-
-  @override
-  AnimationController get controller => _hostPageRoute?.controller ?? super.controller;
-
-  @override
-  bool get hasScopedWillPopCallback => _hostPageRoute?.hasScopedWillPopCallback ?? super.hasScopedWillPopCallback;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 300);
+  Duration get transitionDuration => const Duration(milliseconds: 350);
 
   @override
   Color get barrierColor => null;
@@ -104,7 +98,10 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   @override
   void dispose() {
     _backGestureController?.dispose();
-    if (_hostPageRoute == null)
+    // If the route is never installed (i.e. pushed into a Navigator) such as the
+    // case when [MaterialPageRoute] delegates transition building to [CupertinoPageRoute],
+    // don't dispose super.
+    if (overlayEntries.isNotEmpty)
       super.dispose();
   }
 
@@ -122,31 +119,40 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///    is defined for this route.
   @override
   NavigationGestureController startPopGesture() {
+    return startPopGestureForRoute(this);
+  }
+
+  /// Create a CupertinoBackGestureController using a specific PageRoute.
+  ///
+  /// Used when [MaterialPageRoute] delegates the back gesture to [CupertinoPageRoute]
+  /// since the [CupertinoPageRoute] is not actually inserted into the Navigator.
+  NavigationGestureController startPopGestureForRoute(PageRoute<T> hostRoute) {
     // If attempts to dismiss this route might be vetoed such as in a page
     // with forms, then do not allow the user to dismiss the route with a swipe.
-    if (hasScopedWillPopCallback)
+    if (hostRoute.hasScopedWillPopCallback)
       return null;
     // Fullscreen dialogs aren't dismissable by back swipe.
     if (fullscreenDialog)
       return null;
-    if (controller.status != AnimationStatus.completed)
+    if (hostRoute.controller.status != AnimationStatus.completed)
       return null;
     assert(_backGestureController == null);
     _backGestureController = new CupertinoBackGestureController(
-      navigator: navigator,
-      controller: controller,
+      navigator: hostRoute.navigator,
+      controller: hostRoute.controller,
     );
 
-    controller.addStatusListener(_handleBackGestureEnded);
-    return _backGestureController;
-  }
+    Function handleBackGestureEnded;
+    handleBackGestureEnded = (AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        _backGestureController?.dispose();
+        _backGestureController = null;
+        hostRoute.controller.removeStatusListener(handleBackGestureEnded);
+      }
+    };
 
-  void _handleBackGestureEnded(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      _backGestureController?.dispose();
-      _backGestureController = null;
-      controller.removeStatusListener(_handleBackGestureEnded);
-    }
+    hostRoute.controller.addStatusListener(handleBackGestureEnded);
+    return _backGestureController;
   }
 
   @override

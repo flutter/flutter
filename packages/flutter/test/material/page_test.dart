@@ -38,7 +38,7 @@ void main() {
     // Animation begins from the top of the page.
     expect(widget2TopLeft.dy < widget2Size.height, true);
 
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
 
     // Page 2 covers page 1.
     expect(find.text('Page 1'), findsNothing);
@@ -53,7 +53,7 @@ void main() {
     // Page 2 starts to move down.
     expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
 
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
@@ -301,5 +301,80 @@ void main() {
 
     // Page 2 didn't move
     expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
+  });
+
+  testWidgets('test adaptable transitions switch during execution', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: const Material(child: const Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(child: const Text('Page 2'));
+          },
+        },
+      )
+    );
+
+    final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    final Size widget2Size = tester.getSize(find.text('Page 2'));
+
+    // Android transition is vertical only.
+    expect(widget1InitialTopLeft.dx == widget2TopLeft.dx, true);
+    // Page 1 is above page 2 mid-transition.
+    expect(widget1InitialTopLeft.dy < widget2TopLeft.dy, true);
+    // Animation begins from the top of the page.
+    expect(widget2TopLeft.dy < widget2Size.height, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Page 2 covers page 1.
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    // Re-pump the same app but with iOS instead of Android.
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.iOS),
+        home: const Material(child: const Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return const Material(child: const Text('Page 2'));
+          },
+        },
+      )
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // Page 1 is coming back from the left.
+    expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
+    // Page 1 isn't moving vertically.
+    expect(widget1TransientTopLeft.dy == widget1InitialTopLeft.dy, true);
+    // iOS transition is horizontal only.
+    expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
+    // Page 2 is leaving towards the right.
+    expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
+
+    widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    // Page 1 is back where it started.
+    expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   });
 }
