@@ -6,7 +6,10 @@ package io.flutter.plugin.editing;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.Selection;
+import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -29,16 +32,16 @@ import org.json.JSONObject;
  */
 public class TextInputPlugin implements MethodCallHandler {
 
-    private final Activity mActivity;
     private final FlutterView mView;
+    private final InputMethodManager mImm;
     private final MethodChannel mFlutterChannel;
     private int mClient = 0;
     private JSONObject mConfiguration;
-    private JSONObject mLatestState;
+    private Editable mEditable;
 
-    public TextInputPlugin(Activity activity, FlutterView view) {
-        mActivity = activity;
+    public TextInputPlugin(FlutterView view) {
         mView = view;
+        mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         mFlutterChannel = new MethodChannel(view, "flutter/textinput",
             JSONMethodCodec.INSTANCE);
         mFlutterChannel.setMethodCallHandler(this);
@@ -98,60 +101,53 @@ public class TextInputPlugin implements MethodCallHandler {
         throws JSONException {
         if (mClient == 0)
             return null;
+
         outAttrs.inputType = inputTypeFromTextInputType(mConfiguration.getString("inputType"),
             mConfiguration.optBoolean("obscureText"));
         if (!mConfiguration.isNull("actionLabel"))
           outAttrs.actionLabel = mConfiguration.getString("actionLabel");
         outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
-        InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient, this,
-            mFlutterChannel);
-        if (mLatestState != null) {
-            int selectionBase = (Integer) mLatestState.get("selectionBase");
-            int selectionExtent = (Integer) mLatestState.get("selectionExtent");
-            outAttrs.initialSelStart = selectionBase;
-            outAttrs.initialSelEnd = selectionExtent;
-            connection.getEditable().append((String) mLatestState.get("text"));
-            connection.setSelection(Math.max(selectionBase, 0),
-                Math.max(selectionExtent, 0));
-            connection.setComposingRegion((Integer) mLatestState.get("composingBase"),
-                (Integer) mLatestState.get("composingExtent"));
-        } else {
-            outAttrs.initialSelStart = 0;
-            outAttrs.initialSelEnd = 0;
-        }
+
+        InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient, mFlutterChannel, mEditable);
+        outAttrs.initialSelStart = Math.max(Selection.getSelectionStart(mEditable), 0);
+        outAttrs.initialSelEnd = Math.max(Selection.getSelectionEnd(mEditable), 0);
+
         return connection;
     }
 
     private void showTextInput(FlutterView view) {
-        InputMethodManager imm =
-            (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(view, 0);
+        mImm.showSoftInput(view, 0);
     }
 
     private void hideTextInput(FlutterView view) {
-        InputMethodManager imm =
-            (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+        mImm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
     }
 
     private void setTextInputClient(FlutterView view, int client, JSONObject configuration) {
-        mLatestState = null;
         mClient = client;
         mConfiguration = configuration;
-        InputMethodManager imm =
-            (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.restartInput(view);
+        mEditable = Editable.Factory.getInstance().newEditable("");
+
+        mImm.restartInput(view);
     }
 
-    private void setTextInputEditingState(FlutterView view, JSONObject state) {
-        mLatestState = state;
-        InputMethodManager imm =
-            (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.restartInput(view);
-    }
-
-    void setLatestEditingState(Map<String, Object> state) {
-        mLatestState = (JSONObject) JSONUtil.wrap(state);
+    private void setTextInputEditingState(FlutterView view, JSONObject state)
+        throws JSONException {
+        if (state.getString("text").equals(mEditable.toString())) {
+            Selection.setSelection(mEditable, state.getInt("selectionBase"),
+                state.getInt("selectionExtent"));
+            mImm.updateSelection(
+                mView,
+                Math.max(Selection.getSelectionStart(mEditable), 0),
+                Math.max(Selection.getSelectionEnd(mEditable), 0),
+                BaseInputConnection.getComposingSpanStart(mEditable),
+                BaseInputConnection.getComposingSpanEnd(mEditable));
+        } else {
+            mEditable.replace(0, mEditable.length(), state.getString("text"));
+            Selection.setSelection(mEditable, state.getInt("selectionBase"),
+                state.getInt("selectionExtent"));
+            mImm.restartInput(view);
+        }
     }
 
     private void clearTextInputClient() {

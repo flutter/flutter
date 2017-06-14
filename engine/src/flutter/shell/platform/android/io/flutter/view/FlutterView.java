@@ -174,7 +174,7 @@ public class FlutterView extends SurfaceView
             "flutter/platform", JSONMethodCodec.INSTANCE);
         flutterPlatformChannel.setMethodCallHandler(platformPlugin);
         addActivityLifecycleListener(platformPlugin);
-        mTextInputPlugin = new TextInputPlugin((Activity) getContext(), this);
+        mTextInputPlugin = new TextInputPlugin(this);
 
         setLocale(getResources().getConfiguration().locale);
 

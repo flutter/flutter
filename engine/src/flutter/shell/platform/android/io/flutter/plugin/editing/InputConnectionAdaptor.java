@@ -4,9 +4,11 @@
 
 package io.flutter.plugin.editing;
 
+import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
 import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.InputMethodManager;
 import android.view.KeyEvent;
 
 import io.flutter.plugin.common.MethodChannel;
@@ -17,63 +19,104 @@ import java.util.HashMap;
 import java.util.Map;
 
 class InputConnectionAdaptor extends BaseInputConnection {
+    private final FlutterView mFlutterView;
     private final int mClient;
-    private final TextInputPlugin mPlugin;
     private final MethodChannel mFlutterChannel;
-    private final Map<String, Object> mOutgoingState;
+    private final Editable mEditable;
+    private int mBatchCount;
+    private InputMethodManager mImm;
 
     public InputConnectionAdaptor(FlutterView view, int client,
-        TextInputPlugin plugin, MethodChannel flutterChannel) {
+        MethodChannel flutterChannel, Editable editable) {
         super(view, true);
+        mFlutterView = view;
         mClient = client;
-        mPlugin = plugin;
         mFlutterChannel = flutterChannel;
-        mOutgoingState = new HashMap<>();
+        mEditable = editable;
+        mBatchCount = 0;
+        mImm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
     }
 
+    // Send the current state of the editable to Flutter.
     private void updateEditingState() {
-        final Editable content = getEditable();
-        mOutgoingState.put("text", content.toString());
-        mOutgoingState.put("selectionBase", Selection.getSelectionStart(content));
-        mOutgoingState.put("selectionExtent", Selection.getSelectionEnd(content));
-        mOutgoingState.put("composingBase", BaseInputConnection.getComposingSpanStart(content));
-        mOutgoingState.put("composingExtent", BaseInputConnection.getComposingSpanEnd(content));
-        mFlutterChannel.invokeMethod("TextInputClient.updateEditingState", Arrays
-            .asList(mClient, mOutgoingState));
-        mPlugin.setLatestEditingState(mOutgoingState);
+        // If the IME is in the middle of a batch edit, then wait until it completes.
+        if (mBatchCount > 0)
+            return;
+
+        int selectionStart = Selection.getSelectionStart(mEditable);
+        int selectionEnd = Selection.getSelectionEnd(mEditable);
+        int composingStart = BaseInputConnection.getComposingSpanStart(mEditable);
+        int composingEnd = BaseInputConnection.getComposingSpanEnd(mEditable);
+
+        mImm.updateSelection(mFlutterView,
+                             selectionStart, selectionEnd,
+                             composingStart, composingEnd);
+
+        HashMap<Object, Object> state = new HashMap<Object, Object>();
+        state.put("text", mEditable.toString());
+        state.put("selectionBase", selectionStart);
+        state.put("selectionExtent", selectionEnd);
+        state.put("composingBase", composingStart);
+        state.put("composingExtent", composingEnd);
+        mFlutterChannel.invokeMethod("TextInputClient.updateEditingState",
+            Arrays.asList(mClient, state));
+    }
+
+    @Override
+    public Editable getEditable() {
+        return mEditable;
+    }
+
+    @Override
+    public boolean beginBatchEdit() {
+        mBatchCount++;
+        return super.beginBatchEdit();
+    }
+
+    @Override
+    public boolean endBatchEdit() {
+        boolean result = super.endBatchEdit();
+        mBatchCount--;
+        updateEditingState();
+        return result;
     }
 
     @Override
     public boolean commitText(CharSequence text, int newCursorPosition) {
-        final boolean result = super.commitText(text, newCursorPosition);
+        boolean result = super.commitText(text, newCursorPosition);
         updateEditingState();
         return result;
     }
 
     @Override
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
-        final boolean result = super.deleteSurroundingText(beforeLength, afterLength);
+        boolean result = super.deleteSurroundingText(beforeLength, afterLength);
         updateEditingState();
         return result;
     }
 
     @Override
     public boolean setComposingRegion(int start, int end) {
-        final boolean result = super.setComposingRegion(start, end);
+        boolean result = super.setComposingRegion(start, end);
         updateEditingState();
         return result;
     }
 
     @Override
     public boolean setComposingText(CharSequence text, int newCursorPosition) {
-        final boolean result = super.setComposingText(text, newCursorPosition);
+        boolean result;
+        if (text.length() == 0) {
+            result = super.commitText(text, newCursorPosition);
+        } else {
+            result = super.setComposingText(text, newCursorPosition);
+        }
         updateEditingState();
         return result;
     }
 
     @Override
     public boolean setSelection(int start, int end) {
-        final boolean result = super.setSelection(start, end);
+        boolean result = super.setSelection(start, end);
         updateEditingState();
         return result;
     }
@@ -82,24 +125,24 @@ class InputConnectionAdaptor extends BaseInputConnection {
     public boolean sendKeyEvent(KeyEvent event) {
         final boolean result = super.sendKeyEvent(event);
         if (event.getAction() == KeyEvent.ACTION_UP) {
-            // Weird special case. This method is (sometimes) called for the backspace key in 2
-            // situations:
-            // 1. There is no selection. In that case, we want to delete the previous character.
-            // 2. There is a selection. In that case, we want to delete the selection.
-            //    event.getNumber() is 0, and commitText("", 1) will do what we want.
-            if (event.getKeyCode() == KeyEvent.KEYCODE_DEL &&
-                optInt("selectionBase", -1) == optInt("selectionExtent", -1)) {
-                deleteSurroundingText(1, 0);
+            if (event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
+                int selStart = Selection.getSelectionStart(mEditable);
+                int selEnd = Selection.getSelectionEnd(mEditable);
+                if (selEnd > selStart) {
+                    // Delete the selection.
+                    Selection.setSelection(mEditable, selStart);
+                    deleteSurroundingText(0, selEnd - selStart);
+                } else if (selStart > 0) {
+                    // Delete to the left of the cursor.
+                    Selection.setSelection(mEditable, selStart - 1);
+                    deleteSurroundingText(0, 1);
+                }
             } else {
-                String text = event.getNumber() == 0 ? "" : String.valueOf(event.getNumber());
-                commitText(text, 1);
+                // Enter a character.
+                commitText(String.valueOf(event.getNumber()), 1);
             }
         }
         return result;
-    }
-
-    private int optInt(String key, int defaultValue) {
-        return mOutgoingState.containsKey(key) ? (Integer) mOutgoingState.get(key) : defaultValue;
     }
 
     @Override
