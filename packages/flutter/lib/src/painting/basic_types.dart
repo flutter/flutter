@@ -25,6 +25,7 @@ export 'dart:ui' show
   Shader,
   Size,
   StrokeCap,
+  StrokeJoin,
   TextAlign,
   TextBaseline,
   TextDecoration,
