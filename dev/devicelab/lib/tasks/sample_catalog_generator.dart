@@ -21,8 +21,8 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
   await inDirectory(catalogDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
-    final bool isIOSDevice = deviceOperatingSystem == DeviceOperatingSystem.ios;
-    if (isIOSDevice)
+    final bool isIosDevice = deviceOperatingSystem == DeviceOperatingSystem.ios;
+    if (isIosDevice)
       await prepareProvisioningCertificates(catalogDirectory.path);
 
     await dart(<String>['bin/sample_page.dart']);
@@ -38,7 +38,7 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
       directory: dir('${flutterDirectory.path}/examples/catalog/.generated'),
       commit: await getCurrentFlutterRepoCommit(),
       token: authorizationToken,
-      prefix: isIOSDevice ? 'ios_' : '',
+      prefix: isIosDevice ? 'ios_' : '',
     );
   });
 
