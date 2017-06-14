@@ -961,12 +961,19 @@ class _TabBarViewState extends State<TabBarView> {
   }
 }
 
-/// Displays a single 12x12 circle with the specified border and background colors.
+/// Displays a single circle with the specified border and background colors.
 ///
 /// Used by [TabPageSelector] to indicate the selected page.
 class TabPageSelectorIndicator extends StatelessWidget {
   /// Creates an indicator used by [TabPageSelector].
-  const TabPageSelectorIndicator({ Key key, this.backgroundColor, this.borderColor }) : super(key: key);
+  ///
+  /// The [backgroundColor], [borderColor], and [size] parameters cannot be null.
+  const TabPageSelectorIndicator({
+    Key key,
+    @required this.backgroundColor,
+    @required this.borderColor,
+    @required this.size,
+  }) : assert(backgroundColor != null), assert(borderColor != null), assert(size != null), super(key: key);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -974,11 +981,14 @@ class TabPageSelectorIndicator extends StatelessWidget {
   /// The indicator circle's border color.
   final Color borderColor;
 
+  /// The indicator circle's diameter.
+  final double size;
+
   @override
   Widget build(BuildContext context) {
     return new Container(
-      width: 12.0,
-      height: 12.0,
+      width: size,
+      height: size,
       margin: const EdgeInsets.all(4.0),
       decoration: new BoxDecoration(
         color: backgroundColor,
@@ -996,7 +1006,13 @@ class TabPageSelectorIndicator extends StatelessWidget {
 /// ancestor.
 class TabPageSelector extends StatelessWidget {
   /// Creates a compact widget that indicates which tab has been selected.
-  const TabPageSelector({ Key key, this.controller }) : super(key: key);
+  const TabPageSelector({
+    Key key,
+    this.controller,
+    this.indicatorSize: 12.0,
+    this.color,
+    this.selectedColor,
+  }) : assert(indicatorSize != null && indicatorSize > 0.0), super(key: key);
 
   /// This widget's selection and animation state.
   ///
@@ -1004,47 +1020,64 @@ class TabPageSelector extends StatelessWidget {
   /// will be used.
   final TabController controller;
 
+  /// The indicator circle's diameter (the default value is 12.0).
+  final double indicatorSize;
+
+  /// The indicator cicle's fill color for unselected pages.
+  ///
+  /// If this parameter is null then the indicator is filled with [Colors.transparent].
+  final Color color;
+
+  /// The indicator cicle's fill color for selected pages and border color
+  /// for all indicator circles.
+  ///
+  /// If this parameter is null then the indicator is filled with the theme's
+  /// accent color, [ThemeData.accentColor].
+  final Color selectedColor;
+
   Widget _buildTabIndicator(
     int tabIndex,
     TabController tabController,
-    ColorTween selectedColor,
-    ColorTween previousColor,
+    ColorTween selectedColorTween,
+    ColorTween previousColorTween,
   ) {
     Color background;
     if (tabController.indexIsChanging) {
       // The selection's animation is animating from previousValue to value.
       final double t = 1.0 - _indexChangeProgress(tabController);
       if (tabController.index == tabIndex)
-        background = selectedColor.lerp(t);
+        background = selectedColorTween.lerp(t);
       else if (tabController.previousIndex == tabIndex)
-        background = previousColor.lerp(t);
+        background = previousColorTween.lerp(t);
       else
-        background = selectedColor.begin;
+        background = selectedColorTween.begin;
     } else {
       // The selection's offset reflects how far the TabBarView has
       /// been dragged to the left (-1.0 to 0.0) or the right (0.0 to 1.0).
       final double offset = tabController.offset;
       if (tabController.index == tabIndex) {
-        background = selectedColor.lerp(1.0 - offset.abs());
+        background = selectedColorTween.lerp(1.0 - offset.abs());
       } else if (tabController.index == tabIndex - 1 && offset > 0.0) {
-        background = selectedColor.lerp(offset);
+        background = selectedColorTween.lerp(offset);
       } else if (tabController.index == tabIndex + 1 && offset < 0.0) {
-        background = selectedColor.lerp(-offset);
+        background = selectedColorTween.lerp(-offset);
       } else {
-        background = selectedColor.begin;
+        background = selectedColorTween.begin;
       }
     }
     return new TabPageSelectorIndicator(
       backgroundColor: background,
-      borderColor: selectedColor.end,
+      borderColor: selectedColorTween.end,
+      size: indicatorSize,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color color = Theme.of(context).accentColor;
-    final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
-    final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
+    final Color fixColor = color ?? Colors.transparent;
+    final Color fixSelectedColor = selectedColor ?? Theme.of(context).accentColor;
+    final ColorTween selectedColorTween = new ColorTween(begin: fixColor, end: fixSelectedColor);
+    final ColorTween previousColorTween = new ColorTween(begin: fixSelectedColor, end: fixColor);
     final TabController tabController = controller ?? DefaultTabController.of(context);
     assert(() {
       if (tabController == null) {
@@ -1070,7 +1103,7 @@ class TabPageSelector extends StatelessWidget {
           child: new Row(
             mainAxisSize: MainAxisSize.min,
             children: new List<Widget>.generate(tabController.length, (int tabIndex) {
-              return _buildTabIndicator(tabIndex, tabController, selectedColor, previousColor);
+              return _buildTabIndicator(tabIndex, tabController, selectedColorTween, previousColorTween);
             }).toList(),
           ),
         );
