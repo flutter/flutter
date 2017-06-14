@@ -25,6 +25,7 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     cd dev/docs
 
     if [ "$TRAVIS_BRANCH" == "master" ]; then
+      echo -e "User-agent: *\nDisallow: /" > doc/robots.txt
       firebase deploy --project master-docs-flutter-io
     fi
 
