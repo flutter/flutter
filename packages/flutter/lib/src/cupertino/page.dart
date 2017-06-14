@@ -55,13 +55,34 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
     bool fullscreenDialog: false,
   }) : assert(builder != null),
        assert(opaque),
+       _hostPageRoute = null,
        super(settings: settings, fullscreenDialog: fullscreenDialog);
+
+  CupertinoPageRoute.delegate({
+    @required PageRoute<T> hostPageRoute,
+    bool fullscreenDialog,
+  }) : assert(hostPageRoute != null),
+       _hostPageRoute = hostPageRoute,
+       builder = null,
+       maintainState = null,
+       super(fullscreenDialog: fullscreenDialog);
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
+  final PageRoute<T> _hostPageRoute;
+
   @override
   final bool maintainState;
+
+  @override
+  NavigatorState get navigator => _hostPageRoute?.navigator ?? super.navigator;
+
+  @override
+  AnimationController get controller => _hostPageRoute?.controller ?? super.controller;
+
+  @override
+  bool get hasScopedWillPopCallback => _hostPageRoute?.hasScopedWillPopCallback ?? super.hasScopedWillPopCallback;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
@@ -83,7 +104,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   @override
   void dispose() {
     _backGestureController?.dispose();
-    super.dispose();
+    if (_hostPageRoute == null)
+      super.dispose();
   }
 
   CupertinoBackGestureController _backGestureController;

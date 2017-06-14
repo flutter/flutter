@@ -70,11 +70,11 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   /// A delegate PageRoute to which iOS themed page operations are delegated to.
   /// It's lazily created on first use.
-  CupertinoPageRoute<Null> _cupertinoPageRoute;
-  CupertinoPageRoute<Null> get cupertinoPageRoute {
+  CupertinoPageRoute<T> _cupertinoPageRoute;
+  CupertinoPageRoute<T> get cupertinoPageRoute {
     if (_cupertinoPageRoute == null) {
-      _cupertinoPageRoute = new CupertinoPageRoute<Null>(
-        builder: builder, // Should be never used.
+      _cupertinoPageRoute = new CupertinoPageRoute<T>.delegate(
+        hostPageRoute: this,
         fullscreenDialog: fullscreenDialog,
       );
     }
