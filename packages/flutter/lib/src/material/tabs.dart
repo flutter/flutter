@@ -729,14 +729,21 @@ class _TabBarState extends State<TabBar> {
     // Add the tap handler to each tab. If the tab bar is scrollable
     // then give all of the tabs equal flexibility so that their widths
     // reflect the intrinsic width of their labels.
-    for (int index = 0; index < widget.tabs.length; index++) {
+    final int tabCount = widget.tabs.length;
+    for (int index = 0; index < tabCount; index++) {
       wrappedTabs[index] = new MergeSemantics(
-        child: new Semantics(
-          selected: index == _currentIndex,
-          child: new InkWell(
-            onTap: () { _handleTap(index); },
-            child: wrappedTabs[index],
-          ),
+        child: new Stack(
+          children: <Widget>[
+            new InkWell(
+              onTap: () { _handleTap(index); },
+              child: wrappedTabs[index],
+            ),
+            new Semantics(
+              selected: index == _currentIndex,
+              // TODO(goderbauer): I10N-ify
+              label: 'Tab ${index + 1} of $tabCount',
+            ),
+          ],
         ),
       );
       if (!widget.isScrollable)
