@@ -114,15 +114,11 @@ Future<Null> saveScreenshots(List<String> fromPaths, List<String> largeNames, Li
 String screenshotName(String path) => basenameWithoutExtension(path);
 
 Future<Null> saveCatalogScreenshots({
-    @required Directory directory, // Where the *.png screenshots are.
-    @required String commit, // The commit hash to be used as a cloud storage "directory".
-    @required String token, // Cloud storage authorization token.
-    @required String prefix, // Prefix for all file names.
+    Directory directory, // Where the *.png screenshots are.
+    String commit, // The commit hash to be used as a cloud storage "directory".
+    String token, // Cloud storage authorization token.
+    String prefix, // Prefix for all file names.
   }) async {
-  assert(commit != null);
-  assert(token != null);
-  assert(prefix != null);
-
   final List<String> screenshots = <String>[];
   directory.listSync().forEach((FileSystemEntity entity) {
     if (entity is File && entity.path.endsWith('.png')) {
