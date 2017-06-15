@@ -228,12 +228,12 @@ class SimControl {
 
   bool _isAnyConnected() => getConnectedDevices().isNotEmpty;
 
-  Future<bool> isInstalled(String appId) {
+  Future<bool> isInstalled(String deviceId, String appId) {
     return exitsHappyAsync(<String>[
       _xcrunPath,
       'simctl',
       'get_app_container',
-      'booted',
+      deviceId,
       appId,
     ]);
   }
@@ -253,8 +253,8 @@ class SimControl {
     return runCheckedAsync(args);
   }
 
-  Future<Null> takeScreenshot(String outputPath) {
-    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', 'booted', 'screenshot', outputPath]);
+  Future<Null> takeScreenshot(String deviceId, String outputPath) {
+    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
   }
 }
 
@@ -340,7 +340,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) {
-    return SimControl.instance.isInstalled(app.id);
+    return SimControl.instance.isInstalled(id, app.id);
   }
 
   @override
@@ -596,7 +596,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) {
-    return SimControl.instance.takeScreenshot(outputFile.path);
+    return SimControl.instance.takeScreenshot(id, outputFile.path);
   }
 }
 
