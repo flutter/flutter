@@ -96,20 +96,20 @@ class IOSDevice extends Device {
   @override
   bool get supportsStartPaused => false;
 
-  static List<IOSDevice> getAttachedDevices([IOSDevice mockIOS]) {
+  static List<IOSDevice> getAttachedDevices() {
     if (!doctor.iosWorkflow.hasIDeviceId)
       return <IOSDevice>[];
 
     final List<IOSDevice> devices = <IOSDevice>[];
-    for (String id in _getAttachedDeviceIDs(mockIOS)) {
-      final String name = IOSDevice._getDeviceInfo(id, 'DeviceName', mockIOS);
+    for (String id in _getAttachedDeviceIDs()) {
+      final String name = IOSDevice._getDeviceInfo(id, 'DeviceName');
       devices.add(new IOSDevice(id, name: name));
     }
     return devices;
   }
 
-  static Iterable<String> _getAttachedDeviceIDs([IOSDevice mockIOS]) {
-    final String listerPath = (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
+  static Iterable<String> _getAttachedDeviceIDs() {
+    final String listerPath = _checkForCommand('idevice_id');
     try {
       final String output = runSync(<String>[listerPath, '-l']);
       return output.trim().split('\n').where((String s) => s != null && s.isNotEmpty);
@@ -118,10 +118,8 @@ class IOSDevice extends Device {
     }
   }
 
-  static String _getDeviceInfo(String deviceID, String infoKey, [IOSDevice mockIOS]) {
-    final String informerPath = (mockIOS != null)
-        ? mockIOS.informerPath
-        : _checkForCommand('ideviceinfo');
+  static String _getDeviceInfo(String deviceID, String infoKey) {
+    final String informerPath = _checkForCommand('ideviceinfo');
     return runSync(<String>[informerPath, '-k', infoKey, '-u', deviceID]).trim();
   }
 
