@@ -17,12 +17,12 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
 import 'code_signing.dart';
+import 'ios_workflow.dart';
 import 'xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 7;
@@ -354,8 +354,8 @@ final String cocoaPodsUpgradeInstructions = '''
 
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!await doctor.iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
-      final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
+    if (!await iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
+      final String minimumVersion = iosWorkflow.cocoaPodsMinimumVersion;
       printError(
         'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
         '$noCocoaPodsConsequence\n'
@@ -365,7 +365,7 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
       );
       return;
     }
-    if (!await doctor.iosWorkflow.isCocoaPodsInitialized) {
+    if (!await iosWorkflow.isCocoaPodsInitialized) {
       printError(
         'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
         '$noCocoaPodsConsequence\n'
