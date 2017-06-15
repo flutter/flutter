@@ -76,12 +76,10 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   /// It's lazily created on first use.
   CupertinoPageRoute<T> _internalCupertinoPageRoute;
   CupertinoPageRoute<T> get _cupertinoPageRoute {
-    if (_internalCupertinoPageRoute == null) {
-      _internalCupertinoPageRoute = new CupertinoPageRoute<T>(
-        builder: builder, // Not used.
-        fullscreenDialog: fullscreenDialog,
-      );
-    }
+    _internalCupertinoPageRoute ??= new CupertinoPageRoute<T>(
+      builder: builder, // Not used.
+      fullscreenDialog: fullscreenDialog,
+    );
     return _internalCupertinoPageRoute;
   }
 
