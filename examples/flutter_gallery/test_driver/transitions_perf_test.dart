@@ -174,7 +174,7 @@ Future<Null> runDemos(Iterable<Demo> demos, FlutterDriver driver) async {
   }
 }
 
-void main(List<String> args) {
+void main([List<String> args = const <String>[]]) {
   group('flutter gallery transitions', () {
     FlutterDriver driver;
     setUpAll(() async {
