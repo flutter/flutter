@@ -45,6 +45,39 @@ class PythonModule {
     'Install via \'pip install $name\' or \'sudo easy_install $name\'.';
 }
 
+class IMobileDevice {
+  const IMobileDevice();
+
+  static IMobileDevice get instance => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
+
+  bool get isInstalled => exitsHappy(<String>['idevice_id', '-h']);
+
+  /// Returns true if libimobiledevice is installed and working as expected.
+  ///
+  /// Older releases of libimobiledevice fail to work with iOS 10.3 and above.
+  Future<bool> get isWorking async {
+    if (!isInstalled)
+      return false;
+
+    // If a device is attached, verify that we can get its name.
+    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+    if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['idevicename']))
+      return false;
+    return true;
+  }
+
+  List<String> getAttachedDeviceIDs() {
+    return runSync(<String>['idevice_id', '-l']).trim().split('\n').where((String line) => line.isNotEmpty).toList();
+  }
+
+  /// Returns the value associated with the specified `ideviceinfo` key for a device.
+  ///
+  /// If either the specified key or device does not exist, returns the empty string.
+  String getInfoForDevice(String deviceID, String key) {
+    return runSync(<String>['ideviceinfo', '-k', key, '-u', deviceID]).trim();
+  }
+}
+
 class Xcode {
   Xcode() {
     _eulaSigned = false;

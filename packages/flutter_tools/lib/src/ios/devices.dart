@@ -97,25 +97,15 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static List<IOSDevice> getAttachedDevices() {
-    if (!iosWorkflow.hasIDeviceId)
+    if (!iMobileDevice.isInstalled)
       return <IOSDevice>[];
 
     final List<IOSDevice> devices = <IOSDevice>[];
-    for (String id in _getAttachedDeviceIDs()) {
-      final String name = IOSDevice._getDeviceInfo(id, 'DeviceName');
+    for (String id in iMobileDevice.getAttachedDeviceIDs()) {
+      final String name = iMobileDevice.getInfoForDevice(id, 'DeviceName');
       devices.add(new IOSDevice(id, name: name));
     }
     return devices;
-  }
-
-  static Iterable<String> _getAttachedDeviceIDs() {
-    final String listerPath = _checkForCommand('idevice_id');
-    try {
-      final String output = runSync(<String>[listerPath, '-l']);
-      return output.trim().split('\n').where((String s) => s != null && s.isNotEmpty);
-    } catch (e) {
-      return <String>[];
-    }
   }
 
   static String _getDeviceInfo(String deviceID, String infoKey) {
