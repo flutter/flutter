@@ -48,7 +48,7 @@ void beginFrame(Duration timeStamp) {
     ..style = ui.PaintingStyle.stroke
     ..strokeCap = ui.StrokeCap.butt  // Other choices are round and square.
     ..strokeJoin = ui.StrokeJoin.miter  // Other choices are round and bevel.
-    ..strokeMiterLimit = 5.0 // Try smaller and larger values greater than zero.
+    ..strokeMiterLimit = 4.0 // Try smaller and larger values zero or above.
     ..strokeWidth = 20.0;
   canvas.drawPoints(ui.PointMode.polygon, points, paint);
 
