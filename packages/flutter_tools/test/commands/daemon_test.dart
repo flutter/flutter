@@ -272,14 +272,14 @@ void main() {
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
 class MockAndroidWorkflow extends AndroidWorkflow {
-  MockAndroidWorkflow({this.canListDevices: true});
+  MockAndroidWorkflow({ this.canListDevices: true });
 
   @override
   final bool canListDevices;
 }
 
 class MockIOSWorkflow extends IOSWorkflow {
-  MockIOSWorkflow({this.canListDevices:true});
+  MockIOSWorkflow({ this.canListDevices:true });
 
   @override
   final bool canListDevices;
