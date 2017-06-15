@@ -55,8 +55,8 @@ Future<int> runTests(
     serverType: serverType,
   );
 
-  // Set the package path used for child processes.
-  // TODO(skybrian): why is this global? Move to installHook?
+  // Make the global packages path absolute.
+  // (Makes sure it still works after we change the current directory.)
   PackageMap.globalPackagesPath =
       fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
 

@@ -72,12 +72,6 @@ class TestCommand extends FlutterCommand {
   @override
   String get description => 'Run Flutter unit tests for the current project.';
 
-  Directory get _currentPackageTestDir {
-    // We don't scan the entire package, only the test/ subdirectory, so that
-    // files with names like like "hit_test.dart" don't get run.
-    return fs.directory('test');
-  }
-
   Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
     final Status status = logger.startProgress('Collecting coverage information...');
     final String coverageData = await collector.finalizeCoverage(
@@ -159,7 +153,9 @@ class TestCommand extends FlutterCommand {
 
     Directory workDir;
     if (files.isEmpty) {
-      workDir = _currentPackageTestDir;
+      // We don't scan the entire package, only the test/ subdirectory, so that
+      // files with names like like "hit_test.dart" don't get run.
+      workDir = fs.directory('test');
       if (!workDir.existsSync())
         throwToolExit('Test directory "${workDir.path}" not found.');
       files = _findTests(workDir);
