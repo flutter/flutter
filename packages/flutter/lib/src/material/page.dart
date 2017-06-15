@@ -74,15 +74,15 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   /// A delegate PageRoute to which iOS themed page operations are delegated to.
   /// It's lazily created on first use.
-  CupertinoPageRoute<T> _cupertinoPageRoute;
-  CupertinoPageRoute<T> get cupertinoPageRoute {
-    if (_cupertinoPageRoute == null) {
-      _cupertinoPageRoute = new CupertinoPageRoute<T>(
+  CupertinoPageRoute<T> _internalCupertinoPageRoute;
+  CupertinoPageRoute<T> get _cupertinoPageRoute {
+    if (_internalCupertinoPageRoute == null) {
+      _internalCupertinoPageRoute = new CupertinoPageRoute<T>(
         builder: builder, // Not used.
         fullscreenDialog: fullscreenDialog,
       );
     }
-    return _cupertinoPageRoute;
+    return _internalCupertinoPageRoute;
   }
 
   @override
@@ -108,7 +108,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   void dispose() {
-    _cupertinoPageRoute?.dispose();
+    _internalCupertinoPageRoute?.dispose();
     super.dispose();
   }
 
@@ -125,7 +125,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   @override
   NavigationGestureController startPopGesture() {
     return Theme.of(navigator.context).platform == TargetPlatform.iOS
-        ? cupertinoPageRoute.startPopGestureForRoute(this)
+        ? _cupertinoPageRoute.startPopGestureForRoute(this)
         : null;
   }
 
@@ -147,7 +147,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
-      return cupertinoPageRoute.buildTransitions(context, animation, secondaryAnimation, child);
+      return _cupertinoPageRoute.buildTransitions(context, animation, secondaryAnimation, child);
     } else {
       return new _MountainViewPageTransition(
         routeAnimation: animation,
