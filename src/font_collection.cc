@@ -28,14 +28,18 @@
 
 namespace txt {
 
-FontCollection& FontCollection::GetDefaultFontCollection() {
+FontCollection& FontCollection::GetFontCollection(std::string dir) {
   static FontCollection* collection = nullptr;
   static std::once_flag once;
-  std::call_once(once, []() { collection = new FontCollection(); });
+  std::call_once(once, [dir]() { collection = new FontCollection(dir); });
   return *collection;
 }
 
-FontCollection::FontCollection() {
+FontCollection& FontCollection::GetDefaultFontCollection() {
+  return GetFontCollection("");
+}
+
+FontCollection::FontCollection(std::string dir) {
 #ifdef DIRECTORY_FONT_MANAGER_AVAILABLE
   skia_font_manager_ = dir.length() != 0
                            ? SkFontMgr_New_Custom_Directory(dir.c_str())
@@ -47,7 +51,7 @@ FontCollection::FontCollection() {
 
 FontCollection::~FontCollection() = default;
 
-std::set<std::string> FontCollection::GetFamilyNames(const std::string& dir) {
+std::set<std::string> FontCollection::GetFamilyNames() {
   std::set<std::string> names;
   SkString str;
   for (int i = 0; i < skia_font_manager_->countFamilies(); i++) {
@@ -72,8 +76,7 @@ const std::string FontCollection::ProcessFamilyName(const std::string& family) {
 }
 
 std::shared_ptr<minikin::FontCollection>
-FontCollection::GetMinikinFontCollectionForFamily(const std::string& family,
-                                                  const std::string& dir) {
+FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
   FTL_DCHECK(skia_font_manager_ != nullptr);
 
   // Ask Skia to resolve a font style set for a font family name.
