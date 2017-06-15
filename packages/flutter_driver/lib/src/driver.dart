@@ -21,6 +21,7 @@ import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
 import 'render_tree.dart';
+import 'semantics.dart';
 import 'timeline.dart';
 
 /// Timeline stream identifier.
@@ -158,8 +159,8 @@ class FlutterDriver {
     VMIsolate isolate = await vm.isolates.first.loadRunnable();
 
     // TODO(yjbanov): vm_service_client does not support "None" pause event yet.
-    // It is currently reported as `null`, but we cannot rely on it because
-    // eventually the event will be reported as a non-`null` object. For now,
+    // It is currently reported as null, but we cannot rely on it because
+    // eventually the event will be reported as a non-null object. For now,
     // list all the events we know about. Later we'll check for "None" event
     // explicitly.
     //
@@ -381,6 +382,15 @@ class FlutterDriver {
   /// Returns the text in the `Text` widget located by [finder].
   Future<String> getText(SerializableFinder finder, { Duration timeout }) async {
     return GetTextResult.fromJson(await _sendCommand(new GetText(finder, timeout: timeout))).text;
+  }
+
+  /// Turns semantics on or off in the Flutter app under test.
+  ///
+  /// Returns `true` when the call actually changed the state from on to off or
+  /// vice versa.
+  Future<bool> setSemantics(bool enabled, { Duration timeout: _kShortTimeout }) async {
+    final SetSemanticsResult result = SetSemanticsResult.fromJson(await _sendCommand(new SetSemantics(enabled, timeout: timeout)));
+    return result.changedState;
   }
 
   /// Take a screenshot.  The image will be returned as a PNG.

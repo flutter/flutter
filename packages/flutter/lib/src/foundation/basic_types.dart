@@ -79,9 +79,9 @@ class BitField<T extends dynamic> {
   /// Creates a bit field of all zeros.
   ///
   /// The given length must be at most 62.
-  BitField(this._length) : _bits = _kAllZeros {
-    assert(_length <= _kSMIBits);
-  }
+  BitField(this._length)
+    : assert(_length <= _kSMIBits),
+      _bits = _kAllZeros;
 
   /// Creates a bit field filled with a particular value.
   ///
@@ -89,9 +89,10 @@ class BitField<T extends dynamic> {
   /// the bits are filled with zeros.
   ///
   /// The given length must be at most 62.
-  BitField.filled(this._length, bool value) : _bits = value ? _kAllOnes : _kAllZeros {
-    assert(_length <= _kSMIBits);
-  }
+  BitField.filled(this._length, bool value)
+    : assert(_length <= _kSMIBits),
+      _bits = value ? _kAllOnes : _kAllZeros;
+
   final int _length;
   int _bits;
 

@@ -328,18 +328,21 @@ class BorderSide {
 ///
 /// ## Sample code
 ///
+/// All four borders the same, two-pixel wide solid white:
+///
 /// ```dart
-/// // All four borders the same, two-pixel wide solid white:
 /// new Border.all(width: 2.0, color: const Color(0xFFFFFFFF))
 /// ```
 ///
+/// The border for a material design divider:
+///
 /// ```dart
-/// // The border for a material design divider:
 /// new Border(bottom: new BorderSide(color: Theme.of(context).dividerColor))
 /// ```
 ///
+/// A 1990s-era "OK" button:
+///
 /// ```dart
-/// // A 1990s-era "OK" button:
 /// new Container(
 ///   decoration: const BoxDecoration(
 ///     border: const Border(
@@ -1013,21 +1016,24 @@ class LinearGradient extends Gradient {
 ///
 /// ## Sample code
 ///
+/// This function draws a gradient that looks like a sun in a blue sky.
+///
 /// ```dart
-/// // This gradient looks like a sun in a blue sky.
-/// var gradient = new RadialGradient(
-///   center: const FractionalOffset(0.7, 0.2), // near the top right
-///   radius: 0.2,
-///   colors: [
-///     const Color(0xFFFFFF00), // yellow sun
-///     const Color(0xFF0099FF), // blue sky
-///   ],
-///   stops: [0.4, 1.0],
-/// );
-/// // rect is the area we are painting over
-/// var paint = new Paint()
-///   ..shader = gradient.createShader(rect);
-/// canvas.drawRect(rect, paint);
+/// void paintSky(Canvas canvas, Rect rect) {
+///   var gradient = new RadialGradient(
+///     center: const FractionalOffset(0.7, 0.2), // near the top right
+///     radius: 0.2,
+///     colors: [
+///       const Color(0xFFFFFF00), // yellow sun
+///       const Color(0xFF0099FF), // blue sky
+///     ],
+///     stops: [0.4, 1.0],
+///   );
+///   // rect is the area we are painting over
+///   var paint = new Paint()
+///     ..shader = gradient.createShader(rect);
+///   canvas.drawRect(rect, paint);
+/// }
 /// ```
 ///
 /// See also:
@@ -1411,7 +1417,7 @@ class DecorationImage {
 ///
 /// The [BoxDecoration] class provides a variety of ways to draw a box.
 ///
-/// The box has a [border], a body, and may cast a [shadow].
+/// The box has a [border], a body, and may cast a [boxShadow].
 ///
 /// The [shape] of the box can be a circle or a rectangle. If it is a rectangle,
 /// then the [borderRadius] property controls the roundness of the corners.
@@ -1421,7 +1427,7 @@ class DecorationImage {
 /// the box. Finally there is the [image], the precise alignment of which is
 /// controlled by the [DecorationImage] class.
 ///
-/// The [border] paints over the body; the [shadow], naturally, paints below it.
+/// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
 /// ## Sample code
 ///
@@ -1659,9 +1665,9 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(@required this._decoration, VoidCallback onChange) : super(onChange) {
-    assert(_decoration != null);
-  }
+  _BoxDecorationPainter(this._decoration, VoidCallback onChange)
+    : assert(_decoration != null),
+      super(onChange);
 
   final BoxDecoration _decoration;
 

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show Image; // to disambiguate mentions of Image in the dartdocs
 
 import 'package:flutter/foundation.dart';
 
@@ -13,22 +12,6 @@ import 'basic_types.dart';
 ///
 /// See also [applyBoxFit], which applies the sizing semantics of these values
 /// (though not the alignment semantics).
-///
-/// The following diagrams show the effects of each value:
-///
-/// ![`fill`: Fill the target box by distorting the source's aspect ratio.](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fill.png)
-///
-/// ![`contain`: As large as possible while still containing the source entirely within the target box.](https://flutter.github.io/assets-for-api-docs/painting/box_fit_contain.png)
-///
-/// ![`cover`: As small as possible while still covering the entire target box.](https://flutter.github.io/assets-for-api-docs/painting/box_fit_cover.png)
-///
-/// ![`fitWidth`: Make sure the full width of the source is shown.](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fitWidth.png)
-///
-/// ![`fitHeight`: Make sure the full height of the source is shown.](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fitHeight.png)
-///
-/// ![`none`: Do not resize the source.](https://flutter.github.io/assets-for-api-docs/painting/box_fit_none.png)
-///
-/// ![`scaleDown`: Same as `contain` if that would shrink the image, otherwise same as `none`.](https://flutter.github.io/assets-for-api-docs/painting/box_fit_scaleDown.png)
 enum BoxFit {
   /// Fill the target box by distorting the source's aspect ratio.
   ///
@@ -121,16 +104,18 @@ class FittedSizes {
 ///
 /// ## Sample code
 ///
-/// This example paints an [Image] `image` onto the [Rect] `outputRect` on a
-/// [Canvas] `canvas`, using a [Paint] paint, applying the [BoxFit] algorithm
+/// This function paints a [dart:ui.Image] `image` onto the [Rect] `outputRect` on a
+/// [Canvas] `canvas`, using a [Paint] `paint`, applying the [BoxFit] algorithm
 /// `fit`:
 ///
 /// ```dart
-/// final Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
-/// final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
-/// final Rect inputSubrect = FractionalOffset.center.inscribe(sizes.source, Offset.zero & imageSize);
-/// final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
-/// canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
+/// void paintImage(ui.Image image, Rect outputRect, Canvas canvas, Paint paint, BoxFit fit) {
+///   final Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
+///   final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
+///   final Rect inputSubrect = FractionalOffset.center.inscribe(sizes.source, Offset.zero & imageSize);
+///   final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
+///   canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
+/// }
 /// ```
 ///
 /// See also:

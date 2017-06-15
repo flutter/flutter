@@ -84,20 +84,20 @@ class Template {
           return null;
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
-      final String organization = context['organization'];
       final String projectName = context['projectName'];
+      final String androidIdentifier = context['androidIdentifier'];
       final String pluginClass = context['pluginClass'];
       final String destinationDirPath = destination.absolute.path;
       final String pathSeparator = fs.path.separator;
       String finalDestinationPath = fs.path
         .join(destinationDirPath, relativeDestinationPath)
         .replaceAll(_kCopyTemplateExtension, '')
-        .replaceAll(_kTemplateExtension, '')
-        .replaceAll(
-          '${pathSeparator}organization$pathSeparator',
-          '$pathSeparator${organization.replaceAll('.', pathSeparator)}$pathSeparator',
-        );
-      
+        .replaceAll(_kTemplateExtension, '');
+
+      if (androidIdentifier != null) {
+        finalDestinationPath = finalDestinationPath
+            .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
+      }
       if (projectName != null)
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       if (pluginClass != null)

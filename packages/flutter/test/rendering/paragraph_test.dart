@@ -79,12 +79,13 @@ void main() {
       const TextSpan(
         text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
               'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
-        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0)),
+        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      ),
       maxLines: 1,
       softWrap: true,
     );
 
-    void relayoutWith({int maxLines, bool softWrap, TextOverflow overflow}) {
+    void relayoutWith({ int maxLines, bool softWrap, TextOverflow overflow }) {
       paragraph
         ..maxLines = maxLines
         ..softWrap = softWrap
@@ -146,6 +147,35 @@ void main() {
 
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
+  });
+
+
+  test('maxLines', () {
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(
+        text: 'How do you write like you\'re running out of time? Write day and night like you\'re running out of time?',
+            // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
+            // 0          1          2       3       4      5     6         7         8    9       10      11     12
+        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      ),
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+    void layoutAt(int maxLines) {
+      paragraph.maxLines = maxLines;
+      pumpFrame();
+    }
+
+    layoutAt(null);
+    expect(paragraph.size.height, 130.0);
+
+    layoutAt(1);
+    expect(paragraph.size.height, 10.0);
+
+    layoutAt(2);
+    expect(paragraph.size.height, 20.0);
+
+    layoutAt(3);
+    expect(paragraph.size.height, 30.0);
   });
 }
 

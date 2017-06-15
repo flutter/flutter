@@ -236,6 +236,9 @@ abstract class Finder {
   /// [Offstage] widgets, as well as children of inactive [Route]s.
   final bool skipOffstage;
 
+  /// Returns all the [Element]s that will be considered by this finder.
+  ///
+  /// See [collectAllElementsFrom].
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(

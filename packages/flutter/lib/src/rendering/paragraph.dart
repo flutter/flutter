@@ -31,14 +31,24 @@ const String _kEllipsis = '\u2026';
 class RenderParagraph extends RenderBox {
   /// Creates a paragraph render object.
   ///
-  /// The [text], [overflow], and [softWrap] arguments must not be null.
+  /// The [text], [overflow], [softWrap], and [textScaleFactor] arguments must
+  /// not be null.
+  ///
+  /// The [maxLines] property may be null (and indeed defaults to null), but if
+  /// it is not null, it must be greater than zero.
   RenderParagraph(TextSpan text, {
     TextAlign textAlign,
     bool softWrap: true,
     TextOverflow overflow: TextOverflow.clip,
     double textScaleFactor: 1.0,
     int maxLines,
-  }) : _softWrap = softWrap,
+  }) : assert(text != null),
+       assert(text.debugAssertIsValid()),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(textScaleFactor != null),
+       assert(maxLines == null || maxLines > 0),
+       _softWrap = softWrap,
        _overflow = overflow,
        _textPainter = new TextPainter(
          text: text,
@@ -46,13 +56,7 @@ class RenderParagraph extends RenderBox {
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
          ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
-       ) {
-    assert(text != null);
-    assert(text.debugAssertIsValid());
-    assert(softWrap != null);
-    assert(overflow != null);
-    assert(textScaleFactor != null);
-  }
+       );
 
   final TextPainter _textPainter;
 
@@ -78,7 +82,11 @@ class RenderParagraph extends RenderBox {
 
   /// Whether the text should break at soft line breaks.
   ///
-  /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
+  /// If false, the glyphs in the text will be positioned as if there was
+  /// unlimited horizontal space.
+  ///
+  /// If [softWrap] is false, [overflow] and [textAlign] may have unexpected
+  /// effects.
   bool get softWrap => _softWrap;
   bool _softWrap;
   set softWrap(bool value) {
@@ -117,9 +125,11 @@ class RenderParagraph extends RenderBox {
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
-  /// to [overflow].
+  /// to [overflow] and [softWrap].
   int get maxLines => _textPainter.maxLines;
+  /// The value may be null. If it is not null, then it must be greater than zero.
   set maxLines(int value) {
+    assert(value == null || value > 0);
     if (_textPainter.maxLines == value)
       return;
     _textPainter.maxLines = value;
@@ -128,8 +138,7 @@ class RenderParagraph extends RenderBox {
   }
 
   void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
-    final bool wrap = _softWrap || (_overflow == TextOverflow.ellipsis && maxLines == null);
-    _textPainter.layout(minWidth: minWidth, maxWidth: wrap ? maxWidth : double.INFINITY);
+    _textPainter.layout(minWidth: minWidth, maxWidth: _softWrap ? maxWidth : double.INFINITY);
   }
 
   void _layoutTextWithConstraints(BoxConstraints constraints) {

@@ -15,6 +15,6 @@ void main() {
 
     await HapticFeedback.vibrate();
 
-    expect(log, equals(<MethodCall>[new MethodCall('HapticFeedback.vibrate')]));
+    expect(log, equals(<MethodCall>[const MethodCall('HapticFeedback.vibrate')]));
   });
 }

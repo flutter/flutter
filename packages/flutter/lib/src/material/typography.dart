@@ -9,7 +9,7 @@ import 'colors.dart';
 
 // TODO(eseidel): Font weights are supposed to be language relative.
 // TODO(jackson): Baseline should be language relative.
-// These values are for English-like text.
+// TODO(ianh): These values are for English-like text.
 
 /// Material design text theme.
 ///
@@ -20,11 +20,21 @@ import 'colors.dart';
 /// To obtain the current text theme, call [Theme.of] with the current
 /// [BuildContext] and read the [ThemeData.textTheme] property.
 ///
+/// The following image [from the material design
+/// specification](https://material.io/guidelines/style/typography.html#typography-styles)
+/// shows the recommended styles for each of the properties of a [TextTheme].
+/// This image uses the `Roboto` font, which is the font used on Android. On
+/// iOS, the [San Francisco
+/// font](https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/)
+/// is automatically used instead.
+///
+/// ![To see the image, visit the typography site referenced below.](https://storage.googleapis.com/material-design/publish/material_v_11/assets/0Bzhp5Z4wHba3alhXZ2pPWGk3Zjg/style_typography_styles_scale.png)
+///
 /// See also:
 ///
-///  * [Typography]
-///  * [Theme]
-///  * [ThemeData]
+///  * [Typography], the class that generates [TextTheme]s appropriate for a platform.
+///  * [Theme], for other aspects of a material design application that can be
+///    globally adjusted, such as the color scheme.
 ///  * <http://material.google.com/style/typography.html>
 @immutable
 class TextTheme {
@@ -49,34 +59,34 @@ class TextTheme {
     this.body2,
     this.body1,
     this.caption,
-    this.button
+    this.button,
   });
 
   const TextTheme._blackMountainView()
-    : display4 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display3 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
+    : display4 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+      display3 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+      display2 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+      display1 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+      headline = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      title    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      subhead  = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      body2    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      body1    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      caption  = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+      button   = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
 
   const TextTheme._whiteMountainView()
-    : display4 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display3 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontFamily: 'Roboto', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
+    : display4 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      display3 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      display2 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      display1 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      headline = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      title    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      subhead  = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      body2    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      body1    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      caption  = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      button   = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
 
   const TextTheme._blackCupertino()
     : display4 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
@@ -85,11 +95,11 @@ class TextTheme {
       display1 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
       headline = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
       title    = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
+      subhead  = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      body2    = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      body1    = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
+      caption  = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
+      button   = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
 
   const TextTheme._whiteCupertino()
     : display4 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
@@ -98,11 +108,11 @@ class TextTheme {
       display1 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
       headline = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
       title    = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontFamily: '.SF UI Text', inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
+      subhead  = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      body2    = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      body1    = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
+      caption  = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
+      button   = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
 
   /// Extremely large text.
   ///
@@ -173,7 +183,7 @@ class TextTheme {
       body2: body2 ?? this.body2,
       body1: body1 ?? this.body1,
       caption: caption ?? this.caption,
-      button: button ?? this.button
+      button: button ?? this.button,
     );
   }
 
@@ -199,67 +209,67 @@ class TextTheme {
         color: displayColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       display3: display3.apply(
         color: displayColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       display2: display2.apply(
         color: displayColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       display1: display1.apply(
         color: displayColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       headline: headline.apply(
         color: bodyColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       title: title.apply(
         color: bodyColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       subhead: subhead.apply(
         color: bodyColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       body2: body2.apply(
         color: bodyColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       body1: body1.apply(
         color: bodyColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       caption: caption.apply(
         color: displayColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
       button: button.apply(
         color: bodyColor,
         fontFamily: fontFamily,
         fontSizeFactor: fontSizeFactor,
-        fontSizeDelta: fontSizeDelta
+        fontSizeDelta: fontSizeDelta,
       ),
     );
   }
@@ -277,7 +287,7 @@ class TextTheme {
       body2: TextStyle.lerp(begin.body2, end.body2, t),
       body1: TextStyle.lerp(begin.body1, end.body1, t),
       caption: TextStyle.lerp(begin.caption, end.caption, t),
-      button: TextStyle.lerp(begin.button, end.button, t)
+      button: TextStyle.lerp(begin.button, end.button, t),
     );
   }
 
@@ -285,7 +295,7 @@ class TextTheme {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextTheme)
+    if (other.runtimeType != runtimeType)
       return false;
     final TextTheme typedOther = other;
     return display4 == typedOther.display4 &&
@@ -331,8 +341,9 @@ class TextTheme {
 ///
 /// See also:
 ///
-///  * [Theme]
-///  * [ThemeData]
+///  * [TextTheme], which shows what the text styles in a theme look like.
+///  * [Theme], for other aspects of a material design application that can be
+///    globally adjusted, such as the color scheme.
 ///  * <http://material.google.com/style/typography.html>
 class Typography {
   /// Creates the default typography for the specified platform.

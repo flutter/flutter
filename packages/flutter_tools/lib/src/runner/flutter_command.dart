@@ -134,7 +134,7 @@ abstract class FlutterCommand extends Command<Null> {
     applicationPackages ??= new ApplicationPackageStore();
   }
 
-  /// The path to send to Google Analytics. Return `null` here to disable
+  /// The path to send to Google Analytics. Return null here to disable
   /// tracking of the command.
   Future<String> get usagePath async => name;
 
@@ -218,7 +218,7 @@ abstract class FlutterCommand extends Command<Null> {
   /// Find and return all target [Device]s based upon currently connected
   /// devices and criteria entered by the user on the command line.
   /// If no device can be found that meets specified criteria,
-  /// then print an error message and return `null`.
+  /// then print an error message and return null.
   Future<List<Device>> findAllTargetDevices() async {
     if (!doctor.canLaunchAnything) {
       printError("Unable to locate a development device; please run 'flutter doctor' "
@@ -264,7 +264,7 @@ abstract class FlutterCommand extends Command<Null> {
   /// Find and return the target [Device] based upon currently connected
   /// devices and criteria entered by the user on the command line.
   /// If a device cannot be found that meets specified criteria,
-  /// then print an error message and return `null`.
+  /// then print an error message and return null.
   Future<Device> findTargetDevice() async {
     List<Device> deviceList = await findAllTargetDevices();
     if (deviceList == null)

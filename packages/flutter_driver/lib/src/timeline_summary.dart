@@ -28,14 +28,14 @@ class TimelineSummary {
   /// Average amount of time spent per frame in the framework building widgets,
   /// updating layout, painting and compositing.
   ///
-  /// Returns `null` if no frames were recorded.
+  /// Returns null if no frames were recorded.
   double computeAverageFrameBuildTimeMillis() {
     return _averageInMillis(_extractFrameThreadDurations());
   }
 
   /// The longest frame build time in milliseconds.
   ///
-  /// Returns `null` if no frames were recorded.
+  /// Returns null if no frames were recorded.
   double computeWorstFrameBuildTimeMillis() {
     return _maxInMillis(_extractFrameThreadDurations());
   }
@@ -48,14 +48,14 @@ class TimelineSummary {
 
   /// Average amount of time spent per frame in the GPU rasterizer.
   ///
-  /// Returns `null` if no frames were recorded.
+  /// Returns null if no frames were recorded.
   double computeAverageFrameRasterizerTimeMillis() {
     return _averageInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()));
   }
 
   /// The longest frame rasterization time in milliseconds.
   ///
-  /// Returns `null` if no frames were recorded.
+  /// Returns null if no frames were recorded.
   double computeWorstFrameRasterizerTimeMillis() {
     return _maxInMillis(_extractDuration(_extractGpuRasterizerDrawEvents()));
   }

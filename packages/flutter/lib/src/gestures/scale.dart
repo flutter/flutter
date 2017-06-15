@@ -32,9 +32,8 @@ class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
   ///
   /// The [focalPoint] argument must not be null.
-  ScaleStartDetails({ this.focalPoint: Offset.zero }) {
-    assert(focalPoint != null);
-  }
+  ScaleStartDetails({ this.focalPoint: Offset.zero })
+    : assert(focalPoint != null);
 
   /// The initial focal point of the pointers in contact with the screen.
   /// Reported in global coordinates.
@@ -50,10 +49,11 @@ class ScaleUpdateDetails {
   ///
   /// The [focalPoint] and [scale] arguments must not be null. The [scale]
   /// argument must be greater than or equal to zero.
-  ScaleUpdateDetails({ this.focalPoint: Offset.zero, this.scale: 1.0 }) {
-    assert(focalPoint != null);
-    assert(scale != null && scale >= 0.0);
-  }
+  ScaleUpdateDetails({
+    this.focalPoint: Offset.zero,
+    this.scale: 1.0,
+  }) : assert(focalPoint != null),
+       assert(scale != null && scale >= 0.0);
 
   /// The focal point of the pointers in contact with the screen. Reported in
   /// global coordinates.
@@ -72,9 +72,8 @@ class ScaleEndDetails {
   /// Creates details for [GestureScaleEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  ScaleEndDetails({ this.velocity: Velocity.zero }) {
-    assert(velocity != null);
-  }
+  ScaleEndDetails({ this.velocity: Velocity.zero })
+    : assert(velocity != null);
 
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;

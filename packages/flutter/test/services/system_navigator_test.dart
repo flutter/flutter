@@ -15,6 +15,6 @@ void main() {
 
     await SystemNavigator.pop();
 
-    expect(log, equals(<MethodCall>[new MethodCall('SystemNavigator.pop')]));
+    expect(log, equals(<MethodCall>[const MethodCall('SystemNavigator.pop')]));
   });
 }

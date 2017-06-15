@@ -88,7 +88,6 @@ Future<Null> run(List<String> args) async {
     }
     loader.installHook(
       shellPath: shellPath,
-      debuggerMode: false,
     );
 
     PackageMap.globalPackagesPath =

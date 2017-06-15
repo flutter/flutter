@@ -219,9 +219,10 @@ class FlutterLogoDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _FlutterLogoPainter extends BoxPainter {
-  _FlutterLogoPainter(this._config) : super(null) {
-    assert(_config != null);
-    assert(_config.debugAssertIsValid());
+  _FlutterLogoPainter(this._config)
+    : assert(_config != null),
+      assert(_config.debugAssertIsValid()),
+      super(null) {
     _prepareText();
   }
 

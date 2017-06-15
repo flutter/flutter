@@ -6,6 +6,10 @@ import 'package:meta/meta.dart';
 
 /// A mixin that helps dump string representations of trees.
 abstract class TreeDiagnosticsMixin {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory TreeDiagnosticsMixin._() => null;
+
   @override
   String toString() => '$runtimeType#$hashCode';
 

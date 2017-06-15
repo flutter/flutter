@@ -41,6 +41,9 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
   if [[ $DART_SDK_VERSION == *"-dev."* ]]
   then
     DART_CHANNEL="dev"
+  elif [[ $DART_SDK_VERSION == "hash/"* ]]
+  then
+    DART_CHANNEL="be"
   fi
 
   DART_SDK_URL="https://storage.googleapis.com/dart-archive/channels/$DART_CHANNEL/raw/$DART_SDK_VERSION/sdk/$DART_ZIP_NAME"

@@ -5,8 +5,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-const Color _kBlue = const Color(0xFF007AFF);
-
 class CupertinoButtonsDemo extends StatefulWidget {
   static const String routeName = '/cupertino/buttons';
 
@@ -27,15 +25,17 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
         children: <Widget> [
           const Padding(
             padding: const EdgeInsets.all(16.0),
-            child: const Text('iOS themed buttons are flat. They can have borders or backgrounds but '
-                'only when necessary.'),
+            child: const Text(
+              'iOS themed buttons are flat. They can have borders or backgrounds but '
+              'only when necessary.'
+            ),
           ),
           new Expanded(
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget> [
                 new Text(_pressedCount > 0
-                    ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? '' : 's'}'
+                    ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? "" : "s"}'
                     : ' '),
                 const Padding(padding: const EdgeInsets.all(12.0)),
                 new Align(
@@ -46,7 +46,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                       new CupertinoButton(
                         child: const Text('Cupertino Button'),
                         onPressed: () {
-                          setState(() {_pressedCount++;});
+                          setState(() { _pressedCount += 1; });
                         }
                       ),
                       const CupertinoButton(
@@ -59,15 +59,15 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                 const Padding(padding: const EdgeInsets.all(12.0)),
                 new CupertinoButton(
                   child: const Text('With Background'),
-                  color: _kBlue,
+                  color: CupertinoColors.activeBlue,
                   onPressed: () {
-                    setState(() {_pressedCount++;});
+                    setState(() { _pressedCount += 1; });
                   }
                 ),
                 const Padding(padding: const EdgeInsets.all(12.0)),
                 const CupertinoButton(
                   child: const Text('Disabled'),
-                  color: _kBlue,
+                  color: CupertinoColors.activeBlue,
                   onPressed: null,
                 ),
               ],

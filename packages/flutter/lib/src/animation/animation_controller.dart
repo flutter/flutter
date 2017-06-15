@@ -15,6 +15,9 @@ import 'listener_helpers.dart';
 
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
+// Examples can assume:
+// AnimationController _controller;
+
 /// The direction in which an animation is running.
 enum _AnimationDirection {
   /// The animation is running from beginning to end.
@@ -44,17 +47,20 @@ const Tolerance _kFlingTolerance = const Tolerance(
 /// * Define the [upperBound] and [lowerBound] values of an animation.
 /// * Create a [fling] animation effect using a physics simulation.
 ///
-/// By default, an [AnimationController] linearly produces values that range from 0.0 to 1.0, during
-/// a given duration. The animation controller generates a new value whenever the device running
-/// your app is ready to display a new frame (typically, this rate is around 60 values per second).
+/// By default, an [AnimationController] linearly produces values that range
+/// from 0.0 to 1.0, during a given duration. The animation controller generates
+/// a new value whenever the device running your app is ready to display a new
+/// frame (typically, this rate is around 60 values per second).
 ///
-/// An AnimationController needs a [TickerProvider], which is configured using the `vsync` argument
-/// on the constructor. If you are creating an AnimationController from a [State], then you can use
-/// the [TickerProviderStateMixin] and [SingleTickerProviderStateMixin] classes to obtain a suitable
-/// [TickerProvider]. The widget test framework [WidgetTester] object can be used as a ticker provider
-/// in the context of tests. In other contexts, you will have to either pass a [TickerProvider] from
-/// a higher level (e.g. indirectly from a [State] that mixes in [TickerProviderStateMixin]), or
-/// create a custom [TickerProvider] subclass.
+/// An AnimationController needs a [TickerProvider], which is configured using
+/// the `vsync` argument on the constructor. If you are creating an
+/// AnimationController from a [State], then you can use the
+/// [TickerProviderStateMixin] and [SingleTickerProviderStateMixin] classes to
+/// obtain a suitable [TickerProvider]. The widget test framework [WidgetTester]
+/// object can be used as a ticker provider in the context of tests. In other
+/// contexts, you will have to either pass a [TickerProvider] from a higher
+/// level (e.g. indirectly from a [State] that mixes in
+/// [TickerProviderStateMixin]), or create a custom [TickerProvider] subclass.
 ///
 /// The methods that start animations return a [TickerFuture] object which
 /// completes when the animation completes successfully, and never throws an
@@ -115,12 +121,11 @@ class AnimationController extends Animation<double>
     this.lowerBound: 0.0,
     this.upperBound: 1.0,
     @required TickerProvider vsync,
-  }) {
-    assert(lowerBound != null);
-    assert(upperBound != null);
-    assert(upperBound >= lowerBound);
-    assert(vsync != null);
-    _direction = _AnimationDirection.forward;
+  }) : assert(lowerBound != null),
+       assert(upperBound != null),
+       assert(upperBound >= lowerBound),
+       assert(vsync != null),
+       _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value ?? lowerBound);
   }
@@ -146,11 +151,11 @@ class AnimationController extends Animation<double>
     this.duration,
     this.debugLabel,
     @required TickerProvider vsync,
-  }) : lowerBound = double.NEGATIVE_INFINITY,
-       upperBound = double.INFINITY {
-    assert(value != null);
-    assert(vsync != null);
-    _direction = _AnimationDirection.forward;
+  }) : assert(value != null),
+       assert(vsync != null),
+       lowerBound = double.NEGATIVE_INFINITY,
+       upperBound = double.INFINITY,
+       _direction = _AnimationDirection.forward {
     _ticker = vsync.createTicker(_tick);
     _internalSetValue(value);
   }
@@ -496,11 +501,10 @@ class AnimationController extends Animation<double>
 
 class _InterpolationSimulation extends Simulation {
   _InterpolationSimulation(this._begin, this._end, Duration duration, this._curve)
-    : _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND {
-    assert(_durationInSeconds > 0.0);
-    assert(_begin != null);
-    assert(_end != null);
-  }
+    : assert(_begin != null),
+      assert(_end != null),
+      assert(duration != null && duration.inMicroseconds > 0),
+      _durationInSeconds = duration.inMicroseconds / Duration.MICROSECONDS_PER_SECOND;
 
   final double _durationInSeconds;
   final double _begin;

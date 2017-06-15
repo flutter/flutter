@@ -108,7 +108,11 @@ bool debugPrintMarkNeedsLayoutStacks = false;
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 bool debugCheckIntrinsicSizes = false;
 
-/// Adds [dart:developer.Timeline] events for every RenderObject painted.
+/// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
+///
+/// This is only enabled in debug builds. The timing information this exposes is
+/// not representative of actual paints. However, it can expose unexpected
+/// painting in the timeline.
 ///
 /// For details on how to use [dart:developer.Timeline] events in the Dart
 /// Observatory to optimize your app, see:

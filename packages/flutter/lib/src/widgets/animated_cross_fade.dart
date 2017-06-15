@@ -29,15 +29,41 @@ enum CrossFadeState {
 ///
 /// The animation is controlled through the [crossFadeState] parameter.
 /// [firstCurve] and [secondCurve] represent the opacity curves of the two
-/// children. Note that [firstCurve] is inverted, i.e. it fades out when
-/// providing a growing curve like [Curves.linear]. [sizeCurve] is the curve
-/// used to animated between the size of the fading out child and the size of
-/// the fading in child.
+/// children. The [firstCurve] is inverted, i.e. it fades out when providing a
+/// growing curve like [Curves.linear]. The [sizeCurve] is the curve used to
+/// animated between the size of the fading out child and the size of the fading
+/// in child.
 ///
 /// This widget is intended to be used to fade a pair of widgets with the same
 /// width. In the case where the two children have different heights, the
 /// animation crops overflowing children during the animation by aligning their
 /// top edge, which means that the bottom will be clipped.
+///
+/// The animation is automatically triggered when an existing
+/// [AnimatedCrossFade] is rebuilt with a different value for the
+/// [crossFadeState] property.
+///
+/// ## Sample code
+///
+/// This code fades between two representations of the Flutter logo. It depends
+/// on a boolean field `_on`; when `_on` is true, the first logo is shown,
+/// otherwise the second logo is shown. When the field changes state, the
+/// [AnimatedCrossFade] widget cross-fades between the two forms of the logo
+/// over three seconds.
+///
+/// ```dart
+/// new AnimatedCrossFade(
+///   duration: const Duration(seconds: 3),
+///   firstChild: const FlutterLogo(style: FlutterLogoStyle.horizontal, size: 100.0),
+///   secondChild: const FlutterLogo(style: FlutterLogoStyle.stacked, size: 100.0),
+///   crossFadeState: _first ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [AnimatedSize], the lower-level widget which [AnimatedCrossFade] uses to
+///    automatically change size.
 class AnimatedCrossFade extends StatefulWidget {
   /// Creates a cross-fade animation widget.
   ///
@@ -99,6 +125,14 @@ class AnimatedCrossFade extends StatefulWidget {
 
   @override
   _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('$crossFadeState');
+    if (alignment != FractionalOffset.topCenter)
+      description.add('alignment: $alignment');
+  }
 }
 
 class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProviderStateMixin {
@@ -211,5 +245,14 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         ),
       ),
     );
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('${widget.crossFadeState}');
+    description.add('$_controller');
+    if (widget.alignment != FractionalOffset.topCenter)
+      description.add('alignment: ${widget.alignment}');
   }
 }

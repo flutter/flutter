@@ -12,6 +12,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart' show required;
 
+// Examples can assume:
+// dynamic _lot;
+
 /// Base class for widgets that build themselves based on interaction with
 /// a specified [Stream].
 ///
@@ -195,7 +198,7 @@ class AsyncSnapshot<T> {
   const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
-  AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null); // not const because https://github.com/dart-lang/sdk/issues/29432
+  const AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [error].
   const AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);

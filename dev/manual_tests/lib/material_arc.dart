@@ -189,10 +189,13 @@ class _PointDemoState extends State<_PointDemo> {
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) { // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-          return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
-            ..onStart = _handleOnStart;
-        }
+        ImmediateMultiDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
+          () => new ImmediateMultiDragGestureRecognizer(),
+          (ImmediateMultiDragGestureRecognizer instance) {
+            instance
+              ..onStart = _handleOnStart;
+          },
+        ),
       },
       child: new ClipRect(
         child: new CustomPaint(
@@ -359,10 +362,13 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) { // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-          return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
-            ..onStart = _handleOnStart;
-        }
+        ImmediateMultiDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
+          () => new ImmediateMultiDragGestureRecognizer(),
+          (ImmediateMultiDragGestureRecognizer instance) {
+            instance
+              ..onStart = _handleOnStart;
+          },
+        ),
       },
       child: new ClipRect(
         child: new CustomPaint(

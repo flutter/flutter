@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -379,35 +380,6 @@ void checkNotNull(Object o1,
     throw 'o10 is null';
 }
 
-/// Add benchmark values to a JSON results file.
-///
-/// If the file contains information about how long the benchmark took to run
-/// (a `time` field), then return that info.
-// TODO(yjbanov): move this data to __metadata__
-num addBuildInfo(File jsonFile,
-    {num expected, String sdk, String commit, DateTime timestamp}) {
-  Map<String, dynamic> json;
-
-  if (jsonFile.existsSync())
-    json = JSON.decode(jsonFile.readAsStringSync());
-  else
-    json = <String, dynamic>{};
-
-  if (expected != null)
-    json['expected'] = expected;
-  if (sdk != null)
-    json['sdk'] = sdk;
-  if (commit != null)
-    json['commit'] = commit;
-  if (timestamp != null)
-    json['timestamp'] = timestamp.millisecondsSinceEpoch;
-
-  jsonFile.writeAsStringSync(jsonEncode(json));
-
-  // Return the elapsed time of the benchmark (if any).
-  return json['time'];
-}
-
 /// Splits [from] into lines and selects those that contain [pattern].
 Iterable<String> grep(Pattern pattern, {@required String from}) {
   return from.split('\n').where((String line) {
@@ -452,3 +424,23 @@ Future<int> findAvailablePort() async {
 }
 
 bool canRun(String path) => _processManager.canRun(path);
+
+String extractCloudAuthTokenArg(List<String> rawArgs) {
+  final ArgParser argParser = new ArgParser()..addOption('cloud-auth-token');
+  ArgResults args;
+  try {
+    args = argParser.parse(rawArgs);
+  } on FormatException catch(error) {
+    stderr.writeln('${error.message}\n');
+    stderr.writeln('Usage:\n');
+    stderr.writeln(argParser.usage);
+    return null;
+  }
+
+  final String token = args['cloud-auth-token'];
+  if (token == null) {
+    stderr.writeln('Required option --cloud-auth-token not found');
+    return null;
+  }
+  return token;
+}

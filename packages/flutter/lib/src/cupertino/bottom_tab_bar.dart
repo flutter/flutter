@@ -13,8 +13,26 @@ import 'colors.dart';
 const double _kTabBarHeight = 50.0;
 
 const Color _kDefaultTabBarBackgroundColor = const Color(0xCCF8F8F8);
+const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 
-class CupertinoTabBar extends StatelessWidget {
+/// An iOS-styled bottom navigation tab bar.
+///
+/// Displays multiple tabs using [BottomNavigationBarItem] with one tab being
+/// active, the first tab by default.
+///
+/// This [StatelessWidget] doesn't store the active tab itself. You must
+/// listen to the [onTap] callbacks and call `setState` with a new [currentIndex]
+/// for the new selection to reflect.
+///
+/// Tab changes typically trigger a switch between [Navigator]s, each with its
+/// own navigation stack, per standard iOS design.
+///
+/// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
+/// default), it will produce a blurring effect to the content behind it.
+//
+// TODO(xster): document using with a CupertinoScaffold.
+class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates a tab bar in the iOS style.
   CupertinoTabBar({
     Key key,
     @required this.items,
@@ -24,12 +42,11 @@ class CupertinoTabBar extends StatelessWidget {
     this.activeColor: CupertinoColors.activeBlue,
     this.inactiveColor: CupertinoColors.inactiveGray,
     this.iconSize: 24.0,
-  }) : super(key: key) {
-    assert(items != null);
-    assert(items.length >= 2);
-    assert(0 <= currentIndex && currentIndex < items.length);
-    assert(iconSize != null);
-  }
+  }) : assert(items != null),
+       assert(items.length >= 2),
+       assert(0 <= currentIndex && currentIndex < items.length),
+       assert(iconSize != null),
+       super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
   final List<BottomNavigationBarItem> items;
@@ -64,15 +81,19 @@ class CupertinoTabBar extends StatelessWidget {
   /// should configure itself to match the icon theme's size and color.
   final double iconSize;
 
+  /// True if the tab bar's background color has no transparency.
+  bool get opaque => backgroundColor.alpha == 0xFF;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(_kTabBarHeight);
+
   @override
   Widget build(BuildContext context) {
-    final bool addBlur = backgroundColor.alpha != 0xFF;
-
     Widget result = new DecoratedBox(
       decoration: new BoxDecoration(
         border: const Border(
           top: const BorderSide(
-            color: const Color(0x4C000000),
+            color: _kDefaultTabBarBorderColor,
             width: 0.0, // One physical pixel.
             style: BorderStyle.solid,
           ),
@@ -103,7 +124,7 @@ class CupertinoTabBar extends StatelessWidget {
       ),
     );
 
-    if (addBlur) {
+    if (!opaque) {
       // For non-opaque backgrounds, apply a blur effect.
       result = new ClipRect(
         child: new BackdropFilter(
@@ -124,6 +145,7 @@ class CupertinoTabBar extends StatelessWidget {
         _wrapActiveItem(
           new Expanded(
             child: new GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: onTap == null ? null : () { onTap(index); },
               child: new Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
@@ -156,6 +178,30 @@ class CupertinoTabBar extends StatelessWidget {
         style: new TextStyle(color: activeColor),
         child: item,
       ),
+    );
+  }
+
+  /// Create a clone of the current [CupertinoTabBar] but with provided
+  /// parameters overriden.
+  CupertinoTabBar copyWith({
+    Key key,
+    List<BottomNavigationBarItem> items,
+    Color backgroundColor,
+    Color activeColor,
+    Color inactiveColor,
+    Size iconSize,
+    int currentIndex,
+    ValueChanged<int> onTap,
+  }) {
+    return new CupertinoTabBar(
+       key: key ?? this.key,
+       items: items ?? this.items,
+       backgroundColor: backgroundColor ?? this.backgroundColor,
+       activeColor: activeColor ?? this.activeColor,
+       inactiveColor: inactiveColor ?? this.inactiveColor,
+       iconSize: iconSize ?? this.iconSize,
+       currentIndex: currentIndex ?? this.currentIndex,
+       onTap: onTap ?? this.onTap,
     );
   }
 }

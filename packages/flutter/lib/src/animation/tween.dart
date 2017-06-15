@@ -97,7 +97,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// `_animation`:
 ///
 /// ```dart
-/// _animation = new Tween<Offset>(
+/// Animation<Offset> _animation = new Tween<Offset>(
 ///   begin: const Offset(100.0, 50.0),
 ///   end: const Offset(200.0, 300.0),
 /// ).animate(_controller);
@@ -291,9 +291,8 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ @required this.curve }) {
-    assert(curve != null);
-  }
+  CurveTween({ @required this.curve })
+    : assert(curve != null);
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;

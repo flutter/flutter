@@ -180,9 +180,7 @@ class _HeroFlightManifest {
     @required this.fromHero,
     @required this.toHero,
     @required this.createRectTween,
-  }) {
-    assert(fromHero.widget.tag == toHero.widget.tag);
-  }
+  }) : assert(fromHero.widget.tag == toHero.widget.tag);
 
   final _HeroFlightType type;
   final OverlayState overlay;

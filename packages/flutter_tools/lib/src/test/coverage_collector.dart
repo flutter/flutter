@@ -11,9 +11,17 @@ import '../base/io.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 
+import 'watcher.dart';
+
 /// A class that's used to collect coverage data during tests.
-class CoverageCollector {
+class CoverageCollector extends TestWatcher {
   Map<String, dynamic> _globalHitmap;
+
+  @override
+  Future<Null> onFinishedTests(ProcessEvent event) async {
+    printTrace('test ${event.childIndex}: collecting coverage');
+    await collectCoverage(event.process, event.observatoryUri);
+  }
 
   void _addHitmap(Map<String, dynamic> hitmap) {
     if (_globalHitmap == null)

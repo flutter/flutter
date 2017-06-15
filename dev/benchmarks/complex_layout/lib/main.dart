@@ -111,9 +111,9 @@ class ComplexLayoutState extends State<ComplexLayout> {
               key: const Key('complex-scroll'), // this key is used by the driver test
               itemBuilder: (BuildContext context, int index) {
                 if (index % 2 == 0)
-                  return new FancyImageItem(index, key: new ValueKey<int>(index));
+                  return new FancyImageItem(index, key: new PageStorageKey<int>(index));
                 else
-                  return new FancyGalleryItem(index, key: new ValueKey<int>(index));
+                  return new FancyGalleryItem(index, key: new PageStorageKey<int>(index));
               },
             )
           ),
@@ -496,7 +496,7 @@ class ItemGalleryBox extends StatelessWidget {
               child: new TabBarView(
                 children: tabNames.map((String tabName) {
                   return new Container(
-                    key: new Key(tabName),
+                    key: new PageStorageKey<String>(tabName),
                     child: new Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: new Card(
@@ -611,6 +611,7 @@ class GalleryDrawer extends StatelessWidget {
     final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
     return new Drawer(
       child: new ListView(
+        key: const PageStorageKey<String>('gallery-drawer'),
         children: <Widget>[
           new FancyDrawerHeader(),
           new ListTile(

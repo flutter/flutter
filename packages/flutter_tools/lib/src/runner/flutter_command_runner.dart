@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -59,6 +60,9 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
+    argParser.addFlag('machine',
+        negatable: false,
+        hide: true);
     argParser.addFlag('color',
         negatable: true,
         hide: !verboseHelp,
@@ -255,8 +259,19 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
-      printStatus(FlutterVersion.instance.toString());
+      String status;
+      if (globalResults['machine']) {
+        status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
+      } else {
+        status = FlutterVersion.instance.toString();
+      }
+      printStatus(status);
       return;
+    }
+
+    if (globalResults['machine']) {
+      printError('The --machine flag is only valid with the --version flag.');
+      throw new ProcessExit(2);
     }
 
     await super.runCommand(globalResults);
@@ -331,7 +346,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
   /// Get all pub packages in the Flutter repo.
   List<Directory> getRepoPackages() {
-    return _gatherProjectPaths(fs.path.absolute(Cache.flutterRoot))
+    final String root = fs.path.absolute(Cache.flutterRoot);
+    // not bin, and not the root
+    return <String>['dev', 'examples', 'packages']
+      .expand<String>((String path) => _gatherProjectPaths(fs.path.join(root, path)))
       .map((String dir) => fs.directory(dir))
       .toList();
   }
@@ -349,22 +367,6 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
       })
       .toList();
-  }
-
-  /// Get the entry-points we want to analyze in the Flutter repo.
-  List<Directory> getRepoAnalysisEntryPoints() {
-    final String rootPath = fs.path.absolute(Cache.flutterRoot);
-    final List<Directory> result = <Directory>[
-      // not bin, and not the root
-      fs.directory(fs.path.join(rootPath, 'dev')),
-      fs.directory(fs.path.join(rootPath, 'examples')),
-    ];
-    // And since analyzer refuses to look at paths that end in "packages/":
-    result.addAll(
-      _gatherProjectPaths(fs.path.join(rootPath, 'packages'))
-      .map<Directory>((String path) => fs.directory(path))
-    );
-    return result;
   }
 
   void _checkFlutterCopy() {
