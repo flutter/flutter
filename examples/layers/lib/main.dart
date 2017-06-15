@@ -4,4 +4,4 @@
 
 import 'package:flutter/widgets.dart';
 
-void main() => runApp(const Center(child: const Text('flutter run -t xxx/yyy.dart')));
+void main() => runApp(const Center(child: const Text('flutter run -t raw/spinning_square.dart')));
