@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
@@ -13,6 +14,8 @@ import '../base/process.dart';
 import '../base/version.dart';
 import '../doctor.dart';
 import 'mac.dart';
+
+IOSWorkflow get iosWorkflow => context.putIfAbsent(IOSWorkflow, () => new IOSWorkflow());
 
 Xcode get xcode => Xcode.instance;
 

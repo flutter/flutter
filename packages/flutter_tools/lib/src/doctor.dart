@@ -27,18 +27,6 @@ import 'version.dart';
 Doctor get doctor => context[Doctor];
 
 class Doctor {
-  Doctor() {
-    _androidWorkflow = new AndroidWorkflow();
-    _iosWorkflow = new IOSWorkflow();
-  }
-
-  IOSWorkflow _iosWorkflow;
-  AndroidWorkflow _androidWorkflow;
-
-  IOSWorkflow get iosWorkflow => _iosWorkflow;
-
-  AndroidWorkflow get androidWorkflow => _androidWorkflow;
-
   List<DoctorValidator> _validators;
 
   List<DoctorValidator> get validators {
@@ -46,11 +34,11 @@ class Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(new _FlutterValidator());
 
-      if (_androidWorkflow.appliesToHostPlatform)
-        _validators.add(_androidWorkflow);
+      if (androidWorkflow.appliesToHostPlatform)
+        _validators.add(androidWorkflow);
 
-      if (_iosWorkflow.appliesToHostPlatform)
-        _validators.add(_iosWorkflow);
+      if (iosWorkflow.appliesToHostPlatform)
+        _validators.add(iosWorkflow);
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);

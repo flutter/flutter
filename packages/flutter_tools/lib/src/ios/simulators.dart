@@ -16,10 +16,10 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../protocol_discovery.dart';
+import 'ios_workflow.dart';
 import 'mac.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
@@ -34,7 +34,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get supportsPlatform => platform.isMacOS;
 
   @override
-  bool get canListAnything => doctor.iosWorkflow.canListDevices;
+  bool get canListAnything => iosWorkflow.canListDevices;
 
   @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
