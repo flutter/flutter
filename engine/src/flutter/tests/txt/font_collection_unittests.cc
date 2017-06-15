@@ -25,33 +25,31 @@ namespace txt {
 TEST(FontCollection, HasDefaultRegistrations) {
   std::string defaultFamilyName = txt::FontCollection::GetDefaultFamilyName();
 
-  auto collection =
-      txt::FontCollection::GetDefaultFontCollection()
-          .GetMinikinFontCollectionForFamily("", txt::GetFontDir());
-  ASSERT_EQ(
-      defaultFamilyName,
-      txt::FontCollection::GetDefaultFontCollection().ProcessFamilyName(""));
+  auto collection = txt::FontCollection::GetFontCollection(txt::GetFontDir())
+                        .GetMinikinFontCollectionForFamily("");
+  ASSERT_EQ(defaultFamilyName,
+            txt::FontCollection::GetFontCollection(txt::GetFontDir())
+                .ProcessFamilyName(""));
   ASSERT_NE(defaultFamilyName,
-            txt::FontCollection::GetDefaultFontCollection().ProcessFamilyName(
-                "NotARealFont!"));
+            txt::FontCollection::GetFontCollection(txt::GetFontDir())
+                .ProcessFamilyName("NotARealFont!"));
   ASSERT_EQ("NotARealFont!",
-            txt::FontCollection::GetDefaultFontCollection().ProcessFamilyName(
-                "NotARealFont!"));
+            txt::FontCollection::GetFontCollection(txt::GetFontDir())
+                .ProcessFamilyName("NotARealFont!"));
   ASSERT_NE(collection.get(), nullptr);
 }
 
 TEST(FontCollection, GetMinikinFontCollections) {
   std::string defaultFamilyName = txt::FontCollection::GetDefaultFamilyName();
 
-  auto collectionDef =
-      txt::FontCollection::GetDefaultFontCollection()
-          .GetMinikinFontCollectionForFamily("", txt::GetFontDir());
+  auto collectionDef = txt::FontCollection::GetFontCollection(txt::GetFontDir())
+                           .GetMinikinFontCollectionForFamily("");
   auto collectionRoboto =
-      txt::FontCollection::GetDefaultFontCollection()
-          .GetMinikinFontCollectionForFamily("Roboto", txt::GetFontDir());
-  auto collectionHomemadeApple = txt::FontCollection::GetDefaultFontCollection()
-                                     .GetMinikinFontCollectionForFamily(
-                                         "Homemade Apple", txt::GetFontDir());
+      txt::FontCollection::GetFontCollection(txt::GetFontDir())
+          .GetMinikinFontCollectionForFamily("Roboto");
+  auto collectionHomemadeApple =
+      txt::FontCollection::GetFontCollection(txt::GetFontDir())
+          .GetMinikinFontCollectionForFamily("Homemade Apple");
   for (size_t base = 0; base < 50; base++) {
     for (size_t variation = 0; variation < 50; variation++) {
       ASSERT_EQ(collectionDef->hasVariationSelector(base, variation),
@@ -66,7 +64,8 @@ TEST(FontCollection, GetMinikinFontCollections) {
 
 TEST(FontCollection, GetFamilyNames) {
   std::set<std::string> names =
-      txt::FontCollection::GetFamilyNames(txt::GetFontDir());
+      txt::FontCollection::GetFontCollection(txt::GetFontDir())
+          .GetFamilyNames();
 
   ASSERT_EQ(names.size(), 19ull);
 

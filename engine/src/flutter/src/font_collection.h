@@ -37,12 +37,13 @@ class FontCollection {
  public:
   static FontCollection& GetDefaultFontCollection();
 
+  static FontCollection& GetFontCollection(std::string dir = "");
+
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
-      const std::string& family,
-      const std::string& dir = "");
+      const std::string& family);
 
   // Provides a set of all available family names.
-  std::set<std::string> GetFamilyNames(const std::string& dir = "");
+  std::set<std::string> GetFamilyNames();
 
  private:
   sk_sp<SkFontMgr> skia_font_manager_;
@@ -57,7 +58,7 @@ class FontCollection {
     return DEFAULT_FAMILY_NAME;
   };
 
-  FontCollection();
+  FontCollection(std::string dir = "");
 
   ~FontCollection();
 

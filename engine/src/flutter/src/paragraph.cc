@@ -121,8 +121,8 @@ void Paragraph::AddRunsToLineBreaker(const std::string& rootdir) {
   for (size_t i = 0; i < runs_.size(); ++i) {
     auto run = runs_.GetRun(i);
     auto collection =
-        FontCollection::GetDefaultFontCollection()
-            .GetMinikinFontCollectionForFamily(run.style.font_family, rootdir);
+        FontCollection::GetFontCollection(rootdir)
+            .GetMinikinFontCollectionForFamily(run.style.font_family);
     GetFontAndMinikinPaint(run.style, &font, &paint);
     breaker_.addStyleRun(&paint, collection, font, run.start, run.end, false);
   }
@@ -154,8 +154,8 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
     auto collection =
-        FontCollection::GetDefaultFontCollection()
-            .GetMinikinFontCollectionForFamily(run.style.font_family, rootdir);
+        FontCollection::GetFontCollection(rootdir)
+            .GetMinikinFontCollectionForFamily(run.style.font_family);
     GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
     GetPaint(run.style, &paint);
 
