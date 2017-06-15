@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../android/android_sdk.dart';
+import '../android/android_workflow.dart';
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
@@ -17,7 +18,6 @@ import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 
@@ -45,7 +45,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  bool get canListAnything => doctor.androidWorkflow.canListDevices;
+  bool get canListAnything => androidWorkflow.canListDevices;
 
   @override
   List<Device> pollingGetDevices() => getAdbDevices();
