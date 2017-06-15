@@ -622,11 +622,15 @@ class DevFS {
       final String packagePath = fs.path.fromUri(packageUri);
       final Directory packageDirectory = fs.directory(packageUri);
       Uri directoryUriOnDevice = fs.path.toUri(fs.path.join('packages', packageName) + fs.path.separator);
-      bool packageExists;
+      bool packageExists = packageDirectory.existsSync();
+
+      if (!packageExists) {
+        // If the package directory doesn't exist at all, we ignore it.
+        continue;
+      }
 
       if (fs.path.isWithin(rootDirectory.path, packagePath)) {
         // We already scanned everything under the root directory.
-        packageExists = packageDirectory.existsSync();
         directoryUriOnDevice = fs.path.toUri(
             fs.path.relative(packagePath, from: rootDirectory.path) + fs.path.separator
         );
