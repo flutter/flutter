@@ -16,7 +16,7 @@ import '../globals.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart' as android_studio;
 
-AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
+AndroidWorkflow get androidWorkflow => context.putIfAbsent(AndroidWorkflow, () => new AndroidWorkflow());
 
 class AndroidWorkflow extends DoctorValidator implements Workflow {
   AndroidWorkflow() : super('Android toolchain - develop for Android devices');

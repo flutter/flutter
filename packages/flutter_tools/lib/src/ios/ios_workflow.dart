@@ -15,7 +15,7 @@ import '../base/version.dart';
 import '../doctor.dart';
 import 'mac.dart';
 
-IOSWorkflow get iosWorkflow => context[IOSWorkflow];
+IOSWorkflow get iosWorkflow => context.putIfAbsent(IOSWorkflow, () => new IOSWorkflow());
 
 Xcode get xcode => Xcode.instance;
 
