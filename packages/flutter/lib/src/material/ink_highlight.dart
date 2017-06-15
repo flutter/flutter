@@ -43,13 +43,13 @@ class InkHighlight extends InkFeature {
     BorderRadius borderRadius,
     RectCallback rectCallback,
     VoidCallback onRemoved,
-  }) : _color = color,
+  }) : assert(color != null),
+       assert(shape != null),
+       _color = color,
        _shape = shape,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _rectCallback = rectCallback,
        super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
-    assert(color != null);
-    assert(shape != null);
     _alphaController = new AnimationController(duration: _kHighlightFadeDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..addStatusListener(_handleAlphaStatusChanged)

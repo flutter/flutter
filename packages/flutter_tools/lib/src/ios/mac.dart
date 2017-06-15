@@ -147,7 +147,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   String developmentTeam;
-  if (codesign && mode != BuildMode.release && buildForDevice)
+  if (codesign && buildForDevice)
     developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
 
   // Before the build, all service definitions must be updated and the dylibs
@@ -246,50 +246,39 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
-  final File plistFile = fs.file('ios/Runner/Info.plist');
-  if (plistFile.existsSync()) {
-    final String plistContent = plistFile.readAsStringSync();
-    if (plistContent.contains('com.yourcompany')) {
-      printError('');
-      printError('It appears that your application still contains the default signing identifier.');
-      printError("Try replacing 'com.yourcompany' with your signing id");
-      printError('in ${plistFile.absolute.path}');
-      return;
-    }
+Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
+  if (result.xcodeBuildExecution != null &&
+      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      result.stdout?.contains('BCEROR') == true &&
+      // May need updating if Xcode changes its outputs.
+      result.stdout?.contains('Xcode couldn\'t find a provisioning profile matching') == true) {
+    printError(noProvisioningProfileInstruction, emphasis: true);
+    return;
+  }
+  if (result.xcodeBuildExecution != null &&
+      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
+      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
+      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+    printError(noDevelopmentTeamInstruction, emphasis: true);
+    return;
+  }
+  if (app.id?.contains('com.yourcompany') ?? false) {
+    printError('');
+    printError('It appears that your application still contains the default signing identifier.');
+    printError("Try replacing 'com.yourcompany' with your signing id in Xcode:");
+    printError('  open ios/Runner.xcworkspace');
+    return;
   }
   if (result.stdout?.contains('Code Sign error') == true) {
     printError('');
     printError('It appears that there was a problem signing your application prior to installation on the device.');
     printError('');
-    if (plistFile.existsSync()) {
-      printError('Verify that the CFBundleIdentifier in the Info.plist file is your signing id');
-      printError('  ${plistFile.absolute.path}');
-      printError('');
-    }
-    printError("Try launching Xcode and selecting 'Product > Build' to fix the problem:");
-    printError("  open ios/Runner.xcworkspace");
+    printError('Verify that the Bundle Identifier in your project is your signing id in Xcode');
+    printError('  open ios/Runner.xcworkspace');
+    printError('');
+    printError("Also try selecting 'Product > Build' to fix the problem:");
     return;
-  }
-  if (result.xcodeBuildExecution != null) {
-    assert(result.xcodeBuildExecution.buildForPhysicalDevice != null);
-    assert(result.xcodeBuildExecution.buildCommands != null);
-    assert(result.xcodeBuildExecution.appDirectory != null);
-    if (result.xcodeBuildExecution.buildForPhysicalDevice &&
-        result.xcodeBuildExecution.buildCommands.contains('build')) {
-      final RunResult checkBuildSettings = await runAsync(
-        result.xcodeBuildExecution.buildCommands..add('-showBuildSettings'),
-        workingDirectory: result.xcodeBuildExecution.appDirectory,
-        allowReentrantFlutter: true
-      );
-      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
-      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
-      if (checkBuildSettings.exitCode == 0 &&
-          !checkBuildSettings.stdout?.contains(new RegExp(r'\bDEVELOPMENT_TEAM\b')) == true &&
-          !checkBuildSettings.stdout?.contains(new RegExp(r'\bPROVISIONING_PROFILE\b')) == true) {
-        printError(noDevelopmentTeamInstruction, emphasis: true);
-      }
-    }
   }
 }
 

@@ -33,7 +33,7 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so here we pin it
   # precisely.
-  test: 0.12.20
+  test: 0.12.21
 
   # Version from the vended Dart SDK as defined in `dependency_overrides`.
   analyzer: any

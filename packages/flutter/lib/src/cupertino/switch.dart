@@ -22,8 +22,28 @@ import 'thumb_painter.dart';
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
+/// ## Sample code
+///
+/// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
+/// [MergeSemantics] is used to turn the entire [ListTile] into a single item
+/// for accessibility tools.
+///
+/// ```dart
+/// new MergeSemantics(
+///   child: new ListTile(
+///     title: new Text('Lights'),
+///     trailing: new CupertinoSwitch(
+///       value: _lights,
+///       onChanged: (bool value) { setState(() { _lights = value; }); },
+///     ),
+///     onTap: () { setState(() { _lights = !_lights; }); },
+///   ),
+/// )
+/// ```
+///
 /// See also:
 ///
+///  * [Switch], the material design equivalent.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
@@ -141,14 +161,14 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     @required Color activeColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }) : _value = value,
-        _activeColor = activeColor,
-        _onChanged = onChanged,
-        _vsync = vsync,
-        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
-    assert(value != null);
-    assert(activeColor != null);
-    assert(vsync != null);
+  }) : assert(value != null),
+       assert(activeColor != null),
+       assert(vsync != null),
+       _value = value,
+       _activeColor = activeColor,
+       _onChanged = onChanged,
+       _vsync = vsync,
+       super(additionalConstraints: const BoxConstraints.tightFor(width: _kSwitchWidth, height: _kSwitchHeight)) {
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap

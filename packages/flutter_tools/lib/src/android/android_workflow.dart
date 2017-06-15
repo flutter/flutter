@@ -83,11 +83,10 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       messages.add(new ValidationMessage.error('Could not determine java version'));
       return false;
     }
-    messages.add(new ValidationMessage('Java version: $javaVersion'));
+    messages.add(new ValidationMessage('Java version $javaVersion'));
     // TODO(johnmccutchan): Validate version.
     return true;
   }
-
 
   @override
   Future<ValidationResult> validate() async {

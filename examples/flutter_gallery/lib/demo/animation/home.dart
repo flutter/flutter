@@ -35,10 +35,10 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   _RenderStatusBarPaddingSliver({
     @required double maxHeight,
     @required double scrollFactor,
-  }) : _maxHeight = maxHeight, _scrollFactor = scrollFactor {
-    assert(maxHeight != null && maxHeight >= 0.0);
-    assert(scrollFactor != null && scrollFactor >= 1.0);
-  }
+  }) : assert(maxHeight != null && maxHeight >= 0.0),
+       assert(scrollFactor != null && scrollFactor >= 1.0),
+       _maxHeight = maxHeight,
+       _scrollFactor = scrollFactor;
 
   // The height of the status bar
   double get maxHeight => _maxHeight;
@@ -75,14 +75,13 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
 }
 
 class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
-  _StatusBarPaddingSliver({
+  const _StatusBarPaddingSliver({
     Key key,
     @required this.maxHeight,
     this.scrollFactor: 5.0,
-  }) : super(key: key) {
-    assert(maxHeight != null && maxHeight >= 0.0);
-    assert(scrollFactor != null && scrollFactor >= 1.0);
-  }
+  }) : assert(maxHeight != null && maxHeight >= 0.0),
+       assert(scrollFactor != null && scrollFactor >= 1.0),
+       super(key: key);
 
   final double maxHeight;
   final double scrollFactor;
@@ -272,14 +271,13 @@ class _AllSectionsView extends AnimatedWidget {
     this.midHeight,
     this.maxHeight,
     this.sectionCards: const <Widget>[],
-  }) : super(key: key, listenable: selectedIndex) {
-    assert(sections != null);
-    assert(sectionCards != null);
-    assert(sectionCards.length == sections.length);
-    assert(sectionIndex >= 0 && sectionIndex < sections.length);
-    assert(selectedIndex != null);
-    assert(selectedIndex.value >= 0.0 && selectedIndex.value < sections.length.toDouble());
-  }
+  }) : assert(sections != null),
+       assert(sectionCards != null),
+       assert(sectionCards.length == sections.length),
+       assert(sectionIndex >= 0 && sectionIndex < sections.length),
+       assert(selectedIndex != null),
+       assert(selectedIndex.value >= 0.0 && selectedIndex.value < sections.length.toDouble()),
+       super(key: key, listenable: selectedIndex);
 
   final int sectionIndex;
   final List<Section> sections;
@@ -371,7 +369,7 @@ class _AllSectionsView extends AnimatedWidget {
 // app bar's height is _kAppBarMidHeight and only one section heading is
 // visible.
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
-  _SnappingScrollPhysics({
+  const _SnappingScrollPhysics({
     ScrollPhysics parent,
     @required this.midScrollOffset,
   }) : assert(midScrollOffset != null),

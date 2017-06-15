@@ -143,4 +143,76 @@ void main() {
 
     expect(find.text('Home'), findsOneWidget);
   });
+
+  testWidgets('Default initialRoute', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(routes: <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('route "/"'),
+    }));
+
+    expect(find.text('route "/"'), findsOneWidget);
+  });
+
+  testWidgets('Custom initialRoute only', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        initialRoute: '/a',
+        routes: <String, WidgetBuilder>{
+          '/a': (BuildContext context) => const Text('route "/a"'),
+        },
+      )
+    );
+
+    expect(find.text('route "/a"'), findsOneWidget);
+  });
+
+  testWidgets('Custom initialRoute along with Navigator.defaultRouteName', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('route "/"'),
+      '/a': (BuildContext context) => const Text('route "/a"'),
+      '/b': (BuildContext context) => const Text('route "/b"'),
+    };
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        initialRoute: '/a',
+        routes: routes,
+      )
+    );
+    expect(find.text('route "/"'), findsNothing);
+    expect(find.text('route "/a"'), findsOneWidget);
+    expect(find.text('route "/b"'), findsNothing);
+  });
+
+  testWidgets('Make sure initialRoute is only used the first time', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('route "/"'),
+      '/a': (BuildContext context) => const Text('route "/a"'),
+      '/b': (BuildContext context) => const Text('route "/b"'),
+    };
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        initialRoute: '/a',
+        routes: routes,
+      )
+    );
+    expect(find.text('route "/"'), findsNothing);
+    expect(find.text('route "/a"'), findsOneWidget);
+    expect(find.text('route "/b"'), findsNothing);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        initialRoute: '/b',
+        routes: routes,
+      )
+    );
+    expect(find.text('route "/"'), findsNothing);
+    expect(find.text('route "/a"'), findsOneWidget);
+    expect(find.text('route "/b"'), findsNothing);
+
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+    expect(find.text('route "/"'), findsNothing);
+    expect(find.text('route "/a"'), findsOneWidget);
+    expect(find.text('route "/b"'), findsNothing);
+  });
 }

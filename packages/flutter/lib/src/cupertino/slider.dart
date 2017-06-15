@@ -192,11 +192,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
     Color activeColor,
     this.onChanged,
     TickerProvider vsync,
-  }) : _value = value,
+  }) : assert(value != null && value >= 0.0 && value <= 1.0),
+       _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSliderWidth, height: _kSliderHeight)) {
-    assert(value != null && value >= 0.0 && value <= 1.0);
     _drag = new HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
       ..onUpdate = _handleDragUpdate

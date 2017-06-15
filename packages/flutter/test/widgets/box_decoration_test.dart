@@ -86,4 +86,82 @@ void main() {
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
   });
 
+
+  testWidgets('Can hit test on BoxDecoration', (WidgetTester tester) async {
+
+    List<int> itemsTapped;
+
+    final Key key = const Key('Container with BoxDecoration');
+    Widget buildFrame(Border border) {
+      itemsTapped = <int>[];
+      return new Center(
+        child: new GestureDetector( 
+            behavior: HitTestBehavior.deferToChild,
+            child: new Container(
+            key: key,
+            width: 100.0,
+            height: 50.0,
+            decoration: new BoxDecoration(border: border),
+          ),
+          onTap: () {
+            itemsTapped.add(1);
+          },
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(new Border.all()));
+    expect(itemsTapped, isEmpty);
+
+    await tester.tap(find.byKey(key));
+    expect(itemsTapped, <int>[1]);
+
+    await tester.tapAt(const Offset(350.0, 275.0));
+    expect(itemsTapped, <int>[1,1]);
+
+    await tester.tapAt(const Offset(449.0, 324.0));
+    expect(itemsTapped, <int>[1,1,1]);
+  
+  });
+
+  testWidgets('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
+
+    List<int> itemsTapped;
+
+    final Key key = const Key('Container with BoxDecoration');
+    Widget buildFrame(Border border) {
+      itemsTapped = <int>[];
+      return new Center(
+        child: new GestureDetector( 
+            behavior: HitTestBehavior.deferToChild,
+            child: new Container(
+            key: key,
+            width: 100.0,
+            height: 50.0,
+            decoration: new BoxDecoration(border: border, shape: BoxShape.circle),
+          ),
+          onTap: () {
+            itemsTapped.add(1);
+          },
+        )
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(new Border.all()));
+    expect(itemsTapped, isEmpty);
+
+    await tester.tapAt(const Offset(0.0, 0.0));
+    expect(itemsTapped, isEmpty);
+
+    await tester.tapAt(const Offset(350.0, 275.0));
+    expect(itemsTapped, isEmpty);
+
+    await tester.tapAt(const Offset(400.0, 300.0));
+    expect(itemsTapped, <int>[1]);
+
+    await tester.tap(find.byKey(key));
+    expect(itemsTapped, <int>[1,1]);
+  
+  });
+
 }

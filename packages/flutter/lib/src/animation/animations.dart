@@ -115,6 +115,10 @@ class AlwaysStoppedAnimation<T> extends Animation<T> {
 /// given [parent] Animation. To implement an [Animation] that proxies to a
 /// parent, this class plus implementing "T get value" is all that is necessary.
 abstract class AnimationWithParentMixin<T> {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AnimationWithParentMixin._() => null;
+
   /// The animation whose value this animation will proxy.
   ///
   /// This animation must remain the same for the lifetime of this object. If
@@ -233,19 +237,19 @@ class ProxyAnimation extends Animation<double>
 /// An animation that is the reverse of another animation.
 ///
 /// If the parent animation is running forward from 0.0 to 1.0, this animation
-/// is running in reverse from 1.0 to 0.0. Notice that using a ReverseAnimation
-/// is different from simply using a [Tween] with a begin of 1.0 and an end of
-/// 0.0 because the tween does not change the status or direction of the
-/// animation.
+/// is running in reverse from 1.0 to 0.0.
+///
+/// Using a [ReverseAnimation] is different from simply using a [Tween] with a
+/// begin of 1.0 and an end of 0.0 because the tween does not change the status
+/// or direction of the animation.
 class ReverseAnimation extends Animation<double>
   with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
 
   /// Creates a reverse animation.
   ///
   /// The parent argument must not be null.
-  ReverseAnimation(this.parent) {
-    assert(parent != null);
-  }
+  ReverseAnimation(this.parent)
+    : assert(parent != null);
 
   /// The animation whose value and direction this animation is reversing.
   final Animation<double> parent;
@@ -327,9 +331,8 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     @required this.parent,
     @required this.curve,
     this.reverseCurve
-  }) {
-    assert(parent != null);
-    assert(curve != null);
+  }) : assert(parent != null),
+       assert(curve != null) {
     _updateCurveDirection(parent.status);
     parent.addStatusListener(_updateCurveDirection);
   }
@@ -437,8 +440,8 @@ class TrainHoppingAnimation extends Animation<double>
   ///
   /// The current train argument must not be null but the next train argument
   /// can be null.
-  TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain }) {
-    assert(_currentTrain != null);
+  TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain })
+    : assert(_currentTrain != null) {
     if (_nextTrain != null) {
       if (_currentTrain.value > _nextTrain.value) {
         _mode = _TrainHoppingMode.maximize;
@@ -548,10 +551,8 @@ abstract class CompoundAnimation<T> extends Animation<T>
   CompoundAnimation({
     @required this.first,
     @required this.next,
-  }) {
-    assert(first != null);
-    assert(next != null);
-  }
+  }) : assert(first != null),
+       assert(next != null);
 
   /// The first sub-animation. Its status takes precedence if neither are
   /// animating.

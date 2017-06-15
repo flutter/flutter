@@ -28,5 +28,8 @@ const int kRadialReactionAlpha = 0x33;
 /// The duration of the horizontal scroll animation that occurs when a tab is tapped.
 const Duration kTabScrollDuration = const Duration(milliseconds: 300);
 
+/// The horizontal padding included by [Tab]s.
+const EdgeInsets kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0);
+
 /// The padding added around material list items.
 const EdgeInsets kMaterialListPadding = const EdgeInsets.symmetric(vertical: 8.0);

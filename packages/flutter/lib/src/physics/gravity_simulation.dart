@@ -8,6 +8,30 @@ import 'simulation.dart';
 ///
 /// Models a particle that follows Newton's second law of motion. The simulation
 /// ends when the position reaches a defined point.
+///
+/// ## Sample code
+///
+/// This method triggers an [AnimationController] (a previously constructed
+/// `_controller` field) to simulate a fall of 300 pixels.
+///
+/// ```dart
+/// void _startFall() {
+///   _controller.animateWith(new GravitySimulation(
+///     10.0, // acceleration, pixels per second per second
+///     0.0, // starting position, pixels
+///     300.0, // ending position, pixels
+///     0.0, // starting velocity, pixels per second
+///   ));
+/// }
+/// ```
+///
+/// This [AnimationController] could be used with an [AnimatedBuilder] to
+/// animate the position of a child as if it was falling.
+///
+/// See also:
+///
+///  * [Curves.bounceOut], a [Curve] that has a similar aesthetics but includes
+///    a bouncing effect.
 class GravitySimulation extends Simulation {
   /// Creates a [GravitySimulation] using the given arguments, which are,
   /// respectively: an acceleration that is to be applied continually over time;
@@ -28,16 +52,15 @@ class GravitySimulation extends Simulation {
     double distance,
     double endDistance,
     double velocity
-  ) : _a = acceleration,
+  ) : assert(acceleration != null),
+      assert(distance != null),
+      assert(velocity != null),
+      assert(endDistance != null),
+      assert(endDistance >= 0),
+      _a = acceleration,
       _x = distance,
       _v = velocity,
-      _end = endDistance {
-    assert(acceleration != null);
-    assert(distance != null);
-    assert(velocity != null);
-    assert(endDistance != null);
-    assert(endDistance >= 0);
-  }
+      _end = endDistance;
 
   final double _x;
   final double _v;

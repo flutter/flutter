@@ -30,7 +30,8 @@ import 'text_field.dart';
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///
-  /// For a documentation about the various parameters, see [TextField].
+  /// For documentation about the various parameters, see the [TextField] class
+  /// and [new TextField], the constructor.
   TextFormField({
     Key key,
     TextEditingController controller,
@@ -44,7 +45,11 @@ class TextFormField extends FormField<String> {
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
-  }) : super(
+  }) : assert(keyboardType != null),
+       assert(autofocus != null),
+       assert(obscureText != null),
+       assert(maxLines == null || maxLines > 0),
+       super(
     key: key,
     initialValue: controller != null ? controller.value.text : '',
     onSaved: onSaved,

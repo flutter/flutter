@@ -46,7 +46,7 @@ void main() {
     'First line of text is '
     'Second line goes until '
     'Third line of stuff ';
-  const String kFourLines =
+  const String kMoreThanFourLines =
     kThreeLines +
     'Fourth line won\'t display and ends at';
 
@@ -462,7 +462,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(builder(3));
+    await tester.pumpWidget(builder(null));
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
 
@@ -470,28 +470,44 @@ void main() {
     final Size emptyInputSize = inputBox.size;
 
     await tester.enterText(find.byType(TextField), 'No wrapping here.');
-    await tester.pumpWidget(builder(3));
+    await tester.pumpWidget(builder(null));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    await tester.enterText(find.byType(TextField), kThreeLines);
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
 
     final Size threeLineInputSize = inputBox.size;
 
+    await tester.enterText(find.byType(TextField), kThreeLines);
+    await tester.pumpWidget(builder(null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, greaterThan(emptyInputSize));
+
+    await tester.enterText(find.byType(TextField), kThreeLines);
+    await tester.pumpWidget(builder(null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, threeLineInputSize);
+
     // An extra line won't increase the size because we max at 3.
-    await tester.enterText(find.byType(TextField), kFourLines);
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
-    // But now it will.
-    await tester.enterText(find.byType(TextField), kFourLines);
+    // But now it will... but it will max at four
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
     await tester.pumpWidget(builder(4));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(threeLineInputSize));
+
+    final Size fourLineInputSize = inputBox.size;
+
+    // Now it won't max out until the end
+    await tester.pumpWidget(builder(null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, greaterThan(fourLineInputSize));
   });
 
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
@@ -594,7 +610,7 @@ void main() {
     await tester.pumpWidget(builder());
     await tester.pump(const Duration(seconds: 1));
 
-    await tester.enterText(find.byType(TextField), kFourLines);
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
 
     await tester.pumpWidget(builder());
     await tester.pump(const Duration(seconds: 1));
@@ -603,8 +619,8 @@ void main() {
     final RenderBox inputBox = findInputBox();
 
     // Check that the last line of text is not displayed.
-    final Offset firstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
-    final Offset fourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
     expect(firstPos.dx, fourthPos.dx);
     expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
@@ -622,8 +638,8 @@ void main() {
     await tester.pump();
 
     // Now the first line is scrolled up, and the fourth line is visible.
-    Offset newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
-    Offset newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    Offset newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    Offset newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
 
     expect(newFirstPos.dy, lessThan(firstPos.dy));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
@@ -633,7 +649,7 @@ void main() {
 
     // Long press the 'i' in 'Fourth line' to select the word.
     await tester.pump(const Duration(seconds: 1));
-    final Offset untilPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth line')+8);
+    final Offset untilPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth line')+8);
     gesture = await tester.startGesture(untilPos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
@@ -645,7 +661,7 @@ void main() {
 
     // Drag the left handle to the first line, just after 'First'.
     final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
-    final Offset newHandlePos = textOffsetToPosition(tester, kFourLines.indexOf('First') + 5);
+    final Offset newHandlePos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
     await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
@@ -655,8 +671,8 @@ void main() {
 
     // The text should have scrolled up with the handle to keep the active
     // cursor visible, back to its original position.
-    newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
-    newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
     expect(newFirstPos.dy, firstPos.dy);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);

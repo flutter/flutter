@@ -17,6 +17,15 @@ export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPri
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
+// Examples can assume:
+// BuildContext context;
+// void setState(VoidCallback fn) { }
+
+// Examples can assume:
+// abstract class RenderFrogJar extends RenderObject { }
+// abstract class FrogJar extends RenderObjectWidget { }
+// abstract class FrogJarParentData extends ParentData { Size size; }
+
 // KEYS
 
 /// A [Key] is an identifier for [Widget]s and [Element]s.
@@ -313,19 +322,19 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
   /// The label does not affect the key's identity.
-  const LabeledGlobalKey(this._debugLabel) : super.constructor();
+  LabeledGlobalKey(this._debugLabel) : super.constructor();
 
   // Used for forwarding the constructor from GlobalKey.
-  const LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
+  LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
 
   final String _debugLabel;
 
   @override
   String toString() {
-    final String tag = _debugLabel != null ? ' $_debugLabel' : '#$hashCode';
+    final String label = _debugLabel != null ? ' $_debugLabel' : '';
     if (runtimeType == LabeledGlobalKey)
-      return '[GlobalKey$tag]';
-    return '[$runtimeType$tag]';
+      return '[GlobalKey#$hashCode$label]';
+    return '[$runtimeType#$hashCode$label]';
   }
 }
 
@@ -643,20 +652,20 @@ abstract class StatelessWidget extends Widget {
 ///
 /// ## Sample code
 ///
-/// The following is a skeleton of a stateful widget subclass called `GreenFrog`:
+/// The following is a skeleton of a stateful widget subclass called `YellowBird`:
 ///
 /// ```dart
-/// class GreenFrog extends StatefulWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
+/// class YellowBird extends StatefulWidget {
+///   const YellowBird({ Key key }) : super(key: key);
 ///
 ///   @override
-///   _GreenFrogState createState() => new _GreenFrogState();
+///   _YellowBirdState createState() => new _YellowBirdState();
 /// }
 ///
-/// class _GreenFrogState extends State<GreenFrog> {
+/// class _YellowBirdState extends State<YellowBird> {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Container(color: const Color(0xFF2DBD3A));
+///     return new Container(color: const Color(0xFFFFE306));
 ///   }
 /// }
 /// ```
@@ -665,15 +674,15 @@ abstract class StatelessWidget extends Widget {
 /// represented as private member fields. Also, normally widgets have more
 /// constructor arguments, each of which corresponds to a `final` property.
 ///
-/// The next example shows the more generic widget `Frog` which can be given a
+/// The next example shows the more generic widget `Bird` which can be given a
 /// color and a child, and which has some internal state with a method that
 /// can be called to mutate it:
 ///
 /// ```dart
-/// class Frog extends StatefulWidget {
-///   const Frog({
+/// class Bird extends StatefulWidget {
+///   const Bird({
 ///     Key key,
-///     this.color: const Color(0xFF2DBD3A),
+///     this.color: const Color(0xFFFFE306),
 ///     this.child,
 ///   }) : super(key: key);
 ///
@@ -681,10 +690,10 @@ abstract class StatelessWidget extends Widget {
 ///
 ///   final Widget child;
 ///
-///   _FrogState createState() => new _FrogState();
+///   _BirdState createState() => new _BirdState();
 /// }
 ///
-/// class _FrogState extends State<Frog> {
+/// class _BirdState extends State<Bird> {
 ///   double _size = 1.0;
 ///
 ///   void grow() {
@@ -695,7 +704,7 @@ abstract class StatelessWidget extends Widget {
 ///   Widget build(BuildContext context) {
 ///     return new Container(
 ///       color: widget.color,
-///       transform: new Matrix4.diagonalValues(_size, _size, 1.0),
+///       transform: new Matrix4.diagonal3Values(_size, _size, 1.0),
 ///       child: widget.child,
 ///     );
 ///   }
@@ -1309,7 +1318,7 @@ abstract class ProxyWidget extends Widget {
 ///
 /// ```dart
 /// class FrogSize extends ParentDataWidget<FrogJar> {
-///   Pond({
+///   FrogSize({
 ///     Key key,
 ///     @required this.size,
 ///     @required Widget child,
@@ -1425,7 +1434,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// ```dart
 /// class FrogColor extends InheritedWidget {
-///   const FrogColor(
+///   const FrogColor({
 ///     Key key,
 ///     @required this.color,
 ///     @required Widget child,
@@ -1452,7 +1461,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// Sometimes, the `of` method returns the data rather than the inherited
 /// widget; for example, in this case it could have returned a [Color] instead
-/// of the [FrogColor] widget.
+/// of the `FrogColor` widget.
 ///
 /// Occasionally, the inherited widget is an implementation detail of another
 /// class, and is therefore private. The `of` method in that case is typically
@@ -1573,9 +1582,8 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// objects.
   MultiChildRenderObjectWidget({ Key key, this.children: const <Widget>[] })
     : assert(children != null),
-      super(key: key) {
-    assert(!children.any((Widget child) => child == null)); // https://github.com/dart-lang/sdk/issues/29276
-  }
+      assert(!children.any((Widget child) => child == null)), // https://github.com/dart-lang/sdk/issues/29276
+      super(key: key);
 
   /// The widgets below this widget in the tree.
   ///
@@ -2375,9 +2383,9 @@ abstract class Element implements BuildContext {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
-  Element(Widget widget) : _widget = widget {
-    assert(widget != null);
-  }
+  Element(Widget widget)
+    : assert(widget != null),
+      _widget = widget;
 
   Element _parent;
 
@@ -4363,9 +4371,9 @@ class SingleChildRenderObjectElement extends RenderObjectElement {
 /// are expected to inherit from [MultiChildRenderObjectWidget].
 class MultiChildRenderObjectElement extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget) : super(widget) {
-    assert(!debugChildrenHaveDuplicateKeys(widget, widget.children));
-  }
+  MultiChildRenderObjectElement(MultiChildRenderObjectWidget widget)
+    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.children)),
+      super(widget);
 
   @override
   MultiChildRenderObjectWidget get widget => super.widget;

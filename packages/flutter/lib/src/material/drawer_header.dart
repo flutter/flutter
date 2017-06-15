@@ -82,7 +82,7 @@ class DrawerHeader extends StatelessWidget {
         border: new Border(
           bottom: new BorderSide(
             color: theme.dividerColor,
-            width: 1.0
+            width: 0.0
           )
         )
       ),

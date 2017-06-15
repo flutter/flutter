@@ -5,112 +5,98 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-import '../framework/benchmarks.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
-TaskFunction createAnalyzerCliTest({
-  @required String sdk,
-  @required String commit,
-  @required DateTime timestamp,
-}) {
-  return new AnalyzerCliTask(sdk, commit, timestamp);
+/// Run each benchmark this many times and compute average.
+const int _kRunsPerBenchmark = 3;
+
+/// Runs a benchmark once and reports the result as a lower-is-better numeric
+/// value.
+typedef Future<double> _Benchmark();
+
+/// Path to the generated "mega gallery" app.
+Directory get _megaGalleryDirectory => dir(path.join(Directory.systemTemp.path, 'mega_gallery'));
+
+Future<TaskResult> analyzerBenchmarkTask() async {
+  await inDirectory(flutterDirectory, () async {
+    rmTree(_megaGalleryDirectory);
+    mkdirs(_megaGalleryDirectory);
+    await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
+  });
+
+  final Map<String, dynamic> data = <String, dynamic>{
+    'flutter_repo_batch': await _run(new _FlutterRepoBenchmark()),
+    'flutter_repo_watch': await _run(new _FlutterRepoBenchmark(watch: true)),
+    'mega_gallery_batch': await _run(new _MegaGalleryBenchmark()),
+    'mega_gallery_watch': await _run(new _MegaGalleryBenchmark(watch: true)),
+  };
+
+  return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
 }
 
-TaskFunction createAnalyzerServerTest({
-  @required String sdk,
-  @required String commit,
-  @required DateTime timestamp,
-}) {
-  return new AnalyzerServerTask(sdk, commit, timestamp);
-}
+/// Times how long it takes to analyze the Flutter repository.
+class _FlutterRepoBenchmark {
+  _FlutterRepoBenchmark({ this.watch = false });
 
-abstract class AnalyzerTask {
-  Benchmark benchmark;
+  final bool watch;
 
-  Future<TaskResult> call() async {
-    section(benchmark.name);
-    await runBenchmark(benchmark, iterations: 3, warmUpBenchmark: true);
-    return benchmark.bestResult;
-  }
-}
-
-class AnalyzerCliTask extends AnalyzerTask {
-  AnalyzerCliTask(String sdk, String commit, DateTime timestamp) {
-    benchmark = new FlutterAnalyzeBenchmark(sdk, commit, timestamp);
-  }
-}
-
-class AnalyzerServerTask extends AnalyzerTask {
-  AnalyzerServerTask(String sdk, String commit, DateTime timestamp) {
-    benchmark = new FlutterAnalyzeAppBenchmark(sdk, commit, timestamp);
-  }
-}
-
-class FlutterAnalyzeBenchmark extends Benchmark {
-  FlutterAnalyzeBenchmark(this.sdk, this.commit, this.timestamp)
-      : super('flutter analyze --flutter-repo');
-
-  final String sdk;
-  final String commit;
-  final DateTime timestamp;
-
-  File get benchmarkFile =>
-      file(path.join(flutterDirectory.path, 'analysis_benchmark.json'));
-
-  @override
-  TaskResult get lastResult => new TaskResult.successFromFile(benchmarkFile);
-
-  @override
-  Future<num> run() async {
-    rm(benchmarkFile);
+  Future<double> call() async {
+    section('Analyze Flutter repo ${watch ? 'with watcher' : ''}');
+    final Stopwatch stopwatch = new Stopwatch();
     await inDirectory(flutterDirectory, () async {
-      await flutter('analyze', options: <String>[
+      final List<String> options = <String>[
         '--flutter-repo',
         '--benchmark',
-      ]);
+      ];
+
+      if (watch)
+        options.add('--watch');
+
+      stopwatch.start();
+      await flutter('analyze', options: options);
+      stopwatch.stop();
     });
-    return addBuildInfo(benchmarkFile,
-        timestamp: timestamp, expected: 25.0, sdk: sdk, commit: commit);
+    return stopwatch.elapsedMilliseconds / 1000;
   }
 }
 
-class FlutterAnalyzeAppBenchmark extends Benchmark {
-  FlutterAnalyzeAppBenchmark(this.sdk, this.commit, this.timestamp)
-      : super('analysis server mega_gallery');
+/// Times how long it takes to analyze the generated "mega_gallery" app.
+class _MegaGalleryBenchmark {
+  _MegaGalleryBenchmark({ this.watch = false });
 
-  final String sdk;
-  final String commit;
-  final DateTime timestamp;
+  final bool watch;
 
-  @override
-  TaskResult get lastResult => new TaskResult.successFromFile(benchmarkFile);
-
-  Directory get megaDir => dir(
-      path.join(flutterDirectory.path, 'dev/benchmarks/mega_gallery'));
-  File get benchmarkFile =>
-      file(path.join(megaDir.path, 'analysis_benchmark.json'));
-
-  @override
-  Future<Null> init() {
-    return inDirectory(flutterDirectory, () async {
-      await dart(<String>['dev/tools/mega_gallery.dart']);
-    });
-  }
-
-  @override
-  Future<num> run() async {
-    rm(benchmarkFile);
-    await inDirectory(megaDir, () async {
-      await flutter('analyze', options: <String>[
-        '--watch',
+  Future<double> call() async {
+    section('Analyze mega gallery ${watch ? 'with watcher' : ''}');
+    final Stopwatch stopwatch = new Stopwatch();
+    await inDirectory(_megaGalleryDirectory, () async {
+      final List<String> options = <String>[
         '--benchmark',
-      ]);
+      ];
+
+      if (watch)
+        options.add('--watch');
+
+      stopwatch.start();
+      await flutter('analyze', options: options);
+      stopwatch.stop();
     });
-    return addBuildInfo(benchmarkFile,
-        timestamp: timestamp, expected: 10.0, sdk: sdk, commit: commit);
+    return stopwatch.elapsedMilliseconds / 1000;
   }
+}
+
+/// Runs a [benchmark] several times and reports the average result.
+Future<double> _run(_Benchmark benchmark) async {
+  double total = 0.0;
+  for (int i = 0; i < _kRunsPerBenchmark; i++) {
+    // Delete cached analysis results.
+    rmTree(dir('${Platform.environment['HOME']}/.dartServer'));
+
+    total += await benchmark();
+  }
+  final double average = total / _kRunsPerBenchmark;
+  return average;
 }

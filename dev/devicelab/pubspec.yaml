@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   args: ^0.13.4
+  image: ^1.1.27
   meta: ^1.0.5
   path: ^1.4.0
   process: 2.0.3
@@ -17,4 +18,4 @@ dependencies:
 
 dev_dependencies:
   # See packages/flutter_test/pubspec.yaml for why we're pinning this version.
-  test: 0.12.20
+  test: 0.12.21

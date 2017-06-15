@@ -51,17 +51,15 @@ abstract class ScrollView extends StatelessWidget {
     bool primary,
     ScrollPhysics physics,
     this.shrinkWrap: false,
-  }) : primary = primary ?? controller == null && scrollDirection == Axis.vertical,
-       physics = physics ?? (primary == true || (primary == null && controller == null && scrollDirection == Axis.vertical) ? const AlwaysScrollableScrollPhysics() : null),
-       super(key: key) {
-    assert(reverse != null);
-    assert(shrinkWrap != null);
-    assert(this.primary != null);
-    assert(controller == null || !this.primary,
+  }) : assert(reverse != null),
+       assert(shrinkWrap != null),
+       assert(!(controller != null && primary == true),
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.'
-    );
-  }
+       ),
+       primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       physics = physics ?? (primary == true || (primary == null && controller == null && scrollDirection == Axis.vertical) ? const AlwaysScrollableScrollPhysics() : null),
+       super(key: key);
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -511,18 +509,17 @@ class ListView extends BoxScrollView {
     EdgeInsets padding,
     this.itemExtent,
     @required this.childrenDelegate,
-  }) : super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-  ) {
-    assert(childrenDelegate != null);
-  }
+  }) : assert(childrenDelegate != null),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+       );
 
   /// If non-null, forces the children to have the given extent in the scroll
   /// direction.
@@ -607,18 +604,18 @@ class GridView extends BoxScrollView {
     EdgeInsets padding,
     @required this.gridDelegate,
     List<Widget> children: const <Widget>[],
-  }) : childrenDelegate = new SliverChildListDelegate(children), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-  ) {
-    assert(gridDelegate != null);
-  }
+  }) : assert(gridDelegate != null),
+       childrenDelegate = new SliverChildListDelegate(children),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+       );
 
   /// Creates a scrollable, 2D array of widgets that are created on demand.
   ///
@@ -645,18 +642,18 @@ class GridView extends BoxScrollView {
     @required this.gridDelegate,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
-  }) : childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-  ) {
-    assert(gridDelegate != null);
-  }
+  }) : assert(gridDelegate != null),
+       childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+       );
 
   /// Creates a scrollable, 2D array of widgets with both a custom
   /// [SliverGridDelegate] and a custom [SliverChildDelegate].
@@ -676,19 +673,18 @@ class GridView extends BoxScrollView {
     EdgeInsets padding,
     @required this.gridDelegate,
     @required this.childrenDelegate,
-  }) : super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller,
-    primary: primary,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-  ) {
-    assert(gridDelegate != null);
-    assert(childrenDelegate != null);
-  }
+  }) : assert(gridDelegate != null),
+       assert(childrenDelegate != null),
+       super(
+         key: key,
+         scrollDirection: scrollDirection,
+         reverse: reverse,
+         controller: controller,
+         primary: primary,
+         physics: physics,
+         shrinkWrap: shrinkWrap,
+         padding: padding,
+       );
 
   /// Creates a scrollable, 2D array of widgets with a fixed number of tiles in
   /// the cross axis.

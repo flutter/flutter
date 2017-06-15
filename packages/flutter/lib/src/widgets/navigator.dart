@@ -256,8 +256,8 @@ class NavigatorObserver {
 abstract class NavigationGestureController {
   /// Configures the NavigationGestureController and tells the given [Navigator] that
   /// a gesture has started.
-  NavigationGestureController(this._navigator) {
-    assert(_navigator != null);
+  NavigationGestureController(this._navigator)
+    : assert(_navigator != null) {
     // Disable Hero transitions until the gesture is complete.
     _navigator.didStartUserGesture();
   }

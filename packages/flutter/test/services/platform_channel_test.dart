@@ -91,7 +91,7 @@ void main() {
     });
     test('can handle method call with no registered plugin', () async {
       channel.setMethodCallHandler(null);
-      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
       await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
         envelope = result;
@@ -102,7 +102,7 @@ void main() {
       channel.setMethodCallHandler((MethodCall call) async {
         throw new MissingPluginException();
       });
-      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
       await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
         envelope = result;
@@ -111,7 +111,7 @@ void main() {
     });
     test('can handle method call with successful result', () async {
       channel.setMethodCallHandler((MethodCall call) async => '${call.arguments}, world');
-      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
       await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
         envelope = result;
@@ -122,7 +122,7 @@ void main() {
       channel.setMethodCallHandler((MethodCall call) async {
         throw new PlatformException(code: 'bad', message: 'sayHello failed', details: null);
       });
-      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
       await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
         envelope = result;
@@ -141,7 +141,7 @@ void main() {
       channel.setMethodCallHandler((MethodCall call) async {
         throw new ArgumentError('bad');
       });
-      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData envelope;
       await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
         envelope = result;

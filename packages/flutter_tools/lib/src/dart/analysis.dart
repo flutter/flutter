@@ -136,7 +136,7 @@ class AnalysisDriver {
 
   bool _isFiltered(AnalysisError error) {
     final ErrorProcessor processor = ErrorProcessor.getProcessor(context.analysisOptions, error);
-    // Filtered errors are processed to a severity of `null`.
+    // Filtered errors are processed to a severity of null.
     return processor != null && processor.severity == null;
   }
 

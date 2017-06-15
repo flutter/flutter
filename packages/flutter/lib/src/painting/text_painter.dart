@@ -35,16 +35,22 @@ class TextPainter {
   ///
   /// The text argument is optional but [text] must be non-null before calling
   /// [layout].
+  ///
+  /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
     TextSpan text,
     TextAlign textAlign,
     double textScaleFactor: 1.0,
     int maxLines,
     String ellipsis,
-  }) : _text = text, _textAlign = textAlign, _textScaleFactor = textScaleFactor, _maxLines = maxLines, _ellipsis = ellipsis {
-    assert(text == null || text.debugAssertIsValid());
-    assert(textScaleFactor != null);
-  }
+  }) : assert(text == null || text.debugAssertIsValid()),
+       assert(textScaleFactor != null),
+       assert(maxLines == null || maxLines > 0),
+       _text = text,
+       _textAlign = textAlign,
+       _textScaleFactor = textScaleFactor,
+       _maxLines = maxLines,
+       _ellipsis = ellipsis;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -106,6 +112,11 @@ class TextPainter {
   /// passed to [layout].
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
+  ///
+  /// The higher layers of the system, such as the [Text] widget, represent
+  /// overflow effects using the [TextOverflow] enum. The
+  /// [TextOverflow.ellipsis] value corresponds to setting this property to
+  /// U+2026 HORIZONTAL ELLIPSIS (…).
   String get ellipsis => _ellipsis;
   String _ellipsis;
   set ellipsis(String value) {
@@ -126,7 +137,9 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   int get maxLines => _maxLines;
   int _maxLines;
+  /// The value may be null. If it is not null, then it must be greater than zero.
   set maxLines(int value) {
+    assert(value == null || value > 0);
     if (_maxLines == value)
       return;
     _maxLines = value;

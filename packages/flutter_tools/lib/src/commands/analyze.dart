@@ -57,7 +57,7 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() {
     if (argResults['watch']) {
-      return new AnalyzeContinuously(argResults, runner.getRepoAnalysisEntryPoints()).analyze();
+      return new AnalyzeContinuously(argResults, runner.getRepoPackages()).analyze();
     } else {
       return new AnalyzeOnce(argResults, runner.getRepoPackages(), workingDirectory: workingDirectory).analyze();
     }

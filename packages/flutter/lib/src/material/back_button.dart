@@ -10,6 +10,8 @@ import 'theme.dart';
 
 /// A "back" icon that's appropriate for the current [TargetPlatform].
 ///
+/// The current platform is determined by querying for the ambient [Theme].
+///
 /// See also:
 ///
 ///  * [BackButton], an [IconButton] with a [BackButtonIcon] that calls
@@ -17,7 +19,10 @@ import 'theme.dart';
 ///  * [IconButton], which is a more general widget for creating buttons
 ///    with icons.
 ///  * [Icon], a material design icon.
+///  * [ThemeData.platform], which specifies the current platform.
 class BackButtonIcon extends StatelessWidget {
+  /// Creates an icon that shows the appropriate "back" image for
+  /// the current platform (as obtained from the [Theme]).
   const BackButtonIcon({ Key key }) : super(key: key);
 
   /// Returns tha appropriate "back" icon for the given `platform`.

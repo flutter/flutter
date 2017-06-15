@@ -13,8 +13,17 @@ import 'routes.dart';
 abstract class PageRoute<T> extends ModalRoute<T> {
   /// Creates a modal route that replaces the entire screen.
   PageRoute({
-    RouteSettings settings: const RouteSettings()
+    RouteSettings settings: const RouteSettings(),
+    this.fullscreenDialog: false,
   }) : super(settings: settings);
+
+  /// Whether this page route is a full-screen dialog.
+  ///
+  /// In Material and Cupertino, being fullscreen has the effects of making
+  /// the app bars have a close button instead of a back button. On
+  /// iOS, dialogs transitions animate differently and are also not closeable
+  /// with the back swipe gesture.
+  final bool fullscreenDialog;
 
   @override
   bool get opaque => true;
@@ -76,13 +85,12 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.barrierDismissible: false,
     this.barrierColor: null,
     this.maintainState: true,
-  }) : super(settings: settings) {
-    assert(pageBuilder != null);
-    assert(transitionsBuilder != null);
-    assert(opaque != null);
-    assert(barrierDismissible != null);
-    assert(maintainState != null);
-  }
+  }) : assert(pageBuilder != null),
+       assert(transitionsBuilder != null),
+       assert(opaque != null),
+       assert(barrierDismissible != null),
+       assert(maintainState != null),
+       super(settings: settings);
 
   /// Used build the route's primary contents.
   ///

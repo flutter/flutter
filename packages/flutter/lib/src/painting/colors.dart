@@ -172,3 +172,39 @@ class HSVColor {
   @override
   String toString() => "HSVColor($alpha, $hue, $saturation, $value)";
 }
+
+/// A color that has a small table of related colors called a "swatch".
+///
+/// The table is indexed by values of type `T`.
+///
+/// See also:
+///
+///  * [MaterialColor] and [MaterialAccentColor], which define material design
+///    primary and accent color swatches.
+///  * [Colors], which defines all of the standard material design colors.
+class ColorSwatch<T> extends Color {
+  /// Creates a color that has a small table of related colors called a "swatch".
+  const ColorSwatch(int primary, this._swatch) : super(primary);
+
+  @protected
+  final Map<T, Color> _swatch;
+
+  /// Returns an element of the swatch table.
+  Color operator [](T index) => _swatch[index];
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final ColorSwatch<T> typedOther = other;
+    return super==(other) && _swatch == typedOther._swatch;
+  }
+
+  @override
+  int get hashCode => hashValues(runtimeType, value, _swatch);
+
+  @override
+  String toString() => '$runtimeType(primary value: ${super.toString()})';
+}

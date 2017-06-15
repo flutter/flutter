@@ -26,14 +26,21 @@ enum Axis {
 ///
 /// Here are some examples of how to create [EdgeInsets] instances:
 ///
+/// Typical eight-pixel margin on all sides:
+///
 /// ```dart
-/// // typical 8-pixel margin on all sides
 /// const EdgeInsets.all(8.0)
+/// ```
 ///
-/// // 8-pixel margin above and below, no horizontal margins
+/// Eight pixel margin above and below, no horizontal margins:
+///
+/// ```dart
 /// const EdgeInsets.symmetric(vertical: 8.0)
+/// ```
 ///
-/// // left-margin indent of 40 pixels
+/// Left margin indent of 40 pixels:
+///
+/// ```dart
 /// const EdgeInsets.only(left: 40.0)
 /// ```
 ///
@@ -49,8 +56,9 @@ class EdgeInsets {
   ///
   /// ## Sample code
   ///
+  /// Typical eight-pixel margin on all sides:
+  ///
   /// ```dart
-  /// // typical 8-pixel margin on all sides
   /// const EdgeInsets.all(8.0)
   /// ```
   const EdgeInsets.all(double value)
@@ -60,8 +68,9 @@ class EdgeInsets {
   ///
   /// ## Sample code
   ///
+  /// Left margin indent of 40 pixels:
+  ///
   /// ```dart
-  /// // left-margin indent of 40 pixels
   /// const EdgeInsets.only(left: 40.0)
   /// ```
   const EdgeInsets.only({
@@ -75,8 +84,9 @@ class EdgeInsets {
   ///
   /// ## Sample code
   ///
+  /// Eight pixel margin above and below, no horizontal margins:
+  ///
   /// ```dart
-  /// // 8-pixel margin above and below, no horizontal margins
   /// const EdgeInsets.symmetric(vertical: 8.0)
   /// ```
   const EdgeInsets.symmetric({ double vertical: 0.0,

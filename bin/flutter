@@ -46,8 +46,8 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART="$DART_SDK_PATH/bin/dart"
 PUB="$DART_SDK_PATH/bin/pub"
 
-# Test if running as superuser
-if [[ "$EUID" == "0" ]]; then
+# Test if running as superuser – but don't warn if running within Docker
+if [[ "$EUID" == "0" ]] && ! [[ -f /.dockerenv ]]; then
   echo "   Woah! You appear to be trying to run flutter as root."
   echo "   We strongly recommend running the flutter tool without superuser privileges."
   echo "  /"

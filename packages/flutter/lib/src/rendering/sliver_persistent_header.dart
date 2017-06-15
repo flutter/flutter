@@ -35,6 +35,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// child changes its intrinsic dimensions.
   double get minExtent;
 
+  /// The dimension of the child in the main axis.
   @protected
   double get childExtent {
     if (child == null)
@@ -270,11 +271,9 @@ class FloatingHeaderSnapConfiguration {
     @required this.vsync,
     this.curve: Curves.ease,
     this.duration: const Duration(milliseconds: 300),
-  }) {
-    assert(vsync != null);
-    assert(curve != null);
-    assert(duration != null);
-  }
+  }) : assert(vsync != null),
+       assert(curve != null),
+       assert(duration != null);
 
   /// The [TickerProvider] for the [AnimationController] that causes a
   /// floating header to snap in or out of view.
