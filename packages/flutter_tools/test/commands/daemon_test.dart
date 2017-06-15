@@ -220,7 +220,7 @@ void main() {
       expect(response['params'], containsPair('message', contains('Unable to discover Android devices')));
     }, overrides: <Type, Generator>{
       AndroidWorkflow: () => new MockAndroidWorkflow(canListDevices: false),
-      IOSWorkflow: () => new MockIOSWorkflow(canListDevices: true),
+      IOSWorkflow: () => new MockIOSWorkflow(),
     });
 
     testUsingContext('device.getDevices should respond with list', () async {
@@ -263,8 +263,8 @@ void main() {
         commands.close();
       });
     }, overrides: <Type, Generator>{
-      AndroidWorkflow: () => new MockAndroidWorkflow(canListDevices: true),
-      IOSWorkflow: () => new MockIOSWorkflow(canListDevices: true),
+      AndroidWorkflow: () => new MockAndroidWorkflow(),
+      IOSWorkflow: () => new MockIOSWorkflow(),
     });
   });
 }
@@ -272,14 +272,14 @@ void main() {
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
 class MockAndroidWorkflow extends AndroidWorkflow {
-  MockAndroidWorkflow({this.canListDevices});
+  MockAndroidWorkflow({this.canListDevices: true});
 
   @override
   final bool canListDevices;
 }
 
 class MockIOSWorkflow extends IOSWorkflow {
-  MockIOSWorkflow({this.canListDevices});
+  MockIOSWorkflow({this.canListDevices:true});
 
   @override
   final bool canListDevices;
