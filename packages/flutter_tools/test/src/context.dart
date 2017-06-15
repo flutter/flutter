@@ -58,8 +58,6 @@ void _defaultInitializeContext(AppContext testContext) {
       when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
       return mock;
     })
-    ..putIfAbsent(AndroidWorkflow, () => new AndroidWorkflow())
-    ..putIfAbsent(IOSWorkflow, () => new IOSWorkflow())
     ..putIfAbsent(SimControl, () => new MockSimControl())
     ..putIfAbsent(Usage, () => new MockUsage())
     ..putIfAbsent(FlutterVersion, () => new MockFlutterVersion())

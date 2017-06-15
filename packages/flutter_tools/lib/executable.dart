@@ -136,8 +136,6 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
     context.putIfAbsent(Artifacts, () => new CachedArtifacts());
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
-    context.putIfAbsent(AndroidWorkflow, () => new AndroidWorkflow());
-    context.putIfAbsent(IOSWorkflow, () => new IOSWorkflow());
 
     // Initialize the system locale.
     await intl.findSystemLocale();
