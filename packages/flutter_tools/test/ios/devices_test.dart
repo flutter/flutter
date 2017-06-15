@@ -22,7 +22,7 @@ void main() {
   final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
   osx.operatingSystem = 'macos';
 
-  group('test screenshot', () {
+  group('screenshot', () {
     MockProcessManager mockProcessManager;
     MockFile mockOutputFile;
     IOSDevice iosDeviceUnderTest;
@@ -32,75 +32,68 @@ void main() {
       mockOutputFile = new MockFile();
     });
 
-    testUsingContext(
-      'screenshot without ideviceinstaller error',
-      () async {
-        when(mockOutputFile.path).thenReturn(fs.path.join('some', 'test', 'path', 'image.png'));
-        // Let everything else return exit code 0 so process.dart doesn't crash.
-        // The matcher order is important.
-        when(
-          mockProcessManager.run(any, environment: null, workingDirectory:  null)
-        ).thenReturn(
-          new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
-        );
-        // Let `which idevicescreenshot` fail with exit code 1.
-        when(
-          mockProcessManager.runSync(
-            <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
-        ).thenReturn(
-          new ProcessResult(1, 1, '', '')
-        );
+    testUsingContext('error if idevicescreenshot is not installed', () async {
+      when(mockOutputFile.path).thenReturn(fs.path.join('some', 'test', 'path', 'image.png'));
+      // Let everything else return exit code 0 so process.dart doesn't crash.
+      // The matcher order is important.
+      when(
+        mockProcessManager.run(any, environment: null, workingDirectory:  null)
+      ).thenReturn(
+        new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
+      );
+      // Let `which idevicescreenshot` fail with exit code 1.
+      when(
+        mockProcessManager.runSync(
+          <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
+      ).thenReturn(
+        new ProcessResult(1, 1, '', '')
+      );
 
-        iosDeviceUnderTest = new IOSDevice('1234');
-        await iosDeviceUnderTest.takeScreenshot(mockOutputFile);
-        verify(mockProcessManager.runSync(
-          <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
-        verifyNever(mockProcessManager.run(
-          <String>['idevicescreenshot', fs.path.join('some', 'test', 'path', 'image.png')],
-          environment: null,
-          workingDirectory: null
-        ));
-        expect(testLogger.errorText, contains('brew install ideviceinstaller'));
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Platform: () => osx,
-      }
-    );
+      iosDeviceUnderTest = new IOSDevice('1234');
+      await iosDeviceUnderTest.takeScreenshot(mockOutputFile);
+      verify(mockProcessManager.runSync(
+        <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
+      verifyNever(mockProcessManager.run(
+        <String>['idevicescreenshot', fs.path.join('some', 'test', 'path', 'image.png')],
+        environment: null,
+        workingDirectory: null
+      ));
+      expect(testLogger.errorText, contains('brew install ideviceinstaller'));
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => osx,
+    });
 
-    testUsingContext(
-      'screenshot with ideviceinstaller gets command',
-      () async {
-        when(mockOutputFile.path).thenReturn(fs.path.join('some', 'test', 'path', 'image.png'));
-        // Let everything else return exit code 0.
-        // The matcher order is important.
-        when(
-          mockProcessManager.run(any, environment: null, workingDirectory:  null)
-        ).thenReturn(
-          new Future<ProcessResult>.value(new ProcessResult(4, 0, '', ''))
-        );
-        // Let there be idevicescreenshot in the PATH.
-        when(
-          mockProcessManager.runSync(
-            <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
-        ).thenReturn(
-          new ProcessResult(3, 0, fs.path.join('some', 'path', 'to', 'iscreenshot'), '')
-        );
+    testUsingContext('idevicescreenshot captures and returns screenshot', () async {
+      when(mockOutputFile.path).thenReturn(fs.path.join('some', 'test', 'path', 'image.png'));
+      // Let everything else return exit code 0.
+      // The matcher order is important.
+      when(
+        mockProcessManager.run(any, environment: null, workingDirectory:  null)
+      ).thenReturn(
+        new Future<ProcessResult>.value(new ProcessResult(4, 0, '', ''))
+      );
+      // Let there be idevicescreenshot in the PATH.
+      when(
+        mockProcessManager.runSync(
+          <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
+      ).thenReturn(
+        new ProcessResult(3, 0, fs.path.join('some', 'path', 'to', 'iscreenshot'), '')
+      );
 
-        iosDeviceUnderTest = new IOSDevice('1234');
-        await iosDeviceUnderTest.takeScreenshot(mockOutputFile);
-        verify(mockProcessManager.runSync(
-          <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
-        verify(mockProcessManager.run(
-          <String>[
-            fs.path.join('some', 'path', 'to', 'iscreenshot'),
-            fs.path.join('some', 'test', 'path', 'image.png')
-          ],
-          environment: null,
-          workingDirectory: null
-        ));
-      },
-      overrides: <Type, Generator>{ProcessManager: () => mockProcessManager}
-    );
+      iosDeviceUnderTest = new IOSDevice('1234');
+      await iosDeviceUnderTest.takeScreenshot(mockOutputFile);
+      verify(mockProcessManager.runSync(
+        <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
+      verify(mockProcessManager.run(
+        <String>[
+          fs.path.join('some', 'path', 'to', 'iscreenshot'),
+          fs.path.join('some', 'test', 'path', 'image.png')
+        ],
+        environment: null,
+        workingDirectory: null
+      ));
+    }, overrides: <Type, Generator>{ProcessManager: () => mockProcessManager});
   });
 }
