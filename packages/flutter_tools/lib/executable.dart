@@ -9,7 +9,6 @@ import 'package:intl/intl_standalone.dart' as intl;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import 'src/android/android_workflow.dart';
 import 'src/artifacts.dart';
 import 'src/base/common.dart';
 import 'src/base/config.dart';
@@ -49,7 +48,6 @@ import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
-import 'src/ios/ios_workflow.dart';
 import 'src/ios/simulators.dart';
 import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';

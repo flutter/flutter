@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
@@ -18,7 +17,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/run_hot.dart';
