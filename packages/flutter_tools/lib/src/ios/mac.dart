@@ -70,14 +70,6 @@ class IMobileDevice {
     return await exitsHappyAsync(<String>['idevicename']);
   }
 
-  List<String> getAttachedDeviceIDs() {
-    return runSync(<String>['idevice_id', '-l'])
-        .trim()
-        .split('\n')
-        .where((String line) => line.isNotEmpty)
-        .toList();
-  }
-
   /// Returns the value associated with the specified `ideviceinfo` key for a device.
   ///
   /// If either the specified key or device does not exist, returns the empty string.
@@ -165,6 +157,8 @@ class Xcode {
 
     return _xcodeVersionCheckValid(_xcodeMajorVersion, _xcodeMinorVersion);
   }
+
+  String getAvailableDevices() => runSync(<String>['/usr/bin/instruments', '-s', 'devices']);
 }
 
 bool _xcodeVersionCheckValid(int major, int minor) {
