@@ -139,6 +139,7 @@ Future<Null> _runCoverage() async {
   if (Platform.environment['TRAVIS'] == null ||
       Platform.environment['TRAVIS_PULL_REQUEST'] != 'false') {
     print('${bold}DONE: test.dart does not run coverage for Travis pull requests');
+    return;
   }
 
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
