@@ -84,6 +84,9 @@ class IMobileDevice {
   String getInfoForDevice(String deviceID, String key) {
     return runSync(<String>['ideviceinfo', '-k', key, '-u', deviceID]).trim();
   }
+
+  /// Starts `idevicesyslog` and returns the running process.
+  Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
 }
 
 class Xcode {
