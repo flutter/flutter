@@ -67,7 +67,11 @@ class IMobileDevice {
   }
 
   List<String> getAttachedDeviceIDs() {
-    return runSync(<String>['idevice_id', '-l']).trim().split('\n').where((String line) => line.isNotEmpty).toList();
+    return runSync(<String>['idevice_id', '-l'])
+        .trim()
+        .split('\n')
+        .where((String line) => line.isNotEmpty)
+        .toList();
   }
 
   /// Returns the value associated with the specified `ideviceinfo` key for a device.
