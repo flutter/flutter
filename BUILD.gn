@@ -38,8 +38,6 @@ static_library("txt") {
     "src/paragraph.h",
     "src/paragraph_builder.cc",
     "src/paragraph_builder.h",
-    "src/paragraph_constraints.cc",
-    "src/paragraph_constraints.h",
     "src/paragraph_style.cc",
     "src/paragraph_style.h",
     "src/styled_runs.cc",

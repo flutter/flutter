@@ -43,8 +43,7 @@ TEST_F(RenderTest, SimpleParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
-                    txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
@@ -77,8 +76,7 @@ TEST_F(RenderTest, SimpleRedParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
-                    txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
@@ -98,7 +96,7 @@ TEST_F(RenderTest, RainbowParagraph) {
   auto icu_text1 = icu::UnicodeString::fromUTF8(text1);
   std::u16string u16_text1(icu_text1.getBuffer(),
                            icu_text1.getBuffer() + icu_text1.length());
-  const char* text2 = "BigGreenDefault ";
+  const char* text2 = "Big Green Default ";
   auto icu_text2 = icu::UnicodeString::fromUTF8(text2);
   std::u16string u16_text2(icu_text2.getBuffer(),
                            icu_text2.getBuffer() + icu_text2.length());
@@ -129,8 +127,8 @@ TEST_F(RenderTest, RainbowParagraph) {
 
   txt::TextStyle text_style2;
   text_style2.font_size = 50;
-  // Letter spacing not yet implemented
-  text_style2.letter_spacing = 100;
+  text_style2.letter_spacing = 10;
+  text_style2.word_spacing = 30;
   text_style2.font_weight = txt::FontWeight::w600;
   text_style2.fake_bold = true;
   text_style2.color = SK_ColorGREEN;
@@ -159,8 +157,7 @@ TEST_F(RenderTest, RainbowParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
-                    txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
 
   paragraph->Paint(GetCanvas(), 10.0, 50.0);
 
@@ -199,8 +196,7 @@ TEST_F(RenderTest, DefaultStyleParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
-                    txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
@@ -236,8 +232,7 @@ TEST_F(RenderTest, BoldParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
-                    txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
 
   paragraph->Paint(GetCanvas(), 10.0, 60.0);
 
@@ -302,8 +297,7 @@ TEST_F(RenderTest, LinebreakParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
-                    txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
 
   paragraph->Paint(GetCanvas(), 5.0, 30.0);
 
@@ -338,8 +332,7 @@ TEST_F(RenderTest, ItalicsParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(txt::ParagraphConstraints{GetTestCanvasWidth()},
-                    txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
 
   paragraph->Paint(GetCanvas(), 10.0, 35.0);
 
