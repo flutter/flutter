@@ -142,6 +142,9 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
       ..close();
 
   final String opensslOutput = await UTF8.decodeStream(opensslProcess.stdout);
+  // Fire and forget dump of the stderr stream so we don't hold onto resources.
+  // Don't care about the result.
+  // ignore: unawaited_futures
   opensslProcess.stderr.drain<String>();
 
   if (await opensslProcess.exitCode != 0) {

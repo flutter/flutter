@@ -99,8 +99,11 @@ class FlutterDevice {
     if (flutterViews == null || flutterViews.isEmpty)
       return;
     for (FlutterView view in flutterViews) {
-      if (view != null && view.uiIsolate != null)
+      if (view != null && view.uiIsolate != null) {
+        // Manage waits specifically below.
+        // ignore: unawaited_futures
         view.uiIsolate.flutterExit();
+      }
     }
     await new Future<Null>.delayed(const Duration(milliseconds: 100));
   }
@@ -563,8 +566,9 @@ abstract class ResidentRunner {
   }
 
   Future<Null> stopEchoingDeviceLog() async {
-    for (FlutterDevice device in flutterDevices)
-      device.stopEchoingDeviceLog();
+    await Future.wait(
+      flutterDevices.map((FlutterDevice device) => device.stopEchoingDeviceLog())
+    );
   }
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
@@ -591,6 +595,8 @@ abstract class ResidentRunner {
     // Listen for service protocol connection to close.
     for (FlutterDevice device in flutterDevices) {
       for (VMService service in device.vmServices) {
+        // Callback hookups' Futures are uninteresting.
+        // ignore: unawaited_futures
         service.done.then<Null>(
           _serviceProtocolDone,
           onError: _serviceProtocolError

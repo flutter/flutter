@@ -334,6 +334,8 @@ class RunCommand extends RunCommandBase {
     //
     // Do not add more operations to the future.
     final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync();
+    // Callback hookups' Futures are uninteresting.
+    // ignore: unawaited_futures
     appStartedTimeRecorder.future.then(
       (_) { appStartedTime = clock.now(); }
     );

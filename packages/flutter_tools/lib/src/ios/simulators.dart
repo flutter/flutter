@@ -59,6 +59,122 @@ class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
   static SimControl get instance => context[SimControl];
 
+<<<<<<< HEAD
+=======
+  Future<bool> boot({ String deviceName }) async {
+    if (_isAnyConnected())
+      return true;
+
+    if (deviceName == null) {
+      final SimDevice testDevice = _createTestDevice();
+      if (testDevice == null) {
+        return false;
+      }
+      deviceName = testDevice.name;
+    }
+
+    // `xcrun instruments` requires a template (-t). @yjbanov has no idea what
+    // "template" is but the built-in 'Blank' seems to work. -l causes xcrun to
+    // quit after a time limit without killing the simulator. We quit after
+    // 1 second.
+    final List<String> args = <String>[_xcrunPath, 'instruments', '-w', deviceName, '-t', 'Blank', '-l', '1'];
+    printTrace(args.join(' '));
+    // Synchronization is managed separately below.
+    // ignore: unawaited_futures
+    runDetached(args);
+    printStatus('Waiting for iOS Simulator to boot...');
+
+    bool connected = false;
+    int attempted = 0;
+    while (!connected && attempted < 20) {
+      connected = _isAnyConnected();
+      if (!connected) {
+        printStatus('Still waiting for iOS Simulator to boot...');
+        await new Future<Null>.delayed(const Duration(seconds: 1));
+      }
+      attempted++;
+    }
+
+    if (connected) {
+      printStatus('Connected to iOS Simulator.');
+      return true;
+    } else {
+      printStatus('Timed out waiting for iOS Simulator to boot.');
+      return false;
+    }
+  }
+
+  SimDevice _createTestDevice() {
+    final SimDeviceType deviceType = _findSuitableDeviceType();
+    if (deviceType == null)
+      return null;
+
+    final String runtime = _findSuitableRuntime();
+    if (runtime == null)
+      return null;
+
+    // Delete any old test devices
+    getDevices()
+      .where((SimDevice d) => d.name.endsWith(_kFlutterTestDeviceSuffix))
+      .forEach(_deleteDevice);
+
+    // Create new device
+    final String deviceName = '${deviceType.name} $_kFlutterTestDeviceSuffix';
+    final List<String> args = <String>[_xcrunPath, 'simctl', 'create', deviceName, deviceType.identifier, runtime];
+    printTrace(args.join(' '));
+    runCheckedSync(args);
+
+    return getDevices().firstWhere((SimDevice d) => d.name == deviceName);
+  }
+
+  SimDeviceType _findSuitableDeviceType() {
+    final List<Map<String, dynamic>> allTypes = _list(SimControlListSection.devicetypes);
+    final List<Map<String, dynamic>> usableTypes = allTypes
+      .where((Map<String, dynamic> info) => info['name'].startsWith('iPhone'))
+      .toList()
+      ..sort((Map<String, dynamic> r1, Map<String, dynamic> r2) => -compareIphoneVersions(r1['identifier'], r2['identifier']));
+
+    if (usableTypes.isEmpty) {
+      printError(
+        'No suitable device type found.\n'
+        'You may launch an iOS Simulator manually and Flutter will attempt to use it.'
+      );
+    }
+
+    return new SimDeviceType(
+      usableTypes.first['name'],
+      usableTypes.first['identifier']
+    );
+  }
+
+  String _findSuitableRuntime() {
+    final List<Map<String, dynamic>> allRuntimes = _list(SimControlListSection.runtimes);
+    final List<Map<String, dynamic>> usableRuntimes = allRuntimes
+      .where((Map<String, dynamic> info) => info['name'].startsWith('iOS'))
+      .toList()
+      ..sort((Map<String, dynamic> r1, Map<String, dynamic> r2) => -compareIosVersions(r1['version'], r2['version']));
+
+    if (usableRuntimes.isEmpty) {
+      printError(
+        'No suitable iOS runtime found.\n'
+        'You may launch an iOS Simulator manually and Flutter will attempt to use it.'
+      );
+    }
+
+    return usableRuntimes.first['identifier'];
+  }
+
+  void _deleteDevice(SimDevice device) {
+    try {
+      final List<String> args = <String>[_xcrunPath, 'simctl', 'delete', device.name];
+      printTrace(args.join(' '));
+      runCheckedSync(args);
+    } catch(e) {
+      printError(e);
+    }
+  }
+
+>>>>>>> round 3
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
   ///
@@ -237,7 +353,7 @@ class IOSSimulator extends Device {
   Future<bool> installApp(ApplicationPackage app) async {
     try {
       final IOSApp iosApp = app;
-      SimControl.instance.install(id, iosApp.simulatorBundlePath);
+      await SimControl.instance.install(id, iosApp.simulatorBundlePath);
       return true;
     } catch (e) {
       return false;
@@ -382,7 +498,7 @@ class IOSSimulator extends Device {
       printError('Error waiting for a debug connection: $error');
       return new LaunchResult.failed();
     } finally {
-      observatoryDiscovery.cancel();
+      await observatoryDiscovery.cancel();
     }
   }
 
@@ -524,6 +640,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _systemProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
     _systemProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
 
+    // Callback hookups' Futures are uninteresting.
+    // ignore: unawaited_futures
     _deviceProcess.exitCode.whenComplete(() {
       if (_linesController.hasListener)
         _linesController.close();

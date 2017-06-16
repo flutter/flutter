@@ -42,7 +42,7 @@ const List<String> _kRequiredOptions = const <String>[
 Future<Null> main(List<String> args) async {
   final AppContext executableContext = new AppContext();
   executableContext.setVariable(Logger, new StdoutLogger());
-  executableContext.runInZone(() {
+  await executableContext.runInZone(() {
     // Initialize the context with some defaults.
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());

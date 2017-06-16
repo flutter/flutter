@@ -42,6 +42,8 @@ class CoverageCollector extends TestWatcher {
 
     final int pid = process.pid;
     int exitCode;
+    // Callback hookups' Futures are uninteresting.
+    // ignore: unawaited_futures
     process.exitCode.then<Null>((int code) {
       exitCode = code;
     });
