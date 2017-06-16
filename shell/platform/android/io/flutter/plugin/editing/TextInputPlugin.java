@@ -131,11 +131,20 @@ public class TextInputPlugin implements MethodCallHandler {
         mImm.restartInput(view);
     }
 
+    private void applyStateToSelection(JSONObject state) throws JSONException {
+        int selStart = state.getInt("selectionBase");
+        int selEnd = state.getInt("selectionExtent");
+        if (selStart != -1 && selEnd != -1) {
+            Selection.setSelection(mEditable, selStart, selEnd);
+        } else {
+            Selection.removeSelection(mEditable);
+        }
+    }
+
     private void setTextInputEditingState(FlutterView view, JSONObject state)
         throws JSONException {
         if (state.getString("text").equals(mEditable.toString())) {
-            Selection.setSelection(mEditable, state.getInt("selectionBase"),
-                state.getInt("selectionExtent"));
+            applyStateToSelection(state);
             mImm.updateSelection(
                 mView,
                 Math.max(Selection.getSelectionStart(mEditable), 0),
@@ -144,8 +153,7 @@ public class TextInputPlugin implements MethodCallHandler {
                 BaseInputConnection.getComposingSpanEnd(mEditable));
         } else {
             mEditable.replace(0, mEditable.length(), state.getString("text"));
-            Selection.setSelection(mEditable, state.getInt("selectionBase"),
-                state.getInt("selectionExtent"));
+            applyStateToSelection(state);
             mImm.restartInput(view);
         }
     }
