@@ -33,6 +33,8 @@ const int kXcodeRequiredVersionMinor = 0;
 // Homebrew.
 const PythonModule kPythonSix = const PythonModule('six');
 
+IMobileDevice get iMobileDevice => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
+
 class PythonModule {
   const PythonModule(this.name);
 
@@ -43,6 +45,43 @@ class PythonModule {
   String get errorMessage =>
     'Missing Xcode dependency: Python module "$name".\n'
     'Install via \'pip install $name\' or \'sudo easy_install $name\'.';
+}
+
+class IMobileDevice {
+  const IMobileDevice();
+
+  bool get isInstalled => exitsHappy(<String>['idevice_id', '-h']);
+
+  /// Returns true if libimobiledevice is installed and working as expected.
+  ///
+  /// Older releases of libimobiledevice fail to work with iOS 10.3 and above.
+  Future<bool> get isWorking async {
+    if (!isInstalled)
+      return false;
+
+    // If no device is attached, we're unable to detect any problems. Assume all is well.
+    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+    if (result.exitCode != 0 || result.stdout.isEmpty)
+      return true;
+
+    // Check that we can look up the names of any attached devices.
+    return await exitsHappyAsync(<String>['idevicename']);
+  }
+
+  List<String> getAttachedDeviceIDs() {
+    return runSync(<String>['idevice_id', '-l'])
+        .trim()
+        .split('\n')
+        .where((String line) => line.isNotEmpty)
+        .toList();
+  }
+
+  /// Returns the value associated with the specified `ideviceinfo` key for a device.
+  ///
+  /// If either the specified key or device does not exist, returns the empty string.
+  String getInfoForDevice(String deviceID, String key) {
+    return runSync(<String>['ideviceinfo', '-k', key, '-u', deviceID]).trim();
+  }
 }
 
 class Xcode {
