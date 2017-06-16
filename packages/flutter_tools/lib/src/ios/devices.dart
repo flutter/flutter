@@ -43,8 +43,6 @@ class IOSDevice extends Device {
   IOSDevice(String id, { this.name }) : super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
-    _loggerPath = _checkForCommand('idevicesyslog');
-    _screenshotPath = _checkForCommand('idevicescreenshot');
     _pusherPath = _checkForCommand(
       'ios-deploy',
       'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
@@ -55,8 +53,6 @@ class IOSDevice extends Device {
 
   String _installerPath;
   String _iproxyPath;
-  String _loggerPath;
-  String _screenshotPath;
   String _pusherPath;
 
   @override
@@ -335,12 +331,10 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsScreenshot => _screenshotPath != null && _screenshotPath.isNotEmpty;
+  bool get supportsScreenshot => iMobileDevice.isInstalled;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) {
-    return runCheckedAsync(<String>[_screenshotPath, outputFile.path]);
-  }
+  Future<Null> takeScreenshot(File outputFile) => iMobileDevice.takeScreenshot(outputFile);
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
@@ -372,7 +366,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    runCommand(<String>[device._loggerPath]).then<Null>((Process process) {
+    iMobileDevice.startLogger().then<Null>((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);

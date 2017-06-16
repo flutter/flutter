@@ -84,6 +84,14 @@ class IMobileDevice {
   String getInfoForDevice(String deviceID, String key) {
     return runSync(<String>['ideviceinfo', '-k', key, '-u', deviceID]).trim();
   }
+
+  /// Starts `idevicesyslog` and returns the running process.
+  Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
+
+  /// Captures a screenshot to the specified outputfile.
+  Future<Null> takeScreenshot(File outputFile) {
+    return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
+  }
 }
 
 class Xcode {
