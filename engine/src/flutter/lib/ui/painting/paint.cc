@@ -23,15 +23,28 @@ constexpr int kBlendModeIndex = 2;
 constexpr int kStyleIndex = 3;
 constexpr int kStrokeWidthIndex = 4;
 constexpr int kStrokeCapIndex = 5;
-constexpr int kFilterQualityIndex = 6;
-constexpr int kColorFilterIndex = 7;
-constexpr int kColorFilterColorIndex = 8;
-constexpr int kColorFilterBlendModeIndex = 9;
-constexpr size_t kDataByteCount = 40;
+constexpr int kStrokeJoinIndex = 6;
+constexpr int kStrokeMiterLimitIndex = 7;
+constexpr int kFilterQualityIndex = 8;
+constexpr int kColorFilterIndex = 9;
+constexpr int kColorFilterColorIndex = 10;
+constexpr int kColorFilterBlendModeIndex = 11;
+constexpr size_t kDataByteCount = 48;
 
 constexpr int kMaskFilterIndex = 0;
 constexpr int kShaderIndex = 1;
 constexpr int kObjectCount = 2;  // Must be one larger than the largest index
+
+// Must be kept in sync with the default in painting.dart.
+constexpr uint32_t kColorDefault = 0xFF000000;
+
+// Must be kept in sync with the default in painting.dart.
+constexpr uint32_t kBlendModeDefault =
+    static_cast<uint32_t>(SkBlendMode::kSrcOver);
+
+// Must be kept in sync with the default in painting.dart, and also with the
+// default SkPaintDefaults_MiterLimit in Skia (which is not in a public header).
+constexpr double kStrokeMiterLimitDefault = 4.0;
 
 Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
                                           int index,
@@ -78,14 +91,14 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
 
   uint32_t encoded_color = uint_data[kColorIndex];
   if (encoded_color) {
-    SkColor color = encoded_color ^ 0xFF000000;
+    SkColor color = encoded_color ^ kColorDefault;
     paint.setColor(color);
   }
 
   uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
   if (encoded_blend_mode) {
     uint32_t blend_mode =
-        encoded_blend_mode ^ static_cast<uint32_t>(SkBlendMode::kSrcOver);
+        encoded_blend_mode ^ kBlendModeDefault;
     paint.setBlendMode(static_cast<SkBlendMode>(blend_mode));
   }
 
@@ -100,6 +113,14 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
   uint32_t stroke_cap = uint_data[kStrokeCapIndex];
   if (stroke_cap)
     paint.setStrokeCap(static_cast<SkPaint::Cap>(stroke_cap));
+
+  uint32_t stroke_join = uint_data[kStrokeJoinIndex];
+  if (stroke_join)
+    paint.setStrokeJoin(static_cast<SkPaint::Join>(stroke_join));
+
+  float stroke_miter_limit = float_data[kStrokeMiterLimitIndex];
+  if (stroke_miter_limit != 0.0)
+    paint.setStrokeMiter(stroke_miter_limit + kStrokeMiterLimitDefault);
 
   uint32_t filter_quality = uint_data[kFilterQualityIndex];
   if (filter_quality)
