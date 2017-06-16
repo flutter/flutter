@@ -2,13 +2,69 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
 
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockFile extends Mock implements File {}
+
 void main() {
+  final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
+  osx.operatingSystem = 'macos';
+
+  group('IMobileDevice', () {
+    group('screenshot', () {
+      final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
+      MockProcessManager mockProcessManager;
+      MockFile mockOutputFile;
+
+      setUp(() {
+        mockProcessManager = new MockProcessManager();
+        mockOutputFile = new MockFile();
+      });
+
+      testUsingContext('error if idevicescreenshot is not installed', () async {
+        when(mockOutputFile.path).thenReturn(outputPath);
+
+        // Let `idevicescreenshot` fail with exit code 1.
+        when(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
+            environment: null,
+            workingDirectory: null
+        )).thenReturn(new ProcessResult(4, 1, '', ''));
+
+        expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => mockProcessManager,
+        Platform: () => osx,
+      });
+
+      testUsingContext('idevicescreenshot captures and returns screenshot', () async {
+        when(mockOutputFile.path).thenReturn(outputPath);
+        when(mockProcessManager.run(any, environment: null, workingDirectory:  null))
+            .thenReturn(new Future<ProcessResult>.value(new ProcessResult(4, 0, '', '')));
+
+        await iMobileDevice.takeScreenshot(mockOutputFile);
+        verify(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
+            environment: null,
+            workingDirectory: null
+        ));
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => mockProcessManager,
+      });
+    });
+  });
+
   group('Diagnose Xcode build failure', () {
     BuildableIOSApp app;
 
