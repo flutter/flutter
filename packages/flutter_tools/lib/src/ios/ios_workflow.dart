@@ -22,7 +22,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get appliesToHostPlatform => platform.isMacOS;
 
-  // We need xcode (+simctl) to list simulator devices, and idevice_id to list real devices.
+  // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
   bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
 
