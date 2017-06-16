@@ -53,6 +53,10 @@ class Paragraph {
 
   double GetIdeographicBaseline() const;
 
+  double GetMaxIntrinsicWidth() const;
+
+  double GetMinIntrinsicWidth() const;
+
   bool DidExceedMaxLines() const;
 
  private:
@@ -73,6 +77,8 @@ class Paragraph {
   SkScalar y_ = 0.0f;  // Height of the paragraph after Layout().
   double width_ = 0.0f;
   int lines_ = 0;
+  double max_intrinsic_width_ = 0.0f;
+  double min_intrinsic_width_ = FLT_MAX;
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 

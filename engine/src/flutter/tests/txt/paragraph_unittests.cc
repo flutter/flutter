@@ -110,7 +110,9 @@ TEST_F(RenderTest, RainbowParagraph) {
   auto icu_text4 = icu::UnicodeString::fromUTF8(text4);
   std::u16string u16_text4(icu_text4.getBuffer(),
                            icu_text4.getBuffer() + icu_text4.length());
-  const char* text5 = "ContinueLastStyle";
+  const char* text5 =
+      "Continue Last Style With lots of words to check if it overlaps properly "
+      "or not";
   auto icu_text5 = icu::UnicodeString::fromUTF8(text5);
   std::u16string u16_text5(icu_text5.getBuffer(),
                            icu_text5.getBuffer() + icu_text5.length());
@@ -284,6 +286,7 @@ TEST_F(RenderTest, LinebreakParagraph) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 1000;
   txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style;

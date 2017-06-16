@@ -147,6 +147,10 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
 
   SkTextBlobBuilder builder;
 
+  // Reset member variables so Layout still works when called more than once
+  max_intrinsic_width_ = 0.0f;
+  lines_ = 0;
+
   minikin::Layout layout;
   SkScalar x = x_offset;
   y_ = y_offset;
@@ -187,6 +191,7 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
           buffer.pos[pos_index + 1] = layout.getY(glyph_index);
         }
         blob_start += blob_length;
+        max_intrinsic_width_ += layout.getX(blob_start - 1);
       }
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
@@ -220,6 +225,14 @@ double Paragraph::GetAlphabeticBaseline() const {
 
 double Paragraph::GetIdeographicBaseline() const {
   return FLT_MAX;
+}
+
+double Paragraph::GetMaxIntrinsicWidth() const {
+  return max_intrinsic_width_;
+}
+
+double Paragraph::GetMinIntrinsicWidth() const {
+  return min_intrinsic_width_;
 }
 
 double Paragraph::GetHeight() const {
