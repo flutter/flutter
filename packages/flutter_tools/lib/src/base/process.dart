@@ -164,7 +164,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   await Future.wait(<Future<Null>>[
     stdoutSubscription.cancel(),
     stderrSubscription.cancel(),
-  ]);
+  ].where((Future<Null> future) => future != null));
 
   return await process.exitCode;
 }

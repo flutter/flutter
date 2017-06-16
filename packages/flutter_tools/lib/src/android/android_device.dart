@@ -453,7 +453,7 @@ class AndroidDevice extends Device {
       await Future.wait(<Future<Null>>[
         observatoryDiscovery.cancel(),
         diagnosticDiscovery.cancel(),
-      ]);
+      ].where((Future<Null> future) => future != null));
     }
   }
 
@@ -527,7 +527,7 @@ class AndroidDevice extends Device {
     await Future.wait(<Future<Null>>[
       new Future<Null>.delayed(const Duration(seconds: 1)),
       logs.cancel(),
-    ]);
+    ].where((Future<Null> future) => future != null));
     return result;
   }
 }
