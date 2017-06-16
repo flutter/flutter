@@ -160,8 +160,11 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
     stdoutSubscription.asFuture<Null>(),
     stderrSubscription.asFuture<Null>(),
   ]);
-  stdoutSubscription.cancel();
-  stderrSubscription.cancel();
+
+  await Future.wait(<Future<Null>>[
+    stdoutSubscription.cancel(),
+    stderrSubscription.cancel(),
+  ]);
 
   return await process.exitCode;
 }

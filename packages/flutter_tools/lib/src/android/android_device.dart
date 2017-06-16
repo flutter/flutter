@@ -450,8 +450,10 @@ class AndroidDevice extends Device {
       printError('Error waiting for a debug connection: $error');
       return new LaunchResult.failed();
     } finally {
-      observatoryDiscovery.cancel();
-      diagnosticDiscovery.cancel();
+      await Future.wait(<Future<Null>>[
+        observatoryDiscovery.cancel(),
+        diagnosticDiscovery.cancel(),
+      ]);
     }
   }
 
@@ -522,8 +524,10 @@ class AndroidDevice extends Device {
       'shell', 'am', 'broadcast', '-a', 'io.flutter.view.DISCOVER'
     ]));
 
-    await new Future<Null>.delayed(const Duration(seconds: 1));
-    logs.cancel();
+    await Future.wait(<Future<Null>>[
+      new Future<Null>.delayed(const Duration(seconds: 1)),
+      logs.cancel(),
+    ]);
     return result;
   }
 }

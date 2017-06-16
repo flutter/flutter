@@ -394,6 +394,8 @@ class AppDomain extends Domain {
 
     if (options.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
+      // Callback hookups' Futures are uninteresting.
+      // ignore: unawaited_futures
       connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) {
         final Map<String, dynamic> params = <String, dynamic>{
           'port': info.httpUri.port,
@@ -405,6 +407,8 @@ class AppDomain extends Domain {
       });
     }
     final Completer<Null> appStartedCompleter = new Completer<Null>();
+    // Callback hookups' Futures are uninteresting.
+    // ignore: unawaited_futures
     appStartedCompleter.future.then<Null>((Null value) {
       _sendAppEvent(app, 'started');
     });

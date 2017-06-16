@@ -189,9 +189,10 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         <String>[sdkManagerPath, '--licenses'],
         environment: sdkManagerEnv,
     );
-    stdout.addStream(process.stdout);
-    stderr.addStream(process.stderr);
-    process.stdin.addStream(stdin);
+
+    await stdout.addStream(process.stdout);
+    await stderr.addStream(process.stderr);
+    await process.stdin.addStream(stdin);
 
     final int exitCode = await process.exitCode;
     return exitCode == 0;
