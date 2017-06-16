@@ -209,11 +209,10 @@ class FlutterVersion {
 
     if (beenAWhileSinceWarningWasPrinted && installationSeemsOutdated && await newerFrameworkVersionAvailable()) {
       printStatus(versionOutOfDateMessage(frameworkAge), emphasis: true);
-      final Future<Null> saveWarningStampFuture = stamp.store(
-        newTimeWarningWasPrinted: _clock.now(),
-      );
       await Future.wait<Null>(<Future<Null>>[
-        saveWarningStampFuture,
+        stamp.store(
+          newTimeWarningWasPrinted: _clock.now(),
+        ),
         new Future<Null>.delayed(kPauseToLetUserReadTheMessage),
       ]);
     }
@@ -257,9 +256,7 @@ class FlutterVersion {
     try {
       final String branch = _channel == 'alpha' ? 'alpha' : 'master';
       final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(branch));
-      // fire and forget since nothing subsequent depends on it. Hope there's a flush/sync mechanism.
-      // ignore: unawaited_futures
-      versionCheckStamp.store(
+      await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
         newKnownRemoteVersion: remoteFrameworkCommitDate,
       );
