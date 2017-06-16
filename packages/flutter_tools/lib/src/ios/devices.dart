@@ -43,7 +43,6 @@ class IOSDevice extends Device {
   IOSDevice(String id, { this.name }) : super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _listerPath = _checkForCommand('idevice_id');
-    _informerPath = _checkForCommand('ideviceinfo');
     _iproxyPath = _checkForCommand('iproxy');
     _debuggerPath = _checkForCommand('idevicedebug');
     _loggerPath = _checkForCommand('idevicesyslog');
@@ -61,9 +60,6 @@ class IOSDevice extends Device {
 
   String _listerPath;
   String get listerPath => _listerPath;
-
-  String _informerPath;
-  String get informerPath => _informerPath;
 
   String _iproxyPath;
   String get iproxyPath => _iproxyPath;
@@ -97,30 +93,15 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static List<IOSDevice> getAttachedDevices() {
-    if (!iosWorkflow.hasIDeviceId)
+    if (!iMobileDevice.isInstalled)
       return <IOSDevice>[];
 
     final List<IOSDevice> devices = <IOSDevice>[];
-    for (String id in _getAttachedDeviceIDs()) {
-      final String name = IOSDevice._getDeviceInfo(id, 'DeviceName');
+    for (String id in iMobileDevice.getAttachedDeviceIDs()) {
+      final String name = iMobileDevice.getInfoForDevice(id, 'DeviceName');
       devices.add(new IOSDevice(id, name: name));
     }
     return devices;
-  }
-
-  static Iterable<String> _getAttachedDeviceIDs() {
-    final String listerPath = _checkForCommand('idevice_id');
-    try {
-      final String output = runSync(<String>[listerPath, '-l']);
-      return output.trim().split('\n').where((String s) => s != null && s.isNotEmpty);
-    } catch (e) {
-      return <String>[];
-    }
-  }
-
-  static String _getDeviceInfo(String deviceID, String infoKey) {
-    final String informerPath = _checkForCommand('ideviceinfo');
-    return runSync(<String>[informerPath, '-k', infoKey, '-u', deviceID]).trim();
   }
 
   static String _checkForCommand(
@@ -353,9 +334,9 @@ class IOSDevice extends Device {
   @override
   Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion ($_buildVersion)';
 
-  String get _sdkVersion => _getDeviceInfo(id, 'ProductVersion');
+  String get _sdkVersion => iMobileDevice.getInfoForDevice(id, 'ProductVersion');
 
-  String get _buildVersion => _getDeviceInfo(id, 'BuildVersion');
+  String get _buildVersion => iMobileDevice.getInfoForDevice(id, 'BuildVersion');
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {

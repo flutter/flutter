@@ -19,11 +19,13 @@ import '../src/context.dart';
 
 void main() {
   group('iOS Workflow validation', () {
+    MockIMobileDevice iMobileDevice;
     MockXcode xcode;
     MockProcessManager processManager;
     FileSystem fs;
 
     setUp(() {
+      iMobileDevice = new MockIMobileDevice();
       xcode = new MockXcode();
       processManager = new MockProcessManager();
       fs = new MemoryFileSystem();
@@ -39,7 +41,10 @@ void main() {
       );
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when Xcode is not installed', () async {
       when(xcode.isInstalled).thenReturn(false);
@@ -47,7 +52,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when Xcode is partially installed', () async {
       when(xcode.isInstalled).thenReturn(false);
@@ -55,7 +63,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when Xcode version too low', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -66,7 +77,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when Xcode EULA not signed', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -77,7 +91,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when python six not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -88,7 +105,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasPythonSixModule: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when homebrew not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -99,7 +119,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when libimobiledevice is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -107,10 +130,13 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasWorkingLibimobiledevice: false);
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => new MockIMobileDevice(isWorking: false),
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when ios-deploy is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -121,7 +147,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasIosDeploy: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when ios-deploy version is too low', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -132,7 +161,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(iosDeployVersionText: '1.8.0');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when CocoaPods is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -143,7 +175,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasCocoaPods: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when CocoaPods version is too low', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -154,7 +189,10 @@ void main() {
       final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(cocoaPodsVersionText: '0.39.0');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
 
     testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
       when(xcode.isInstalled).thenReturn(true);
@@ -172,6 +210,7 @@ void main() {
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
       ProcessManager: () => processManager,
     });
@@ -194,6 +233,7 @@ void main() {
       expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
       ProcessManager: () => processManager,
     });
@@ -207,6 +247,13 @@ final ProcessResult exitsHappy = new ProcessResult(
   '',    // stderr
 );
 
+class MockIMobileDevice extends IMobileDevice {
+  MockIMobileDevice({bool isWorking: true}) : isWorking = new Future<bool>.value(isWorking);
+
+  @override
+  final Future<bool> isWorking;
+}
+
 class MockXcode extends Mock implements Xcode {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
@@ -214,14 +261,12 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
   IOSWorkflowTestTarget({
     this.hasPythonSixModule: true,
     this.hasHomebrew: true,
-    bool hasWorkingLibimobiledevice: true,
     bool hasIosDeploy: true,
     String iosDeployVersionText: '1.9.0',
     bool hasIDeviceInstaller: true,
     bool hasCocoaPods: true,
     String cocoaPodsVersionText: '1.2.0',
-  }) : hasWorkingLibimobiledevice = new Future<bool>.value(hasWorkingLibimobiledevice),
-       hasIosDeploy = new Future<bool>.value(hasIosDeploy),
+  }) : hasIosDeploy = new Future<bool>.value(hasIosDeploy),
        iosDeployVersionText = new Future<String>.value(iosDeployVersionText),
        hasIDeviceInstaller = new Future<bool>.value(hasIDeviceInstaller),
        hasCocoaPods = new Future<bool>.value(hasCocoaPods),
@@ -232,9 +277,6 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
 
   @override
   final bool hasHomebrew;
-
-  @override
-  final Future<bool> hasWorkingLibimobiledevice;
 
   @override
   final Future<bool> hasIosDeploy;
