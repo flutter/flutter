@@ -23,11 +23,15 @@ export 'pointer_router.dart' show PointerRouter;
 /// anonymous functions that return objects of particular types.
 typedef T RecognizerCallback<T>();
 
-/// The base class that all GestureRecognizers should inherit from.
+/// The base class that all gesture recognizers inherit from.
 ///
 /// Provides a basic API that can be used by classes that work with
 /// gesture recognizers but don't care about the specific details of
 /// the gestures recognizers themselves.
+///
+/// See also:
+///
+///  * [GestureDetector], the widget that is used to detect gestures.
 abstract class GestureRecognizer extends GestureArenaMember {
   /// Registers a new pointer that might be relevant to this gesture
   /// detector.
