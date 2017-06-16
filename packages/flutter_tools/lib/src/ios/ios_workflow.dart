@@ -16,8 +16,6 @@ import 'mac.dart';
 
 IOSWorkflow get iosWorkflow => context.putIfAbsent(IOSWorkflow, () => new IOSWorkflow());
 
-IMobileDevice get iMobileDevice => IMobileDevice.instance;
-
 Xcode get xcode => Xcode.instance;
 
 class IOSWorkflow extends DoctorValidator implements Workflow {

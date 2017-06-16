@@ -33,6 +33,8 @@ const int kXcodeRequiredVersionMinor = 0;
 // Homebrew.
 const PythonModule kPythonSix = const PythonModule('six');
 
+IMobileDevice get iMobileDevice => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
+
 class PythonModule {
   const PythonModule(this.name);
 
@@ -47,8 +49,6 @@ class PythonModule {
 
 class IMobileDevice {
   const IMobileDevice();
-
-  static IMobileDevice get instance => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
 
   bool get isInstalled => exitsHappy(<String>['idevice_id', '-h']);
 
