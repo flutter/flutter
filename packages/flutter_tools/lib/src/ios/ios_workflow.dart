@@ -35,8 +35,6 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
 
-  bool get hasIDeviceId => iMobileDevice.isInstalled;
-
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
   Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
