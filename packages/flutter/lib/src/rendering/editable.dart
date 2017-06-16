@@ -477,8 +477,17 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
+    // We grab _textPainter.size here because assigning to `size` on the next
+    // line will trigger us to validate our intrinsic sizes, which will change
+    // _textPainter's layout because the intrinsic size calculations are
+    // destructive, which would mean we would get different results if we later
+    // used properties on _textPainter in this method.
+    // Other _textPainter state like didExceedMaxLines will also be affected,
+    // though we currently don't use those here.
+    // See also RenderParagraph which has a similar issue.
+    final Size textPainterSize = _textPainter.size;
     size = new Size(constraints.maxWidth, constraints.constrainHeight(_preferredHeight(constraints.maxWidth)));
-    final Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
+    final Size contentSize = new Size(textPainterSize.width + _kCaretGap + _kCaretWidth, textPainterSize.height);
     final double _maxScrollExtent = _getMaxScrollExtent(contentSize);
     _hasVisualOverflow = _maxScrollExtent > 0.0;
     offset.applyViewportDimension(_viewportExtent);
