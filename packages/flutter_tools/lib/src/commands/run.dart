@@ -177,7 +177,7 @@ class RunCommand extends RunCommandBase {
   void printNoConnectedDevices() {
     super.printNoConnectedDevices();
     if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
-        Xcode.instance.isInstalledAndMeetsVersionCheck) {
+        xcode.isInstalledAndMeetsVersionCheck) {
       printStatus('');
       printStatus('To run on a simulator, launch it first: open -a Simulator.app');
       printStatus('');

@@ -45,7 +45,7 @@ class IOSSimulatorUtils {
   static IOSSimulatorUtils get instance => context[IOSSimulatorUtils];
 
   List<IOSSimulator> getAttachedDevices() {
-    if (!Xcode.instance.isInstalledAndMeetsVersionCheck)
+    if (!xcode.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
     return SimControl.instance.getConnectedDevices().map((SimDevice device) {
@@ -587,8 +587,7 @@ class IOSSimulator extends Device {
   }
 
   bool get _xcodeVersionSupportsScreenshot {
-    return Xcode.instance.xcodeMajorVersion > 8 ||
-        (Xcode.instance.xcodeMajorVersion == 8 && Xcode.instance.xcodeMinorVersion >= 2);
+    return xcode.xcodeMajorVersion > 8 || (xcode.xcodeMajorVersion == 8 && xcode.xcodeMinorVersion >= 2);
   }
 
   @override
