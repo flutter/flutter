@@ -81,11 +81,17 @@ class DeviceManager {
         : getAllConnectedDevices();
   }
 
+  Iterable<DeviceDiscovery> get _platformDiscoverers {
+    return _deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
+  }
+
   /// Return the list of all connected devices.
-  Stream<Device> getAllConnectedDevices() {
-    return new Stream<Device>.fromIterable(_deviceDiscoverers
-      .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform)
-      .expand((DeviceDiscovery discoverer) => discoverer.devices));
+  Stream<Device> getAllConnectedDevices() async* {
+    for (DeviceDiscovery discoverer in _platformDiscoverers) {
+      for (Device device in await discoverer.devices) {
+        yield device;
+      }
+    }
   }
 }
 
@@ -97,7 +103,7 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
-  List<Device> get devices;
+  Future<List<Device>> get devices;
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -111,13 +117,13 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   ItemListNotifier<Device> _items;
   Timer _timer;
 
-  List<Device> pollingGetDevices();
+  Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
     if (_timer == null) {
       _items ??= new ItemListNotifier<Device>();
-      _timer = new Timer.periodic(_pollingDuration, (Timer timer) {
-        _items.updateWithNewList(pollingGetDevices());
+      _timer = new Timer.periodic(_pollingDuration, (Timer timer) async {
+        _items.updateWithNewList(await pollingGetDevices());
       });
     }
   }
@@ -128,8 +134,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   }
 
   @override
-  List<Device> get devices {
-    _items ??= new ItemListNotifier<Device>.from(pollingGetDevices());
+  Future<List<Device>> get devices async {
+    _items ??= new ItemListNotifier<Device>.from(await pollingGetDevices());
     return _items.items;
   }
 
