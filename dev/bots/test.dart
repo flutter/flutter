@@ -42,7 +42,7 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
 /// SHARD=analyze bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 Future<Null> main() async {
-  final String shard = Platform.environment['SHARD'];
+  final String shard = Platform.environment['SHARD'] ?? 'tests';
   if (!_kShards.containsKey(shard))
     throw new ArgumentError('Invalid shard: $shard');
   await _kShards[shard]();
