@@ -6,7 +6,7 @@ export PATH="$PWD/bin:$PWD/bin/cache/dart-sdk/bin:$PATH"
 
 LCOV_FILE=./packages/flutter/coverage/lcov.info
 
-if [ "$SHARD" = "tests" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ] && [ -f "$LCOV_FILE" ]; then
+if [ "$SHARD" = "coverage" ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ] && [ -f "$LCOV_FILE" ]; then
   GSUTIL=$HOME/google-cloud-sdk/bin/gsutil
   GCLOUD=$HOME/google-cloud-sdk/bin/gcloud
 
