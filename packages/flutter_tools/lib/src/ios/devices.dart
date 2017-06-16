@@ -44,7 +44,6 @@ class IOSDevice extends Device {
     _installerPath = _checkForCommand('ideviceinstaller');
     _listerPath = _checkForCommand('idevice_id');
     _iproxyPath = _checkForCommand('iproxy');
-    _debuggerPath = _checkForCommand('idevicedebug');
     _loggerPath = _checkForCommand('idevicesyslog');
     _screenshotPath = _checkForCommand('idevicescreenshot');
     _pusherPath = _checkForCommand(
@@ -63,9 +62,6 @@ class IOSDevice extends Device {
 
   String _iproxyPath;
   String get iproxyPath => _iproxyPath;
-
-  String _debuggerPath;
-  String get debuggerPath => _debuggerPath;
 
   String _loggerPath;
   String get loggerPath => _loggerPath;
