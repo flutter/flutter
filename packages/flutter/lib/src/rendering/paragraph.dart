@@ -213,6 +213,7 @@ class RenderParagraph extends RenderBox {
     // us to validate our intrinsic sizes, which will change _textPainter's
     // layout because the intrinsic size calculations are destructive.
     // Other _textPainter state like didExceedMaxLines will also be affected.
+    // See also RenderEditable which has a similar issue.
     final Size textSize = _textPainter.size;
     final bool didOverflowHeight = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
