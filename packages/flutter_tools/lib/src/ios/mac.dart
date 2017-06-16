@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show JSON;
+import 'dart:io' show ProcessResult;
 
 import 'package:meta/meta.dart';
 
@@ -83,6 +84,14 @@ class IMobileDevice {
   /// If either the specified key or device does not exist, returns the empty string.
   String getInfoForDevice(String deviceID, String key) {
     return runSync(<String>['ideviceinfo', '-k', key, '-u', deviceID]).trim();
+  }
+
+  /// Starts `idevicesyslog` and returns the running process.
+  Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
+
+  /// Captures a screenshot to the specified outputfile.
+  Future<Null> takeScreenshot(File outputFile) {
+    return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
   }
 }
 
