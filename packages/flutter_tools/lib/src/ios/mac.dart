@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert' show JSON;
-import 'dart:io' show ProcessResult;
 
 import 'package:meta/meta.dart';
 
