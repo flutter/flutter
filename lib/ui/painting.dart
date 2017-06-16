@@ -286,6 +286,25 @@ enum StrokeCap {
   square,
 }
 
+/// Styles to use for line joins.
+///
+/// This only affects line joins for polygons drawn by [Canvas.drawPath] and
+/// rectangles, not points drawn as lines with [Canvas.drawPoints].
+///
+/// See [Paint.strokeJoin].
+// These enum values must be kept in sync with SkPaint::Join.
+enum StrokeJoin {
+  /// Joins between line segments form sharp corners.
+  miter,
+
+  /// Joins between line segments are semi-circular.
+  round,
+
+  /// Joins between line segments connect the corners of the butt ends of the
+  /// line segments to give a beveled appearance.
+  bevel,
+}
+
 /// Strategies for painting shapes and paths on a canvas.
 ///
 /// See [Paint.style].
@@ -321,7 +340,7 @@ class Paint {
   // * _data is binary data in four-byte fields, each of which is either a
   //   uint32_t or a float. The default value for each field is encoded as
   //   zero to make initialization trivial. Most values already have a default
-  //   value of zero, but some, such a color, have a non-zero default value.
+  //   value of zero, but some, such as color, have a non-zero default value.
   //   To encode or decode these values, XOR the value with the default value.
   //
   // * _objects is a list of unencodable objects, typically wrappers for native
@@ -337,10 +356,12 @@ class Paint {
   static const int _kStyleIndex = 3;
   static const int _kStrokeWidthIndex = 4;
   static const int _kStrokeCapIndex = 5;
-  static const int _kFilterQualityIndex = 6;
-  static const int _kColorFilterIndex = 7;
-  static const int _kColorFilterColorIndex = 8;
-  static const int _kColorFilterBlendModeIndex = 9;
+  static const int _kStrokeJoinIndex = 6;
+  static const int _kStrokeMiterLimitIndex = 7;
+  static const int _kFilterQualityIndex = 8;
+  static const int _kColorFilterIndex = 9;
+  static const int _kColorFilterColorIndex = 10;
+  static const int _kColorFilterBlendModeIndex = 11;
 
   static const int _kIsAntiAliasOffset = _kIsAntiAliasIndex << 2;
   static const int _kColorOffset = _kColorIndex << 2;
@@ -348,12 +369,14 @@ class Paint {
   static const int _kStyleOffset = _kStyleIndex << 2;
   static const int _kStrokeWidthOffset = _kStrokeWidthIndex << 2;
   static const int _kStrokeCapOffset = _kStrokeCapIndex << 2;
+  static const int _kStrokeJoinOffset = _kStrokeJoinIndex << 2;
+  static const int _kStrokeMiterLimitOffset = _kStrokeMiterLimitIndex << 2;
   static const int _kFilterQualityOffset = _kFilterQualityIndex << 2;
   static const int _kColorFilterOffset = _kColorFilterIndex << 2;
   static const int _kColorFilterColorOffset = _kColorFilterColorIndex << 2;
   static const int _kColorFilterBlendModeOffset = _kColorFilterBlendModeIndex << 2;
   // If you add more fields, remember to update _kDataByteCount.
-  static const int _kDataByteCount = 40;
+  static const int _kDataByteCount = 48;
 
   // Binary format must match the deserialization code in paint.cc.
   List<dynamic> _objects;
@@ -375,6 +398,7 @@ class Paint {
     _data.setInt32(_kIsAntiAliasOffset, encoded, _kFakeHostEndian);
   }
 
+  // Must be kept in sync with the default in paint.cc.
   static const int _kColorDefault = 0xFF000000;
 
   /// The color to use when stroking or filling a shape.
@@ -399,6 +423,7 @@ class Paint {
     _data.setInt32(_kColorOffset, encoded, _kFakeHostEndian);
   }
 
+  // Must be kept in sync with the default in paint.cc.
   static final int _kBlendModeDefault = BlendMode.srcOver.index;
 
   /// A blend mode to apply when a shape is drawn or a layer is composited.
@@ -459,6 +484,44 @@ class Paint {
     assert(value != null);
     final int encoded = value.index;
     _data.setInt32(_kStrokeCapOffset, encoded, _kFakeHostEndian);
+  }
+
+  /// The kind of finish to place on the joins between segments.
+  ///
+  /// This applies to paths drawn when [style] is set to [PaintingStyle.stroke],
+  /// It does not apply to points drawn as lines with [Canvas.drawPoints].
+  ///
+  /// Defaults to [StrokeJoin.miter], i.e. sharp corners. See also
+  /// [strokeMiterLimit] to control when miters are replaced by bevels.
+  StrokeJoin get strokeJoin {
+    return StrokeJoin.values[_data.getInt32(_kStrokeJoinOffset, _kFakeHostEndian)];
+  }
+  set strokeJoin(StrokeJoin value) {
+    assert(value != null);
+    final int encoded = value.index;
+    _data.setInt32(_kStrokeJoinOffset, encoded, _kFakeHostEndian);
+  }
+
+  // Must be kept in sync with the default in paint.cc.
+  static final double _kStrokeMiterLimitDefault = 4.0;
+
+  /// The limit for miters to be drawn on segments when the join is set to
+  /// [StrokeJoin.miter] and the [style] is set to [PaintingStyle.stroke]. If
+  /// this limit is exceeded, then a [StrokeJoin.bevel] join will be drawn
+  /// instead. This may cause some 'popping' of the corners of a path if the
+  /// angle between line segments is animated.
+  ///
+  /// This limit is expressed as a limit on the length of the miter.
+  ///
+  /// Defaults to 4.0.  Using zero as a limit will cause a [StrokeJoin.bevel]
+  /// join to be used all the time.
+  double get strokeMiterLimit {
+    return _data.getFloat32(_kStrokeMiterLimitOffset, _kFakeHostEndian);
+  }
+  set strokeMiterLimit(double value) {
+    assert(value != null);
+    final double encoded = value - _kStrokeMiterLimitDefault;
+    _data.setFloat32(_kStrokeMiterLimitOffset, encoded, _kFakeHostEndian);
   }
 
   /// A mask filter (for example, a blur) to apply to a shape after it has been
@@ -547,25 +610,31 @@ class Paint {
     if (style == PaintingStyle.stroke) {
       result.write('$style');
       if (strokeWidth != 0.0)
-        result.write(' $strokeWidth');
+        result.write(' ${strokeWidth.toStringAsFixed(1)}');
       else
         result.write(' hairline');
       if (strokeCap != StrokeCap.butt)
         result.write(' $strokeCap');
+      if (strokeJoin == StrokeJoin.miter) {
+        if (strokeMiterLimit != _kStrokeMiterLimitDefault)
+          result.write(' $strokeJoin up to ${strokeMiterLimit.toStringAsFixed(1)}');
+      } else {
+        result.write(' $strokeJoin');
+      }
       semicolon = '; ';
     }
     if (isAntiAlias != true) {
       result.write('${semicolon}antialias off');
       semicolon = '; ';
     }
-    if (color != const Color(0xFF000000)) {
+    if (color != const Color(_kColorDefault)) {
       if (color != null)
         result.write('$semicolon$color');
       else
         result.write('${semicolon}no color');
       semicolon = '; ';
     }
-    if (blendMode != BlendMode.srcOver) {
+    if (blendMode.index != _kBlendModeDefault) {
       result.write('$semicolon$blendMode');
       semicolon = '; ';
     }
