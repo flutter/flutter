@@ -55,6 +55,7 @@ class WriteBuffer {
 
   /// Write an Float64 into the buffer.
   void putFloat64(double value) {
+    _alignTo(8);
     _eightBytes.setFloat64(0, value, Endianness.HOST_ENDIAN);
     _buffer.addAll(_eightBytesAsList);
   }
@@ -150,6 +151,7 @@ class ReadBuffer {
 
   /// Reads a Float64 from the buffer.
   double getFloat64() {
+    _alignTo(8);
     final double value = data.getFloat64(_position, Endianness.HOST_ENDIAN);
     _position += 8;
     return value;
