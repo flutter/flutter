@@ -4,11 +4,9 @@
 
 import 'dart:async';
 
-import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -16,7 +14,6 @@ import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
 import '../resident_runner.dart';
 import 'run.dart';
 
@@ -198,56 +195,15 @@ Future<Device> findTargetDevice() async {
     return devices.first;
   }
 
-
-  if (platform.isMacOS) {
-    // On Mac we look for the iOS Simulator. If available, we use that. Then
-    // we look for an Android device. If there's one, we use that. Otherwise,
-    // we launch a new iOS Simulator.
-    Device reusableDevice;
-    for (Device device in devices) {
-      if (await device.isLocalEmulator) {
-        reusableDevice = device;
-        break;
-      }
-    }
-    if (reusableDevice == null) {
-      for (Device device in devices) {
-        if (device is AndroidDevice) {
-          reusableDevice = device;
-          break;
-        }
-      }
-    }
-
-    if (reusableDevice != null) {
-      printStatus('Found connected ${await reusableDevice.isLocalEmulator ? "emulator" : "device"} "${reusableDevice.name}"; will reuse it.');
-      return reusableDevice;
-    }
-
-    // No running emulator found. Attempt to start one.
-    printStatus('Starting iOS Simulator, because did not find existing connected devices.');
-    final bool started = await SimControl.instance.boot();
-    if (started) {
-      return IOSSimulatorUtils.instance.getAttachedDevices().first;
-    } else {
-      printError('Failed to start iOS Simulator.');
-      return null;
-    }
-  } else if (platform.isLinux || platform.isWindows) {
-    // On Linux and Windows, for now, we just grab the first connected device we can find.
-    if (devices.isEmpty) {
-      printError('No devices found.');
-      return null;
-    } else if (devices.length > 1) {
-      printStatus('Found multiple connected devices:');
-      printStatus(devices.map((Device d) => '  - ${d.name}\n').join(''));
-    }
-    printStatus('Using device ${devices.first.name}.');
-    return devices.first;
-  } else {
-    printError('The operating system on this computer is not supported.');
+  if (devices.isEmpty) {
+    printError('No devices found.');
     return null;
+  } else if (devices.length > 1) {
+    printStatus('Found multiple connected devices:');
+    printStatus(devices.map((Device d) => '  - ${d.name}\n').join(''));
   }
+  printStatus('Using device ${devices.first.name}.');
+  return devices.first;
 }
 
 /// Starts the application on the device given command configuration.
