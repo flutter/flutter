@@ -59,11 +59,13 @@ class IMobileDevice {
     if (!isInstalled)
       return false;
 
-    // If a device is attached, verify that we can get its name.
+    // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['idevicename']))
-      return false;
-    return true;
+    if (result.exitCode != 0 || result.stdout.isEmpty)
+      return true;
+
+    // Check that we can look up the names of any attached devices.
+    return await exitsHappyAsync(<String>['idevicename']);
   }
 
   List<String> getAttachedDeviceIDs() {
