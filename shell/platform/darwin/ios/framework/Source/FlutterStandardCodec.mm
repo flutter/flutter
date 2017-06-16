@@ -275,6 +275,7 @@ using namespace shell;
     } else if (strcmp(type, @encode(double)) == 0 || strcmp(type, @encode(float)) == 0) {
       Float64 f = number.doubleValue;
       [self writeByte:FlutterStandardFieldFloat64];
+      [self writeAlignment:8];
       [_data appendBytes:(UInt8*)&f length:8];
     } else if (strcmp(type, @encode(unsigned long)) == 0 ||
                strcmp(type, @encode(signed long long)) == 0 ||
@@ -430,6 +431,7 @@ using namespace shell;
     }
     case FlutterStandardFieldFloat64: {
       Float64 value;
+      [self readAlignment:8];
       [self readBytes:&value length:8];
       return [NSNumber numberWithDouble:value];
     }
