@@ -35,6 +35,8 @@ const PythonModule kPythonSix = const PythonModule('six');
 
 IMobileDevice get iMobileDevice => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
 
+Xcode get xcode => context.putIfAbsent(Xcode, () => new Xcode());
+
 class PythonModule {
   const PythonModule(this.name);
 
@@ -119,9 +121,6 @@ class Xcode {
       _isInstalled = false;
     }
   }
-
-  /// Returns [Xcode] active in the current app context.
-  static Xcode get instance => context.putIfAbsent(Xcode, () => new Xcode());
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
