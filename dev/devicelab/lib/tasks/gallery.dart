@@ -31,11 +31,8 @@ class GalleryTransitionTest {
     await inDirectory(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(galleryDirectory.path);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
 
       final String testDriver = semanticsEnabled
           ? 'transitions_perf_with_semantics.dart'

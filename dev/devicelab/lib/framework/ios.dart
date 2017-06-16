@@ -16,11 +16,17 @@ const String _kTestXcconfigFileName = 'TestConfig.xcconfig';
 const FileSystem _fs = const io.LocalFileSystem();
 
 /// Patches the given Xcode project adding provisioning certificates and team
-/// information required to build and run the project.
+/// information required to build and run the project, if
+/// FLUTTER_DEVICELAB_XCODE_PROVISIONING_CONFIG is set. If it is not set,
+/// we rely on automatic signing by Xcode.
 Future<Null> prepareProvisioningCertificates(String flutterProjectPath) async {
   final String certificateConfig = await _readProvisioningConfigFile();
-  await _patchXcconfigFilesIfNotPatched(flutterProjectPath);
+  if (certificateConfig == null) {
+    // No cert config available, rely on automatic signing by Xcode.
+    return;
+  }
 
+  await _patchXcconfigFilesIfNotPatched(flutterProjectPath);
   final File testXcconfig = _fs.file(path.join(flutterProjectPath, 'ios/Flutter/$_kTestXcconfigFileName'));
   await testXcconfig.writeAsString(certificateConfig);
 }
@@ -76,18 +82,11 @@ $specificMessage
   }
 
   if (!dart_io.Platform.environment.containsKey(_kProvisioningConfigFileEnvironmentVariable)) {
-    throwUsageError('''
+    print('''
 $_kProvisioningConfigFileEnvironmentVariable variable is not defined in your
-environment. Please, define it and try again.
-
-Example provisioning xcconfig:
-
-ProvisioningStyle=Manual
-CODE_SIGN_IDENTITY=...
-PROVISIONING_PROFILE=...
-DEVELOPMENT_TEAM=...
-PROVISIONING_PROFILE_SPECIFIER=...
+environment. Relying on automatic signing by Xcode...
 '''.trim());
+    return null;
   }
 
   final String filePath = dart_io.Platform.environment[_kProvisioningConfigFileEnvironmentVariable];
