@@ -42,7 +42,6 @@ class IOSDevices extends PollingDeviceDiscovery {
 class IOSDevice extends Device {
   IOSDevice(String id, { this.name }) : super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
-    _listerPath = _checkForCommand('idevice_id');
     _iproxyPath = _checkForCommand('iproxy');
     _debuggerPath = _checkForCommand('idevicedebug');
     _loggerPath = _checkForCommand('idevicesyslog');
@@ -57,9 +56,6 @@ class IOSDevice extends Device {
 
   String _installerPath;
   String get installerPath => _installerPath;
-
-  String _listerPath;
-  String get listerPath => _listerPath;
 
   String _iproxyPath;
   String get iproxyPath => _iproxyPath;
