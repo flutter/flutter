@@ -201,11 +201,6 @@ void main() {
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
 
-      when(processManager.runSync(argThat(contains('idevice_id'))))
-          .thenReturn(exitsHappy);
-      when(processManager.run(argThat(contains('idevice_id')), workingDirectory: any, environment: any))
-          .thenReturn(exitsHappy);
-
       final ValidationResult result = await new IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -221,11 +216,6 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-
-      when(processManager.runSync(argThat(contains('idevice_id'))))
-          .thenReturn(exitsHappy);
-      when(processManager.run(argThat(contains('idevice_id')), workingDirectory: any, environment: any))
-          .thenReturn(exitsHappy);
 
       ensureDirectoryExists(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master', 'README.md'));
 
