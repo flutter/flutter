@@ -192,6 +192,7 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
                 writeLong(stream, (long) value);
             } else if (value instanceof Float || value instanceof Double) {
                 stream.write(DOUBLE);
+                writeAlignment(stream, 8);
                 writeDouble(stream, ((Number) value).doubleValue());
             } else if (value instanceof BigInteger) {
                 stream.write(BIGINT);
@@ -305,6 +306,7 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
                 break;
             }
             case DOUBLE:
+                readAlignment(buffer, 8);
                 result = buffer.getDouble();
                 break;
             case STRING: {
