@@ -4,23 +4,70 @@
 
 import 'package:meta/meta.dart';
 
+import 'print.dart';
+
 /// A mixin that helps dump string representations of trees.
 abstract class TreeDiagnosticsMixin {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory TreeDiagnosticsMixin._() => null;
 
+  /// A brief description of this object, usually just the [runtimeType] and the
+  /// [hashCode].
+  ///
+  /// See also:
+  ///
+  ///  * [toStringShallow], for a detailed description of the object.
+  ///  * [toStringDeep], for a description of the subtree rooted at this object.
   @override
   String toString() => '$runtimeType#$hashCode';
 
+  /// Returns a one-line detailed description of the object.
+  ///
+  /// This description includes everything from [debugFillDescription], but does
+  /// not recurse to any children.
+  ///
+  /// The [toStringShallow] method can take an argument, which is the string to
+  /// place between each part obtained from [debugFillDescription]. Passing a
+  /// string such as `'\n '` will result in a multiline string that indents the
+  /// properties of the object below its name (as per [toString]).
+  ///
+  /// See also:
+  ///
+  ///  * [toString], for a brief description of the object.
+  ///  * [toStringDeep], for a description of the subtree rooted at this object.
+  String toStringShallow([String joiner = '; ']) {
+    final StringBuffer result = new StringBuffer();
+    result.write('${this}$joiner');
+    final List<String> description = <String>[];
+    debugFillDescription(description);
+    result.write(description.join(joiner));
+    return result.toString();
+  }
+
   /// Returns a string representation of this node and its descendants.
+  ///
+  /// This includes the information from [debugFillDescription], and then
+  /// recurses into the children using [debugDescribeChildren].
+  ///
+  /// The [toStringDeep] method takes arguments, but those are intended for
+  /// internal use when recursing to the descendants, and so can be ignored.
+  ///
+  /// See also:
+  ///
+  ///  * [toString], for a brief description of the object but not its children.
+  ///  * [toStringShallow], for a detailed description of the object but not its
+  ///    children.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     String result = '$prefixLineOne$this\n';
     final String childrenDescription = debugDescribeChildren(prefixOtherLines);
     final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
     final List<String> description = <String>[];
     debugFillDescription(description);
-    result += description.map((String description) => '$descriptionPrefix$description\n').join();
+    result += description
+      .expand((String description) => debugWordWrap(description, 65, wrapIndent: '  '))
+      .map<String>((String line) => "$descriptionPrefix$line\n")
+      .join();
     if (childrenDescription == '') {
       final String prefix = prefixOtherLines.trimRight();
       if (prefix != '')
@@ -31,7 +78,8 @@ abstract class TreeDiagnosticsMixin {
     return result;
   }
 
-  /// Add additional information to the given description for use by [toStringDeep].
+  /// Add additional information to the given description for use by
+  /// [toStringDeep] and [toStringShallow].
   @protected
   @mustCallSuper
   void debugFillDescription(List<String> description) { }
