@@ -474,7 +474,7 @@ class IOSSimulator extends Device {
 
     // Launch the updated application in the simulator.
     try {
-      SimControl.instance.launch(id, app.id, args);
+      await SimControl.instance.launch(id, app.id, args);
     } catch (error) {
       printError('$error');
       return new LaunchResult.failed();
@@ -529,7 +529,7 @@ class IOSSimulator extends Device {
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
 
     // Step 3: Install the updated bundle to the simulator.
-    SimControl.instance.install(id, fs.path.absolute(bundle.path));
+    await SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
   Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app) =>
