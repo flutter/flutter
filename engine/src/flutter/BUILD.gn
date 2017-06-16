@@ -8,6 +8,7 @@ group("flutter") {
   deps = [
     "//flutter/lib/snapshot:generate_snapshot_bin",
     "//flutter/sky",
+    "//lib/txt",
   ]
 
   if (is_fuchsia) {
@@ -30,6 +31,8 @@ group("flutter") {
       "//flutter/sky/engine/wtf:wtf_unittests",
       "//flutter/synchronization:synchronization_unittests",
       "//lib/ftl:ftl_unittests",
+      "//lib/txt/examples:txt_example($host_toolchain)",
+      "//lib/txt/tests($host_toolchain)",  # txt_unittests
     ]
   }
 }
