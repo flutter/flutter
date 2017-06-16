@@ -128,12 +128,12 @@ void Paragraph::AddRunsToLineBreaker(const std::string& rootdir) {
   }
 }
 
-void Paragraph::Layout(const ParagraphConstraints& constraints,
+void Paragraph::Layout(double width,
                        const std::string& rootdir,
                        const double x_offset,
                        const double y_offset) {
-  breaker_.setLineWidths(0.0f, 0, constraints.width());
-  width_ = constraints.width();
+  breaker_.setLineWidths(0.0f, 0, width);
+  width_ = width;
   AddRunsToLineBreaker(rootdir);
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
@@ -149,12 +149,14 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
 
   // Reset member variables so Layout still works when called more than once
   max_intrinsic_width_ = 0.0f;
-  lines_ = 0;
+  lines_ = 1;
 
   minikin::Layout layout;
   SkScalar x = x_offset;
   y_ = y_offset;
   size_t break_index = 0;
+  double letter_spacing_offset = 0.0f;
+  double word_spacing_offset = 0.0f;
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
     auto collection =
@@ -163,8 +165,13 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
     GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
     GetPaint(run.style, &paint);
 
+    // Subtract inital offset to avoid big gap at start of run.
+    letter_spacing_offset -= run.style.letter_spacing;
+
     size_t layout_start = run.start;
-    while (layout_start < run.end && !DidExceedMaxLines()) {
+
+    while (layout_start < run.end &&
+           GetLineCount() <= paragraph_style_.max_lines) {
       const size_t next_break = (break_index > breaks_count - 1)
                                     ? std::numeric_limits<size_t>::max()
                                     : breaks[break_index];
@@ -187,11 +194,20 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
           const size_t glyph_index = blob_start + blob_index;
           buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
           const size_t pos_index = 2 * blob_index;
-          buffer.pos[pos_index] = layout.getX(glyph_index);
+          letter_spacing_offset += run.style.letter_spacing;
+          buffer.pos[pos_index] = layout.getX(glyph_index) +
+                                  letter_spacing_offset + word_spacing_offset;
           buffer.pos[pos_index + 1] = layout.getY(glyph_index);
         }
         blob_start += blob_length;
-        max_intrinsic_width_ += layout.getX(blob_start - 1);
+
+        // Subtract letter offset to avoid big gap at end of run.
+        letter_spacing_offset -= run.style.letter_spacing;
+
+        word_spacing_offset += run.style.word_spacing;
+
+        max_intrinsic_width_ +=
+            layout.getX(blob_start - 1) + letter_spacing_offset;
       }
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
@@ -201,11 +217,15 @@ void Paragraph::Layout(const ParagraphConstraints& constraints,
 
       if (layout_end == next_break) {
         x = 0.0f;
+        letter_spacing_offset = 0.0f;
+        word_spacing_offset = 0.0f;
         // TODO(abarth): Use the line height, which is something like the max
         // font_size for runs in this line times the paragraph's line height.
         y_ += run.style.font_size * run.style.height;
         break_index += 1;
         lines_++;
+        if (lines_ > paragraph_style_.max_lines)
+          lines_--;
       } else {
         x += layout.getAdvance();
       }
@@ -220,10 +240,12 @@ const ParagraphStyle& Paragraph::GetParagraphStyle() const {
 }
 
 double Paragraph::GetAlphabeticBaseline() const {
+  // TODO(garyq): Implement.
   return FLT_MAX;
 }
 
 double Paragraph::GetIdeographicBaseline() const {
+  // TODO(garyq): Implement.
   return FLT_MAX;
 }
 
@@ -232,6 +254,7 @@ double Paragraph::GetMaxIntrinsicWidth() const {
 }
 
 double Paragraph::GetMinIntrinsicWidth() const {
+  // TODO(garyq): Implement.
   return min_intrinsic_width_;
 }
 
@@ -253,10 +276,13 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   }
 }
 
+int Paragraph::GetLineCount() const {
+  // FTL_LOG(INFO) << "Lines: " << lines_;
+  return lines_;
+}
+
 bool Paragraph::DidExceedMaxLines() const {
-  if (y_ / (paragraph_style_.font_size * paragraph_style_.line_height) >
-      paragraph_style_.max_lines)
-    // if (lines_ > paragraph_style_.max_lines)
+  if (GetLineCount() > paragraph_style_.max_lines)
     return true;
   return false;
 }

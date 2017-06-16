@@ -21,7 +21,6 @@
 
 #include "lib/ftl/macros.h"
 #include "lib/txt/src/paint_record.h"
-#include "lib/txt/src/paragraph_constraints.h"
 #include "lib/txt/src/paragraph_style.h"
 #include "lib/txt/src/styled_runs.h"
 #include "minikin/LineBreaker.h"
@@ -38,7 +37,7 @@ class Paragraph {
 
   ~Paragraph();
 
-  void Layout(const ParagraphConstraints& constraints,
+  void Layout(double width,
               const std::string& rootdir = "",
               const double x_offset = 0.0,
               const double y_offset = 0.0);
@@ -56,6 +55,8 @@ class Paragraph {
   double GetMaxIntrinsicWidth() const;
 
   double GetMinIntrinsicWidth() const;
+
+  int GetLineCount() const;
 
   bool DidExceedMaxLines() const;
 
@@ -76,9 +77,9 @@ class Paragraph {
   ParagraphStyle paragraph_style_;
   SkScalar y_ = 0.0f;  // Height of the paragraph after Layout().
   double width_ = 0.0f;
-  int lines_ = 0;
+  int lines_ = 1;
   double max_intrinsic_width_ = 0.0f;
-  double min_intrinsic_width_ = FLT_MAX;
+  double min_intrinsic_width_ = 0;
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 

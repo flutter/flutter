@@ -52,7 +52,7 @@ int runTest() {
 
   int width = 800;
   int height = 600;
-  paragraph->Layout(ParagraphConstraints(width));
+  paragraph->Layout(width);
 
   SkAutoGraphics ag;
   SkBitmap bitmap;
