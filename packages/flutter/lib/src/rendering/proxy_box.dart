@@ -2862,6 +2862,23 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
         break;
     }
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    final List<String> gestures = <String>[];
+    if (onTap != null)
+      gestures.add('tap');
+    if (onLongPress != null)
+      gestures.add('long press');
+    if (onHorizontalDragUpdate != null)
+      gestures.add('horizontal scroll');
+    if (onVerticalDragUpdate != null)
+      gestures.add('vertical scroll');
+    if (gestures.isEmpty)
+      gestures.add('<none>');
+    description.add('gestures: ${gestures.join(", ")}');
+  }
 }
 
 /// Add annotations to the [SemanticsNode] for this subtree.

@@ -1587,9 +1587,6 @@ abstract class RenderBox extends RenderObject {
   @override
   BoxConstraints get constraints => super.constraints;
 
-  // We check the intrinsic sizes of each render box once by default.
-  bool _debugNeedsIntrinsicSizeCheck = true;
-
   @override
   void debugAssertDoesMeetConstraints() {
     assert(constraints != null);
@@ -1657,7 +1654,7 @@ abstract class RenderBox extends RenderObject {
           'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
         );
       }
-      if (_debugNeedsIntrinsicSizeCheck || debugCheckIntrinsicSizes) {
+      if (debugCheckIntrinsicSizes) {
         // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
@@ -1696,7 +1693,6 @@ abstract class RenderBox extends RenderObject {
         // TODO(ianh): Test that values are internally consistent in more ways than the above.
 
         RenderObject.debugCheckingIntrinsics = false;
-        _debugNeedsIntrinsicSizeCheck = false;
         if (failures.isNotEmpty) {
           assert(failureCount > 0);
           throw new FlutterError(

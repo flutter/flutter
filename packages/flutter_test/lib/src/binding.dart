@@ -95,10 +95,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding() {
     debugPrint = debugPrintOverride;
+    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   }
 
   @protected
   DebugPrintCallback get debugPrintOverride => debugPrint;
+
+  @protected
+  bool get checkIntrinsicSizes => false;
 
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
@@ -460,13 +464,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       debugPrintOverride: debugPrintOverride,
     ));
     assert(debugAssertAllRenderVarsUnset(
-      'The value of a rendering debug variable was changed by the test.'
+      'The value of a rendering debug variable was changed by the test.',
+      debugCheckIntrinsicSizesOverride: checkIntrinsicSizes,
     ));
     assert(debugAssertAllWidgetVarsUnset(
-      'The value of a widget debug variable was changed by the test.'
+      'The value of a widget debug variable was changed by the test.',
     ));
     assert(debugAssertAllSchedulerVarsUnset(
-      'The value of a scheduler debug variable was changed by the test.'
+      'The value of a scheduler debug variable was changed by the test.',
     ));
   }
 
@@ -504,6 +509,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   DebugPrintCallback get debugPrintOverride => debugPrintSynchronously;
+
+  @override
+  bool get checkIntrinsicSizes => true;
 
   @override
   test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(seconds: 5));
