@@ -17,6 +17,7 @@ install:
 env:
   - SHARD=analyze
   - SHARD=tests
+  - SHARD=coverage
   - SHARD=docs
 before_script:
   - ./dev/bots/travis_setup.sh

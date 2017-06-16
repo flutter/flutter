@@ -8,6 +8,8 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
+typedef Future<Null> ShardRunner();
+
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
@@ -22,6 +24,13 @@ final String yellow = hasColor ? '\x1B[33m' : '';
 final String cyan = hasColor ? '\x1B[36m' : '';
 final String reset = hasColor ? '\x1B[0m' : '';
 
+const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
+  'docs': _generateDocs,
+  'analyze': _analyzeRepo,
+  'tests': _runTests,
+  'coverage': _runCoverage,
+};
+
 /// When you call this, you can set FLUTTER_TEST_ARGS to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script using FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt to
@@ -33,94 +42,111 @@ final String reset = hasColor ? '\x1B[0m' : '';
 /// SHARD=analyze bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 Future<Null> main() async {
-  if (Platform.environment['SHARD'] == 'docs') {
-    print('${bold}DONE: test.dart does nothing in the docs shard.$reset');
-  } else if (Platform.environment['SHARD'] == 'analyze') {
-    // Analyze all the Dart code in the repo.
-    await _runFlutterAnalyze(flutterRoot,
-      options: <String>['--flutter-repo'],
-    );
+  final String shard = Platform.environment['SHARD'] ?? 'tests';
+  if (!_kShards.containsKey(shard))
+    throw new ArgumentError('Invalid shard: $shard');
+  await _kShards[shard]();
+}
 
-    // Analyze all the sample code in the repo
-    await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
-      workingDirectory: flutterRoot,
-    );
+Future<Null> _generateDocs() async {
+  print('${bold}DONE: test.dart does nothing in the docs shard.$reset');
+}
 
-    // Try with the --watch analyzer, to make sure it returns success also.
-    // The --benchmark argument exits after one run.
-    await _runFlutterAnalyze(flutterRoot,
-      options: <String>['--flutter-repo', '--watch', '--benchmark'],
-    );
+Future<Null> _analyzeRepo() async {
+  // Analyze all the Dart code in the repo.
+  await _runFlutterAnalyze(flutterRoot,
+    options: <String>['--flutter-repo'],
+  );
 
-    // Try an analysis against a big version of the gallery.
-    await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
-      workingDirectory: flutterRoot,
-    );
-    await _runFlutterAnalyze(path.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
-      options: <String>['--watch', '--benchmark'],
-    );
+  // Analyze all the sample code in the repo
+  await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
+    workingDirectory: flutterRoot,
+  );
 
-    print('${bold}DONE: Analysis successful.$reset');
-  } else {
-    // Verify that the tests actually return failure on failure and success on success.
-    final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
-    await _runFlutterTest(automatedTests,
-      script: path.join('test_smoke_test', 'fail_test.dart'),
-      expectFailure: true,
-      printOutput: false,
-    );
-    await _runFlutterTest(automatedTests,
-      script: path.join('test_smoke_test', 'pass_test.dart'),
-      printOutput: false,
-    );
-    await _runFlutterTest(automatedTests,
-      script: path.join('test_smoke_test', 'crash1_test.dart'),
-      expectFailure: true,
-      printOutput: false,
-    );
-    await _runFlutterTest(automatedTests,
-      script: path.join('test_smoke_test', 'crash2_test.dart'),
-      expectFailure: true,
-      printOutput: false,
-    );
-    await _runFlutterTest(automatedTests,
-      script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
-      expectFailure: true,
-      printOutput: false,
-    );
-    await _runFlutterTest(automatedTests,
-      script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
-      expectFailure: true,
-      printOutput: false,
-    );
-    await _runCommand(flutter, <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
-      workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
-      expectFailure: true,
-      printOutput: false,
-    );
+  // Try with the --watch analyzer, to make sure it returns success also.
+  // The --benchmark argument exits after one run.
+  await _runFlutterAnalyze(flutterRoot,
+    options: <String>['--flutter-repo', '--watch', '--benchmark'],
+  );
 
-    final List<String> coverageFlags = <String>[];
-    if (Platform.environment['TRAVIS'] != null && Platform.environment['TRAVIS_PULL_REQUEST'] == 'false')
-      coverageFlags.add('--coverage');
+  // Try an analysis against a big version of the gallery.
+  await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
+    workingDirectory: flutterRoot,
+  );
+  await _runFlutterAnalyze(path.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
+    options: <String>['--watch', '--benchmark'],
+  );
 
-    // Run tests.
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-      options: coverageFlags,
-    );
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
-    await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
+  print('${bold}DONE: Analysis successful.$reset');
+}
 
-    await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
+Future<Null> _runTests() async {
+  // Verify that the tests actually return failure on failure and success on success.
+  final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'fail_test.dart'),
+    expectFailure: true,
+    printOutput: false,
+  );
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'pass_test.dart'),
+    printOutput: false,
+  );
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'crash1_test.dart'),
+    expectFailure: true,
+    printOutput: false,
+  );
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'crash2_test.dart'),
+    expectFailure: true,
+    printOutput: false,
+  );
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
+    expectFailure: true,
+    printOutput: false,
+  );
+  await _runFlutterTest(automatedTests,
+    script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
+    expectFailure: true,
+    printOutput: false,
+  );
+  await _runCommand(flutter, <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
+    workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
+    expectFailure: true,
+    printOutput: false,
+  );
 
-    print('${bold}DONE: All tests successful.$reset');
+  // Run tests.
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
+  await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
+
+  await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
+  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'));
+
+  print('${bold}DONE: All tests successful.$reset');
+}
+
+Future<Null> _runCoverage() async {
+  if (Platform.environment['TRAVIS'] == null ||
+      Platform.environment['TRAVIS_PULL_REQUEST'] != 'false') {
+    print('${bold}DONE: test.dart does not run coverage for Travis pull requests');
+    return;
   }
+
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
+    options: const <String>['--coverage'],
+  );
+
+  print('${bold}DONE: Coverage collection successful.$reset');
 }
 
 Future<Null> _pubRunTest(
