@@ -54,19 +54,10 @@ class IOSDevice extends Device {
   }
 
   String _installerPath;
-  String get installerPath => _installerPath;
-
   String _iproxyPath;
-  String get iproxyPath => _iproxyPath;
-
   String _loggerPath;
-  String get loggerPath => _loggerPath;
-
   String _screenshotPath;
-  String get screenshotPath => _screenshotPath;
-
   String _pusherPath;
-  String get pusherPath => _pusherPath;
 
   @override
   bool get supportsHotMode => true;
@@ -116,7 +107,7 @@ class IOSDevice extends Device {
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     try {
-      final RunResult apps = await runCheckedAsync(<String>[installerPath, '--list-apps']);
+      final RunResult apps = await runCheckedAsync(<String>[_installerPath, '--list-apps']);
       if (new RegExp(app.id, multiLine: true).hasMatch(apps.stdout)) {
         return true;
       }
@@ -139,7 +130,7 @@ class IOSDevice extends Device {
     }
 
     try {
-      await runCheckedAsync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
+      await runCheckedAsync(<String>[_installerPath, '-i', iosApp.deviceBundlePath]);
       return true;
     } catch (e) {
       return false;
@@ -149,7 +140,7 @@ class IOSDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      await runCheckedAsync(<String>[installerPath, '-U', app.id]);
+      await runCheckedAsync(<String>[_installerPath, '-U', app.id]);
       return true;
     } catch (e) {
       return false;
@@ -304,7 +295,7 @@ class IOSDevice extends Device {
   Future<bool> pushFile(ApplicationPackage app, String localFile, String targetFile) async {
     if (platform.isMacOS) {
       runSync(<String>[
-        pusherPath,
+        _pusherPath,
         '-t',
         '1',
         '--bundle_id',
@@ -344,11 +335,11 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsScreenshot => screenshotPath != null && screenshotPath.isNotEmpty;
+  bool get supportsScreenshot => _screenshotPath != null && _screenshotPath.isNotEmpty;
 
   @override
   Future<Null> takeScreenshot(File outputFile) {
-    return runCheckedAsync(<String>[screenshotPath, outputFile.path]);
+    return runCheckedAsync(<String>[_screenshotPath, outputFile.path]);
   }
 }
 
@@ -381,7 +372,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    runCommand(<String>[device.loggerPath]).then<Null>((Process process) {
+    runCommand(<String>[device._loggerPath]).then<Null>((Process process) {
       _process = process;
       _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
@@ -425,7 +416,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
     final Process process = await runCommand(<String>[
-      device.iproxyPath,
+      device._iproxyPath,
       hostPort.toString(),
       devicePort.toString(),
       device.id,
