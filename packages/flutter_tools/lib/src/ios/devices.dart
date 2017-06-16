@@ -43,7 +43,6 @@ class IOSDevice extends Device {
   IOSDevice(String id, { this.name }) : super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
-    _screenshotPath = _checkForCommand('idevicescreenshot');
     _pusherPath = _checkForCommand(
       'ios-deploy',
       'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
@@ -54,7 +53,6 @@ class IOSDevice extends Device {
 
   String _installerPath;
   String _iproxyPath;
-  String _screenshotPath;
   String _pusherPath;
 
   @override
@@ -333,12 +331,10 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsScreenshot => _screenshotPath != null && _screenshotPath.isNotEmpty;
+  bool get supportsScreenshot => iMobileDevice.isInstalled;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) {
-    return runCheckedAsync(<String>[_screenshotPath, outputFile.path]);
-  }
+  Future<Null> takeScreenshot(File outputFile) => iMobileDevice.takeScreenshot(outputFile);
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {

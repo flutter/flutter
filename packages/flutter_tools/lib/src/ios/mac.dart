@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show JSON;
+import 'dart:io' show ProcessResult;
 
 import 'package:meta/meta.dart';
 
@@ -87,6 +88,11 @@ class IMobileDevice {
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
+
+  /// Captures a screenshot to the specified outputfile.
+  Future<Null> takeScreenshot(File outputFile) {
+    return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
+  }
 }
 
 class Xcode {
