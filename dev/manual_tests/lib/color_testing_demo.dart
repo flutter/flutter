@@ -30,22 +30,22 @@ class ColorDemoHome extends StatelessWidget {
 
           // Lerped color should match the center of the gradient.
           const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFF00FF00)),
-          new ColorRow(color: Color.lerp(new Color(0xFFFF0000), new Color(0xFF00FF00), 0.5)),
+          new ColorRow(color: Color.lerp(const Color(0xFFFF0000), const Color(0xFF00FF00), 0.5)),
 
           const GradientRow(leftColor: const Color(0xFF0000FF), rightColor: const Color(0xFFFFFF00)),
-          new ColorRow(color: Color.lerp(new Color(0xFF0000FF), new Color(0xFFFFFF00), 0.5)),
+          new ColorRow(color: Color.lerp(const Color(0xFF0000FF), const Color(0xFFFFFF00), 0.5)),
 
           const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFF0000FF)),
-          new ColorRow(color: Color.lerp(new Color(0xFFFF0000), new Color(0xFF0000FF), 0.5)),
+          new ColorRow(color: Color.lerp(const Color(0xFFFF0000), const Color(0xFF0000FF), 0.5)),
 
           const GradientRow(leftColor: const Color(0xFF00FF00), rightColor: const Color(0xFFFFFF00)),
-          new ColorRow(color: Color.lerp(new Color(0xFF00FF00), new Color(0xFFFFFF00), 0.5)),
+          new ColorRow(color: Color.lerp(const Color(0xFF00FF00), const Color(0xFFFFFF00), 0.5)),
 
           const GradientRow(leftColor: const Color(0xFF0000FF), rightColor: const Color(0xFF00FF00)),
-          new ColorRow(color: Color.lerp(new Color(0xFF0000FF), new Color(0xFF00FF00), 0.5)),
+          new ColorRow(color: Color.lerp(const Color(0xFF0000FF), const Color(0xFF00FF00), 0.5)),
 
           const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFFFFFF00)),
-          new ColorRow(color: Color.lerp(new Color(0xFFFF0000), new Color(0xFFFFFF00), 0.5)),
+          new ColorRow(color: Color.lerp(const Color(0xFFFF0000), const Color(0xFFFFFF00), 0.5)),
 
           // For the following pairs, the blend result should match the opaque color.
           const ColorRow(color: const Color(0xFFBCBCBC)),
