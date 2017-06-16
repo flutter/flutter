@@ -23,7 +23,7 @@ const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
 const String gradleAppOutDirV1 = 'android/app/build/outputs/apk';
 
-String _cachedGradleAppOutDirV2;
+Map<String, String> _cachedGradleAppProperties;
 
 enum FlutterPluginVersion {
   none,
@@ -71,38 +71,48 @@ String getGradleAppOut() {
 }
 
 String getGradleAppOutDirV2() {
-  _cachedGradleAppOutDirV2 ??= _calculateGradleAppOutDirV2();
-  return _cachedGradleAppOutDirV2;
+  String buildDir = _getAppProperties()['buildDir'];
+  if (buildDir == null)
+    return gradleAppOutDirV1; // Fall back to the default
+
+  final String currentDirectory = fs.currentDirectory.path;
+  if (buildDir.startsWith(currentDirectory)) {
+    // Relativize path, snip current directory + separating '/'.
+    buildDir = buildDir.substring(currentDirectory.length + 1);
+  }
+  return '$buildDir/outputs/apk';
+}
+
+bool get usingAndroidStudio3 => _getAppProperties().containsKey('flutterClasspathJson');
+
+Map<String, String> _getAppProperties() {
+  _cachedGradleAppProperties ??= _calculateAppProperties();
+  return _cachedGradleAppProperties;
 }
 
 // Note: this call takes about a second to complete.
-String _calculateGradleAppOutDirV2() {
+Map<String, String> _calculateAppProperties() {
   final String gradle = ensureGradle();
   updateLocalProperties();
   try {
-    final String properties = runCheckedSync(
+    final String stdout = runCheckedSync(
       <String>[gradle, 'app:properties'],
       workingDirectory: 'android',
       hideStdout: true,
       environment: _gradleEnv,
     );
-    String buildDir = properties
-        .split('\n')
-        .firstWhere((String s) => s.startsWith('buildDir: '))
-        .substring('buildDir: '.length)
-        .trim();
-    final String currentDirectory = fs.currentDirectory.path;
-    if (buildDir.startsWith(currentDirectory)) {
-      // Relativize path, snip current directory + separating '/'.
-      buildDir = buildDir.substring(currentDirectory.length + 1);
+    final Map<String, String> result = <String, String>{};
+    for (Match m in _propertyPattern.allMatches(stdout)) {
+      result[m.group(1)] = m.group(2);
     }
-    return '$buildDir/outputs/apk';
+    return result;
   } catch (e) {
     printError('Error running gradle: $e');
+    return <String, String>{};
   }
-  // Fall back to the default
-  return gradleAppOutDirV1;
 }
+
+final RegExp _propertyPattern = new RegExp(r'^(\w+):\s+(.*)$', multiLine: true);
 
 String locateSystemGradle({ bool ensureExecutable: true }) {
   final String gradle = gradleExecutable;
@@ -211,17 +221,6 @@ Future<Null> buildGradleProjectV1(String gradle) async {
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
-File findApkFile(String buildDirectory, String buildModeName) {
-  final String apkFilename = 'app-$buildModeName.apk';
-  File apkFile = fs.file('$buildDirectory/$apkFilename');
-  if (apkFile.existsSync())
-    return apkFile;
-  apkFile = fs.file('$buildDirectory/$buildModeName/$apkFilename');
-  if (apkFile.existsSync())
-    return apkFile;
-  return null;
-}
-
 Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String target, String kernelPath) async {
   final String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
@@ -255,9 +254,13 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
     throwToolExit('Gradle build failed: $exitcode', exitCode: exitcode);
 
   final String buildDirectory = getGradleAppOutDirV2();
-  final File apkFile = findApkFile(buildDirectory, buildModeName);
-  if (apkFile == null)
-    throwToolExit('Gradle build failed to produce an Android package.');
+  File apkFile = fs.file('$buildDirectory/app-$buildModeName.apk');
+  if (usingAndroidStudio3)
+    apkFile = fs.file('$buildDirectory/$buildModeName/app-$buildModeName.apk');
+  
+  if (!apkFile.existsSync()) 
+    throwToolExit("can't find apk file");
+
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
   apkFile.copySync('$buildDirectory/app.apk');
 

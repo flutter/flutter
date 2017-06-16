@@ -1,6 +1,8 @@
 import java.nio.file.Path
 import java.nio.file.Paths
 
+import groovy.json.JsonOutput
+
 import com.android.builder.model.AndroidProject
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
@@ -18,10 +20,17 @@ import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
   repositories {
+    maven { url 'https://maven.google.com' }
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.3'
+    if (GradleVersion.current() >= GradleVersion.version("4.0-milestone-1")) {
+        // Using Android Studio 3.0 or better.
+        classpath 'com.android.tools.build:gradle:3.0.0-alpha3'
+    } else {
+        // Assume 2.3.
+        classpath 'com.android.tools.build:gradle:2.2.3'
+    }
   }
 }
 
@@ -188,6 +197,21 @@ class FlutterPlugin implements Plugin<Project> {
         File kernel
         if (project.hasProperty('kernel')) {
             kernel = project.file(project.property('kernel'))
+        }
+
+        // Optionally create a task for printing the classpath as JSON.
+        // (Wrapped in "[{" and "}]" to help distinguish it in Gradle's output.)
+        // The getCompileClasspath() method is available starting with Android Studio 3.0 Preview,
+        // which uses Gradle 4.0.
+        if (GradleVersion.current() >= GradleVersion.version("4.0-milestone-1")) {
+            project.tasks.create("flutterClasspathJson") {
+                doLast {
+                    def jsonMap = project.android.applicationVariants.collectEntries {
+                        [(it.name): it.getCompileClasspath(null).getFiles().collect {it.canonicalPath}]
+                    }
+                    println JsonOutput.toJson([jsonMap])
+                }
+            }
         }
 
         project.android.applicationVariants.all { variant ->
