@@ -158,12 +158,7 @@ class Xcode {
     return _xcodeVersionCheckValid(_xcodeMajorVersion, _xcodeMinorVersion);
   }
 
-  Future<String> getAvailableDevices() async {
-    final RunResult result = await runAsync(<String>['/usr/bin/instruments', '-s', 'devices']);
-    if (result.exitCode != 0)
-      throw new ToolExit('Failed to invoke /usr/bin/instruments. Is Xcode installed?');
-    return result.stdout;
-  }
+  String getAvailableDevices() => runSync(<String>['/usr/bin/instruments', '-s', 'devices']);
 }
 
 bool _xcodeVersionCheckValid(int major, int minor) {
