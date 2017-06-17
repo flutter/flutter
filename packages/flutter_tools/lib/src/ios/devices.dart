@@ -36,7 +36,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   bool get canListAnything => iosWorkflow.canListDevices;
 
   @override
-  List<Device> pollingGetDevices() => IOSDevice.getAttachedDevices();
+  Future<List<Device>> pollingGetDevices() => IOSDevice.getAttachedDevices();
 }
 
 class IOSDevice extends Device {
@@ -81,12 +81,12 @@ class IOSDevice extends Device {
   // iPhone 6s (9.3) [F6CEE7CF-81EB-4448-81B4-1755288C7C11] (Simulator)
   static final RegExp _deviceRegex = new RegExp(r'^(.*) +\((.*)\) +\[(.*)\]$');
 
-  static List<IOSDevice> getAttachedDevices() {
+  static Future<List<IOSDevice>> getAttachedDevices() async {
     if (!xcode.isInstalled)
       return <IOSDevice>[];
 
     final List<IOSDevice> devices = <IOSDevice>[];
-    final Iterable<String> deviceLines = xcode.getAvailableDevices()
+    final Iterable<String> deviceLines = (await xcode.getAvailableDevices())
         .split('\n')
         .map((String line) => line.trim());
     for (String line in deviceLines) {
