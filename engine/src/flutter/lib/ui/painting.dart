@@ -1350,9 +1350,6 @@ class Canvas extends NativeFieldWrapperClass2 {
       throw new ArgumentError('"recorder" must not be null.');
     if (recorder.isRecording)
       throw new ArgumentError('"recorder" must not already be associated with another Canvas.');
-    if (!cullRect.isFinite)
-      throw new ArgumentError('"cullRect" must not contain infinite or NaN coordinates.');
-    // TODO(ianh): throw if recorder is defunct (https://github.com/flutter/flutter/issues/2531)
     _constructor(recorder, cullRect.left, cullRect.top, cullRect.right, cullRect.bottom);
   }
   void _constructor(PictureRecorder recorder,
