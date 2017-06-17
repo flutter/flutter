@@ -29,6 +29,9 @@ class Usage {
     // default as custom dimension 1 (configured in our analytics account).
     _analytics.setSessionValue('dimension1', os.name);
 
+    // Report the branch (or, "channel") name.
+    _analytics.setSessionValue('dimension2', FlutterVersion.getBranchName(whitelistBranchName: true));
+
     bool runningOnCI = false;
 
     // Many CI systems don't do a full git checkout.
