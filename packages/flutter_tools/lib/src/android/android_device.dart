@@ -48,7 +48,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get canListAnything => androidWorkflow.canListDevices;
 
   @override
-  List<Device> pollingGetDevices() => getAdbDevices();
+  Future<List<Device>> pollingGetDevices() async => getAdbDevices();
 }
 
 class AndroidDevice extends Device {
