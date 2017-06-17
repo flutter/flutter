@@ -40,7 +40,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 }
 
 class IOSDevice extends Device {
-  IOSDevice(String id, { this.name, String sdkVersion }) : _sdkVersion = sdkVersion, super(id) {
+  IOSDevice(String id, { this.name }) : super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
     _pusherPath = _checkForCommand(
@@ -54,8 +54,6 @@ class IOSDevice extends Device {
   String _installerPath;
   String _iproxyPath;
   String _pusherPath;
-
-  final String _sdkVersion;
 
   @override
   bool get supportsHotMode => true;
@@ -73,30 +71,14 @@ class IOSDevice extends Device {
   @override
   bool get supportsStartPaused => false;
 
-  // Physical device line format to be matched:
-  // My iPhone (10.3.2) [75b90e947c5f429fa67f3e9169fda0d89f0492f1]
-  //
-  // Other formats in output (desktop, simulator) to be ignored:
-  // my-mac-pro [2C10513E-4dA5-405C-8EF5-C44353DB3ADD]
-  // iPhone 6s (9.3) [F6CEE7CF-81EB-4448-81B4-1755288C7C11] (Simulator)
-  static final RegExp _deviceRegex = new RegExp(r'^(.*) +\((.*)\) +\[(.*)\]$');
-
   static List<IOSDevice> getAttachedDevices() {
-    if (!xcode.isInstalled)
+    if (!iMobileDevice.isInstalled)
       return <IOSDevice>[];
 
     final List<IOSDevice> devices = <IOSDevice>[];
-    final Iterable<String> deviceLines = xcode.getAvailableDevices()
-        .split('\n')
-        .map((String line) => line.trim());
-    for (String line in deviceLines) {
-      final Match match = _deviceRegex.firstMatch(line);
-      if (match != null) {
-        final String deviceName = match.group(1);
-        final String sdkVersion = match.group(2);
-        final String deviceID = match.group(3);
-        devices.add(new IOSDevice(deviceID, name: deviceName, sdkVersion: sdkVersion));
-      }
+    for (String id in iMobileDevice.getAttachedDeviceIDs()) {
+      final String name = iMobileDevice.getInfoForDevice(id, 'DeviceName');
+      devices.add(new IOSDevice(id, name: name));
     }
     return devices;
   }
@@ -329,7 +311,11 @@ class IOSDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';
+  Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion ($_buildVersion)';
+
+  String get _sdkVersion => iMobileDevice.getInfoForDevice(id, 'ProductVersion');
+
+  String get _buildVersion => iMobileDevice.getInfoForDevice(id, 'BuildVersion');
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
