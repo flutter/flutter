@@ -305,7 +305,7 @@ class AppDomain extends Domain {
     final String target = _getStringArg(args, 'target');
     final bool enableHotReload = _getBoolArg(args, 'hot') ?? kHotReloadDefault;
 
-    final Device device = await daemon.deviceDomain._getOrLocateDevice(deviceId);
+    final Device device = daemon.deviceDomain._getOrLocateDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -493,7 +493,7 @@ class AppDomain extends Domain {
   Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
 
-    final Device device = await daemon.deviceDomain._getDevice(deviceId);
+    final Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -575,12 +575,11 @@ class DeviceDomain extends Domain {
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  Future<List<Device>> getDevices([Map<String, dynamic> args]) async {
-    final List<Device> devices = <Device>[];
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
-      devices.addAll(await discoverer.devices);
-    }
-    return devices;
+  Future<List<Device>> getDevices([Map<String, dynamic> args]) {
+    final List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
+      return discoverer.devices;
+    }).toList();
+    return new Future<List<Device>>.value(devices);
   }
 
   /// Enable device events.
@@ -603,7 +602,7 @@ class DeviceDomain extends Domain {
     final int devicePort = _getIntArg(args, 'devicePort', required: true);
     int hostPort = _getIntArg(args, 'hostPort');
 
-    final Device device = await daemon.deviceDomain._getDevice(deviceId);
+    final Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -618,7 +617,7 @@ class DeviceDomain extends Domain {
     final int devicePort = _getIntArg(args, 'devicePort', required: true);
     final int hostPort = _getIntArg(args, 'hostPort', required: true);
 
-    final Device device = await daemon.deviceDomain._getDevice(deviceId);
+    final Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -632,25 +631,23 @@ class DeviceDomain extends Domain {
   }
 
   /// Return the device matching the deviceId field in the args.
-  Future<Device> _getDevice(String deviceId) async {
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
-      final Device device = (await discoverer.devices).firstWhere((Device device) => device.id == deviceId, orElse: () => null);
-      if (device != null)
-        return device;
-    }
-    return null;
+  Device _getDevice(String deviceId) {
+    final List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
+      return discoverer.devices;
+    }).toList();
+    return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
   }
 
   /// Return a known matching device, or scan for devices if no known match is found.
-  Future<Device> _getOrLocateDevice(String deviceId) async {
+  Device _getOrLocateDevice(String deviceId) {
     // Look for an already known device.
-    final Device device = await _getDevice(deviceId);
+    final Device device = _getDevice(deviceId);
     if (device != null)
       return device;
 
     // Scan the different device providers for a match.
     for (PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = await discoverer.pollingGetDevices();
+      final List<Device> devices = discoverer.pollingGetDevices();
       for (Device device in devices)
         if (device.id == deviceId)
           return device;
