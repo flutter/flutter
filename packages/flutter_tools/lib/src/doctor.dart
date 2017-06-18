@@ -280,8 +280,8 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     if (_hasIssues(messages)) {
       messages.add(new ValidationMessage(
-        'For information about managing plugins, see\n'
-        'https://www.jetbrains.com/help/idea/managing-plugins.html'
+        'For information about installing plugins, see\n'
+        'https://flutter.io/intellij-setup/#installing-the-plugins'
       ));
     }
 
