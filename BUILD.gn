@@ -54,7 +54,6 @@ static_library("txt") {
 
   deps = [
     "//lib/txt/libs/minikin",
-    "//third_party/gtest",
     "//third_party/skia",
   ]
 }
