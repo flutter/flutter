@@ -92,25 +92,25 @@ TEST_F(RenderTest, SimpleRedParagraph) {
 }
 
 TEST_F(RenderTest, RainbowParagraph) {
-  const char* text1 = "RedRoboto ";
+  const char* text1 = "Red Roboto";
   auto icu_text1 = icu::UnicodeString::fromUTF8(text1);
   std::u16string u16_text1(icu_text1.getBuffer(),
                            icu_text1.getBuffer() + icu_text1.length());
-  const char* text2 = "Big Green Default ";
+  const char* text2 = "Big Green Default";
   auto icu_text2 = icu::UnicodeString::fromUTF8(text2);
   std::u16string u16_text2(icu_text2.getBuffer(),
                            icu_text2.getBuffer() + icu_text2.length());
-  const char* text3 = "DefcolorHomemadeApple ";
+  const char* text3 = "Defcolor Homemade Apple";
   auto icu_text3 = icu::UnicodeString::fromUTF8(text3);
   std::u16string u16_text3(icu_text3.getBuffer(),
                            icu_text3.getBuffer() + icu_text3.length());
-  const char* text4 = "SmallBlueRoboto ";
+  const char* text4 = "Small Blue Roboto";
   auto icu_text4 = icu::UnicodeString::fromUTF8(text4);
   std::u16string u16_text4(icu_text4.getBuffer(),
                            icu_text4.getBuffer() + icu_text4.length());
   const char* text5 =
-      "Continue Last Style With lots of words to check if it overlaps properly "
-      "or not";
+      "Continue Last Style With lots of words to check if it overlaps "
+      "properly or not";
   auto icu_text5 = icu::UnicodeString::fromUTF8(text5);
   std::u16string u16_text5(icu_text5.getBuffer(),
                            icu_text5.getBuffer() + icu_text5.length());
@@ -281,13 +281,13 @@ TEST_F(RenderTest, LinebreakParagraph) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  paragraph_style.max_lines = 1000;
+  paragraph_style.max_lines = 14;
   txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
   // Letter spacing not yet implemented
-  text_style.letter_spacing = 10;
+  text_style.letter_spacing = 0;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1.15;
   builder.PushStyle(text_style);
@@ -297,9 +297,9 @@ TEST_F(RenderTest, LinebreakParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth() - 100, txt::GetFontDir());
 
-  paragraph->Paint(GetCanvas(), 5.0, 30.0);
+  paragraph->Paint(GetCanvas(), 0, 30.0);
 
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
   for (size_t i = 0; i < u16_text.length(); i++) {

@@ -149,7 +149,7 @@ void Paragraph::Layout(double width,
 
   // Reset member variables so Layout still works when called more than once
   max_intrinsic_width_ = 0.0f;
-  lines_ = 1;
+  lines_ = 0;
 
   minikin::Layout layout;
   SkScalar x = x_offset;
@@ -170,8 +170,7 @@ void Paragraph::Layout(double width,
 
     size_t layout_start = run.start;
 
-    while (layout_start < run.end &&
-           GetLineCount() <= paragraph_style_.max_lines) {
+    while (layout_start < run.end && lines_ < paragraph_style_.max_lines) {
       const size_t next_break = (break_index > breaks_count - 1)
                                     ? std::numeric_limits<size_t>::max()
                                     : breaks[break_index];
@@ -194,14 +193,15 @@ void Paragraph::Layout(double width,
           const size_t glyph_index = blob_start + blob_index;
           buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
           const size_t pos_index = 2 * blob_index;
-          letter_spacing_offset += run.style.letter_spacing;
           buffer.pos[pos_index] = layout.getX(glyph_index) +
                                   letter_spacing_offset + word_spacing_offset;
+          letter_spacing_offset += run.style.letter_spacing;
           buffer.pos[pos_index + 1] = layout.getY(glyph_index);
         }
         blob_start += blob_length;
 
-        // Subtract letter offset to avoid big gap at end of run.
+        // Subtract letter offset to avoid big gap at end of run. This my be
+        // removed depending on the specificatins for letter spacing.
         letter_spacing_offset -= run.style.letter_spacing;
 
         word_spacing_offset += run.style.word_spacing;
@@ -209,6 +209,10 @@ void Paragraph::Layout(double width,
         max_intrinsic_width_ +=
             layout.getX(blob_start - 1) + letter_spacing_offset;
       }
+
+      // Subtract word offset to avoid big gap at end of run. This my be
+      // removed depending on the specificatins for word spacing.
+      word_spacing_offset -= run.style.word_spacing;
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
       // color stayed the same.
@@ -224,8 +228,6 @@ void Paragraph::Layout(double width,
         y_ += run.style.font_size * run.style.height;
         break_index += 1;
         lines_++;
-        if (lines_ > paragraph_style_.max_lines)
-          lines_--;
       } else {
         x += layout.getAdvance();
       }
@@ -259,8 +261,7 @@ double Paragraph::GetMinIntrinsicWidth() const {
 }
 
 double Paragraph::GetHeight() const {
-  return paragraph_style_.font_size * paragraph_style_.line_height *
-         paragraph_style_.max_lines;
+  return y_;
 }
 
 void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
@@ -277,7 +278,6 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
 }
 
 int Paragraph::GetLineCount() const {
-  // FTL_LOG(INFO) << "Lines: " << lines_;
   return lines_;
 }
 
