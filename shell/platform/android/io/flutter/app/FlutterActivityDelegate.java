@@ -265,10 +265,10 @@ public final class FlutterActivityDelegate
                 // was specified.
                 appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
             }
-            flutterView.runFromBundle(appBundlePath, intent.getStringExtra("snapshot"));
             if (route != null) {
-                flutterView.pushRoute(route);
+                flutterView.setInitialRoute(route);
             }
+            flutterView.runFromBundle(appBundlePath, intent.getStringExtra("snapshot"));
             return true;
         }
 
