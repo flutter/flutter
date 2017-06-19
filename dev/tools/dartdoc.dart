@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'update_versions.dart';
 
 const String kDocRoot = 'dev/docs/doc';
 
@@ -29,9 +30,12 @@ Future<Null> main(List<String> args) async {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
+  RawVersion version = new RawVersion('VERSION');
+
   // Create the pubspec.yaml file.
   final StringBuffer buf = new StringBuffer('''
 name: Flutter
+version: ${version.toString()}
 dependencies:
 ''');
   for (String package in findPackageNames()) {
