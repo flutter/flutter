@@ -143,9 +143,24 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return _vmServiceCache[port];
   }
 
+  Future<bool> _checkPort(int port) async {
+    bool connected = true;
+    Socket s;
+    try {
+      s = await Socket.connect("$_address", port);
+    } catch (_) {
+      connected = false;
+    }
+    if (s != null)
+      await s.close();
+    return connected;
+  }
+
   Future<List<FlutterView>> _getViews(List<int> ports) async {
     final List<FlutterView> views = <FlutterView>[];
     for (int port in ports) {
+      if (!await _checkPort(port))
+        continue;
       final VMService vmService = _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
