@@ -70,13 +70,6 @@ class IMobileDevice {
     return await exitsHappyAsync(<String>['idevicename']);
   }
 
-  /// Returns the value associated with the specified `ideviceinfo` key for a device.
-  ///
-  /// If either the specified key or device does not exist, returns the empty string.
-  String getInfoForDevice(String deviceID, String key) {
-    return runSync(<String>['ideviceinfo', '-k', key, '-u', deviceID]).trim();
-  }
-
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
 
