@@ -46,9 +46,9 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
 }
 
 void main() {
-  stock_data.StockDataFetcher.actuallyFetchData = false;
+  stock_data.StockData.actuallyFetchData = false;
 
-  testWidgets("Test icon colors", (WidgetTester tester) async {
+  testWidgets('Icon colors', (WidgetTester tester) async {
     stocks.main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame

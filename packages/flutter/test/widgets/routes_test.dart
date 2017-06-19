@@ -98,6 +98,12 @@ void main() {
   testWidgets('Route settings', (WidgetTester tester) async {
     final RouteSettings settings = const RouteSettings(name: 'A');
     expect(settings, hasOneLineDescription);
+    final RouteSettings settings2 = settings.copyWith(name: 'B');
+    expect(settings2.name, 'B');
+    expect(settings2.isInitialRoute, false);
+    final RouteSettings settings3 = settings2.copyWith(isInitialRoute: true);
+    expect(settings3.name, 'B');
+    expect(settings3.isInitialRoute, true);
   });
 
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {

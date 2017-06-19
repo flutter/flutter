@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
@@ -116,7 +117,12 @@ void mkdirs(Directory directory) {
 bool exists(FileSystemEntity entity) => entity.existsSync();
 
 void section(String title) {
-  print('\n••• $title •••');
+  title = '╡ ••• $title ••• ╞';
+  final String line = '═' * math.max((80 - title.length) ~/ 2, 2);
+  String output = '$line$title$line';
+  if (output.length == 79)
+    output += '═';
+  print('\n\n$output\n');
 }
 
 Future<String> getDartVersion() async {
@@ -179,6 +185,7 @@ Future<Process> startProcess(
   _runningProcesses.add(processInfo);
 
   process.exitCode.whenComplete(() {
+    print('\n'); // separate the output of this script from subsequent output to make logs easier to read
     _runningProcesses.remove(processInfo);
   });
 

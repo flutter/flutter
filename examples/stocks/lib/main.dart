@@ -29,9 +29,7 @@ class StocksApp extends StatefulWidget {
 }
 
 class StocksAppState extends State<StocksApp> {
-
-  final Map<String, Stock> _stocks = <String, Stock>{};
-  final List<String> _symbols = <String>[];
+  StockData stocks;
 
   StockConfiguration _configuration = new StockConfiguration(
     stockMode: StockMode.optimistic,
@@ -49,11 +47,7 @@ class StocksAppState extends State<StocksApp> {
   @override
   void initState() {
     super.initState();
-    new StockDataFetcher((StockData data) {
-      setState(() {
-        data.appendTo(_stocks, _symbols);
-      });
-    });
+    stocks = new StockData();
   }
 
   void configurationUpdater(StockConfiguration value) {
@@ -80,19 +74,28 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Route<Null> _getRoute(RouteSettings settings) {
+    // Routes, by convention, are split on slashes, like filesystem paths.
     final List<String> path = settings.name.split('/');
+    // We only support paths that start with a slash, so bail if
+    // the first component is not empty:
     if (path[0] != '')
       return null;
-    if (path[1] == 'stock') {
-      if (path.length != 3)
+    // If the path is "/stock:..." then show a stock page for the
+    // specified stock symbol.
+    if (path[1].startsWith('stock:')) {
+      // We don't yet support subpages of a stock, so bail if there's
+      // any more path components.
+      if (path.length != 2)
         return null;
-      if (_stocks.containsKey(path[2])) {
-        return new MaterialPageRoute<Null>(
-          settings: settings,
-          builder: (BuildContext context) => new StockSymbolPage(stock: _stocks[path[2]])
-        );
-      }
+      // Extract the symbol part of "stock:..." and return a route
+      // for that symbol.
+      final String symbol = path[1].substring(6);
+      return new MaterialPageRoute<Null>(
+        settings: settings,
+        builder: (BuildContext context) => new StockSymbolPage(symbol: symbol, stocks: stocks),
+      );
     }
+    // The other paths we support are in the routes table.
     return null;
   }
 
@@ -120,7 +123,7 @@ class StocksAppState extends State<StocksApp> {
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
-         '/':         (BuildContext context) => new StockHome(_stocks, _symbols, _configuration, configurationUpdater),
+         '/':         (BuildContext context) => new StockHome(stocks, _configuration, configurationUpdater),
          '/settings': (BuildContext context) => new StockSettings(_configuration, configurationUpdater)
       },
       onGenerateRoute: _getRoute,
