@@ -263,11 +263,9 @@ abstract class IntelliJValidator extends DoctorValidator {
   static final Map<String, String> _idToTitle = <String, String>{
     'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
     'IdeaIC' : 'IntelliJ IDEA Community Edition',
-    'WebStorm': 'WebStorm',
   };
 
   static final Version kMinIdeaVersion = new Version(2017, 1, 0);
-  static final Version kMinWebStormVersion = new Version(2017, 1, 0);
   static final Version kMinFlutterPluginVersion = new Version(14, 0, 0);
 
   static Iterable<DoctorValidator> get installedValidators {
@@ -284,11 +282,7 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     _validatePackage(messages, 'flutter-intellij.jar', 'Flutter',
         minVersion: kMinFlutterPluginVersion);
-
-    // Dart is bundled with WebStorm.
-    if (!isWebStorm) {
-      _validatePackage(messages, 'Dart', 'Dart');
-    }
+    _validatePackage(messages, 'Dart', 'Dart');
 
     if (_hasIssues(messages)) {
       messages.add(new ValidationMessage(
@@ -297,7 +291,7 @@ abstract class IntelliJValidator extends DoctorValidator {
       ));
     }
 
-    _validateIntelliJVersion(messages, isWebStorm ? kMinWebStormVersion : kMinIdeaVersion);
+    _validateIntelliJVersion(messages, kMinIdeaVersion);
 
     return new ValidationResult(
       _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
@@ -309,8 +303,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   bool _hasIssues(List<ValidationMessage> messages) {
     return messages.any((ValidationMessage message) => message.isError);
   }
-
-  bool get isWebStorm => title == 'WebStorm';
 
   void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
     // Ignore unknown versions.
@@ -441,7 +433,6 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     'IntelliJ IDEA.app' : 'IntelliJIdea',
     'IntelliJ IDEA Ultimate.app' : 'IntelliJIdea',
     'IntelliJ IDEA CE.app' : 'IdeaIC',
-    'WebStorm.app': 'WebStorm',
   };
 
   static Iterable<DoctorValidator> get installed {
