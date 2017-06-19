@@ -37,7 +37,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get canListAnything => iosWorkflow.canListDevices;
 
   @override
-  List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
+  Future<List<Device>> pollingGetDevices() async => IOSSimulatorUtils.instance.getAttachedDevices();
 }
 
 class IOSSimulatorUtils {
