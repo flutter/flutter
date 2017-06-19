@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -10,8 +12,6 @@ import 'arc.dart';
 import 'colors.dart';
 import 'page.dart';
 import 'theme.dart';
-
-export 'dart:ui' show Locale;
 
 const TextStyle _errorTextStyle = const TextStyle(
   color: const Color(0xD0FF0000),
@@ -54,7 +54,7 @@ class MaterialApp extends StatefulWidget {
     this.theme,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
-    this.initialRoute: Navigator.defaultRouteName,
+    String initialRoute,
     this.onGenerateRoute,
     this.onLocaleChanged,
     this.navigatorObservers: const <NavigatorObserver>[],
@@ -64,11 +64,13 @@ class MaterialApp extends StatefulWidget {
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
-  }) : assert(debugShowMaterialGrid != null),
+  }) : this.initialRoute = initialRoute ?? ui.window.defaultRouteName ?? Navigator.defaultRouteName,
+       assert(debugShowMaterialGrid != null),
        assert(routes != null),
-       assert(!routes.containsKey(initialRoute) || (home == null)),
-       assert(routes.containsKey(initialRoute) || (home != null) || (onGenerateRoute != null)),
-       super(key: key);
+       super(key: key) {
+     assert(!routes.containsKey(this.initialRoute) || (home == null));
+     assert(routes.containsKey(this.initialRoute) || (home != null) || (onGenerateRoute != null));
+  }
 
   /// A one-line description of this app for use in the window manager.
   final String title;
