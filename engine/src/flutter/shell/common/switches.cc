@@ -7,6 +7,8 @@
 #include <sstream>
 #include <string>
 
+#include "lib/ftl/strings/string_view.h"
+
 // Include once for the default enum definition.
 #include "flutter/shell/common/switches.h"
 
@@ -14,7 +16,7 @@
 
 struct SwitchDesc {
   shell::Switch sw;
-  const char* flag;
+  const ftl::StringView flag;
   const char* help;
 };
 
@@ -46,7 +48,7 @@ void PrintUsage(const std::string& executable_name) {
   uint32_t max_width = 2;
   for (uint32_t i = 0; i < flags_count; i++) {
     auto desc = gSwitchDescs[i];
-    max_width = std::max<uint32_t>(strlen(desc.flag) + 2, max_width);
+    max_width = std::max<uint32_t>(desc.flag.size() + 2, max_width);
   }
 
   const uint32_t help_width = column_width - max_width - 3;
@@ -56,7 +58,7 @@ void PrintUsage(const std::string& executable_name) {
     auto desc = gSwitchDescs[i];
 
     std::cerr << std::setw(max_width)
-              << std::string("--") + std::string(desc.flag) << " : ";
+              << std::string("--") + desc.flag.ToString() << " : ";
 
     std::istringstream stream(desc.help);
     int32_t remaining = help_width;
@@ -78,13 +80,13 @@ void PrintUsage(const std::string& executable_name) {
   std::cerr << std::string(column_width, '-') << std::endl;
 }
 
-const char* FlagForSwitch(Switch swtch) {
+const ftl::StringView FlagForSwitch(Switch swtch) {
   for (uint32_t i = 0; i < static_cast<uint32_t>(Switch::Sentinel); i++) {
     if (gSwitchDescs[i].sw == swtch) {
       return gSwitchDescs[i].flag;
     }
   }
-  return nullptr;
+  return ftl::StringView();
 }
 
 }  // namespace shell
