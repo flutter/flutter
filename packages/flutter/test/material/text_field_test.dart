@@ -38,6 +38,11 @@ Widget overlay(Widget child) {
   );
 }
 
+Future<Null> skipPastScrollingAnimation(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 200));
+}
+
 void main() {
   final MockClipboard mockClipboard = new MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
@@ -112,8 +117,7 @@ void main() {
         expect(textFieldValue, equals(testValue));
 
         await tester.pumpWidget(builder());
-        // skip past scrolling animation
-        await tester.pump(const Duration(milliseconds: 200));
+        await skipPastScrollingAnimation(tester);
       });
     }
 
@@ -219,8 +223,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap to reposition the caret.
     final int tapIndex = testValue.indexOf('e');
@@ -263,8 +266,7 @@ void main() {
     expect(controller.value.text, testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     expect(controller.selection.isCollapsed, true);
 
@@ -299,8 +301,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
@@ -362,8 +363,7 @@ void main() {
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
@@ -382,8 +382,7 @@ void main() {
     // COPY should reset the selection.
     await tester.tap(find.text('COPY'));
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
     expect(controller.selection.isCollapsed, true);
 
     // Tap again to bring back the menu.
@@ -418,8 +417,7 @@ void main() {
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
@@ -532,8 +530,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Check that the text spans multiple lines.
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
@@ -1340,8 +1337,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'a1b\n2c3');
       expect(textController.text, '123');
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       await tester.tapAt(textOffsetToPosition(tester, '123'.indexOf('2')));
       await tester.pumpWidget(builder());
@@ -1382,8 +1378,7 @@ void main() {
       final String longText = 'a' * 20;
       await tester.enterText(find.byType(TextField), longText);
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
       expect(scrollableState.position.pixels, equals(0.0));
@@ -1392,8 +1387,7 @@ void main() {
       // scrolls to make the caret visible.
       controller.selection = new TextSelection.collapsed(offset: longText.length);
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       scrollableState = tester.firstState(find.byType(Scrollable));
       expect(scrollableState.position.pixels, isNot(equals(0.0)));
