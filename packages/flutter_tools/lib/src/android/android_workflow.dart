@@ -178,7 +178,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     final String javaBinary = _findJavaBinary();
     if (javaBinary != null) {
       sdkManagerEnv['PATH'] =
-          platform.environment['PATH'] + os.pathVarSeparator + fs.path.dirname(javaBinary);
+          fs.path.dirname(javaBinary) + os.pathVarSeparator + platform.environment['PATH'];
     }
 
     final String sdkManagerPath = fs.path.join(
