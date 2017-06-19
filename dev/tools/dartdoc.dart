@@ -35,7 +35,7 @@ Future<Null> main(List<String> args) async {
   // Create the pubspec.yaml file.
   final StringBuffer buf = new StringBuffer('''
 name: Flutter
-version: ${version.toString()}
+version: $version
 dependencies:
 ''');
   for (String package in findPackageNames()) {
