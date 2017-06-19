@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "lib/ftl/strings/string_view.h"
-
 #ifndef SHELL_COMMON_SWITCHES_H_
 #define SHELL_COMMON_SWITCHES_H_
 
@@ -108,7 +106,7 @@ DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);
 
-const ftl::StringView FlagForSwitch(Switch sw);
+const char* FlagForSwitch(Switch sw);
 
 }  // namespace shell
 
