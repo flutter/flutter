@@ -211,6 +211,17 @@ Future<Null> buildGradleProjectV1(String gradle) async {
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
+File findApkFile(String buildDirectory, String buildModeName) {
+  final String apkFilename = 'app-$buildModeName.apk';
+  File apkFile = fs.file('$buildDirectory/$apkFilename');
+  if (apkFile.existsSync())
+    return apkFile;
+  apkFile = fs.file('$buildDirectory/$buildModeName/$apkFilename');
+  if (apkFile.existsSync())
+    return apkFile;
+  return null;
+}
+
 Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String target, String kernelPath) async {
   final String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
@@ -244,8 +255,9 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
     throwToolExit('Gradle build failed: $exitcode', exitCode: exitcode);
 
   final String buildDirectory = getGradleAppOutDirV2();
-  final String apkFilename = 'app-$buildModeName.apk';
-  final File apkFile = fs.file('$buildDirectory/$apkFilename');
+  final File apkFile = findApkFile(buildDirectory, buildModeName);
+  if (apkFile == null)
+    throwToolExit('Gradle build failed to produce an Android package.');
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
   apkFile.copySync('$buildDirectory/app.apk');
 
