@@ -30,7 +30,7 @@ Future<Null> main(List<String> args) async {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
-  RawVersion version = new RawVersion('VERSION');
+  final RawVersion version = new RawVersion('VERSION');
 
   // Create the pubspec.yaml file.
   final StringBuffer buf = new StringBuffer('''
