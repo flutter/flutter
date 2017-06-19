@@ -22,11 +22,55 @@ copy("generate_dart_ui") {
   ]
 }
 
+if (target_is_fuchsia) {
+  action("generate_package_map") {
+    dart_deps = [
+      "//lib/fidl/dart:dart",
+      "//lib/flutter/packages/flutter:flutter",
+      "//lib/widgets/packages/widgets:lib.widgets",
+      "//application/lib/app/dart:dart",
+    ]
+
+    dot_packages_file = "$target_gen_dir/snapshot.packages"
+    outputs = [
+      dot_packages_file
+    ]
+    deps = dart_deps
+    depfile = "$dot_packages_file.d"
+
+    script = "//build/dart/gen_dot_packages.py"
+    args = [
+      "--out",
+      rebase_path(dot_packages_file, root_build_dir),
+      "--source-dir",
+      rebase_path("."),
+      "--root-build-dir",
+      rebase_path(root_build_dir),
+      "--root-gen-dir",
+      rebase_path(root_gen_dir),
+      "--package-name",
+      "snapshot_root",
+      "--depfile",
+      rebase_path(depfile),
+      "--deps",
+    ] + dart_deps
+  }
+}
+
 action("generate_snapshot_bin") {
   if (target_is_fuchsia) {
     snapshot_dart = "snapshot_fuchsia.dart"
+    # TODO(rmacnak): Fuchsia cross builds use the wrong Dart target
+    # architecture, and have added steps that depend on this error for
+    # reasonable build times (e.g., invoking the analyzer).
+    if (target_cpu == host_cpu) {
+      snapshot_kind = "core-jit"
+    } else {
+      snapshot_kind = "core"
+    }
   } else {
     snapshot_dart = "snapshot.dart"
+    snapshot_kind = "core"
   }
 
   deps = [
@@ -37,6 +81,10 @@ action("generate_snapshot_bin") {
              "//dart/runtime/tools/create_snapshot_bin.py",
              snapshot_dart,
            ] + dart_ui_files
+  if (target_is_fuchsia) {
+    deps += [ ":generate_package_map" ]
+    inputs += [ "fuchsia_compilation_trace.txt" ]
+  }
 
   vm_snapshot_data = "$target_gen_dir/vm_isolate_snapshot.bin"
   vm_snapshot_instructions = "$target_gen_dir/vm_snapshot_instructions.bin"
@@ -60,12 +108,16 @@ action("generate_snapshot_bin") {
   args = [
     "--executable",
     rebase_path("$gen_snapshot_dir/gen_snapshot"),
-    "--package_root",
-    rebase_path("$root_gen_dir"),
     "--script",
     rebase_path(snapshot_dart),
     "--snapshot_kind",
-    "core",
+    snapshot_kind,
+    "--vm_flag",
+    "--await_is_keyword",
+    "--vm_flag",
+    "--assert_initializer",
+    "--vm_flag",
+    "--enable_mirrors=false",
     "--vm_output_bin",
     rebase_path(vm_snapshot_data, root_build_dir),
     "--vm_instructions_output_bin",
@@ -77,6 +129,19 @@ action("generate_snapshot_bin") {
     "--url_mapping=dart:ui,$rebased_dart_ui_path",
   ]
 
+  if (is_debug) {
+    args += [
+      "--vm_flag",
+      "--enable_asserts",
+      "--vm_flag",
+      "--enable_type_checks",
+      "--vm_flag",
+      "--error_on_bad_type",
+      "--vm_flag",
+      "--error_on_bad_override",
+    ]
+  }
+
   if (target_is_fuchsia) {
     inputs += fidl_dart_sdk_ext_files + mozart_dart_sdk_ext_files
     fidl_internal_path = rebase_path(fidl_dart_sdk_ext_lib)
@@ -84,6 +149,10 @@ action("generate_snapshot_bin") {
     args += [
       "--url_mapping=dart:fidl.internal,$fidl_internal_path",
       "--url_mapping=dart:mozart.internal,$mozart_internal_path",
+      "--packages",
+      rebase_path("$target_gen_dir/snapshot.packages"),
+      "--load_compilation_trace",
+      rebase_path("fuchsia_compilation_trace.txt"),
     ]
   }
 }

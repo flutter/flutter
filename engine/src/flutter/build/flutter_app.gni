@@ -135,6 +135,9 @@ template("flutter_app") {
       "--root-build-dir",
       rebase_path(root_build_dir),
     ]
+    if (is_debug) {
+      args += [ "--checked" ]
+    }
 
     deps = [
       ":$dart_package_name",
@@ -286,6 +289,9 @@ template("flutter_aot_app") {
       "--root-build-dir",
       rebase_path(root_build_dir),
     ]
+    if (is_debug) {
+      args += [ "--checked" ]
+    }
 
     deps = [
       ":$dart_package_name",
