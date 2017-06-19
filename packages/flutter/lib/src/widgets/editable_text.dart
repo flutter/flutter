@@ -460,11 +460,13 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     // selection, then scroll the caret into view.
     if (_textChangedSinceLastCaretUpdate) {
       _textChangedSinceLastCaretUpdate = false;
-      _scrollController.animateTo(
-        _getScrollOffsetForCaret(caretRect),
-        curve: Curves.fastOutSlowIn,
-        duration: const Duration(milliseconds: 50),
-      );
+      scheduleMicrotask(() {
+        _scrollController.animateTo(
+          _getScrollOffsetForCaret(caretRect),
+          curve: Curves.fastOutSlowIn,
+          duration: const Duration(milliseconds: 50),
+        );
+      });
     }
   }
 
