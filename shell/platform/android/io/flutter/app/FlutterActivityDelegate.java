@@ -245,6 +245,9 @@ public final class FlutterActivityDelegate
         if (intent.getBooleanExtra("enable-software-rendering", false)) {
             args.add("--enable-software-rendering");
         }
+        if (intent.getBooleanExtra("enable-txt", false)) {
+            args.add("--enable-txt");
+        }
         if (!args.isEmpty()) {
             String[] argsArray = new String[args.size()];
             return args.toArray(argsArray);
