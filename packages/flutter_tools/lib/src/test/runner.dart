@@ -38,7 +38,7 @@ Future<int> runTests(
   }
 
   if (json) {
-    testArgs.addAll(<String>["-r", "json"]);
+    testArgs.addAll(<String>['-r', 'json']);
   }
 
   testArgs.add('--');

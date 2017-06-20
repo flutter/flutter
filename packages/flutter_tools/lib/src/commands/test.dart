@@ -193,7 +193,8 @@ class TestCommand extends FlutterCommand {
         enableObservatory: collector != null || startPaused,
         startPaused: startPaused,
         ipv6: argResults['ipv6'],
-        json: machine);
+        json: machine,
+        );
 
     if (collector != null) {
       if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))
