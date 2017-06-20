@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'flat_button.dart';
@@ -90,8 +91,17 @@ class _TextSelectionToolbar extends StatelessWidget {
 /// Centers the toolbar around the given position, ensuring that it remains on
 /// screen.
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
-  _TextSelectionToolbarLayout(this.position);
+  _TextSelectionToolbarLayout(this.screenSize, this.globalEditableRegion, this.position);
 
+  /// The size of the screen at the time that the toolbar was last laid out.
+  final Size screenSize;
+
+  /// Size and position of the editing region at the time the toolbar was last
+  /// laid out, in global coordinates.
+  final Rect globalEditableRegion;
+
+  /// Anchor position of the toolbar, relative to the top left of the
+  /// [globalEditableRegion].
   final Offset position;
 
   @override
@@ -101,17 +111,20 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double x = position.dx - childSize.width / 2.0;
-    double y = position.dy - childSize.height;
+    final Offset globalPosition = globalEditableRegion.topLeft + position;
+
+    double x = globalPosition.dx - childSize.width / 2.0;
+    double y = globalPosition.dy - childSize.height;
 
     if (x < _kToolbarScreenPadding)
       x = _kToolbarScreenPadding;
-    else if (x + childSize.width > size.width - 2 * _kToolbarScreenPadding)
-      x = size.width - childSize.width - _kToolbarScreenPadding;
+    else if (x + childSize.width > screenSize.width - _kToolbarScreenPadding)
+      x = screenSize.width - childSize.width - _kToolbarScreenPadding;
+
     if (y < _kToolbarScreenPadding)
       y = _kToolbarScreenPadding;
-    else if (y + childSize.height > size.height - 2 * _kToolbarScreenPadding)
-      y = size.height - childSize.height - _kToolbarScreenPadding;
+    else if (y + childSize.height > screenSize.height - _kToolbarScreenPadding)
+      y = screenSize.height - childSize.height - _kToolbarScreenPadding;
 
     return new Offset(x, y);
   }
@@ -149,15 +162,17 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
-  Widget buildToolbar(
-      BuildContext context, Offset position, TextSelectionDelegate delegate) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
-    final Size screenSize = MediaQuery.of(context).size;
     return new ConstrainedBox(
-      constraints: new BoxConstraints.loose(screenSize),
+      constraints: new BoxConstraints.tight(globalEditableRegion.size),
       child: new CustomSingleChildLayout(
-        delegate: new _TextSelectionToolbarLayout(position),
-        child: new _TextSelectionToolbar(delegate)
+        delegate: new _TextSelectionToolbarLayout(
+          MediaQuery.of(context).size,
+          globalEditableRegion,
+          position,
+        ),
+        child: new _TextSelectionToolbar(delegate),
       )
     );
   }

@@ -1829,7 +1829,7 @@ abstract class RenderBox extends RenderObject {
   /// Subclasses that apply transforms during painting should override this
   /// function to factor those transforms into the calculation.
   ///
-  /// The RenderBox implementation takes care of adjusting the matrix for the
+  /// The [RenderBox] implementation takes care of adjusting the matrix for the
   /// position of the given child as determined during layout and stored on the
   /// child's [parentData] in the [BoxParentData.offset] field.
   @override

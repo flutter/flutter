@@ -56,13 +56,29 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 /// child might be recorded in separate compositing layers. For this reason, do
 /// not hold a reference to the canvas across operations that might paint
 /// child render objects.
+///
+/// New [PaintingContext] objects are created automatically when using
+/// [PaintingContext.repaintCompositedChild] and [pushLayer].
 class PaintingContext {
-  PaintingContext._(this._containerLayer, this._paintBounds)
+  PaintingContext._(this._containerLayer, this.canvasBounds)
     : assert(_containerLayer != null),
-      assert(_paintBounds != null);
+      assert(canvasBounds != null);
 
   final ContainerLayer _containerLayer;
-  final Rect _paintBounds;
+
+  /// The bounds within which the painting context's [canvas] will record
+  /// painting commands.
+  ///
+  /// A render object provided with this [PaintingContext] (e.g. in its
+  /// [RenderObject.paint] method) is permitted to paint outside the region that
+  /// the render object occupies during layout, but is not permitted to paint
+  /// outside these paints bounds. These paint bounds are used to construct
+  /// memory-efficient composited layers, which means attempting to paint
+  /// outside these bounds can attempt to write to pixels that do not exist in
+  /// the composited layer.
+  ///
+  /// The [paintBounds] rectangle is in the [canvas] coordinate system.
+  final Rect canvasBounds;
 
   /// Repaint the given render object.
   ///
@@ -70,6 +86,11 @@ class PaintingContext {
   /// composited layer, and must be in need of painting. The render object's
   /// layer, if any, is re-used, along with any layers in the subtree that don't
   /// need to be repainted.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
+  ///    has a composited layer.
   static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent: false }) {
     assert(child.isRepaintBoundary);
     assert(child._needsPaint);
@@ -97,7 +118,7 @@ class PaintingContext {
     childContext._stopRecordingIfNeeded();
   }
 
-  /// Paint a child render object.
+  /// Paint a child [RenderObject].
   ///
   /// If the child has its own composited layer, the child will be composited
   /// into the layer subtree associated with this painting context. Otherwise,
@@ -180,6 +201,8 @@ class PaintingContext {
   /// The current canvas can change whenever you paint a child using this
   /// context, which means it's fragile to hold a reference to the canvas
   /// returned by this getter.
+  ///
+  /// Only calls within the [canvasBounds] will be recorded.
   Canvas get canvas {
     if (_canvas == null)
       _startRecording();
@@ -188,9 +211,9 @@ class PaintingContext {
 
   void _startRecording() {
     assert(!_isRecording);
-    _currentLayer = new PictureLayer();
+    _currentLayer = new PictureLayer(canvasBounds);
     _recorder = new ui.PictureRecorder();
-    _canvas = new Canvas(_recorder, _paintBounds);
+    _canvas = new Canvas(_recorder, canvasBounds);
     _containerLayer.append(_currentLayer);
   }
 
@@ -203,14 +226,14 @@ class PaintingContext {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 6.0
           ..color = debugCurrentRepaintColor.toColor();
-        canvas.drawRect(_paintBounds.deflate(3.0), paint);
+        canvas.drawRect(canvasBounds.deflate(3.0), paint);
       }
       if (debugPaintLayerBordersEnabled) {
         final Paint paint = new Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
           ..color = debugPaintLayerBordersColor;
-        canvas.drawRect(_paintBounds, paint);
+        canvas.drawRect(canvasBounds, paint);
       }
       return true;
     });
@@ -262,7 +285,7 @@ class PaintingContext {
   }
 
   /// Appends the given layer to the recording, and calls the `painter` callback
-  /// with that layer, providing the [childPaintBounds] as the paint bounds of
+  /// with that layer, providing the `childPaintBounds` as the paint bounds of
   /// the child. Canvas recording commands are not guaranteed to be stored
   /// outside of the paint bounds.
   ///
@@ -272,9 +295,11 @@ class PaintingContext {
   ///
   /// The `offset` is the offset to pass to the `painter`.
   ///
-  /// If the `childPaintBounds` are not specified then the current layer's
+  /// If the `childPaintBounds` are not specified then the current layer's paint
   /// bounds are used. This is appropriate if the child layer does not apply any
-  /// transformation or clipping to its contents.
+  /// transformation or clipping to its contents. The `childPaintBounds`, if
+  /// specified, must be in the coordinate system of the new layer, and should
+  /// not go outside the current layer's paint bounds.
   ///
   /// See also:
   ///
@@ -285,7 +310,7 @@ class PaintingContext {
     assert(painter != null);
     _stopRecordingIfNeeded();
     _appendLayer(childLayer);
-    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? _paintBounds);
+    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? canvasBounds);
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
@@ -379,7 +404,7 @@ class PaintingContext {
         new TransformLayer(transform: effectiveTransform),
         painter,
         offset,
-        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, _paintBounds),
+        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, canvasBounds),
       );
     } else {
       canvas.save();
@@ -406,6 +431,9 @@ class PaintingContext {
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
     pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
   }
+
+  @override
+  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $canvasBounds)';
 }
 
 /// An abstract set of layout constraints.
@@ -1981,6 +2009,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// frequently might want to repaint themselves without requiring their parent
   /// to repaint.
   ///
+  /// If this getter returns true, the [paintBounds] are applied to this object
+  /// and all descendants.
+  ///
   /// Warning: This getter must not change value over the lifetime of this object.
   bool get isRepaintBoundary => false;
 
@@ -2272,12 +2303,15 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// The bounds within which this render object will paint.
   ///
-  /// A render object is permitted to paint outside the region it occupies
-  /// during layout but is not permitted to paint outside these paints bounds.
-  /// These paint bounds are used to construct memory-efficient composited
-  /// layers, which means attempting to paint outside these bounds can attempt
-  /// to write to pixels that do not exist in this render object's composited
-  /// layer.
+  /// A render object and its descendants are permitted to paint outside the
+  /// region it occupies during layout, but they are not permitted to paint
+  /// outside these paints bounds. These paint bounds are used to construct
+  /// memory-efficient composited layers, which means attempting to paint
+  /// outside these bounds can attempt to write to pixels that do not exist in
+  /// this render object's composited layer.
+  ///
+  /// The [paintBounds] are only actually enforced when the render object is a
+  /// repaint boundary; see [isRepaintBoundary].
   Rect get paintBounds;
 
   /// Override this method to paint debugging information.

@@ -24,6 +24,10 @@ import 'scroll_position_with_single_context.dart';
 /// to an individual [Scrollable] widget. To use a custom [ScrollPosition],
 /// subclass [ScrollController] and override [createScrollPosition].
 ///
+/// A [ScrollController] is a [Listenable]. It notifies its listeners whenever
+/// any of the attached [ScrollPosition]s notify _their_ listeners (i.e.
+/// whenever any of them scroll).
+///
 /// Typically used with [ListView], [GridView], [CustomScrollView].
 ///
 /// See also:

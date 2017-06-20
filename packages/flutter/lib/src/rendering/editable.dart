@@ -30,8 +30,9 @@ typedef void SelectionChangedHandler(TextSelection selection, RenderEditable ren
 /// Used by [RenderEditable.onCaretChanged].
 typedef void CaretChangedHandler(Rect caretRect);
 
-/// Represents a global screen coordinate of the point in a selection, and the
-/// text direction at that point.
+/// Represents the coordinates of the point in a selection, and the text
+/// direction at that point, relative to top left of the [RenderEditable] that
+/// holds the selection.
 @immutable
 class TextSelectionPoint {
   /// Creates a description of a point in a text selection.
@@ -40,7 +41,8 @@ class TextSelectionPoint {
   const TextSelectionPoint(this.point, this.direction)
       : assert(point != null);
 
-  /// Screen coordinates of the lower left or lower right corner of the selection.
+  /// Coordinates of the lower left or lower right corner of the selection,
+  /// relative to the top left of the [RenderEditable] object.
   final Offset point;
 
   /// Direction of the text at this edge of the selection.
@@ -316,7 +318,7 @@ class RenderEditable extends RenderBox {
 
   bool _hasVisualOverflow = false;
 
-  /// Returns the global coordinates of the endpoints of the given selection.
+  /// Returns the local coordinates of the endpoints of the given selection.
   ///
   /// If the selection is collapsed (and therefore occupies a single point), the
   /// returned list is of length one. Otherwise, the selection is not collapsed
@@ -333,14 +335,14 @@ class RenderEditable extends RenderBox {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
       final Offset start = new Offset(0.0, _preferredLineHeight) + caretOffset + paintOffset;
-      return <TextSelectionPoint>[new TextSelectionPoint(localToGlobal(start), null)];
+      return <TextSelectionPoint>[new TextSelectionPoint(start, null)];
     } else {
       final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
       final Offset start = new Offset(boxes.first.start, boxes.first.bottom) + paintOffset;
       final Offset end = new Offset(boxes.last.end, boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
-        new TextSelectionPoint(localToGlobal(start), boxes.first.direction),
-        new TextSelectionPoint(localToGlobal(end), boxes.last.direction),
+        new TextSelectionPoint(start, boxes.first.direction),
+        new TextSelectionPoint(end, boxes.last.direction),
       ];
     }
   }
