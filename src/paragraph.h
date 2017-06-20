@@ -17,6 +17,7 @@
 #ifndef LIB_TXT_SRC_PARAGRAPH_H_
 #define LIB_TXT_SRC_PARAGRAPH_H_
 
+#include <tuple>
 #include <vector>
 
 #include "lib/ftl/macros.h"
@@ -74,18 +75,30 @@ class Paragraph {
   StyledRuns runs_;
   minikin::LineBreaker breaker_;
   std::vector<PaintRecord> records_;
+  std::vector<
+      std::tuple<TextDecoration, SkColor, TextDecorationStyle, FontWeight>>
+      decorations_;
   ParagraphStyle paragraph_style_;
   SkScalar y_ = 0.0f;  // Height of the paragraph after Layout().
   double width_ = 0.0f;
   int lines_ = 1;
   double max_intrinsic_width_ = 0.0f;
-  double min_intrinsic_width_ = 0;
+  double min_intrinsic_width_ = 0.0f;
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 
   void SetParagraphStyle(const ParagraphStyle& style);
 
   void AddRunsToLineBreaker(const std::string& rootdir = "");
+
+  void PaintDecorations(
+      SkCanvas* canvas,
+      double x,
+      double y,
+      std::tuple<TextDecoration, SkColor, TextDecorationStyle, FontWeight>
+          decoration,
+      SkPaint::FontMetrics metrics,
+      SkTextBlob* blob);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };

@@ -96,7 +96,7 @@ TEST_F(RenderTest, RainbowParagraph) {
   auto icu_text1 = icu::UnicodeString::fromUTF8(text1);
   std::u16string u16_text1(icu_text1.getBuffer(),
                            icu_text1.getBuffer() + icu_text1.length());
-  const char* text2 = "Big Green Default";
+  const char* text2 = "big Greeen Default";
   auto icu_text2 = icu::UnicodeString::fromUTF8(text2);
   std::u16string u16_text2(icu_text2.getBuffer(),
                            icu_text2.getBuffer() + icu_text2.length());
@@ -116,6 +116,7 @@ TEST_F(RenderTest, RainbowParagraph) {
                            icu_text5.getBuffer() + icu_text5.length());
 
   txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 2;
   txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style1;
@@ -132,6 +133,8 @@ TEST_F(RenderTest, RainbowParagraph) {
   text_style2.font_weight = txt::FontWeight::w600;
   text_style2.fake_bold = true;
   text_style2.color = SK_ColorGREEN;
+  text_style2.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style2.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style2);
 
   builder.AddText(u16_text2);
@@ -165,6 +168,7 @@ TEST_F(RenderTest, RainbowParagraph) {
   for (size_t i = 0; i < u16_text1.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text1[i]);
   }
+  ASSERT_TRUE(Snapshot());
   ASSERT_EQ(paragraph->runs_.runs_.size(), 4ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 4ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style1));
@@ -175,7 +179,6 @@ TEST_F(RenderTest, RainbowParagraph) {
   ASSERT_EQ(paragraph->records_[1].color(), text_style2.color);
   ASSERT_EQ(paragraph->records_[2].color(), text_style3.color);
   ASSERT_EQ(paragraph->records_[3].color(), text_style4.color);
-  ASSERT_TRUE(Snapshot());
 }
 
 // Currently, this should render nothing without a supplied TextStyle.
@@ -290,6 +293,8 @@ TEST_F(RenderTest, LinebreakParagraph) {
   text_style.letter_spacing = 0;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1.15;
+  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
   builder.AddText(u16_text);

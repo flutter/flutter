@@ -15,26 +15,33 @@
  */
 
 #include "lib/txt/src/paint_record.h"
+#include "lib/ftl/logging.h"
 
 namespace txt {
 
-PaintRecord::PaintRecord() = default;
-
 PaintRecord::~PaintRecord() = default;
 
-PaintRecord::PaintRecord(SkColor color, SkPoint offset, sk_sp<SkTextBlob> text)
-    : color_(color), offset_(offset), text_(std::move(text)) {}
+PaintRecord::PaintRecord(SkColor color,
+                         SkPoint offset,
+                         sk_sp<SkTextBlob> text,
+                         SkPaint::FontMetrics metrics)
+    : color_(color),
+      offset_(offset),
+      text_(std::move(text)),
+      metrics_(metrics) {}
 
 PaintRecord::PaintRecord(PaintRecord&& other) {
   color_ = other.color_;
   offset_ = other.offset_;
   text_ = std::move(other.text_);
+  metrics_ = other.metrics_;
 }
 
 PaintRecord& PaintRecord::operator=(PaintRecord&& other) {
   color_ = other.color_;
   offset_ = other.offset_;
   text_ = std::move(other.text_);
+  metrics_ = other.metrics_;
   return *this;
 }
 
