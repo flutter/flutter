@@ -15,6 +15,7 @@
 #include "flutter/shell/common/tracing_controller.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
 #include "lib/ftl/command_line.h"
+#include "lib/ftl/strings/string_view.h"
 
 namespace shell {
 
@@ -91,7 +92,7 @@ static bool FlagsValidForCommandLineLaunch(const std::string& bundle_path,
   return true;
 }
 
-static std::string ResolveCommandLineLaunchFlag(const char* name) {
+static std::string ResolveCommandLineLaunchFlag(const ftl::StringView name) {
   const auto& command_line = shell::Shell::Shared().GetCommandLine();
 
   std::string command_line_option;
@@ -100,7 +101,7 @@ static std::string ResolveCommandLineLaunchFlag(const char* name) {
   }
 
   const char* saved_default =
-      [[NSUserDefaults standardUserDefaults] stringForKey:@(name)].UTF8String;
+      [[NSUserDefaults standardUserDefaults] stringForKey:@(name.data())].UTF8String;
 
   if (saved_default != NULL) {
     return saved_default;
@@ -121,9 +122,9 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
     // one go. We dont want to end up in a situation where we take one value
     // from the command line and the others from user defaults. In case, any
     // new flags are specified, forget about all the old ones.
-    [defaults removeObjectForKey:@(FlagForSwitch(Switch::FLX))];
-    [defaults removeObjectForKey:@(FlagForSwitch(Switch::MainDartFile))];
-    [defaults removeObjectForKey:@(FlagForSwitch(Switch::Packages))];
+    [defaults removeObjectForKey:@(FlagForSwitch(Switch::FLX).data())];
+    [defaults removeObjectForKey:@(FlagForSwitch(Switch::MainDartFile).data())];
+    [defaults removeObjectForKey:@(FlagForSwitch(Switch::Packages).data())];
 
     [defaults synchronize];
   }
@@ -139,9 +140,9 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
   // Save the newly resolved dart main file and the package root to user
   // defaults so that the next time the user launches the application in the
   // simulator without the tooling, the application boots up.
-  [defaults setObject:@(bundle_path.c_str()) forKey:@(FlagForSwitch(Switch::FLX))];
-  [defaults setObject:@(main.c_str()) forKey:@(FlagForSwitch(Switch::MainDartFile))];
-  [defaults setObject:@(packages.c_str()) forKey:@(FlagForSwitch(Switch::Packages))];
+  [defaults setObject:@(bundle_path.c_str()) forKey:@(FlagForSwitch(Switch::FLX).data())];
+  [defaults setObject:@(main.c_str()) forKey:@(FlagForSwitch(Switch::MainDartFile).data())];
+  [defaults setObject:@(packages.c_str()) forKey:@(FlagForSwitch(Switch::Packages).data())];
 
   [defaults synchronize];
 

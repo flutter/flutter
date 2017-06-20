@@ -1,4 +1,4 @@
-Signature: 4dcd5e5c7ba17499b85da8a9b3fa6637
+Signature: 8ce9795a1571ef4554479f407125b26e
 
 UNUSED LICENSES:
 
@@ -78,6 +78,7 @@ FILE: ../../../lib/ftl/files/symlink.h
 FILE: ../../../lib/ftl/files/symlink_posix.cc
 FILE: ../../../lib/ftl/files/unique_fd.cc
 FILE: ../../../lib/ftl/files/unique_fd.h
+FILE: ../../../lib/ftl/functional/auto_call.h
 FILE: ../../../lib/ftl/functional/closure.h
 FILE: ../../../lib/ftl/functional/make_copyable.h
 FILE: ../../../lib/ftl/functional/make_copyable_unittest.cc
@@ -224,6 +225,11 @@ ORIGIN: ../../../lib/ftl/files/path_win.cc + ../../../lib/ftl/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../lib/ftl/files/path_win.cc
 FILE: ../../../lib/ftl/files/symlink_win.cc
+FILE: ../../../lib/ftl/functional/apply.h
+FILE: ../../../lib/ftl/functional/apply_unittest.cc
+FILE: ../../../lib/ftl/functional/auto_call_unittest.cc
+FILE: ../../../lib/ftl/functional/cancelable_callback.h
+FILE: ../../../lib/ftl/functional/cancelable_callback_unittest.cc
 FILE: ../../../lib/ftl/inttypes.h
 FILE: ../../../lib/ftl/portable_unistd.h
 FILE: ../../../lib/ftl/random/rand_unittest.cc

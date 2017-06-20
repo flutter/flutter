@@ -10,20 +10,21 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h"
+#include "lib/ftl/strings/string_view.h"
 
-static NSURL* URLForSwitch(const char* name) {
+static NSURL* URLForSwitch(const ftl::StringView name) {
   const auto& cmd = shell::Shell::Shared().GetCommandLine();
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 
   std::string switch_value;
   if (cmd.GetOptionValue(name, &switch_value)) {
     auto url = [NSURL fileURLWithPath:@(switch_value.c_str())];
-    [defaults setURL:url forKey:@(name)];
+    [defaults setURL:url forKey:@(name.data())];
     [defaults synchronize];
     return url;
   }
 
-  return [defaults URLForKey:@(name)];
+  return [defaults URLForKey:@(name.data())];
 }
 
 @implementation FlutterDartProject {
