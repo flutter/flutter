@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
@@ -26,10 +27,8 @@ class Usage {
     _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
 
     // Report a more detailed OS version string than package:usage does by
-    // default as custom dimension 1 (configured in our analytics account).
+    // default. Also, send the branch name as the "channel".
     _analytics.setSessionValue('dimension1', os.name);
-
-    // Report the branch (or, "channel") name.
     _analytics.setSessionValue('dimension2', FlutterVersion.getBranchName(whitelistBranchName: true));
 
     bool runningOnCI = false;
