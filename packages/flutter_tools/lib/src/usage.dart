@@ -27,8 +27,8 @@ class Usage {
 
     // Report a more detailed OS version string than package:usage does by
     // default. Also, send the branch name as the "channel".
-    _analytics.setSessionValue('dimension1', os.name);
-    _analytics.setSessionValue('dimension2', FlutterVersion.getBranchName(whitelistBranchName: true));
+    _analytics.setSessionValue('cd1', os.name);
+    _analytics.setSessionValue('cd2', FlutterVersion.getBranchName(whitelistBranchName: true));
 
     bool runningOnCI = false;
 
