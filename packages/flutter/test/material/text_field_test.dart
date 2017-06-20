@@ -741,6 +741,75 @@ void main() {
     await checkText('Hello World');
   });
 
+  testWidgets('TextField errorText trumps helperText', (WidgetTester tester) async {
+    Widget builder() {
+      return const Center(
+        child: const Material(
+          child: const TextField(
+            decoration: const InputDecoration(
+              errorText: 'error text',
+              helperText: 'helper text',
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    expect(find.text('helper text'), findsNothing);
+    expect(find.text('error text'), findsOneWidget);
+  });
+
+  testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
+    final ThemeData themeData = new ThemeData(
+      hintColor: Colors.blue[500],
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Theme(
+          data: themeData,
+          child: const Material(
+            child: const TextField(
+              decoration: const InputDecoration(
+                helperText: 'helper text',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final Text helperText = tester.widget(find.text('helper text'));
+    expect(helperText.style.color, themeData.hintColor);
+    expect(helperText.style.fontSize, themeData.textTheme.caption.fontSize);
+  });
+
+  testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
+    final TextStyle style = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new TextField(
+            decoration: new InputDecoration(
+              helperText: 'helper text',
+              helperStyle: style,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final Text helperText = tester.widget(find.text('helper text'));
+    expect(helperText.style, style);
+  });
+
   testWidgets('TextField with default hintStyle', (WidgetTester tester) async {
     final TextStyle style = new TextStyle(
       color: Colors.pink[500],

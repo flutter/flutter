@@ -31,6 +31,8 @@ class InputDecoration {
     this.icon,
     this.labelText,
     this.labelStyle,
+    this.helperText,
+    this.helperStyle,
     this.hintText,
     this.hintStyle,
     this.errorText,
@@ -55,6 +57,8 @@ class InputDecoration {
   }) : icon = null,
        labelText = null,
        labelStyle = null,
+       helperText = null,
+       helperStyle = null,
        errorText = null,
        errorStyle = null,
        isDense = false,
@@ -93,6 +97,17 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle labelStyle;
 
+  /// Text that provides context about the field’s value, such as how the value
+  /// will be used.
+  ///
+  /// If non-null, the text is displayed below the input field, in the same
+  /// location as [errorText]. If a non-null [errorText] value is specified then
+  /// the helper text is not shown.
+  final String helperText;
+
+  /// The style to use for the [helperText].
+  final TextStyle helperStyle;
+
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the input field (i.e., at the same location on the
@@ -113,7 +128,7 @@ class InputDecoration {
 
   /// Text that appears below the input field.
   ///
-  /// If non-null the divider, that appears below the input field is red.
+  /// If non-null, the divider that appears below the input field is red.
   final String errorText;
 
   /// The style to use for the [errorText].
@@ -171,6 +186,8 @@ class InputDecoration {
     Widget icon,
     String labelText,
     TextStyle labelStyle,
+    String helperText,
+    TextStyle helperStyle,
     String hintText,
     TextStyle hintStyle,
     String errorText,
@@ -186,6 +203,8 @@ class InputDecoration {
       icon: icon ?? this.icon,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
+      helperText: helperText ?? this.helperText,
+      helperStyle: helperStyle ?? this.helperStyle,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
       errorText: errorText ?? this.errorText,
@@ -209,6 +228,8 @@ class InputDecoration {
     return typedOther.icon == icon
         && typedOther.labelText == labelText
         && typedOther.labelStyle == labelStyle
+        && typedOther.helperText == helperText
+        && typedOther.helperStyle == helperStyle
         && typedOther.hintText == hintText
         && typedOther.hintStyle == hintStyle
         && typedOther.errorText == errorText
@@ -228,6 +249,8 @@ class InputDecoration {
       icon,
       labelText,
       labelStyle,
+      helperText,
+      helperStyle,
       hintText,
       hintStyle,
       errorText,
@@ -249,6 +272,8 @@ class InputDecoration {
       description.add('icon: $icon');
     if (labelText != null)
       description.add('labelText: "$labelText"');
+    if (helperText != null)
+      description.add('helperText: "$helperText"');
     if (hintText != null)
       description.add('hintText: "$hintText"');
     if (errorText != null)
@@ -390,6 +415,7 @@ class InputDecorator extends StatelessWidget {
     assert(!isDense || !isCollapsed);
 
     final String labelText = decoration.labelText;
+    final String helperText = decoration.helperText;
     final String hintText = decoration.hintText;
     final String errorText = decoration.errorText;
 
@@ -485,16 +511,20 @@ class InputDecorator extends StatelessWidget {
       stackChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild));
     }
 
-    if (!isDense && errorText != null) {
+    if (!isDense && (errorText != null || helperText != null)) {
       assert(!isCollapsed);
-      final TextStyle errorStyle = decoration.errorStyle ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor);
+      final TextStyle captionStyle = themeData.textTheme.caption;
+      final TextStyle subtextStyle = errorText != null
+        ? decoration.errorStyle ?? captionStyle.copyWith(color: themeData.errorColor)
+        : decoration.helperStyle ?? captionStyle.copyWith(color: themeData.hintColor);
+
       stackChildren.add(new Positioned(
         left: 0.0,
         right: 0.0,
         bottom: 0.0,
         child: new Text(
-          errorText,
-          style: errorStyle,
+          errorText ?? helperText,
+          style: subtextStyle,
           textAlign: textAlign,
           overflow: TextOverflow.ellipsis,
         ),
