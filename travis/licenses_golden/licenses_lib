@@ -1,4 +1,4 @@
-Signature: 483a21a70cc588d9a999c71e3b537fcb
+Signature: 4f9937cd68149dc6ae096743a11b92c9
 
 UNUSED LICENSES:
 
@@ -110,8 +110,6 @@ FILE: ../../../lib/txt/src/paragraph.cc
 FILE: ../../../lib/txt/src/paragraph.h
 FILE: ../../../lib/txt/src/paragraph_builder.cc
 FILE: ../../../lib/txt/src/paragraph_builder.h
-FILE: ../../../lib/txt/src/paragraph_constraints.cc
-FILE: ../../../lib/txt/src/paragraph_constraints.h
 FILE: ../../../lib/txt/src/paragraph_style.cc
 FILE: ../../../lib/txt/src/paragraph_style.h
 FILE: ../../../lib/txt/src/styled_runs.cc
