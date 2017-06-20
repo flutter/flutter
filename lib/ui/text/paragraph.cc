@@ -4,16 +4,14 @@
 
 #include "flutter/lib/ui/text/paragraph.h"
 
-#include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/core/rendering/PaintInfo.h"
-#include "flutter/sky/engine/core/rendering/RenderParagraph.h"
 #include "flutter/sky/engine/core/rendering/RenderText.h"
+#include "flutter/sky/engine/core/rendering/RenderParagraph.h"
 #include "flutter/sky/engine/core/rendering/style/RenderStyle.h"
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
 #include "flutter/sky/engine/platform/text/TextBoundaries.h"
-#include "flutter/sky/engine/wtf/PassOwnPtr.h"
 #include "lib/ftl/tasks/task_runner.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
@@ -33,7 +31,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
   V(Paragraph, maxIntrinsicWidth)   \
   V(Paragraph, alphabeticBaseline)  \
   V(Paragraph, ideographicBaseline) \
-  V(Paragraph, didExceedMaxLines)   \
+  V(Paragraph, didExceedMaxLines) \
   V(Paragraph, layout)              \
   V(Paragraph, paint)               \
   V(Paragraph, getWordBoundary)     \
@@ -43,65 +41,155 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Paragraph);
 DART_BIND_ALL(Paragraph, FOR_EACH_BINDING)
 
 Paragraph::Paragraph(PassOwnPtr<RenderView> renderView)
-    : m_paragraphImpl(std::make_unique<ParagraphImplBlink>(renderView)) {}
-
-Paragraph::Paragraph(std::unique_ptr<txt::Paragraph> paragraph)
-    : m_paragraphImpl(
-          std::make_unique<ParagraphImplTxt>(std::move(paragraph))) {}
+    : m_renderView(renderView) {}
 
 Paragraph::~Paragraph() {
   if (m_renderView) {
     RenderView* renderView = m_renderView.leakPtr();
-    Threads::UI()->PostTask([renderView]() { renderView->destroy(); });
+    Threads::UI()->PostTask(
+        [renderView]() { renderView->destroy(); });
   }
 }
 
 double Paragraph::width() {
-  return m_paragraphImpl->width();
+  return firstChildBox()->width();
 }
 
 double Paragraph::height() {
-  return m_paragraphImpl->height();
+  return firstChildBox()->height();
 }
 
 double Paragraph::minIntrinsicWidth() {
-  return m_paragraphImpl->minIntrinsicWidth();
+  return firstChildBox()->minPreferredLogicalWidth();
 }
 
 double Paragraph::maxIntrinsicWidth() {
-  return m_paragraphImpl->maxIntrinsicWidth();
+  return firstChildBox()->maxPreferredLogicalWidth();
 }
 
 double Paragraph::alphabeticBaseline() {
-  return m_paragraphImpl->alphabeticBaseline();
+  return firstChildBox()->firstLineBoxBaseline(
+      FontBaselineOrAuto(AlphabeticBaseline));
 }
 
 double Paragraph::ideographicBaseline() {
-  return m_paragraphImpl->ideographicBaseline();
+  return firstChildBox()->firstLineBoxBaseline(
+      FontBaselineOrAuto(IdeographicBaseline));
 }
 
 bool Paragraph::didExceedMaxLines() {
-  return m_paragraphImpl->didExceedMaxLines();
+  RenderBox* box = firstChildBox();
+  ASSERT(box->isRenderParagraph());
+  RenderParagraph* paragraph = static_cast<RenderParagraph*>(box);
+  return paragraph->didExceedMaxLines();
 }
 
 void Paragraph::layout(double width) {
-  m_paragraphImpl->layout(width);
+  FontCachePurgePreventer fontCachePurgePreventer;
+
+  int maxWidth = LayoutUnit(width);  // Handles infinity properly.
+  m_renderView->setFrameViewSize(IntSize(maxWidth, intMaxForLayoutUnit));
+  m_renderView->layout();
 }
 
 void Paragraph::paint(Canvas* canvas, double x, double y) {
-  m_paragraphImpl->paint(canvas, x, y);
+  SkCanvas* skCanvas = canvas->canvas();
+  if (!skCanvas)
+    return;
+
+  FontCachePurgePreventer fontCachePurgePreventer;
+
+  // Very simplified painting to allow painting an arbitrary (layer-less)
+  // subtree.
+  RenderBox* box = firstChildBox();
+  skCanvas->translate(x, y);
+
+  GraphicsContext context(skCanvas);
+  Vector<RenderBox*> layers;
+  LayoutRect bounds = box->absoluteBoundingBoxRect();
+  FTL_DCHECK(bounds.x() == 0 && bounds.y() == 0);
+  PaintInfo paintInfo(&context, enclosingIntRect(bounds), box);
+  box->paint(paintInfo, LayoutPoint(), layers);
+  // Note we're ignoring any layers encountered.
+  // TODO(abarth): Remove the concept of RenderLayers.
+
+  skCanvas->translate(-x, -y);
 }
 
 std::vector<TextBox> Paragraph::getRectsForRange(unsigned start, unsigned end) {
-  return m_paragraphImpl->getRectsForRange(start, end);
+  if (end <= start || start == end)
+    return std::vector<TextBox>();
+
+  unsigned offset = 0;
+  std::vector<TextBox> boxes;
+  for (RenderObject* object = m_renderView.get(); object;
+       object = object->nextInPreOrder()) {
+    if (!object->isText())
+      continue;
+    RenderText* text = toRenderText(object);
+    unsigned length = text->textLength();
+    if (offset + length > start) {
+      unsigned startOffset = offset > start ? 0 : start - offset;
+      unsigned endOffset = end - offset;
+      text->appendAbsoluteTextBoxesForRange(boxes, startOffset, endOffset);
+    }
+    offset += length;
+    if (offset >= end)
+      break;
+  }
+
+  return boxes;
+}
+
+int Paragraph::absoluteOffsetForPosition(const PositionWithAffinity& position) {
+  FTL_DCHECK(position.renderer());
+  unsigned offset = 0;
+  for (RenderObject* object = m_renderView.get(); object;
+       object = object->nextInPreOrder()) {
+    if (object == position.renderer())
+      return offset + position.offset();
+    if (object->isText()) {
+      RenderText* text = toRenderText(object);
+      offset += text->textLength();
+    }
+  }
+  FTL_DCHECK(false);
+  return 0;
 }
 
 Dart_Handle Paragraph::getPositionForOffset(double dx, double dy) {
-  return m_paragraphImpl->getPositionForOffset(dx, dy);
+  LayoutPoint point(dx, dy);
+  PositionWithAffinity position = m_renderView->positionForPoint(point);
+  Dart_Handle result = Dart_NewList(2);
+  Dart_ListSetAt(result, 0, ToDart(absoluteOffsetForPosition(position)));
+  Dart_ListSetAt(result, 1, ToDart(static_cast<int>(position.affinity())));
+  return result;
 }
 
 Dart_Handle Paragraph::getWordBoundary(unsigned offset) {
-  return m_paragraphImpl->getWordBoundary(offset);
+  String text;
+  int start = 0, end = 0;
+
+  for (RenderObject* object = m_renderView.get(); object;
+       object = object->nextInPreOrder()) {
+    if (!object->isText())
+      continue;
+    RenderText* renderText = toRenderText(object);
+    text.append(renderText->text());
+  }
+
+  TextBreakIterator* it = wordBreakIterator(text, 0, text.length());
+  if (it) {
+    end = it->following(offset);
+    if (end < 0)
+      end = it->last();
+    start = it->previous();
+  }
+
+  Dart_Handle result = Dart_NewList(2);
+  Dart_ListSetAt(result, 0, ToDart(start));
+  Dart_ListSetAt(result, 1, ToDart(end));
+  return result;
 }
 
 }  // namespace blink
