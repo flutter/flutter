@@ -130,6 +130,7 @@ Future<Null> main() async {
     }
     final List<String> buffer = <String>[];
     buffer.add('// generated code');
+    buffer.add('import \'dart:async\';');
     buffer.add('import \'dart:math\' as math;');
     buffer.add('import \'dart:ui\' as ui;');
     for (FileSystemEntity file in flutterPackage.listSync(recursive: false, followLinks: false)) {
