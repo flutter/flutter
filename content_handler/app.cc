@@ -25,6 +25,13 @@ void QuitMessageLoop() {
   mtl::MessageLoop::GetCurrent()->QuitNow();
 }
 
+std::string GetLabelFromURL(const std::string& url) {
+  size_t last_slash = url.rfind('/');
+  if (last_slash == std::string::npos || last_slash + 1 == url.length())
+    return url;
+  return url.substr(last_slash + 1);
+}
+
 }  // namespace
 
 App::App() {
@@ -116,6 +123,11 @@ void App::StartApplication(
     app::ApplicationPackagePtr application,
     app::ApplicationStartupInfoPtr startup_info,
     fidl::InterfaceRequest<app::ApplicationController> controller) {
+  // Name this process after the url of the application being launched.
+  std::string label =
+      "flutter:" + GetLabelFromURL(startup_info->launch_info->url);
+  mx::process::self().set_property(MX_PROP_NAME, label.c_str(), label.size());
+
   std::unique_ptr<ApplicationControllerImpl> impl =
       std::make_unique<ApplicationControllerImpl>(this, std::move(application),
                                                   std::move(startup_info),
