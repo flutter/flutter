@@ -97,10 +97,11 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle labelStyle;
 
-  /// Text gives context about the field’s value, such as how the value will be used.
+  /// Text that provides context about the field’s value, such as how the value
+  /// will be used.
   ///
   /// If non-null, the text is displayed below the input field, in the same
-  /// location as [errorText]. If a non-null [errorText] value is provided then
+  /// location as [errorText]. If a non-null [errorText] value is specified then
   /// the helper text is not shown.
   final String helperText;
 
@@ -272,7 +273,7 @@ class InputDecoration {
     if (labelText != null)
       description.add('labelText: "$labelText"');
     if (helperText != null)
-      description.add('hellperText: "$helperText"');
+      description.add('helperText: "$helperText"');
     if (hintText != null)
       description.add('hintText: "$hintText"');
     if (errorText != null)
