@@ -329,4 +329,13 @@ void main() {
       });
     });
   });
+
+  test('days in month', () {
+    expect(DayPicker.getDaysInMonth(2017, 10), 31);
+    expect(DayPicker.getDaysInMonth(2017, 6), 30);
+    expect(DayPicker.getDaysInMonth(2017, 2), 28);
+    expect(DayPicker.getDaysInMonth(2016, 2), 29);
+    expect(DayPicker.getDaysInMonth(2000, 2), 29);
+    expect(DayPicker.getDaysInMonth(1900, 2), 28);
+  });
 }
