@@ -71,9 +71,6 @@ deps = {
   'src/lib/zip':
    Var('fuchsia_git') + '/zip' + '@' + '92dc87ca645fe8e9f5151ef6dac86d8311a7222f',
 
-  'src/lib/txt':
-   Var('fuchsia_git') + '/txt' + '@' + '95dc633d881d1b23b88e657bcb2f654459706412',
-
   'src/third_party/gtest':
    Var('fuchsia_git') + '/third_party/gtest' + '@' + 'c00f82917331efbbd27124b537e4ccc915a02b72',
 

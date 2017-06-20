@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 source_set("ui") {
-  
   sources = [
     "compositing/scene.cc",
     "compositing/scene.h",
@@ -56,12 +55,6 @@ source_set("ui") {
     "text/paragraph.h",
     "text/paragraph_builder.cc",
     "text/paragraph_builder.h",
-    "text/paragraph_impl.cc",
-    "text/paragraph_impl.h",
-    "text/paragraph_impl_blink.cc",
-    "text/paragraph_impl_blink.h",
-    "text/paragraph_impl_txt.cc",
-    "text/paragraph_impl_txt.h",
     "text/text_box.cc",
     "text/text_box.h",
     "ui_dart_state.cc",
@@ -90,6 +83,5 @@ source_set("ui") {
     "//lib/tonic",
     "//third_party/skia",
     "//third_party/skia:gpu",
-    "//lib/txt",
   ]
 }
