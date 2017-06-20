@@ -172,8 +172,8 @@ class TestCommand extends FlutterCommand {
       collector = new CoverageCollector();
     }
 
-    final bool wantEvents = argResults['machine'];
-    if (collector != null && wantEvents) {
+    final bool machine = argResults['machine'];
+    if (collector != null && machine) {
       throwToolExit(
           "The test command doesn't support --machine and coverage together");
     }
@@ -181,7 +181,7 @@ class TestCommand extends FlutterCommand {
     TestWatcher watcher;
     if (collector != null) {
       watcher = collector;
-    } else if (wantEvents) {
+    } else if (machine) {
       watcher = new EventPrinter();
     }
 
@@ -192,7 +192,9 @@ class TestCommand extends FlutterCommand {
         watcher: watcher,
         enableObservatory: collector != null || startPaused,
         startPaused: startPaused,
-        ipv6: argResults['ipv6']);
+        ipv6: argResults['ipv6'],
+        json: machine,
+        );
 
     if (collector != null) {
       if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))
