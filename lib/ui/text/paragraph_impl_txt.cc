@@ -8,7 +8,6 @@
 #include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/lib/ui/text/paragraph_impl.h"
 #include "lib/ftl/tasks/task_runner.h"
-#include "lib/txt/src/paragraph_constraints.h"
 
 namespace blink {
 
@@ -47,7 +46,7 @@ bool ParagraphImplTxt::didExceedMaxLines() {
 
 void ParagraphImplTxt::layout(double width) {
   m_width = width;
-  m_paragraph->Layout(txt::ParagraphConstraints{width});
+  m_paragraph->Layout(width);
 }
 
 void ParagraphImplTxt::paint(Canvas* canvas, double x, double y) {
