@@ -94,7 +94,7 @@ class FocusNode extends ChangeNotifier {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode${hasFocus ? '(FOCUSED)' : ''}';
+  String toString() => '${idAndType(this)}${hasFocus ? '(FOCUSED)' : ''}';
 }
 
 /// An interior node in the focus tree.
@@ -446,7 +446,7 @@ class FocusManager {
   String toString() {
     final String status = _haveScheduledUpdate ? ' UPDATE SCHEDULED' : '';
     final String indent = '  ';
-    return '$runtimeType#$hashCode$status\n'
+    return '${idAndType(this)}$status\n'
       '${indent}currentFocus: $_currentFocus\n'
       '${rootScope.toStringDeep(indent, indent)}';
   }

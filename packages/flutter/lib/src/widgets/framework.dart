@@ -112,7 +112,7 @@ class UniqueKey extends LocalKey {
   UniqueKey();
 
   @override
-  String toString() => '[#$hashCode]';
+  String toString() => '[#${shortHash(this)}]';
 }
 
 /// A key that takes its identity from the object used as its value.
@@ -142,8 +142,8 @@ class ObjectKey extends LocalKey {
   @override
   String toString() {
     if (runtimeType == ObjectKey)
-      return '[${value.runtimeType}#${value.hashCode}]';
-    return '[$runtimeType ${value.runtimeType}#${value.hashCode}]';
+      return '[${idAndType(value)}]';
+    return '[$runtimeType ${idAndType(value)}]';
   }
 }
 
@@ -333,8 +333,8 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   String toString() {
     final String label = _debugLabel != null ? ' $_debugLabel' : '';
     if (runtimeType == LabeledGlobalKey)
-      return '[GlobalKey#$hashCode$label]';
-    return '[$runtimeType#$hashCode$label]';
+      return '[GlobalKey#${shortHash(this)}$label]';
+    return '[${idAndType(this)}$label]';
   }
 }
 
@@ -364,7 +364,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   int get hashCode => identityHashCode(value);
 
   @override
-  String toString() => '[$runtimeType ${value.runtimeType}#${value.hashCode}]';
+  String toString() => '[$runtimeType ${idAndType(value)}]';
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
@@ -1247,7 +1247,7 @@ abstract class State<T extends StatefulWidget> {
   String toString() {
     final List<String> data = <String>[];
     debugFillDescription(data);
-    return '$runtimeType#$hashCode(${data.join("; ")})';
+    return '${idAndType(this)}(${data.join("; ")})';
   }
 
   /// Add additional information to the given description for use by [toString].

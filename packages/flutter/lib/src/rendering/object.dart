@@ -636,7 +636,7 @@ abstract class _SemanticsFragment {
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics });
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => idAndType(this);
 }
 
 /// A SemanticsFragment that doesn't produce any [SemanticsNode]s when compiled.
@@ -2686,7 +2686,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a human understandable name.
   @override
   String toString() {
-    String header = '$runtimeType#$hashCode';
+    String header = idAndType(this);
     if (_relayoutBoundary != null && _relayoutBoundary != this) {
       int count = 1;
       RenderObject target = parent;

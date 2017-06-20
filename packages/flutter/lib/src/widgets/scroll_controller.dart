@@ -238,7 +238,7 @@ class ScrollController extends ChangeNotifier {
   String toString() {
     final List<String> description = <String>[];
     debugFillDescription(description);
-    return '$runtimeType#$hashCode(${description.join(", ")})';
+    return '${idAndType(this)}(${description.join(", ")})';
   }
 
   /// Add additional information to the given description for use by [toString].

@@ -75,7 +75,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode()';
+  String toString() => '${idAndType(this)}}()';
 }
 
 class TestImage extends ui.Image {

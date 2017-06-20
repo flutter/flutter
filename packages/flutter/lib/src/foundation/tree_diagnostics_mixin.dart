@@ -20,7 +20,7 @@ abstract class TreeDiagnosticsMixin {
   ///  * [toStringShallow], for a detailed description of the object.
   ///  * [toStringDeep], for a description of the subtree rooted at this object.
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => idAndType(this);
 
   /// Returns a one-line detailed description of the object.
   ///
