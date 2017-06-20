@@ -1636,7 +1636,7 @@ class RenderTransform extends RenderProxyBox {
       Matrix4 inverse;
       try {
         inverse = new Matrix4.inverted(_effectiveTransform);
-      } catch (e) {
+      } on ArgumentError {
         // We cannot invert the effective transform. That means the child
         // doesn't appear on screen and cannot be hit.
         return false;
@@ -1661,7 +1661,6 @@ class RenderTransform extends RenderProxyBox {
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.multiply(_effectiveTransform);
-    super.applyPaintTransform(child, transform);
   }
 
   @override
@@ -1785,7 +1784,7 @@ class RenderFittedBox extends RenderProxyBox {
     Matrix4 inverse;
     try {
       inverse = new Matrix4.inverted(_transform);
-    } catch (e) {
+    } on ArgumentError {
       // We cannot invert the effective transform. That means the child
       // doesn't appear on screen and cannot be hit.
       return false;
@@ -1798,7 +1797,6 @@ class RenderFittedBox extends RenderProxyBox {
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     _updatePaintData();
     transform.multiply(_transform);
-    super.applyPaintTransform(child, transform);
   }
 
   @override
@@ -1864,7 +1862,6 @@ class RenderFractionalTranslation extends RenderProxyBox {
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.translate(translation.dx * size.width, translation.dy * size.height);
-    super.applyPaintTransform(child, transform);
   }
 
   @override
@@ -3044,5 +3041,196 @@ class RenderExcludeSemantics extends RenderProxyBox {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('excluding: $excluding');
+  }
+}
+
+/// Provides an anchor for a [RenderFollowerLayer].
+///
+/// See also:
+///
+///  * [CompositedTransformTarget], the corresponding widget.
+///  * [LeaderLayer], the layer that this render object creates.
+class RenderLeaderLayer extends RenderProxyBox {
+  /// Creates a render object that uses a [LeaderLayer].
+  ///
+  /// The [link] must not be null.
+  RenderLeaderLayer({
+    @required LayerLink link,
+    RenderBox child,
+  }) : assert(link != null),
+       super(child) {
+    this.link = link;
+  }
+
+  /// The link object that connects this [RenderLeaderLayer] with one or more
+  /// [RenderFollowerLayer]s.
+  ///
+  /// This property must not be null. The object must not be associated with
+  /// another [RenderLeaderLayer] that is also being painted.
+  LayerLink get link => _link;
+  LayerLink _link;
+  set link(LayerLink value) {
+    assert(value != null);
+    if (_link == value)
+      return;
+    _link = value;
+    markNeedsPaint();
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.pushLayer(new LeaderLayer(link: link, offset: offset), super.paint, Offset.zero);
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('link: $link');
+  }
+}
+
+/// Transform the child so that its origin is [offset] from the orign of the
+/// [RenderLeaderLayer] with the same [LayerLink].
+///
+/// The [RenderLeaderLayer] in question must be earlier in the paint order.
+///
+/// Hit testing on descendants of this render object will only work if the
+/// target position is within the box that this render object's parent considers
+/// to be hitable.
+///
+/// See also:
+///
+///  * [CompositedTransformFollower], the corresponding widget.
+///  * [FollowerLayer], the layer that this render object creates.
+class RenderFollowerLayer extends RenderProxyBox {
+  /// Creates a render object that uses a [FollowerLayer].
+  ///
+  /// The [link] and [offset] arguments must not be null.
+  RenderFollowerLayer({
+    @required LayerLink link,
+    bool showWhenUnlinked: true,
+    Offset offset: Offset.zero,
+    RenderBox child,
+  }) : assert(link != null),
+       assert(showWhenUnlinked != null),
+       assert(offset != null),
+       super(child) {
+    this.link = link;
+    this.showWhenUnlinked = showWhenUnlinked;
+    this.offset = offset;
+  }
+
+  /// The link object that connects this [RenderFollowerLayer] with a
+  /// [RenderLeaderLayer] earlier in the paint order.
+  LayerLink get link => _link;
+  LayerLink _link;
+  set link(LayerLink value) {
+    assert(value != null);
+    if (_link == value)
+      return;
+    _link = value;
+    markNeedsPaint();
+  }
+
+  /// Whether to show the render object's contents when there is no
+  /// corresponding [RenderLeaderLayer] with the same [link].
+  ///
+  /// When the render object is linked, the child is positioned such that it has
+  /// the same global position as the linked [RenderLeaderLayer].
+  ///
+  /// When the render object is not linked, then: if [showWhenUnlinked] is true,
+  /// the child is visible and not repositioned; if it is false, then child is
+  /// hidden.
+  bool get showWhenUnlinked => _showWhenUnlinked;
+  bool _showWhenUnlinked;
+  set showWhenUnlinked(bool value) {
+    assert(value != null);
+    if (_showWhenUnlinked == value)
+      return;
+    _showWhenUnlinked = value;
+    markNeedsPaint();
+  }
+
+  /// The offset to apply to the origin of the linked [RenderLeaderLayer] to
+  /// obtain this render object's origin.
+  Offset get offset => _offset;
+  Offset _offset;
+  set offset(Offset value) {
+    assert(value != null);
+    if (_offset == value)
+      return;
+    _offset = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void detach() {
+    _layer = null;
+    super.detach();
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  /// The layer we created when we were last painted.
+  FollowerLayer _layer;
+
+  Matrix4 getCurrentTransform() {
+    return _layer?.getLastTransform() ?? new Matrix4.identity();
+  }
+
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    Matrix4 inverse;
+    try {
+      inverse = new Matrix4.inverted(getCurrentTransform());
+    } on ArgumentError {
+      // We cannot invert the effective transform. That means the child
+      // doesn't appear on screen and cannot be hit.
+      return false;
+    }
+    position = MatrixUtils.transformPoint(inverse, position);
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    assert(showWhenUnlinked != null);
+    _layer = new FollowerLayer(
+      link: link,
+      showWhenUnlinked: showWhenUnlinked,
+      linkedOffset: this.offset,
+      unlinkedOffset: offset,
+    );
+    context.pushLayer(
+      _layer,
+      super.paint,
+      Offset.zero,
+      childPaintBounds: new Rect.fromLTRB(
+        // We don't know where we'll end up, so we have no idea what our cull rect should be.
+        double.NEGATIVE_INFINITY,
+        double.NEGATIVE_INFINITY,
+        double.INFINITY,
+        double.INFINITY,
+      ),
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.multiply(getCurrentTransform());
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('link: $link');
+    description.add('showWhenUnlinked: $showWhenUnlinked');
+    description.add('offset: $offset');
+    description.add('current transform matrix:');
+    description.addAll(debugDescribeTransform(getCurrentTransform()));
   }
 }

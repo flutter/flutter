@@ -26,6 +26,7 @@ export 'package:flutter/rendering.dart' show
   FlowPaintingContext,
   FractionalOffsetTween,
   HitTestBehavior,
+  LayerLink,
   MainAxisAlignment,
   MainAxisSize,
   MultiChildLayoutDelegate,
@@ -301,11 +302,13 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   final Size size;
 
   @override
-  RenderCustomPaint createRenderObject(BuildContext context) => new RenderCustomPaint(
-    painter: painter,
-    foregroundPainter: foregroundPainter,
-    preferredSize: size,
-  );
+  RenderCustomPaint createRenderObject(BuildContext context) {
+    return new RenderCustomPaint(
+      painter: painter,
+      foregroundPainter: foregroundPainter,
+      preferredSize: size,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderCustomPaint renderObject) {
@@ -711,12 +714,14 @@ class Transform extends SingleChildRenderObjectWidget {
   final bool transformHitTests;
 
   @override
-  RenderTransform createRenderObject(BuildContext context) => new RenderTransform(
-    transform: transform,
-    origin: origin,
-    alignment: alignment,
-    transformHitTests: transformHitTests
-  );
+  RenderTransform createRenderObject(BuildContext context) {
+    return new RenderTransform(
+      transform: transform,
+      origin: origin,
+      alignment: alignment,
+      transformHitTests: transformHitTests
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderTransform renderObject) {
@@ -725,6 +730,140 @@ class Transform extends SingleChildRenderObjectWidget {
       ..origin = origin
       ..alignment = alignment
       ..transformHitTests = transformHitTests;
+  }
+}
+
+/// A widget that can be targetted by a [CompositedTransformFollower].
+///
+/// When this widget is composited during the compositing phase (which comes
+/// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
+/// updates the [link] object so that any [CompositedTransformFollower] widgets
+/// that are subsequently composited in the same frame and were given the same
+/// [LayerLink] can position themselves at the same screen location.
+///
+/// A single [CompositedTransformTarget] can be followed by multiple
+/// [CompositedTransformFollower] widgets.
+///
+/// The [CompositedTransformTarget] must come earlier in the paint order than
+/// any linked [CompositedTransformFollower]s.
+///
+/// See also:
+///
+///  * [CompositedTransformFollower], the widget that can target this one.
+///  * [LeaderLayer], the layer that implements this widget's logic.
+class CompositedTransformTarget extends SingleChildRenderObjectWidget {
+  /// Creates a composited transform target widget.
+  ///
+  /// The [link] property must not be null, and must not be currently being used
+  /// by any other [CompositedTransformTarget] object that is in the tree.
+  const CompositedTransformTarget({
+    Key key,
+    @required this.link,
+    Widget child,
+  }) : assert(link != null),
+       super(key: key, child: child);
+
+  /// The link object that connects this [CompositedTransformTarget] with one or
+  /// more [CompositedTransformFollower]s.
+  ///
+  /// This property must not be null. The object must not be associated with
+  /// another [CompositedTransformTarget] that is also being painted.
+  final LayerLink link;
+
+  @override
+  RenderLeaderLayer createRenderObject(BuildContext context) {
+    return new RenderLeaderLayer(
+      link: link,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderLeaderLayer renderObject) {
+    renderObject
+      ..link = link;
+  }
+}
+
+/// A widget that follows a [CompositedTransformTarget].
+///
+/// When this widget is composited during the compositing phase (which comes
+/// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
+/// applies a transformation that causes it to provide its child with a
+/// coordinate space that matches that of the linked [CompositedTransformTarget]
+/// widget, offset by [offset].
+///
+/// The [LayerLink] object used as the [link] must be the same object as that
+/// provided to the matching [CompositedTransformTarget].
+///
+/// The [CompositedTransformTarget] must come earlier in the paint order than
+/// this [CompositedTransformFollower].
+///
+/// Hit testing on descendants of this widget will only work if the target
+/// position is within the box that this widget's parent considers to be
+/// hitable. If the parent covers the screen, this is trivially achievable, so
+/// this widget is usually used as the root of an [OverlayEntry] in an app-wide
+/// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
+///
+/// See also:
+///
+///  * [CompositedTransformTarget], the widget that this widget can target.
+///  * [FollowerLayer], the layer that implements this widget's logic.
+///  * [Transform], which applies an arbitrary transform to a child.
+class CompositedTransformFollower extends SingleChildRenderObjectWidget {
+  /// Creates a composited transform target widget.
+  ///
+  /// The [link] property must not be null. If it was also provided to a
+  /// [CompositedTransformTarget], that widget must come earlier in the paint
+  /// order.
+  ///
+  /// The [showWhenUnlinked] and [offset] properties must also not be null.
+  const CompositedTransformFollower({
+    Key key,
+    @required this.link,
+    this.showWhenUnlinked: true,
+    this.offset: Offset.zero,
+    Widget child,
+  }) : assert(link != null),
+       assert(showWhenUnlinked != null),
+       assert(offset != null),
+       super(key: key, child: child);
+
+  /// The link object that connects this [CompositedTransformFollower] with a
+  /// [CompositedTransformTarget].
+  ///
+  /// This property must not be null.
+  final LayerLink link;
+
+  /// Whether to show the widget's contents when there is no corresponding
+  /// [CompositedTransformTarget] with the same [link].
+  ///
+  /// When the widget is linked, the child is positioned such that it has the
+  /// same global position as the linked [CompositedTransformTarget].
+  ///
+  /// When the widget is not linked, then: if [showWhenUnlinked] is true, the
+  /// child is visible and not repositioned; if it is false, then child is
+  /// hidden.
+  final bool showWhenUnlinked;
+
+  /// The offset to apply to the origin of the linked
+  /// [CompositedTransformTarget] to obtain this widget's origin.
+  final Offset offset;
+
+  @override
+  RenderFollowerLayer createRenderObject(BuildContext context) {
+    return new RenderFollowerLayer(
+      link: link,
+      showWhenUnlinked: showWhenUnlinked,
+      offset: offset,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderFollowerLayer renderObject) {
+    renderObject
+      ..link = link
+      ..showWhenUnlinked = showWhenUnlinked
+      ..offset = offset;
   }
 }
 
@@ -1207,9 +1346,11 @@ class SizedBox extends SingleChildRenderObjectWidget {
   final double height;
 
   @override
-  RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(
-    additionalConstraints: _additionalConstraints,
-  );
+  RenderConstrainedBox createRenderObject(BuildContext context) {
+    return new RenderConstrainedBox(
+      additionalConstraints: _additionalConstraints,
+    );
+  }
 
   BoxConstraints get _additionalConstraints {
     return new BoxConstraints.tightFor(width: width, height: height);
@@ -1353,11 +1494,13 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   final FractionalOffset alignment;
 
   @override
-  RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) => new RenderFractionallySizedOverflowBox(
-    alignment: alignment,
-    widthFactor: widthFactor,
-    heightFactor: heightFactor
-  );
+  RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) {
+    return new RenderFractionallySizedOverflowBox(
+      alignment: alignment,
+      widthFactor: widthFactor,
+      heightFactor: heightFactor
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFractionallySizedOverflowBox renderObject) {
@@ -1423,10 +1566,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   final double maxHeight;
 
   @override
-  RenderLimitedBox createRenderObject(BuildContext context) => new RenderLimitedBox(
-    maxWidth: maxWidth,
-    maxHeight: maxHeight
-  );
+  RenderLimitedBox createRenderObject(BuildContext context) {
+    return new RenderLimitedBox(
+      maxWidth: maxWidth,
+      maxHeight: maxHeight
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderLimitedBox renderObject) {
@@ -1489,13 +1634,15 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   final double maxHeight;
 
   @override
-  RenderConstrainedOverflowBox createRenderObject(BuildContext context) => new RenderConstrainedOverflowBox(
-    alignment: alignment,
-    minWidth: minWidth,
-    maxWidth: maxWidth,
-    minHeight: minHeight,
-    maxHeight: maxHeight
-  );
+  RenderConstrainedOverflowBox createRenderObject(BuildContext context) {
+    return new RenderConstrainedOverflowBox(
+      alignment: alignment,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderConstrainedOverflowBox renderObject) {
@@ -3196,18 +3343,20 @@ class RawImage extends LeafRenderObjectWidget {
   final Rect centerSlice;
 
   @override
-  RenderImage createRenderObject(BuildContext context) => new RenderImage(
-    image: image,
-    width: width,
-    height: height,
-    scale: scale,
-    color: color,
-    colorBlendMode: colorBlendMode,
-    fit: fit,
-    alignment: alignment,
-    repeat: repeat,
-    centerSlice: centerSlice
-  );
+  RenderImage createRenderObject(BuildContext context) {
+    return new RenderImage(
+      image: image,
+      width: width,
+      height: height,
+      scale: scale,
+      color: color,
+      colorBlendMode: colorBlendMode,
+      fit: fit,
+      alignment: alignment,
+      repeat: repeat,
+      centerSlice: centerSlice
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
@@ -3371,13 +3520,15 @@ class Listener extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
-  RenderPointerListener createRenderObject(BuildContext context) => new RenderPointerListener(
-    onPointerDown: onPointerDown,
-    onPointerMove: onPointerMove,
-    onPointerUp: onPointerUp,
-    onPointerCancel: onPointerCancel,
-    behavior: behavior
-  );
+  RenderPointerListener createRenderObject(BuildContext context) {
+    return new RenderPointerListener(
+      onPointerDown: onPointerDown,
+      onPointerMove: onPointerMove,
+      onPointerUp: onPointerUp,
+      onPointerCancel: onPointerCancel,
+      behavior: behavior
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPointerListener renderObject) {
@@ -3499,10 +3650,12 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   final bool ignoringSemantics;
 
   @override
-  RenderIgnorePointer createRenderObject(BuildContext context) => new RenderIgnorePointer(
-    ignoring: ignoring,
-    ignoringSemantics: ignoringSemantics
-  );
+  RenderIgnorePointer createRenderObject(BuildContext context) {
+    return new RenderIgnorePointer(
+      ignoring: ignoring,
+      ignoringSemantics: ignoringSemantics
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
@@ -3583,10 +3736,12 @@ class MetaData extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
-  RenderMetaData createRenderObject(BuildContext context) => new RenderMetaData(
-    metaData: metaData,
-    behavior: behavior
-  );
+  RenderMetaData createRenderObject(BuildContext context) {
+    return new RenderMetaData(
+      metaData: metaData,
+      behavior: behavior
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderMetaData renderObject) {
@@ -3668,12 +3823,14 @@ class Semantics extends SingleChildRenderObjectWidget {
   final String label;
 
   @override
-  RenderSemanticsAnnotations createRenderObject(BuildContext context) => new RenderSemanticsAnnotations(
-    container: container,
-    checked: checked,
-    selected: selected,
-    label: label,
-  );
+  RenderSemanticsAnnotations createRenderObject(BuildContext context) {
+    return new RenderSemanticsAnnotations(
+      container: container,
+      checked: checked,
+      selected: selected,
+      label: label,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
