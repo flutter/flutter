@@ -220,14 +220,24 @@ class DayPicker extends StatelessWidget {
     }).toList(growable: false);
   }
 
+  // Do not use this directly - call getDaysInMonth instead.
+  static const List<int> _kDaysInMonth = const <int>[31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+  static int getDaysInMonth(int year, int month) {
+    if (month == DateTime.FEBRUARY) {
+      final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
+      if (isLeapYear)
+        return 29;
+    }
+    return _kDaysInMonth[month - 1];
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final int year = displayedMonth.year;
     final int month = displayedMonth.month;
-    // Dart's Date time constructor is very forgiving and will understand
-    // month 13 as January of the next year. :)
-    final int daysInMonth = new DateTime(year, month + 1).difference(new DateTime(year, month)).inDays;
+    final int daysInMonth = getDaysInMonth(year, month);
     // This assumes a start day of SUNDAY, but could be changed.
     final int firstWeekday = new DateTime(year, month).weekday % 7;
     final List<Widget> labels = <Widget>[];
