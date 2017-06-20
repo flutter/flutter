@@ -149,6 +149,16 @@ class FlutterVersion {
     String commit = _shortGitRevision(_runSync(<String>['git', 'rev-parse', 'HEAD']));
     commit = commit.isEmpty ? 'unknown' : commit;
 
+    final String branch = getBranchName(whitelistBranchName: whitelistBranchName);
+
+    return '$branch/$commit';
+  }
+
+  /// Return the branch name.
+  ///
+  /// If whitelistBranchName is true and the branch is unknown,
+  /// the branch name will be returned as 'dev'.
+  static String getBranchName({ bool whitelistBranchName: false }) {
     String branch = _runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD']);
     branch = branch == 'HEAD' ? 'master' : branch;
 
@@ -158,7 +168,7 @@ class FlutterVersion {
         branch = 'dev';
     }
 
-    return '$branch/$commit';
+    return branch;
   }
 
   /// The amount of time we wait before pinging the server to check for the
