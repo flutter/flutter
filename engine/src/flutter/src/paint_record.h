@@ -17,20 +17,23 @@
 #ifndef LIB_TXT_SRC_PAINT_RECORD_H_
 #define LIB_TXT_SRC_PAINT_RECORD_H_
 
+#include "lib/ftl/logging.h"
 #include "lib/ftl/macros.h"
+#include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 namespace txt {
 
 class PaintRecord {
  public:
-  PaintRecord();
+  PaintRecord() = delete;
 
   ~PaintRecord();
 
-  PaintRecord(SkColor color, SkPoint offset, sk_sp<SkTextBlob> text);
-
-  PaintRecord(const PaintRecord& other) = delete;
+  PaintRecord(SkColor color,
+              SkPoint offset,
+              sk_sp<SkTextBlob> text,
+              SkPaint::FontMetrics metrics);
 
   PaintRecord(PaintRecord&& other);
 
@@ -42,10 +45,15 @@ class PaintRecord {
 
   SkTextBlob* text() const { return text_.get(); }
 
+  const SkPaint::FontMetrics& metrics() const { return metrics_; }
+
  private:
   SkColor color_;
   SkPoint offset_;
   sk_sp<SkTextBlob> text_;
+  SkPaint::FontMetrics metrics_;
+
+  FTL_DISALLOW_COPY_AND_ASSIGN(PaintRecord);
 };
 
 }  // namespace txt
