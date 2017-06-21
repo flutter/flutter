@@ -323,7 +323,7 @@ bool Engine::HandleLifecyclePlatformMessage(blink::PlatformMessage* message) {
     activity_running_ = false;
     StopAnimator();
   } else if (state == "AppLifecycleState.resumed" ||
-             state == "AppLifecycle.inactive") {
+             state == "AppLifecycleState.inactive") {
     activity_running_ = true;
     StartAnimatorIfPossible();
   }
