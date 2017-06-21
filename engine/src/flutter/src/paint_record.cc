@@ -22,16 +22,19 @@ namespace txt {
 PaintRecord::~PaintRecord() = default;
 
 PaintRecord::PaintRecord(SkColor color,
+                         TextStyle style,
                          SkPoint offset,
                          sk_sp<SkTextBlob> text,
                          SkPaint::FontMetrics metrics)
     : color_(color),
+      style_(style),
       offset_(offset),
       text_(std::move(text)),
       metrics_(metrics) {}
 
 PaintRecord::PaintRecord(PaintRecord&& other) {
   color_ = other.color_;
+  style_ = other.style_;
   offset_ = other.offset_;
   text_ = std::move(other.text_);
   metrics_ = other.metrics_;
@@ -39,6 +42,7 @@ PaintRecord::PaintRecord(PaintRecord&& other) {
 
 PaintRecord& PaintRecord::operator=(PaintRecord&& other) {
   color_ = other.color_;
+  style_ = other.style_;
   offset_ = other.offset_;
   text_ = std::move(other.text_);
   metrics_ = other.metrics_;
