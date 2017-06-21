@@ -6,6 +6,16 @@ import 'package:meta/meta.dart';
 
 import 'print.dart';
 
+/// Returns a 5 character long hexadecimal string generated from
+/// Object.hashCode's 20 least-significant bits.
+String shortHash(Object object) {
+  return object.hashCode.toUnsigned(20).toRadixString(16).padLeft(5, '0');
+}
+
+/// Returns a summary of the runtime type and hash code of `object`.
+String describeIdentity(Object object) =>
+    '${object.runtimeType}#${shortHash(object)}';
+
 /// A mixin that helps dump string representations of trees.
 abstract class TreeDiagnosticsMixin {
   // This class is intended to be used as a mixin, and should not be
@@ -20,7 +30,7 @@ abstract class TreeDiagnosticsMixin {
   ///  * [toStringShallow], for a detailed description of the object.
   ///  * [toStringDeep], for a description of the subtree rooted at this object.
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => describeIdentity(this);
 
   /// Returns a one-line detailed description of the object.
   ///
