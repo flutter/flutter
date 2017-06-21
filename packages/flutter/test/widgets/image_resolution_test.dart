@@ -77,7 +77,7 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  String toString() => '${idAndType(this)}()';
+  String toString() => '${describeIdentity(this)}()';
 }
 
 class TestAssetImage extends AssetImage {

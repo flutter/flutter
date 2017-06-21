@@ -343,7 +343,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  String toString() => '${idAndType(this)}()';
+  String toString() => '${describeIdentity(this)}()';
 }
 
 class TestImage extends ui.Image {

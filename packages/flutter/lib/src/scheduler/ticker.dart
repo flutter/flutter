@@ -419,7 +419,7 @@ class TickerFuture implements Future<Null> {
   }
 
   @override
-  String toString() => '${idAndType(this)}(${ _completed == null ? "active" : _completed ? "complete" : "canceled" })';
+  String toString() => '${describeIdentity(this)}(${ _completed == null ? "active" : _completed ? "complete" : "canceled" })';
 }
 
 /// Exception thrown by [Ticker] objects on the [TickerFuture.orCancel] future

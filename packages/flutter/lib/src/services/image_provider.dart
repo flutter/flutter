@@ -578,7 +578,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   int get hashCode => hashValues(bytes.hashCode, scale);
 
   @override
-  String toString() => '$runtimeType(${idAndType(bytes)}, scale: $scale)';
+  String toString() => '$runtimeType(${describeIdentity(bytes)}, scale: $scale)';
 }
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
 ///

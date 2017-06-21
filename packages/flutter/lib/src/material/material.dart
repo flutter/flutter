@@ -425,5 +425,5 @@ abstract class InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform);
 
   @override
-  String toString() => idAndType(this);
+  String toString() => describeIdentity(this);
 }

@@ -12,7 +12,8 @@ String shortHash(Object object) {
 }
 
 /// Returns a summary of [object]'s runtime type and hash code.
-String idAndType(Object object) => '${object.runtimeType}#${shortHash(object)}';
+String describeIdentity(Object object) =>
+    '${object.runtimeType}#${shortHash(object)}';
 
 /// A mixin that helps dump string representations of trees.
 abstract class TreeDiagnosticsMixin {
@@ -28,7 +29,7 @@ abstract class TreeDiagnosticsMixin {
   ///  * [toStringShallow], for a detailed description of the object.
   ///  * [toStringDeep], for a description of the subtree rooted at this object.
   @override
-  String toString() => idAndType(this);
+  String toString() => describeIdentity(this);
 
   /// Returns a one-line detailed description of the object.
   ///

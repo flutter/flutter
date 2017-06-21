@@ -142,8 +142,8 @@ class ObjectKey extends LocalKey {
   @override
   String toString() {
     if (runtimeType == ObjectKey)
-      return '[${idAndType(value)}]';
-    return '[$runtimeType ${idAndType(value)}]';
+      return '[${describeIdentity(value)}]';
+    return '[$runtimeType ${describeIdentity(value)}]';
   }
 }
 
@@ -334,7 +334,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
     final String label = _debugLabel != null ? ' $_debugLabel' : '';
     if (runtimeType == LabeledGlobalKey)
       return '[GlobalKey#${shortHash(this)}$label]';
-    return '[${idAndType(this)}$label]';
+    return '[${describeIdentity(this)}$label]';
   }
 }
 
@@ -364,7 +364,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   int get hashCode => identityHashCode(value);
 
   @override
-  String toString() => '[$runtimeType ${idAndType(value)}]';
+  String toString() => '[$runtimeType ${describeIdentity(value)}]';
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
@@ -1247,7 +1247,7 @@ abstract class State<T extends StatefulWidget> {
   String toString() {
     final List<String> data = <String>[];
     debugFillDescription(data);
-    return '${idAndType(this)}(${data.join("; ")})';
+    return '${describeIdentity(this)}(${data.join("; ")})';
   }
 
   /// Add additional information to the given description for use by [toString].

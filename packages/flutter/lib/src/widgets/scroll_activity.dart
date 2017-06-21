@@ -125,7 +125,7 @@ abstract class ScrollActivity {
   }
 
   @override
-  String toString() => idAndType(this);
+  String toString() => describeIdentity(this);
 }
 
 /// A scroll activity that does nothing.
@@ -282,7 +282,7 @@ class ScrollDragController implements Drag {
   dynamic _lastDetails;
 
   @override
-  String toString() => idAndType(this);
+  String toString() => describeIdentity(this);
 }
 
 /// The activity a scroll view performs when a the user drags their finger
@@ -348,7 +348,7 @@ class DragScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${idAndType(this)}($_controller)';
+    return '${describeIdentity(this)}($_controller)';
   }
 }
 
@@ -439,7 +439,7 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${idAndType(this)}($_controller)';
+    return '${describeIdentity(this)}($_controller)';
   }
 }
 
@@ -524,6 +524,6 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${idAndType(this)}($_controller)';
+    return '${describeIdentity(this)}($_controller)';
   }
 }

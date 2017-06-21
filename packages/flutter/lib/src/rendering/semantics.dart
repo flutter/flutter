@@ -781,5 +781,5 @@ class SemanticsOwner extends ChangeNotifier {
   }
 
   @override
-  String toString() => idAndType(this);
+  String toString() => describeIdentity(this);
 }
