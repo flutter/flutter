@@ -38,6 +38,7 @@ public class TextInputPlugin implements MethodCallHandler {
     private int mClient = 0;
     private JSONObject mConfiguration;
     private Editable mEditable;
+    private boolean mRestartInputPending;
 
     public TextInputPlugin(FlutterView view) {
         mView = view;
@@ -128,7 +129,9 @@ public class TextInputPlugin implements MethodCallHandler {
         mConfiguration = configuration;
         mEditable = Editable.Factory.getInstance().newEditable("");
 
-        mImm.restartInput(view);
+        // setTextInputClient will be followed by a call to setTextInputEditingState.
+        // Do a restartInput at that time.
+        mRestartInputPending = true;
     }
 
     private void applyStateToSelection(JSONObject state) throws JSONException {
@@ -143,7 +146,8 @@ public class TextInputPlugin implements MethodCallHandler {
 
     private void setTextInputEditingState(FlutterView view, JSONObject state)
         throws JSONException {
-        if (state.getString("text").equals(mEditable.toString())) {
+        if (!mRestartInputPending &&
+            state.getString("text").equals(mEditable.toString())) {
             applyStateToSelection(state);
             mImm.updateSelection(
                 mView,
@@ -155,6 +159,7 @@ public class TextInputPlugin implements MethodCallHandler {
             mEditable.replace(0, mEditable.length(), state.getString("text"));
             applyStateToSelection(state);
             mImm.restartInput(view);
+            mRestartInputPending = false;
         }
     }
 
