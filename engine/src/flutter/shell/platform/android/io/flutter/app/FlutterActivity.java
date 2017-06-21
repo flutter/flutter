@@ -36,15 +36,6 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
     }
 
     /**
-     * Hook for subclasses to customize their startup behavior.
-     *
-     * @deprecated Just override {@link #onCreate(Bundle)} instead, and add your
-     * logic after calling {@code super.onCreate()}.
-     */
-    @Deprecated
-    protected void onFlutterReady() {}
-
-    /**
      * Hook for subclasses to customize the creation of the
      * {@code FlutterView}.
      *
@@ -75,7 +66,6 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         eventDelegate.onCreate(savedInstanceState);
-        onFlutterReady();
     }
 
     @Override
