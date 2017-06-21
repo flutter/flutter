@@ -81,7 +81,7 @@ abstract class Animation<T> extends Listenable {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}(${toStringDetails()})';
+    return '$runtimeType#$hashCode(${toStringDetails()})';
   }
 
   /// Provides a string describing the status of this object, but not including

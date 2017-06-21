@@ -79,7 +79,7 @@ abstract class AssetBundle {
   void evict(String key) { }
 
   @override
-  String toString() => '${describeIdentity(this)}()';
+  String toString() => '$runtimeType#$hashCode()';
 }
 
 /// An [AssetBundle] that loads resources over the network.
@@ -133,7 +133,7 @@ class NetworkAssetBundle extends AssetBundle {
   // should implement evict().
 
   @override
-  String toString() => '${describeIdentity(this)}($_baseUrl)';
+  String toString() => '$runtimeType#$hashCode($_baseUrl)';
 }
 
 /// An [AssetBundle] that permanently caches string and structured resources
