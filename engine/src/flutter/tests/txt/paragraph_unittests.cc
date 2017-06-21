@@ -18,6 +18,7 @@
 #include "lib/txt/src/font_style.h"
 #include "lib/txt/src/font_weight.h"
 #include "lib/txt/src/paragraph.h"
+#include "lib/txt/src/text_align.h"
 #include "lib/txt/tests/txt/utils.h"
 #include "paragraph_builder.h"
 #include "render_test.h"
@@ -117,6 +118,7 @@ TEST_F(RenderTest, RainbowParagraph) {
 
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 2;
+  paragraph_style.text_align = TextAlign::left;
   txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style1;
@@ -285,6 +287,7 @@ TEST_F(RenderTest, LinebreakParagraph) {
 
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::center;
   txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style;

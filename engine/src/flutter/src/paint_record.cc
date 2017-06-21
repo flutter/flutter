@@ -24,22 +24,26 @@ PaintRecord::~PaintRecord() = default;
 PaintRecord::PaintRecord(TextStyle style,
                          SkPoint offset,
                          sk_sp<SkTextBlob> text,
-                         SkPaint::FontMetrics metrics)
+                         SkPaint::FontMetrics metrics,
+                         int line)
     : style_(style),
       offset_(offset),
       text_(std::move(text)),
-      metrics_(metrics) {}
+      metrics_(metrics),
+      line_(line) {}
 
 PaintRecord::PaintRecord(TextStyle style,
                          sk_sp<SkTextBlob> text,
-                         SkPaint::FontMetrics metrics)
-    : style_(style), text_(std::move(text)), metrics_(metrics) {}
+                         SkPaint::FontMetrics metrics,
+                         int line)
+    : style_(style), text_(std::move(text)), metrics_(metrics), line_(line) {}
 
 PaintRecord::PaintRecord(PaintRecord&& other) {
   style_ = other.style_;
   offset_ = other.offset_;
   text_ = std::move(other.text_);
   metrics_ = other.metrics_;
+  line_ = other.line_;
 }
 
 PaintRecord& PaintRecord::operator=(PaintRecord&& other) {
@@ -47,6 +51,7 @@ PaintRecord& PaintRecord::operator=(PaintRecord&& other) {
   offset_ = other.offset_;
   text_ = std::move(other.text_);
   metrics_ = other.metrics_;
+  line_ = other.line_;
   return *this;
 }
 
