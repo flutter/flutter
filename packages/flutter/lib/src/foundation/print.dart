@@ -172,11 +172,3 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent: '
     }
   }
 }
-
-/// Returns a 5 character long hexadecimal hash code for [object].
-String shortHash(Object object) {
-  return object.hashCode.toUnsigned(20).toRadixString(16).padLeft(5, '0');
-}
-
-/// Returns a summary of [object]'s runtime type and hash code.
-String idAndType(Object object) => '${object.runtimeType}#${shortHash(object)}';
