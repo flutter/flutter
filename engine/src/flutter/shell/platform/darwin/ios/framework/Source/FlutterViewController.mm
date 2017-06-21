@@ -273,9 +273,17 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   [view release];
 }
 
+#pragma mark - UIViewController lifecycle notifications
+
 - (void)viewWillAppear:(BOOL)animated {
   [self connectToEngineAndLoad];
   [super viewWillAppear:animated];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.paused"];
+
+  [super viewDidDisappear];
 }
 
 #pragma mark - Application lifecycle notifications
@@ -533,6 +541,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
   [self surfaceUpdated:YES];
   [self onLocaleUpdated:nil];
   [self onVoiceOverChanged:nil];
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.resumed"];
 
   [super viewDidAppear:animated];
 }
