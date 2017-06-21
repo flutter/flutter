@@ -781,5 +781,5 @@ class SemanticsOwner extends ChangeNotifier {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => describeIdentity(this);
 }
