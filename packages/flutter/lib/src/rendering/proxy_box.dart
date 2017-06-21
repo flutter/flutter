@@ -2034,7 +2034,7 @@ abstract class CustomPainter extends Listenable {
   bool hitTest(Offset position) => null;
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
+  String toString() => '$runtimeType#$hashCode(${ _repaint?.toString() ?? "" })';
 }
 
 /// Provides a canvas on which to draw during the paint phase.

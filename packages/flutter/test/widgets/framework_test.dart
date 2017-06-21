@@ -483,7 +483,7 @@ void main() {
     final MultiChildRenderObjectElement element = key0.currentContext;
 
     final String dump =
-        element.toStringDeep().replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#000');
+        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
     expect(dump, equals('''Column([GlobalKey#000]; renderObject: RenderFlex#000)
 ├Container()
 │└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)

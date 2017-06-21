@@ -419,7 +419,7 @@ class TickerFuture implements Future<Null> {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _completed == null ? "active" : _completed ? "complete" : "canceled" })';
+  String toString() => '$runtimeType#$hashCode(${ _completed == null ? "active" : _completed ? "complete" : "canceled" })';
 }
 
 /// Exception thrown by [Ticker] objects on the [TickerFuture.orCancel] future

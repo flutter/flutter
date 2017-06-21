@@ -524,7 +524,7 @@ void main() {
     final RenderObjectElement element = key0.currentContext;
 
     final String dump =
-        element.toStringDeep().replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#000');
+        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
     expect(dump, equals('''Table([GlobalKey#000]; renderObject: RenderTable#000)
 ├Text("A")
 │└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
