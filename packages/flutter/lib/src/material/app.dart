@@ -118,7 +118,7 @@ class MaterialApp extends StatefulWidget {
 
   /// The name of the first route to show.
   ///
-  /// Defaults to [Window.defaultRouteName].
+  /// Defaults to [Navigator.defaultRouteName].
   final String initialRoute;
 
   /// The route generator callback used when the app is navigated to a
