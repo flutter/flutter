@@ -283,7 +283,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 - (void)viewDidDisappear:(BOOL)animated {
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.paused"];
 
-  [super viewDidDisappear];
+  [super viewDidDisappear:animated];
 }
 
 #pragma mark - Application lifecycle notifications
