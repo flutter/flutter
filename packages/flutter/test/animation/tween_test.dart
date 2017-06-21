@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('Can chain tweens', () {
@@ -48,5 +49,27 @@ void main() {
     final RectTween tween = new RectTween(begin: a, end: b);
     expect(tween.lerp(0.5), equals(Rect.lerp(a, b, 0.5)));
     expect(tween, hasOneLineDescription);
+  });
+
+  test('Matrix4Tween', () {
+    final Matrix4 a = new Matrix4.identity();
+    final Matrix4 b = a.clone()..translate(6.0, -8.0, 0.0)..scale(0.5, 1.0, 5.0);
+    final Matrix4Tween tween = new Matrix4Tween(begin: a, end: b);
+    expect(tween.lerp(0.0), equals(a));
+    expect(tween.lerp(1.0), equals(b));
+    expect(
+      tween.lerp(0.5),
+      equals(a.clone()..translate(3.0, -4.0, 0.0)..scale(0.75, 1.0, 3.0))
+    );
+    final Matrix4 c = a.clone()..rotateZ(1.0);
+    final Matrix4Tween rotationTween = new Matrix4Tween(begin: a, end: c);
+    expect(rotationTween.lerp(0.0), equals(a));
+    expect(rotationTween.lerp(1.0), equals(c));
+    expect(
+      rotationTween.lerp(0.5).absoluteError(
+        a.clone()..rotateZ(0.5)
+      ),
+      moreOrLessEquals(0.0)
+    );
   });
 }

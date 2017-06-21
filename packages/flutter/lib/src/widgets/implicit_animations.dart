@@ -111,12 +111,21 @@ class Matrix4Tween extends Tween<Matrix4> {
   Matrix4 lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    // TODO(abarth): We should use [Matrix4.decompose] and animate the
-    // decomposed parameters instead of just animating the translation.
-    final Vector3 beginT = begin.getTranslation();
-    final Vector3 endT = end.getTranslation();
-    final Vector3 lerpT = beginT*(1.0-t) + endT*t;
-    return new Matrix4.identity()..translate(lerpT);
+    final Vector3 beginTranslation = new Vector3.zero();
+    final Vector3 endTranslation = new Vector3.zero();
+    final Quaternion beginRotation = new Quaternion.identity();
+    final Quaternion endRotation = new Quaternion.identity();
+    final Vector3 beginScale = new Vector3.zero();
+    final Vector3 endScale = new Vector3.zero();
+    begin.decompose(beginTranslation, beginRotation, beginScale);
+    end.decompose(endTranslation, endRotation, endScale);
+    final Vector3 lerpTranslation =
+        beginTranslation * (1.0 - t) + endTranslation * t;
+    // TODO(alangardner): Implement slerp for constant rotation
+    final Quaternion lerpRotation =
+        (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
+    final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;
+    return new Matrix4.compose(lerpTranslation, lerpRotation, lerpScale);
   }
 }
 
