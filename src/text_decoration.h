@@ -19,6 +19,8 @@
 
 namespace txt {
 
+// Multiple decorations can be applied at once. Ex: Underline and overline is
+// (0x1 | 0x2)
 enum TextDecoration {
   kNone = 0x0,
   kUnderline = 0x1,
@@ -26,13 +28,7 @@ enum TextDecoration {
   kLineThrough = 0x4,
 };
 
-enum TextDecorationStyle {
-  kSolid,
-  kDouble,  // "double" is reserved.
-  kDotted,
-  kDashed,
-  kWavy
-};
+enum TextDecorationStyle { kSolid, kDouble, kDotted, kDashed, kWavy };
 
 }  // namespace txt
 

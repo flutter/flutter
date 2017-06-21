@@ -19,6 +19,7 @@
 
 #include "lib/ftl/logging.h"
 #include "lib/ftl/macros.h"
+#include "lib/txt/src/text_style.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
@@ -31,6 +32,7 @@ class PaintRecord {
   ~PaintRecord();
 
   PaintRecord(SkColor color,
+              TextStyle style,
               SkPoint offset,
               sk_sp<SkTextBlob> text,
               SkPaint::FontMetrics metrics);
@@ -47,8 +49,11 @@ class PaintRecord {
 
   const SkPaint::FontMetrics& metrics() const { return metrics_; }
 
+  const TextStyle& style() const { return style_; }
+
  private:
   SkColor color_;
+  TextStyle style_;
   SkPoint offset_;
   sk_sp<SkTextBlob> text_;
   SkPaint::FontMetrics metrics_;

@@ -75,9 +75,6 @@ class Paragraph {
   StyledRuns runs_;
   minikin::LineBreaker breaker_;
   std::vector<PaintRecord> records_;
-  std::vector<
-      std::tuple<TextDecoration, SkColor, TextDecorationStyle, FontWeight>>
-      decorations_;
   ParagraphStyle paragraph_style_;
   SkScalar y_ = 0.0f;  // Height of the paragraph after Layout().
   double width_ = 0.0f;
@@ -91,14 +88,12 @@ class Paragraph {
 
   void AddRunsToLineBreaker(const std::string& rootdir = "");
 
-  void PaintDecorations(
-      SkCanvas* canvas,
-      double x,
-      double y,
-      std::tuple<TextDecoration, SkColor, TextDecorationStyle, FontWeight>
-          decoration,
-      SkPaint::FontMetrics metrics,
-      SkTextBlob* blob);
+  void PaintDecorations(SkCanvas* canvas,
+                        double x,
+                        double y,
+                        TextStyle style,
+                        SkPaint::FontMetrics metrics,
+                        SkTextBlob* blob);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };

@@ -31,6 +31,8 @@
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 #include "third_party/skia/include/core/SkTypeface.h"
+#include "third_party/skia/include/effects/SkDashPathEffect.h"
+#include "third_party/skia/include/effects/SkDiscretePathEffect.h"
 
 namespace txt {
 namespace {
@@ -230,11 +232,9 @@ void Paragraph::Layout(double width,
       // run.
       SkPaint::FontMetrics metrics;
       paint.getFontMetrics(&metrics);
-      records_.push_back(PaintRecord{run.style.color, SkPoint::Make(x, y_),
-                                     builder.make(), metrics});
-      decorations_.push_back(
-          std::make_tuple(run.style.decoration, run.style.decoration_color,
-                          run.style.decoration_style, run.style.font_weight));
+      records_.push_back(PaintRecord{run.style.color, run.style,
+                                     SkPoint::Make(x, y_), builder.make(),
+                                     metrics});
       if (max_line_spacing < -metrics.fAscent * run.style.height)
         max_line_spacing = -metrics.fAscent * run.style.height;
 
@@ -290,48 +290,87 @@ void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
 }
 
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
-  int i = 0;
   for (const auto& record : records_) {
     SkPaint paint;
     paint.setColor(record.color());
     const SkPoint& offset = record.offset();
     canvas->drawTextBlob(record.text(), x + offset.x(), y + offset.y(), paint);
-    PaintDecorations(canvas, x + offset.x(), y + offset.y(), decorations_[i],
+    PaintDecorations(canvas, x + offset.x(), y + offset.y(), record.style(),
                      record.metrics(), record.text());
-    i++;
   }
 }
 
-void Paragraph::PaintDecorations(
-    SkCanvas* canvas,
-    double x,
-    double y,
-    std::tuple<TextDecoration, SkColor, TextDecorationStyle, FontWeight>
-        decoration,
-    SkPaint::FontMetrics metrics,
-    SkTextBlob* blob) {
-  if (std::get<0>(decoration) != TextDecoration::kNone) {
+void Paragraph::PaintDecorations(SkCanvas* canvas,
+                                 double x,
+                                 double y,
+                                 TextStyle style,
+                                 SkPaint::FontMetrics metrics,
+                                 SkTextBlob* blob) {
+  if (style.decoration != TextDecoration::kNone) {
     SkPaint paint;
     paint.setStyle(SkPaint::kStroke_Style);
-    paint.setColor(std::get<1>(decoration));
+    paint.setColor(style.decoration_color);
     paint.setAntiAlias(true);
+
+    // This is set to 2 for the double line style
+    int decoration_count = 1;
+
+    switch (style.decoration_style) {
+      case TextDecorationStyle::kSolid:
+        break;
+      case TextDecorationStyle::kDouble: {
+        decoration_count = 2;
+        break;
+      }
+      case TextDecorationStyle::kDotted: {
+        const SkScalar intervals[] = {3.0f, 5.0f, 3.0f, 5.0f};
+        size_t count = sizeof(intervals) / sizeof(intervals[0]);
+        paint.setPathEffect(SkPathEffect::MakeCompose(
+            SkDashPathEffect::Make(intervals, count, 0.0f),
+            SkDiscretePathEffect::Make(0, 0)));
+        break;
+      }
+      case TextDecorationStyle::kDashed: {
+        const SkScalar intervals[] = {10.0f, 5.0f, 10.0f, 5.0f};
+        size_t count = sizeof(intervals) / sizeof(intervals[0]);
+        paint.setPathEffect(SkPathEffect::MakeCompose(
+            SkDashPathEffect::Make(intervals, count, 0.0f),
+            SkDiscretePathEffect::Make(0, 0)));
+        break;
+      }
+      case TextDecorationStyle::kWavy: {
+        // TODO(garyq): Wave currently does a random wave instead of an ordered
+        // wave.
+        const SkScalar intervals[] = {1};
+        size_t count = sizeof(intervals) / sizeof(intervals[0]);
+        paint.setPathEffect(SkPathEffect::MakeCompose(
+            SkDashPathEffect::Make(intervals, count, 0.0f),
+            SkDiscretePathEffect::Make(metrics.fAvgCharWidth / 10.0f,
+                                       metrics.fAvgCharWidth / 10.0f)));
+        break;
+      }
+    }
 
     double width = blob->bounds().fRight + blob->bounds().fLeft;
 
-    if (std::get<0>(decoration) & 0x1) {
-      paint.setStrokeWidth(metrics.fUnderlineThickness);
-      canvas->drawLine(x, y + metrics.fUnderlineThickness, x + width,
-                       y + metrics.fUnderlineThickness, paint);
-    }
-    if (std::get<0>(decoration) & 0x2) {
-      paint.setStrokeWidth(metrics.fUnderlineThickness);
-      canvas->drawLine(x, y + metrics.fAscent, x + width, y + metrics.fAscent,
-                       paint);
-    }
-    if (std::get<0>(decoration) & 0x4) {
-      paint.setStrokeWidth(metrics.fUnderlineThickness);
-      canvas->drawLine(x, y - metrics.fCapHeight / 2.5, x + width,
-                       y - metrics.fCapHeight / 2.5, paint);
+    for (int i = 0; i < decoration_count; i++) {
+      double y_offset = i * metrics.fUnderlineThickness * 3.0f;
+      if (style.decoration & 0x1) {
+        paint.setStrokeWidth(metrics.fUnderlineThickness);
+        canvas->drawLine(x, y + metrics.fUnderlineThickness + y_offset,
+                         x + width, y + metrics.fUnderlineThickness + y_offset,
+                         paint);
+      }
+      if (style.decoration & 0x2) {
+        paint.setStrokeWidth(metrics.fUnderlineThickness);
+        canvas->drawLine(x, y + metrics.fAscent + y_offset, x + width,
+                         y + metrics.fAscent + y_offset, paint);
+      }
+      if (style.decoration & 0x4) {
+        paint.setStrokeWidth(metrics.fUnderlineThickness);
+        canvas->drawLine(x, y - metrics.fXHeight / 2 + y_offset, x + width,
+                         y - metrics.fXHeight / 2 + y_offset, paint);
+      }
     }
   }
 }
