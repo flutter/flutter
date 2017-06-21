@@ -6,9 +6,9 @@
 
 #if defined(OS_FUCHSIA)
 
-#include "apps/mozart/lib/skia/skia_vmo_surface.h"
-#include "apps/mozart/lib/skia/type_converters.h"
-#include "apps/mozart/services/composition/scenes.fidl.h"
+#include "apps/mozart/lib/skia/skia_vmo_surface.h" // nogncheck
+#include "apps/mozart/lib/skia/type_converters.h" // nogncheck
+#include "apps/mozart/services/composition/scenes.fidl.h" // nogncheck
 #include "flutter/flow/layers/layer.h"
 #include "flutter/glue/trace_event.h"
 

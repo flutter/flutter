@@ -16,9 +16,9 @@
 #include "third_party/skia/include/core/SkSurface.h"
 
 #if defined(OS_FUCHSIA)
-#include "apps/mozart/services/composition/nodes.fidl.h"
-#include "apps/mozart/services/composition/resources.fidl.h"
-#include "apps/mozart/services/images/image.fidl.h"
+#include "apps/mozart/services/composition/nodes.fidl.h" // nogncheck
+#include "apps/mozart/services/composition/resources.fidl.h" // nogncheck
+#include "apps/mozart/services/images/image.fidl.h" // nogncheck
 #endif  // defined(OS_FUCHSIA)
 
 namespace mozart {
