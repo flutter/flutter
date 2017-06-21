@@ -101,11 +101,11 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         result.setEnabled(true); // TODO(ianh): Expose disabled subtrees
 
         if ((object.actions & SEMANTICS_ACTION_TAP) != 0) {
-            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLICK);
+            result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
             result.setClickable(true);
         }
         if ((object.actions & SEMANTICS_ACTION_LONG_PRESS) != 0) {
-            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
+            result.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
             result.setLongClickable(true);
         }
         if ((object.actions & SEMANTICS_ACTION_SCROLLABLE) != 0) {
@@ -113,8 +113,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
             // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
             // _UP, and _DOWN when appropriate.
             // TODO(ianh): Only include the actions if you can actually scroll that way.
-            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
-            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             result.setScrollable(true);
         }
 
@@ -131,9 +131,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
 
         // Accessibility Focus
         if (mFocusedObject != null && mFocusedObject.id == virtualViewId) {
-            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+            result.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
         } else {
-            result.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
+            result.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
         }
 
         if (object.children != null) {
