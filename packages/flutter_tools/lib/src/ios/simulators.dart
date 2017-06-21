@@ -315,6 +315,7 @@ class IOSSimulator extends Device {
     String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
   }) async {
     if (!prebuiltApplication) {
       printTrace('Building ${app.name} for $id.');
