@@ -75,14 +75,16 @@ class Paragraph {
   StyledRuns runs_;
   minikin::LineBreaker breaker_;
   std::vector<PaintRecord> records_;
+  std::vector<double> line_widths_;
   ParagraphStyle paragraph_style_;
-  SkScalar y_ = 0.0f;
   // TODO(garyq): Height of the paragraph after Layout().
   SkScalar height_ = 0.0f;
   double width_ = 0.0f;
   int lines_ = 1;
   double max_intrinsic_width_ = 0.0f;
   double min_intrinsic_width_ = 0.0f;
+  double alphabetic_baseline_ = FLT_MAX;
+  double ideographic_baseline_ = FLT_MAX;
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 

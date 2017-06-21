@@ -158,21 +158,22 @@ void Paragraph::Layout(double width,
   // Reset member variables so Layout still works when called more than once
   max_intrinsic_width_ = 0.0f;
   lines_ = 0;
-  y_ = y_offset;
 
   SkScalar x = x_offset;
+  SkScalar y = y_offset;
   size_t break_index = 0;
   double letter_spacing_offset = 0.0f;
   double word_spacing_offset = 0.0f;
   double max_line_spacing = 0.0f;
   double max_descent = 0.0f;
   double prev_max_descent = 0.0f;
+  double line_width = 0.0f;
   std::vector<SkScalar> x_queue;
 
-  auto flush = [this, &x_queue]() -> void {
+  auto flush = [this, &x_queue, &y]() -> void {
     for (size_t i = 0; i < x_queue.size(); ++i) {
       records_[records_.size() - (x_queue.size() - i)].SetOffset(
-          SkPoint::Make(x_queue[i], y_));
+          SkPoint::Make(x_queue[i], y));
     }
     x_queue.clear();
   };
@@ -240,13 +241,18 @@ void Paragraph::Layout(double width,
       // Subtract word offset to avoid big gap at end of run. This my be
       // removed depending on the specificatins for word spacing.
       word_spacing_offset -= run.style.word_spacing;
+
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
       // color stayed the same.
       // TODO(garyq): Ensure that the typeface does not change throughout a
       // run.
       SkPaint::FontMetrics metrics;
       paint.getFontMetrics(&metrics);
-      records_.push_back(PaintRecord{run.style, builder.make(), metrics});
+      records_.push_back(
+          PaintRecord{run.style, builder.make(), metrics, lines_});
+      line_width +=
+          std::abs(records_[records_.size() - 1].text()->bounds().fRight +
+                   records_[records_.size() - 1].text()->bounds().fLeft);
 
       // Must adjust each line to the largest text in the line, so cannot
       // directly push the offset property of PaintRecord until line is
@@ -254,15 +260,25 @@ void Paragraph::Layout(double width,
       x_queue.push_back(x);
 
       if (max_line_spacing <
-          (-metrics.fAscent + metrics.fLeading) * run.style.height)
-        max_line_spacing =
-            (-metrics.fAscent + metrics.fLeading) * run.style.height;
+          (-metrics.fAscent + metrics.fLeading) * run.style.height) {
+        max_line_spacing = lines_ == 0 ? -metrics.fAscent * run.style.height
+                                       : (-metrics.fAscent + metrics.fLeading) *
+                                             run.style.height;
+        // Record the alphabetic_baseline_:
+        if (lines_ == 0) {
+          alphabetic_baseline_ = -metrics.fAscent * run.style.height;
+          // TODO(garyq): Properly implement ideographic_baseline_.
+          ideographic_baseline_ =
+              ((metrics.fDescent / 2) - metrics.fAscent) * run.style.height;
+        }
+      }
       if (max_descent < metrics.fDescent * run.style.height)
         max_descent = metrics.fDescent * run.style.height;
 
       if (layout_end == next_break) {
-        y_ += max_line_spacing + prev_max_descent;
+        y += max_line_spacing + prev_max_descent;
         prev_max_descent = max_descent;
+        line_widths_.push_back(line_width);
         flush();
 
         max_line_spacing = 0.0f;
@@ -270,6 +286,7 @@ void Paragraph::Layout(double width,
         x = 0.0f;
         letter_spacing_offset = 0.0f;
         word_spacing_offset = 0.0f;
+        line_width = 0.0f;
         // TODO(abarth): Use the line height, which is something like the max
         // font_size for runs in this line times the paragraph's line height.
         break_index += 1;
@@ -281,8 +298,12 @@ void Paragraph::Layout(double width,
       layout_start = layout_end;
     }
   }
-  y_ += max_line_spacing;
+  y += max_line_spacing;
   flush();
+  if (line_width != 0)
+    line_widths_.push_back(line_width);
+
+  height_ = y + max_descent;
 }
 
 const ParagraphStyle& Paragraph::GetParagraphStyle() const {
@@ -290,13 +311,12 @@ const ParagraphStyle& Paragraph::GetParagraphStyle() const {
 }
 
 double Paragraph::GetAlphabeticBaseline() const {
-  // TODO(garyq): Implement.
-  return FLT_MAX;
+  return alphabetic_baseline_;
 }
 
 double Paragraph::GetIdeographicBaseline() const {
   // TODO(garyq): Implement.
-  return FLT_MAX;
+  return ideographic_baseline_;
 }
 
 double Paragraph::GetMaxIntrinsicWidth() const {
@@ -309,7 +329,7 @@ double Paragraph::GetMinIntrinsicWidth() const {
 }
 
 double Paragraph::GetHeight() const {
-  return y_;
+  return height_;
 }
 
 void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
@@ -320,7 +340,24 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   for (const auto& record : records_) {
     SkPaint paint;
     paint.setColor(record.style().color);
-    const SkPoint& offset = record.offset();
+    SkPoint offset = record.offset();
+    // TODO(garyq): Fix alignment for paragraphs with multiple styles per line.
+    switch (paragraph_style_.text_align) {
+      case TextAlign::left:
+        break;
+      case TextAlign::right: {
+        offset.offset(width_ - line_widths_[record.line()], 0);
+        break;
+      }
+      case TextAlign::center: {
+        offset.offset((width_ - line_widths_[record.line()]) / 2, 0);
+        break;
+      }
+      case TextAlign::justify: {
+        // TODO(garyq): implement justify.
+        break;
+      }
+    }
     canvas->drawTextBlob(record.text(), x + offset.x(), y + offset.y(), paint);
     PaintDecorations(canvas, x + offset.x(), y + offset.y(), record.style(),
                      record.metrics(), record.text());
