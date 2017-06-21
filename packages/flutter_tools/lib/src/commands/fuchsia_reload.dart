@@ -395,9 +395,8 @@ class FuchsiaDeviceCommandRunner {
 =======
     // Copy that file to the local filesystem.
     result = await Process.run(netcp, <String>[':$remoteStdout', localStdout]);
-    // Try to delete the remote file. Don't care about the result;
-    // ignore: unawaited_futures
-    Process.run(netruncmd, <String>[':', 'rm $remoteStdout']);
+    // Try to delete the remote file. Don't care about the result.
+    Process.run(netruncmd, <String>[':', 'rm $remoteStdout']); // ignore: unawaited_futures
     if (result.exitCode != 0)
       return null;
     // Read the local file.

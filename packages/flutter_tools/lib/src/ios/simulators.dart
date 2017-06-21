@@ -80,8 +80,7 @@ class SimControl {
     final List<String> args = <String>[_xcrunPath, 'instruments', '-w', deviceName, '-t', 'Blank', '-l', '1'];
     printTrace(args.join(' '));
     // Synchronization is managed separately below.
-    // ignore: unawaited_futures
-    runDetached(args);
+    runDetached(args); // ignore: unawaited_futures
     printStatus('Waiting for iOS Simulator to boot...');
 
     bool connected = false;
