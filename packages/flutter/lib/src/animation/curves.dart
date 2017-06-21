@@ -175,6 +175,8 @@ class Threshold extends Curve {
 /// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_ease_in.png)
 /// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_ease_out.png)
 /// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_ease_in_out.png)
+///
+/// The [Cubic] class implements third-order Bézier curves.
 class Cubic extends Curve {
   /// Creates a cubic curve.
   ///

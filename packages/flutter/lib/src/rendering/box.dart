@@ -11,7 +11,6 @@ import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'node.dart';
 import 'object.dart';
 
 // This class should only be used in debug builds.
@@ -1587,9 +1586,6 @@ abstract class RenderBox extends RenderObject {
   @override
   BoxConstraints get constraints => super.constraints;
 
-  // We check the intrinsic sizes of each render box once by default.
-  bool _debugNeedsIntrinsicSizeCheck = true;
-
   @override
   void debugAssertDoesMeetConstraints() {
     assert(constraints != null);
@@ -1657,7 +1653,7 @@ abstract class RenderBox extends RenderObject {
           'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
         );
       }
-      if (_debugNeedsIntrinsicSizeCheck || debugCheckIntrinsicSizes) {
+      if (debugCheckIntrinsicSizes) {
         // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
@@ -1696,7 +1692,6 @@ abstract class RenderBox extends RenderObject {
         // TODO(ianh): Test that values are internally consistent in more ways than the above.
 
         RenderObject.debugCheckingIntrinsics = false;
-        _debugNeedsIntrinsicSizeCheck = false;
         if (failures.isNotEmpty) {
           assert(failureCount > 0);
           throw new FlutterError(
@@ -1834,7 +1829,7 @@ abstract class RenderBox extends RenderObject {
   /// Subclasses that apply transforms during painting should override this
   /// function to factor those transforms into the calculation.
   ///
-  /// The RenderBox implementation takes care of adjusting the matrix for the
+  /// The [RenderBox] implementation takes care of adjusting the matrix for the
   /// position of the given child as determined during layout and stored on the
   /// child's [parentData] in the [BoxParentData.offset] field.
   @override
@@ -1862,34 +1857,6 @@ abstract class RenderBox extends RenderObject {
     final BoxParentData childParentData = child.parentData;
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
-  }
-
-  /// Returns a matrix that maps the local coordinate system to the coordinate
-  /// system of `ancestor`.
-  ///
-  /// If `ancestor` is null, this method returns a matrix that maps from the
-  /// local coordinate system to the coordinate system of the
-  /// [PipelineOwner.rootNode]. For the render tree owner by the
-  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
-  /// this means that this method maps to the global coordinate system in
-  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
-  /// [RenderView] to further transform the coordinate.
-  Matrix4 getTransformTo(RenderObject ancestor) {
-    assert(attached);
-    if (ancestor == null) {
-      final AbstractNode rootNode = owner.rootNode;
-      if (rootNode is RenderObject)
-        ancestor = rootNode;
-    }
-    final List<RenderObject> renderers = <RenderObject>[];
-    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent) {
-      assert(renderer != null); // Failed to find ancestor in parent chain.
-      renderers.add(renderer);
-    }
-    final Matrix4 transform = new Matrix4.identity();
-    for (int index = renderers.length - 1; index > 0; index -= 1)
-      renderers[index].applyPaintTransform(renderers[index - 1], transform);
-    return transform;
   }
 
   /// Convert the given point from the global coodinate system in logical pixels

@@ -70,12 +70,14 @@ class _ContactItem extends StatelessWidget {
         )
       ));
     }
-    return new Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: rowChildren
-      )
+    return new MergeSemantics(
+      child: new Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: rowChildren
+        )
+      ),
     );
   }
 }

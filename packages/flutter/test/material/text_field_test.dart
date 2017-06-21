@@ -27,7 +27,7 @@ class MockClipboard {
 
 Widget overlay(Widget child) {
   return new MediaQuery(
-    data: const MediaQueryData(),
+    data: const MediaQueryData(size: const Size(800.0, 600.0)),
     child: new Overlay(
       initialEntries: <OverlayEntry>[
         new OverlayEntry(
@@ -36,6 +36,11 @@ Widget overlay(Widget child) {
       ],
     ),
   );
+}
+
+Future<Null> skipPastScrollingAnimation(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 200));
 }
 
 void main() {
@@ -68,10 +73,22 @@ void main() {
     return renderEditable;
   }
 
+  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+    return points.map((TextSelectionPoint point) {
+      return new TextSelectionPoint(
+        box.localToGlobal(point.point),
+        point.direction,
+      );
+    }).toList();
+  }
+
   Offset textOffsetToPosition(WidgetTester tester, int offset) {
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-      new TextSelection.collapsed(offset: offset),
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(
+        new TextSelection.collapsed(offset: offset),
+      ),
+      renderEditable,
     );
     expect(endpoints.length, 1);
     return endpoints[0].point + const Offset(0.0, -2.0);
@@ -112,8 +129,7 @@ void main() {
         expect(textFieldValue, equals(testValue));
 
         await tester.pumpWidget(builder());
-        // skip past scrolling animation
-        await tester.pump(const Duration(milliseconds: 200));
+        await skipPastScrollingAnimation(tester);
       });
     }
 
@@ -219,8 +235,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap to reposition the caret.
     final int tapIndex = testValue.indexOf('e');
@@ -263,8 +278,7 @@ void main() {
     expect(controller.value.text, testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     expect(controller.selection.isCollapsed, true);
 
@@ -299,8 +313,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
@@ -308,15 +321,19 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     final TextSelection selection = controller.selection;
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the right handle 2 letters to the right.
-    // Note: use a small offset because the endpoint is on the very corner
+    // We use a small offset because the endpoint is on the very corner
     // of the handle.
     Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
     Offset newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
@@ -362,16 +379,20 @@ void main() {
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     RenderEditable renderEditable = findRenderEditable(tester);
-    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     // SELECT ALL should select all the text.
     await tester.tap(find.text('SELECT ALL'));
@@ -382,17 +403,21 @@ void main() {
     // COPY should reset the selection.
     await tester.tap(find.text('COPY'));
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
     expect(controller.selection.isCollapsed, true);
 
     // Tap again to bring back the menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     renderEditable = findRenderEditable(tester);
-    endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     // PASTE right before the 'e'.
     await tester.tap(find.text('PASTE'));
@@ -418,14 +443,17 @@ void main() {
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
@@ -532,8 +560,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Check that the text spans multiple lines.
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
@@ -550,12 +577,16 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     expect(controller.selection.baseOffset, 39);
     expect(controller.selection.extentOffset, 44);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the right handle to the third line, just after 'Third'.
@@ -656,7 +687,10 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
@@ -742,6 +776,75 @@ void main() {
     }
 
     await checkText('Hello World');
+  });
+
+  testWidgets('TextField errorText trumps helperText', (WidgetTester tester) async {
+    Widget builder() {
+      return const Center(
+        child: const Material(
+          child: const TextField(
+            decoration: const InputDecoration(
+              errorText: 'error text',
+              helperText: 'helper text',
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    expect(find.text('helper text'), findsNothing);
+    expect(find.text('error text'), findsOneWidget);
+  });
+
+  testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
+    final ThemeData themeData = new ThemeData(
+      hintColor: Colors.blue[500],
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Theme(
+          data: themeData,
+          child: const Material(
+            child: const TextField(
+              decoration: const InputDecoration(
+                helperText: 'helper text',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final Text helperText = tester.widget(find.text('helper text'));
+    expect(helperText.style.color, themeData.hintColor);
+    expect(helperText.style.fontSize, themeData.textTheme.caption.fontSize);
+  });
+
+  testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
+    final TextStyle style = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new TextField(
+            decoration: new InputDecoration(
+              helperText: 'helper text',
+              helperStyle: style,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final Text helperText = tester.widget(find.text('helper text'));
+    expect(helperText.style, style);
   });
 
   testWidgets('TextField with default hintStyle', (WidgetTester tester) async {
@@ -1340,16 +1443,19 @@ void main() {
       await tester.enterText(find.byType(TextField), 'a1b\n2c3');
       expect(textController.text, '123');
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       await tester.tapAt(textOffsetToPosition(tester, '123'.indexOf('2')));
       await tester.pumpWidget(builder());
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
       final RenderEditable renderEditable = findRenderEditable(tester);
-      final List<TextSelectionPoint> endpoints =
-          renderEditable.getEndpointsForSelection(textController.selection);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(textController.selection),
+        renderEditable,
+      );
       await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
       await tester.pumpWidget(builder());
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
       Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('PASTE'));
@@ -1382,8 +1488,7 @@ void main() {
       final String longText = 'a' * 20;
       await tester.enterText(find.byType(TextField), longText);
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
       expect(scrollableState.position.pixels, equals(0.0));
@@ -1392,8 +1497,7 @@ void main() {
       // scrolls to make the caret visible.
       controller.selection = new TextSelection.collapsed(offset: longText.length);
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       scrollableState = tester.firstState(find.byType(Scrollable));
       expect(scrollableState.position.pixels, isNot(equals(0.0)));

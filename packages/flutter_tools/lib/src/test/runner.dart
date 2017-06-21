@@ -24,6 +24,7 @@ Future<int> runTests(
     bool enableObservatory: false,
     bool startPaused: false,
     bool ipv6: false,
+    bool json: false,
     TestWatcher watcher,
     }) async {
   // Compute the command-line arguments for package:test.
@@ -34,6 +35,10 @@ Future<int> runTests(
   if (enableObservatory) {
     // (In particular, for collecting code coverage.)
     testArgs.add('--concurrency=1');
+  }
+
+  if (json) {
+    testArgs.addAll(<String>['-r', 'json']);
   }
 
   testArgs.add('--');
@@ -55,8 +60,8 @@ Future<int> runTests(
     serverType: serverType,
   );
 
-  // Set the package path used for child processes.
-  // TODO(skybrian): why is this global? Move to installHook?
+  // Make the global packages path absolute.
+  // (Makes sure it still works after we change the current directory.)
   PackageMap.globalPackagesPath =
       fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
 

@@ -72,12 +72,6 @@ class TestCommand extends FlutterCommand {
   @override
   String get description => 'Run Flutter unit tests for the current project.';
 
-  Directory get _currentPackageTestDir {
-    // We don't scan the entire package, only the test/ subdirectory, so that
-    // files with names like like "hit_test.dart" don't get run.
-    return fs.directory('test');
-  }
-
   Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
     final Status status = logger.startProgress('Collecting coverage information...');
     final String coverageData = await collector.finalizeCoverage(
@@ -159,7 +153,9 @@ class TestCommand extends FlutterCommand {
 
     Directory workDir;
     if (files.isEmpty) {
-      workDir = _currentPackageTestDir;
+      // We don't scan the entire package, only the test/ subdirectory, so that
+      // files with names like like "hit_test.dart" don't get run.
+      workDir = fs.directory('test');
       if (!workDir.existsSync())
         throwToolExit('Test directory "${workDir.path}" not found.');
       files = _findTests(workDir);
@@ -176,8 +172,8 @@ class TestCommand extends FlutterCommand {
       collector = new CoverageCollector();
     }
 
-    final bool wantEvents = argResults['machine'];
-    if (collector != null && wantEvents) {
+    final bool machine = argResults['machine'];
+    if (collector != null && machine) {
       throwToolExit(
           "The test command doesn't support --machine and coverage together");
     }
@@ -185,7 +181,7 @@ class TestCommand extends FlutterCommand {
     TestWatcher watcher;
     if (collector != null) {
       watcher = collector;
-    } else if (wantEvents) {
+    } else if (machine) {
       watcher = new EventPrinter();
     }
 
@@ -196,7 +192,9 @@ class TestCommand extends FlutterCommand {
         watcher: watcher,
         enableObservatory: collector != null || startPaused,
         startPaused: startPaused,
-        ipv6: argResults['ipv6']);
+        ipv6: argResults['ipv6'],
+        json: machine,
+        );
 
     if (collector != null) {
       if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))

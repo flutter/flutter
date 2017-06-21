@@ -4,6 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'rendering_tester.dart';
 
@@ -128,6 +129,11 @@ void main() {
     expect(result.path.first.target, equals(c));
   });
 
+  Offset _getPaintOrigin(RenderObject render) {
+    final Vector3 transformed3 = render.getTransformTo(null).perspectiveTransform(new Vector3(0.0, 0.0, 0.0));
+    return new Offset(transformed3.x, transformed3.y);
+  }
+
   test('RenderViewport basic test - right', () {
     RenderBox a, b, c, d, e;
     final RenderViewport root = new RenderViewport(
@@ -146,11 +152,23 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
+    final RenderSliver sliverA = a.parent;
+    final RenderSliver sliverB = b.parent;
+    final RenderSliver sliverC = c.parent;
+    final RenderSliver sliverD = d.parent;
+    final RenderSliver sliverE = e.parent;
+
     expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
     expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
     expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
+
+    expect(_getPaintOrigin(sliverA), const Offset(0.0, 0.0));
+    expect(_getPaintOrigin(sliverB), const Offset(400.0, 0.0));
+    expect(_getPaintOrigin(sliverC), const Offset(800.0, 0.0));
+    expect(_getPaintOrigin(sliverD), const Offset(800.0, 0.0));
+    expect(_getPaintOrigin(sliverE), const Offset(800.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
@@ -160,6 +178,12 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
 
+    expect(_getPaintOrigin(sliverA), const Offset(000.0, 0.0));
+    expect(_getPaintOrigin(sliverB), const Offset(200.0, 0.0));
+    expect(_getPaintOrigin(sliverC), const Offset(600.0, 0.0));
+    expect(_getPaintOrigin(sliverD), const Offset(800.0, 0.0));
+    expect(_getPaintOrigin(sliverE), const Offset(800.0, 0.0));
+
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
     expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(-600.0, 0.0));
@@ -168,6 +192,12 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
 
+    expect(_getPaintOrigin(sliverA), const Offset(000.0, 0.0));
+    expect(_getPaintOrigin(sliverB), const Offset(000.0, 0.0));
+    expect(_getPaintOrigin(sliverC), const Offset(200.0, 0.0));
+    expect(_getPaintOrigin(sliverD), const Offset(600.0, 0.0));
+    expect(_getPaintOrigin(sliverE), const Offset(800.0, 0.0));
+
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
     expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(-900.0, 0.0));
@@ -175,6 +205,12 @@ void main() {
     expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(-100.0, 0.0));
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(300.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
+
+    expect(_getPaintOrigin(sliverA), const Offset(000.0, 0.0));
+    expect(_getPaintOrigin(sliverB), const Offset(000.0, 0.0));
+    expect(_getPaintOrigin(sliverC), const Offset(000.0, 0.0));
+    expect(_getPaintOrigin(sliverD), const Offset(300.0, 0.0));
+    expect(_getPaintOrigin(sliverE), const Offset(700.0, 0.0));
 
     final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Offset(150.0, 450.0));

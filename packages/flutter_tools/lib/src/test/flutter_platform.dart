@@ -18,7 +18,6 @@ import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import 'coverage_collector.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -53,7 +52,6 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
 /// main()`), you can set an observatory port and a diagnostic port explicitly.
 void installHook({
   @required String shellPath,
-  CoverageCollector collector,
   TestWatcher watcher,
   bool enableObservatory: false,
   bool startPaused: false,

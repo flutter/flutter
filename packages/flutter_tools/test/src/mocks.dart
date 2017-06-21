@@ -37,7 +37,7 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   MockPollingDeviceDiscovery() : super('mock');
 
   @override
-  List<Device> pollingGetDevices() => _devices;
+  Future<List<Device>> pollingGetDevices() async => _devices;
 
   @override
   bool get supportsPlatform => true;
@@ -52,7 +52,7 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   }
 
   @override
-  List<Device> get devices => _devices;
+  Future<List<Device>> get devices async => _devices;
 
   @override
   Stream<Device> get onAdded => _onAddedController.stream;

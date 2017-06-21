@@ -5,8 +5,8 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -14,7 +14,7 @@ import '../base/version.dart';
 import '../doctor.dart';
 import 'mac.dart';
 
-Xcode get xcode => Xcode.instance;
+IOSWorkflow get iosWorkflow => context.putIfAbsent(IOSWorkflow, () => new IOSWorkflow());
 
 class IOSWorkflow extends DoctorValidator implements Workflow {
   IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
@@ -22,7 +22,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get appliesToHostPlatform => platform.isMacOS;
 
-  // We need xcode (+simctl) to list simulator devices, and idevice_id to list real devices.
+  // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
   bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
 
@@ -30,21 +30,6 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   // for real devices.
   @override
   bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
-
-  bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
-
-  Future<bool> get hasWorkingLibimobiledevice async {
-    // Verify that libimobiledevice tools are installed.
-    if (!hasIDeviceId)
-      return false;
-
-    // If a device is attached, verify that we can get its name.
-    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['idevicename']))
-      return false;
-
-    return true;
-  }
 
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
@@ -151,7 +136,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (hasHomebrew) {
       brewStatus = ValidationType.installed;
 
-      if (!await hasWorkingLibimobiledevice) {
+      if (!await iMobileDevice.isWorking) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
             'libimobiledevice and ideviceinstaller are not installed or require updating. To update, run:\n'

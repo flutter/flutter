@@ -17,12 +17,12 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
 import 'code_signing.dart';
+import 'ios_workflow.dart';
 import 'xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 7;
@@ -32,6 +32,10 @@ const int kXcodeRequiredVersionMinor = 0;
 // default, but may not be present in custom Python installs; e.g., via
 // Homebrew.
 const PythonModule kPythonSix = const PythonModule('six');
+
+IMobileDevice get iMobileDevice => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
+
+Xcode get xcode => context.putIfAbsent(Xcode, () => new Xcode());
 
 class PythonModule {
   const PythonModule(this.name);
@@ -43,6 +47,36 @@ class PythonModule {
   String get errorMessage =>
     'Missing Xcode dependency: Python module "$name".\n'
     'Install via \'pip install $name\' or \'sudo easy_install $name\'.';
+}
+
+class IMobileDevice {
+  const IMobileDevice();
+
+  bool get isInstalled => exitsHappy(<String>['idevice_id', '-h']);
+
+  /// Returns true if libimobiledevice is installed and working as expected.
+  ///
+  /// Older releases of libimobiledevice fail to work with iOS 10.3 and above.
+  Future<bool> get isWorking async {
+    if (!isInstalled)
+      return false;
+
+    // If no device is attached, we're unable to detect any problems. Assume all is well.
+    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+    if (result.exitCode != 0 || result.stdout.isEmpty)
+      return true;
+
+    // Check that we can look up the names of any attached devices.
+    return await exitsHappyAsync(<String>['idevicename']);
+  }
+
+  /// Starts `idevicesyslog` and returns the running process.
+  Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
+
+  /// Captures a screenshot to the specified outputfile.
+  Future<Null> takeScreenshot(File outputFile) {
+    return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
+  }
 }
 
 class Xcode {
@@ -81,9 +115,6 @@ class Xcode {
     }
   }
 
-  /// Returns [Xcode] active in the current app context.
-  static Xcode get instance => context.putIfAbsent(Xcode, () => new Xcode());
-
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
   String _xcodeSelectPath;
@@ -118,6 +149,13 @@ class Xcode {
     _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
 
     return _xcodeVersionCheckValid(_xcodeMajorVersion, _xcodeMinorVersion);
+  }
+
+  Future<String> getAvailableDevices() async {
+    final RunResult result = await runAsync(<String>['/usr/bin/instruments', '-s', 'devices']);
+    if (result.exitCode != 0)
+      throw new ToolExit('Failed to invoke /usr/bin/instruments. Is Xcode installed?');
+    return result.stdout;
   }
 }
 
@@ -354,8 +392,8 @@ final String cocoaPodsUpgradeInstructions = '''
 
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!await doctor.iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
-      final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
+    if (!await iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
+      final String minimumVersion = iosWorkflow.cocoaPodsMinimumVersion;
       printError(
         'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
         '$noCocoaPodsConsequence\n'
@@ -365,7 +403,7 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
       );
       return;
     }
-    if (!await doctor.iosWorkflow.isCocoaPodsInitialized) {
+    if (!await iosWorkflow.isCocoaPodsInitialized) {
       printError(
         'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
         '$noCocoaPodsConsequence\n'

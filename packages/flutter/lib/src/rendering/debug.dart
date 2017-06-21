@@ -106,6 +106,9 @@ bool debugPrintMarkNeedsPaintStacks = false;
 bool debugPrintMarkNeedsLayoutStacks = false;
 
 /// Check the intrinsic sizes of each [RenderBox] during layout.
+///
+/// By default this is turned off since these checks are expensive, but it is
+/// enabled by the test framework.
 bool debugCheckIntrinsicSizes = false;
 
 /// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
@@ -120,8 +123,13 @@ bool debugCheckIntrinsicSizes = false;
 bool debugProfilePaintsEnabled = false;
 
 
-/// Returns a list of strings representing the given transform in a format useful for [RenderObject.debugFillDescription].
+/// Returns a list of strings representing the given transform in a format
+/// useful for [RenderObject.debugFillDescription].
+///
+/// If the argument is null, returns a list with the single string "null".
 List<String> debugDescribeTransform(Matrix4 transform) {
+  if (transform == null)
+    return const <String>['null'];
   final List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;
@@ -161,9 +169,13 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See [https://docs.flutter.io/flutter/rendering/rendering-library.html] for
+/// See <https://docs.flutter.io/flutter/rendering/rendering-library.html> for
 /// a complete list.
-bool debugAssertAllRenderVarsUnset(String reason) {
+///
+/// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
+/// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
+/// test framework itself overrides this value in some cases.)
+bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride: false }) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||
@@ -173,7 +185,7 @@ bool debugAssertAllRenderVarsUnset(String reason) {
         debugRepaintTextRainbowEnabled ||
         debugPrintMarkNeedsPaintStacks ||
         debugPrintMarkNeedsLayoutStacks ||
-        debugCheckIntrinsicSizes ||
+        debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
         debugProfilePaintsEnabled ||
         debugPaintSizeColor != _kDebugPaintSizeColor ||
         debugPaintSpacingColor != _kDebugPaintSpacingColor ||

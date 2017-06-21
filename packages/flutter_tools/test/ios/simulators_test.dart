@@ -161,7 +161,7 @@ void main() {
               '/usr/bin/xcrun',
               'simctl',
               'io',
-              'booted',
+              'x',
               'screenshot',
               fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],

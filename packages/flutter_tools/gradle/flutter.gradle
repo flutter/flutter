@@ -110,6 +110,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (!debugFlutterJar.isFile()) {
                 project.exec {
                     executable flutterExecutable.absolutePath
+                    args "--suppress-analytics"
                     args "precache"
                 }
                 if (!debugFlutterJar.isFile()) {
@@ -272,6 +273,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                     args "--local-engine-src-path", localEngineSrcPath
                 }
                 args "build", "aot"
+                args "--suppress-analytics"
                 args "--quiet"
                 args "--target", targetPath
                 args "--target-platform", "android-arm"
@@ -288,6 +290,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--local-engine-src-path", localEngineSrcPath
             }
             args "build", "flx"
+            args "--suppress-analytics"
             args "--target", targetPath
             if (kernelFile != null) {
                 args "--kernel", kernelFile.absolutePath
