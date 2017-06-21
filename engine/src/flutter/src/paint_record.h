@@ -31,9 +31,12 @@ class PaintRecord {
 
   ~PaintRecord();
 
-  PaintRecord(SkColor color,
-              TextStyle style,
+  PaintRecord(TextStyle style,
               SkPoint offset,
+              sk_sp<SkTextBlob> text,
+              SkPaint::FontMetrics metrics);
+
+  PaintRecord(TextStyle style,
               sk_sp<SkTextBlob> text,
               SkPaint::FontMetrics metrics);
 
@@ -41,9 +44,9 @@ class PaintRecord {
 
   PaintRecord& operator=(PaintRecord&& other);
 
-  SkColor color() const { return color_; }
-
   SkPoint offset() const { return offset_; }
+
+  void SetOffset(SkPoint pt);
 
   SkTextBlob* text() const { return text_.get(); }
 
@@ -52,7 +55,6 @@ class PaintRecord {
   const TextStyle& style() const { return style_; }
 
  private:
-  SkColor color_;
   TextStyle style_;
   SkPoint offset_;
   sk_sp<SkTextBlob> text_;

@@ -138,8 +138,9 @@ void Paragraph::Layout(double width,
                        const std::string& rootdir,
                        const double x_offset,
                        const double y_offset) {
-  breaker_.setLineWidths(0.0f, 0, width);
   width_ = width;
+
+  breaker_.setLineWidths(0.0f, 0, width);
   AddRunsToLineBreaker(rootdir);
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
@@ -150,20 +151,31 @@ void Paragraph::Layout(double width,
 
   minikin::FontStyle font;
   minikin::MinikinPaint minikin_paint;
+  minikin::Layout layout;
 
   SkTextBlobBuilder builder;
 
   // Reset member variables so Layout still works when called more than once
   max_intrinsic_width_ = 0.0f;
   lines_ = 0;
-
-  minikin::Layout layout;
-  SkScalar x = x_offset;
   y_ = y_offset;
+
+  SkScalar x = x_offset;
   size_t break_index = 0;
   double letter_spacing_offset = 0.0f;
   double word_spacing_offset = 0.0f;
   double max_line_spacing = 0.0f;
+  double max_descent = 0.0f;
+  double prev_max_descent = 0.0f;
+  std::vector<SkScalar> x_queue;
+
+  auto flush = [this, &x_queue]() -> void {
+    for (size_t i = 0; i < x_queue.size(); ++i) {
+      records_[records_.size() - (x_queue.size() - i)].SetOffset(
+          SkPoint::Make(x_queue[i], y_));
+    }
+    x_queue.clear();
+  };
 
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
@@ -206,10 +218,12 @@ void Paragraph::Layout(double width,
           const size_t glyph_index = blob_start + blob_index;
           buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
           const size_t pos_index = 2 * blob_index;
+
           buffer.pos[pos_index] = layout.getX(glyph_index) +
                                   letter_spacing_offset + word_spacing_offset;
-          letter_spacing_offset += run.style.letter_spacing;
           buffer.pos[pos_index + 1] = layout.getY(glyph_index);
+
+          letter_spacing_offset += run.style.letter_spacing;
         }
         blob_start += blob_length;
 
@@ -232,16 +246,27 @@ void Paragraph::Layout(double width,
       // run.
       SkPaint::FontMetrics metrics;
       paint.getFontMetrics(&metrics);
-      records_.push_back(PaintRecord{run.style.color, run.style,
-                                     SkPoint::Make(x, y_), builder.make(),
-                                     metrics});
-      if (max_line_spacing < -metrics.fAscent * run.style.height)
-        max_line_spacing = -metrics.fAscent * run.style.height;
+      records_.push_back(PaintRecord{run.style, builder.make(), metrics});
+
+      // Must adjust each line to the largest text in the line, so cannot
+      // directly push the offset property of PaintRecord until line is
+      // finished.
+      x_queue.push_back(x);
+
+      if (max_line_spacing <
+          (-metrics.fAscent + metrics.fLeading) * run.style.height)
+        max_line_spacing =
+            (-metrics.fAscent + metrics.fLeading) * run.style.height;
+      if (max_descent < metrics.fDescent * run.style.height)
+        max_descent = metrics.fDescent * run.style.height;
 
       if (layout_end == next_break) {
-        y_ += max_line_spacing;
+        y_ += max_line_spacing + prev_max_descent;
+        prev_max_descent = max_descent;
+        flush();
 
         max_line_spacing = 0.0f;
+        max_descent = 0.0f;
         x = 0.0f;
         letter_spacing_offset = 0.0f;
         word_spacing_offset = 0.0f;
@@ -256,6 +281,8 @@ void Paragraph::Layout(double width,
       layout_start = layout_end;
     }
   }
+  y_ += max_line_spacing;
+  flush();
 }
 
 const ParagraphStyle& Paragraph::GetParagraphStyle() const {
@@ -292,7 +319,7 @@ void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   for (const auto& record : records_) {
     SkPaint paint;
-    paint.setColor(record.color());
+    paint.setColor(record.style().color);
     const SkPoint& offset = record.offset();
     canvas->drawTextBlob(record.text(), x + offset.x(), y + offset.y(), paint);
     PaintDecorations(canvas, x + offset.x(), y + offset.y(), record.style(),
