@@ -76,7 +76,9 @@ class Paragraph {
   minikin::LineBreaker breaker_;
   std::vector<PaintRecord> records_;
   ParagraphStyle paragraph_style_;
-  SkScalar y_ = 0.0f;  // Height of the paragraph after Layout().
+  SkScalar y_ = 0.0f;
+  // TODO(garyq): Height of the paragraph after Layout().
+  SkScalar height_ = 0.0f;
   double width_ = 0.0f;
   int lines_ = 1;
   double max_intrinsic_width_ = 0.0f;

@@ -54,7 +54,7 @@ TEST_F(RenderTest, SimpleParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -87,7 +87,7 @@ TEST_F(RenderTest, SimpleRedParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -175,10 +175,10 @@ TEST_F(RenderTest, RainbowParagraph) {
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style2));
   ASSERT_TRUE(paragraph->runs_.styles_[2].equals(text_style3));
   ASSERT_TRUE(paragraph->runs_.styles_[3].equals(text_style4));
-  ASSERT_EQ(paragraph->records_[0].color(), text_style1.color);
-  ASSERT_EQ(paragraph->records_[1].color(), text_style2.color);
-  ASSERT_EQ(paragraph->records_[2].color(), text_style3.color);
-  ASSERT_EQ(paragraph->records_[3].color(), text_style4.color);
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style1.color);
+  ASSERT_EQ(paragraph->records_[1].style().color, text_style2.color);
+  ASSERT_EQ(paragraph->records_[2].style().color, text_style3.color);
+  ASSERT_EQ(paragraph->records_[3].style().color, text_style4.color);
 }
 
 // Currently, this should render nothing without a supplied TextStyle.
@@ -246,7 +246,7 @@ TEST_F(RenderTest, BoldParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -313,7 +313,7 @@ TEST_F(RenderTest, LinebreakParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -348,7 +348,7 @@ TEST_F(RenderTest, ItalicsParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].color(), text_style.color);
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 }
 
