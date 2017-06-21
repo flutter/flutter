@@ -3,25 +3,21 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
+
 import 'package:test/test.dart';
 
 import 'src/common.dart';
+import 'src/context.dart';
 
 void main()  {
-  // Create a temporary directory and write a single file into it.
-  final FileSystem fs = const LocalFileSystem();
-  final Directory tempDir = fs.systemTempDirectory.createTempSync();
-  final String projectRoot = tempDir.path;
-  final String assetPath = 'banana.txt';
-  final String assetContents = 'banana';
-  final File tempFile = fs.file(fs.path.join(projectRoot, assetPath));
-  tempFile.parent.createSync(recursive: true);
-  tempFile.writeAsBytesSync(UTF8.encode(assetContents));
-
   setUpAll(() {
     Cache.flutterRoot = getFlutterRoot();
   });
@@ -56,7 +52,17 @@ void main()  {
       expect(archivePaths[0], 'apple.txt');
       expect(archivePaths[1], 'packages/flutter_gallery_assets/shrine/products/heels.png');
     });
-    test('file contents', () async {
+
+    testUsingContext('file contents', () async {
+      // Create a temporary directory and write a single file into it.
+      final Directory tempDir = fs.systemTempDirectory.createTempSync();
+      final String projectRoot = tempDir.path;
+      final String assetPath = 'banana.txt';
+      final String assetContents = 'banana';
+      final File tempFile = fs.file(fs.path.join(projectRoot, assetPath));
+      tempFile.parent.createSync(recursive: true);
+      tempFile.writeAsBytesSync(UTF8.encode(assetContents));
+
       final AssetBundle ab = new AssetBundle.fixed(projectRoot, assetPath);
       expect(ab.entries, isNotEmpty);
       expect(ab.entries.length, 1);
@@ -64,6 +70,8 @@ void main()  {
       final DevFSContent content = ab.entries[archivePath];
       expect(archivePath, assetPath);
       expect(assetContents, UTF8.decode(await content.contentsAsBytes()));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => const LocalFileSystem(),
     });
   });
 
@@ -74,4 +82,60 @@ void main()  {
       expect(ab.entries.length, greaterThan(0));
     });
   });
+
+  group('AssetBundle asset variants', () {
+    testUsingContext('main asset and variants', () async {
+      fs.file("pubspec.yaml")
+        ..createSync()
+        ..writeAsStringSync(
+'''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  assets:
+    - a/b/c/foo
+'''
+      );
+      fs.file(".packages")..createSync();
+
+      final List<String> assets = <String>[
+        'a/b/c/foo',
+        'a/b/c/var1/foo',
+        'a/b/c/var2/foo',
+        'a/b/c/var3/foo',
+      ];
+      for (String asset in assets) {
+        fs.file(asset)
+          ..createSync(recursive: true)
+          ..writeAsStringSync(asset);
+      }
+
+      AssetBundle bundle = new AssetBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+
+      // The main asset file, /a/b/c/foo, and its variants exist.
+      for (String asset in assets) {
+        expect(bundle.entries.containsKey(asset), true);
+        expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
+      }
+
+      fs.file('/a/b/c/foo').deleteSync();
+      bundle = new AssetBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+
+      // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
+      // the /a/b/c/*/foo variants do exist.
+      expect(bundle.entries.containsKey('/a/b/c/foo'), false);
+      for (String asset in assets.skip(1)) {
+        expect(bundle.entries.containsKey(asset), true);
+        expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
+      }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => new MemoryFileSystem(),
+    });
+
+  });
+
 }

@@ -77,7 +77,7 @@ class AssetBundle {
       manifest = _loadFlutterManifest(manifestPath);
     } catch (e) {
       printStatus('Error detected in pubspec.yaml:', emphasis: true);
-      printError(e);
+      printError(e.toString());
       return 1;
     }
     if (manifest == null) {
@@ -113,8 +113,9 @@ class AssetBundle {
         manifestDescriptor['uses-material-design'];
 
     for (_Asset asset in assetVariants.keys) {
-      assert(asset.assetFileExists);
-      entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
+      assert(asset.assetFileExists || assetVariants.isNotEmpty);
+      if (asset.assetFileExists)
+        entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
       for (_Asset variant in assetVariants[asset]) {
         assert(variant.assetFileExists);
         entries[variant.assetEntry] = new DevFSFileContent(variant.assetFile);
@@ -313,6 +314,49 @@ DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
   return new DevFSStringContent(JSON.encode(fonts));
 }
 
+// Given an assets directory like this:
+//
+// assets/foo
+// assets/var1/foo
+// assets/var2/foo
+// assets/bar
+//
+// variantsFor('assets', 'foo') => ['/assets/var1/foo', '/assets/var2/foo']
+// variantsFor('assets', 'bar') => []
+class _AssetDirectoryCache {
+  _AssetDirectoryCache(Iterable<String> excluded) {
+    _excluded = excluded.map<String>((String path) => fs.path.absolute(path) + fs.path.separator);
+  }
+
+  Iterable<String> _excluded;
+  final Map<String, Map<String, List<String>>> _cache = <String, Map<String, List<String>>>{};
+
+  List<String> variantsFor(String assetPath) {
+    final String assetName = fs.path.basename(assetPath);
+    final String directory = fs.path.dirname(assetPath);
+
+    if (_cache[directory] == null) {
+      final Iterable<String> paths = fs.directory(directory).listSync(recursive: true)
+        .map((FileSystemEntity entity) => entity.path)
+        .where((String path) {
+          return fs.isFileSync(path) &&
+            !_excluded.any((String exclude) => path.startsWith(exclude));
+        });
+      final Map<String, List<String>> variants = <String, List<String>>{};
+      for (String path in paths) {
+        final String variantName = fs.path.basename(path);
+        if (directory == fs.path.dirname(path))
+          continue;
+        variants[variantName] ??= <String>[];
+        variants[variantName].add(path);
+      }
+      _cache[directory] = variants;
+    }
+
+    return _cache[directory][assetName] ?? const <String>[];
+  }
+}
+
 /// Given an assetBase location and a pubspec.yaml Flutter manifest, return a
 /// map of assets to asset variants.
 ///
@@ -328,45 +372,21 @@ Map<_Asset, List<_Asset>> _parseAssets(
   if (manifestDescriptor == null)
     return result;
 
-  excludeDirs = excludeDirs.map<String>(
-    (String exclude) => fs.path.absolute(exclude) + fs.path.separator
-  ).toList();
-
   if (manifestDescriptor.containsKey('assets')) {
-    for (String asset in manifestDescriptor['assets']) {
-      final _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
-
-      if (!baseAsset.assetFileExists) {
-        printError('Error: unable to locate asset entry in pubspec.yaml: "$asset".');
-        return null;
-      }
-
+    final _AssetDirectoryCache cache = new _AssetDirectoryCache(excludeDirs);
+    for (String assetName in manifestDescriptor['assets']) {
+      final _Asset asset = _resolveAsset(packageMap, assetBase, assetName);
       final List<_Asset> variants = <_Asset>[];
-      result[baseAsset] = variants;
 
-      // Find asset variants
-      final String assetPath = baseAsset.assetFile.path;
-      final String assetFilename = fs.path.basename(assetPath);
-      final Directory assetDir = fs.directory(fs.path.dirname(assetPath));
-
-      final List<FileSystemEntity> files = assetDir.listSync(recursive: true);
-
-      for (FileSystemEntity entity in files) {
-        if (!fs.isFileSync(entity.path))
-          continue;
-
-        // Exclude any files in the given directories.
-        if (excludeDirs.any((String exclude) => entity.path.startsWith(exclude)))
-          continue;
-
-        if (fs.path.basename(entity.path) == assetFilename && entity.path != assetPath) {
-          final String key = fs.path.relative(entity.path, from: baseAsset.base);
-          String assetEntry;
-          if (baseAsset.symbolicPrefix != null)
-            assetEntry = fs.path.join(baseAsset.symbolicPrefix, key);
-          variants.add(new _Asset(base: baseAsset.base, assetEntry: assetEntry, relativePath: key));
-        }
+      for (String path in cache.variantsFor(asset.assetFile.path)) {
+        final String key = fs.path.relative(path, from: asset.base);
+        String assetEntry;
+        if (asset.symbolicPrefix != null)
+          assetEntry = fs.path.join(asset.symbolicPrefix, key);
+        variants.add(new _Asset(base: asset.base, assetEntry: assetEntry, relativePath: key));
       }
+
+      result[asset] = variants;
     }
   }
 
