@@ -425,5 +425,5 @@ abstract class InkFeature {
   void paintFeature(Canvas canvas, Matrix4 transform);
 
   @override
-  String toString() => describeIdentity(this);
+  String toString() => '$runtimeType#$hashCode';
 }

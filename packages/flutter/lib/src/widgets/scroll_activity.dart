@@ -125,7 +125,7 @@ abstract class ScrollActivity {
   }
 
   @override
-  String toString() => describeIdentity(this);
+  String toString() => '$runtimeType#$hashCode';
 }
 
 /// A scroll activity that does nothing.
@@ -282,7 +282,9 @@ class ScrollDragController implements Drag {
   dynamic _lastDetails;
 
   @override
-  String toString() => describeIdentity(this);
+  String toString() {
+    return '$runtimeType#$hashCode';
+  }
 }
 
 /// The activity a scroll view performs when a the user drags their finger
@@ -348,7 +350,7 @@ class DragScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($_controller)';
+    return '$runtimeType#$hashCode($_controller)';
   }
 }
 
@@ -439,7 +441,7 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($_controller)';
+    return '$runtimeType#$hashCode($_controller)';
   }
 }
 
@@ -524,6 +526,6 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '${describeIdentity(this)}($_controller)';
+    return '$runtimeType#$hashCode($_controller)';
   }
 }

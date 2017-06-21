@@ -86,7 +86,7 @@ abstract class GestureRecognizer extends GestureArenaMember {
   }
 
   @override
-  String toString() => describeIdentity(this);
+  String toString() => '$runtimeType#$hashCode';
 }
 
 /// Base class for gesture recognizers that can only recognize one
@@ -321,5 +321,5 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  String toString() => '${describeIdentity(this)}($state)';
+  String toString() => '$runtimeType#$hashCode($state)';
 }

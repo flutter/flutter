@@ -94,7 +94,7 @@ abstract class SliverChildDelegate {
   String toString() {
     final List<String> description = <String>[];
     debugFillDescription(description);
-    return '${describeIdentity(this)}(${description.join(", ")})';
+    return '$runtimeType#$hashCode(${description.join(", ")})';
   }
 
   /// Add additional information to the given description for use by [toString].

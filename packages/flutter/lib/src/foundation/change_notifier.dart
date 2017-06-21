@@ -7,7 +7,6 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'observer_list.dart';
-import 'print.dart';
 
 /// An object that maintains a list of listeners.
 abstract class Listenable {
@@ -186,5 +185,5 @@ class ValueNotifier<T> extends ChangeNotifier {
   }
 
   @override
-  String toString() => '${idAndType(this)}($value)';
+  String toString() => '$runtimeType#$hashCode($value)';
 }
