@@ -77,7 +77,7 @@ class AssetBundle {
       manifest = _loadFlutterManifest(manifestPath);
     } catch (e) {
       printStatus('Error detected in pubspec.yaml:', emphasis: true);
-      printError(e.toString());
+      printError('$e');
       return 1;
     }
     if (manifest == null) {
@@ -113,7 +113,11 @@ class AssetBundle {
         manifestDescriptor['uses-material-design'];
 
     for (_Asset asset in assetVariants.keys) {
-      assert(asset.assetFileExists || assetVariants.isNotEmpty);
+      if (!asset.assetFileExists && assetVariants.isEmpty) {
+        printStatus('Error detected in pubspec.yaml:', emphasis: true);
+        printError('No file or variants found for $asset.\n');
+        return 1;
+      }
       if (asset.assetFileExists)
         entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
       for (_Asset variant in assetVariants[asset]) {
@@ -321,8 +325,8 @@ DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
 // assets/var2/foo
 // assets/bar
 //
-// variantsFor('assets', 'foo') => ['/assets/var1/foo', '/assets/var2/foo']
-// variantsFor('assets', 'bar') => []
+// variantsFor('assets/foo') => ['/assets/var1/foo', '/assets/var2/foo']
+// variantsFor('assets/bar') => []
 class _AssetDirectoryCache {
   _AssetDirectoryCache(Iterable<String> excluded) {
     _excluded = excluded.map<String>((String path) => fs.path.absolute(path) + fs.path.separator);
@@ -336,12 +340,13 @@ class _AssetDirectoryCache {
     final String directory = fs.path.dirname(assetPath);
 
     if (_cache[directory] == null) {
-      final Iterable<String> paths = fs.directory(directory).listSync(recursive: true)
-        .map((FileSystemEntity entity) => entity.path)
-        .where((String path) {
-          return fs.isFileSync(path) &&
-            !_excluded.any((String exclude) => path.startsWith(exclude));
-        });
+      final List<String> paths = <String>[];
+      for (FileSystemEntity entity in fs.directory(directory).listSync(recursive: true)) {
+        final String path = entity.path;
+        if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude)))
+          paths.add(path);
+      }
+
       final Map<String, List<String>> variants = <String, List<String>>{};
       for (String path in paths) {
         final String variantName = fs.path.basename(path);
