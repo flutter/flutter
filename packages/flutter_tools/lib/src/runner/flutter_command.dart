@@ -42,7 +42,7 @@ class FlutterCommandResult {
 
   final ExitStatus exitStatus;
 
-  /// Optional data that can be appended to the timing event name.
+  /// Optional data that can be appended to the timing event.
   /// https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#timingLabel
   /// Do not add PII.
   final List<String> timingLabelParts;
