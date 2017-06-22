@@ -85,6 +85,7 @@ void main()  {
 
   group('AssetBundle asset variants', () {
     testUsingContext('main asset and variants', () async {
+      Cache.flutterRoot = getFlutterRoot();
       fs.file("pubspec.yaml")
         ..createSync()
         ..writeAsStringSync(
