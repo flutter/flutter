@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+
 import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -185,10 +187,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
 
   @override
   Future<dynamic> destroy(String fsName) async {
-    await vmService.vm.invokeRpcRaw(
-      '_deleteDevFS',
-      params: <String, dynamic> { 'fsName': fsName },
-    );
+    await vmService.vm.deleteDevFS(fsName);
   }
 
   @override
@@ -352,7 +351,16 @@ class DevFS {
 
   Future<Uri> create() async {
     printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
-    _baseUri = await _operations.create(fsName);
+    try {
+      _baseUri = await _operations.create(fsName);
+    } on rpc.RpcException catch (rpcException) {
+      // 1001 is kFileSystemAlreadyExists in //dart/runtime/vm/json_stream.h
+      if (rpcException.code != 1001)
+        rethrow;
+      printTrace('DevFS: Creating failed. Destroying and trying again');
+      await destroy();
+      _baseUri = await _operations.create(fsName);
+    }
     printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri;
   }
