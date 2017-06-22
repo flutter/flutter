@@ -176,11 +176,11 @@ class RunCommand extends RunCommandBase {
   @override
   Future<Map<String, String>> get usageValues async {
     final bool isEmulator = await devices[0].isLocalEmulator;
-    final String deviceName = devices.length == 1 
+    final String deviceType = devices.length == 1 
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple';
 
-    return <String, String>{ 'cd3': '$isEmulator', 'cd4': deviceName };
+    return <String, String>{ 'cd3': '$isEmulator', 'cd4': deviceType };
   }
 
   @override

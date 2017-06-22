@@ -218,7 +218,7 @@ class MockUsage implements Usage {
   String get clientId => '00000000-0000-4000-0000-000000000000';
 
   @override
-  void sendCommand(String command) { }
+  void sendCommand(String command, { Map<String, String> parameters }) { }
 
   @override
   void sendEvent(String category, String parameter) { }
