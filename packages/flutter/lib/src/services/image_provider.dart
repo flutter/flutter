@@ -161,7 +161,7 @@ class ImageConfiguration {
 ///
 /// The following shows the code required to write a widget that fully conforms
 /// to the [ImageProvider] and [Widget] protocols. (It is essentially a
-/// bare-bones version of the [Image] widget.)
+/// bare-bones version of the [widgets.Image] widget.)
 ///
 /// ```dart
 /// class MyImage extends StatefulWidget {

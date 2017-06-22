@@ -436,6 +436,46 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     @required this.gridDelegate,
   }) : super(key: key, delegate: delegate);
 
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement with a fixed number of tiles in the cross axis.
+  ///
+  /// Uses a [SliverGridDelegateWithFixedCrossAxisCount] as the [gridDelegate],
+  /// and a [SliverChildListDelegate] as the [delegate].
+  SliverGrid.count({
+    Key key,
+    @required int crossAxisCount,
+    double mainAxisSpacing: 0.0,
+    double crossAxisSpacing: 0.0,
+    double childAspectRatio: 1.0,
+    List<Widget> children: const <Widget>[],
+  }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
+         crossAxisCount: crossAxisCount,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       super(key: key, delegate: new SliverChildListDelegate(children));
+
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement with tiles that have a maximum cross-axis extent.
+  ///
+  /// Uses a [SliverGridDelegateWithMaxCrossAxisExtent] as the [gridDelegate],
+  /// and a [SliverChildListDelegate] as the [delegate].
+  SliverGrid.extent({
+    Key key,
+    @required double maxCrossAxisExtent,
+    double mainAxisSpacing: 0.0,
+    double crossAxisSpacing: 0.0,
+    double childAspectRatio: 1.0,
+    List<Widget> children: const <Widget>[],
+  }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
+         maxCrossAxisExtent: maxCrossAxisExtent,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       super(key: key, delegate: new SliverChildListDelegate(children));
+
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
 
