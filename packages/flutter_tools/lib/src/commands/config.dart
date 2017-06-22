@@ -13,6 +13,11 @@ class ConfigCommand extends FlutterCommand {
     argParser.addFlag('analytics',
       negatable: true,
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+    argParser.addFlag(
+      'clear-ios-signing-cert',
+      negatable: false,
+      help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment'
+    );
     argParser.addOption('gradle-dir', help: 'The gradle install directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
   }
@@ -59,6 +64,9 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.wasParsed('android-studio-dir'))
       _updateConfig('android-studio-dir', argResults['android-studio-dir']);
+
+    if (argResults.wasParsed('clear-ios-signing-cert'))
+      _updateConfig('ios-signing-cert', '');
 
     if (argResults.arguments.isEmpty)
       printStatus(usage);
