@@ -33,8 +33,6 @@ class Usage {
       _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
     }
 
-    _analytics.onSend.listen((e) => print('XXX $e'));
-
     bool runningOnCI = false;
 
     // Many CI systems don't do a full git checkout.
