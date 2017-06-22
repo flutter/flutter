@@ -214,8 +214,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   await _addServicesToBundle(appDirectory);
   final bool hasFlutterPlugins = injectPlugins();
 
-  if (hasFlutterPlugins)
+  if (hasFlutterPlugins && await _checkPodCondition()) {
     await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
+  }
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -411,30 +412,39 @@ final String cocoaPodsUpgradeInstructions = '''
   brew upgrade cocoapods
   pod setup''';
 
+Future<bool> _checkPodCondition() async {
+  if (!await iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
+    final String minimumVersion = iosWorkflow.cocoaPodsMinimumVersion;
+    printError(
+      'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
+      '$noCocoaPodsConsequence\n'
+      'To install:\n'
+      '$cocoaPodsInstallInstructions\n',
+      emphasis: true,
+    );
+    return false;
+  }
+  if (!await iosWorkflow.isCocoaPodsInitialized) {
+    printError(
+      'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
+      '$noCocoaPodsConsequence\n'
+      'To initialize CocoaPods, run:\n'
+      '  pod setup\n'
+      'once to finalize CocoaPods\' installation.',
+      emphasis: true,
+    );
+    return false;
+  }
+
+  return true;
+}
+
+Future<Null> _createPodfile(Directory bundle) async {
+
+}
+
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!await iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
-      final String minimumVersion = iosWorkflow.cocoaPodsMinimumVersion;
-      printError(
-        'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
-        '$noCocoaPodsConsequence\n'
-        'To install:\n'
-        '$cocoaPodsInstallInstructions\n',
-        emphasis: true,
-      );
-      return;
-    }
-    if (!await iosWorkflow.isCocoaPodsInitialized) {
-      printError(
-        'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
-        '$noCocoaPodsConsequence\n'
-        'To initialize CocoaPods, run:\n'
-        '  pod setup\n'
-        'once to finalize CocoaPods\' installation.',
-        emphasis: true,
-      );
-      return;
-    }
     final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
