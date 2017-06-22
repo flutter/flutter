@@ -44,7 +44,7 @@ Future<Null> generateDocs(
     }
   }
 
-  final File testFile = new File('${output.path}/${checkFile}');
+  final File testFile = new File('${output.path}/$checkFile');
   if (!testFile.existsSync()) {
     print('Expected file ${testFile.path} not found');
     exit(1);
