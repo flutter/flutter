@@ -438,6 +438,9 @@ class ListView extends BoxScrollView {
   /// children because constructing the [List] requires doing work for every
   /// child that could possibly be displayed in the list view instead of just
   /// those children that are actually visible.
+  ///
+  /// It is usually more efficient to create children on demand using [new
+  /// ListView.builder].
   ListView({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -466,11 +469,18 @@ class ListView extends BoxScrollView {
   /// number of children because the builder is called only for those children
   /// that are actually visible.
   ///
-  /// Providing a non-null [itemCount] improves the ability of the [ListView] to
+  /// Providing a non-null `itemCount` improves the ability of the [ListView] to
   /// estimate the maximum scroll extent.
   ///
-  /// [itemBuilder] will be called only with indices greater than or equal to
-  /// zero and less than [itemCount].
+  /// The `itemBuilder` callback will be called only with indices greater than
+  /// or equal to zero and less than `itemCount`.
+  ///
+  /// The `itemBuilder` should actually create the widget instances when called.
+  /// Avoid using a builder that returns a previously-constructed widget; if the
+  /// list view's children are created in advance, or all at once when the
+  /// [ListView] itself is created, it is more efficient to use [new ListView].
+  /// Even more efficient, however, is to create the instances on demand using
+  /// this constructor's `itemBuilder` callback.
   ListView.builder({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -623,11 +633,11 @@ class GridView extends BoxScrollView {
   /// number of children because the builder is called only for those children
   /// that are actually visible.
   ///
-  /// Providing a non-null [itemCount] improves the ability of the [GridView] to
+  /// Providing a non-null `itemCount` improves the ability of the [GridView] to
   /// estimate the maximum scroll extent.
   ///
-  /// [itemBuilder] will be called only with indices greater than or equal to
-  /// zero and less than [itemCount].
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
   ///
   /// The [gridDelegate] argument must not be null.
   GridView.builder({
