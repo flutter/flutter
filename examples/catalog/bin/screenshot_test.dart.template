@@ -22,6 +22,7 @@ void main() {
       final List<String> paths = <String>[
         @(paths)
       ];
+      await driver.waitUntilNoTransientCallbacks();
       for (String path in paths) {
         final List<int> pixels = await driver.screenshot();
         final File file = new File(path);
