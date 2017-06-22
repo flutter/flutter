@@ -20,10 +20,6 @@ import 'src/context.dart';
 void main()  {
   group('AssetBundle asset variants', () {
     testUsingContext('main asset and variants', () async {
-      // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-      // path separator.
-      Cache.flutterRoot = getFlutterRoot();
-
       fs.file("pubspec.yaml")
         ..createSync()
         ..writeAsStringSync(
