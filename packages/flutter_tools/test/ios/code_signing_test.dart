@@ -7,9 +7,11 @@ import 'dart:convert';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
@@ -18,11 +20,13 @@ import '../src/context.dart';
 void main() {
   group('Auto signing', () {
     ProcessManager mockProcessManager;
+    Config mockConfig;
     BuildableIOSApp app;
     AnsiTerminal testTerminal;
 
     setUp(() {
       mockProcessManager = new MockProcessManager();
+      mockConfig = new MockConfig();
       testTerminal = new TestTerminal();
       app = new BuildableIOSApp(
         projectBundleId: 'test.app',
@@ -198,10 +202,78 @@ void main() {
       expect(testLogger.errorText, isEmpty);
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
       expect(developmentTeam, '4444DDDD44');
+
+      verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Config: () => mockConfig,
       AnsiTerminal: () => testTerminal,
+    });
+
+    testUsingContext('Test saved certificate used', () async {
+      when(mockProcessManager.runSync(<String>['which', 'security']))
+          .thenReturn(exitsHappy);
+      when(mockProcessManager.runSync(<String>['which', 'openssl']))
+          .thenReturn(exitsHappy);
+      when(mockProcessManager.runSync(
+        argThat(contains('find-identity')), environment: any, workingDirectory: any,
+      )).thenReturn(new ProcessResult(
+        1,     // pid
+        0,     // exitCode
+        '''
+1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
+2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
+3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
+    3 valid identities found''',
+        ''
+      ));
+      when(mockProcessManager.runSync(
+        <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+        environment: any,
+        workingDirectory: any,
+      )).thenReturn(new ProcessResult(
+        1,     // pid
+        0,     // exitCode
+        'This is a mock certificate',
+        '',
+      ));
+
+      final MockProcess mockOpenSslProcess = new MockProcess();
+      final MockStdIn mockOpenSslStdIn = new MockStdIn();
+      final MockStream mockOpenSslStdErr = new MockStream();
+
+      when(mockProcessManager.start(
+        argThat(contains('openssl')), environment: any, workingDirectory: any,
+      )).thenReturn(new Future<Process>.value(mockOpenSslProcess));
+
+      when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
+      when(mockOpenSslProcess.stdout).thenReturn(new Stream<List<int>>.fromFuture(
+        new Future<List<int>>.value(UTF8.encode(
+          'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
+        ))
+      ));
+      when(mockOpenSslProcess.stderr).thenReturn(mockOpenSslStdErr);
+      when(mockOpenSslProcess.exitCode).thenReturn(0);
+      when(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
+
+      final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
+
+      expect(
+        testLogger.statusText,
+        contains('Found saved certificate choice "iPhone Developer: Profile 3 (3333CCCC33)". To clear, use "flutter config"')
+      );
+      expect(
+        testLogger.statusText,
+        contains('Signing iOS app for device deployment using developer identity: "iPhone Developer: Profile 3 (3333CCCC33)"')
+      );
+      expect(testLogger.errorText, isEmpty);
+      verify(mockOpenSslStdIn.write('This is a mock certificate'));
+      expect(developmentTeam, '4444DDDD44');
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Config: () => mockConfig,
     });
   });
 }
@@ -224,6 +296,7 @@ class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockStream extends Mock implements Stream<List<int>> {}
 class MockStdIn extends Mock implements IOSink {}
+class MockConfig extends Mock implements Config {}
 
 Stream<String> mockTerminalStdInStream;
 

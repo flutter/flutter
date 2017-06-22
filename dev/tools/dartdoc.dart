@@ -35,6 +35,7 @@ Future<Null> main(List<String> args) async {
   // Create the pubspec.yaml file.
   final StringBuffer buf = new StringBuffer('''
 name: Flutter
+homepage: https://flutter.io
 version: $version
 dependencies:
 ''');

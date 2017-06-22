@@ -164,9 +164,21 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
     return validCodeSigningIdentities.first;
 
   if (validCodeSigningIdentities.length > 1) {
+    final String savedCertChoice = config.getValue('ios-signing-cert');
+
+    if (savedCertChoice != null) {
+      if (validCodeSigningIdentities.contains(savedCertChoice)) {
+        printStatus('Found saved certificate choice "$savedCertChoice". To clear, use "flutter config".');
+        return savedCertChoice;
+      }
+      else {
+        printError('Saved signing certificate "$savedCertChoice" is not a valid development certificate');
+      }
+    }
+
     final int count = validCodeSigningIdentities.length;
     printStatus(
-      'Multiple valid development certificates available:',
+      'Multiple valid development certificates available (your choice will be saved):',
       emphasis: true,
     );
     for (int i=0; i<count; i++) {
@@ -182,10 +194,14 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
     );
 
-    if (choice == 'a')
+    if (choice == 'a') {
       throwToolExit('Aborted. Code signing is required to build a deployable iOS app.');
-    else
-      return validCodeSigningIdentities[int.parse(choice) - 1];
+    } else {
+      final String selectedCert = validCodeSigningIdentities[int.parse(choice) - 1];
+      printStatus('Certificate choice "$savedCertChoice" saved');
+      config.setValue('ios-signing-cert', selectedCert);
+      return selectedCert;
+    }
   }
 
   return null;

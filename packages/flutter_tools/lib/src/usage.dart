@@ -9,11 +9,10 @@ import 'package:usage/usage_io.dart';
 
 import 'base/context.dart';
 import 'base/os.dart';
+import 'base/platform.dart';
 import 'base/utils.dart';
 import 'globals.dart';
 import 'version.dart';
-
-// TODO(devoncarew): We'll want to find a way to send (sanitized) command parameters.
 
 const String _kFlutterUA = 'UA-67589403-6';
 
@@ -25,10 +24,14 @@ class Usage {
     final String version = versionOverride ?? FlutterVersion.getVersionString(whitelistBranchName: true);
     _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
 
-    // Report a more detailed OS version string than package:usage does by
-    // default. Also, send the branch name as the "channel".
-    _analytics.setSessionValue('dimension1', os.name);
-    _analytics.setSessionValue('dimension2', FlutterVersion.getBranchName(whitelistBranchName: true));
+    // Report a more detailed OS version string than package:usage does by default.
+    _analytics.setSessionValue('cd1', os.name);
+    // Send the branch name as the "channel".
+    _analytics.setSessionValue('cd2', FlutterVersion.getBranchName(whitelistBranchName: true));
+    // Record the host as the application installer ID - the context that flutter_tools is running in.
+    if (platform.environment.containsKey('FLUTTER_HOST')) {
+      _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
+    }
 
     _analytics.onSend.listen((e) => print('XXX $e'));
 
