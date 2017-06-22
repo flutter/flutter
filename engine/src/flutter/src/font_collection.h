@@ -39,6 +39,8 @@ class FontCollection {
 
   static FontCollection& GetFontCollection(std::string dir = "");
 
+  static FontCollection& GetFontCollection(std::vector<std::string> dirs);
+
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family);
 
@@ -46,7 +48,9 @@ class FontCollection {
   std::set<std::string> GetFamilyNames();
 
  private:
-  sk_sp<SkFontMgr> skia_font_manager_;
+  std::vector<sk_sp<SkFontMgr>> skia_font_managers_;
+  // Cache the names because GetFamilyNames() can be frequently called.
+  std::set<std::string> family_names_;
 
   FRIEND_TEST(FontCollection, HasDefaultRegistrations);
   FRIEND_TEST(FontCollection, GetMinikinFontCollections);
@@ -58,7 +62,7 @@ class FontCollection {
     return DEFAULT_FAMILY_NAME;
   };
 
-  FontCollection(std::string dir = "");
+  FontCollection(const std::vector<std::string>& dirs);
 
   ~FontCollection();
 
