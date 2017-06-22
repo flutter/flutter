@@ -107,7 +107,7 @@ flutter:
         'a/b/c/var3/foo',
       ];
       for (String asset in assets) {
-        fs.file(asset)
+        fs.file(asset.replaceAll('/', fs.path.separator))
           ..createSync(recursive: true)
           ..writeAsStringSync(asset);
       }
@@ -121,7 +121,7 @@ flutter:
         expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
 
-      fs.file('/a/b/c/foo').deleteSync();
+      fs.file('/a/b/c/foo'.replaceAll('/', fs.path.separator)).deleteSync();
       bundle = new AssetBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
 
