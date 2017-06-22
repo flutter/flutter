@@ -274,7 +274,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit(null, exitCode: result);
       return new FlutterCommandResult(
         ExitStatus.success,
-        analyticsParameters: <String>['daemon'],
+        timingLabelParts: <String>['daemon'],
         endTimeOverride: appStartedTime,
       );
     }

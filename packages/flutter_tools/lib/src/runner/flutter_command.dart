@@ -37,7 +37,6 @@ class FlutterCommandResult {
   const FlutterCommandResult(
     this.exitStatus, {
     this.timingLabelParts,
-    this.customDimensions,
     this.endTimeOverride,
   });
 
@@ -55,9 +54,6 @@ class FlutterCommandResult {
   /// [FlutterCommand] will automatically measure and report the command's
   /// complete time if not overriden.
   final DateTime endTimeOverride;
-
-  /// Optional custom dimensions for the analytics event.
-  final Map<String, String> customDimensions;
 }
 
 abstract class FlutterCommand extends Command<Null> {
