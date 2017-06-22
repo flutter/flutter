@@ -10,7 +10,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/devfs.dart';
 
 import 'package:test/test.dart';
 
@@ -46,7 +45,7 @@ flutter:
         'a/b/c/var3/foo',
       ];
       for (String asset in assets) {
-        fs.file(asset.replaceAll('/', fs.path.separator))
+        fs.file(asset)
           ..createSync(recursive: true)
           ..writeAsStringSync(asset);
       }
@@ -60,7 +59,7 @@ flutter:
         expect(UTF8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
 
-      fs.file('/a/b/c/foo'.replaceAll('/', fs.path.separator)).deleteSync();
+      fs.file('/a/b/c/foo').deleteSync();
       bundle = new AssetBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
 

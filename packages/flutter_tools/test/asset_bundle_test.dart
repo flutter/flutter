@@ -5,7 +5,6 @@
 import 'dart:convert';
 
 import 'package:file/file.dart';
-import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
