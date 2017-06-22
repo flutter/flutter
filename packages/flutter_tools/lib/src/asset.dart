@@ -113,7 +113,7 @@ class AssetBundle {
         manifestDescriptor['uses-material-design'];
 
     for (_Asset asset in assetVariants.keys) {
-      if (!asset.assetFileExists && assetVariants.isEmpty) {
+      if (!asset.assetFileExists && assetVariants[asset].isEmpty) {
         printStatus('Error detected in pubspec.yaml:', emphasis: true);
         printError('No file or variants found for $asset.\n');
         return 1;
