@@ -112,6 +112,9 @@ Paragraph::Paragraph() = default;
 Paragraph::~Paragraph() = default;
 
 void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
+  needs_layout_ = true;
+  if (text.size() == 0)
+    return;
   text_ = std::move(text);
   runs_ = std::move(runs);
 
@@ -138,6 +141,11 @@ void Paragraph::Layout(double width,
                        const std::string& rootdir,
                        const double x_offset,
                        const double y_offset) {
+  // Do not allow calling layout multiple times without changing anything.
+  if (!needs_layout_)
+    return;
+  needs_layout_ = false;
+
   width_ = width;
 
   breaker_.setLineWidths(0.0f, 0, width);
@@ -261,15 +269,15 @@ void Paragraph::Layout(double width,
 
       if (max_line_spacing <
           (-metrics.fAscent + metrics.fLeading) * run.style.height) {
-        max_line_spacing = lines_ == 0 ? -metrics.fAscent * run.style.height
+        max_line_spacing = lines_ == 0 ? metrics.fCapHeight * run.style.height
                                        : (-metrics.fAscent + metrics.fLeading) *
                                              run.style.height;
         // Record the alphabetic_baseline_:
         if (lines_ == 0) {
-          alphabetic_baseline_ = -metrics.fAscent * run.style.height;
+          alphabetic_baseline_ = metrics.fCapHeight * run.style.height;
           // TODO(garyq): Properly implement ideographic_baseline_.
           ideographic_baseline_ =
-              ((metrics.fDescent / 2) - metrics.fAscent) * run.style.height;
+              (metrics.fDescent + metrics.fCapHeight) * run.style.height;
         }
       }
       if (max_descent < metrics.fDescent * run.style.height)
@@ -333,12 +341,13 @@ double Paragraph::GetHeight() const {
 }
 
 void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
+  needs_layout_ = true;
   paragraph_style_ = style;
 }
 
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
+  SkPaint paint;
   for (const auto& record : records_) {
-    SkPaint paint;
     paint.setColor(record.style().color);
     SkPoint offset = record.offset();
     // TODO(garyq): Fix alignment for paragraphs with multiple styles per line.
@@ -362,6 +371,12 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
     PaintDecorations(canvas, x + offset.x(), y + offset.y(), record.style(),
                      record.metrics(), record.text());
   }
+
+  paint.setStyle(SkPaint::kFill_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(4);
+  paint.setColor(0xffFE938C);
+  canvas->drawCircle(x, y, 3, paint);
 }
 
 void Paragraph::PaintDecorations(SkCanvas* canvas,

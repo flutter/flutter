@@ -85,6 +85,7 @@ class Paragraph {
   double min_intrinsic_width_ = 0.0f;
   double alphabetic_baseline_ = FLT_MAX;
   double ideographic_baseline_ = FLT_MAX;
+  bool needs_layout_ = true;
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 
