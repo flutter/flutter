@@ -681,10 +681,15 @@ public class FlutterView extends SurfaceView
         }
     }
 
+    // Called by native to update the semantics/accessibility tree.
     private void updateSemantics(ByteBuffer buffer, String[] strings) {
-        if (mAccessibilityNodeProvider != null) {
-            buffer.order(ByteOrder.LITTLE_ENDIAN);
-            mAccessibilityNodeProvider.updateSemantics(buffer, strings);
+        try {
+            if (mAccessibilityNodeProvider != null) {
+                buffer.order(ByteOrder.LITTLE_ENDIAN);
+                mAccessibilityNodeProvider.updateSemantics(buffer, strings);
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, "Uncaught exception while updating semantics", ex);
         }
     }
 
