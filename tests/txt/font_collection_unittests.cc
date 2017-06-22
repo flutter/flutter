@@ -67,7 +67,7 @@ TEST(FontCollection, GetFamilyNames) {
       txt::FontCollection::GetFontCollection(txt::GetFontDir())
           .GetFamilyNames();
 
-  ASSERT_EQ(names.size(), 19ull);
+  ASSERT_TRUE(names.size() >= 19ull);
 
   ASSERT_EQ(names.count("Roboto"), 1ull);
   ASSERT_EQ(names.count("Homemade Apple"), 1ull);
@@ -92,9 +92,7 @@ TEST(FontCollection, GetFamilyNames) {
 
   ASSERT_EQ(names.count("Not a real font!"), 0ull);
   ASSERT_EQ(names.count(""), 0ull);
-  ASSERT_EQ(names.count("Helvetica"), 0ull);
-  ASSERT_EQ(names.count("TimesNewRoman"), 0ull);
-  ASSERT_EQ(names.count("Arial"), 0ull);
+  ASSERT_EQ(names.count("Another Fake Font"), 0ull);
 }
 
 }  // namespace txt
