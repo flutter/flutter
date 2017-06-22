@@ -174,6 +174,16 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
+  Future<Map<String, String>> get usageValues async {
+    final bool isEmulator = await devices[0].isLocalEmulator;
+    final String deviceName = devices.length == 1 
+            ? getNameForTargetPlatform(await devices[0].targetPlatform)
+            : 'multiple';
+
+    return <String, String>{ 'cd3': '$isEmulator', 'cd4': deviceName };
+  }
+
+  @override
   void printNoConnectedDevices() {
     super.printNoConnectedDevices();
     if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
@@ -335,7 +345,7 @@ class RunCommand extends RunCommandBase {
       throwToolExit(null, exitCode: result);
     return new FlutterCommandResult(
       ExitStatus.success,
-      analyticsParameters: <String>[
+      timingLabelParts: <String>[
         hotMode ? 'hot' : 'cold',
         getModeName(getBuildMode()),
         devices.length == 1 

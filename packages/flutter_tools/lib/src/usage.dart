@@ -30,6 +30,8 @@ class Usage {
     _analytics.setSessionValue('dimension1', os.name);
     _analytics.setSessionValue('dimension2', FlutterVersion.getBranchName(whitelistBranchName: true));
 
+    _analytics.onSend.listen((e) => print('XXX $e'));
+
     bool runningOnCI = false;
 
     // Many CI systems don't do a full git checkout.
@@ -72,9 +74,15 @@ class Usage {
   /// reports coming from the same computer.
   String get clientId => _analytics.clientId;
 
-  void sendCommand(String command) {
-    if (!suppressAnalytics)
-      _analytics.sendScreenView(command);
+  void sendCommand(String command, { Map<String, String> parameters }) {
+    if (suppressAnalytics)
+      return;
+
+    if (parameters != null) {
+      parameters.forEach(_analytics.setSessionValue);
+    }
+
+    _analytics.sendScreenView(command);
   }
 
   void sendEvent(String category, String parameter) {

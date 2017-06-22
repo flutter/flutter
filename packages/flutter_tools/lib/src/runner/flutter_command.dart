@@ -36,16 +36,17 @@ enum ExitStatus {
 class FlutterCommandResult {
   const FlutterCommandResult(
     this.exitStatus, {
-    this.analyticsParameters,
+    this.timingLabelParts,
+    this.customDimensions,
     this.endTimeOverride,
   });
 
   final ExitStatus exitStatus;
 
-  /// Optional dimension data that can be appended to the timing event.
+  /// Optional data that can be appended to the timing event name.
   /// https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#timingLabel
   /// Do not add PII.
-  final List<String> analyticsParameters;
+  final List<String> timingLabelParts;
 
   /// Optional epoch time when the command's non-interactive wait time is
   /// complete during the command's execution. Use to measure user perceivable
@@ -54,6 +55,9 @@ class FlutterCommandResult {
   /// [FlutterCommand] will automatically measure and report the command's
   /// complete time if not overriden.
   final DateTime endTimeOverride;
+
+  /// Optional custom dimensions for the analytics event.
+  final Map<String, String> customDimensions;
 }
 
 abstract class FlutterCommand extends Command<Null> {
@@ -138,6 +142,9 @@ abstract class FlutterCommand extends Command<Null> {
   /// tracking of the command.
   Future<String> get usagePath async => name;
 
+  /// Additional usage values to be sent with the usage ping.
+  Future<Map<String, String>> get usageValues async => const <String, String>{};
+
   /// Runs this command.
   ///
   /// Rather than overriding this method, subclasses should override
@@ -164,8 +171,8 @@ abstract class FlutterCommand extends Command<Null> {
         final List<String> labels = <String>[];
         if (commandResult?.exitStatus != null)
           labels.add(getEnumName(commandResult.exitStatus));
-        if (commandResult?.analyticsParameters?.isNotEmpty ?? false)
-          labels.addAll(commandResult.analyticsParameters);
+        if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+          labels.addAll(commandResult.timingLabelParts);
 
         final String label = labels
             .where((String label) => !isBlank(label))
@@ -205,8 +212,12 @@ abstract class FlutterCommand extends Command<Null> {
     setupApplicationPackages();
 
     final String commandPath = await usagePath;
-    if (commandPath != null)
-      flutterUsage.sendCommand(commandPath);
+
+    if (commandPath != null) {
+      final Map<String, String> additionalUsageValues = await usageValues;
+      flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
+    }
+
     return await runCommand();
   }
 
