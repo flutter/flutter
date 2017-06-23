@@ -25,7 +25,7 @@ import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'xcodeproj.dart';
 
-const int kXcodeRequiredVersionMajor = 7;
+const int kXcodeRequiredVersionMajor = 8;
 const int kXcodeRequiredVersionMinor = 0;
 
 // The Python `six` module is a dependency for Xcode builds, and installed by
@@ -295,8 +295,8 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp 
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
-      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
+      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic signing)
+      // signing or the PROVISIONING_PROFILE (for manual signing).
       !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
@@ -356,7 +356,7 @@ class XcodeBuildExecution {
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
-final String _xcodeRequirement = 'Xcode 7.0 or greater is required to develop for iOS.';
+final String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
   if (!platform.isMacOS)
@@ -364,7 +364,7 @@ bool _checkXcodeVersion() {
   try {
     final String version = runCheckedSync(<String>['xcodebuild', '-version']);
     final Match match = _xcodeVersionRegExp.firstMatch(version);
-    if (int.parse(match[1]) < 7) {
+    if (int.parse(match[1]) < kXcodeRequiredVersionMajor) {
       printError('Found "${match[0]}". $_xcodeRequirement');
       return false;
     }
