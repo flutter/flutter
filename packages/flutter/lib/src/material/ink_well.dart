@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
+import 'feedback.dart';
 import 'ink_highlight.dart';
 import 'ink_splash.dart';
 import 'material.dart';
@@ -93,7 +94,8 @@ class InkResponse extends StatefulWidget {
     this.borderRadius: BorderRadius.zero,
     this.highlightColor,
     this.splashColor,
-  }) : super(key: key);
+    bool enableFeedback,
+  }) : enableFeedback = enableFeedback ?? true, super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -178,6 +180,12 @@ class InkResponse extends StatefulWidget {
   ///  * [radius], the (maximum) size of the ink splash.
   ///  * [highlightColor], the color of the highlight.
   final Color splashColor;
+
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  final bool enableFeedback;
 
   /// The rectangle to use for the highlight effect and for clipping
   /// the splash effects if [containedInkWell] is true.
@@ -288,12 +296,15 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     updateHighlight(true);
   }
 
-  void _handleTap() {
+  void _handleTap(BuildContext context) {
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(false);
-    if (widget.onTap != null)
+    if (widget.onTap != null) {
+      if (widget.enableFeedback)
+        Feedback.forTap(context);
       widget.onTap();
+    }
   }
 
   void _handleTapCancel() {
@@ -309,10 +320,12 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       widget.onDoubleTap();
   }
 
-  void _handleLongPress() {
+  void _handleLongPress(BuildContext context) {
     _currentSplash?.confirm();
     _currentSplash = null;
     if (widget.onLongPress != null)
+      if (widget.enableFeedback)
+        Feedback.forLongPress(context);
       widget.onLongPress();
   }
 
@@ -340,10 +353,10 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     final bool enabled = widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
     return new GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,
-      onTap: enabled ? _handleTap : null,
+      onTap: enabled ? () => _handleTap(context) : null,
       onTapCancel: enabled ? _handleTapCancel : null,
       onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
-      onLongPress: widget.onLongPress != null ? _handleLongPress : null,
+      onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
       behavior: HitTestBehavior.opaque,
       child: widget.child
     );
@@ -392,6 +405,7 @@ class InkWell extends InkResponse {
     Color highlightColor,
     Color splashColor,
     BorderRadius borderRadius,
+    bool enableFeedback,
   }) : super(
     key: key,
     child: child,
@@ -404,5 +418,6 @@ class InkWell extends InkResponse {
     highlightColor: highlightColor,
     splashColor: splashColor,
     borderRadius: borderRadius,
+    enableFeedback: enableFeedback,
   );
 }

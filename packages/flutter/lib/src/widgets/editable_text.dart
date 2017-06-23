@@ -150,6 +150,7 @@ class EditableText extends StatefulWidget {
     this.keyboardType,
     this.onChanged,
     this.onSubmitted,
+    this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -225,6 +226,9 @@ class EditableText extends StatefulWidget {
 
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<String> onSubmitted;
+
+  /// Called when the selection of text changed.
+  final SelectionChangedCallback onSelectionChanged;
 
   /// Optional input validation and formatting overrides. Formatters are run
   /// in the provided order when the text input changes.
@@ -447,6 +451,8 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
         _selectionOverlay.showHandles();
       if (longPress)
         _selectionOverlay.showToolbar();
+      if (widget.onSelectionChanged != null)
+        widget.onSelectionChanged(selection, longPress);
     }
   }
 
@@ -650,3 +656,6 @@ class _Editable extends LeafRenderObjectWidget {
     return new TextSpan(style: style, text: text);
   }
 }
+
+/// Signature for the callback that reports when the user changes the selection.
+typedef void SelectionChangedCallback(TextSelection selection, bool longPress);

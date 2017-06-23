@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'feedback_tester.dart';
+
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -1503,4 +1505,34 @@ void main() {
       expect(scrollableState.position.pixels, isNot(equals(0.0)));
     }
   );
+
+  testWidgets('haptic feedback', (WidgetTester tester) async {
+    final FeedbackTester feedback = new FeedbackTester();
+    final TextEditingController controller = new TextEditingController();
+
+    Widget builder() {
+      return overlay(new Center(
+        child: new Material(
+          child: new Container(
+            width: 100.0,
+            child: new TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ));
+    }
+
+    await tester.pumpWidget(builder());
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 0);
+    expect(feedback.hapticCount, 0);
+
+    await tester.longPress(find.byType(TextField));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 0);
+    expect(feedback.hapticCount, 1);
+  });
 }

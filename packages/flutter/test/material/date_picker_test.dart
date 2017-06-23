@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+
+import 'feedback_tester.dart';
 
 void main() {
   DateTime firstDate;
@@ -273,17 +274,10 @@ void main() {
 
   group('haptic feedback', () {
     const Duration kHapticFeedbackInterval = const Duration(milliseconds: 10);
-    int hapticFeedbackCount;
-
-    setUpAll(() {
-      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-        if (methodCall.method == "HapticFeedback.vibrate")
-          hapticFeedbackCount++;
-      });
-    });
+    FeedbackTester feedback;
 
     setUp(() {
-      hapticFeedbackCount = 0;
+      feedback = new FeedbackTester();
       initialDate = new DateTime(2017, DateTime.JANUARY, 16);
       firstDate = new DateTime(2017, DateTime.JANUARY, 10);
       lastDate = new DateTime(2018, DateTime.JANUARY, 20);
@@ -294,13 +288,13 @@ void main() {
       await preparePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('10'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 1);
+        expect(feedback.hapticCount, 1);
         await tester.tap(find.text('12'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 2);
+        expect(feedback.hapticCount, 2);
         await tester.tap(find.text('14'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 3);
+        expect(feedback.hapticCount, 3);
       });
     });
 
@@ -308,13 +302,13 @@ void main() {
       await preparePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('11'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 0);
+        expect(feedback.hapticCount, 0);
         await tester.tap(find.text('13'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 0);
+        expect(feedback.hapticCount, 0);
         await tester.tap(find.text('15'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 0);
+        expect(feedback.hapticCount, 0);
       });
     });
 
@@ -322,10 +316,10 @@ void main() {
       await preparePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('2017'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 1);
+        expect(feedback.hapticCount, 1);
         await tester.tap(find.text('2018'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 2);
+        expect(feedback.hapticCount, 2);
       });
     });
   });
