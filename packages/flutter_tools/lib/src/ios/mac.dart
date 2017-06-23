@@ -97,7 +97,6 @@ class Xcode {
         _isInstalled = false;
       } else {
         try {
-          printTrace('xcrun clang');
           final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
 
           if (result.stdout != null && result.stdout.contains('license'))
