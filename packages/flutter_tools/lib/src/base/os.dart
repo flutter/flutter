@@ -174,16 +174,19 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void unzip(File file, Directory targetDirectory) {
-    _unpackInMemory(file, targetDirectory);
+    final Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
+    _unpackArchive(archive, targetDirectory);
   }
 
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    _unpackInMemory(gzippedTarFile, targetDirectory);
+    final Archive archive = new TarDecoder().decodeBytes(
+      new GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
+    );
+    _unpackArchive(archive, targetDirectory);
   }
 
-  void _unpackInMemory(File file, Directory targetDirectory) {
-    final Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
+  void _unpackArchive(Archive archive, Directory targetDirectory) {
 
     for (ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
