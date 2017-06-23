@@ -133,13 +133,51 @@ class Image extends StatefulWidget {
   /// If the `bundle` argument is omitted or null, then the
   /// [DefaultAssetBundle] will be used.
   ///
-  /// If the `scale` argument is omitted or null, then pixel-density-aware asset
-  /// resolution will be attempted.
+  /// By default, the exact asset specified will be used. In addition:
   ///
-  /// If [width] and [height] are both specified, and [scale] is not, then
-  /// size-aware asset resolution will be attempted also.
+  /// * If the `scale` argument is omitted or null, then pixel-density-aware
+  ///   asset resolution will be attempted.
+  //
+  // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
+  // ///
+  // /// * If [width] and [height] are both specified, and [scale] is not, then
+  // ///   size-aware asset resolution will be attempted also, with the given
+  // ///   dimensions interpreted as logical pixels.
+  // ///
+  // /// * If the images have platform or locale variants, the current platform
+  // ///   and locale is taken into account during asset resolution as well.
   ///
   /// The [name] and [repeat] arguments must not be null.
+  ///
+  /// ## Sample code
+  ///
+  /// Suppose that the project's `pubspec.yaml` file contains the following:
+  ///
+  /// ```yaml
+  /// flutter:
+  ///   assets:
+  ///     - images/cat.png
+  ///     - images/2x/cat.png
+  ///     - images/3.5x/cat.png
+  /// ```
+  ///
+  /// On a screen with a device pixel ratio of 2.0, the following widget would
+  /// render the `images/2x/cat.png` file:
+  ///
+  /// ```dart
+  /// new Image.asset('images/cat.png')
+  /// ```
+  ///
+  /// This corresponds to the file that is in the project's `images/2x/`
+  /// directory with the name `cat.png` (the paths are relative to the
+  /// `pubspec.yaml` file).
+  ///
+  /// See also:
+  ///
+  ///  * [AssetImage], which is used to implement the behavior when the scale is
+  ///    omitted.
+  ///  * [ExactAssetImage], which is used to implement the behavior when the
+  ///    scale is present.
   Image.asset(String name, {
     Key key,
     AssetBundle bundle,

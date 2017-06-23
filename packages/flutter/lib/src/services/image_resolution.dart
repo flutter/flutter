@@ -152,6 +152,7 @@ class AssetImage extends AssetBundleImageProvider {
       mapping[_parseScale(candidate)] = candidate;
     mapping[_naturalResolution] = main;
     // TODO(ianh): implement support for config.locale, config.size, config.platform
+    // (then document this over in the Image.asset docs)
     return _findNearest(mapping, config.devicePixelRatio);
   }
 
@@ -177,7 +178,7 @@ class AssetImage extends AssetBundleImageProvider {
     final Match match = _extractRatioRegExp.firstMatch(key);
     if (match != null && match.groupCount > 0)
       return double.parse(match.group(1));
-    return _naturalResolution;
+    return _naturalResolution; // i.e. default to 1.0x
   }
 
   @override
