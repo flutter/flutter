@@ -97,7 +97,7 @@ class Xcode {
   bool get isInstalled {
     if (xcodeSelectPath == null || xcodeSelectPath.isEmpty)
       return false;
-    if (!xcodeVersionRegex.hasMatch(xcodeVersionText))
+    if (xcodeVersionText == null || !xcodeVersionRegex.hasMatch(xcodeVersionText))
       return false;
     return true;
   }
@@ -142,7 +142,7 @@ class Xcode {
   final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
 
   bool get xcodeVersionSatisfactory {
-    if (!xcodeVersionRegex.hasMatch(xcodeVersionText))
+    if (xcodeVersionText == null || !xcodeVersionRegex.hasMatch(xcodeVersionText))
       return false;
 
     final String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
