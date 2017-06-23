@@ -95,7 +95,7 @@ class Xcode {
   }
 
   bool get isInstalled {
-    if (xcodeSelectPath != null && xcodeSelectPath.isNotEmpty)
+    if (xcodeSelectPath == null || xcodeSelectPath.isEmpty)
       return false;
     if (!xcodeVersionRegex.hasMatch(xcodeVersionText))
       return false;
