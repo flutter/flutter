@@ -14,6 +14,9 @@
 
 namespace vulkan {
 
+static const int kGrCacheMaxCount = 8192;
+static const size_t kGrCacheMaxByteSize = 512 * (1 << 20);
+
 class VulkanDevice;
 class VulkanProcTable;
 
