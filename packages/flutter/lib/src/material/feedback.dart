@@ -36,6 +36,14 @@ import 'package:flutter/widgets.dart';
 ///     child: const Text('X'),
 ///   );
 /// }
+///
+/// void _onTapHandler() {
+///   // Respond to tap.
+/// }
+///
+/// void _onLongPressHandler() {
+///   // Respond to long press.
+/// }
 /// ```
 ///
 /// Alternatively, you can also call [forTap] or [forLongPress] directly within
