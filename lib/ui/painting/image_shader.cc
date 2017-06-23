@@ -9,6 +9,8 @@
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 
+using tonic::ToDart;
+
 namespace blink {
 
 static void ImageShader_constructor(Dart_NativeArguments args) {
@@ -35,7 +37,8 @@ void ImageShader::initWithImage(CanvasImage* image,
                                 SkShader::TileMode tmx,
                                 SkShader::TileMode tmy,
                                 const tonic::Float64List& matrix4) {
-  FTL_DCHECK(image != NULL);
+  if (!image)
+    Dart_ThrowException(ToDart("ImageShader constructor called with non-genuine Image."));
   SkMatrix sk_matrix = ToSkMatrix(matrix4);
   set_shader(image->image()->makeShader(tmx, tmy, &sk_matrix));
 }

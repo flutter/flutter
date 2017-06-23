@@ -12,6 +12,8 @@
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 
+using tonic::ToDart;
+
 namespace blink {
 
 typedef CanvasPath Path;
@@ -165,13 +167,15 @@ void CanvasPath::addRRect(const RRect& rrect) {
 }
 
 void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
-  if (path)
-    path_.addPath(path->path(), dx, dy, SkPath::kAppend_AddPathMode);
+  if (!path)
+    Dart_ThrowException(ToDart("Path.addPath called with non-genuine Path."));
+  path_.addPath(path->path(), dx, dy, SkPath::kAppend_AddPathMode);
 }
 
 void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
-  if (path)
-    path_.addPath(path->path(), dx, dy, SkPath::kExtend_AddPathMode);
+  if (!path)
+    Dart_ThrowException(ToDart("Path.extendWithPath called with non-genuine Path."));
+  path_.addPath(path->path(), dx, dy, SkPath::kExtend_AddPathMode);
 }
 
 void CanvasPath::close() {

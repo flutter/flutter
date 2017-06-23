@@ -4,6 +4,15 @@
 
 part of dart.ui;
 
+// Some methods in this file assert that their arguments are not null. These
+// asserts are just to improve the error messages; they should only cover
+// arguments that are either dereferenced _in Dart_, before being passed to the
+// engine, or that the engine explicitly null-checks itself (after attempting to
+// convert the argument to a native type). It should not be possible for a null
+// or invalid value to be used by the engine even in release mode, since that
+// would cause a crash. It is, however, acceptable for error messages to be much
+// less useful or correct in release mode than in debug mode.
+
 Color _scaleAlpha(Color a, double factor) {
   return a.withAlpha((a.alpha * factor).round());
 }
@@ -808,6 +817,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// The line segment added if [forceMoveTo] is false starts at the
   /// current point and ends at the start of the arc.
   void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) {
+    assert(rect != null);
     _arcTo(rect.left, rect.top, rect.right, rect.bottom, startAngle, sweepAngle, forceMoveTo);
   }
   void _arcTo(double left, double top, double right, double bottom,
@@ -816,6 +826,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// Adds a new subpath that consists of four lines that outline the
   /// given rectangle.
   void addRect(Rect rect) {
+    assert(rect != null);
     _addRect(rect.left, rect.top, rect.right, rect.bottom);
   }
   void _addRect(double left, double top, double right, double bottom) native "Path_addRect";
@@ -823,6 +834,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// Adds a new subpath that consists of a curve that forms the
   /// ellipse that fills the given rectangle.
   void addOval(Rect oval) {
+    assert(oval != null);
     _addOval(oval.left, oval.top, oval.right, oval.bottom);
   }
   void _addOval(double left, double top, double right, double bottom) native "Path_addOval";
@@ -836,6 +848,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// rectangle and with positive angles going clockwise around the
   /// oval.
   void addArc(Rect oval, double startAngle, double sweepAngle) {
+    assert(oval != null);
     _addArc(oval.left, oval.top, oval.right, oval.bottom, startAngle, sweepAngle);
   }
   void _addArc(double left, double top, double right, double bottom,
@@ -849,6 +862,7 @@ class Path extends NativeFieldWrapperClass2 {
   ///
   /// The `points` argument is interpreted as offsets from the origin.
   void addPolygon(List<Offset> points, bool close) {
+    assert(points != null);
     _addPolygon(_encodePointList(points), close);
   }
   void _addPolygon(Float32List points, bool close) native "Path_addPolygon";
@@ -856,17 +870,28 @@ class Path extends NativeFieldWrapperClass2 {
   /// Adds a new subpath that consists of the straight lines and
   /// curves needed to form the rounded rectangle described by the
   /// argument.
-  void addRRect(RRect rrect) => _addRRect(rrect._value);
+  void addRRect(RRect rrect) {
+    assert(rrect != null);
+    _addRRect(rrect._value);
+  }
   void _addRRect(Float32List rrect) native "Path_addRRect";
 
   /// Adds a new subpath that consists of the given path offset by the given
   /// offset.
-  void addPath(Path path, Offset offset) => _addPath(path, offset.dx, offset.dy);
+  void addPath(Path path, Offset offset) {
+    assert(path != null); // path is checked on the engine side
+    assert(offset != null);
+    _addPath(path, offset.dx, offset.dy);
+  }
   void _addPath(Path path, double dx, double dy) native "Path_addPath";
 
   /// Adds the given path to this path by extending the current segment of this
   /// path with the the first segment of the given path.
-  void extendWithPath(Path path, Offset offset) => _extendWithPath(path, offset.dx, offset.dy);
+  void extendWithPath(Path path, Offset offset) {
+    assert(path != null); // path is checked on the engine side
+    assert(offset != null);
+    _extendWithPath(path, offset.dx, offset.dy);
+  }
   void _extendWithPath(Path path, double dx, double dy) native "Path_extendWithPath";
 
   /// Closes the last subpath, as if a straight line had been drawn
@@ -885,17 +910,24 @@ class Path extends NativeFieldWrapperClass2 {
   /// The `point` argument is interpreted as an offset from the origin.
   ///
   /// Returns true if the point is in the path, and false otherwise.
-  bool contains(Offset point) => _contains(point.dx, point.dy);
+  bool contains(Offset point) {
+    assert(point != null);
+    return _contains(point.dx, point.dy);
+  }
   bool _contains(double x, double y) native "Path_contains";
 
   /// Returns a copy of the path with all the segments of every
   /// subpath translated by the given offset.
-  Path shift(Offset offset) => _shift(offset.dx, offset.dy);
+  Path shift(Offset offset) {
+    assert(offset != null);
+    return _shift(offset.dx, offset.dy);
+  }
   Path _shift(double dx, double dy) native "Path_shift";
 
   /// Returns a copy of the path with all the segments of every
   /// subpath transformed by the given matrix.
   Path transform(Float64List matrix4) {
+    assert(matrix4 != null);
     if (matrix4.length != 16)
       throw new ArgumentError('"matrix4" must have 16 entries.');
     return _transform(matrix4);
@@ -946,6 +978,7 @@ class MaskFilter extends NativeFieldWrapperClass2 {
   ///
   /// A blur is an expensive operation and should therefore be used sparingly.
   MaskFilter.blur(BlurStyle style, double sigma) {
+    assert(style != null);
     _constructor(style.index, sigma);
   }
   void _constructor(int style, double sigma) native "MaskFilter_constructor";
@@ -1082,6 +1115,7 @@ Int32List _encodeColorList(List<Color> colors) {
 }
 
 Float32List _encodePointList(List<Offset> points) {
+  assert(points != null);
   final int pointCount = points.length;
   final Float32List result = new Float32List(pointCount * 2);
   for (int i = 0; i < pointCount; ++i) {
@@ -1139,6 +1173,10 @@ class Gradient extends Shader {
     List<double> colorStops = null,
     TileMode tileMode = TileMode.clamp,
   ]) {
+    assert(from != null);
+    assert(to != null);
+    assert(colors != null);
+    assert(tileMode != null);
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
     final Int32List colorsBuffer = _encodeColorList(colors);
@@ -1172,6 +1210,9 @@ class Gradient extends Shader {
                   List<double> colorStops = null,
                   TileMode tileMode = TileMode.clamp,
   ]) {
+    assert(center != null);
+    assert(colors != null);
+    assert(tileMode != null);
     _validateColorStops(colors, colorStops);
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
@@ -1199,14 +1240,10 @@ class ImageShader extends Shader {
   /// matrix to apply to the effect. All the arguments are required and must not
   /// be null.
   ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4) {
-    if (image == null)
-      throw new ArgumentError('"image" argument cannot be null.');
-    if (tmx == null)
-      throw new ArgumentError('"tmx" argument cannot be null.');
-    if (tmy == null)
-      throw new ArgumentError('"tmy" argument cannot be null.');
-    if (matrix4 == null)
-      throw new ArgumentError('"matrix4" argument cannot be null.');
+    assert(image != null); // image is checked on the engine side
+    assert(tmx != null);
+    assert(tmy != null);
+    assert(matrix4 != null);
     if (matrix4.length != 16)
       throw new ArgumentError('"matrix4" must have 16 entries.');
     _constructor();
@@ -1240,6 +1277,8 @@ class Vertices extends NativeFieldWrapperClass2 {
     List<Color> colors,
     List<int> indices,
   }) {
+    assert(mode != null);
+    assert(positions != null);
     if (textureCoordinates != null && textureCoordinates.length != positions.length)
       throw new ArgumentError('"positions" and "textureCoordinates" lengths must match.');
     if (colors != null && colors.length != positions.length)
@@ -1250,8 +1289,8 @@ class Vertices extends NativeFieldWrapperClass2 {
     Float32List encodedPositions = _encodePointList(positions);
     Float32List encodedTextureCoordinates = (textureCoordinates != null) ?
       _encodePointList(textureCoordinates) : null;
-    Int32List encodedColors = (colors != null) ? _encodeColorList(colors) : null;
-    Int32List encodedIndices = (indices != null) ? new Int32List.fromList(indices) : null;
+    Int32List encodedColors = colors != null ? _encodeColorList(colors) : null;
+    Int32List encodedIndices = indices != null ? new Int32List.fromList(indices) : null;
 
     _constructor();
     _init(mode.index, encodedPositions, encodedTextureCoordinates, encodedColors, encodedIndices);
@@ -1264,6 +1303,8 @@ class Vertices extends NativeFieldWrapperClass2 {
     Int32List colors,
     Int32List indices,
   }) {
+    assert(mode != null);
+    assert(positions != null);
     if (textureCoordinates != null && textureCoordinates.length != positions.length)
       throw new ArgumentError('"positions" and "textureCoordinates" lengths must match.');
     if (colors != null && colors.length * 2 != positions.length)
@@ -1346,10 +1387,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// To end the recording, call [PictureRecorder.endRecording] on the
   /// given recorder.
   Canvas(PictureRecorder recorder, Rect cullRect) {
-    if (recorder == null)
-      throw new ArgumentError('"recorder" must not be null.');
+    assert(recorder != null);
     if (recorder.isRecording)
       throw new ArgumentError('"recorder" must not already be associated with another Canvas.');
+    assert(cullRect != null);
     _constructor(recorder, cullRect.left, cullRect.top, cullRect.right, cullRect.bottom);
   }
   void _constructor(PictureRecorder recorder,
@@ -1378,6 +1419,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// Call [restore] to pop the save stack and apply the paint to the group.
   void saveLayer(Rect bounds, Paint paint) {
+    assert(bounds != null);
+    assert(paint != null);
     if (bounds == null) {
       _saveLayerWithoutBounds(paint._objects, paint._data);
     } else {
@@ -1387,7 +1430,6 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
   void _saveLayerWithoutBounds(List<dynamic> paintObjects, ByteData paintData)
       native "Canvas_saveLayerWithoutBounds";
-  // TODO(jackson): Paint should be optional, but making it optional causes crash
   void _saveLayer(double left,
                   double top,
                   double right,
@@ -1433,6 +1475,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Multiply the current transform by the specified 4⨉4 transformation matrix
   /// specified as a list of values in column-major order.
   void transform(Float64List matrix4) {
+    assert(matrix4 != null);
     if (matrix4.length != 16)
       throw new ArgumentError('"matrix4" must have 16 entries.');
     _transform(matrix4);
@@ -1442,6 +1485,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rectangle.
   void clipRect(Rect rect) {
+    assert(rect != null);
     _clipRect(rect.left, rect.top, rect.right, rect.bottom);
   }
   void _clipRect(double left,
@@ -1451,17 +1495,26 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rounded rectangle.
-  void clipRRect(RRect rrect) => _clipRRect(rrect._value);
+  void clipRRect(RRect rrect) {
+    assert(rrect != null);
+    _clipRRect(rrect._value);
+  }
   void _clipRRect(Float32List rrect) native "Canvas_clipRRect";
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
-  void clipPath(Path path) native "Canvas_clipPath";
+  void clipPath(Path path) {
+    assert(path != null); // path is checked on the engine side
+    _clipPath(path);
+  }
+  void _clipPath(Path path) native "Canvas_clipPath";
 
   /// Paints the given [Color] onto the canvas, applying the given
   /// [BlendMode], with the given color being the source and the background
   /// being the destination.
   void drawColor(Color color, BlendMode blendMode) {
+    assert(color != null);
+    assert(blendMode != null);
     _drawColor(color.value, blendMode.index);
   }
   void _drawColor(int color, int blendMode) native "Canvas_drawColor";
@@ -1471,6 +1524,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// The `p1` and `p2` arguments are interpreted as offsets from the origin.
   void drawLine(Offset p1, Offset p2, Paint paint) {
+    assert(p1 != null);
+    assert(p2 != null);
+    assert(paint != null);
     _drawLine(p1.dx, p1.dy, p2.dx, p2.dy, paint._objects, paint._data);
   }
   void _drawLine(double x1,
@@ -1484,12 +1540,17 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// To fill the canvas with a solid color and blend mode, consider
   /// [drawColor] instead.
-  void drawPaint(Paint paint) => _drawPaint(paint._objects, paint._data);
+  void drawPaint(Paint paint) {
+    assert(paint != null);
+    _drawPaint(paint._objects, paint._data);
+  }
   void _drawPaint(List<dynamic> paintObjects, ByteData paintData) native "Canvas_drawPaint";
 
   /// Draws a rectangle with the given [Paint]. Whether the rectangle is filled
   /// or stroked (or both) is controlled by [Paint.style].
   void drawRect(Rect rect, Paint paint) {
+    assert(rect != null);
+    assert(paint != null);
     _drawRect(rect.left, rect.top, rect.right, rect.bottom,
               paint._objects, paint._data);
   }
@@ -1503,6 +1564,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Draws a rounded rectangle with the given [Paint]. Whether the rectangle is
   /// filled or stroked (or both) is controlled by [Paint.style].
   void drawRRect(RRect rrect, Paint paint) {
+    assert(rrect != null);
+    assert(paint != null);
     _drawRRect(rrect._value, paint._objects, paint._data);
   }
   void _drawRRect(Float32List rrect,
@@ -1515,6 +1578,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// This shape is almost but not quite entirely unlike an annulus.
   void drawDRRect(RRect outer, RRect inner, Paint paint) {
+    assert(outer != null);
+    assert(inner != null);
+    assert(paint != null);
     _drawDRRect(outer._value, inner._value, paint._objects, paint._data);
   }
   void _drawDRRect(Float32List outer,
@@ -1526,6 +1592,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
   /// controlled by [Paint.style].
   void drawOval(Rect rect, Paint paint) {
+    assert(rect != null);
+    assert(paint != null);
     _drawOval(rect.left, rect.top, rect.right, rect.bottom,
               paint._objects, paint._data);
   }
@@ -1541,6 +1609,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// the third argument. Whether the circle is filled or stroked (or both) is
   /// controlled by [Paint.style].
   void drawCircle(Offset c, double radius, Paint paint) {
+    assert(c != null);
+    assert(paint != null);
     _drawCircle(c.dx, c.dy, radius, paint._objects, paint._data);
   }
   void _drawCircle(double x,
@@ -1560,6 +1630,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// This method is optimized for drawing arcs and should be faster than [Path.arcTo].
   void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
+    assert(rect != null);
+    assert(paint != null);
     _drawArc(rect.left, rect.top, rect.right, rect.bottom, startAngle,
              sweepAngle, useCenter, paint._objects, paint._data);
   }
@@ -1577,6 +1649,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// filled or stroked (or both) is controlled by [Paint.style]. If the path is
   /// filled, then subpaths within it are implicitly closed (see [Path.close]).
   void drawPath(Path path, Paint paint) {
+    assert(path != null); // path is checked on the engine side
+    assert(paint != null);
     _drawPath(path, paint._objects, paint._data);
   }
   void _drawPath(Path path,
@@ -1586,6 +1660,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Draws the given [Image] into the canvas with its top-left corner at the
   /// given [Offset]. The image is composited into the canvas using the given [Paint].
   void drawImage(Image image, Offset p, Paint paint) {
+    assert(image != null); // image is checked on the engine side
+    assert(p != null);
+    assert(paint != null);
     _drawImage(image, p.dx, p.dy, paint._objects, paint._data);
   }
   void _drawImage(Image image,
@@ -1600,6 +1677,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// This might sample from outside the `src` rect by up to half the width of
   /// an applied filter.
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
+    assert(image != null); // image is checked on the engine side
+    assert(src != null);
+    assert(dst != null);
+    assert(paint != null);
     _drawImageRect(image,
                    src.left,
                    src.top,
@@ -1638,6 +1719,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// cover the destination rectangle while maintaining their relative
   /// positions.
   void drawImageNine(Image image, Rect center, Rect dst, Paint paint) {
+    assert(image != null); // image is checked on the engine side
+    assert(center != null);
+    assert(dst != null);
+    assert(paint != null);
     _drawImageNine(image,
                    center.left,
                    center.top,
@@ -1664,7 +1749,11 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Draw the given picture onto the canvas. To create a picture, see
   /// [PictureRecorder].
-  void drawPicture(Picture picture) native "Canvas_drawPicture";
+  void drawPicture(Picture picture) {
+    assert(picture != null); // picture is checked on the engine side
+    _drawPicture(picture);
+  }
+  void _drawPicture(Picture picture) native "Canvas_drawPicture";
 
   /// Draws the text in the given [Paragraph] into this canvas at the given
   /// [Offset].
@@ -1687,6 +1776,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// described by adding half of the [ParagraphConstraints.width] given to
   /// [Paragraph.layout], to the `offset` argument's [Offset.dx] coordinate.
   void drawParagraph(Paragraph paragraph, Offset offset) {
+    assert(paragraph != null);
+    assert(offset != null);
     paragraph._paint(this, offset.dx, offset.dy);
   }
 
@@ -1699,6 +1790,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///  * [drawRawPoints], which takes `points` as a [Float32List] rather than a
   ///    [List<Offset>].
   void drawPoints(PointMode pointMode, List<Offset> points, Paint paint) {
+    assert(pointMode != null);
+    assert(points != null);
+    assert(paint != null);
     _drawPoints(paint._objects, paint._data, pointMode.index, _encodePointList(points));
   }
 
@@ -1712,6 +1806,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///  * [drawPoints], which takes `points` as a [List<Offset>] rather than a
   ///    [List<Float32List>].
   void drawRawPoints(PointMode pointMode, Float32List points, Paint paint) {
+    assert(pointMode != null);
+    assert(points != null);
+    assert(paint != null);
     if (points.length % 2 != 0)
       throw new ArgumentError('"points" must have an even number of values.');
     _drawPoints(paint._objects, paint._data, pointMode.index, points);
@@ -1723,11 +1820,13 @@ class Canvas extends NativeFieldWrapperClass2 {
                    Float32List points) native "Canvas_drawPoints";
 
   void drawVertices(Vertices vertices, BlendMode blendMode, Paint paint) {
-    _drawVertices(vertices, blendMode, paint._objects, paint._data);
+    assert(vertices != null); // vertices is checked on the engine side
+    assert(paint != null);
+    assert(blendMode != null);
+    _drawVertices(vertices, blendMode.index, paint._objects, paint._data);
   }
-
   void _drawVertices(Vertices vertices,
-                     BlendMode blendMode,
+                     int blendMode,
                      List<dynamic> paintObjects,
                      ByteData paintData) native "Canvas_drawVertices";
 
@@ -1736,7 +1835,6 @@ class Canvas extends NativeFieldWrapperClass2 {
   //
   //  * [drawRawAtlas], which takes its arguments as typed data lists rather
   //    than objects.
-  // TODO(eseidel): Paint should be optional, but optional doesn't work.
   void drawAtlas(Image atlas,
                  List<RSTransform> transforms,
                  List<Rect> rects,
@@ -1744,8 +1842,15 @@ class Canvas extends NativeFieldWrapperClass2 {
                  BlendMode blendMode,
                  Rect cullRect,
                  Paint paint) {
-    final int rectCount = rects.length;
+    assert(atlas != null); // atlas is checked on the engine side
+    assert(transforms != null);
+    assert(rects != null);
+    assert(colors != null);
+    assert(blendMode != null);
+    assert(cullRect != null);
+    assert(paint != null);
 
+    final int rectCount = rects.length;
     if (transforms.length != rectCount)
       throw new ArgumentError('"transforms" and "rects" lengths must match.');
     if (colors.isNotEmpty && colors.length != rectCount)
@@ -1802,8 +1907,15 @@ class Canvas extends NativeFieldWrapperClass2 {
                     BlendMode blendMode,
                     Rect cullRect,
                     Paint paint) {
-    final int rectCount = rects.length;
+    assert(atlas != null); // atlas is checked on the engine side
+    assert(rstTransforms != null);
+    assert(rects != null);
+    assert(colors != null);
+    assert(blendMode != null);
+    assert(cullRect != null);
+    assert(paint != null);
 
+    final int rectCount = rects.length;
     if (rstTransforms.length != rectCount)
       throw new ArgumentError('"rstTransforms" and "rects" lengths must match.');
     if (rectCount % 4 != 0)
@@ -1830,9 +1942,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// transparentOccluder should be true if the occluding object is not opaque.
   void drawShadow(Path path, Color color, double elevation, bool transparentOccluder) {
+    assert(path != null); // path is checked on the engine side
+    assert(color != null);
     _drawShadow(path, color.value, elevation, transparentOccluder);
   }
-
   void _drawShadow(Path path,
                    int color,
                    double elevation,
