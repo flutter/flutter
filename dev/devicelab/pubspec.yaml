@@ -12,7 +12,7 @@ dependencies:
   image: ^1.1.27
   meta: ^1.0.5
   path: ^1.4.0
-  process: 2.0.3
+  process: 2.0.4
   stack_trace: ^1.4.0
   vm_service_client: '0.2.2+4'
 
