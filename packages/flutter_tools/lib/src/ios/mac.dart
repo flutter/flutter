@@ -80,58 +80,54 @@ class IMobileDevice {
 }
 
 class Xcode {
+  Xcode() {
+    _eulaSigned = false;
+
+    try {
+      _xcodeSelectPath = runSync(<String>['xcode-select', '--print-path'])?.trim();
+      if (_xcodeSelectPath == null || _xcodeSelectPath.isEmpty) {
+        _isInstalled = false;
+        return;
+      }
+      _isInstalled = true;
+
+      _xcodeVersionText = runSync(<String>['xcodebuild', '-version']).replaceAll('\n', ', ');
+
+      if (!xcodeVersionRegex.hasMatch(_xcodeVersionText)) {
+        _isInstalled = false;
+      } else {
+        try {
+          final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
+
+          if (result.stdout != null && result.stdout.contains('license'))
+            _eulaSigned = false;
+          else if (result.stderr != null && result.stderr.contains('license'))
+            _eulaSigned = false;
+          else
+            _eulaSigned = true;
+        } catch (error) {
+          _eulaSigned = false;
+        }
+      }
+    } catch (error) {
+      _isInstalled = false;
+    }
+  }
+
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
   String _xcodeSelectPath;
-  String get xcodeSelectPath {
-    if (_xcodeSelectPath == null) {
-      try {
-        _xcodeSelectPath = runSync(<String>['/usr/bin/xcode-select', '--print-path'])?.trim();
-      } on ProcessException {
-        // Ignore: return null below.
-      }
-    }
-    return _xcodeSelectPath;
-  }
+  String get xcodeSelectPath => _xcodeSelectPath;
 
-  bool get isInstalled {
-    if (xcodeSelectPath == null || xcodeSelectPath.isEmpty)
-      return false;
-    if (!xcodeVersionRegex.hasMatch(xcodeVersionText))
-      return false;
-    return true;
-  }
+  bool _isInstalled;
+  bool get isInstalled => _isInstalled;
 
   bool _eulaSigned;
   /// Has the EULA been signed?
-  bool get eulaSigned {
-    if (_eulaSigned == null) {
-      try {
-        final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
-        if (result.stdout != null && result.stdout.contains('license'))
-          _eulaSigned = false;
-        else if (result.stderr != null && result.stderr.contains('license'))
-          _eulaSigned = false;
-        else
-          _eulaSigned = true;
-      } on ProcessException {
-        _eulaSigned = false;
-      }
-    }
-    return _eulaSigned;
-  }
+  bool get eulaSigned => _eulaSigned;
 
   String _xcodeVersionText;
-  String get xcodeVersionText {
-    if (_xcodeVersionText != null) {
-      try {
-        _xcodeVersionText = runSync(<String>['/usr/bin/xcodebuild', '-version']).replaceAll('\n', ', ');
-      } on ProcessException {
-        // Ignore: return null below.
-      }
-    }
-    return _xcodeVersionText;
-  }
+  String get xcodeVersionText => _xcodeVersionText;
 
   int _xcodeMajorVersion;
   int get xcodeMajorVersion => _xcodeMajorVersion;
