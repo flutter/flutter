@@ -122,14 +122,15 @@ const Matcher hasOneLineDescription = const _HasOneLineDescription();
 ///
 /// Specifically, this matcher checks that an object's
 /// `toStringDeep(prefixLineOne, prefixOtherLines)`:
+///
 ///  * Does not have leading or trailing whitespace.
 ///  * Does not contain the default `Instance of ...` string.
 ///  * The last line has characters other than tree connector characters and
 ///    whitespace. For example: the line ` │ ║ ╎` has only tree connector
 ///    characters and whitespace.
-///  * Does not contain lines with trailing white.
+///  * Does not contain lines with trailing white space.
 ///  * Has multiple lines.
-///  * The first line starts with`prefixLineOne`
+///  * The first line starts with `prefixLineOne`
 ///  * All subsequent lines start with `prefixOtherLines`.
 const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
 
@@ -198,18 +199,18 @@ Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
 ///
 /// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
-/// and is normalized to #000.
+/// and is normalized to #00000.
 ///
 /// See Also:
 ///
-///  * [describeIdentity] method that generates short descriptions of objects
+///  * [describeIdentity], a method that generates short descriptions of objects
 ///    with ids that match the pattern #[0-9a-f]{5}.
-///  * [shortHash] method that generates a 5 character long hexadecimal [String]
-///    based on [Object.hashCode].
-///  * [TreeDiagnosticsMixin.toStringDeep] which returns a [String] typically
-///    containing multiple hash codes.
-Matcher normalizeHashCodesEquals(String value) {
-  return new _NormalizeHashCodesEquals(value);
+///  * [shortHash], a method that generates a 5 character long hexadecimal
+///    [String] based on [Object.hashCode].
+///  * [TreeDiagnosticsMixin.toStringDeep], a method that returns a [String]
+///    typically containing multiple hash codes.
+Matcher equalsIgnoringHashCodes(String value) {
+  return new _EqualsIgnoringHashCodes(value);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -385,15 +386,15 @@ class _HasOneLineDescription extends Matcher {
   Description describe(Description description) => description.add('one line description');
 }
 
-class _NormalizeHashCodesEquals extends Matcher {
-  _NormalizeHashCodesEquals(String v) : _value = _normalize(v);
+class _EqualsIgnoringHashCodes extends Matcher {
+  _EqualsIgnoringHashCodes(String v) : _value = _normalize(v);
 
   final String _value;
 
   static final Object _mismatchedValueKey = new Object();
 
   static String _normalize(String s) {
-    return s.replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#000');
+    return s.replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#00000');
   }
 
   @override

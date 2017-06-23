@@ -100,7 +100,7 @@ void main() {
         '│\n'), isNot(hasAGoodToStringDeep));
 
     expect(new _MockToStringDeep.fromLines(
-        <String>['Paragraph#000\n',
+        <String>['Paragraph#00000\n',
                  ' │ size: (400x200)\n',
                  ' ╘═╦══ text ═══\n',
                  '   ║ TextSpan:\n',
@@ -110,7 +110,7 @@ void main() {
 
     // Text span
     expect(new _MockToStringDeep.fromLines(
-        <String>['Paragraph#000\n',
+        <String>['Paragraph#00000\n',
                  ' │ size: (400x200)\n',
                  ' ╘═╦══ text ═══\n',
                  '   ║ TextSpan:\n',
@@ -119,42 +119,42 @@ void main() {
   });
 
   test('normalizeHashCodesEquals', () {
-    expect('Foo#34219', normalizeHashCodesEquals('Foo#000'));
-    expect('Foo#34219', normalizeHashCodesEquals('Foo#12345'));
-    expect('Foo#34219', normalizeHashCodesEquals('Foo#abcdf'));
-    expect('Foo#34219', isNot(normalizeHashCodesEquals('Foo')));
-    expect('Foo#34219', isNot(normalizeHashCodesEquals('Foo#')));
-    expect('Foo#34219', isNot(normalizeHashCodesEquals('Foo#0')));
-    expect('Foo#34219', isNot(normalizeHashCodesEquals('Foo#00')));
-    expect('Foo#34219', isNot(normalizeHashCodesEquals('Foo#000 ')));
-    expect('Foo#34219', isNot(normalizeHashCodesEquals('Foo#0000')));
-    expect('Foo#34219', isNot(normalizeHashCodesEquals('Foo#123456')));
+    expect('Foo#34219', equalsIgnoringHashCodes('Foo#00000'));
+    expect('Foo#34219', equalsIgnoringHashCodes('Foo#12345'));
+    expect('Foo#34219', equalsIgnoringHashCodes('Foo#abcdf'));
+    expect('Foo#34219', isNot(equalsIgnoringHashCodes('Foo')));
+    expect('Foo#34219', isNot(equalsIgnoringHashCodes('Foo#')));
+    expect('Foo#34219', isNot(equalsIgnoringHashCodes('Foo#0')));
+    expect('Foo#34219', isNot(equalsIgnoringHashCodes('Foo#00')));
+    expect('Foo#34219', isNot(equalsIgnoringHashCodes('Foo#00000 ')));
+    expect('Foo#34219', isNot(equalsIgnoringHashCodes('Foo#000000')));
+    expect('Foo#34219', isNot(equalsIgnoringHashCodes('Foo#123456')));
 
-    expect('Foo#34219:', normalizeHashCodesEquals('Foo#000:'));
-    expect('Foo#34219:', isNot(normalizeHashCodesEquals('Foo#000')));
+    expect('Foo#34219:', equalsIgnoringHashCodes('Foo#00000:'));
+    expect('Foo#34219:', isNot(equalsIgnoringHashCodes('Foo#00000')));
 
-    expect('Foo#a3b4d', normalizeHashCodesEquals('Foo#000'));
-    expect('Foo#a3b4d', normalizeHashCodesEquals('Foo#12345'));
-    expect('Foo#a3b4d', normalizeHashCodesEquals('Foo#abcdf'));
-    expect('Foo#a3b4d', isNot(normalizeHashCodesEquals('Foo')));
-    expect('Foo#a3b4d', isNot(normalizeHashCodesEquals('Foo#')));
-    expect('Foo#a3b4d', isNot(normalizeHashCodesEquals('Foo#0')));
-    expect('Foo#a3b4d', isNot(normalizeHashCodesEquals('Foo#00')));
-    expect('Foo#a3b4d', isNot(normalizeHashCodesEquals('Foo#000 ')));
-    expect('Foo#a3b4d', isNot(normalizeHashCodesEquals('Foo#0000')));
-    expect('Foo#a3b4d', isNot(normalizeHashCodesEquals('Foo#123456')));
+    expect('Foo#a3b4d', equalsIgnoringHashCodes('Foo#00000'));
+    expect('Foo#a3b4d', equalsIgnoringHashCodes('Foo#12345'));
+    expect('Foo#a3b4d', equalsIgnoringHashCodes('Foo#abcdf'));
+    expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo')));
+    expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#')));
+    expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#0')));
+    expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#00')));
+    expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#00000 ')));
+    expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#000000')));
+    expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#123456')));
 
-    expect('Foo#A3b4D', isNot(normalizeHashCodesEquals('Foo#000')));
+    expect('Foo#A3b4D', isNot(equalsIgnoringHashCodes('Foo#00000')));
 
     expect('Foo#12345(Bar#9110f)',
-        normalizeHashCodesEquals('Foo#000(Bar#000)'));
+        equalsIgnoringHashCodes('Foo#00000(Bar#00000)'));
     expect('Foo#12345(Bar#9110f)',
-        isNot(normalizeHashCodesEquals('Foo#000(Bar#)')));
+        isNot(equalsIgnoringHashCodes('Foo#00000(Bar#)')));
 
-    expect('Foo', isNot(normalizeHashCodesEquals('Foo#000')));
-    expect('Foo#', isNot(normalizeHashCodesEquals('Foo#000')));
-    expect('Foo#3421', isNot(normalizeHashCodesEquals('Foo#000')));
-    expect('Foo#342193', isNot(normalizeHashCodesEquals('Foo#000')));
+    expect('Foo', isNot(equalsIgnoringHashCodes('Foo#00000')));
+    expect('Foo#', isNot(equalsIgnoringHashCodes('Foo#00000')));
+    expect('Foo#3421', isNot(equalsIgnoringHashCodes('Foo#00000')));
+    expect('Foo#342193', isNot(equalsIgnoringHashCodes('Foo#00000')));
   });
 
   test('moreOrLessEquals', () {
