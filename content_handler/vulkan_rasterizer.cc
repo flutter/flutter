@@ -406,6 +406,9 @@ bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
       kVulkan_GrBackend,
       reinterpret_cast<GrBackendContext>(backend_context_.get())));
 
+  context_->setResourceCacheLimits(vulkan::kGrCacheMaxCount,
+                                   vulkan::kGrCacheMaxByteSize);
+
   FTL_DLOG(INFO) << "Successfully initialized VulkanRasterizer";
   return true;
 }
