@@ -68,7 +68,10 @@ class Paragraph {
   FRIEND_TEST(RenderTest, RainbowParagraph);
   FRIEND_TEST(RenderTest, DefaultStyleParagraph);
   FRIEND_TEST(RenderTest, BoldParagraph);
-  FRIEND_TEST(RenderTest, LinebreakParagraph);
+  FRIEND_TEST(RenderTest, LeftAlignParagraph);
+  FRIEND_TEST(RenderTest, RightAlignParagraph);
+  FRIEND_TEST(RenderTest, CenterAlignParagraph);
+  FRIEND_TEST(RenderTest, JustifyAlignParagraph);
   FRIEND_TEST(RenderTest, ItalicsParagraph);
 
   std::vector<uint16_t> text_;
@@ -80,7 +83,7 @@ class Paragraph {
   // TODO(garyq): Height of the paragraph after Layout().
   SkScalar height_ = 0.0f;
   double width_ = 0.0f;
-  int lines_ = 1;
+  size_t lines_ = 0;
   double max_intrinsic_width_ = 0.0f;
   double min_intrinsic_width_ = 0.0f;
   double alphabetic_baseline_ = FLT_MAX;
@@ -92,6 +95,11 @@ class Paragraph {
   void SetParagraphStyle(const ParagraphStyle& style);
 
   void AddRunsToLineBreaker(const std::string& rootdir = "");
+
+  void JustifyLine(std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
+                   std::vector<size_t>& buffer_sizes,
+                   int word_count,
+                   size_t character_index);
 
   void PaintDecorations(SkCanvas* canvas,
                         double x,

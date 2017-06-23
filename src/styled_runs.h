@@ -60,7 +60,10 @@ class StyledRuns {
   FRIEND_TEST(RenderTest, RainbowParagraph);
   FRIEND_TEST(RenderTest, DefaultStyleParagraph);
   FRIEND_TEST(RenderTest, BoldParagraph);
-  FRIEND_TEST(RenderTest, LinebreakParagraph);
+  FRIEND_TEST(RenderTest, LeftAlignParagraph);
+  FRIEND_TEST(RenderTest, RightAlignParagraph);
+  FRIEND_TEST(RenderTest, CenterAlignParagraph);
+  FRIEND_TEST(RenderTest, JustifyAlignParagraph);
   FRIEND_TEST(RenderTest, ItalicsParagraph);
 
   struct IndexedRun {

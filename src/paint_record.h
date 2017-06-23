@@ -56,14 +56,14 @@ class PaintRecord {
 
   const TextStyle& style() const { return style_; }
 
-  double line() const { return line_; }
+  size_t line() const { return line_; }
 
  private:
   TextStyle style_;
   SkPoint offset_;
   sk_sp<SkTextBlob> text_;
   SkPaint::FontMetrics metrics_;
-  int line_;
+  size_t line_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PaintRecord);
 };

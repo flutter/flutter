@@ -47,7 +47,7 @@ bool RenderTest::Snapshot() {
 }
 
 size_t RenderTest::GetTestCanvasWidth() const {
-  return 800;
+  return 1000;
 }
 
 size_t RenderTest::GetTestCanvasHeight() const {
