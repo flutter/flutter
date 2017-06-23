@@ -122,6 +122,10 @@ void main() {
       feedback = new FeedbackTester();
     });
 
+    tearDown(() {
+      feedback?.dispose();
+    });
+
     testWidgets('tap-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
       await tester.tapAt(new Offset(center.dx, center.dy - 50.0));

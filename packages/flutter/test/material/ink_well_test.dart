@@ -66,6 +66,10 @@ void main() {
       feedback = new FeedbackTester();
     });
 
+    tearDown(() {
+      feedback?.dispose();
+    });
+
     testWidgets('enabled (default)', (WidgetTester tester) async {
       await tester.pumpWidget(new Material(
         child: new Center(

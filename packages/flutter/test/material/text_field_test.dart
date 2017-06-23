@@ -1534,5 +1534,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.clickSoundCount, 0);
     expect(feedback.hapticCount, 1);
+
+    feedback.dispose();
   });
 }

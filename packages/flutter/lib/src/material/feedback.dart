@@ -15,34 +15,36 @@ import 'package:flutter/widgets.dart';
 /// tapped, call [forTap]. For the Android-specific vibration when long pressing
 /// an element, call [forLongPress]. Alternatively, you can also wrap your
 /// [onTap] or [onLongPress] callback in [wrapForTap] or [wrapForLongPress] to
-/// achive the same (see example code below).
+/// achieve the same (see example code below).
 ///
 /// Calling any of these methods is a no-op on iOS as actions on that platform
 /// typically don't provide haptic or acoustic feedback.
 ///
 /// All methods in this class are usually called from within a [build] method
-/// as you have to provide a [BuildContext].
+/// or from a State's methods as you have to provide a [BuildContext].
 ///
 /// ## Sample code
 ///
 /// To trigger platform-specific feedback before executing the actual callback:
 ///
 /// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return new GestureDetector(
-///     onTap: Feedback.wrapForTap(_onTapHandler, context),
-///     onLongPress: Feedback.wrapForLongPress(_onLongPressHandler, context),
-///     child: const Text('X'),
-///   );
-/// }
+/// class WidgetWithWrappedHandler extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return new GestureDetector(
+///       onTap: Feedback.wrapForTap(_onTapHandler, context),
+///       onLongPress: Feedback.wrapForLongPress(_onLongPressHandler, context),
+///       child: const Text('X'),
+///     );
+///   }
 ///
-/// void _onTapHandler() {
-///   // Respond to tap.
-/// }
+///   void _onTapHandler() {
+///     // Respond to tap.
+///   }
 ///
-/// void _onLongPressHandler() {
-///   // Respond to long press.
+///   void _onLongPressHandler() {
+///     // Respond to long press.
+///   }
 /// }
 /// ```
 ///
@@ -50,21 +52,23 @@ import 'package:flutter/widgets.dart';
 /// your tap or long press handler:
 ///
 /// ```dart
-/// @override
-/// Widget build(BuildContext context) {
-///   return new GestureDetector(
-///     onTap: () {
-///       // Do some work (e.g. check if the tap is valid)
-///       Feedback.forTap(context);
-///       // Do more work (e.g. respond to the tap)
-///     },
-///     onLongPress: () {
-///       // Do some work (e.g. check if the long press is valid)
-///       Feedback.forLongPress(context);
-///       // Do more work (e.g. respond to the long press)
-///     },
-///     child: const Text('X'),
-///   );
+/// class WidgetWithExplicitCall extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return new GestureDetector(
+///       onTap: () {
+///         // Do some work (e.g. check if the tap is valid)
+///         Feedback.forTap(context);
+///         // Do more work (e.g. respond to the tap)
+///       },
+///       onLongPress: () {
+///         // Do some work (e.g. check if the long press is valid)
+///         Feedback.forLongPress(context);
+///         // Do more work (e.g. respond to the long press)
+///       },
+///       child: const Text('X'),
+///     );
+///   }
 /// }
 /// ```
 class Feedback {
@@ -76,8 +80,8 @@ class Feedback {
   ///
   /// See also:
   ///
-  /// * [wrapForTap] to trigger platform-specific feedback before executing a
-  ///   [GestureTapCallback].
+  ///  * [wrapForTap] to trigger platform-specific feedback before executing a
+  ///    [GestureTapCallback].
   static Future<Null> forTap(BuildContext context) async {
     switch (_platform(context)) {
       case TargetPlatform.android:
@@ -96,8 +100,8 @@ class Feedback {
   ///
   /// See also:
   ///
-  /// * [forTap] to just trigger the platform-specific feedback without wrapping
-  ///   a [GestureTapCallback].
+  ///  * [forTap] to just trigger the platform-specific feedback without wrapping
+  ///    a [GestureTapCallback].
   static GestureTapCallback wrapForTap(GestureTapCallback callback, BuildContext context) {
     if (callback == null)
       return null;
@@ -114,8 +118,8 @@ class Feedback {
   ///
   /// See also:
   ///
-  /// * [wrapForLongPress] to trigger platform-specific feedback before
-  ///   executing a [GestureLongPressCallback].
+  ///  * [wrapForLongPress] to trigger platform-specific feedback before
+  ///    executing a [GestureLongPressCallback].
   static Future<Null> forLongPress(BuildContext context) {
     switch (_platform(context)) {
       case TargetPlatform.android:
@@ -135,8 +139,8 @@ class Feedback {
   ///
   /// See also:
   ///
-  /// * [forLongPress] to just trigger the platform-specific feedback without
-  ///   wrapping a [GestureLongPressCallback].
+  ///  * [forLongPress] to just trigger the platform-specific feedback without
+  ///    wrapping a [GestureLongPressCallback].
   static GestureLongPressCallback wrapForLongPress(GestureLongPressCallback callback, BuildContext context) {
     if (callback == null)
       return null;

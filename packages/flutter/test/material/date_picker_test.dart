@@ -284,6 +284,10 @@ void main() {
       selectableDayPredicate = (DateTime date) => date.day.isEven;
     });
 
+    tearDown(() {
+      feedback?.dispose();
+    });
+
     testWidgets('tap-select date vibrates', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('10'));

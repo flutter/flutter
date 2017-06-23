@@ -37,5 +37,7 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.clickSoundCount, 1);
+
+    feedback.dispose();
   });
 }

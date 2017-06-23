@@ -521,6 +521,8 @@ void main() {
     await tester.longPress(find.byType(Tooltip));
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.hapticCount, 1);
+
+    feedback.dispose();
   });
 
 }

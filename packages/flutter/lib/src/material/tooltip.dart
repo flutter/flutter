@@ -111,6 +111,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _removeEntry();
   }
 
+  /// Shows the tooltip if it is not already visible.
+  ///
   /// Returns `false` when the tooltip was already visible.
   bool ensureTooltipVisible() {
     if (_entry != null) {

@@ -5,6 +5,9 @@
 import 'package:flutter/services.dart';
 
 /// Tracks how often feedback has been requested since its instantiation.
+///
+/// It replaces the MockMethodCallHandler of [SystemChannels.platform] and
+/// cannot be used in combination with other classes that do the same.
 class FeedbackTester {
   FeedbackTester() {
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) {
@@ -23,4 +26,9 @@ class FeedbackTester {
   /// Number of times the click sound was requested to play.
   int get clickSoundCount => _clickSoundCount;
   int _clickSoundCount = 0;
+
+  /// Stops tracking.
+  void dispose() {
+    SystemChannels.platform.setMockMethodCallHandler(null);
+  }
 }

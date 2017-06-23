@@ -16,6 +16,10 @@ void main () {
     feedback = new FeedbackTester();
   });
 
+  tearDown(() {
+    feedback?.dispose();
+  });
+
   group('Feedback on Android', () {
 
     testWidgets('forTap', (WidgetTester tester) async {

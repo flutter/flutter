@@ -71,6 +71,7 @@ import 'theme.dart';
 /// ```dart
 /// assert(debugCheckHasMaterial(context));
 /// ```
+/// The parameter [enableFeedback] must not be `null`.
 ///
 /// See also:
 ///
@@ -185,6 +186,10 @@ class InkResponse extends StatefulWidget {
   ///
   /// For example, on Android a tap will produce a clicking sound and a
   /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool enableFeedback;
 
   /// The rectangle to use for the highlight effect and for clipping

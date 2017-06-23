@@ -21,7 +21,8 @@ import 'text_selection.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 
-/// Signature for the callback that reports when the user changes the selection.
+/// Signature for the callback that reports when the user changes the selection
+/// (including the cursor location).
 typedef void SelectionChangedCallback(TextSelection selection, bool longPress);
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
