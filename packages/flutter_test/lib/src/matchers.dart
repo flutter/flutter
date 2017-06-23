@@ -117,6 +117,23 @@ const Matcher isNotInCard = const _IsNotInCard();
 /// empty, and does not contain the default `Instance of ...` string.
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
+/// Asserts that an object's toStringDeep() is a plausible multi-line
+/// description.
+///
+/// Specifically, this matcher checks that an object's
+/// `toStringDeep(prefixLineOne, prefixOtherLines)`:
+///
+///  * Does not have leading or trailing whitespace.
+///  * Does not contain the default `Instance of ...` string.
+///  * The last line has characters other than tree connector characters and
+///    whitespace. For example: the line ` │ ║ ╎` has only tree connector
+///    characters and whitespace.
+///  * Does not contain lines with trailing white space.
+///  * Has multiple lines.
+///  * The first line starts with `prefixLineOne`
+///  * All subsequent lines start with `prefixOtherLines`.
+const Matcher hasAGoodToStringDeep = const _HasGoodToStringDeep();
+
 /// A matcher for functions that throw [FlutterError].
 ///
 /// This is equivalent to `throwsA(const isInstanceOf<FlutterError>())`.
@@ -177,6 +194,23 @@ const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 ///    range.
 Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
   return new _MoreOrLessEquals(value, epsilon);
+}
+
+/// Asserts that two [String]s are equal after normalizing likely hash codes.
+///
+/// A `#` followed by 5 hexadecimal digits is assumed to be a short hash code
+/// and is normalized to #00000.
+///
+/// See Also:
+///
+///  * [describeIdentity], a method that generates short descriptions of objects
+///    with ids that match the pattern #[0-9a-f]{5}.
+///  * [shortHash], a method that generates a 5 character long hexadecimal
+///    [String] based on [Object.hashCode].
+///  * [TreeDiagnosticsMixin.toStringDeep], a method that returns a [String]
+///    typically containing multiple hash codes.
+Matcher equalsIgnoringHashCodes(String value) {
+  return new _EqualsIgnoringHashCodes(value);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -350,6 +384,185 @@ class _HasOneLineDescription extends Matcher {
 
   @override
   Description describe(Description description) => description.add('one line description');
+}
+
+class _EqualsIgnoringHashCodes extends Matcher {
+  _EqualsIgnoringHashCodes(String v) : _value = _normalize(v);
+
+  final String _value;
+
+  static final Object _mismatchedValueKey = new Object();
+
+  static String _normalize(String s) {
+    return s.replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#00000');
+  }
+
+  @override
+  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+    final String description = _normalize(object);
+    if (_value != description) {
+      matchState[_mismatchedValueKey] = description;
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('multi line description equals $_value');
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose
+  ) {
+    if (matchState.containsKey(_mismatchedValueKey)) {
+      final String actualValue = matchState[_mismatchedValueKey];
+      // Leading whitespace is added so that lines in the multi-line
+      // description returned by addDescriptionOf are all indented equally
+      // which makes the output easier to read for this case.
+      return mismatchDescription
+          .add('expected normalized value\n  ')
+          .addDescriptionOf(_value)
+          .add('\nbut got\n  ')
+          .addDescriptionOf(actualValue);
+    }
+    return mismatchDescription;
+  }
+}
+
+/// Returns `true` if [c] represents a whitespace code unit.
+bool _isWhitespace(int c) => (c <= 0x000D && c >= 0x0009) || c == 0x0020;
+
+/// Returns `true` if [c] represents a vertical line unicode line art code unit.
+///
+/// See [https://en.wikipedia.org/wiki/Box-drawing_character]. This method only
+/// specifies vertical line art code units currently used by Flutter line art.
+/// There are other line art characters that technically also represent vertical
+/// lines.
+bool _isVerticalLine(int c) {
+  return c == 0x2502 || c == 0x2503 || c == 0x2551 || c == 0x254e;
+}
+
+/// Returns whether a [line] is all vertical tree connector characters.
+///
+/// Example vertical tree connector characters: `│ ║ ╎`.
+/// The last line of a text tree contains only vertical tree connector
+/// characters indicates a poorly formatted tree.
+bool _isAllTreeConnectorCharacters(String line) {
+  for (int i = 0; i < line.length; ++i) {
+    final int c = line.codeUnitAt(i);
+    if (!_isWhitespace(c) && !_isVerticalLine(c))
+      return false;
+  }
+  return true;
+}
+
+class _HasGoodToStringDeep extends Matcher {
+  const _HasGoodToStringDeep();
+
+  static final Object _toStringDeepErrorDescriptionKey = new Object();
+
+  @override
+  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+    final List<String> issues = <String>[];
+    String description = object.toStringDeep();
+    if (description.endsWith('\n')) {
+      // Trim off trailing \n as the remaining calculations assume
+      // the description does not end with a trailing \n.
+      description = description.substring(0, description.length - 1);
+    } else {
+      issues.add('Not terminated with a line break.');
+    }
+
+    if (description.trim() != description)
+      issues.add('Has trailing whitespace.');
+
+    final List<String> lines = description.split('\n');
+    if (lines.length < 2)
+      issues.add('Does not have multiple lines.');
+
+    if (description.contains('Instance of '))
+      issues.add('Contains text "Instance of ".');
+
+    for (int i = 0; i < lines.length; ++i) {
+      final String line = lines[i];
+      if (line.isEmpty)
+        issues.add('Line ${i+1} is empty.');
+
+      if (line.trimRight() != line)
+        issues.add('Line ${i+1} has trailing whitespace.');
+    }
+
+    if (_isAllTreeConnectorCharacters(lines.last))
+      issues.add('Last line is all tree connector characters.');
+
+    // If a toStringDeep method doesn't properly handle nested values that
+    // contain line breaks it can  fail to add the required prefixes to all
+    // lined when toStringDeep is called specifying prefixes.
+    final String prefixLineOne    = 'PREFIX_LINE_ONE____';
+    final String prefixOtherLines = 'PREFIX_OTHER_LINES_';
+    final List<String> prefixIssues = <String>[];
+    String descriptionWithPrefixes =
+        object.toStringDeep(prefixLineOne, prefixOtherLines);
+    if (descriptionWithPrefixes.endsWith('\n')) {
+      // Trim off trailing \n as the remaining calculations assume
+      // the description does not end with a trailing \n.
+      descriptionWithPrefixes = descriptionWithPrefixes.substring(
+          0, descriptionWithPrefixes.length - 1);
+    }
+    final List<String> linesWithPrefixes = descriptionWithPrefixes.split('\n');
+    if (!linesWithPrefixes.first.startsWith(prefixLineOne))
+      prefixIssues.add('First line does not contain expected prefix.');
+
+    for (int i = 1; i < linesWithPrefixes.length; ++i) {
+      if (!linesWithPrefixes[i].startsWith(prefixOtherLines))
+        prefixIssues.add('Line ${i+1} does not contain the expected prefix.');
+    }
+
+    final StringBuffer errorDescription = new StringBuffer();
+    if (issues.isNotEmpty) {
+      errorDescription.writeln('Bad toStringDeep():');
+      errorDescription.writeln(description);
+      errorDescription.writeAll(issues, '\n');
+    }
+
+    if (prefixIssues.isNotEmpty) {
+      errorDescription.writeln(
+          'Bad toStringDeep("$prefixLineOne", "$prefixOtherLines"):');
+      errorDescription.writeln(descriptionWithPrefixes);
+      errorDescription.writeAll(prefixIssues, '\n');
+    }
+
+    if (errorDescription.isNotEmpty) {
+      matchState[_toStringDeepErrorDescriptionKey] =
+          errorDescription.toString();
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose
+  ) {
+    if (matchState.containsKey(_toStringDeepErrorDescriptionKey)) {
+      return mismatchDescription.add(
+          matchState[_toStringDeepErrorDescriptionKey]);
+    }
+    return mismatchDescription;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('multi line description');
+  }
 }
 
 class _MoreOrLessEquals extends Matcher {
