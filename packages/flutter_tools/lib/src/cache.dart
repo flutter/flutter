@@ -205,35 +205,38 @@ abstract class CachedArtifact {
   final String name;
   final Cache cache;
 
+  Directory get location => cache.getArtifactDirectory(name);
+  String get version => cache.getVersionFor(name);
+
   bool isUpToDate() {
-    final Directory location = cache.getArtifactDirectory(name);
     if (!location.existsSync())
       return false;
-    if (cache.getVersionFor(name) != cache.getStampFor(name))
+    if (version != cache.getStampFor(name))
       return false;
-    return isUpToDateIn(location);
+    return isUpToDateInner();
   }
 
   Future<Null> update() async {
-    final Directory directory = cache.getArtifactDirectory(name);
-    if (directory.existsSync())
-      directory.deleteSync(recursive: true);
-    directory.createSync(recursive: true);
-    final String version = cache.getVersionFor(name);
-    return updateTo(version, directory).then<Null>((Null value) {
+    if (location.existsSync())
+      location.deleteSync(recursive: true);
+    location.createSync(recursive: true);
+    return updateInner().then<Null>((Null value) {
       cache.setStampFor(name, version);
     });
   }
 
-  bool isUpToDateIn(Directory location) => true;
-  Future<Null> updateTo(String version, Directory location);
+  /// Hook method for extra checks for being up-to-date.
+  bool isUpToDateInner() => true;
+
+  /// Template method to perform artifact update.
+  Future<Null> updateInner();
 }
 
 class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache): super('material_fonts', cache);
 
   @override
-  Future<Null> updateTo(String version, Directory location) {
+  Future<Null> updateInner() {
     final Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
     return _downloadZipArchive(Uri.parse(version), location).then<Null>((Null value) {
       status.stop();
@@ -307,7 +310,7 @@ class FlutterEngine extends CachedArtifact {
   ];
 
   @override
-  bool isUpToDateIn(Directory location) {
+  bool isUpToDateInner() {
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
       final String pkgPath = fs.path.join(pkgDir.path, pkgName);
@@ -324,7 +327,7 @@ class FlutterEngine extends CachedArtifact {
   }
 
   @override
-  Future<Null> updateTo(String version, Directory location) async {
+  Future<Null> updateInner() async {
     final String url = 'https://storage.googleapis.com/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
@@ -375,7 +378,7 @@ class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache): super('gradle_wrapper', cache);
 
   @override
-  Future<Null> updateTo(String version, Directory location) async {
+  Future<Null> updateInner() async {
     final Status status = logger.startProgress('Downloading Gradle Wrapper...', expectSlowOperation: true);
 
     final String url = 'https://android.googlesource.com'
