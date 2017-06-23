@@ -325,7 +325,7 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
   }
 }
 
-/// Creates grid layouts with tiles that have a maximum cross-axis extent.
+/// Creates grid layouts with tiles that each have a maximum cross-axis extent.
 ///
 /// This delegate will select a cross-axis extent for the tiles that is as
 /// large as possible subject to the following conditions:
