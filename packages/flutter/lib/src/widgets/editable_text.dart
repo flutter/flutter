@@ -21,6 +21,10 @@ import 'text_selection.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 
+/// Signature for the callback that reports when the user changes the selection
+/// (including the cursor location).
+typedef void SelectionChangedCallback(TextSelection selection, bool longPress);
+
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
 /// A controller for an editable text field.
@@ -150,6 +154,7 @@ class EditableText extends StatefulWidget {
     this.keyboardType,
     this.onChanged,
     this.onSubmitted,
+    this.onSelectionChanged,
     List<TextInputFormatter> inputFormatters,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -225,6 +230,10 @@ class EditableText extends StatefulWidget {
 
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<String> onSubmitted;
+
+  /// Called when the user changes the selection of text (including the cursor
+  /// location).
+  final SelectionChangedCallback onSelectionChanged;
 
   /// Optional input validation and formatting overrides. Formatters are run
   /// in the provided order when the text input changes.
@@ -447,6 +456,8 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
         _selectionOverlay.showHandles();
       if (longPress)
         _selectionOverlay.showToolbar();
+      if (widget.onSelectionChanged != null)
+        widget.onSelectionChanged(selection, longPress);
     }
   }
 

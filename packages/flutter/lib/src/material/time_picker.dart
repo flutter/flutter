@@ -13,6 +13,7 @@ import 'button.dart';
 import 'button_bar.dart';
 import 'colors.dart';
 import 'dialog.dart';
+import 'feedback.dart';
 import 'flat_button.dart';
 import 'theme.dart';
 import 'typography.dart';
@@ -289,7 +290,7 @@ class _TimePickerHeader extends StatelessWidget {
     );
 
     final Widget dayPeriodPicker = new GestureDetector(
-      onTap: _handleChangeDayPeriod,
+      onTap: Feedback.wrapForTap(_handleChangeDayPeriod, context),
       behavior: HitTestBehavior.opaque,
       child: new Column(
         mainAxisSize: MainAxisSize.min,
@@ -302,12 +303,12 @@ class _TimePickerHeader extends StatelessWidget {
     );
 
     final Widget hour = new GestureDetector(
-      onTap: () => _handleChangeMode(_TimePickerMode.hour),
+      onTap: Feedback.wrapForTap(() => _handleChangeMode(_TimePickerMode.hour), context),
       child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle),
     );
 
     final Widget minute = new GestureDetector(
-      onTap: () => _handleChangeMode(_TimePickerMode.minute),
+      onTap: Feedback.wrapForTap(() => _handleChangeMode(_TimePickerMode.minute), context),
       child: new Text(selectedTime.minuteLabel, style: minuteStyle),
     );
 

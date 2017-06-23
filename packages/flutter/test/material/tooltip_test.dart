@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 // This file uses "as dynamic" in a few places to defeat the static
 // analysis. In general you want to avoid using this style in your
@@ -499,6 +500,29 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Haptic feedback', (WidgetTester tester) async {
+    final FeedbackTester feedback = new FeedbackTester();
+    await tester.pumpWidget(new MaterialApp(
+        home: new Center(
+            child: new Tooltip(
+                message: 'Foo',
+                child: new Container(
+                  width: 100.0,
+                  height: 100.0,
+                  color: Colors.green[500],
+                )
+            )
+        )
+      )
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.hapticCount, 1);
+
+    feedback.dispose();
   });
 
 }

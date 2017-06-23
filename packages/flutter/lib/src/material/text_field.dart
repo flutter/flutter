@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'feedback.dart';
 import 'input_decorator.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -220,6 +221,11 @@ class _TextFieldState extends State<TextField> {
     _editableTextKey.currentState?.requestKeyboard();
   }
 
+  void _onSelectionChanged(BuildContext context, bool longPress) {
+    if (longPress)
+      Feedback.forLongPress(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -243,6 +249,7 @@ class _TextFieldState extends State<TextField> {
         selectionControls: materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
+        onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
         inputFormatters: widget.inputFormatters,
       ),
     );
