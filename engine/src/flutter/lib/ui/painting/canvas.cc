@@ -17,6 +17,8 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkRSXform.h"
 
+using tonic::ToDart;
+
 namespace blink {
 
 static void Canvas_constructor(Dart_NativeArguments args) {
@@ -70,8 +72,9 @@ ftl::RefPtr<Canvas> Canvas::Create(PictureRecorder* recorder,
                                    double top,
                                    double right,
                                    double bottom) {
-  FTL_DCHECK(recorder);
-  FTL_DCHECK(!recorder->isRecording());
+  if (!recorder)
+    Dart_ThrowException(ToDart("Canvas constructor called with non-genuine PictureRecorder."));
+  FTL_DCHECK(!recorder->isRecording()); // verified by Dart code
   ftl::RefPtr<Canvas> canvas = ftl::MakeRefCounted<Canvas>(
       recorder->BeginRecording(SkRect::MakeLTRB(left, top, right, bottom)));
   recorder->set_canvas(canvas);
@@ -164,6 +167,8 @@ void Canvas::clipRRect(const RRect& rrect) {
 void Canvas::clipPath(const CanvasPath* path) {
   if (!canvas_)
     return;
+  if (!path)
+    Dart_ThrowException(ToDart("Canvas.clipPath called with non-genuine Path."));
   canvas_->clipPath(path->path(), true);
 }
 
@@ -260,7 +265,8 @@ void Canvas::drawPath(const CanvasPath* path,
                       const PaintData& paint_data) {
   if (!canvas_)
     return;
-  FTL_DCHECK(path);
+  if (!path)
+    Dart_ThrowException(ToDart("Canvas.drawPath called with non-genuine Path."));
   canvas_->drawPath(path->path(), *paint.paint());
 }
 
@@ -271,7 +277,8 @@ void Canvas::drawImage(const CanvasImage* image,
                        const PaintData& paint_data) {
   if (!canvas_)
     return;
-  FTL_DCHECK(image);
+  if (!image)
+    Dart_ThrowException(ToDart("Canvas.drawImage called with non-genuine Image."));
   canvas_->drawImage(image->image(), x, y, paint.paint());
 }
 
@@ -288,7 +295,8 @@ void Canvas::drawImageRect(const CanvasImage* image,
                            const PaintData& paint_data) {
   if (!canvas_)
     return;
-  FTL_DCHECK(image);
+  if (!image)
+    Dart_ThrowException(ToDart("Canvas.drawImageRect called with non-genuine Image."));
   SkRect src = SkRect::MakeLTRB(src_left, src_top, src_right, src_bottom);
   SkRect dst = SkRect::MakeLTRB(dst_left, dst_top, dst_right, dst_bottom);
   canvas_->drawImageRect(image->image(), src, dst, paint.paint(),
@@ -308,7 +316,8 @@ void Canvas::drawImageNine(const CanvasImage* image,
                            const PaintData& paint_data) {
   if (!canvas_)
     return;
-  FTL_DCHECK(image);
+  if (!image)
+    Dart_ThrowException(ToDart("Canvas.drawImageNine called with non-genuine Image."));
   SkRect center =
       SkRect::MakeLTRB(center_left, center_top, center_right, center_bottom);
   SkIRect icenter;
@@ -320,7 +329,8 @@ void Canvas::drawImageNine(const CanvasImage* image,
 void Canvas::drawPicture(Picture* picture) {
   if (!canvas_)
     return;
-  FTL_DCHECK(picture);
+  if (!picture)
+    Dart_ThrowException(ToDart("Canvas.drawPicture called with non-genuine Picture."));
   canvas_->drawPicture(picture->picture().get());
 }
 
@@ -346,6 +356,8 @@ void Canvas::drawVertices(const Vertices* vertices,
                           const PaintData& paint_data) {
   if (!canvas_)
     return;
+  if (!vertices)
+    Dart_ThrowException(ToDart("Canvas.drawVertices called with non-genuine Vertices."));
 
   canvas_->drawVertices(vertices->vertices(),
                         blend_mode,
@@ -362,6 +374,8 @@ void Canvas::drawAtlas(const Paint& paint,
                        const tonic::Float32List& cull_rect) {
   if (!canvas_)
     return;
+  if (!atlas)
+    Dart_ThrowException(ToDart("Canvas.drawAtlas or Canvas.drawRawAtlas called with non-genuine Image."));
 
   sk_sp<SkImage> skImage = atlas->image();
 
@@ -383,6 +397,8 @@ void Canvas::drawShadow(const CanvasPath* path,
                         SkColor color,
                         double elevation,
                         bool transparentOccluder) {
+  if (!path)
+    Dart_ThrowException(ToDart("Canvas.drawShader called with non-genuine Path."));
   flow::PhysicalModelLayer::DrawShadow(canvas_,
                                        path->path(),
                                        color,
