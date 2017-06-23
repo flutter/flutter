@@ -2056,6 +2056,13 @@ class RepositoryDartDirectory extends RepositoryDirectory {
   }
 }
 
+class RepositoryRootLibDirectory extends RepositoryDirectory {
+  RepositoryRootLibDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool get subdirectoriesAreLicenseRoots => true;
+}
+
 class RepositoryFlutterDirectory extends RepositoryDirectory {
   RepositoryFlutterDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -2115,6 +2122,8 @@ class RepositoryRoot extends RepositoryDirectory {
       throw '//base is no longer part of this client: remove it';
     if (entry.name == 'third_party')
       return new RepositoryRootThirdPartyDirectory(this, entry);
+    if (entry.name == 'lib')
+      return new RepositoryRootLibDirectory(this, entry);
     if (entry.name == 'dart')
       return new RepositoryDartDirectory(this, entry);
     if (entry.name == 'flutter')
@@ -2237,14 +2246,18 @@ Future<Null> main(List<String> arguments) async {
 
         // Check whether the golden file matches the signature of the current contents
         // of this directory.
-        system.File goldenFile = new system.File(
-            path.join(argResults['golden'], 'licenses_${component.io.name}'));
-        String goldenSignature = await goldenFile.openRead()
-            .transform(UTF8.decoder).transform(new LineSplitter()).first;
-        Match goldenMatch = signaturePattern.matchAsPrefix(goldenSignature);
-        if (goldenMatch != null && goldenMatch.group(1) == signature) {
-          system.stderr.writeln('    Skipping this component - no change in signature');
-          continue;
+        try {
+          system.File goldenFile = new system.File(
+              path.join(argResults['golden'], 'licenses_${component.io.name}'));
+          String goldenSignature = await goldenFile.openRead()
+              .transform(UTF8.decoder).transform(new LineSplitter()).first;
+          Match goldenMatch = signaturePattern.matchAsPrefix(goldenSignature);
+          if (goldenMatch != null && goldenMatch.group(1) == signature) {
+            system.stderr.writeln('    Skipping this component - no change in signature');
+            continue;
+          }
+        } on system.FileSystemException {
+            system.stderr.writeln('    Failed to read signature file, scanning directory.');
         }
 
         Progress progress = new Progress(component.fileCount);
