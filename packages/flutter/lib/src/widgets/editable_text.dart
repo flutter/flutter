@@ -541,6 +541,10 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
+    if (!_hasFocus) {
+      // Clear the selection and composition state if this widget lost focus.
+      _value = new TextEditingValue(text: _value.text);
+    }
   }
 
   @override
