@@ -48,6 +48,34 @@ void main() {
       Platform: () => new FakePlatform()..environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'},
     });
   });
+  group('Cache', () {
+    test('should not be up to date, if some cached artifact is not', () {
+      final CachedArtifact artifact1 = new MockCachedArtifact();
+      final CachedArtifact artifact2 = new MockCachedArtifact();
+      when(artifact1.isUpToDate()).thenReturn(true);
+      when(artifact2.isUpToDate()).thenReturn(false);
+      final Cache cache = new Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
+      expect(cache.isUpToDate(), isFalse);
+    });
+    test('should be up to date, if all cached artifacts are', () {
+      final CachedArtifact artifact1 = new MockCachedArtifact();
+      final CachedArtifact artifact2 = new MockCachedArtifact();
+      when(artifact1.isUpToDate()).thenReturn(true);
+      when(artifact2.isUpToDate()).thenReturn(true);
+      final Cache cache = new Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
+      expect(cache.isUpToDate(), isTrue);
+    });
+    test('should update cached artifacts which are not up to date', () async {
+      final CachedArtifact artifact1 = new MockCachedArtifact();
+      final CachedArtifact artifact2 = new MockCachedArtifact();
+      when(artifact1.isUpToDate()).thenReturn(true);
+      when(artifact2.isUpToDate()).thenReturn(false);
+      final Cache cache = new Cache(artifacts: <CachedArtifact>[artifact1, artifact2]);
+      await cache.updateAll();
+      verifyNever(artifact1.update());
+      verify(artifact2.update());
+    });
+  });
 }
 
 class MockFileSystem extends MemoryFileSystem {
@@ -65,3 +93,4 @@ class MockFile extends Mock implements File {
 }
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
+class MockCachedArtifact extends Mock implements CachedArtifact {}
