@@ -231,7 +231,8 @@ class EditableText extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<String> onSubmitted;
 
-  /// Called when the selection of text changed.
+  /// Called when the user changes the selection of text (including the cursor
+  /// location).
   final SelectionChangedCallback onSelectionChanged;
 
   /// Optional input validation and formatting overrides. Formatters are run
