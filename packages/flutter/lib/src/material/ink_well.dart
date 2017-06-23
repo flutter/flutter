@@ -94,8 +94,8 @@ class InkResponse extends StatefulWidget {
     this.borderRadius: BorderRadius.zero,
     this.highlightColor,
     this.splashColor,
-    bool enableFeedback,
-  }) : enableFeedback = enableFeedback ?? true, super(key: key);
+    this.enableFeedback: true,
+  }) : assert(enableFeedback != null), super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -323,10 +323,11 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   void _handleLongPress(BuildContext context) {
     _currentSplash?.confirm();
     _currentSplash = null;
-    if (widget.onLongPress != null)
+    if (widget.onLongPress != null) {
       if (widget.enableFeedback)
         Feedback.forLongPress(context);
       widget.onLongPress();
+    }
   }
 
   @override
@@ -405,7 +406,7 @@ class InkWell extends InkResponse {
     Color highlightColor,
     Color splashColor,
     BorderRadius borderRadius,
-    bool enableFeedback,
+    bool enableFeedback: true,
   }) : super(
     key: key,
     child: child,

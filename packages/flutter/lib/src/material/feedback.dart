@@ -11,15 +11,67 @@ import 'package:flutter/widgets.dart';
 /// Provides platform-specific acoustic and/or haptic feedback for certain
 /// actions.
 ///
-/// See also:
-/// * [FeedbackWrapper] to provide feedback for a gesture callback by
-///   wrapping it.
+/// For example, to play the Android-typically click sound when a button is
+/// tapped, call [forTap]. For the Android-specific vibration when long pressing
+/// an element, call [forLongPress]. Alternatively, you can also wrap your
+/// [onTap] or [onLongPress] callback in [wrapForTap] or [wrapForLongPress] to
+/// achive the same (see example code below).
+///
+/// Calling any of these methods is a no-op on iOS as actions on that platform
+/// typically don't provide haptic or acoustic feedback.
+///
+/// All methods in this class are usually called from within a [build] method
+/// as you have to provide a [BuildContext].
+///
+/// ## Sample code
+///
+/// To trigger platform-specific feedback before executing the actual callback:
+///
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   return new GestureDetector(
+///     onTap: Feedback.wrapForTap(_onTapHandler, context),
+///     onLongPress: Feedback.wrapForLongPress(_onLongPressHandler, context),
+///     child: const Text('X'),
+///   );
+/// }
+/// ```
+///
+/// Alternatively, you can also call [forTap] or [forLongPress] directly within
+/// your tap or long press handler:
+///
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   return new GestureDetector(
+///     onTap: () {
+///       // Do some work (e.g. check if the tap is valid)
+///       Feedback.forTap(context);
+///       // Do more work (e.g. respond to the tap)
+///     },
+///     onLongPress: () {
+///       // Do some work (e.g. check if the long press is valid)
+///       Feedback.forLongPress(context);
+///       // Do more work (e.g. respond to the long press)
+///     },
+///     child: const Text('X'),
+///   );
+/// }
+/// ```
 class Feedback {
   Feedback._();
 
   /// Provides platform-specific feedback for a tap.
+  ///
+  /// On Android the click system sound is played. On iOS this is a no-op.
+  ///
+  /// See also:
+  ///
+  /// * [wrapForTap] to trigger platform-specific feedback before executing a
+  ///   [GestureTapCallback].
   static Future<Null> forTap(BuildContext context) async {
-    switch(_platform(context)) {
+    switch (_platform(context)) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return SystemSound.play(SystemSoundType.click);
@@ -28,31 +80,17 @@ class Feedback {
     }
   }
 
-  /// Provides platform-specific feedback for a long press.
-  static Future<Null> forLongPress(BuildContext context) {
-    switch(_platform(context)) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return HapticFeedback.vibrate();
-      default:
-        return new Future<Null>.value();
-    }
-  }
-
-  static TargetPlatform _platform(BuildContext context) => Theme.of(context).platform;
-
-}
-
-/// Wraps a GestureCallback to provide platform-specific acoustic and/or haptic
-/// feedback before executing the callback.
-///
-/// See also:
-/// * [Feedback] to provide feedback without wrapping a callback.
-class FeedbackWrapper {
-  FeedbackWrapper._();
-
-  /// Provides platform-specific feedback for a tap.
-  static GestureTapCallback forTap(GestureTapCallback callback, BuildContext context) {
+  /// Wraps a [GestureTapCallback] to provide platform specific feedback for a
+  /// tap before the provided callback is executed.
+  ///
+  /// On Android the platform-typical click system sound is played. On iOS this
+  /// is a no-op as that platform usually doesn't provide feedback for a tap.
+  ///
+  /// See also:
+  ///
+  /// * [forTap] to just trigger the platform-specific feedback without wrapping
+  ///   a [GestureTapCallback].
+  static GestureTapCallback wrapForTap(GestureTapCallback callback, BuildContext context) {
     if (callback == null)
       return null;
     return () {
@@ -62,7 +100,36 @@ class FeedbackWrapper {
   }
 
   /// Provides platform-specific feedback for a long press.
-  static GestureLongPressCallback forLongPress(GestureLongPressCallback callback, BuildContext context) {
+  ///
+  /// On Android the platform-typical vibration is triggered. On iOS this is a
+  /// no-op as that platform usually doesn't provide feedback for long presses.
+  ///
+  /// See also:
+  ///
+  /// * [wrapForLongPress] to trigger platform-specific feedback before
+  ///   executing a [GestureLongPressCallback].
+  static Future<Null> forLongPress(BuildContext context) {
+    switch (_platform(context)) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return HapticFeedback.vibrate();
+      default:
+        return new Future<Null>.value();
+    }
+  }
+
+  /// Wraps a [GestureLongPressCallback] to provide platform specific feedback
+  /// for a long press before the provided callback is executed.
+  ///
+  /// On Android the platform-typical vibration is triggered. On iOS this
+  /// is a no-op as that platform usually doesn't provide feedback for a long
+  /// press.
+  ///
+  /// See also:
+  ///
+  /// * [forLongPress] to just trigger the platform-specific feedback without
+  ///   wrapping a [GestureLongPressCallback].
+  static GestureLongPressCallback wrapForLongPress(GestureLongPressCallback callback, BuildContext context) {
     if (callback == null)
       return null;
     return () {
@@ -70,4 +137,6 @@ class FeedbackWrapper {
       callback();
     };
   }
+
+  static TargetPlatform _platform(BuildContext context) => Theme.of(context).platform;
 }

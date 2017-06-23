@@ -117,7 +117,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _timer?.cancel();
       _timer = null;
       _controller.forward();
-      return false;  // Already visible.
+      return false; // Already visible.
     }
     final RenderBox box = context.findRenderObject();
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));

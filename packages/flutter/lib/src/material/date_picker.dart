@@ -121,11 +121,11 @@ class _DatePickerHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new GestureDetector(
-            onTap: FeedbackWrapper.forTap(() => _handleChangeMode(_DatePickerMode.year), context),
+            onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.year), context),
             child: new Text(new DateFormat('yyyy').format(selectedDate), style: yearStyle),
           ),
           new GestureDetector(
-            onTap: FeedbackWrapper.forTap(() => _handleChangeMode(_DatePickerMode.day), context),
+            onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.day), context),
             child: new Text(new DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle),
           ),
         ],

@@ -103,7 +103,7 @@ class Chip extends StatelessWidget {
     if (deletable) {
       rightPadding = 0.0;
       children.add(new GestureDetector(
-        onTap: FeedbackWrapper.forTap(onDeleted, context),
+        onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
           message: 'Delete "$label"',
           child: new Container(

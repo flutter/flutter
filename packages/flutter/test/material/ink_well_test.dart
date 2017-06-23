@@ -47,6 +47,18 @@ void main() {
     expect(log, equals(<String>['long-press']));
   });
 
+  testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(const Material(
+      child: const Center(
+        child: const InkWell(),
+      ),
+    ));
+    await tester.tap(find.byType(InkWell), pointer: 1);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.longPress(find.byType(InkWell), pointer: 1);
+    await tester.pump(const Duration(seconds: 1));
+  });
+
   group('feedback', () {
     FeedbackTester feedback;
 

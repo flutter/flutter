@@ -290,7 +290,7 @@ class _TimePickerHeader extends StatelessWidget {
     );
 
     final Widget dayPeriodPicker = new GestureDetector(
-      onTap: FeedbackWrapper.forTap(_handleChangeDayPeriod, context),
+      onTap: Feedback.wrapForTap(_handleChangeDayPeriod, context),
       behavior: HitTestBehavior.opaque,
       child: new Column(
         mainAxisSize: MainAxisSize.min,
@@ -303,12 +303,12 @@ class _TimePickerHeader extends StatelessWidget {
     );
 
     final Widget hour = new GestureDetector(
-      onTap: FeedbackWrapper.forTap(() => _handleChangeMode(_TimePickerMode.hour), context),
+      onTap: Feedback.wrapForTap(() => _handleChangeMode(_TimePickerMode.hour), context),
       child: new Text(selectedTime.hourOfPeriodLabel, style: hourStyle),
     );
 
     final Widget minute = new GestureDetector(
-      onTap: FeedbackWrapper.forTap(() => _handleChangeMode(_TimePickerMode.minute), context),
+      onTap: Feedback.wrapForTap(() => _handleChangeMode(_TimePickerMode.minute), context),
       child: new Text(selectedTime.minuteLabel, style: minuteStyle),
     );
 

@@ -42,7 +42,7 @@ void main () {
 
       await tester.pumpWidget(new TestWidget(
         tapHandler: (BuildContext context) {
-          return FeedbackWrapper.forTap(callback, context);
+          return Feedback.wrapForTap(callback, context);
         },
       ));
       await tester.pumpAndSettle(kWaitDuration);
@@ -81,7 +81,7 @@ void main () {
 
       await tester.pumpWidget(new TestWidget(
         longPressHandler: (BuildContext context) {
-          return FeedbackWrapper.forLongPress(callback, context);
+          return Feedback.wrapForLongPress(callback, context);
         },
       ));
       await tester.pumpAndSettle(kWaitDuration);

@@ -21,6 +21,9 @@ import 'text_selection.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
 
+/// Signature for the callback that reports when the user changes the selection.
+typedef void SelectionChangedCallback(TextSelection selection, bool longPress);
+
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
 /// A controller for an editable text field.
@@ -656,6 +659,3 @@ class _Editable extends LeafRenderObjectWidget {
     return new TextSpan(style: style, text: text);
   }
 }
-
-/// Signature for the callback that reports when the user changes the selection.
-typedef void SelectionChangedCallback(TextSelection selection, bool longPress);
