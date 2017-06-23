@@ -88,6 +88,10 @@ class ImageStream {
   ///
   /// This is usually done automatically by the [ImageProvider] that created the
   /// [ImageStream].
+  ///
+  /// This method can only be called once per stream. To have an [ImageStream]
+  /// represent multiple images over time, assign it a completer that
+  /// completes several images in succession.
   void setCompleter(ImageStreamCompleter value) {
     assert(_completer == null);
     _completer = value;
@@ -98,9 +102,17 @@ class ImageStream {
     }
   }
 
-  /// Adds a listener callback that is called whenever a concrete [ImageInfo]
+  /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available. If a concrete image is already available, this object
   /// will call the listener synchronously.
+  ///
+  /// If the assigned [completer] completes multiple images over its lifetime,
+  /// this listener will fire multiple times.
+  ///
+  /// The listener will be passed a flag indicating whether a synchronous call
+  /// occurred. If the listener is added within a render object paint function,
+  /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
+  /// a paint.
   void addListener(ImageListener listener) {
     if (_completer != null)
       return _completer.addListener(listener);
@@ -161,13 +173,17 @@ class ImageStreamCompleter {
   final List<ImageListener> _listeners = <ImageListener>[];
   ImageInfo _current;
 
-  /// Adds a listener callback that is called whenever a concrete [ImageInfo]
+  /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available. If a concrete image is already available, this object
   /// will call the listener synchronously.
   ///
+  /// If the assigned [completer] completes multiple images over its lifetime,
+  /// this listener will fire multiple times.
+  ///
   /// The listener will be passed a flag indicating whether a synchronous call
   /// occurred. If the listener is added within a render object paint function,
-  /// then use this flag to avoid calling markNeedsPaint during a paint.
+  /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
+  /// a paint.
   void addListener(ImageListener listener) {
     _listeners.add(listener);
     if (_current != null) {
@@ -254,7 +270,8 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
         stack: stack,
         library: 'services',
         context: 'resolving a single-frame image stream',
-        informationCollector: informationCollector
+        informationCollector: informationCollector,
+        silent: true,
       ));
     });
   }
