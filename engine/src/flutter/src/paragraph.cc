@@ -24,6 +24,7 @@
 
 #include <minikin/Layout.h>
 #include "lib/ftl/logging.h"
+#include "lib/txt/libs/minikin/LayoutUtils.h"
 #include "lib/txt/src/font_collection.h"
 #include "lib/txt/src/font_skia.h"
 #include "minikin/LineBreaker.h"
@@ -96,7 +97,7 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   *font = minikin::FontStyle(GetWeight(style), GetItalic(style));
   paint->size = style.font_size;
   paint->letterSpacing = style.letter_spacing;
-  paint->wordSpacing = style.word_spacing;  // Likely not working yet.
+  paint->wordSpacing = style.word_spacing;
   // TODO(abarth):  word_spacing.
 }
 
@@ -148,8 +149,9 @@ void Paragraph::Layout(double width,
 
   width_ = width;
 
-  breaker_.setLineWidths(0.0f, 0, width);
+  breaker_.setLineWidths(0.0f, 0, width_);
   AddRunsToLineBreaker(rootdir);
+  breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
 
@@ -171,12 +173,12 @@ void Paragraph::Layout(double width,
   SkScalar y = y_offset;
   size_t break_index = 0;
   double letter_spacing_offset = 0.0f;
-  double word_spacing_offset = 0.0f;
   double max_line_spacing = 0.0f;
   double max_descent = 0.0f;
   double prev_max_descent = 0.0f;
   double line_width = 0.0f;
   std::vector<SkScalar> x_queue;
+  size_t character_index = 0;
 
   auto flush = [this, &x_queue, &y]() -> void {
     for (size_t i = 0; i < x_queue.size(); ++i) {
@@ -209,28 +211,44 @@ void Paragraph::Layout(double width,
       int bidiFlags = 0;
       layout.doLayout(text_.data(), layout_start, layout_end - layout_start,
                       text_.size(), bidiFlags, font, minikin_paint, collection);
-
       const size_t glyph_count = layout.nGlyphs();
       size_t blob_start = 0;
-      // Each word/blob.
+      // Each blob.
+      std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
+      std::vector<size_t> buffer_sizes;
+      int word_count = 0;
       while (blob_start < glyph_count) {
         const size_t blob_length = GetBlobLength(layout, blob_start);
+        buffer_sizes.push_back(blob_length);
         // TODO(abarth): Precompute when we can use allocRunPosH.
         paint.setTypeface(GetTypefaceForGlyph(layout, blob_start));
 
-        auto buffer = builder.allocRunPos(paint, blob_length);
+        buffers.push_back(&builder.allocRunPos(paint, blob_length));
 
         letter_spacing_offset += run.style.letter_spacing;
 
         // Each Glyph/Letter.
+        bool whitespace_ended = true;
         for (size_t blob_index = 0; blob_index < blob_length; ++blob_index) {
           const size_t glyph_index = blob_start + blob_index;
-          buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
+          buffers.back()->glyphs[blob_index] = layout.getGlyphId(glyph_index);
+          // Check if the current Glyph is a whitespace and handle multiple
+          // whitespaces in a row.
+          if (minikin::isWordSpace(text_[character_index])) {
+            // Only increment word_count if it is the first in a series of
+            // whitespaces.
+            if (whitespace_ended)
+              ++word_count;
+            whitespace_ended = false;
+          } else {
+            whitespace_ended = true;
+          }
+          ++character_index;
           const size_t pos_index = 2 * blob_index;
 
-          buffer.pos[pos_index] = layout.getX(glyph_index) +
-                                  letter_spacing_offset + word_spacing_offset;
-          buffer.pos[pos_index + 1] = layout.getY(glyph_index);
+          buffers.back()->pos[pos_index] =
+              layout.getX(glyph_index) + letter_spacing_offset;
+          buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
 
           letter_spacing_offset += run.style.letter_spacing;
         }
@@ -240,15 +258,9 @@ void Paragraph::Layout(double width,
         // removed depending on the specifications for letter spacing.
         // letter_spacing_offset -= run.style.letter_spacing;
 
-        word_spacing_offset += run.style.word_spacing;
-
         max_intrinsic_width_ +=
             layout.getX(blob_start - 1) + letter_spacing_offset;
       }
-
-      // Subtract word offset to avoid big gap at end of run. This my be
-      // removed depending on the specificatins for word spacing.
-      word_spacing_offset -= run.style.word_spacing;
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
       // color stayed the same.
@@ -256,6 +268,11 @@ void Paragraph::Layout(double width,
       // run.
       SkPaint::FontMetrics metrics;
       paint.getFontMetrics(&metrics);
+      // Apply additional word spacing if the text is justified.
+      if (paragraph_style_.text_align == TextAlign::justify &&
+          buffer_sizes.size() > 0) {
+        JustifyLine(buffers, buffer_sizes, word_count, character_index);
+      }
       records_.push_back(
           PaintRecord{run.style, builder.make(), metrics, lines_});
       line_width +=
@@ -293,7 +310,7 @@ void Paragraph::Layout(double width,
         max_descent = 0.0f;
         x = 0.0f;
         letter_spacing_offset = 0.0f;
-        word_spacing_offset = 0.0f;
+        word_count = 0;
         line_width = 0.0f;
         // TODO(abarth): Use the line height, which is something like the max
         // font_size for runs in this line times the paragraph's line height.
@@ -312,6 +329,45 @@ void Paragraph::Layout(double width,
     line_widths_.push_back(line_width);
 
   height_ = y + max_descent;
+}
+
+// Amends the buffers to incorporate justification.
+void Paragraph::JustifyLine(
+    std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
+    std::vector<size_t>& buffer_sizes,
+    int word_count,
+    size_t character_index) {
+  // TODO(garyq): Add letter_spacing_offset back in. It is Temporarily
+  // removed.
+  double justify_spacing =
+      (width_ - breaker_.getWidths()[lines_]) / (word_count - 1);
+  word_count = 0;
+  // Set up index to properly access text_ because minikin::isWordSpace()
+  // takes uint_16 instead of GlyphIDs.
+  size_t line_character_index = character_index;
+  for (size_t i = 0; i < buffers.size(); ++i)
+    line_character_index -= buffer_sizes[i];
+  bool whitespace_ended = true;
+  for (size_t i = 0; i < buffers.size(); ++i) {
+    for (size_t glyph_index = 0; glyph_index < buffer_sizes[i]; ++glyph_index) {
+      // Check if the current Glyph is a whitespace and handle multiple
+      // whitespaces in a row.
+      if (minikin::isWordSpace(text_[line_character_index])) {
+        // Only increment word_count and add justification spacing to
+        // whitespace if it is the first in a series of whitespaces.
+        if (whitespace_ended) {
+          ++word_count;
+          buffers[i]->pos[glyph_index * 2] += justify_spacing * word_count;
+        }
+        whitespace_ended = false;
+      } else {
+        // Add justification spacing for all non-whitespace glyphs.
+        buffers[i]->pos[glyph_index * 2] += justify_spacing * word_count;
+        whitespace_ended = true;
+      }
+      ++line_character_index;
+    }
+  }
 }
 
 const ParagraphStyle& Paragraph::GetParagraphStyle() const {
@@ -346,8 +402,8 @@ void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
 }
 
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
-  SkPaint paint;
   for (const auto& record : records_) {
+    SkPaint paint;
     paint.setColor(record.style().color);
     SkPoint offset = record.offset();
     // TODO(garyq): Fix alignment for paragraphs with multiple styles per line.
@@ -355,15 +411,15 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
       case TextAlign::left:
         break;
       case TextAlign::right: {
-        offset.offset(width_ - line_widths_[record.line()], 0);
+        offset.offset(width_ - breaker_.getWidths()[record.line()], 0);
         break;
       }
       case TextAlign::center: {
-        offset.offset((width_ - line_widths_[record.line()]) / 2, 0);
+        offset.offset((width_ - breaker_.getWidths()[record.line()]) / 2, 0);
         break;
       }
       case TextAlign::justify: {
-        // TODO(garyq): implement justify.
+        // Justify is performed in the Layout().
         break;
       }
     }
@@ -371,12 +427,6 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
     PaintDecorations(canvas, x + offset.x(), y + offset.y(), record.style(),
                      record.metrics(), record.text());
   }
-
-  paint.setStyle(SkPaint::kFill_Style);
-  paint.setAntiAlias(true);
-  paint.setStrokeWidth(4);
-  paint.setColor(0xffFE938C);
-  canvas->drawCircle(x, y, 3, paint);
 }
 
 void Paragraph::PaintDecorations(SkCanvas* canvas,
