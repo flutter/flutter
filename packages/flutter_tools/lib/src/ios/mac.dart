@@ -99,8 +99,6 @@ class Xcode {
       return false;
     if (!xcodeVersionRegex.hasMatch(xcodeVersionText))
       return false;
-    if (!eulaSigned)
-      return false;
     return true;
   }
 
