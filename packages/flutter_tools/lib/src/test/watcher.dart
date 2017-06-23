@@ -7,7 +7,6 @@ import '../base/io.dart' show Process;
 
 /// Callbacks for reporting progress while running tests.
 class TestWatcher {
-
   /// Called after a child process starts.
   ///
   /// If startPaused was true, the caller needs to resume in Observatory to

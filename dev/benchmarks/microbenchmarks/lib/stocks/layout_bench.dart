@@ -16,7 +16,7 @@ import '../common.dart';
 const Duration kBenchmarkTime = const Duration(seconds: 15);
 
 Future<Null> main() async {
-  stock_data.StockDataFetcher.actuallyFetchData = false;
+  stock_data.StockData.actuallyFetchData = false;
 
   // This allows us to call onBeginFrame even when the engine didn't request it,
   // and have it actually do something:

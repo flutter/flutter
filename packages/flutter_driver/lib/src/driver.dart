@@ -21,6 +21,7 @@ import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
 import 'render_tree.dart';
+import 'request_data.dart';
 import 'semantics.dart';
 import 'timeline.dart';
 
@@ -382,6 +383,13 @@ class FlutterDriver {
   /// Returns the text in the `Text` widget located by [finder].
   Future<String> getText(SerializableFinder finder, { Duration timeout }) async {
     return GetTextResult.fromJson(await _sendCommand(new GetText(finder, timeout: timeout))).text;
+  }
+
+  /// Sends a string and returns a string.
+  ///
+  /// The application can respond to this by providing a handler to [enableFlutterDriverExtension].
+  Future<String> requestData(String message, { Duration timeout }) async {
+    return RequestDataResult.fromJson(await _sendCommand(new RequestData(message, timeout: timeout))).message;
   }
 
   /// Turns semantics on or off in the Flutter app under test.
