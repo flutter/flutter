@@ -295,8 +295,9 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp 
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic signing)
-      // signing or the PROVISIONING_PROFILE (for manual signing).
+      // Make sure the user has specified one of:
+      // DEVELOPMENT_TEAM (automatic signing)
+      // PROVISIONING_PROFILE (manual signing)
       !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
