@@ -123,10 +123,10 @@ void App::StartApplication(
     app::ApplicationPackagePtr application,
     app::ApplicationStartupInfoPtr startup_info,
     fidl::InterfaceRequest<app::ApplicationController> controller) {
-  // Name this process after the url of the application being launched.
-  std::string label =
-      "flutter:" + GetLabelFromURL(startup_info->launch_info->url);
-  mx::process::self().set_property(MX_PROP_NAME, label.c_str(), label.size());
+  if (controllers_.empty()) {
+    // Name this process after the url of the first application being launched.
+    base_label_ = "flutter:" + GetLabelFromURL(startup_info->launch_info->url);
+  }
 
   std::unique_ptr<ApplicationControllerImpl> impl =
       std::make_unique<ApplicationControllerImpl>(this, std::move(application),
@@ -134,6 +134,8 @@ void App::StartApplication(
                                                   std::move(controller));
   ApplicationControllerImpl* key = impl.get();
   controllers_.emplace(key, std::move(impl));
+
+  UpdateProcessLabel();
 }
 
 void App::Destroy(ApplicationControllerImpl* controller) {
@@ -141,6 +143,23 @@ void App::Destroy(ApplicationControllerImpl* controller) {
   if (it == controllers_.end())
     return;
   controllers_.erase(it);
+  UpdateProcessLabel();
+}
+
+void App::UpdateProcessLabel() {
+  std::string label;
+  if (controllers_.size() < 2) {
+    label = base_label_;
+  } else {
+    std::string suffix = " (+" + std::to_string(controllers_.size() - 1) + ")";
+    if (base_label_.size() + suffix.size() <= MX_MAX_NAME_LEN - 1) {
+      label = base_label_ + suffix;
+    } else {
+      label = base_label_.substr(0, MX_MAX_NAME_LEN - 1 - suffix.size() - 3) +
+              "..." + suffix;
+    }
+  }
+  mx::process::self().set_property(MX_PROP_NAME, label.c_str(), label.size());
 }
 
 }  // namespace flutter_runner

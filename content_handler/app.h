@@ -45,6 +45,7 @@ class App : public app::ApplicationRunner {
   void WaitForPlatformViewsIdsUIThread(
     std::vector<PlatformViewInfo>* platform_view_ids,
     ftl::AutoResetWaitableEvent* latch);
+  void UpdateProcessLabel();
 
   std::unique_ptr<app::ApplicationContext> context_;
   std::unique_ptr<Thread> gpu_thread_;
@@ -53,6 +54,7 @@ class App : public app::ApplicationRunner {
   std::unordered_map<ApplicationControllerImpl*,
                      std::unique_ptr<ApplicationControllerImpl>>
       controllers_;
+  std::string base_label_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(App);
 };
