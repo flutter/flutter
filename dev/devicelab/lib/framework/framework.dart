@@ -26,7 +26,7 @@ bool _isTaskRegistered = false;
 
 /// Registers a [task] to run, returns the result when it is complete.
 ///
-/// Note, the task does not run immediately but waits for the request via the
+/// The task does not run immediately but waits for the request via the
 /// VM service protocol to run it.
 ///
 /// It is ok for a [task] to perform many things. However, only one task can be

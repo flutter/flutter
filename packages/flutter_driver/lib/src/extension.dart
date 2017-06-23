@@ -6,10 +6,12 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,19 +22,26 @@ import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
 import 'render_tree.dart';
+import 'request_data.dart';
 import 'semantics.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 
-class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
+typedef Future<String> DataHandler(String message);
+
+class _DriverBinding extends BindingBase with SchedulerBinding, GestureBinding, ServicesBinding, RendererBinding, WidgetsBinding {
+  _DriverBinding(this._handler);
+
+  final DataHandler _handler;
+
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    final FlutterDriverExtension extension = new FlutterDriverExtension();
+    final FlutterDriverExtension extension = new FlutterDriverExtension(_handler);
     registerServiceExtension(
       name: _extensionMethodName,
-      callback: extension.call
+      callback: extension.call,
     );
   }
 }
@@ -44,9 +53,12 @@ class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so 
 ///
 /// Call this function prior to running your application, e.g. before you call
 /// `runApp`.
-void enableFlutterDriverExtension() {
+///
+/// Optionally you can pass a [DataHandler] callback. It will be called if the
+/// test calls [FlutterDriver.requestData].
+void enableFlutterDriverExtension({ DataHandler handler }) {
   assert(WidgetsBinding.instance == null);
-  new _DriverBinding();
+  new _DriverBinding(handler);
   assert(WidgetsBinding.instance is _DriverBinding);
 }
 
@@ -62,18 +74,17 @@ typedef Finder FinderConstructor(SerializableFinder finder);
 
 @visibleForTesting
 class FlutterDriverExtension {
-  static final Logger _log = new Logger('FlutterDriverExtension');
-
-  FlutterDriverExtension() {
+  FlutterDriverExtension(this._requestDataHandler) {
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
       'get_render_tree': _getRenderTree,
-      'tap': _tap,
       'get_text': _getText,
-      'set_frame_sync': _setFrameSync,
-      'set_semantics': _setSemantics,
+      'request_data': _requestData,
       'scroll': _scroll,
       'scrollIntoView': _scrollIntoView,
+      'set_frame_sync': _setFrameSync,
+      'set_semantics': _setSemantics,
+      'tap': _tap,
       'waitFor': _waitFor,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
     });
@@ -81,12 +92,13 @@ class FlutterDriverExtension {
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
       'get_health': (Map<String, String> params) => new GetHealth.deserialize(params),
       'get_render_tree': (Map<String, String> params) => new GetRenderTree.deserialize(params),
-      'tap': (Map<String, String> params) => new Tap.deserialize(params),
       'get_text': (Map<String, String> params) => new GetText.deserialize(params),
-      'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
-      'set_semantics': (Map<String, String> params) => new SetSemantics.deserialize(params),
+      'request_data': (Map<String, String> params) => new RequestData.deserialize(params),
       'scroll': (Map<String, String> params) => new Scroll.deserialize(params),
       'scrollIntoView': (Map<String, String> params) => new ScrollIntoView.deserialize(params),
+      'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
+      'set_semantics': (Map<String, String> params) => new SetSemantics.deserialize(params),
+      'tap': (Map<String, String> params) => new Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => new WaitUntilNoTransientCallbacks.deserialize(params),
     });
@@ -97,6 +109,10 @@ class FlutterDriverExtension {
       'ByValueKey': _createByValueKeyFinder,
     });
   }
+
+  final DataHandler _requestDataHandler;
+
+  static final Logger _log = new Logger('FlutterDriverExtension');
 
   final WidgetController _prober = new WidgetController(WidgetsBinding.instance);
   final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
@@ -117,6 +133,7 @@ class FlutterDriverExtension {
   ///
   /// The returned JSON is command specific. Generally the caller deserializes
   /// the result into a subclass of [Result], but that's not strictly required.
+  @visibleForTesting
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
     final String commandKind = params['command'];
     try {
@@ -243,8 +260,8 @@ class FlutterDriverExtension {
 
     _prober.binding.hitTest(hitTest, startLocation);
     _prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
-    await new Future<Null>.value();  // so that down and move don't happen in the same microtask
-    for (int moves = 0; moves < totalMoves; moves++) {
+    await new Future<Null>.value(); // so that down and move don't happen in the same microtask
+    for (int moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
       _prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
       await new Future<Null>.delayed(pause);
@@ -267,6 +284,11 @@ class FlutterDriverExtension {
     // TODO(yjbanov): support more ways to read text
     final Text text = target.evaluate().single.widget;
     return new GetTextResult(text.data);
+  }
+
+  Future<RequestDataResult> _requestData(Command command) async {
+    final RequestData requestDataCommand = command;
+    return new RequestDataResult(_requestDataHandler == null ? '' : await _requestDataHandler(requestDataCommand.message));
   }
 
   Future<SetFrameSyncResult> _setFrameSync(Command command) async {

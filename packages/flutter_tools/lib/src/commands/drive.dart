@@ -42,19 +42,22 @@ class DriveCommand extends RunCommandBase {
     argParser.addFlag(
       'keep-app-running',
       negatable: true,
-      defaultsTo: false,
       help:
         'Will keep the Flutter application running when done testing.\n'
-        'By default, Flutter drive stops the application after tests are finished.\n'
-        'Ignored if --use-existing-app is specified.'
+        'By default, "flutter drive" stops the application after tests are finished,\n'
+        'and --keep-app-running overrides this. On the other hand, if --use-existing-app\n'
+        'is specified, then "flutter drive" instead defaults to leaving the application\n'
+        'running, and --no-keep-app-running overrides it.'
     );
 
     argParser.addOption(
       'use-existing-app',
       help:
         'Connect to an already running instance via the given observatory URL.\n'
-        'If this option is given, the application will not be automatically started\n'
-        'or stopped.'
+        'If this option is given, the application will not be automatically started,\n'
+        'and it will only be stopped if --no-keep-app-running is explicitly set.',
+      valueHelp:
+        'url'
     );
   }
 
@@ -95,7 +98,7 @@ class DriveCommand extends RunCommandBase {
 
     String observatoryUri;
     if (argResults['use-existing-app'] == null) {
-      printStatus('Starting application: ${argResults["target"]}');
+      printStatus('Starting application: $targetFile');
 
       if (getBuildMode() == BuildMode.release) {
         // This is because we need VM service to be able to drive the app.
@@ -125,11 +128,11 @@ class DriveCommand extends RunCommandBase {
         rethrow;
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (!argResults['keep-app-running'] && argResults['use-existing-app'] == null) {
+      if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
+        printStatus('Leaving the application running.');
+      } else {
         printStatus('Stopping application instance.');
         await appStopper(this);
-      } else {
-        printStatus('Leaving the application running.');
       }
     }
   }
@@ -137,7 +140,7 @@ class DriveCommand extends RunCommandBase {
   String _getTestFile() {
     String appFile = fs.path.normalize(targetFile);
 
-    // This command extends `flutter start` and therefore CWD == package dir
+    // This command extends `flutter run` and therefore CWD == package dir
     final String packageDir = fs.currentDirectory.path;
 
     // Make appFile path relative to package directory because we are looking
@@ -209,7 +212,7 @@ Future<Device> findTargetDevice() async {
 /// Starts the application on the device given command configuration.
 typedef Future<LaunchResult> AppStarter(DriveCommand command);
 
-AppStarter appStarter = _startApp;
+AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
   appStarter = _startApp;
 }
@@ -255,7 +258,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       observatoryPort: command.observatoryPort,
       diagnosticPort: command.diagnosticPort,
     ),
-    platformArgs: platformArgs
+    platformArgs: platformArgs,
   );
 
   if (!result.started) {
