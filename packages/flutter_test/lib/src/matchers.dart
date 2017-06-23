@@ -447,14 +447,14 @@ bool _isVerticalLine(int c) {
   return c == 0x2502 || c == 0x2503 || c == 0x2551 || c == 0x254e;
 }
 
-/// Returns whether a [str] is all vertical tree connector characters.
+/// Returns whether a [line] is all vertical tree connector characters.
 ///
 /// Example vertical tree connector characters: `│ ║ ╎`.
 /// The last line of a text tree contains only vertical tree connector
 /// characters indicates a poorly formatted tree.
-bool _isAllTreeConnectorCharacters(String str) {
-  for (int i = 0; i < str.length; ++i) {
-    final int c = str.codeUnitAt(i);
+bool _isAllTreeConnectorCharacters(String line) {
+  for (int i = 0; i < line.length; ++i) {
+    final int c = line.codeUnitAt(i);
     if (!_isWhitespace(c) && !_isVerticalLine(c))
       return false;
   }
