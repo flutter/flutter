@@ -71,6 +71,7 @@ static bool IsPictureWorthRasterizing(SkPicture* picture,
 RasterCacheResult RasterizePicture(SkPicture* picture,
                                    GrContext* context,
                                    const MatrixDecomposition& matrix,
+                                   SkColorSpace* dst_color_space,
                                    bool checkerboard) {
   TRACE_EVENT0("flutter", "RasterCachePopulate");
 
@@ -81,7 +82,7 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
       std::ceil(logical_rect.width() * std::abs(scale.x())),  // physical width
       std::ceil(logical_rect.height() *
                 std::abs(scale.y())),  // physical height
-      nullptr                          // colorspace
+      sk_ref_sp(dst_color_space)       // colorspace
       );
 
   sk_sp<SkSurface> surface =
@@ -130,6 +131,7 @@ RasterCacheResult RasterCache::GetPrerolledImage(
     GrContext* context,
     SkPicture* picture,
     const SkMatrix& transformation_matrix,
+    SkColorSpace* dst_color_space,
     bool is_complex,
     bool will_change) {
   if (!IsPictureWorthRasterizing(picture, will_change, is_complex)) {
@@ -159,7 +161,8 @@ RasterCacheResult RasterCache::GetPrerolledImage(
 
   if (!entry.image.is_valid()) {
     entry.image =
-        RasterizePicture(picture, context, matrix, checkerboard_images_);
+        RasterizePicture(picture, context, matrix, dst_color_space,
+                         checkerboard_images_);
   }
 
   // We are not considering unrasterizable images. So if we don't have an image
