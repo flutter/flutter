@@ -8,7 +8,7 @@ _See also: [Flutter's code of conduct](https://flutter.io/design-principles/#cod
 Things you will need
 --------------------
 
- * Linux or Mac OS X. (Windows is not yet supported.)
+ * Linux, Mac OS X, or Windows
  * git (used for source version control).
  * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/).
  * An ssh client (used to authenticate with GitHub).
@@ -91,6 +91,8 @@ assume you want to check a single package and the flutter repository has several
 
 Running the tests
 -----------------
+
+_The `flutter test` command is not available on Windows (See [#8516](https://github.com/flutter/flutter/issues/8516))._
 
 To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and run them inside the flutter shell as a test, use the `flutter test` command, e.g:
 
