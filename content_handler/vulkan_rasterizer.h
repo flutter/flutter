@@ -87,8 +87,8 @@ class VulkanRasterizer : public Rasterizer {
     struct Swapchain {
       std::queue<std::unique_ptr<Surface>> queue;
       uint32_t tick_count = 0;
-      static constexpr uint32_t kMaxSurfaces = 16;
-      static constexpr uint32_t kMaxTickBeforeDiscard = 600;
+      static constexpr uint32_t kMaxSurfaces = 3;
+      static constexpr uint32_t kMaxTickBeforeDiscard = 3;
     };
 
     using size_key_t = uint64_t;
