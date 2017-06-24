@@ -86,7 +86,7 @@ class Xcode {
   String get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = runSync(<String>['/usr/bin/xcode-select', '--print-path'])?.trim();
+        _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
       } on ProcessException {
         // Ignore: return null below.
       }
@@ -125,7 +125,7 @@ class Xcode {
   String get xcodeVersionText {
     if (_xcodeVersionText == null) {
       try {
-        _xcodeVersionText = runSync(<String>['/usr/bin/xcodebuild', '-version']).replaceAll('\n', ', ');
+        _xcodeVersionText = processManager.runSync(<String>['/usr/bin/xcodebuild', '-version']).stdout.replaceAll('\n', ', ');
       } on ProcessException {
         // Ignore: return null below.
       }
@@ -155,10 +155,15 @@ class Xcode {
   }
 
   Future<String> getAvailableDevices() async {
-    final RunResult result = await runAsync(<String>['/usr/bin/instruments', '-s', 'devices']);
-    if (result.exitCode != 0)
+    try {
+      final ProcessResult result = await processManager.run(
+          <String>['/usr/bin/instruments', '-s', 'devices']);
+      if (result.exitCode != 0)
+        throw new ToolExit('/usr/bin/instruments returned an error:\n${result.stderr}');
+      return result.stdout;
+    } on ProcessException {
       throw new ToolExit('Failed to invoke /usr/bin/instruments. Is Xcode installed?');
-    return result.stdout;
+    }
   }
 }
 
