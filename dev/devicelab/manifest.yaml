@@ -126,7 +126,7 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  routing:
+  routing_test:
     description: >
       Verifies that `flutter drive --route` still works. No performance numbers.
     stage: devicelab
