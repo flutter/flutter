@@ -121,25 +121,43 @@ class Xcode {
     return _eulaSigned;
   }
 
+  final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
+  void _updateXcodeVersion() {
+    try {
+      _xcodeVersionText = processManager.runSync(<String>['/usr/bin/xcodebuild', '-version']).stdout.replaceAll('\n', ', ');
+      final Match match = xcodeVersionRegex.firstMatch(xcodeVersionText);
+      if (match == null)
+        return;
+
+      final String version = match.group(1);
+      final List<String> components = version.split('.');
+      _xcodeMajorVersion = int.parse(components[0]);
+      _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
+    } on ProcessException {
+      // Ignore: return null below.
+    }
+  }
+
   String _xcodeVersionText;
   String get xcodeVersionText {
-    if (_xcodeVersionText == null) {
-      try {
-        _xcodeVersionText = processManager.runSync(<String>['/usr/bin/xcodebuild', '-version']).stdout.replaceAll('\n', ', ');
-      } on ProcessException {
-        // Ignore: return null below.
-      }
-    }
+    if (_xcodeVersionText == null)
+      _updateXcodeVersion();
     return _xcodeVersionText;
   }
 
   int _xcodeMajorVersion;
-  int get xcodeMajorVersion => _xcodeMajorVersion;
+  int get xcodeMajorVersion {
+    if (_xcodeMajorVersion == null)
+      _updateXcodeVersion();
+    return _xcodeMajorVersion;
+  }
 
   int _xcodeMinorVersion;
-  int get xcodeMinorVersion => _xcodeMinorVersion;
-
-  final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
+  int get xcodeMinorVersion {
+    if (_xcodeMinorVersion == null)
+      _updateXcodeVersion();
+    return _xcodeMinorVersion;
+  }
 
   bool get xcodeVersionSatisfactory {
     if (xcodeVersionText == null || !xcodeVersionRegex.hasMatch(xcodeVersionText))
