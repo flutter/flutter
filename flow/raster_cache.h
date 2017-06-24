@@ -53,8 +53,10 @@ class RasterCache {
   RasterCacheResult GetPrerolledImage(GrContext* context,
                                       SkPicture* picture,
                                       const SkMatrix& transformation_matrix,
+                                      SkColorSpace* dst_color_space,
                                       bool is_complex,
                                       bool will_change);
+
   void SweepAfterFrame();
 
   void Clear();
