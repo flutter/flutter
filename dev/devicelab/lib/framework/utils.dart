@@ -173,7 +173,7 @@ Future<Process> startProcess(
   String workingDirectory,
 }) async {
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
-  print('Executing: $command');
+  print('\nExecuting: $command');
   environment ??= <String, String>{};
   environment['BOT'] = 'true';
   final Process process = await _processManager.start(
@@ -184,8 +184,8 @@ Future<Process> startProcess(
   final ProcessInfo processInfo = new ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.whenComplete(() {
-    print('\n'); // separate the output of this script from subsequent output to make logs easier to read
+  process.exitCode.then((int exitCode) {
+    print('exitcode: $exitCode');
     _runningProcesses.remove(processInfo);
   });
 
@@ -218,15 +218,22 @@ Future<int> exec(
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment);
 
+  final Completer<Null> stdoutDone = new Completer<Null>();
+  final Completer<Null> stderrDone = new Completer<Null>();
   process.stdout
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
-      .listen(print);
+      .listen((String line) {
+        print('stdout: $line');
+      }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
-      .listen(stderr.writeln);
+      .listen((String line) {
+        print('stderr: $line');
+      }, onDone: () { stderrDone.complete(); });
 
+  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -237,7 +244,7 @@ Future<int> exec(
 
 /// Executes a command and returns its standard output as a String.
 ///
-/// Standard error is redirected to the current process' standard error stream.
+/// For logging purposes, the command's output is also printed out.
 Future<String> eval(
   String executable,
   List<String> arguments, {
@@ -245,16 +252,31 @@ Future<String> eval(
   bool canFail: false,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment);
-  process.stderr.listen((List<int> data) {
-    stderr.add(data);
-  });
-  final String output = await UTF8.decodeStream(process.stdout);
+
+  final StringBuffer output = new StringBuffer();
+  final Completer<Null> stdoutDone = new Completer<Null>();
+  final Completer<Null> stderrDone = new Completer<Null>();
+  process.stdout
+      .transform(UTF8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+        print('stdout: $line');
+        output.writeln(line);
+      }, onDone: () { stdoutDone.complete(); });
+  process.stderr
+      .transform(UTF8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+        print('stderr: $line');
+      }, onDone: () { stderrDone.complete(); });
+
+  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
     fail('Executable failed with exit code $exitCode.');
 
-  return output.trimRight();
+  return output.toString().trimRight();
 }
 
 Future<int> flutter(String command, {

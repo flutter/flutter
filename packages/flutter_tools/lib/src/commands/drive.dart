@@ -41,6 +41,7 @@ class DriveCommand extends RunCommandBase {
   DriveCommand() {
     argParser.addFlag(
       'keep-app-running',
+      defaultsTo: null,
       negatable: true,
       help:
         'Will keep the Flutter application running when done testing.\n'
