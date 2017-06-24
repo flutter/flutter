@@ -6,13 +6,16 @@ Contributing to the Flutter engine
 Things you will need
 --------------------
 
- * Linux or Mac OS X. (Windows is not yet supported.)
+ * Linux, Mac OS X, or Windows
+     * Windows doesn't support cross-compiling artifacts for Android or iOS
+     * Linux doesn't support cross-compiling artifacts for iOS
  * git (used for source version control).
  * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/) or Xcode.
  * An ssh client (used to authenticate with GitHub).
  * Chromium's [depot_tools](http://www.chromium.org/developers/how-tos/install-depot-tools) (make sure it's in your path). We use the `gclient` tool from depot_tools.
  * Python (used by many of our tools, including 'gclient').
- * curl and unzip (used by `gclient sync`).
+ * On Mac OS X and Linux: curl and unzip (used by `gclient sync`).
+ * On Windows: Visual Studio (required for non-Googlers only).
 
 You do not need [Dart](https://www.dartlang.org/downloads/linux.html) installed, as a Dart tool chain is automatically downloaded as part of the "getting the code" step. Similarly for the Android SDK, it's downloaded by the `gclient sync` step below.
 
@@ -52,6 +55,7 @@ target_os = ["android"]
  * If you're on Linux, run `sudo ./build/install-build-deps.sh`
  * If you're on Mac, install Oracle's Java JDK, version 1.7 or later.
  * If you're on Mac, install `ant`: `brew install ant`
+ * If you're on Windows, install Visual Studio (non-Google developers only)
  * If you're planning on working on the [buildroot](https://github.com/flutter/buildroot) repository as well, and have a local checkout of that repository, run the following commands in the `src` directory to update your git remotes accordingly:
 
  ```bash
@@ -147,6 +151,16 @@ Once the artifacts are built, you can start using them in your application by fo
 To run the tests, you'll also need to clone [the main Flutter repository](https://github.com/flutter/flutter).
 See [the instructions for contributing](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md)
 to the main Flutter repository for detailed instructions.
+
+### Desktop (gen_snapshot for Windows)
+
+You can only build selected binaries on Windows (mainly `gen_snapshot`).
+
+* Make sure you have Visual Studio installed (non-Googlers only).
+* `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
+* `gclient sync` to update your dependencies.
+* `python .\flutter\tools\gn [--unoptimized] --runtime-mode=[debug|profile|release] [--android]` to prepare your build files.
+* `ninja -C .\out\<dir created by previous step> gen_snapshot` to build.
 
 ### Building all the builds that matter on Linux and Android
 
