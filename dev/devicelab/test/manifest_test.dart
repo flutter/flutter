@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:test/test.dart';
 
 import 'package:flutter_devicelab/framework/manifest.dart';
@@ -16,6 +18,12 @@ void main() {
       expect(task.description, 'Measures the startup time of the Flutter Gallery app on Android.\n');
       expect(task.stage, 'devicelab');
       expect(task.requiredAgentCapabilities, <String>['linux/android']);
+
+      for (ManifestTask task in manifest.tasks) {
+        final File taskFile = new File('bin/tasks/${task.name}.dart');
+        expect(taskFile.existsSync(), true,
+          reason: 'File ${taskFile.path} corresponding to manifest task "${task.name}" not found');
+      }
     });
   });
 
