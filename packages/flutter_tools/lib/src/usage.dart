@@ -79,16 +79,19 @@ class Usage {
     if (suppressAnalytics)
       return;
 
-    if (parameters != null) {
-      parameters.forEach(_analytics.setSessionValue);
-    }
+    parameters ??= const <String, String>{};
 
-    _analytics.sendScreenView(command);
+    _analytics.sendScreenView(command, parameters: parameters);
   }
 
-  void sendEvent(String category, String parameter) {
-    if (!suppressAnalytics)
-      _analytics.sendEvent(category, parameter);
+  void sendEvent(String category, String parameter,
+      { Map<String, String> parameters }) {
+    if (suppressAnalytics)
+      return;
+
+    parameters ??= const <String, String>{};
+
+    _analytics.sendEvent(category, parameter, parameters: parameters);
   }
 
   void sendTiming(
