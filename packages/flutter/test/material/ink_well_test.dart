@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'feedback_tester.dart';
+
 void main() {
   testWidgets('InkWell gestures control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
@@ -43,5 +45,75 @@ void main() {
     await tester.longPress(find.byType(InkWell), pointer: 4);
 
     expect(log, equals(<String>['long-press']));
+  });
+
+  testWidgets('long-press and tap on disabled should not throw', (WidgetTester tester) async {
+    await tester.pumpWidget(const Material(
+      child: const Center(
+        child: const InkWell(),
+      ),
+    ));
+    await tester.tap(find.byType(InkWell), pointer: 1);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.longPress(find.byType(InkWell), pointer: 1);
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  group('feedback', () {
+    FeedbackTester feedback;
+
+    setUp(() {
+      feedback = new FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback?.dispose();
+    });
+
+    testWidgets('enabled (default)', (WidgetTester tester) async {
+      await tester.pumpWidget(new Material(
+        child: new Center(
+          child: new InkWell(
+            onTap: () {},
+            onLongPress: () {},
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+
+      await tester.tap(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 0);
+
+      await tester.longPress(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 2);
+      expect(feedback.hapticCount, 1);
+    });
+
+    testWidgets('disabled', (WidgetTester tester) async {
+      await tester.pumpWidget(new Material(
+        child: new Center(
+          child: new InkWell(
+            onTap: () {},
+            onLongPress: () {},
+            enableFeedback: false,
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+
+      await tester.longPress(find.byType(InkWell), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
   });
 }

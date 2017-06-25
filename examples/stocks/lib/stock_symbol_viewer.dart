@@ -15,6 +15,7 @@ class _StockSymbolView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(stock != null);
     final String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0)
@@ -63,30 +64,49 @@ class _StockSymbolView extends StatelessWidget {
 }
 
 class StockSymbolPage extends StatelessWidget {
-  const StockSymbolPage({ this.stock });
+  const StockSymbolPage({ this.symbol, this.stocks });
 
-  final Stock stock;
+  final String symbol;
+  final StockData stocks;
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(stock.name)
-      ),
-      body: new SingleChildScrollView(
-        child: new Container(
-          margin: const EdgeInsets.all(20.0),
-          child: new Card(
-            child: new _StockSymbolView(
-              stock: stock,
-              arrow: new Hero(
-                tag: stock,
-                child: new StockArrow(percentChange: stock.percentChange)
+    return new AnimatedBuilder(
+      animation: stocks,
+      builder: (BuildContext context, Widget child) {
+        final Stock stock = stocks[symbol];
+        return new Scaffold(
+          appBar: new AppBar(
+            title: new Text(stock?.name ?? symbol)
+          ),
+          body: new SingleChildScrollView(
+            child: new Container(
+              margin: const EdgeInsets.all(20.0),
+              child: new Card(
+                child: new AnimatedCrossFade(
+                  duration: const Duration(milliseconds: 300),
+                  firstChild: const Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: const Center(child: const CircularProgressIndicator()),
+                  ),
+                  secondChild: stock != null
+                    ? new _StockSymbolView(
+                      stock: stock,
+                      arrow: new Hero(
+                        tag: stock,
+                        child: new StockArrow(percentChange: stock.percentChange),
+                      ),
+                    ) : new Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: new Center(child: new Text('$symbol not found')),
+                    ),
+                  crossFadeState: stock == null && stocks.loading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                ),
               )
             )
           )
-        )
-      )
+        );
+      },
     );
   }
 }

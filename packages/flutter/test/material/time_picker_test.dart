@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'feedback_tester.dart';
 
 class _TimePickerLauncher extends StatelessWidget {
   const _TimePickerLauncher({ Key key, this.onChanged }) : super(key: key);
@@ -115,24 +116,21 @@ void main() {
   group('haptic feedback', () {
     const Duration kFastFeedbackInterval = const Duration(milliseconds: 10);
     const Duration kSlowFeedbackInterval = const Duration(milliseconds: 200);
-    int hapticFeedbackCount;
-
-    setUpAll(() {
-      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) {
-        if (methodCall.method == "HapticFeedback.vibrate")
-          hapticFeedbackCount++;
-      });
-    });
+    FeedbackTester feedback;
 
     setUp(() {
-      hapticFeedbackCount = 0;
+      feedback = new FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback?.dispose();
     });
 
     testWidgets('tap-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
       await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
-      expect(hapticFeedbackCount, 1);
+      expect(feedback.hapticCount, 1);
     });
 
     testWidgets('quick successive tap-selects vibrate once', (WidgetTester tester) async {
@@ -141,7 +139,7 @@ void main() {
       await tester.pump(kFastFeedbackInterval);
       await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
       await finishPicker(tester);
-      expect(hapticFeedbackCount, 1);
+      expect(feedback.hapticCount, 1);
     });
 
     testWidgets('slow successive tap-selects vibrate once per tap', (WidgetTester tester) async {
@@ -152,7 +150,7 @@ void main() {
       await tester.pump(kSlowFeedbackInterval);
       await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
-      expect(hapticFeedbackCount, 3);
+      expect(feedback.hapticCount, 3);
     });
 
     testWidgets('drag-select vibrates once', (WidgetTester tester) async {
@@ -164,7 +162,7 @@ void main() {
       await gesture.moveBy(hour0 - hour3);
       await gesture.up();
       await finishPicker(tester);
-      expect(hapticFeedbackCount, 1);
+      expect(feedback.hapticCount, 1);
     });
 
     testWidgets('quick drag-select vibrates once', (WidgetTester tester) async {
@@ -180,7 +178,7 @@ void main() {
       await gesture.moveBy(hour0 - hour3);
       await gesture.up();
       await finishPicker(tester);
-      expect(hapticFeedbackCount, 1);
+      expect(feedback.hapticCount, 1);
     });
 
     testWidgets('slow drag-select vibrates once', (WidgetTester tester) async {
@@ -196,7 +194,7 @@ void main() {
       await gesture.moveBy(hour0 - hour3);
       await gesture.up();
       await finishPicker(tester);
-      expect(hapticFeedbackCount, 3);
+      expect(feedback.hapticCount, 3);
     });
   });
 }

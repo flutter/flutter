@@ -17,6 +17,7 @@ import 'button_bar.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog.dart';
+import 'feedback.dart';
 import 'flat_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -120,11 +121,11 @@ class _DatePickerHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new GestureDetector(
-            onTap: () => _handleChangeMode(_DatePickerMode.year),
+            onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.year), context),
             child: new Text(new DateFormat('yyyy').format(selectedDate), style: yearStyle),
           ),
           new GestureDetector(
-            onTap: () => _handleChangeMode(_DatePickerMode.day),
+            onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.day), context),
             child: new Text(new DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle),
           ),
         ],

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
+import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -110,12 +111,15 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _removeEntry();
   }
 
-  void ensureTooltipVisible() {
+  /// Shows the tooltip if it is not already visible.
+  ///
+  /// Returns `false` when the tooltip was already visible.
+  bool ensureTooltipVisible() {
     if (_entry != null) {
       _timer?.cancel();
       _timer = null;
       _controller.forward();
-      return;  // Already visible.
+      return false; // Already visible.
     }
     final RenderBox box = context.findRenderObject();
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
@@ -138,6 +142,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
     _controller.forward();
+    return true;
   }
 
   void _removeEntry() {
@@ -177,7 +182,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: ensureTooltipVisible,
+      onLongPress: () {
+        final bool tooltipCreated = ensureTooltipVisible();
+        if (tooltipCreated)
+          Feedback.forLongPress(context);
+      },
       excludeFromSemantics: true,
       child: new Semantics(
         label: widget.message,

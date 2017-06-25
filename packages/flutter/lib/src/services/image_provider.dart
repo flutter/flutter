@@ -161,7 +161,7 @@ class ImageConfiguration {
 ///
 /// The following shows the code required to write a widget that fully conforms
 /// to the [ImageProvider] and [Widget] protocols. (It is essentially a
-/// bare-bones version of the [Image] widget.)
+/// bare-bones version of the [widgets.Image] widget.)
 ///
 /// ```dart
 /// class MyImage extends StatefulWidget {
@@ -528,6 +528,12 @@ class FileImage extends ImageProvider<FileImage> {
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the
 /// given scale.
+///
+/// The provided [bytes] buffer should not be changed after it is provided
+/// to a [MemoryImage]. To provide an [ImageStream] that represents an image
+/// that changes over time, consider creating a new subclass of [ImageProvider]
+/// whose [load] method returns a subclass of [ImageStreamCompleter] that can
+/// handle providing multiple images.
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
@@ -580,6 +586,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   @override
   String toString() => '$runtimeType(${describeIdentity(bytes)}, scale: $scale)';
 }
+
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
 ///
 /// This implementation requires an explicit final [name] and [scale] on

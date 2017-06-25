@@ -276,6 +276,7 @@ class AndroidDevice extends Device {
     }
     if (installResult.exitCode != 0) {
       printError('Error: ADB exited with exit code ${installResult.exitCode}');
+      printError('$installResult');
       return false;
     }
 
