@@ -381,14 +381,22 @@ final String noCocoaPodsConsequence = '''
   For more info, see https://flutter.io/platform-plugins''';
 
 final String cocoaPodsInstallInstructions = '''
-  brew update
-  brew install cocoapods
-  pod setup''';
+  Via RubyGems (if using Ruby version manager):
+    gem install cocoapods
+    pod setup
+  Via Homebrew (if using system Ruby):
+    brew update
+    brew install cocoapods
+    pod setup''';
 
 final String cocoaPodsUpgradeInstructions = '''
-  brew update
-  brew upgrade cocoapods
-  pod setup''';
+  Via RubyGems (if using Ruby version manager):
+    gem update cocoapods
+    pod setup
+  Via Homebrew (if using system Ruby):
+    brew update
+    brew upgrade cocoapods
+    pod setup''';
 
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
