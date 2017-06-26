@@ -166,10 +166,7 @@ class Xcode {
     final String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
     final List<String> components = version.split('.');
 
-    _xcodeMajorVersion = int.parse(components[0]);
-    _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
-
-    return _xcodeVersionCheckValid(_xcodeMajorVersion, _xcodeMinorVersion);
+    return _xcodeVersionCheckValid(xcodeMajorVersion, xcodeMinorVersion);
   }
 
   Future<String> getAvailableDevices() async {
