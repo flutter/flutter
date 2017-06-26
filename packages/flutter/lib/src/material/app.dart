@@ -368,7 +368,7 @@ class _MaterialAppState extends State<MaterialApp> {
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-        platform: theme.platform
+        platform: theme.platform,
       )
     );
 

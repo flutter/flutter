@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Widget buildTest() {
   return new MediaQuery(
-    data: const MediaQueryData(),
+    data: new MediaQueryData(),
     child: new Scaffold(
       body: new DefaultTabController(
         length: 4,

@@ -23,10 +23,9 @@ class ScrollBehavior {
 
   /// The platform whose scroll physics should be implemented.
   ///
-  /// Defaults to the current platform.
+  /// Defaults to [defaultTargetPlatform].
   TargetPlatform getPlatform(BuildContext context) {
-    return MediaQuery.of(context, nullOk: true)?.platform
-        ?? defaultTargetPlatform;
+    return MediaQuery.of(context, nullOk: true)?.platform ?? defaultTargetPlatform;
   }
 
   /// Wraps the given widget, which scrolls in the given [AxisDirection].

@@ -144,7 +144,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
+    if (MediaQuery.of(context).platform == TargetPlatform.iOS) {
       return _cupertinoPageRoute.buildTransitions(context, animation, secondaryAnimation, child);
     } else {
       return new _MountainViewPageTransition(

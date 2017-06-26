@@ -646,7 +646,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   Timer _vibrateTimer;
 
   void _vibrate() {
-    switch (Theme.of(context).platform) {
+    switch (MediaQuery.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         _vibrateTimer?.cancel();

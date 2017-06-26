@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
   return new MediaQuery(
-    data: const MediaQueryData(),
+    data: new MediaQueryData(),
     child: new Scaffold(
       body: new DefaultTabController(
         length: 3,
@@ -696,7 +696,7 @@ void main() {
   });
 
   testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+    final MediaQueryData topPadding100 = new MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
 
     await tester.pumpWidget(
       new MediaQuery(

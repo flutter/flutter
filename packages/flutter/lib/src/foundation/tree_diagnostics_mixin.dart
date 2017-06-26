@@ -20,7 +20,10 @@ String describeIdentity(Object object) =>
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
 ///
-/// For example:
+/// ## Sample code
+///
+/// This example shows the result of calling `enumEntry.toString() and the
+/// result of calling describeEnum.
 ///
 /// ```dart
 /// enum Day {

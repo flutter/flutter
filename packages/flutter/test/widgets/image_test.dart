@@ -178,13 +178,13 @@ void main() {
     await tester.pumpWidget(
       new MediaQuery(
         key: mediaQueryKey1,
-        data: const MediaQueryData(
+        data: new MediaQueryData(
           devicePixelRatio: 10.0,
           padding: EdgeInsets.zero,
         ),
         child: new MediaQuery(
           key: mediaQueryKey2,
-          data: const MediaQueryData(
+          data: new MediaQueryData(
             devicePixelRatio: 5.0,
             padding: EdgeInsets.zero,
           ),
@@ -204,13 +204,13 @@ void main() {
     await tester.pumpWidget(
       new MediaQuery(
         key: mediaQueryKey2,
-        data: const MediaQueryData(
+        data: new MediaQueryData(
           devicePixelRatio: 5.0,
           padding: EdgeInsets.zero,
         ),
         child: new MediaQuery(
           key: mediaQueryKey1,
-          data: const MediaQueryData(
+          data: new MediaQueryData(
             devicePixelRatio: 10.0,
             padding: EdgeInsets.zero,
           ),
@@ -238,7 +238,7 @@ void main() {
         children: <Widget> [
           new MediaQuery(
             key: mediaQueryKey2,
-            data: const MediaQueryData(
+            data: new MediaQueryData(
               devicePixelRatio: 5.0,
               padding: EdgeInsets.zero,
             ),
@@ -249,7 +249,7 @@ void main() {
           ),
           new MediaQuery(
             key: mediaQueryKey1,
-            data: const MediaQueryData(
+            data: new MediaQueryData(
               devicePixelRatio: 10.0,
               padding: EdgeInsets.zero,
             ),
@@ -266,7 +266,7 @@ void main() {
         children: <Widget> [
           new MediaQuery(
             key: mediaQueryKey2,
-            data: const MediaQueryData(
+            data: new MediaQueryData(
               devicePixelRatio: 5.0,
               padding: EdgeInsets.zero,
             ),
@@ -274,7 +274,7 @@ void main() {
           ),
           new MediaQuery(
             key: mediaQueryKey1,
-            data: const MediaQueryData(
+            data: new MediaQueryData(
               devicePixelRatio: 10.0,
               padding: EdgeInsets.zero,
             ),

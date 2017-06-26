@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show window;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -130,9 +132,12 @@ class Theme extends StatelessWidget {
   Widget build(BuildContext context) {
     return new _InheritedTheme(
       theme: this,
-      child: new IconTheme(
-        data: data.iconTheme,
-        child: child,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(ui.window, platform: data.platform),
+        child: new IconTheme(
+          data: data.iconTheme,
+          child: child,
+        ),
       ),
     );
   }
@@ -229,7 +234,10 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   Widget build(BuildContext context) {
     return new Theme(
       isMaterialAppTheme: widget.isMaterialAppTheme,
-      child: widget.child,
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(ui.window, platform: widget.data.platform),
+        child: widget.child,
+      ),
       data: _data.evaluate(animation)
     );
   }

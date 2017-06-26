@@ -166,7 +166,7 @@ class WidgetsApp extends StatefulWidget {
 
   /// The platform widgets should adapt to target.
   ///
-  /// Defaults to the current platform.
+  /// Defaults to [defaultTargetPlatform].
   final TargetPlatform platform;
 
   /// If true, forces the performance overlay to be visible in all instances.

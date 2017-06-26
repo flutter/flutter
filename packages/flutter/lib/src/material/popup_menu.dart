@@ -749,7 +749,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   Widget build(BuildContext context) {
     if (widget.child == null) {
       return new IconButton(
-        icon: _getIcon(Theme.of(context).platform),
+        icon: _getIcon(MediaQuery.of(context).platform),
         padding: widget.padding,
         tooltip: widget.tooltip,
         onPressed: showButtonMenu,

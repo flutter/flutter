@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
-    await tester.pumpWidget(const MediaQuery(
-      data: const MediaQueryData(textScaleFactor: 1.5),
+    await tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(textScaleFactor: 1.5),
       child: const Center(
         child: const Text('Hello')
       )
