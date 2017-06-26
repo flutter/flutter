@@ -27,7 +27,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
+      data: new MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
       child: new Scaffold(
         appBar: new AppBar(title: const Text('Title')),
         body: new Container(key: bodyKey)
@@ -38,7 +38,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 444.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
+      data: new MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
       child: new Scaffold(
         appBar: new AppBar(title: const Text('Title')),
         body: new Container(key: bodyKey),
@@ -53,7 +53,7 @@ void main() {
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(
+      data: new MediaQueryData(
         padding: const EdgeInsets.only(bottom: 700.0),
       ),
       child: new Scaffold(
@@ -65,7 +65,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(
+      data: new MediaQueryData(
         padding: const EdgeInsets.only(bottom: 500.0),
       ),
       child: new Scaffold(
@@ -76,7 +76,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 100.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(
+      data: new MediaQueryData(
         padding: const EdgeInsets.only(bottom: 580.0),
       ),
       child: new Scaffold(
@@ -188,7 +188,7 @@ void main() {
     return new MaterialApp(
       theme: new ThemeData(platform: platform),
       home: new MediaQuery(
-        data: const MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
+        data: new MediaQueryData(padding: const EdgeInsets.only(top: 25.0)), // status bar
         child: new Scaffold(
           body: new CustomScrollView(
             primary: true,
@@ -377,7 +377,7 @@ void main() {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
         new MediaQuery(
-          data: const MediaQueryData(),
+          data: new MediaQueryData(),
           child: new Scaffold(
             body: new Container(
               key: testKey,
@@ -393,7 +393,7 @@ void main() {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
         new MediaQuery(
-          data: const MediaQueryData(),
+          data: new MediaQueryData(),
           child: new Scaffold(
             body: new Container(
               key: testKey,
@@ -410,7 +410,7 @@ void main() {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
         new MediaQuery(
-          data: const MediaQueryData(),
+          data: new MediaQueryData(),
           child: new Scaffold(
             body: new Center(
               child: new Container(
@@ -428,7 +428,7 @@ void main() {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
         new MediaQuery(
-          data: const MediaQueryData(),
+          data: new MediaQueryData(),
           child: new Scaffold(
             body: new FlatButton(
               key: testKey,

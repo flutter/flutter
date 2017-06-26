@@ -722,7 +722,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   bool _shouldHandleBackGesture() {
     assert(mounted);
-    return Theme.of(context).platform == TargetPlatform.iOS && Navigator.canPop(context);
+    return MediaQuery.of(context).platform == TargetPlatform.iOS && Navigator.canPop(context);
   }
 
   void _handleDragStart(DragStartDetails details) {

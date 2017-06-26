@@ -36,12 +36,13 @@ class MediaQueryData {
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
   /// [Window].
-  const MediaQueryData({
+  MediaQueryData({
     this.size: Size.zero,
     this.devicePixelRatio: 1.0,
     this.textScaleFactor: 1.0,
-    this.padding: EdgeInsets.zero
-  });
+    this.padding: EdgeInsets.zero,
+    TargetPlatform platform,
+  }) : platform = platform ?? defaultTargetPlatform;
 
   /// Creates data for a media query based on the given window.
   ///
@@ -49,11 +50,12 @@ class MediaQueryData {
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.Window window)
+  MediaQueryData.fromWindow(ui.Window window, { TargetPlatform platform })
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = 1.0, // TODO(abarth): Read this value from window.
-      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio);
+      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      platform = platform ?? defaultTargetPlatform;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
   ///
@@ -77,6 +79,11 @@ class MediaQueryData {
   /// The padding around the edges of the media (e.g., the screen).
   final EdgeInsets padding;
 
+  /// The platform widgets should adapt to target.
+  ///
+  /// Defaults to [defaultTargetPlatform].
+  final TargetPlatform platform;
+
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
@@ -89,12 +96,14 @@ class MediaQueryData {
     double devicePixelRatio,
     double textScaleFactor,
     EdgeInsets padding,
+    TargetPlatform platform,
   }) {
     return new MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       padding: padding ?? this.padding,
+      platform: platform ?? this.platform
     );
   }
 
@@ -106,14 +115,15 @@ class MediaQueryData {
     return typedOther.size == size
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
-        && typedOther.padding == padding;
+        && typedOther.padding == padding
+        && typedOther.platform == platform;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding);
+  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, platform);
 
   @override
-  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, textScaleFactor: $textScaleFactor, padding: $padding)';
+  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, textScaleFactor: $textScaleFactor, padding: $padding, platform: ${describeEnum(platform ?? defaultTargetPlatform)}';
 }
 
 /// Establishes a subtree in which media queries resolve to the given data.

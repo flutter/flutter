@@ -371,7 +371,7 @@ class ThemeData {
 
   /// The platform the material widgets should adapt to target.
   ///
-  /// Defaults to the current platform.
+  /// Defaults to [defaultTargetPlatform].
   final TargetPlatform platform;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.

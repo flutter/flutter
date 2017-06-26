@@ -29,7 +29,7 @@ class MockClipboard {
 
 Widget overlay(Widget child) {
   return new MediaQuery(
-    data: const MediaQueryData(size: const Size(800.0, 600.0)),
+    data: new MediaQueryData(size: const Size(800.0, 600.0)),
     child: new Overlay(
       initialEntries: <OverlayEntry>[
         new OverlayEntry(
@@ -254,7 +254,7 @@ void main() {
 
     Widget builder() {
       return new MediaQuery(
-        data: const MediaQueryData(),
+        data: new MediaQueryData(),
         child: new Overlay(
           initialEntries: <OverlayEntry>[
             new OverlayEntry(

@@ -16,6 +16,32 @@ String shortHash(Object object) {
 String describeIdentity(Object object) =>
     '${object.runtimeType}#${shortHash(object)}';
 
+/// Returns a short description of an enum value.
+///
+/// Strips off the enum class name from the `enumEntry.toString()`.
+///
+/// ## Sample code
+///
+/// This example shows the result of calling `enumEntry.toString() and the
+/// result of calling describeEnum.
+///
+/// ```dart
+/// enum Day {
+///   monday, tuesday, wednesday, thursday, friday, saturday, sunday
+/// }
+///
+/// main() {
+///   assert(Day.monday.toString() == 'Day.monday');
+///   assert(describeEnum(Day.monday) == 'monday');
+/// }
+/// ```
+String describeEnum(Object enumEntry) {
+  final String description = enumEntry.toString();
+  final int indexOfDot = description.indexOf('.');
+  assert(indexOfDot != -1 && indexOfDot < description.length - 1);
+  return description.substring(indexOfDot + 1);
+}
+
 /// A mixin that helps dump string representations of trees.
 abstract class TreeDiagnosticsMixin {
   // This class is intended to be used as a mixin, and should not be

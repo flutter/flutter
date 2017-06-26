@@ -78,7 +78,7 @@ class _DropdownScrollBehavior extends ScrollBehavior {
   const _DropdownScrollBehavior();
 
   @override
-  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
+  TargetPlatform getPlatform(BuildContext context) => MediaQuery.of(context).platform;
 
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;

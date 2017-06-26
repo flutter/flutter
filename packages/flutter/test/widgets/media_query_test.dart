@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -43,5 +44,6 @@ void main() {
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
     expect(data.size, equals(ui.window.physicalSize / ui.window.devicePixelRatio));
+    expect(data.platform, equals(defaultTargetPlatform));
   });
 }

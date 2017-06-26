@@ -195,7 +195,7 @@ void main() {
     final TestOrientedBox box = new TestOrientedBox(key: boxKey);
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(400.0, 300.0)),
+      data: new MediaQueryData(size: const Size(400.0, 300.0)),
       child: box
     ));
 
@@ -204,7 +204,7 @@ void main() {
     expect(decoration.color, equals(const Color(0xFF00FF00)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(300.0, 400.0)),
+      data: new MediaQueryData(size: const Size(300.0, 400.0)),
       child: box
     ));
 

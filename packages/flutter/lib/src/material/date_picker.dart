@@ -610,7 +610,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   final GlobalKey _pickerKey = new GlobalKey();
 
   void _vibrate() {
-    switch (Theme.of(context).platform) {
+    switch (MediaQuery.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         HapticFeedback.vibrate();

@@ -55,7 +55,8 @@ class WidgetsApp extends StatefulWidget {
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
-    this.debugShowCheckedModeBanner: true
+    this.debugShowCheckedModeBanner: true,
+    this.platform,
   }) : assert(onGenerateRoute != null),
        assert(color != null),
        assert(navigatorObservers != null),
@@ -163,6 +164,11 @@ class WidgetsApp extends StatefulWidget {
   /// The list of observers for the [Navigator] created for this app.
   final List<NavigatorObserver> navigatorObservers;
 
+  /// The platform widgets should adapt to target.
+  ///
+  /// Defaults to [defaultTargetPlatform].
+  final TargetPlatform platform;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by `showPerformanceOverlay` observatory extension.
@@ -252,7 +258,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     }
 
     Widget result = new MediaQuery(
-      data: new MediaQueryData.fromWindow(ui.window),
+      data: new MediaQueryData.fromWindow(ui.window, platform: widget.platform),
       child: new LocaleQuery(
         data: _localeData,
         child: new Title(
