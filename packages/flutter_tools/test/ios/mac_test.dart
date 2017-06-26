@@ -116,6 +116,46 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
+    testUsingContext('xcodeMajorVersion returns major version', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMajorVersion, 8);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMajorVersion is null when version has unexpected format', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMajorVersion, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMinorVersion returns minor version', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMinorVersion, 3);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMinorVersion returns 0 when minor version is unspecified', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMinorVersion, 0);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMajorVersion is null when version has unexpected format', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMinorVersion, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
     testUsingContext('eulaSigned is false when clang is not installed', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
           .thenThrow(const ProcessException('/usr/bin/xcrun', const <String>['clang']));
