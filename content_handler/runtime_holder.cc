@@ -483,7 +483,7 @@ void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
   if (event->is_pointer()) {
     const mozart::PointerEventPtr& pointer = event->get_pointer();
     blink::PointerData pointer_data;
-    pointer_data.time_stamp = pointer->event_time;
+    pointer_data.time_stamp = pointer->event_time / 1000;
     pointer_data.change = GetChangeFromPointerEventPhase(pointer->phase);
     pointer_data.kind = GetKindFromPointerType(pointer->type);
     pointer_data.device = pointer->pointer_id;
