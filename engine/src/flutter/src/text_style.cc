@@ -21,7 +21,7 @@
 
 namespace txt {
 
-bool TextStyle::equals(TextStyle& other) {
+bool TextStyle::equals(const TextStyle& other) const {
   if (color != other.color)
     return false;
   if (font_weight != other.font_weight)
