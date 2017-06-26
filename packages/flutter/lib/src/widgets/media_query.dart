@@ -40,8 +40,9 @@ class MediaQueryData {
     this.size: Size.zero,
     this.devicePixelRatio: 1.0,
     this.textScaleFactor: 1.0,
-    this.padding: EdgeInsets.zero
-  });
+    this.padding: EdgeInsets.zero,
+    TargetPlatform platform
+  }) : _platform = platform;
 
   /// Creates data for a media query based on the given window.
   ///
@@ -49,11 +50,12 @@ class MediaQueryData {
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
   /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
-  MediaQueryData.fromWindow(ui.Window window)
+  MediaQueryData.fromWindow(ui.Window window, {TargetPlatform platform})
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = 1.0, // TODO(abarth): Read this value from window.
-      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio);
+      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      _platform = platform ?? defaultTargetPlatform;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
   ///
@@ -82,6 +84,13 @@ class MediaQueryData {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
 
+  final TargetPlatform _platform;
+
+  /// The platform widgets should adapt to target.
+  ///
+  /// Defaults to the current platform.
+  TargetPlatform get platform => _platform ?? defaultTargetPlatform;
+
   /// Creates a copy of this media query data but with the given fields replaced
   /// with the new values.
   MediaQueryData copyWith({
@@ -89,12 +98,14 @@ class MediaQueryData {
     double devicePixelRatio,
     double textScaleFactor,
     EdgeInsets padding,
+    TargetPlatform platform,
   }) {
     return new MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       padding: padding ?? this.padding,
+      platform: platform ?? this.platform
     );
   }
 
@@ -106,14 +117,15 @@ class MediaQueryData {
     return typedOther.size == size
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
-        && typedOther.padding == padding;
+        && typedOther.padding == padding
+        && typedOther.platform == platform;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding);
+  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, platform);
 
   @override
-  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, textScaleFactor: $textScaleFactor, padding: $padding)';
+  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, textScaleFactor: $textScaleFactor, padding: $padding, platform: ${describeEnum(platform)}';
 }
 
 /// Establishes a subtree in which media queries resolve to the given data.

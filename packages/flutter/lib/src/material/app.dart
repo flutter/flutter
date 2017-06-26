@@ -263,11 +263,6 @@ class MaterialApp extends StatefulWidget {
 
 class _MaterialScrollBehavior extends ScrollBehavior {
   @override
-  TargetPlatform getPlatform(BuildContext context) {
-    return Theme.of(context).platform;
-  }
-
-  @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
@@ -373,6 +368,7 @@ class _MaterialAppState extends State<MaterialApp> {
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
         showSemanticsDebugger: widget.showSemanticsDebugger,
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+        platform: theme.platform
       )
     );
 

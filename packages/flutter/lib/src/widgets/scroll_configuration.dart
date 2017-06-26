@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'media_query.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
 
@@ -23,7 +24,10 @@ class ScrollBehavior {
   /// The platform whose scroll physics should be implemented.
   ///
   /// Defaults to the current platform.
-  TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
+  TargetPlatform getPlatform(BuildContext context) {
+    return MediaQuery.of(context, nullOk: true)?.platform
+        ?? defaultTargetPlatform;
+  }
 
   /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///

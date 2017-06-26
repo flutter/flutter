@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show File, Platform;
+import 'dart:io' show File;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -35,12 +35,13 @@ export 'package:flutter/services.dart' show
 ///
 ///  * [ImageProvider], which has an example showing how this might be used.
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size size }) {
+  final MediaQueryData mediaQueryData = MediaQuery.of(context, nullOk: true);
   return new ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
+    devicePixelRatio: mediaQueryData?.devicePixelRatio ?? 1.0,
     // TODO(ianh): provide the locale
     size: size,
-    platform: Platform.operatingSystem,
+    platform: mediaQueryData?.platform ?? defaultTargetPlatform,
   );
 }
 
