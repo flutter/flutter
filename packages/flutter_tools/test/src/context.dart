@@ -221,7 +221,7 @@ class MockUsage implements Usage {
   void sendCommand(String command, { Map<String, String> parameters }) { }
 
   @override
-  void sendEvent(String category, String parameter) { }
+  void sendEvent(String category, String parameter, { Map<String, String> parameters }) { }
 
   @override
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }
