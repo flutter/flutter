@@ -9,6 +9,8 @@ import 'base/port_scanner.dart';
 import 'device.dart';
 import 'globals.dart';
 
+const Duration kDiscoveryTimeout = const Duration(minutes: 3);
+
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
 class ProtocolDiscovery {
@@ -22,9 +24,9 @@ class ProtocolDiscovery {
     assert(logReader != null);
     assert(portForwarder == null || defaultHostPort != null);
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
-    _timer = new Timer(const Duration(seconds: 60), () {
+    _timer = new Timer(kDiscoveryTimeout, () {
       _stopScrapingLogs();
-      _completer.completeError(new ToolExit('Timeout while attempting to retrieve URL for $serviceName'));
+      _completer.completeError(new ToolExit('Timeout attempting to discover $serviceName URL'));
     });
   }
 
@@ -34,6 +36,7 @@ class ProtocolDiscovery {
     int hostPort,
   }) {
     const String kObservatoryService = 'Observatory';
+
     return new ProtocolDiscovery._(
       logReader, kObservatoryService,
       portForwarder: portForwarder,
@@ -48,6 +51,7 @@ class ProtocolDiscovery {
     int hostPort,
   }) {
     const String kDiagnosticService = 'Diagnostic server';
+
     return new ProtocolDiscovery._(
       logReader, kDiagnosticService,
       portForwarder: portForwarder,
@@ -108,8 +112,8 @@ class ProtocolDiscovery {
       int hostPort = this.hostPort ?? await portScanner.findPreferredPort(defaultHostPort);
       hostPort = await portForwarder
           .forward(devicePort, hostPort: hostPort)
-          .timeout(const Duration(seconds: 60), onTimeout: () {
-        throwToolExit('Timeout while atempting to foward device port $devicePort for $serviceName');
+          .timeout(kDiscoveryTimeout, onTimeout: () {
+        throwToolExit('Timeout fowarding port $devicePort for $serviceName');
       });
       printTrace('Forwarded host port $hostPort to device port $devicePort for $serviceName');
       hostUri = deviceUri.replace(port: hostPort);
