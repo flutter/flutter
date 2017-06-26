@@ -15,16 +15,20 @@ import 'file_system.dart';
 import 'platform.dart';
 
 bool get isRunningOnBot {
-  // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-  // https://www.appveyor.com/docs/environment-variables/
-  // CHROME_HEADLESS is one property set on Flutter's Chrome Infra bots.
   return
-    platform.environment['TRAVIS'] == 'true' ||
     platform.environment['BOT'] == 'true' ||
+
+    // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+    platform.environment['TRAVIS'] == 'true' ||
     platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
+    platform.environment.containsKey('CI') || // Travis and AppVeyor
+
+    // https://www.appveyor.com/docs/environment-variables/
+    platform.environment.containsKey('APPVEYOR') ||
+
+    // Properties on Flutter's Chrome Infra bots.
     platform.environment['CHROME_HEADLESS'] == '1' ||
-    platform.environment['APPVEYOR'] == 'true' ||
-    platform.environment['CI'] == 'true';
+    platform.environment.containsKey('BUILDBOT_BUILDERNAME');
 }
 
 String hex(List<int> bytes) {
