@@ -220,7 +220,7 @@ abstract class CachedArtifact {
     if (location.existsSync())
       location.deleteSync(recursive: true);
     location.createSync(recursive: true);
-    return updateInner().then<Null>((Null value) {
+    return updateInner().then<Null>((_) {
       cache.setStampFor(name, version);
     });
   }
@@ -232,18 +232,20 @@ abstract class CachedArtifact {
   Future<Null> updateInner();
 }
 
+/// A cached artifact containing fonts used for Material Design.
 class MaterialFonts extends CachedArtifact {
   MaterialFonts(Cache cache): super('material_fonts', cache);
 
   @override
   Future<Null> updateInner() {
     final Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
-    return _downloadZipArchive(Uri.parse(version), location).then<Null>((Null value) {
+    return _downloadZipArchive(Uri.parse(version), location).then<Null>((_) {
       status.stop();
     }).whenComplete(status.cancel);
   }
 }
 
+/// A cached artifact containing the Flutter engine binaries.
 class FlutterEngine extends CachedArtifact {
   FlutterEngine(Cache cache): super('engine', cache);
 
@@ -368,12 +370,13 @@ class FlutterEngine extends CachedArtifact {
 
   Future<Null> _downloadItem(String message, String url, Directory dest) {
     final Status status = logger.startProgress(message, expectSlowOperation: true);
-    return _downloadZipArchive(Uri.parse(url), dest).then<Null>((Null value) {
+    return _downloadZipArchive(Uri.parse(url), dest).then<Null>((_) {
       status.stop();
     }).whenComplete(status.cancel);
   }
 }
 
+/// A cached artifact containing Gradle Wrapper scripts and binaries.
 class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache): super('gradle_wrapper', cache);
 
@@ -383,7 +386,7 @@ class GradleWrapper extends CachedArtifact {
 
     final String url = 'https://android.googlesource.com'
         '/platform/tools/base/+archive/$version/templates/gradle/wrapper.tgz';
-    await _downloadZippedTarball(Uri.parse(url), location).then<Null>((Null value) {
+    await _downloadZippedTarball(Uri.parse(url), location).then<Null>((_) {
       // Delete property file, allowing templates to provide it.
       fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
       status.stop();
