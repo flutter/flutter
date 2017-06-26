@@ -78,7 +78,7 @@ void main() {
         '     │   color: Color(0x7f0000ff)\n'
         '     │ configuration: ImageConfiguration(bundle:\n'
         '     │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '     │   macos)\n'
+        '     │   android)\n'
         '     │\n'
         '     └─child: RenderDecoratedBox#00000\n'
         '       │ creator: DecoratedBox ← DecoratedBox ← ConstrainedBox ← Padding ←\n'
@@ -90,7 +90,7 @@ void main() {
         '       │   color: Color(0xff00ff00)\n'
         '       │ configuration: ImageConfiguration(bundle:\n'
         '       │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '       │   macos)\n'
+        '       │   android)\n'
         '       │\n'
         '       └─child: RenderPadding#00000\n'
         '         │ creator: Padding ← DecoratedBox ← DecoratedBox ← ConstrainedBox ←\n'
@@ -129,7 +129,7 @@ void main() {
         '                   color: Color(0xffffff00)\n'
         '                 configuration: ImageConfiguration(bundle:\n'
         '                   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        '                   macos)\n',
+        '                   android)\n',
       ),
     );
   });

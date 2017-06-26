@@ -80,7 +80,7 @@ void main() {
         ' │   color: Color(0xff0000ff)\n'
         ' │ configuration: ImageConfiguration(bundle:\n'
         ' │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'
-        ' │   macos)\n'
+        ' │   android)\n'
         ' │\n'
         ' └─child: RenderLimitedBox#00000\n'
         '   │ creator: LimitedBox ← DecoratedBox ← Container ←\n'
