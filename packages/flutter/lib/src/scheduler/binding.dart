@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
+import 'dart:developer' as developer;
 import 'dart:ui' as ui show window;
 import 'dart:ui' show VoidCallback;
 
@@ -551,6 +551,7 @@ abstract class SchedulerBinding extends BindingBase {
   Duration _currentFrameTimeStamp;
 
   int _debugFrameNumber = 0;
+  Stopwatch _frameStopwatch;
   String _debugBanner;
 
   /// Called by the engine to prepare the framework to produce a new frame.
@@ -577,7 +578,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration rawTimeStamp) {
-    Timeline.startSync('Frame');
+    developer.Timeline.startSync('Frame');
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
     if (rawTimeStamp != null)
@@ -585,6 +586,9 @@ abstract class SchedulerBinding extends BindingBase {
 
     assert(() {
       _debugFrameNumber += 1;
+      _frameStopwatch ??= new Stopwatch();
+      _frameStopwatch.reset();
+      _frameStopwatch.start();
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
         final StringBuffer frameTimeStampDescription = new StringBuffer();
         if (rawTimeStamp != null) {
@@ -603,7 +607,7 @@ abstract class SchedulerBinding extends BindingBase {
     _hasScheduledFrame = false;
     try {
       // TRANSIENT FRAME CALLBACKS
-      Timeline.startSync('Animate');
+      developer.Timeline.startSync('Animate');
       _schedulerPhase = SchedulerPhase.transientCallbacks;
       final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
       _transientCallbacks = <int, _FrameCallbackEntry>{};
@@ -628,7 +632,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// useful when working with frame callbacks.
   void handleDrawFrame() {
     assert(_schedulerPhase == SchedulerPhase.midFrameMicrotasks);
-    Timeline.finishSync(); // end the "Animate" phase
+    developer.Timeline.finishSync(); // end the "Animate" phase
     try {
       // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
@@ -644,14 +648,20 @@ abstract class SchedulerBinding extends BindingBase {
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
-      _currentFrameTimeStamp = null;
-      Timeline.finishSync();
+      developer.Timeline.finishSync(); // end the Frame
       assert(() {
+        _frameStopwatch.stop();
+        developer.postEvent('Flutter.Frame', <String, dynamic>{
+          'frameNumber': _debugFrameNumber,
+          'startTime': _currentFrameTimeStamp.inMilliseconds,
+          'elapsed': _frameStopwatch.elapsedMicroseconds
+        });
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner.length);
         _debugBanner = null;
         return true;
       });
+      _currentFrameTimeStamp = null;
     }
 
     // All frame-related callbacks have been executed. Run lower-priority tasks.
