@@ -653,7 +653,7 @@ abstract class SchedulerBinding extends BindingBase {
         _frameStopwatch.stop();
         developer.postEvent('Flutter.Frame', <String, dynamic>{
           'frameNumber': _debugFrameNumber,
-          'startTime': _currentFrameTimeStamp.inMilliseconds,
+          'startTime': _currentFrameTimeStamp.inMicroseconds,
           'elapsed': _frameStopwatch.elapsedMicroseconds
         });
         if (debugPrintEndFrameBanner)
