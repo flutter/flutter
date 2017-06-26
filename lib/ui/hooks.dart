@@ -24,27 +24,30 @@ void _updateWindowMetrics(double devicePixelRatio,
     .._physicalSize = new Size(width, height)
     .._padding = new WindowPadding._(
       top: top, right: right, bottom: bottom, left: left);
-  if (window.onMetricsChanged != null)
-    window.onMetricsChanged();
+  _invoke(window.onMetricsChanged, window._onMetricsChangedZone);
 }
 
 void _updateLocale(String languageCode, String countryCode) {
   window._locale = new Locale(languageCode, countryCode);
-  if (window.onLocaleChanged != null)
-    window.onLocaleChanged();
+  _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
 }
 
 void _updateSemanticsEnabled(bool enabled) {
   window._semanticsEnabled = enabled;
-  if (window.onSemanticsEnabledChanged != null)
-    window.onSemanticsEnabledChanged();
+  _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
 }
 
 void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
   if (window.onPlatformMessage != null) {
-    window.onPlatformMessage(name, data, (ByteData responseData) {
-      window._respondToPlatformMessage(responseId, responseData);
-    });
+    _invoke3<String, ByteData, PlatformMessageResponseCallback>(
+      window.onPlatformMessage,
+      window._onPlatformMessageZone,
+      name,
+      data,
+      (ByteData responseData) {
+        window._respondToPlatformMessage(responseId, responseData);
+      },
+    );
   } else {
     window._respondToPlatformMessage(responseId, null);
   }
@@ -52,22 +55,82 @@ void _dispatchPlatformMessage(String name, ByteData data, int responseId) {
 
 void _dispatchPointerDataPacket(ByteData packet) {
   if (window.onPointerDataPacket != null)
-    window.onPointerDataPacket(_unpackPointerDataPacket(packet));
+    _invoke1<PointerDataPacket>(window.onPointerDataPacket, window._onPointerDataPacketZone, _unpackPointerDataPacket(packet));
 }
 
 void _dispatchSemanticsAction(int id, int action) {
-  if (window.onSemanticsAction != null)
-    window.onSemanticsAction(id, SemanticsAction.values[action]);
+  _invoke2<int, SemanticsAction>(
+    window.onSemanticsAction,
+    window._onSemanticsActionZone,
+    id,
+    SemanticsAction.values[action],
+  );
 }
 
 void _beginFrame(int microseconds) {
-  if (window.onBeginFrame != null)
-    window.onBeginFrame(new Duration(microseconds: microseconds));
+  _invoke1<Duration>(window.onBeginFrame, window._onBeginFrameZone, new Duration(microseconds: microseconds));
 }
 
 void _drawFrame() {
-  if (window.onDrawFrame != null)
-    window.onDrawFrame();
+  _invoke(window.onDrawFrame, window._onDrawFrameZone);
+}
+
+/// Invokes [callback] inside the given [zone].
+void _invoke(void callback(), Zone zone) {
+  if (callback == null)
+    return;
+
+  assert(zone != null);
+
+  if (identical(zone, Zone.current)) {
+    callback();
+  } else {
+    zone.runGuarded(callback);
+  }
+}
+
+/// Invokes [callback] inside the given [zone] passing it [arg].
+void _invoke1<A>(void callback(A a), Zone zone, A arg) {
+  if (callback == null)
+    return;
+
+  assert(zone != null);
+
+  if (identical(zone, Zone.current)) {
+    callback(arg);
+  } else {
+    zone.runUnaryGuarded<Null, A>(callback, arg);
+  }
+}
+
+/// Invokes [callback] inside the given [zone] passing it [arg1] and [arg2].
+void _invoke2<A1, A2>(void callback(A1 a1, A2 a2), Zone zone, A1 arg1, A2 arg2) {
+  if (callback == null)
+    return;
+
+  assert(zone != null);
+
+  if (identical(zone, Zone.current)) {
+    callback(arg1, arg2);
+  } else {
+    zone.runBinaryGuarded<Null, A1, A2>(callback, arg1, arg2);
+  }
+}
+
+/// Invokes [callback] inside the given [zone] passing it [arg1], [arg2] and [arg3].
+void _invoke3<A1, A2, A3>(void callback(A1 a1, A2 a2, A3 a3), Zone zone, A1 arg1, A2 arg2, A3 arg3) {
+  if (callback == null)
+    return;
+
+  assert(zone != null);
+
+  if (identical(zone, Zone.current)) {
+    callback(arg1, arg2, arg3);
+  } else {
+    zone.runGuarded(() {
+      callback(arg1, arg2, arg3);
+    });
+  }
 }
 
 // If this value changes, update the encoding code in the following files:

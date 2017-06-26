@@ -210,7 +210,16 @@ class Window {
   /// [physicalSize], or [padding] values change, for example when the device is
   /// rotated or when the application is resized (e.g. when showing applications
   /// side-by-side on Android).
-  VoidCallback onMetricsChanged;
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  VoidCallback get onMetricsChanged => _onMetricsChanged;
+  VoidCallback _onMetricsChanged;
+  Zone _onMetricsChangedZone;
+  set onMetricsChanged(VoidCallback callback) {
+    _onMetricsChanged = callback;
+    _onMetricsChangedZone = Zone.current;
+  }
 
   /// The system-reported locale.
   ///
@@ -228,11 +237,20 @@ class Window {
 
   /// A callback that is invoked whenever [locale] changes value.
   ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
   /// See also:
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this callback is invoked.
-  VoidCallback onLocaleChanged;
+  VoidCallback get onLocaleChanged => _onLocaleChanged;
+  VoidCallback _onLocaleChanged;
+  Zone _onLocaleChangedZone;
+  set onLocaleChanged(VoidCallback callback) {
+    _onLocaleChanged = callback;
+    _onLocaleChangedZone = Zone.current;
+  }
 
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
@@ -244,34 +262,61 @@ class Window {
   /// after draining any microtasks (e.g. completions of any [Future]s) queued
   /// by the [onBeginFrame] handler.
   ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
   /// See also:
   ///
   ///  * [SchedulerBinding], the Flutter framework class which manages the
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  FrameCallback onBeginFrame;
+  FrameCallback get onBeginFrame => _onBeginFrame;
+  FrameCallback _onBeginFrame;
+  Zone _onBeginFrameZone;
+  set onBeginFrame(FrameCallback callback) {
+    _onBeginFrame = callback;
+    _onBeginFrameZone = Zone.current;
+  }
 
   /// A callback that is invoked for each frame after [onBeginFrame] has
   /// completed and after the microtask queue has been drained. This can be
   /// used to implement a second phase of frame rendering that happens
   /// after any deferred work queued by the [onBeginFrame] phase.
   ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
   /// See also:
   ///
   ///  * [SchedulerBinding], the Flutter framework class which manages the
   ///    scheduling of frames.
   ///  * [RendererBinding], the Flutter framework class which manages layout and
   ///    painting.
-  VoidCallback onDrawFrame;
+  VoidCallback get onDrawFrame => _onDrawFrame;
+  VoidCallback _onDrawFrame;
+  Zone _onDrawFrameZone;
+  set onDrawFrame(VoidCallback callback) {
+    _onDrawFrame = callback;
+    _onDrawFrameZone = Zone.current;
+  }
 
   /// A callback that is invoked when pointer data is available.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
   ///
   /// See also:
   ///
   ///  * [GestureBinding], the Flutter framework class which manages pointer
   ///    events.
-  PointerDataPacketCallback onPointerDataPacket;
+  PointerDataPacketCallback get onPointerDataPacket => _onPointerDataPacket;
+  PointerDataPacketCallback _onPointerDataPacket;
+  Zone _onPointerDataPacketZone;
+  set onPointerDataPacket(PointerDataPacketCallback callback) {
+    _onPointerDataPacket = callback;
+    _onPointerDataPacketZone = Zone.current;
+  }
 
   /// The route or path that the operating system requested when the application
   /// was launched.
@@ -322,14 +367,32 @@ class Window {
   bool _semanticsEnabled = false;
 
   /// A callback that is invoked when the value of [semanticsEnabled] changes.
-  VoidCallback onSemanticsEnabledChanged;
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  VoidCallback get onSemanticsEnabledChanged => _onSemanticsEnabledChanged;
+  VoidCallback _onSemanticsEnabledChanged;
+  Zone _onSemanticsEnabledChangedZone;
+  set onSemanticsEnabledChanged(VoidCallback callback) {
+    _onSemanticsEnabledChanged = callback;
+    _onSemanticsEnabledChangedZone = Zone.current;
+  }
 
   /// A callback that is invoked whenever the user requests an action to be
   /// performed.
   ///
   /// This callback is used when the user expresses the action they wish to
   /// perform based on the semantics supplied by [updateSemantics].
-  SemanticsActionCallback onSemanticsAction;
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  SemanticsActionCallback get onSemanticsAction => _onSemanticsAction;
+  SemanticsActionCallback _onSemanticsAction;
+  Zone _onSemanticsActionZone;
+  set onSemanticsAction(SemanticsActionCallback callback) {
+    _onSemanticsAction = callback;
+    _onSemanticsActionZone = Zone.current;
+  }
 
   /// Change the retained semantics data about this window.
   ///
@@ -346,10 +409,13 @@ class Window {
   /// `data` parameter contains the message payload and is typically UTF-8
   /// encoded JSON but can be arbitrary data. If the plugin replies to the
   /// message, `callback` will be called with the response.
+  ///
+  /// The framework invokes [callback] in the same zone in which this method
+  /// was called.
   void sendPlatformMessage(String name,
                            ByteData data,
                            PlatformMessageResponseCallback callback) {
-    _sendPlatformMessage(name, callback, data);
+    _sendPlatformMessage(name, _zonedPlatformMessageResponseCallback(callback), data);
   }
   void _sendPlatformMessage(String name,
                             PlatformMessageResponseCallback callback,
@@ -365,11 +431,34 @@ class Window {
   /// Message handlers must call the function given in the `callback` parameter.
   /// If the handler does not need to respond, the handler should pass `null` to
   /// the callback.
-  PlatformMessageCallback onPlatformMessage;
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  PlatformMessageCallback get onPlatformMessage => _onPlatformMessage;
+  PlatformMessageCallback _onPlatformMessage;
+  Zone _onPlatformMessageZone;
+  set onPlatformMessage(PlatformMessageCallback callback) {
+    _onPlatformMessage = callback;
+    _onPlatformMessageZone = Zone.current;
+  }
 
   /// Called by [_dispatchPlatformMessage].
   void _respondToPlatformMessage(int responseId, ByteData data)
       native "Window_respondToPlatformMessage";
+
+  /// Wraps the given [callback] in another callback that ensures that the
+  /// original callback is called in the zone it was registered in.
+  static PlatformMessageResponseCallback _zonedPlatformMessageResponseCallback(PlatformMessageResponseCallback callback) {
+    if (callback == null)
+      return null;
+
+    // Store the zone in which the callback is being registered.
+    final Zone registrationZone = Zone.current;
+
+    return (ByteData data) {
+      registrationZone.runUnaryGuarded(callback, data);
+    };
+  }
 }
 
 /// The [Window] singleton. This object exposes the size of the display, the
