@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'feedback_tester.dart';
+
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -1501,6 +1503,75 @@ void main() {
 
       scrollableState = tester.firstState(find.byType(Scrollable));
       expect(scrollableState.position.pixels, isNot(equals(0.0)));
+    }
+  );
+
+  testWidgets('haptic feedback', (WidgetTester tester) async {
+    final FeedbackTester feedback = new FeedbackTester();
+    final TextEditingController controller = new TextEditingController();
+
+    Widget builder() {
+      return overlay(new Center(
+        child: new Material(
+          child: new Container(
+            width: 100.0,
+            child: new TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ));
+    }
+
+    await tester.pumpWidget(builder());
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 0);
+    expect(feedback.hapticCount, 0);
+
+    await tester.longPress(find.byType(TextField));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 0);
+    expect(feedback.hapticCount, 1);
+
+    feedback.dispose();
+  });
+
+  testWidgets(
+    'Text field drops selection when losing focus',
+    (WidgetTester tester) async {
+      final Key key1 = new UniqueKey();
+      final TextEditingController controller1 = new TextEditingController();
+      final Key key2 = new UniqueKey();
+
+      Widget builder() {
+        return overlay(new Center(
+          child: new Material(
+            child: new Column(
+              children: <Widget>[
+                new TextField(
+                  key: key1,
+                  controller: controller1
+                ),
+                new TextField(key: key2),
+              ],
+            ),
+          ),
+        ));
+      }
+
+      await tester.pumpWidget(builder());
+      await tester.tap(find.byKey(key1));
+      await tester.enterText(find.byKey(key1), 'abcd');
+      await tester.pump();
+      controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
+      await tester.pump();
+      expect(controller1.selection, isNot(equals(TextRange.empty)));
+
+      await tester.tap(find.byKey(key2));
+      await tester.pump();
+      expect(controller1.selection, equals(TextRange.empty));
     }
   );
 }

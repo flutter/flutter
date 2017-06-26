@@ -152,7 +152,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
           results.add(deviceID);
         }
       } else {
-        throw 'Failed to parse device from adb output: $line';
+        throw 'Failed to parse device from adb output: "$line"';
       }
     }
 
@@ -259,6 +259,7 @@ class AndroidDevice implements Device {
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
     final String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
     final Match match = new RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
+    assert(match != null, 'could not parse dumpsys meminfo output');
     return <String, dynamic>{
       'total_kb': int.parse(match.group(1)),
     };

@@ -317,8 +317,8 @@ class RunCommand extends RunCommandBase {
     }
 
     DateTime appStartedTime;
-    // Sync completer so the completing agent attaching to the resident doesn't 
-    // need to know about analytics. 
+    // Sync completer so the completing agent attaching to the resident doesn't
+    // need to know about analytics.
     //
     // Do not add more operations to the future.
     final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync();
@@ -338,7 +338,7 @@ class RunCommand extends RunCommandBase {
       analyticsParameters: <String>[
         hotMode ? 'hot' : 'cold',
         getModeName(getBuildMode()),
-        devices.length == 1 
+        devices.length == 1
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple',
         devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null

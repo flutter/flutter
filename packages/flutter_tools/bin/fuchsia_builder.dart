@@ -15,6 +15,7 @@ import '../lib/src/base/io.dart';
 import '../lib/src/base/logger.dart';
 import '../lib/src/base/os.dart';
 import '../lib/src/base/platform.dart';
+import '../lib/src/base/terminal.dart';
 import '../lib/src/cache.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
@@ -51,6 +52,7 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(Config, () => new Config());
     context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
     context.putIfAbsent(Usage, () => new Usage());
+    context.putIfAbsent(AnsiTerminal, () => new AnsiTerminal());
     return run(args);
   });
 }

@@ -4,12 +4,12 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:math';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../device.dart';
@@ -70,6 +70,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   final String description = 'Hot reload on Fuchsia.';
 
   String _fuchsiaRoot;
+  String _buildType;
   String _projectRoot;
   String _projectName;
   String _binaryName;
@@ -143,9 +144,24 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return _vmServiceCache[port];
   }
 
+  Future<bool> _checkPort(int port) async {
+    bool connected = true;
+    Socket s;
+    try {
+      s = await Socket.connect("$_address", port);
+    } catch (_) {
+      connected = false;
+    }
+    if (s != null)
+      await s.close();
+    return connected;
+  }
+
   Future<List<FlutterView>> _getViews(List<int> ports) async {
     final List<FlutterView> views = <FlutterView>[];
     for (int port in ports) {
+      if (!await _checkPort(port))
+        continue;
       final VMService vmService = _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
@@ -263,6 +279,10 @@ class FuchsiaReloadCommand extends FlutterCommand {
     if (_address == null)
       throwToolExit('Give the address of the device running Fuchsia with --address.');
 
+    _buildType = argResults['build-type'];
+    if (_buildType == null)
+      throwToolExit('Give the build type with --build-type.');
+
     _list = argResults['list'];
     if (_list) {
       // For --list, we only need the device address and the Fuchsia tree root.
@@ -286,11 +306,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
     if (!_fileExists(_target))
       throwToolExit('Couldn\'t find application entry point at $_target.');
 
-    final String buildType = argResults['build-type'];
-    if (buildType == null)
-      throwToolExit('Give the build type with --build-type.');
     final String packagesFileName = '${_projectName}_dart_package.packages';
-    _dotPackagesPath = '$_fuchsiaRoot/out/$buildType/gen/$_projectRoot/$packagesFileName';
+    _dotPackagesPath = '$_fuchsiaRoot/out/$_buildType/gen/$_projectRoot/$packagesFileName';
     if (!_fileExists(_dotPackagesPath))
       throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
 
@@ -326,7 +343,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
   }
 
   Future<List<int>> _getServicePorts() async {
-    final FuchsiaDeviceCommandRunner runner = new FuchsiaDeviceCommandRunner(_fuchsiaRoot);
+    final FuchsiaDeviceCommandRunner runner =
+        new FuchsiaDeviceCommandRunner(_address, _fuchsiaRoot, _buildType);
     final List<String> lsOutput = await runner.run('ls /tmp/dart.services');
     final List<int> ports = <int>[];
     for (String s in lsOutput) {
@@ -354,41 +372,26 @@ class FuchsiaReloadCommand extends FlutterCommand {
 }
 
 
-// TODO(zra): When Fuchsia has ssh, this should be changed to use that instead.
 class FuchsiaDeviceCommandRunner {
+  // TODO(zra): Get rid of _address and instead use
+  // $_fuchsiaRoot/out/build-magenta/tools/netaddr --fuchsia
+  final String _address;
+  final String _buildType;
   final String _fuchsiaRoot;
-  final Random _rng = new Random(new DateTime.now().millisecondsSinceEpoch);
 
-  FuchsiaDeviceCommandRunner(this._fuchsiaRoot);
+  FuchsiaDeviceCommandRunner(this._address, this._fuchsiaRoot, this._buildType);
 
   Future<List<String>> run(String command) async {
-    final int tag = _rng.nextInt(999999);
-    const String kNetRunCommand = 'out/build-magenta/tools/netruncmd';
-    final String netruncmd = fs.path.join(_fuchsiaRoot, kNetRunCommand);
-    const String kNetCP = 'out/build-magenta/tools/netcp';
-    final String netcp = fs.path.join(_fuchsiaRoot, kNetCP);
-    final String remoteStdout = '/tmp/netruncmd.$tag';
-    final String localStdout = '${fs.systemTempDirectory.path}/netruncmd.$tag';
-    final String redirectedCommand = '$command > $remoteStdout';
-    // Run the command with output directed to a tmp file.
-    ProcessResult result =
-        await Process.run(netruncmd, <String>[':', redirectedCommand]);
-    if (result.exitCode != 0)
+    final String config = '$_fuchsiaRoot/out/$_buildType/ssh-keys/ssh_config';
+    final List<String> args = <String>['-F', config, _address, command];
+    printTrace('ssh ${args.join(' ')}');
+    final ProcessResult result =
+        await processManager.run(<String>['ssh', '-F', config, _address, command]);
+    if (result.exitCode != 0) {
+      printStatus("Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}");
       return null;
-    // Copy that file to the local filesystem.
-    result = await Process.run(netcp, <String>[':$remoteStdout', localStdout]);
-    // Try to delete the remote file. Don't care about the result;
-    Process.run(netruncmd, <String>[':', 'rm $remoteStdout']);
-    if (result.exitCode != 0)
-      return null;
-    // Read the local file.
-    final File f = fs.file(localStdout);
-    List<String> lines;
-    try {
-      lines = await f.readAsLines();
-    } finally {
-      f.delete();
     }
-    return lines;
+    printTrace(result.stdout);
+    return result.stdout.split('\n');
   }
 }

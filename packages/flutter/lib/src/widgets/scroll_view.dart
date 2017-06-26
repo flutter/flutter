@@ -420,6 +420,40 @@ abstract class BoxScrollView extends ScrollView {
 /// )
 /// ```
 ///
+/// ## Transitioning to [CustomScrollView]
+///
+/// A [ListView] is basically a [CustomScrollView] with a single [SliverList] in
+/// its [slivers] property.
+///
+/// If [ListView] is no longer sufficient, for example because the scroll view
+/// is to have both a list and a grid, or because the list is to be combined
+/// with a [SliverAppBar], etc, it is straight-forward to port code from using
+/// [ListView] to using [CustomScrollView] directly.
+///
+/// The [key], [scrollDirection], [reverse], [controller], [primary], [physics],
+/// and [shrinkWrap] properties on [ListView] map directly to the identically
+/// named properties on [CustomScrollView].
+///
+/// The [CustomScrollView.slivers] property should be a list containing either a
+/// [SliverList] or a [SliverFixedExtentList]; the former if [itemExtent] on the
+/// [ListView] was null, and the latter if [itemExtent] was not null.
+///
+/// The [childrenDelegate] property on [ListView] corresponds to the
+/// [SliverList.delegate] (or [SliverFixedExtentList.delegate]) property. The
+/// [new ListView] constructor's `children` argument corresponds to the
+/// [childrenDelegate] being a [SliverChildListDelegate] with that same
+/// argument. The [new ListView.builder] constructor's `itemBuilder` and
+/// `childCount` arguments correspond to the [childrenDelegate] being a
+/// [SliverChildBuilderDelegate] with the matching arguments.
+///
+/// The [padding] property corresponds to having a [SliverPadding] in the
+/// [CustomScrollView.slivers] property instead of the list itself, and having
+/// the [SliverList] instead be a child of the [SliverPadding].
+///
+/// Once code has been ported to use [CustomScrollView], other slivers, such as
+/// [SliverGrid] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
+/// list.
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -438,6 +472,9 @@ class ListView extends BoxScrollView {
   /// children because constructing the [List] requires doing work for every
   /// child that could possibly be displayed in the list view instead of just
   /// those children that are actually visible.
+  ///
+  /// It is usually more efficient to create children on demand using [new
+  /// ListView.builder].
   ListView({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -466,11 +503,18 @@ class ListView extends BoxScrollView {
   /// number of children because the builder is called only for those children
   /// that are actually visible.
   ///
-  /// Providing a non-null [itemCount] improves the ability of the [ListView] to
+  /// Providing a non-null `itemCount` improves the ability of the [ListView] to
   /// estimate the maximum scroll extent.
   ///
-  /// [itemBuilder] will be called only with indices greater than or equal to
-  /// zero and less than [itemCount].
+  /// The `itemBuilder` callback will be called only with indices greater than
+  /// or equal to zero and less than `itemCount`.
+  ///
+  /// The `itemBuilder` should actually create the widget instances when called.
+  /// Avoid using a builder that returns a previously-constructed widget; if the
+  /// list view's children are created in advance, or all at once when the
+  /// [ListView] itself is created, it is more efficient to use [new ListView].
+  /// Even more efficient, however, is to create the instances on demand using
+  /// this constructor's `itemBuilder` callback.
   ListView.builder({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -575,6 +619,47 @@ class ListView extends BoxScrollView {
 ///
 /// To create a linear array of children, use a [ListView].
 ///
+/// ## Transitioning to [CustomScrollView]
+///
+/// A [GridView] is basically a [CustomScrollView] with a single [SliverGrid] in
+/// its [slivers] property.
+///
+/// If [GridView] is no longer sufficient, for example because the scroll view
+/// is to have both a grid and a list, or because the grid is to be combined
+/// with a [SliverAppBar], etc, it is straight-forward to port code from using
+/// [GridView] to using [CustomScrollView] directly.
+///
+/// The [key], [scrollDirection], [reverse], [controller], [primary], [physics],
+/// and [shrinkWrap] properties on [GridView] map directly to the identically
+/// named properties on [CustomScrollView].
+///
+/// The [CustomScrollView.slivers] property should be a list containing just a
+/// [SliverGrid].
+///
+/// The [childrenDelegate] property on [GridView] corresponds to the
+/// [SliverGrid.delegate] property, and the [gridDelegate] property on the
+/// [GridView] corresponds to the [SliverGrid.gridDelegate] property.
+///
+/// The [new GridView], [new GridView.count], and [new GridView.extent]
+/// constructors' `children` arguments correspond to the [childrenDelegate]
+/// being a [SliverChildListDelegate] with that same argument. The [new
+/// GridView.builder] constructor's `itemBuilder` and `childCount` arguments
+/// correspond to the [childrenDelegate] being a [SliverChildBuilderDelegate]
+/// with the matching arguments.
+///
+/// The [new GridView.count] and [new GridView.extent] constructors create
+/// custom grid delegates, and have equivalently named constructors on
+/// [SliverGrid] to ease the transition: [new SliverGrid.count] and [new
+/// SliverGrid.extent] respectively.
+///
+/// The [padding] property corresponds to having a [SliverPadding] in the
+/// [CustomScrollView.slivers] property instead of the grid itself, and having
+/// the [SliverGrid] instead be a child of the [SliverPadding].
+///
+/// Once code has been ported to use [CustomScrollView], other slivers, such as
+/// [SliverGrid] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
+/// list.
+///
 /// See also:
 ///
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
@@ -623,11 +708,11 @@ class GridView extends BoxScrollView {
   /// number of children because the builder is called only for those children
   /// that are actually visible.
   ///
-  /// Providing a non-null [itemCount] improves the ability of the [GridView] to
+  /// Providing a non-null `itemCount` improves the ability of the [GridView] to
   /// estimate the maximum scroll extent.
   ///
-  /// [itemBuilder] will be called only with indices greater than or equal to
-  /// zero and less than [itemCount].
+  /// `itemBuilder` will be called only with indices greater than or equal to
+  /// zero and less than `itemCount`.
   ///
   /// The [gridDelegate] argument must not be null.
   GridView.builder({
@@ -690,6 +775,10 @@ class GridView extends BoxScrollView {
   /// the cross axis.
   ///
   /// Uses a [SliverGridDelegateWithFixedCrossAxisCount] as the [gridDelegate].
+  ///
+  /// See also:
+  ///
+  ///  * [new SliverGrid.count], the equivalent constructor for [SliverGrid].
   GridView.count({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -725,6 +814,10 @@ class GridView extends BoxScrollView {
   /// cross-axis extent.
   ///
   /// Uses a [SliverGridDelegateWithMaxCrossAxisExtent] as the [gridDelegate].
+  ///
+  /// See also:
+  ///
+  ///  * [new SliverGrid.extent], the equivalent constructor for [SliverGrid].
   GridView.extent({
     Key key,
     Axis scrollDirection: Axis.vertical,

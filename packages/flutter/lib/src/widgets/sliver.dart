@@ -94,7 +94,7 @@ abstract class SliverChildDelegate {
   String toString() {
     final List<String> description = <String>[];
     debugFillDescription(description);
-    return '$runtimeType#$hashCode(${description.join(", ")})';
+    return '${describeIdentity(this)}(${description.join(", ")})';
   }
 
   /// Add additional information to the given description for use by [toString].
@@ -436,6 +436,46 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     @required this.gridDelegate,
   }) : super(key: key, delegate: delegate);
 
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement with a fixed number of tiles in the cross axis.
+  ///
+  /// Uses a [SliverGridDelegateWithFixedCrossAxisCount] as the [gridDelegate],
+  /// and a [SliverChildListDelegate] as the [delegate].
+  SliverGrid.count({
+    Key key,
+    @required int crossAxisCount,
+    double mainAxisSpacing: 0.0,
+    double crossAxisSpacing: 0.0,
+    double childAspectRatio: 1.0,
+    List<Widget> children: const <Widget>[],
+  }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
+         crossAxisCount: crossAxisCount,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       super(key: key, delegate: new SliverChildListDelegate(children));
+
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement with tiles that have a maximum cross-axis extent.
+  ///
+  /// Uses a [SliverGridDelegateWithMaxCrossAxisExtent] as the [gridDelegate],
+  /// and a [SliverChildListDelegate] as the [delegate].
+  SliverGrid.extent({
+    Key key,
+    @required double maxCrossAxisExtent,
+    double mainAxisSpacing: 0.0,
+    double crossAxisSpacing: 0.0,
+    double childAspectRatio: 1.0,
+    List<Widget> children: const <Widget>[],
+  }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
+         maxCrossAxisExtent: maxCrossAxisExtent,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       super(key: key, delegate: new SliverChildListDelegate(children));
+
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
 
@@ -537,13 +577,20 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       performRebuild();
   }
 
-  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
+  // We inflate widgets at two different times:
+  //  1. When we ourselves are told to rebuild (see performRebuild).
+  //  2. When our render object needs a new child (see createChild).
+  // In both cases, we cache the results of calling into our delegate to get the widget,
+  // so that if we do case 2 later, we don't call the builder again.
+  // Any time we do case 1, though, we reset the cache.
+
   final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
+  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
   RenderBox _currentBeforeChild;
 
   @override
   void performRebuild() {
-    _childWidgets.clear();
+    _childWidgets.clear(); // Reset the cache, as described above.
     super.performRebuild();
     _currentBeforeChild = null;
     assert(_currentlyUpdatingChildIndex == null);
@@ -556,9 +603,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       } else if (_didUnderflow) {
         lastIndex += 1;
       }
-      // We won't call the delegate's build function multiple times, because we
-      // cache the delegate's results until the next time we need to rebuild the
-      // whole widget.
       for (int index = firstIndex; index <= lastIndex; ++index) {
         _currentlyUpdatingChildIndex = index;
         final Element newChild = updateChild(_childElements[index], _build(index), index);

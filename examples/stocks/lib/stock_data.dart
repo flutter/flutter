@@ -10,6 +10,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,54 +39,64 @@ class Stock {
   }
 }
 
-class StockData {
-  StockData(this._data);
-
-  final List<List<String>> _data;
-
-  void appendTo(Map<String, Stock> stocks, List<String> symbols) {
-    for (List<String> fields in _data) {
-      final Stock stock = new Stock.fromFields(fields);
-      symbols.add(stock.symbol);
-      stocks[stock.symbol] = stock;
+class StockData extends ChangeNotifier {
+  StockData() {
+    if (actuallyFetchData) {
+      _httpClient = createHttpClient();
+      _fetchNextChunk();
     }
-    symbols.sort();
-  }
-}
-
-typedef void StockDataCallback(StockData data);
-const int _kChunkCount = 30;
-
-String _urlToFetch(int chunk) {
-  return 'https://domokit.github.io/examples/stocks/data/stock_data_$chunk.json';
-}
-
-class StockDataFetcher {
-  StockDataFetcher(this.callback) {
-    _httpClient = createHttpClient();
-    _fetchNextChunk();
   }
 
-  final StockDataCallback callback;
+  final List<String> _symbols = <String>[];
+  final Map<String, Stock> _stocks = <String, Stock>{};
+
+  Iterable<String> get allSymbols => _symbols;
+
+  Stock operator [](String symbol) => _stocks[symbol];
+
+  bool get loading => _httpClient != null;
+
+  void add(List<List<String>> data) {
+    for (List<String> fields in data) {
+      final Stock stock = new Stock.fromFields(fields);
+      _symbols.add(stock.symbol);
+      _stocks[stock.symbol] = stock;
+    }
+    _symbols.sort();
+    notifyListeners();
+  }
+
+  static const int _kChunkCount = 30;
+  int _nextChunk = 0;
+
+  String _urlToFetch(int chunk) {
+    return 'https://domokit.github.io/examples/stocks/data/stock_data_$chunk.json';
+  }
+
   http.Client _httpClient;
 
   static bool actuallyFetchData = true;
 
-  int _nextChunk = 0;
-
   void _fetchNextChunk() {
-    if (!actuallyFetchData)
-      return;
     _httpClient.get(_urlToFetch(_nextChunk++)).then<Null>((http.Response response) {
       final String json = response.body;
       if (json == null) {
-        print("Failed to load stock data chunk ${_nextChunk - 1}");
-        return null;
+        debugPrint('Failed to load stock data chunk ${_nextChunk - 1}');
+        _end();
+        return;
       }
       final JsonDecoder decoder = const JsonDecoder();
-      callback(new StockData(decoder.convert(json)));
-      if (_nextChunk < _kChunkCount)
+      add(decoder.convert(json));
+      if (_nextChunk < _kChunkCount) {
         _fetchNextChunk();
+      } else {
+        _end();
+      }
     });
+  }
+
+  void _end() {
+    _httpClient?.close();
+    _httpClient = null;
   }
 }

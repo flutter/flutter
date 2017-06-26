@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'debug.dart';
+import 'feedback.dart';
 import 'icons.dart';
 import 'tooltip.dart';
 
@@ -102,7 +103,7 @@ class Chip extends StatelessWidget {
     if (deletable) {
       rightPadding = 0.0;
       children.add(new GestureDetector(
-        onTap: onDeleted,
+        onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
           message: 'Delete "$label"',
           child: new Container(

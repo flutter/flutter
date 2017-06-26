@@ -7,13 +7,14 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
+import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 class MockProcessManager extends Mock implements ProcessManager {}
@@ -62,6 +63,97 @@ void main() {
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
       });
+    });
+  });
+
+  group('Xcode', () {
+    MockProcessManager mockProcessManager;
+    Xcode xcode;
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
+      xcode = new Xcode();
+    });
+
+    testUsingContext('xcodeSelectPath returns null when xcode-select is not installed', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+          .thenThrow(const ProcessException('/usr/bin/xcode-select', const <String>['--print-path']));
+      expect(xcode.xcodeSelectPath, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeSelectPath returns path when xcode-select is installed', () {
+      final String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+          .thenReturn(new ProcessResult(1, 0, xcodePath, ''));
+      expect(xcode.xcodeSelectPath, xcodePath);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeVersionText returns null when xcodebuild is not installed', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenThrow(const ProcessException('/usr/bin/xcodebuild', const <String>['-version']));
+      expect(xcode.xcodeVersionText, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeVersionText returns null when xcodebuild is not installed', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeVersionText, 'Xcode 8.3.3, Build version 8E3004b');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('eulaSigned is false when clang is not installed', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
+          .thenThrow(const ProcessException('/usr/bin/xcrun', const <String>['clang']));
+      expect(xcode.eulaSigned, isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('eulaSigned is false when clang output indicates EULA not yet accepted', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
+          .thenReturn(new ProcessResult(1, 1, '', 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.'));
+      expect(xcode.eulaSigned, isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('eulaSigned is true when clang output indicates EULA has been accepted', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
+          .thenReturn(new ProcessResult(1, 1, '', 'clang: error: no input files'));
+      expect(xcode.eulaSigned, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('getAvailableDevices throws ToolExit when instruments is not installed', () async {
+      when(mockProcessManager.run(<String>['/usr/bin/instruments', '-s', 'devices']))
+          .thenThrow(const ProcessException('/usr/bin/instruments', const <String>['-s', 'devices']));
+      expect(() async => await xcode.getAvailableDevices(), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('getAvailableDevices throws ToolExit when instruments returns non-zero', () async {
+      when(mockProcessManager.run(<String>['/usr/bin/instruments', '-s', 'devices']))
+          .thenReturn(new ProcessResult(1, 1, '', 'Sad today'));
+      expect(() async => await xcode.getAvailableDevices(), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('getAvailableDevices returns instruments output when installed', () async {
+      when(mockProcessManager.run(<String>['/usr/bin/instruments', '-s', 'devices']))
+          .thenReturn(new ProcessResult(1, 0, 'Known Devices:\niPhone 6s (10.3.3) [foo]', ''));
+      expect(await xcode.getAvailableDevices(), 'Known Devices:\niPhone 6s (10.3.3) [foo]');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
     });
   });
 

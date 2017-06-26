@@ -38,9 +38,13 @@ typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
+  ///
+  /// The boolean arguments, [color], [navigatorObservers], and
+  /// [onGenerateRoute] must not be null.
   const WidgetsApp({
     Key key,
     @required this.onGenerateRoute,
+    this.onUnknownRoute,
     this.title,
     this.textStyle,
     @required this.color,
@@ -52,12 +56,14 @@ class WidgetsApp extends StatefulWidget {
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
-  }) : assert(color != null),
-       assert(onGenerateRoute != null),
+  }) : assert(onGenerateRoute != null),
+       assert(color != null),
+       assert(navigatorObservers != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
        assert(checkerboardOffscreenLayers != null),
        assert(showSemanticsDebugger != null),
+       assert(debugShowCheckedModeBanner != null),
        super(key: key);
 
   /// A one-line description of this app for use in the window manager.
@@ -75,11 +81,46 @@ class WidgetsApp extends StatefulWidget {
 
   /// The route generator callback used when the app is navigated to a
   /// named route.
+  ///
+  /// If this returns null when building the routes to handle the specified
+  /// [initialRoute], then all the routes are discarded and
+  /// [Navigator.defaultRouteName] is used instead (`/`). See [initialRoute].
+  ///
+  /// During normal app operation, the [onGenerateRoute] callback will only be
+  /// applied to route names pushed by the application, and so should never
+  /// return null.
   final RouteFactory onGenerateRoute;
+
+  /// Called when [onGenerateRoute] fails to generate a route.
+  ///
+  /// This callback is typically used for error handling. For example, this
+  /// callback might always generate a "not found" page that describes the route
+  /// that wasn't found.
+  ///
+  /// Unknown routes can arise either from errors in the app or from external
+  /// requests to push routes, such as from Android intents.
+  final RouteFactory onUnknownRoute;
 
   /// The name of the first route to show.
   ///
-  /// Defaults to [Window.defaultRouteName].
+  /// Defaults to [Window.defaultRouteName], which may be overridden by the code
+  /// that launched the application.
+  ///
+  /// If the route contains slashes, then it is treated as a "deep link", and
+  /// before this route is pushed, the routes leading to this one are pushed
+  /// also. For example, if the route was `/a/b/c`, then the app would start
+  /// with the three routes `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
+  ///
+  /// If any part of this process fails to generate routes, then the
+  /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
+  /// (`/`). This can happen if the app is started with an intent that specifies
+  /// a non-existent route.
+  ///
+  /// See also:
+  ///
+  ///  * [Navigator.initialRoute], which is used to implement this property.
+  ///  * [Navigator.push], for pushing additional routes.
+  ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
   /// Callback that is called when the operating system changes the
@@ -221,6 +262,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
             key: _navigator,
             initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
             onGenerateRoute: widget.onGenerateRoute,
+            onUnknownRoute: widget.onUnknownRoute,
             observers: widget.navigatorObservers
           )
         )
@@ -238,13 +280,13 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     // options are set.
     if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
       performanceOverlay = new PerformanceOverlay.allEnabled(
-          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       );
     } else if (widget.checkerboardRasterCacheImages || widget.checkerboardOffscreenLayers) {
       performanceOverlay = new PerformanceOverlay(
-          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       );
     }
 

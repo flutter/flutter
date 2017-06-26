@@ -5,16 +5,19 @@
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_driver/src/extension.dart';
 import 'package:flutter_driver/src/find.dart';
+import 'package:flutter_driver/src/request_data.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('waitUntilNoTransientCallbacks', () {
     FlutterDriverExtension extension;
     Map<String, dynamic> result;
+    int messageId = 0;
+    final List<String> log = <String>[];
 
     setUp(() {
       result = null;
-      extension = new FlutterDriverExtension();
+      extension = new FlutterDriverExtension((String message) async { log.add(message); return (messageId += 1).toString(); });
     });
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
@@ -56,6 +59,13 @@ void main() {
             'response': null,
           },
       );
+    });
+
+    testWidgets('handler', (WidgetTester tester) async {
+      expect(log, isEmpty);
+      final dynamic result = RequestDataResult.fromJson((await extension.call(new RequestData('hello').serialize()))['response']);
+      expect(log, <String>['hello']);
+      expect(result.message, '1');
     });
   });
 }
