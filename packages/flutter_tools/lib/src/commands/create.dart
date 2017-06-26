@@ -11,6 +11,7 @@ import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/os.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -167,6 +168,10 @@ class CreateCommand extends FlutterCommand {
     }
 
     generatedCount += _renderTemplate('create', appPath, templateContext);
+    generatedCount += _injectGradleWrapper(appPath);
+    if (appPath != dirPath) {
+      generatedCount += _injectGradleWrapper(dirPath);
+    }
     if (argResults['with-driver-test']) {
       final String testPath = fs.path.join(appPath, 'test_driver');
       generatedCount += _renderTemplate('driver', testPath, templateContext);
@@ -271,6 +276,22 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
   int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
     final Template template = new Template.fromName(templateName);
     return template.render(fs.directory(dirPath), context, overwriteExisting: false);
+  }
+
+  int _injectGradleWrapper(String projectDir) {
+    int filesCreated = 0;
+    copyDirectorySync(
+      cache.getArtifactDirectory('gradle_wrapper'),
+      fs.directory(fs.path.join(projectDir, 'android')),
+      (File sourceFile, File destinationFile) {
+        filesCreated++;
+        final String modes = sourceFile.statSync().modeString();
+        if (modes != null && modes.contains('x')) {
+          os.makeExecutable(destinationFile);
+        }
+      },
+    );
+    return filesCreated;
   }
 }
 

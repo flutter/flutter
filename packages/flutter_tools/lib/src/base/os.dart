@@ -47,6 +47,8 @@ abstract class OperatingSystemUtils {
 
   void unzip(File file, Directory targetDirectory);
 
+  void unpack(File gzippedTarFile, Directory targetDirectory);
+
   /// Returns a pretty name string for the current operating system.
   ///
   /// If available, the detailed version of the OS is included.
@@ -95,6 +97,12 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   void unzip(File file, Directory targetDirectory) {
     runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
+  }
+
+  // tar -xzf tarball -C dest
+  @override
+  void unpack(File gzippedTarFile, Directory targetDirectory) {
+    runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
   }
 
   @override
@@ -167,7 +175,18 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   void unzip(File file, Directory targetDirectory) {
     final Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
+    _unpackArchive(archive, targetDirectory);
+  }
 
+  @override
+  void unpack(File gzippedTarFile, Directory targetDirectory) {
+    final Archive archive = new TarDecoder().decodeBytes(
+      new GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
+    );
+    _unpackArchive(archive, targetDirectory);
+  }
+
+  void _unpackArchive(Archive archive, Directory targetDirectory) {
     for (ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
       if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
