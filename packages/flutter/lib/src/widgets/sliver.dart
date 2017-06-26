@@ -393,6 +393,9 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// [gridDelegate]. Each child is forced to have the size specified by the
 /// [gridDelegate].
 ///
+/// The main axis direction of a grid is the direction in which it scrolls; the
+/// cross axis direction is the orthogonal direction.
+///
 /// ## Sample code
 ///
 /// This example, which would be inserted into a [CustomScrollView.slivers]
@@ -441,6 +444,10 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   /// Uses a [SliverGridDelegateWithFixedCrossAxisCount] as the [gridDelegate],
   /// and a [SliverChildListDelegate] as the [delegate].
+  ///
+  /// See also:
+  ///
+  ///  * [new GridView.count], the equivalent constructor for [GridView] widgets.
   SliverGrid.count({
     Key key,
     @required int crossAxisCount,
@@ -457,10 +464,14 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
        super(key: key, delegate: new SliverChildListDelegate(children));
 
   /// Creates a sliver that places multiple box children in a two dimensional
-  /// arrangement with tiles that have a maximum cross-axis extent.
+  /// arrangement with tiles that each have a maximum cross-axis extent.
   ///
   /// Uses a [SliverGridDelegateWithMaxCrossAxisExtent] as the [gridDelegate],
   /// and a [SliverChildListDelegate] as the [delegate].
+  ///
+  /// See also:
+  ///
+  ///  * [new GridView.extent], the equivalent constructor for [GridView] widgets.
   SliverGrid.extent({
     Key key,
     @required double maxCrossAxisExtent,
