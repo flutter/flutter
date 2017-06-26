@@ -27,12 +27,25 @@ class ColorDemoHome extends StatelessWidget {
           new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/gbr.png'),
           new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/tf.png'),
           new Image.network('https://flutter.github.io/assets-for-api-docs/tests/colors/wide-gamut.png'),
+
+          // Lerped color should match the center of the gradient.
           const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFF00FF00)),
+          new ColorRow(color: Color.lerp(const Color(0xFFFF0000), const Color(0xFF00FF00), 0.5)),
+
           const GradientRow(leftColor: const Color(0xFF0000FF), rightColor: const Color(0xFFFFFF00)),
+          new ColorRow(color: Color.lerp(const Color(0xFF0000FF), const Color(0xFFFFFF00), 0.5)),
+
           const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFF0000FF)),
+          new ColorRow(color: Color.lerp(const Color(0xFFFF0000), const Color(0xFF0000FF), 0.5)),
+
           const GradientRow(leftColor: const Color(0xFF00FF00), rightColor: const Color(0xFFFFFF00)),
+          new ColorRow(color: Color.lerp(const Color(0xFF00FF00), const Color(0xFFFFFF00), 0.5)),
+
           const GradientRow(leftColor: const Color(0xFF0000FF), rightColor: const Color(0xFF00FF00)),
+          new ColorRow(color: Color.lerp(const Color(0xFF0000FF), const Color(0xFF00FF00), 0.5)),
+
           const GradientRow(leftColor: const Color(0xFFFF0000), rightColor: const Color(0xFFFFFF00)),
+          new ColorRow(color: Color.lerp(const Color(0xFFFF0000), const Color(0xFFFFFF00), 0.5)),
 
           // For the following pairs, the blend result should match the opaque color.
           const ColorRow(color: const Color(0xFFBCBCBC)),
