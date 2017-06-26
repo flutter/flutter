@@ -172,12 +172,22 @@ class Image extends StatefulWidget {
   /// directory with the name `cat.png` (the paths are relative to the
   /// `pubspec.yaml` file).
   ///
+  /// On a device with a 4.0 device pixel ratio, the `images/3.5x/cat.png` asset
+  /// would be used. On a device with a 1.0 device pixel ratio, the
+  /// `images/cat.png` resource would be used.
+  ///
+  /// The `images/cat.png` image can be omitted from disk (though it must still
+  /// be present in the manifest). If it is omitted, then on a device with a 1.0
+  /// device pixel ratio, the `images/2x/cat.png` image would be used instead.
+  ///
   /// See also:
   ///
   ///  * [AssetImage], which is used to implement the behavior when the scale is
   ///    omitted.
   ///  * [ExactAssetImage], which is used to implement the behavior when the
   ///    scale is present.
+  ///  * <https://flutter.io/assets-and-images/>, an introduction to assets in
+  ///    Flutter.
   Image.asset(String name, {
     Key key,
     AssetBundle bundle,
