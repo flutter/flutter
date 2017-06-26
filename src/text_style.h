@@ -43,7 +43,7 @@ class TextStyle {
   double word_spacing = 0.0;
   double height = 1.0;
 
-  bool equals(TextStyle& other);
+  bool equals(const TextStyle& other) const;
 };
 
 }  // namespace txt

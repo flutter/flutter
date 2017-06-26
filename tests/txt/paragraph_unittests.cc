@@ -225,7 +225,6 @@ TEST_F(RenderTest, BoldParagraph) {
 
   txt::TextStyle text_style;
   text_style.font_size = 60;
-  // Letter spacing not yet implemented
   text_style.letter_spacing = 10;
   text_style.font_weight = txt::FontWeight::w700;
   text_style.fake_bold = true;
@@ -285,8 +284,8 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   text_style.letter_spacing = 1;
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
-  text_style.height = 1.15;
-  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.height = 1;
+  text_style.decoration = txt::TextDecoration(0x0);
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -305,7 +304,36 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
+  double expected_y = 18.484375;
+
+  ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
+  expected_y += 30.46875 * 10;
+  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
+  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().x(), 0);
+
+  ASSERT_EQ(paragraph_style.text_align,
+            paragraph->GetParagraphStyle().text_align);
+
   ASSERT_TRUE(Snapshot());
 }
 
@@ -342,8 +370,8 @@ TEST_F(RenderTest, RightAlignParagraph) {
   text_style.letter_spacing = 1;
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
-  text_style.height = 1.15;
-  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.height = 1;
+  text_style.decoration = txt::TextDecoration(0x0);
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -362,7 +390,51 @@ TEST_F(RenderTest, RightAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
+  double expected_y = 18.484375;
+
+  ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[0].offset().x(),
+      paragraph->width_ -
+          paragraph->breaker_.getWidths()[paragraph->records_[0].line()]);
+
+  ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[1].offset().x(),
+      paragraph->width_ -
+          paragraph->breaker_.getWidths()[paragraph->records_[1].line()]);
+
+  ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[2].offset().x(),
+      paragraph->width_ -
+          paragraph->breaker_.getWidths()[paragraph->records_[2].line()]);
+
+  ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
+  expected_y += 30.46875 * 10;
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[3].offset().x(),
+      paragraph->width_ -
+          paragraph->breaker_.getWidths()[paragraph->records_[3].line()]);
+
+  ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[13].offset().x(),
+      paragraph->width_ -
+          paragraph->breaker_.getWidths()[paragraph->records_[13].line()]);
+
+  ASSERT_EQ(paragraph_style.text_align,
+            paragraph->GetParagraphStyle().text_align);
+
   ASSERT_TRUE(Snapshot());
 }
 
@@ -399,8 +471,8 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   text_style.letter_spacing = 1;
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
-  text_style.height = 1.15;
-  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.height = 1;
+  text_style.decoration = txt::TextDecoration(0x0);
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -419,7 +491,55 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
+  double expected_y = 18.484375;
+
+  ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[0].offset().x(),
+      (paragraph->width_ -
+       paragraph->breaker_.getWidths()[paragraph->records_[0].line()]) /
+          2);
+
+  ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[1].offset().x(),
+      (paragraph->width_ -
+       paragraph->breaker_.getWidths()[paragraph->records_[1].line()]) /
+          2);
+
+  ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_EQ(paragraph->records_[2].offset().x(),
+            (paragraph->width_ -
+             paragraph->breaker_.getWidths()[paragraph->records_[2].line()]) /
+                2);
+
+  ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
+  expected_y += 30.46875 * 10;
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[3].offset().x(),
+      (paragraph->width_ -
+       paragraph->breaker_.getWidths()[paragraph->records_[3].line()]) /
+          2);
+
+  ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
+  ASSERT_DOUBLE_EQ(
+      paragraph->records_[13].offset().x(),
+      (paragraph->width_ -
+       paragraph->breaker_.getWidths()[paragraph->records_[13].line()]) /
+          2);
+
+  ASSERT_EQ(paragraph_style.text_align,
+            paragraph->GetParagraphStyle().text_align);
+
   ASSERT_TRUE(Snapshot());
 }
 
@@ -456,8 +576,8 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   text_style.letter_spacing = 1;
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
-  text_style.height = 1.15;
-  text_style.decoration = txt::TextDecoration(0x1);
+  text_style.height = 1;
+  text_style.decoration = txt::TextDecoration(0x0);
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -476,7 +596,36 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
+  double expected_y = 18.484375;
+
+  ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
+  expected_y += 30.46875;
+  ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
+  expected_y += 30.46875 * 10;
+  ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 0);
+
+  ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
+  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().y(), expected_y);
+  ASSERT_DOUBLE_EQ(paragraph->records_[13].offset().x(), 0);
+
+  ASSERT_EQ(paragraph_style.text_align,
+            paragraph->GetParagraphStyle().text_align);
+
   ASSERT_TRUE(Snapshot());
 }
 

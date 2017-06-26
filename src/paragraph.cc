@@ -180,10 +180,36 @@ void Paragraph::Layout(double width,
   std::vector<SkScalar> x_queue;
   size_t character_index = 0;
 
-  auto flush = [this, &x_queue, &y]() -> void {
+  auto postprocess_line = [this, &x_queue, &y]() -> void {
+    size_t record_index = 0;
     for (size_t i = 0; i < x_queue.size(); ++i) {
-      records_[records_.size() - (x_queue.size() - i)].SetOffset(
-          SkPoint::Make(x_queue[i], y));
+      record_index = records_.size() - (x_queue.size() - i);
+      records_[record_index].SetOffset(SkPoint::Make(x_queue[i], y));
+      // TODO(garyq): Fix alignment for paragraphs with multiple styles per
+      // line.
+      switch (paragraph_style_.text_align) {
+        case TextAlign::left:
+          break;
+        case TextAlign::right: {
+          records_[record_index].SetOffset(SkPoint::Make(
+              records_[record_index].offset().x() + width_ -
+                  breaker_.getWidths()[records_[record_index].line()],
+              records_[record_index].offset().y()));
+          break;
+        }
+        case TextAlign::center: {
+          records_[record_index].SetOffset(SkPoint::Make(
+              records_[record_index].offset().x() +
+                  (width_ -
+                   breaker_.getWidths()[records_[record_index].line()]) /
+                      2,
+              records_[record_index].offset().y()));
+          break;
+        }
+        case TextAlign::justify: {
+          break;
+        }
+      }
     }
     x_queue.clear();
   };
@@ -304,7 +330,7 @@ void Paragraph::Layout(double width,
         y += max_line_spacing + prev_max_descent;
         prev_max_descent = max_descent;
         line_widths_.push_back(line_width);
-        flush();
+        postprocess_line();
 
         max_line_spacing = 0.0f;
         max_descent = 0.0f;
@@ -324,7 +350,7 @@ void Paragraph::Layout(double width,
     }
   }
   y += max_line_spacing;
-  flush();
+  postprocess_line();
   if (line_width != 0)
     line_widths_.push_back(line_width);
 
@@ -406,23 +432,6 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
     SkPaint paint;
     paint.setColor(record.style().color);
     SkPoint offset = record.offset();
-    // TODO(garyq): Fix alignment for paragraphs with multiple styles per line.
-    switch (paragraph_style_.text_align) {
-      case TextAlign::left:
-        break;
-      case TextAlign::right: {
-        offset.offset(width_ - breaker_.getWidths()[record.line()], 0);
-        break;
-      }
-      case TextAlign::center: {
-        offset.offset((width_ - breaker_.getWidths()[record.line()]) / 2, 0);
-        break;
-      }
-      case TextAlign::justify: {
-        // Justify is performed in the Layout().
-        break;
-      }
-    }
     canvas->drawTextBlob(record.text(), x + offset.x(), y + offset.y(), paint);
     PaintDecorations(canvas, x + offset.x(), y + offset.y(), record.style(),
                      record.metrics(), record.text());
