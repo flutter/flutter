@@ -134,7 +134,7 @@ class Xcode {
       _xcodeMajorVersion = int.parse(components[0]);
       _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
     } on ProcessException {
-      // Ignore: return null below.
+      // Ignore: leave values null.
     }
   }
 
