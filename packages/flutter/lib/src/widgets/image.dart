@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show File, Platform;
+import 'dart:io' show File;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -40,7 +40,7 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
     devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     // TODO(ianh): provide the locale
     size: size,
-    platform: Platform.operatingSystem,
+    platform: defaultTargetPlatform,
   );
 }
 

@@ -73,11 +73,11 @@ class ImageConfiguration {
   /// The size at which the image will be rendered.
   final Size size;
 
-  /// A string (same as [Platform.operatingSystem]) that represents the platform
-  /// for which assets should be used. This allows images to be specified in a
-  /// platform-neutral fashion yet use different assets on different platforms,
-  /// to match local conventions e.g. for color matching or shadows.
-  final String platform;
+  /// The [TargetPlatform] for which assets should be used. This allows images
+  /// to be specified in a platform-neutral fashion yet use different assets on
+  /// different platforms, to match local conventions e.g. for color matching or
+  /// shadows.
+  final TargetPlatform platform;
 
   /// An image configuration that provides no additional information.
   ///
@@ -131,7 +131,7 @@ class ImageConfiguration {
     if (platform != null) {
       if (hasArguments)
         result.write(', ');
-      result.write('platform: $platform');
+      result.write('platform: ${describeEnum(platform)}');
       hasArguments = true;
     }
     result.write(')');
