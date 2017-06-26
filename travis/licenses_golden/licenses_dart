@@ -1,4 +1,4 @@
-Signature: bcf5ed029d6812d104040b05727b5425
+Signature: e340d89dea11ef56c6e266495ffa53b0
 
 UNUSED LICENSES:
 
@@ -548,7 +548,6 @@ FILE: ../../../dart/runtime/lib/developer.dart
 FILE: ../../../dart/runtime/lib/timeline.cc
 FILE: ../../../dart/runtime/lib/timeline.dart
 FILE: ../../../dart/runtime/lib/vmservice.cc
-FILE: ../../../dart/runtime/lib/vmservice_patch.dart
 FILE: ../../../dart/runtime/observatory/lib/allocation_profile.dart
 FILE: ../../../dart/runtime/observatory/lib/cli.dart
 FILE: ../../../dart/runtime/observatory/lib/cpu_profile.dart
@@ -799,9 +798,6 @@ FILE: ../../../dart/runtime/vm/assembler_arm64_test.cc
 FILE: ../../../dart/runtime/vm/assembler_arm_test.cc
 FILE: ../../../dart/runtime/vm/assembler_ia32.cc
 FILE: ../../../dart/runtime/vm/assembler_ia32.h
-FILE: ../../../dart/runtime/vm/assembler_mips.cc
-FILE: ../../../dart/runtime/vm/assembler_mips.h
-FILE: ../../../dart/runtime/vm/assembler_mips_test.cc
 FILE: ../../../dart/runtime/vm/assembler_test.cc
 FILE: ../../../dart/runtime/vm/assembler_x64.cc
 FILE: ../../../dart/runtime/vm/assembler_x64.h
@@ -815,31 +811,24 @@ FILE: ../../../dart/runtime/vm/block_scheduler.h
 FILE: ../../../dart/runtime/vm/class_finalizer.cc
 FILE: ../../../dart/runtime/vm/code_patcher_arm.cc
 FILE: ../../../dart/runtime/vm/code_patcher_arm_test.cc
-FILE: ../../../dart/runtime/vm/code_patcher_mips.cc
-FILE: ../../../dart/runtime/vm/code_patcher_mips_test.cc
 FILE: ../../../dart/runtime/vm/constant_propagator.cc
 FILE: ../../../dart/runtime/vm/constants_arm.h
 FILE: ../../../dart/runtime/vm/constants_ia32.h
-FILE: ../../../dart/runtime/vm/constants_mips.h
 FILE: ../../../dart/runtime/vm/constants_x64.h
-FILE: ../../../dart/runtime/vm/cpu_mips.cc
 FILE: ../../../dart/runtime/vm/dart.cc
 FILE: ../../../dart/runtime/vm/dart_api_impl.cc
-FILE: ../../../dart/runtime/vm/debugger_mips.cc
 FILE: ../../../dart/runtime/vm/debugger_test.cc
 FILE: ../../../dart/runtime/vm/deferred_objects.cc
 FILE: ../../../dart/runtime/vm/deferred_objects.h
 FILE: ../../../dart/runtime/vm/deopt_instructions.cc
 FILE: ../../../dart/runtime/vm/deopt_instructions.h
 FILE: ../../../dart/runtime/vm/disassembler_arm.cc
-FILE: ../../../dart/runtime/vm/disassembler_mips.cc
 FILE: ../../../dart/runtime/vm/flow_graph.h
 FILE: ../../../dart/runtime/vm/flow_graph_allocator.cc
 FILE: ../../../dart/runtime/vm/flow_graph_allocator.h
 FILE: ../../../dart/runtime/vm/flow_graph_compiler.cc
 FILE: ../../../dart/runtime/vm/flow_graph_compiler_arm.cc
 FILE: ../../../dart/runtime/vm/flow_graph_compiler_ia32.cc
-FILE: ../../../dart/runtime/vm/flow_graph_compiler_mips.cc
 FILE: ../../../dart/runtime/vm/flow_graph_compiler_x64.cc
 FILE: ../../../dart/runtime/vm/flow_graph_inliner.cc
 FILE: ../../../dart/runtime/vm/flow_graph_type_propagator.cc
@@ -849,18 +838,13 @@ FILE: ../../../dart/runtime/vm/instructions.h
 FILE: ../../../dart/runtime/vm/instructions_arm.cc
 FILE: ../../../dart/runtime/vm/instructions_arm.h
 FILE: ../../../dart/runtime/vm/instructions_arm_test.cc
-FILE: ../../../dart/runtime/vm/instructions_mips.cc
-FILE: ../../../dart/runtime/vm/instructions_mips.h
-FILE: ../../../dart/runtime/vm/instructions_mips_test.cc
 FILE: ../../../dart/runtime/vm/intermediate_language.cc
 FILE: ../../../dart/runtime/vm/intermediate_language.h
 FILE: ../../../dart/runtime/vm/intermediate_language_arm.cc
 FILE: ../../../dart/runtime/vm/intermediate_language_ia32.cc
-FILE: ../../../dart/runtime/vm/intermediate_language_mips.cc
 FILE: ../../../dart/runtime/vm/intermediate_language_x64.cc
 FILE: ../../../dart/runtime/vm/intrinsifier_arm.cc
 FILE: ../../../dart/runtime/vm/intrinsifier_ia32.cc
-FILE: ../../../dart/runtime/vm/intrinsifier_mips.cc
 FILE: ../../../dart/runtime/vm/intrinsifier_x64.cc
 FILE: ../../../dart/runtime/vm/isolate.cc
 FILE: ../../../dart/runtime/vm/isolate.h
@@ -879,7 +863,6 @@ FILE: ../../../dart/runtime/vm/native_symbol_win.cc
 FILE: ../../../dart/runtime/vm/object_id_ring.cc
 FILE: ../../../dart/runtime/vm/object_id_ring.h
 FILE: ../../../dart/runtime/vm/object_id_ring_test.cc
-FILE: ../../../dart/runtime/vm/object_mips_test.cc
 FILE: ../../../dart/runtime/vm/object_store.cc
 FILE: ../../../dart/runtime/vm/os_test.cc
 FILE: ../../../dart/runtime/vm/profiler.cc
@@ -888,7 +871,6 @@ FILE: ../../../dart/runtime/vm/profiler_test.cc
 FILE: ../../../dart/runtime/vm/random.cc
 FILE: ../../../dart/runtime/vm/random.h
 FILE: ../../../dart/runtime/vm/reusable_handles.h
-FILE: ../../../dart/runtime/vm/runtime_entry_mips.cc
 FILE: ../../../dart/runtime/vm/service.cc
 FILE: ../../../dart/runtime/vm/service.h
 FILE: ../../../dart/runtime/vm/service_isolate.h
@@ -901,17 +883,12 @@ FILE: ../../../dart/runtime/vm/signal_handler_win.cc
 FILE: ../../../dart/runtime/vm/simulator.h
 FILE: ../../../dart/runtime/vm/simulator_arm.cc
 FILE: ../../../dart/runtime/vm/simulator_arm.h
-FILE: ../../../dart/runtime/vm/simulator_mips.cc
-FILE: ../../../dart/runtime/vm/simulator_mips.h
 FILE: ../../../dart/runtime/vm/stack_frame_arm.h
 FILE: ../../../dart/runtime/vm/stack_frame_ia32.h
-FILE: ../../../dart/runtime/vm/stack_frame_mips.h
 FILE: ../../../dart/runtime/vm/stack_frame_x64.h
 FILE: ../../../dart/runtime/vm/stub_code_arm.cc
 FILE: ../../../dart/runtime/vm/stub_code_arm_test.cc
 FILE: ../../../dart/runtime/vm/stub_code_ia32.cc
-FILE: ../../../dart/runtime/vm/stub_code_mips.cc
-FILE: ../../../dart/runtime/vm/stub_code_mips_test.cc
 FILE: ../../../dart/runtime/vm/stub_code_x64.cc
 FILE: ../../../dart/runtime/vm/tags.h
 FILE: ../../../dart/runtime/vm/thread_interrupter.cc
@@ -1097,7 +1074,6 @@ FILE: ../../../dart/runtime/vm/cpu_arm.h
 FILE: ../../../dart/runtime/vm/cpu_arm64.cc
 FILE: ../../../dart/runtime/vm/cpu_arm64.h
 FILE: ../../../dart/runtime/vm/cpu_ia32.h
-FILE: ../../../dart/runtime/vm/cpu_mips.h
 FILE: ../../../dart/runtime/vm/cpu_x64.h
 FILE: ../../../dart/runtime/vm/cpuid.cc
 FILE: ../../../dart/runtime/vm/cpuid.h
@@ -1632,7 +1608,6 @@ FILE: ../../../dart/runtime/vm/malloc_hooks_arm.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_arm64.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_ia32.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_jemalloc.cc
-FILE: ../../../dart/runtime/vm/malloc_hooks_mips.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_tcmalloc.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_test.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_unsupported.cc
