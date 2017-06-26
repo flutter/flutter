@@ -181,9 +181,10 @@ void main() {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(text: _kText),
     );
-    // The toStringDeep method for RenderParagraph needs to be fixed to not emit
-    // a spurious line of trailing whitespace and  fixed so that the \n within
-    // the TextSpan content does not interfere with the box border.
+    // TODO(jacobr): the toStringDeep method for RenderParagraph needs to be
+    // fixed to not emit a spurious line of trailing whitespace and fixed so
+    // that the \n within the TextSpan content does not interfere with the box
+    // border.
     expect(paragraph, isNot(hasAGoodToStringDeep));
     expect(
       paragraph.toStringDeep(),
