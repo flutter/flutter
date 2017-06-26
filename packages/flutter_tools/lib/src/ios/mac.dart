@@ -162,10 +162,6 @@ class Xcode {
   bool get xcodeVersionSatisfactory {
     if (xcodeVersionText == null || !xcodeVersionRegex.hasMatch(xcodeVersionText))
       return false;
-
-    final String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
-    final List<String> components = version.split('.');
-
     return _xcodeVersionCheckValid(xcodeMajorVersion, xcodeMinorVersion);
   }
 
