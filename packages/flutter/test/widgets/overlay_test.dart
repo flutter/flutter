@@ -27,7 +27,7 @@ void main() {
     expect(didBuild, isTrue);
     final RenderObject theater = overlayKey.currentContext.findRenderObject();
 
-    // toStringDeep output is missing a trailing line break.
+    // TODO(jacobr): toStringDeep output is missing a trailing line break.
     expect(theater, isNot(hasAGoodToStringDeep));
     expect(
       theater.toStringDeep(),
