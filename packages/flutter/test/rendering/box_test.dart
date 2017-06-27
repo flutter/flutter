@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -69,6 +69,17 @@ void main() {
     final RenderBox coloredBox = new RenderDecoratedBox(
       decoration: const BoxDecoration(),
     );
+
+    expect(coloredBox, hasAGoodToStringDeep);
+    expect(coloredBox.toStringDeep(), equalsIgnoringHashCodes(
+        'RenderDecoratedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        '   parentData: null\n'
+        '   constraints: null\n'
+        '   size: MISSING\n'
+        '   decoration:\n'
+        '     <no decorations specified>\n'
+        '   configuration: ImageConfiguration()\n'));
+
     final RenderBox paddingBox = new RenderPadding(
       padding: const EdgeInsets.all(10.0),
       child: coloredBox,
@@ -80,6 +91,20 @@ void main() {
     layout(root);
     expect(coloredBox.size.width, equals(780.0));
     expect(coloredBox.size.height, equals(580.0));
+
+    expect(coloredBox, hasAGoodToStringDeep);
+    expect(
+      coloredBox.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderDecoratedBox#00000 NEEDS-PAINT\n'
+        '   parentData: offset=Offset(10.0, 10.0) (can use size)\n'
+        '   constraints: BoxConstraints(w=780.0, h=580.0)\n'
+        '   size: Size(780.0, 580.0)\n'
+        '   decoration:\n'
+        '     <no decorations specified>\n'
+        '   configuration: ImageConfiguration()\n',
+      ),
+    );
   });
 
   test("reparenting should clear position", () {
