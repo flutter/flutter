@@ -16,6 +16,7 @@
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "third_party/skia/src/gpu/vk/GrVkUtil.h"
+#include "flutter/glue/trace_event.h"
 
 namespace flutter_runner {
 namespace {
@@ -469,30 +470,47 @@ bool VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree) {
 
   flow::CompositorContext::ScopedFrame frame = compositor_context_.AcquireFrame(
       nullptr, nullptr, true /* instrumentation enabled */);
+  {
+    TRACE_EVENT0("flutter", "Preroll");
+    layer_tree->Preroll(frame);
 
-  layer_tree->Preroll(frame);
+  }
 
   flow::SceneUpdateContext context(update.get(), surface_producer_.get());
   auto root_node = mozart::Node::New();
-  root_node->hit_test_behavior = mozart::HitTestBehavior::New();
-  layer_tree->UpdateScene(context, root_node.get());
-  update->nodes.insert(mozart::kSceneRootNodeId, std::move(root_node));
+  {
+    TRACE_EVENT0("flutter", "UpdateScene");
+    root_node->hit_test_behavior = mozart::HitTestBehavior::New();
+    layer_tree->UpdateScene(context, root_node.get());
+    update->nodes.insert(mozart::kSceneRootNodeId, std::move(root_node));
 
-  // Publish the updated scene contents.
-  // TODO(jeffbrown): We should set the metadata's presentation_time here too.
-  scene_->Update(std::move(update));
-  auto metadata = mozart::SceneMetadata::New();
-  metadata->version = layer_tree->scene_version();
-  scene_->Publish(std::move(metadata));
-
-  // Draw the contents of the scene to a surface.
-  // We do this after publishing to take advantage of pipelining.
-  context.ExecutePaintTasks(frame);
-  if (!surface_producer_->FinishFrame()) {
-    FTL_LOG(ERROR) << "Failed to Finish Frame";
-    return false;
+    // Publish the updated scene contents.
+    // TODO(jeffbrown): We should set the metadata's presentation_time here too.
+    scene_->Update(std::move(update));
   }
-  surface_producer_->Tick();
+
+  {
+    TRACE_EVENT0("flutter", "Publish");
+    auto metadata = mozart::SceneMetadata::New();
+    metadata->version = layer_tree->scene_version();
+    scene_->Publish(std::move(metadata));
+  }
+
+  {
+    TRACE_EVENT0("flutter", "ExecutePaintTasks");
+    // Draw the contents of the scene to a surface.
+    // We do this after publishing to take advantage of pipelining.
+    context.ExecutePaintTasks(frame);
+  }
+  {
+    TRACE_EVENT0("flutter", "FinishFrame/Tick");
+    if (!surface_producer_->FinishFrame()) {
+      FTL_LOG(ERROR) << "Failed to Finish Frame";
+      return false;
+    }    
+    surface_producer_->Tick();
+  }
+ 
 
   return true;
 }
