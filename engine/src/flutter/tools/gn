@@ -113,6 +113,20 @@ def to_gn_args(args):
     if use_dbc:
       gn_args['dart_target_arch'] = 'dbc'
 
+    # Modify host_toolchain into dart_host_toolchain so it matches word size of target_cpu
+    if args.target_os == 'android' and aot and gn_args['target_cpu'] == 'arm':
+      if sys.platform.startswith('linux'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/linux:clang_x86"
+      elif sys.platform.startswith('darwin'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/mac:clang_i386"
+      elif sys.platform.startswith('win'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/win:x86"
+    elif args.target_os == "ios" and not args.simulator:
+      if gn_args['target_cpu'] == 'arm':
+        gn_args['dart_host_toolchain'] = '//build/toolchain/mac:clang_i386'
+      elif gn_args['target_cpu'] == 'arm64':
+        gn_args['dart_host_toolchain'] = '//build/toolchain/mac:clang_x64'
+
     gn_args['flutter_runtime_mode'] = args.runtime_mode
 
     if args.target_sysroot:
