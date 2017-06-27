@@ -90,6 +90,8 @@ class CrashReportSender {
       req.fields['osVersion'] = os.name;  // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
+      // TODO(tvolkert): Uncomment this (flutter/flutter/11008)
+      //req.fields['error_message'] = '$error';
 
       final String stackTraceWithRelativePaths = new Chain.parse(stackTrace.toString()).terse.toString();
       req.files.add(new http.MultipartFile.fromString(
