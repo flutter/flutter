@@ -80,7 +80,7 @@ void main() {
         ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true, )\n'
         ' │ currently live children: 0 to 0\n'
         ' │\n'
-        ' └─child 1: RenderRepaintBoundary#00000\n'
+        ' └─child with index 0: RenderRepaintBoundary#00000\n'
         '   │ creator: RepaintBoundary-[<0>] ← SliverFillViewport ← Viewport ←\n'
         '   │   _ScrollableScope ← IgnorePointer-[GlobalKey#00000] ← Listener ←\n'
         '   │   _GestureSemantics ←\n'

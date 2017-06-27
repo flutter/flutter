@@ -514,6 +514,10 @@ class ListView extends BoxScrollView {
   ///
   /// It is usually more efficient to create children on demand using [new
   /// ListView.builder].
+  ///
+  /// The `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property and must not be
+  /// null.
   ListView({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -524,8 +528,12 @@ class ListView extends BoxScrollView {
     bool shrinkWrap: false,
     EdgeInsets padding,
     this.itemExtent,
+    bool addRepaintBoundaries: true,
     List<Widget> children: const <Widget>[],
-  }) : childrenDelegate = new SliverChildListDelegate(children), super(
+  }) : childrenDelegate = new SliverChildListDelegate(
+         children,
+         addRepaintBoundaries: addRepaintBoundaries,
+       ), super(
     key: key,
     scrollDirection: scrollDirection,
     reverse: reverse,
@@ -554,6 +562,10 @@ class ListView extends BoxScrollView {
   /// [ListView] itself is created, it is more efficient to use [new ListView].
   /// Even more efficient, however, is to create the instances on demand using
   /// this constructor's `itemBuilder` callback.
+  ///
+  /// The `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property and must not be
+  /// null.
   ListView.builder({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -566,7 +578,12 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
-  }) : childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount), super(
+    bool addRepaintBoundaries: true,
+  }) : childrenDelegate = new SliverChildBuilderDelegate(
+         itemBuilder,
+         childCount: itemCount,
+         addRepaintBoundaries: addRepaintBoundaries,
+       ), super(
     key: key,
     scrollDirection: scrollDirection,
     reverse: reverse,
@@ -765,6 +782,10 @@ class GridView extends BoxScrollView {
   /// [SliverGridDelegate].
   ///
   /// The [gridDelegate] argument must not be null.
+  ///
+  /// The `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property and must not be
+  /// null.
   GridView({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -775,9 +796,13 @@ class GridView extends BoxScrollView {
     bool shrinkWrap: false,
     EdgeInsets padding,
     @required this.gridDelegate,
+    bool addRepaintBoundaries: true,
     List<Widget> children: const <Widget>[],
   }) : assert(gridDelegate != null),
-       childrenDelegate = new SliverChildListDelegate(children),
+       childrenDelegate = new SliverChildListDelegate(
+         children,
+         addRepaintBoundaries: addRepaintBoundaries,
+       ),
        super(
          key: key,
          scrollDirection: scrollDirection,
@@ -802,6 +827,10 @@ class GridView extends BoxScrollView {
   /// zero and less than `itemCount`.
   ///
   /// The [gridDelegate] argument must not be null.
+  ///
+  /// The `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property and must not be
+  /// null.
   GridView.builder({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -814,8 +843,13 @@ class GridView extends BoxScrollView {
     @required this.gridDelegate,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
+    bool addRepaintBoundaries: true,
   }) : assert(gridDelegate != null),
-       childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
+       childrenDelegate = new SliverChildBuilderDelegate(
+         itemBuilder,
+         childCount: itemCount,
+         addRepaintBoundaries: addRepaintBoundaries,
+       ),
        super(
          key: key,
          scrollDirection: scrollDirection,
@@ -863,6 +897,10 @@ class GridView extends BoxScrollView {
   ///
   /// Uses a [SliverGridDelegateWithFixedCrossAxisCount] as the [gridDelegate].
   ///
+  /// The `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property and must not be
+  /// null.
+  ///
   /// See also:
   ///
   ///  * [new SliverGrid.count], the equivalent constructor for [SliverGrid].
@@ -879,6 +917,7 @@ class GridView extends BoxScrollView {
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
     double childAspectRatio: 1.0,
+    bool addRepaintBoundaries: true,
     List<Widget> children: const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
          crossAxisCount: crossAxisCount,
@@ -886,7 +925,10 @@ class GridView extends BoxScrollView {
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       childrenDelegate = new SliverChildListDelegate(children), super(
+       childrenDelegate = new SliverChildListDelegate(
+         children,
+         addRepaintBoundaries: addRepaintBoundaries,
+       ), super(
     key: key,
     scrollDirection: scrollDirection,
     reverse: reverse,
@@ -901,6 +943,10 @@ class GridView extends BoxScrollView {
   /// maximum cross-axis extent.
   ///
   /// Uses a [SliverGridDelegateWithMaxCrossAxisExtent] as the [gridDelegate].
+  ///
+  /// The `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property and must not be
+  /// null.
   ///
   /// See also:
   ///
@@ -918,6 +964,7 @@ class GridView extends BoxScrollView {
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
     double childAspectRatio: 1.0,
+    bool addRepaintBoundaries: true,
     List<Widget> children: const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
          maxCrossAxisExtent: maxCrossAxisExtent,
@@ -925,7 +972,10 @@ class GridView extends BoxScrollView {
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       childrenDelegate = new SliverChildListDelegate(children), super(
+       childrenDelegate = new SliverChildListDelegate(
+         children,
+         addRepaintBoundaries: addRepaintBoundaries,
+       ), super(
     key: key,
     scrollDirection: scrollDirection,
     reverse: reverse,
