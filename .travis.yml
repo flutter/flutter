@@ -1,6 +1,6 @@
 os:
   - linux
-sudo: required
+sudo: false
 addons:
   apt:
     # sky_shell binary depends on /usr/lib/x86_64-linux-gnu/libstdc++.so.6 version GLIBCXX_3.4.18
@@ -22,7 +22,8 @@ env:
 before_script:
   - ./dev/bots/travis_setup.sh
 script:
-  - (./bin/cache/dart-sdk/bin/dart ./dev/bots/test.dart && ./dev/bots/travis_upload.sh)
+  # TODO(tvolkert): Re-enable `&& ./dev/bots/travis_upload.sh`
+  - (./bin/cache/dart-sdk/bin/dart ./dev/bots/test.dart)
 cache:
   directories:
     - $HOME/.pub-cache
