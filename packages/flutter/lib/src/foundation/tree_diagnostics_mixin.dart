@@ -16,6 +16,7 @@ String shortHash(Object object) {
 String describeIdentity(Object object) =>
     '${object.runtimeType}#${shortHash(object)}';
 
+// This method exists as a workaround for https://github.com/dart-lang/sdk/issues/30021
 /// Returns a short description of an enum value.
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
