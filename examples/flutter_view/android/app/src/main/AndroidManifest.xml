@@ -1,9 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.view"
-    android:versionCode="1"
-    android:versionName="0.0.1">
-
-    <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="21" />
+    package="com.example.view">
 
     <!-- The INTERNET permission is required for development. Specifically, flutter needs it to communicate with the running application
          to allow setting breakpoints, to provide hot reload, etc.

@@ -124,20 +124,24 @@ String locateProjectGradlew({ bool ensureExecutable: true }) {
     if (ensureExecutable)
       os.makeExecutable(gradle);
     return gradle.absolute.path;
-  } else {
-    return null;
   }
+  return null;
 }
 
 String ensureGradle() {
   String gradle = locateProjectGradlew();
   if (gradle == null) {
-    gradle = locateSystemGradle();
-    if (gradle == null)
-      throwToolExit('Unable to locate gradle. Please install Android Studio.');
+    _injectGradleWrapper();
+    gradle = locateProjectGradlew();
   }
+  if (gradle == null)
+    throwToolExit('Unable to locate gradle. Please install Android Studio.');
   printTrace('Using gradle from $gradle.');
   return gradle;
+}
+
+void _injectGradleWrapper() {
+  copyDirectorySync(cache.getArtifactDirectory('gradle_wrapper'), fs.directory('android'));
 }
 
 /// Create android/local.properties if needed, and update Flutter settings.
@@ -226,7 +230,7 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   final String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
   // Run 'gradle assemble<BuildMode>'.
-  final Status status = logger.startProgress('Running \'gradle $assembleTask\'...', expectSlowOperation: true);
+  final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
   final String gradlePath = fs.file(gradle).absolute.path;
   final List<String> command = <String>[gradlePath];
   if (!logger.isVerbose) {
