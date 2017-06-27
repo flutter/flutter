@@ -2,8 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/lib/snapshot/toolchain.gni")
 import("//flutter/lib/ui/dart_ui.gni")
+
+import("//dart/runtime/vm/gypi_contents.gni")
+import("//dart/utils/generate_patch_sdk.gni")
 
 if (is_fuchsia) {
   import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
@@ -243,5 +245,125 @@ source_set("snapshot") {
     "$target_gen_dir/isolate_snapshot_instructions.S",
     "$target_gen_dir/vm_snapshot_data.S",
     "$target_gen_dir/vm_snapshot_instructions.S",
+  ]
+}
+
+# Generate flutter_patched_sdk
+
+template("process_library_source") {
+  assert(defined(invoker.libsources), "Need libsources in $target_name")
+  assert(defined(invoker.output), "Need output in $target_name")
+  action(target_name) {
+    deps = [
+      ":generate_dart_ui",
+    ]
+
+    visibility = [ ":*" ]  # Only targets in this file can see this.
+    libsources = invoker.libsources
+
+    script = invoker.script
+    inputs = invoker.inputs + libsources
+    outputs = [
+      invoker.output,
+    ]
+    args = invoker.args + rebase_path(libsources, root_build_dir)
+  }
+}
+
+template("concatenate_patch") {
+  assert(defined(invoker.libsources), "Need a sources in $target_name")
+  assert(defined(invoker.output), "Need an output in $target_name")
+
+  process_library_source(target_name) {
+    libsources = invoker.libsources
+    inputs = []
+    output = invoker.output
+    script = "//dart/runtime/tools/concatenate_patches.py"
+    args = [
+      "--output",
+      rebase_path(output, root_build_dir),
+    ]
+  }
+}
+
+template("generate_vm_patched_sdk") {
+  assert(defined(invoker.libraries), "Need libraries in $target_name")
+
+  concatenation_target_names = []
+
+  # Concatenate vm library patches.
+  foreach(library, invoker.libraries) {
+    name = library[0]
+
+    target_output = "$target_gen_dir/patches/${name}_patch.dart"
+    concatenate_patch("concatenate_${name}_patch") {
+      libsources = rebase_path(library[1], ".", library[2])
+      output = target_output
+    }
+    concatenation_target_names += [ ":concatenate_${name}_patch" ]
+  }
+
+  # Build the patched sdk out of the concatenated patches and the special
+  # libraries.
+  generate_patched_sdk(target_name) {
+    mode = "flutter"
+    deps = concatenation_target_names + ["//dart/runtime/vm:patched_sdk"]
+    input_patches_dir = "$target_gen_dir/patches"
+    patched_sdk_dir = "flutter_patched_sdk"
+  }
+}
+
+generate_vm_patched_sdk("patched_sdk") {
+  libraries = [
+    [
+      "async",
+      processed_gypis.async_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
+      "collection",
+      processed_gypis.collection_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
+      "convert",
+      processed_gypis.convert_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
+      "core",
+      processed_gypis.core_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
+      "developer",
+      processed_gypis.developer_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
+      "internal",
+      processed_gypis.internal_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
+      "io",
+      processed_gypis.bin_io_sources,
+      "//dart/runtime/bin",
+    ],
+    [
+      "isolate",
+      processed_gypis.isolate_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
+      "math",
+      processed_gypis.math_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
+      "typed_data",
+      processed_gypis.typed_data_runtime_sources,
+      "//dart/runtime/lib",
+    ],
   ]
 }
