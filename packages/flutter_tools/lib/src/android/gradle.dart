@@ -115,8 +115,9 @@ String locateProjectGradlew({ bool ensureExecutable: true }) {
     if (ensureExecutable)
       os.makeExecutable(gradle);
     return gradle.absolute.path;
+  } else {
+    return null;
   }
-  return null;
 }
 
 String ensureGradle() {
