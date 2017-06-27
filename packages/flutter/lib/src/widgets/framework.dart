@@ -472,8 +472,9 @@ abstract class Widget {
   @override
   String toString() {
     final String name = toStringShort();
-    final List<String> data = <String>[];
-    debugFillDescription(data);
+    List<DiagnosticsNode> data = <DiagnosticsNode>[];
+    debugFillProperties(data);
+    data = data.where((DiagnosticsNode n) => !n.hidden).toList();
     if (data.isEmpty)
       return '$name';
     return '$name(${data.join("; ")})';
@@ -483,14 +484,14 @@ abstract class Widget {
   ///
   /// This method makes it easier for subclasses to coordinate to provide a
   /// high-quality [toString] implementation. The [toString] implementation on
-  /// the [State] base class calls [debugFillDescription] to collect useful
+  /// the [State] base class calls [debugFillProperties] to collect useful
   /// information from subclasses to incorporate into its return value.
   ///
   /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// `super.debugFillProperties(description)`.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) { }
+  void debugFillProperties(List<DiagnosticsNode> description) { }
 
   /// Whether the `newWidget` can be used to update an [Element] that currently
   /// has the `oldWidget` as its configuration.
@@ -1369,32 +1370,37 @@ abstract class State<T extends StatefulWidget> {
 
   @override
   String toString() {
-    final List<String> data = <String>[];
-    debugFillDescription(data);
-    return '${describeIdentity(this)}(${data.join("; ")})';
+    final List<DiagnosticsNode> allProperties = <DiagnosticsNode>[];
+    debugFillProperties(allProperties);
+    final Iterable<DiagnosticsNode> properties =
+        allProperties.where((DiagnosticsNode n) => !n.hidden);
+    return '${describeIdentity(this)}(${properties.join("; ")})';
   }
 
-  /// Add additional information to the given description for use by [toString].
+  /// Add additional properties to the given description used by
+  /// [toDiagnosticNode], [toString] and [toStringDeep].
   ///
-  /// This method makes it easier for subclasses to coordinate to provide a
-  /// high-quality [toString] implementation. The [toString] implementation on
-  /// the [State] base class calls [debugFillDescription] to collect useful
+  /// This method makes it easier for subclasses to coordinate to provide
+  /// high-quality diagnostic data. The [toString] implementation on
+  /// the [State] base class calls [debugFillProperties] to collect useful
   /// information from subclasses to incorporate into its return value.
   ///
   /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// `super.debugFillProperties(description)`.
+  ///
+  /// See also:
+  ///
+  ///  * [TreeDiagnosticsMixin.debugFillProperties], which provides detailed
+  ///    best practices for defining diagnostic properties.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) {
+  void debugFillProperties(List<DiagnosticsNode> description) {
     assert(() {
-      if (_debugLifecycleState != _StateLifecycle.ready)
-        description.add('$_debugLifecycleState');
+      description.add(new EnumProperty<_StateLifecycle>('lifecycle state', _debugLifecycleState, defaultValue: _StateLifecycle.ready));
       return true;
     });
-    if (_widget == null)
-      description.add('no widget');
-    if (_element == null)
-      description.add('not mounted');
+    description.add(new ObjectFlagProperty<T>('_widget', _widget, ifNull: 'no widget'));
+    description.add(new ObjectFlagProperty<StatefulElement>('_element', _element, ifNull: 'not mounted'));
   }
 }
 
@@ -2516,7 +2522,7 @@ class BuildOwner {
 ///    element.
 ///  * At this point, the element is considered "defunct" and will not be
 ///    incorporated into the tree in the future.
-abstract class Element implements BuildContext {
+abstract class Element implements BuildContext, TreeDiagnostics {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
@@ -3291,52 +3297,60 @@ abstract class Element implements BuildContext {
 
   @override
   String toString() {
-    final List<String> data = <String>[];
-    debugFillDescription(data);
+    List<DiagnosticsNode> data = <DiagnosticsNode>[];
+    debugFillProperties(data);
+    data = data.where((DiagnosticsNode n) => !n.hidden).toList();
     final String name = widget != null ? '${widget.runtimeType}' : '[$runtimeType]';
     return '$name(${data.join("; ")})';
   }
 
-  /// Add additional information to the given description for use by [toString].
+  /// Add additional properties to the given description used by
+  /// [toDiagnosticNode], [toString] and [toStringDeep].
   ///
-  /// This method makes it easier for subclasses to coordinate to provide a
-  /// high-quality [toString] implementation. The [toString] implementation on
-  /// the [State] base class calls [debugFillDescription] to collect useful
+  /// This method makes it easier for subclasses to coordinate to provide
+  /// high-quality diagnostic data. The [toString] implementation on
+  /// the [State] base class calls [debugFillProperties] to collect useful
   /// information from subclasses to incorporate into its return value.
   ///
   /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// `super.debugFillProperties(description)`.
+  ///
+  /// See also:
+  ///
+  ///  * [TreeDiagnosticsMixin.debugFillProperties], which provides detailed
+  ///    best practices for defining diagnostic properties.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) {
-    if (depth == null)
-      description.add('no depth');
-    if (widget == null) {
-      description.add('no widget');
-    } else {
-      if (widget.key != null)
-        description.add('${widget.key}');
-      widget.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    description.add(new ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
+    description.add(new ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
+    if (widget != null) {
+      description.add(new DiagnosticsProperty<Key>('key', widget?.key, showName: false, defaultValue: null));
+      widget.debugFillProperties(description);
     }
-    if (dirty)
-      description.add('dirty');
+    description.add(new FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
   }
 
   /// A detailed, textual description of this element, includings its children.
+  @override
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    final StringBuffer result = new StringBuffer()
-      ..write(prefixLineOne)
-      ..write(this)
-      ..write('\n');
-    final List<Element> children = <Element>[];
-    visitChildren(children.add);
-    if (children.isNotEmpty) {
-      final Element last = children.removeLast();
-      for (Element child in children)
-        result.write(child.toStringDeep("$prefixOtherLines\u251C", "$prefixOtherLines\u2502"));
-      result.write(last.toStringDeep("$prefixOtherLines\u2514", "$prefixOtherLines "));
-    }
-    return result.toString();
+    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return new DiagnosticsNode.lazy(
+      name: name,
+      object: this,
+      getChildren: () {
+        final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+        visitChildren((Element child) {
+          children.add(child.toDiagnosticsNode());
+        });
+        return children;
+      },
+      style: style ?? DiagnosticsTreeStyle.dense,
+    );
   }
 
   /// Returns true if the element has been marked as needing rebuilding.
@@ -3479,9 +3493,9 @@ class ErrorWidget extends LeafRenderObjectWidget {
   RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('message: ' + _stringify(message));
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('message', message, quoted: false));
   }
 }
 
@@ -3760,10 +3774,9 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (state != null)
-      description.add('state: $state');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<State<StatefulWidget>>('state', state, defaultValue: null));
   }
 }
 
@@ -4428,10 +4441,9 @@ abstract class RenderObjectElement extends Element {
   void removeChildRenderObject(covariant RenderObject child);
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (renderObject != null)
-      description.add('renderObject: $renderObject');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<RenderObject>('renderObject', renderObject, defaultValue: null));
   }
 }
 

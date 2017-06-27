@@ -176,25 +176,17 @@ class TextField extends StatefulWidget {
   _TextFieldState createState() => new _TextFieldState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (controller != null)
-      description.add('controller: $controller');
-    if (focusNode != null)
-      description.add('focusNode: $focusNode');
-    description.add('decoration: $decoration');
-    if (keyboardType != TextInputType.text)
-      description.add('keyboardType: $keyboardType');
-    if (style != null)
-      description.add('style: $style');
-    if (autofocus)
-      description.add('autofocus: $autofocus');
-    if (obscureText)
-      description.add('obscureText: $obscureText');
-    if (autocorrect)
-      description.add('autocorrect: $autocorrect');
-    if (maxLines != 1)
-      description.add('maxLines: $maxLines');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    description.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    description.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    description.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
   }
 }
 

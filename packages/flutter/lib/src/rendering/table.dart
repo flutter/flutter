@@ -1278,46 +1278,38 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (border != null)
-      description.add('border: $border');
-    if (_columnWidths.isNotEmpty)
-      description.add('specified column widths: $_columnWidths');
-    description.add('default column width: $defaultColumnWidth');
-    description.add('table size: $columns\u00D7$rows');
-    description.add('column offsets: ${ _columnLefts ?? "unknown" }');
-    description.add('row offsets: ${ _rowTops ?? "unknown" }');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
+    description.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>(
+      'specified column widths',
+      _columnWidths,
+      hidden: _columnWidths.isEmpty,
+    ));
+    description.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
+    description.add(new MessageProperty('table size', '$columns\u00D7$rows'));
+    description.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
+    description.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: "unknown"));
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    final StringBuffer result = new StringBuffer();
-    result.writeln('$prefix \u2502');
-    final int lastIndex = _children.length - 1;
-    if (lastIndex < 0) {
-      result.writeln('$prefix \u2514\u2500table is empty');
-    } else {
-      for (int y = 0; y < rows; y += 1) {
-        for (int x = 0; x < columns; x += 1) {
-          final int xy = x + y * columns;
-          final RenderBox child = _children[xy];
-          if (child != null) {
-            if (xy < lastIndex) {
-              result.write('${child.toStringDeep("$prefix \u251C\u2500child ($x, $y): ", "$prefix \u2502")}');
-            } else {
-              result.write('${child.toStringDeep("$prefix \u2514\u2500child ($x, $y): ", "$prefix  ")}');
-            }
-          } else {
-            if (xy < lastIndex) {
-              result.writeln('$prefix \u251C\u2500child ($x, $y) is null');
-            } else {
-              result.writeln('$prefix \u2514\u2500child ($x, $y) is null');
-            }
-          }
-        }
+  List<DiagnosticsNode> debugDescribeChildren() {
+    if (_children.isEmpty) {
+      return <DiagnosticsNode>[new DiagnosticsNode.message('table is empty')];
+    }
+
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    for (int y = 0; y < rows; y += 1) {
+      for (int x = 0; x < columns; x += 1) {
+        final int xy = x + y * columns;
+        final RenderBox child = _children[xy];
+        final String name = 'child ($x, $y)';
+        if (child != null)
+          children.add(child.toDiagnosticsNode(name: name));
+        else
+          children.add(new DiagnosticsProperty<Object>(name, null, ifNull: 'is null', showSeparator: false));
       }
     }
-    return result.toString();
+    return children;
   }
 }

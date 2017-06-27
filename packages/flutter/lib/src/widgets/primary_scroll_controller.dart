@@ -54,8 +54,8 @@ class PrimaryScrollController extends InheritedWidget {
   bool updateShouldNotify(PrimaryScrollController old) => controller != old.controller;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('${controller ?? "no controller"}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
   }
 }

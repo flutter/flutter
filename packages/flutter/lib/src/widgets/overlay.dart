@@ -370,9 +370,11 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('entries: $_entries');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    // TODO(jacobr): use IterableProperty instead as that would
+    // provide a slightly more consistent string summary of the List.
+    description.add(new DiagnosticsProperty<List<OverlayEntry>>('entries', _entries));
   }
 }
 
@@ -557,33 +559,39 @@ class _RenderTheatre extends RenderBox
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    final StringBuffer result = new StringBuffer();
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+
     if (child != null)
-      result
-        ..write(prefix)
-        ..write(' \u2502\n')
-        ..write(child.toStringDeep('$prefix \u251C\u2500onstage: ', '$prefix \u254E'));
-    if (firstChild != null) {
+      children.add(child.toDiagnosticsNode(name: 'onstage'));
+
+    if (firstChild  != null) {
       RenderBox child = firstChild;
+
       int count = 1;
-      while (child != lastChild) {
-        result.write(child.toStringDeep("$prefix \u254E\u254Coffstage $count: ", "$prefix \u254E"));
-        count += 1;
+      while (true) {
+        children.add(
+          child.toDiagnosticsNode(
+            name: 'offstage $count',
+            style: DiagnosticsTreeStyle.offstage,
+          ),
+        );
+        if (child == lastChild)
+          break;
         final StackParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
-      }
-      if (child != null) {
-        assert(child == lastChild);
-        result.write(child.toStringDeep("$prefix \u2514\u254Coffstage $count: ", "$prefix  "));
+        count += 1;
       }
     } else {
-      result
-        ..write(prefix)
-        ..write(' \u2514\u254Cno offstage children');
+      children.add(
+        new DiagnosticsNode.message(
+          'no offstage children',
+          style: DiagnosticsTreeStyle.offstage,
+        ),
+      );
     }
-    return result.toString();
-  }
+    return children;
+   }
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {

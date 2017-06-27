@@ -524,11 +524,11 @@ class RenderStack extends RenderBox
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    description.add('fit: $fit');
-    description.add('overflow: $overflow');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new EnumProperty<StackFit>('fit', fit));
+    description.add(new EnumProperty<Overflow>('overflow', overflow));
   }
 }
 
@@ -600,8 +600,8 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('index: $index');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new IntProperty('index', index));
   }
 }

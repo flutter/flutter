@@ -27,8 +27,7 @@ void main() {
     expect(didBuild, isTrue);
     final RenderObject theater = overlayKey.currentContext.findRenderObject();
 
-    // TODO(jacobr): toStringDeep is missing a trailing \n on the last line.
-    expect(theater, isNot(hasAGoodToStringDeep));
+    expect(theater, hasAGoodToStringDeep);
     expect(
       theater.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -45,8 +44,8 @@ void main() {
         ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' ╎ │ size: Size(800.0, 600.0)\n'
         ' ╎ │ alignment: FractionalOffset(0.0, 0.0)\n'
-        ' ╎ │ fit: StackFit.expand\n'
-        ' ╎ │ overflow: Overflow.clip\n'
+        ' ╎ │ fit: expand\n'
+        ' ╎ │ overflow: clip\n'
         ' ╎ │\n'
         ' ╎ └─child 1: RenderLimitedBox#00000\n'
         ' ╎   │ creator: LimitedBox ← Container ←\n'
@@ -68,7 +67,7 @@ void main() {
         ' ╎       size: Size(800.0, 600.0)\n'
         ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' └╌no offstage children',
+        ' └╌no offstage children\n',
       ),
     );
   });
@@ -114,8 +113,8 @@ void main() {
           ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
           ' ╎ │ size: Size(800.0, 600.0)\n'
           ' ╎ │ alignment: FractionalOffset(0.0, 0.0)\n'
-          ' ╎ │ fit: StackFit.expand\n'
-          ' ╎ │ overflow: Overflow.clip\n'
+          ' ╎ │ fit: expand\n'
+          ' ╎ │ overflow: clip\n'
           ' ╎ │\n'
           ' ╎ └─child 1: RenderLimitedBox#00000\n'
           ' ╎   │ creator: LimitedBox ← Container ←\n'

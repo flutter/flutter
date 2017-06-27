@@ -299,7 +299,7 @@ void main() {
     await tester.pump();
     expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream(OneFrameImageStreamCompleter; [100×100] @ 1.0x; 1 listener); pixels: [100×100] @ 1.0x)'));
     await tester.pumpWidget(new Container());
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(_StateLifecycle.defunct; not mounted; stream: ImageStream(OneFrameImageStreamCompleter; [100×100] @ 1.0x; 0 listeners); pixels: [100×100] @ 1.0x)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct; not mounted; stream: ImageStream(OneFrameImageStreamCompleter; [100×100] @ 1.0x; 0 listeners); pixels: [100×100] @ 1.0x)'));
   });
 
   testWidgets('Image.memory control test', (WidgetTester tester) async {

@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
@@ -60,13 +61,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (value != null) {
-      description.add('${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%');
-    } else {
-      description.add('<indeterminate>');
-    }
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new PercentProperty('value', value, showName: false, ifNull: '<indeterminate>'));
   }
 }
 

@@ -1601,38 +1601,24 @@ class BoxDecoration extends Decoration {
     );
   }
 
-  /// Stringifies the BoxDecoration. By default, the output will be on one line.
-  /// If the method is passed a non-empty string argument, then the output will
-  /// span multiple lines, each prefixed by that argument.
   @override
-  String toString([String prefix = '', String indentPrefix]) {
-    final List<String> result = <String>[];
-    if (color != null)
-      result.add('${prefix}color: $color');
-    if (image != null)
-      result.add('${prefix}image: $image');
-    if (border != null)
-      result.add('${prefix}border: $border');
-    if (borderRadius != null)
-      result.add('${prefix}borderRadius: $borderRadius');
-    if (boxShadow != null) {
-      if (indentPrefix != null && boxShadow.length > 1) {
-        result.add('${prefix}boxShadow:');
-        for (BoxShadow shadow in boxShadow)
-          result.add('$indentPrefix$shadow');
-      } else {
-        result.add('${prefix}boxShadow: ${boxShadow.map((BoxShadow shadow) => shadow.toString()).join(", ")}');
-      }
-    }
-    if (gradient != null)
-      result.add('${prefix}gradient: $gradient');
-    if (shape != BoxShape.rectangle)
-      result.add('${prefix}shape: $shape');
-    if (prefix == '')
-      return '$runtimeType(${result.join(', ')})';
-    if (result.isEmpty)
-      return '$prefix<no decorations specified>';
-    return result.join('\n');
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style: DiagnosticsTreeStyle.whitespace }) {
+    return new DiagnosticsNode.lazy(
+      name: name,
+      object: this,
+      description: '',
+      style: style,
+      emptyBodyDescription: '<no decorations specified>',
+      fillProperties: (List<DiagnosticsNode> properties) {
+        properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+        properties.add(new DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
+        properties.add(new DiagnosticsProperty<Border>('border', border, defaultValue: null));
+        properties.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
+        properties.add(new IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: style));
+        properties.add(new DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
+        properties.add(new EnumProperty<BoxShape>('shape', shape, defaultValue: BoxShape.rectangle));
+      },
+    );
   }
 
   @override
