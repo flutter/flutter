@@ -16,6 +16,21 @@ import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
+/// A base class for slivers that have a [RenderBox] child which scrolls
+/// normally, except that when it hits the leading edge (typically the top) of
+/// the viewport, it shrinks to a minimum size ([minExtent]).
+///
+/// This class primarily provides helpers for managing the child, in particular:
+///
+///  * [layoutChild], which applies min and max extents and a scroll offset to
+///    lay out the child. This is normally called from [performLayout].
+///
+///  * [childExtent], to convert the child's box layout dimensions to the sliver
+///    geometry model.
+///
+///  * hit testing, painting, and other details of the sliver protocol.
+///
+/// Subclasses must implement [performLayout], [minExtent], and [maxExtent].
 abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
   RenderSliverPersistentHeader({ RenderBox child }) {
     this.child = child;
@@ -286,6 +301,9 @@ class FloatingHeaderSnapConfiguration {
   final Duration duration;
 }
 
+/// A sliver with a [RenderBox] child which shrinks and scrolls like a
+/// [RenderSliverScrollingPersistentHeader], but immediately comes back when the
+/// user scrolls in the reverse direction.
 abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersistentHeader {
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
