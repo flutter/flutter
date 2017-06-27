@@ -9,6 +9,13 @@ import 'package:test/test.dart';
 
 void main() {
   test("TextStyle control test", () {
+    expect(const TextStyle(inherit: false).toString(), equals(
+        'inherit: false\n'
+            '<no style specified>'));
+    expect(const TextStyle(inherit: true).toString(), equals(
+        'inherit: true\n'
+            '<no style specified>'));
+
     final TextStyle s1 = const TextStyle(
       fontSize: 10.0,
       fontWeight: FontWeight.w800,
@@ -20,6 +27,15 @@ void main() {
     expect(s1.fontWeight, FontWeight.w800);
     expect(s1.height, 123.0);
     expect(s1, equals(s1));
+    expect(
+      s1.toString(),
+      equals(
+        'inherit: true\n'
+        'size: 10.0\n'
+        'weight: 800\n'
+        'height: 123.0x',
+      ),
+    );
 
     final TextStyle s2 = s1.copyWith(color: const Color(0xFF00FF00), height: 100.0);
     expect(s1.fontFamily, isNull);
@@ -33,6 +49,16 @@ void main() {
     expect(s2.height, 100.0);
     expect(s2.color, const Color(0xFF00FF00));
     expect(s2, isNot(equals(s1)));
+    expect(
+      s2.toString(),
+      equals(
+        'inherit: true\n'
+        'color: Color(0xff00ff00)\n'
+        'size: 10.0\n'
+        'weight: 800\n'
+        'height: 100.0x',
+      ),
+    );
 
     final TextStyle s3 = s1.apply(fontSizeFactor: 2.0, fontSizeDelta: -2.0, fontWeightDelta: -4);
     expect(s1.fontFamily, isNull);

@@ -39,6 +39,18 @@ void main() {
     expect(interpolated.color, equals(side2.color.withOpacity(0.2)));
   });
 
+  test('BorderSide toString test', () {
+    final BorderSide side1 = const BorderSide();
+    final BorderSide side2 = side1.copyWith(
+      color: const Color(0xFF00FFFF),
+      width: 2.0,
+      style: BorderStyle.solid,
+    );
+
+    expect(side1.toString(), equals('BorderSide(Color(0xff000000), 1.0, BorderStyle.solid)'));
+    expect(side2.toString(), equals('BorderSide(Color(0xff00ffff), 2.0, BorderStyle.solid)'));
+  });
+
   test('Border control test', () {
     final Border border1 = new Border.all(width: 4.0);
     final Border border2 = Border.lerp(null, border1, 0.25);
@@ -52,6 +64,11 @@ void main() {
 
     final Border border4 = Border.lerp(border2, border3, 0.5);
     expect(border4.left.width, equals(2.0));
+  });
+
+  test('Border toString test', () {
+    expect(new Border.all(width: 4.0).toString(), equals(
+        'Border(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid))'));
   });
 
   test('BoxShadow control test', () {
@@ -75,6 +92,10 @@ void main() {
     shadowList = BoxShadow.lerpList(
         <BoxShadow>[shadow2], <BoxShadow>[shadow3, shadow1], 0.5);
     expect(shadowList, equals(<BoxShadow>[shadow4, shadow1.scale(0.5)]));
+  });
+
+  test('BoxShadow toString test', () {
+    expect(const BoxShadow(blurRadius: 4.0).toString(), equals('BoxShadow(Color(0xff000000), Offset(0.0, 0.0), 4.0, 0.0)'));
   });
 
   test('LinearGradient scale test', () {
@@ -129,5 +150,17 @@ void main() {
         const Color(0x77777777),
       ],
     ));
+  });
+
+  test('LinearGradient toString', () {
+    expect(const LinearGradient(
+      begin: FractionalOffset.topLeft,
+      end: FractionalOffset.bottomLeft,
+      colors: const <Color>[
+        const Color(0x33333333),
+        const Color(0x66666666),
+      ],
+    ).toString(),
+        equals('LinearGradient(FractionalOffset(0.0, 0.0), FractionalOffset(0.0, 1.0), [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)'));
   });
 }
