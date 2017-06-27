@@ -6,7 +6,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
@@ -25,26 +24,8 @@ AndroidStudio get androidStudio =>
 // /Applications/Android Studio.app/Contents/
 // $HOME/Applications/Android Studio.app/Contents/
 
-// $STUDIO_HOME/gradle/gradle-X.Y.Z/bin/gradle
-
-final Version minGradleVersion = new Version(2, 14, 1);
-
 final RegExp _dotHomeStudioVersionMatcher =
     new RegExp(r'^\.AndroidStudio([^\d]*)([\d.]+)');
-
-/// Locate Gradle.
-String get gradleExecutable {
-  // See if the user has explicitly configured gradle-dir.
-  final String gradleDir = config.getValue('gradle-dir');
-  if (gradleDir != null) {
-    if (fs.isFileSync(gradleDir))
-      return gradleDir;
-    return fs.path.join(
-        gradleDir, 'bin', platform.isWindows ? 'gradle.bat' : 'gradle'
-    );
-  }
-  return androidStudio?.gradleExecutable ?? os.which('gradle')?.path;
-}
 
 String get javaPath => androidStudio?.javaPath;
 
@@ -58,7 +39,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final Version version;
   final String configured;
 
-  String _gradlePath;
   String _javaPath;
   bool _isValid = false;
   final List<String> _validationMessages = <String>[];
@@ -97,11 +77,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     return null;
   }
-
-  String get gradlePath => _gradlePath;
-
-  String get gradleExecutable => fs.path
-      .join(_gradlePath, 'bin', platform.isWindows ? 'gradle.bat' : 'gradle');
 
   String get javaPath => _javaPath;
 
@@ -244,40 +219,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (!fs.isDirectorySync(directory)) {
       _validationMessages.add('Android Studio not found at $directory');
       return;
-    }
-
-    Version latestGradleVersion;
-
-    List<FileSystemEntity> gradlePaths;
-    try {
-      gradlePaths = fs.directory(fs.path.join(directory, 'gradle')).listSync();
-      for (FileSystemEntity entry in gradlePaths.where((FileSystemEntity e) =>
-          e.basename.startsWith('gradle-') && e is Directory)) {
-        final Version version =
-            new Version.parse(entry.basename.substring('gradle-'.length)) ??
-                Version.unknown;
-        if (latestGradleVersion == null || version > latestGradleVersion) {
-          latestGradleVersion = version;
-          if (version >= minGradleVersion) {
-            _gradlePath = entry.path;
-          }
-        }
-      }
-    } catch (e) {
-      printTrace('Unable to determine Gradle version: $e');
-    }
-
-    if (latestGradleVersion == null) {
-      _validationMessages.add('Gradle not found.');
-    } else if (_gradlePath == null) {
-      _validationMessages.add('Gradle version $minGradleVersion required. '
-          'Found version $latestGradleVersion.');
-    } else if (processManager.canRun(gradleExecutable)) {
-      _isValid = true;
-      _validationMessages.add('Gradle version $latestGradleVersion');
-    } else {
-      _validationMessages.add(
-          'Gradle version $latestGradleVersion at $_gradlePath is not executable.');
     }
 
     final String javaPath = platform.isMacOS ?
