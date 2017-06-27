@@ -372,12 +372,12 @@ class InputDecorator extends StatelessWidget {
   final Widget child;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('decoration: $decoration');
-    description.add('baseStyle: $baseStyle');
-    description.add('isFocused: $isFocused');
-    description.add('isEmpty: $isEmpty');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    description.add(new EnumProperty<TextStyle>('baseStyle', baseStyle));
+    description.add(new DiagnosticsProperty<bool>('isFocused', isFocused));
+    description.add(new DiagnosticsProperty<bool>('isEmpty', isEmpty));
   }
 
   Color _getActiveColor(ThemeData themeData) {
@@ -615,9 +615,9 @@ class _AnimatedLabel extends ImplicitlyAnimatedWidget {
   _AnimatedLabelState createState() => new _AnimatedLabelState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    '$style'.split('\n').forEach(description.add);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    style?.debugFillProperties(description);
   }
 }
 

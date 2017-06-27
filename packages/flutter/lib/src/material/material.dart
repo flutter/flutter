@@ -175,18 +175,13 @@ class Material extends StatefulWidget {
   _MaterialState createState() => new _MaterialState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$type');
-    description.add('elevation: ${elevation.toStringAsFixed(1)}');
-    if (color != null)
-      description.add('color: $color');
-    if (textStyle != null) {
-      for (String entry in '$textStyle'.split('\n'))
-        description.add('textStyle.$entry');
-    }
-    if (borderRadius != null)
-      description.add('borderRadius: $borderRadius');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<MaterialType>('type', type));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    textStyle?.debugFillProperties(description, prefix: 'textStyle.');
+    description.add(new EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
 
   /// The default radius of an ink splash in logical pixels.

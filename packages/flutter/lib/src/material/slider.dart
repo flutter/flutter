@@ -161,11 +161,11 @@ class Slider extends StatefulWidget {
   _SliderState createState() => new _SliderState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: ${value.toStringAsFixed(1)}');
-    description.add('min: $min');
-    description.add('max: $max');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('value', value));
+    description.add(new DoubleProperty('min', min));
+    description.add(new DoubleProperty('max', max));
   }
 }
 

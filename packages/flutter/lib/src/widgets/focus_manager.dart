@@ -354,29 +354,27 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     if (_focus != null)
-      description.add('focus: $_focus');
+      description.add(new DiagnosticsProperty<FocusNode>('focus', _focus));
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    final StringBuffer buffer = new StringBuffer();
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
     if (_firstChild != null) {
       FocusScopeNode child = _firstChild;
       int count = 1;
-      while (child != _lastChild) {
-        buffer.write(child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502"));
-        count += 1;
+      while (true) {
+        children.add(child.toDiagnosticsNode(name: "child $count"));
+        if (child == _lastChild)
+          break;
         child = child._nextSibling;
-      }
-      if (child != null) {
-        assert(child == _lastChild);
-        buffer.write(child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  "));
+        count += 1;
       }
     }
-    return buffer.toString();
+    return children;
   }
 }
 

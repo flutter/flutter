@@ -102,10 +102,10 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('maxHeight: $maxHeight');
-    description.add('scrollFactor: $scrollFactor');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('maxHeight', maxHeight));
+    description.add(new DoubleProperty('scrollFactor', scrollFactor));
   }
 }
 

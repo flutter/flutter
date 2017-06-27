@@ -303,10 +303,21 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: ${value ? "checked" : "unchecked"}');
-    if (!isInteractive)
-      description.add('disabled');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty(
+      'value',
+      value: value,
+      ifTrue: "checked",
+      ifFalse: "unchecked",
+      showName: true,
+    ));
+    description.add(new FlagProperty(
+      'isInteractive',
+      value: isInteractive,
+      ifTrue: 'enabled',
+      ifFalse: 'disabled',
+      defaultValue: true,
+    ));
   }
 }
