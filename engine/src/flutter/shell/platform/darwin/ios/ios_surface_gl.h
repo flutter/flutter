@@ -36,6 +36,10 @@ class IOSSurfaceGL : public IOSSurface, public GPUSurfaceGLDelegate {
 
   intptr_t GLContextFBO() const override;
 
+  sk_sp<SkColorSpace> ColorSpace() const override {
+    return context_.ColorSpace();
+  }
+
  private:
   IOSGLContext context_;
 
