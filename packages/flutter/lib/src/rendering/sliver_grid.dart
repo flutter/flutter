@@ -507,8 +507,9 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       final int oldLastIndex = indexOf(lastChild);
       final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount);
       final int trailingGarbage = targetLastIndex == null ? 0 : (oldLastIndex - targetLastIndex).clamp(0, childCount);
-      if (leadingGarbage + trailingGarbage > 0)
-        collectGarbage(leadingGarbage, trailingGarbage);
+      collectGarbage(leadingGarbage, trailingGarbage);
+    } else {
+      collectGarbage(0, 0);
     }
 
     final SliverGridGeometry firstChildGridGeometry = layout.getGeometryForChildIndex(firstIndex);

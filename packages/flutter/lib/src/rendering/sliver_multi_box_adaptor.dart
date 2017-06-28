@@ -111,8 +111,15 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
   /// The index of this child according to the [RenderSliverBoxChildManager].
   int index;
 
+  /// Whether to keep the child alive even when it is no longer visible.
+  bool keepAlive = false;
+
+  /// Whether the widget is currently in the
+  /// [RenderSliverMultiBoxAdaptor._keepAliveBucket].
+  bool _keptAlive = false;
+
   @override
-  String toString() => 'index=$index; ${super.toString()}';
+  String toString() => 'index=$index; ${keepAlive == true ? "keepAlive; " : ""}${super.toString()}';
 }
 
 /// A sliver with multiple box children.
@@ -168,10 +175,15 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   RenderSliverBoxChildManager get childManager => _childManager;
   final RenderSliverBoxChildManager _childManager;
 
+  /// The nodes being kept alive despite not being visible.
+  final Map<int, RenderBox> _keepAliveBucket = <int, RenderBox>{};
+
   @override
   void adoptChild(RenderObject child) {
     super.adoptChild(child);
-    childManager.didAdoptChild(child);
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    if (!childParentData._keptAlive)
+      childManager.didAdoptChild(child);
   }
 
   bool _debugAssertChildListLocked() => childManager.debugAssertChildListLocked();
@@ -192,64 +204,139 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     });
   }
 
+  @override
+  void remove(RenderBox child) {
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    if (!childParentData._keptAlive) {
+      super.remove(child);
+      return;
+    }
+    assert(_keepAliveBucket[childParentData.index] == child);
+    _keepAliveBucket.remove(childParentData.index);
+    dropChild(child);
+  }
+
+  @override
+  void removeAll() {
+    super.removeAll();
+    for (RenderBox child in _keepAliveBucket.values)
+      dropChild(child);
+    _keepAliveBucket.clear();
+  }
+
+  void _createOrObtainChild(int index, { RenderBox after }) {
+    invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
+      assert(constraints == this.constraints);
+      if (_keepAliveBucket.containsKey(index)) {
+        final RenderBox child = _keepAliveBucket.remove(index);
+        final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+        assert(childParentData._keptAlive);
+        dropChild(child);
+        child.parentData = childParentData;
+        insert(child, after: after);
+        childParentData._keptAlive = false;
+      } else {
+        _childManager.createChild(index, after: after);
+      }
+    });
+  }
+
+  void _destroyOrCacheChild(RenderBox child) {
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    if (childParentData.keepAlive) {
+      assert(!childParentData._keptAlive);
+      remove(child);
+      _keepAliveBucket[childParentData.index] = child;
+      child.parentData = childParentData;
+      super.adoptChild(child);
+      childParentData._keptAlive = true;
+    } else {
+      assert(child.parent == this);
+      _childManager.removeChild(child);
+      assert(child.parent == null);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    for (RenderBox child in _keepAliveBucket.values)
+      child.attach(owner);
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    for (RenderBox child in _keepAliveBucket.values)
+      child.detach();
+  }
+
+  @override
+  void redepthChildren() {
+    super.redepthChildren();
+    for (RenderBox child in _keepAliveBucket.values)
+      redepthChild(child);
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    super.visitChildren(visitor);
+    for (RenderBox child in _keepAliveBucket.values)
+      visitor(child);
+  }
+
   /// Called during layout to create and add the child with the given index and
   /// scroll offset.
   ///
   /// Calls [RenderSliverBoxChildManager.createChild] to actually create and add
-  /// the child.
+  /// the child if necessary. The child may instead be obtained from a cache;
+  /// see [SliverMultiBoxAdaptorParentData.keepAlive].
   ///
-  /// Returns false if createChild did not add any child, otherwise returns
-  /// true.
+  /// Returns false if there was no cached child and `createChild` did not add
+  /// any child, otherwise returns true.
   ///
   /// Does not layout the new child.
   ///
-  /// When this is called, there are no children, so no children can be removed
-  /// during the call to createChild. No child should be added during that call
-  /// either, except for the one that is created and returned by createChild.
+  /// When this is called, there are no visible children, so no children can be
+  /// removed during the call to `createChild`. No child should be added during
+  /// that call either, except for the one that is created and returned by
+  /// `createChild`.
   @protected
   bool addInitialChild({ int index: 0, double layoutOffset: 0.0 }) {
     assert(_debugAssertChildListLocked());
     assert(firstChild == null);
-    bool result;
-    invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
-      assert(constraints == this.constraints);
-      _childManager.createChild(index, after: null);
-      if (firstChild != null) {
-        assert(firstChild == lastChild);
-        assert(indexOf(firstChild) == index);
-        final SliverMultiBoxAdaptorParentData firstChildParentData = firstChild.parentData;
-        firstChildParentData.layoutOffset = layoutOffset;
-        result = true;
-      } else {
-        childManager.setDidUnderflow(true);
-        result = false;
-      }
-    });
-    return result;
+    _createOrObtainChild(index, after: null);
+    if (firstChild != null) {
+      assert(firstChild == lastChild);
+      assert(indexOf(firstChild) == index);
+      final SliverMultiBoxAdaptorParentData firstChildParentData = firstChild.parentData;
+      firstChildParentData.layoutOffset = layoutOffset;
+      return true;
+    }
+    childManager.setDidUnderflow(true);
+    return false;
   }
 
   /// Called during layout to create, add, and layout the child before
   /// [firstChild].
   ///
   /// Calls [RenderSliverBoxChildManager.createChild] to actually create and add
-  /// the child.
+  /// the child if necessary. The child may instead be obtained from a cache;
+  /// see [SliverMultiBoxAdaptorParentData.keepAlive].
   ///
-  /// Returns the new child or null if no child is created.
+  /// Returns the new child or null if no child was obtained.
   ///
   /// The child that was previously the first child, as well as any subsequent
   /// children, may be removed by this call if they have not yet been laid out
   /// during this layout pass. No child should be added during that call except
-  /// for the one that is created and returned by createChild.
+  /// for the one that is created and returned by `createChild`.
   @protected
   RenderBox insertAndLayoutLeadingChild(BoxConstraints childConstraints, {
     bool parentUsesSize: false,
   }) {
     assert(_debugAssertChildListLocked());
     final int index = indexOf(firstChild) - 1;
-    invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
-      assert(constraints == this.constraints);
-      _childManager.createChild(index, after: null);
-    });
+    _createOrObtainChild(index, after: null);
     if (indexOf(firstChild) == index) {
       firstChild.layout(childConstraints, parentUsesSize: parentUsesSize);
       return firstChild;
@@ -262,7 +349,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// the given child.
   ///
   /// Calls [RenderSliverBoxChildManager.createChild] to actually create and add
-  /// the child.
+  /// the child if necessary. The child may instead be obtained from a cache;
+  /// see [SliverMultiBoxAdaptorParentData.keepAlive].
   ///
   /// Returns the new child. It is the responsibility of the caller to configure
   /// the child's scroll offset.
@@ -277,13 +365,9 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     assert(_debugAssertChildListLocked());
     assert(after != null);
     final int index = indexOf(after) + 1;
-    invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
-      assert(constraints == this.constraints);
-      _childManager.createChild(index, after: after);
-    });
+    _createOrObtainChild(index, after: after);
     final RenderBox child = childAfter(after);
     if (child != null && indexOf(child) == index) {
-      assert(indexOf(child) == index);
       child.layout(childConstraints, parentUsesSize: parentUsesSize);
       return child;
     }
@@ -293,19 +377,37 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   /// Called after layout with the number of children that can be garbage
   /// collected at the head and tail of the child list.
+  ///
+  /// Children whose [SliverMultiBoxAdaptorParentData.keepAlive] property is
+  /// set to true will be removed to a cache instead of being dropped.
+  ///
+  /// This method also collects any children that were previously kept alive but
+  /// are now no longer necessary. As such, it should be called every time
+  /// [performLayout] is run, even if the arguments are both zero.
   @protected
   void collectGarbage(int leadingGarbage, int trailingGarbage) {
     assert(_debugAssertChildListLocked());
     assert(childCount >= leadingGarbage + trailingGarbage);
     invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
       while (leadingGarbage > 0) {
-        _childManager.removeChild(firstChild);
+        _destroyOrCacheChild(firstChild);
         leadingGarbage -= 1;
       }
       while (trailingGarbage > 0) {
-        _childManager.removeChild(lastChild);
+        _destroyOrCacheChild(lastChild);
         trailingGarbage -= 1;
       }
+      // Ask the child manager to remove the children that are no longer being
+      // kept alive. (This should cause _keepAliveBucket to change, so we have
+      // to prepare our list ahead of time.)
+      _keepAliveBucket.values.where((RenderBox child) {
+        final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+        return !childParentData.keepAlive;
+      }).toList().forEach(_childManager.removeChild);
+      assert(_keepAliveBucket.values.where((RenderBox child) {
+        final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+        return !childParentData.keepAlive;
+      }).isEmpty);
     });
   }
 
@@ -441,5 +543,43 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       return true;
     });
     return true;
+  }
+
+  @override
+  String debugDescribeChildren(String prefix) {
+    StringBuffer result;
+    if (firstChild != null) {
+      result = new StringBuffer()
+        ..write(prefix)
+        ..write(' \u2502\n');
+      RenderBox child = firstChild;
+      while (child != lastChild) {
+        final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+        result.write(child.toStringDeep("$prefix \u251C\u2500child with index ${childParentData.index}: ", "$prefix \u2502"));
+        child = childParentData.nextSibling;
+      }
+      if (child != null) {
+        assert(child == lastChild);
+        final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+        if (_keepAliveBucket.isEmpty) {
+          result.write(child.toStringDeep("$prefix \u2514\u2500child with index ${childParentData.index}: ", "$prefix  "));
+        } else {
+          result.write(child.toStringDeep("$prefix \u251C\u2500child with index ${childParentData.index}: ", "$prefix \u254E"));
+        }
+      }
+    }
+    if (_keepAliveBucket.isNotEmpty) {
+      result ??= new StringBuffer()
+        ..write(prefix)
+        ..write(' \u254E\n');
+      final List<int> indices = _keepAliveBucket.keys.toList()..sort();
+      final int lastIndex = indices.removeLast();
+      if (indices.isNotEmpty) {
+        for (int index in indices)
+          result.write(_keepAliveBucket[index].toStringDeep("$prefix \u251C\u2500child with index $index (kept alive offstage): ", "$prefix \u254E"));
+      }
+      result.write(_keepAliveBucket[lastIndex].toStringDeep("$prefix \u2514\u2500child with index $lastIndex (kept alive offstage): ", "$prefix  "));
+    }
+    return result?.toString() ?? '';
   }
 }
