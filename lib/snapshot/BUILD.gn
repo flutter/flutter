@@ -313,7 +313,7 @@ template("generate_vm_patched_sdk") {
   }
 }
 
-generate_vm_patched_sdk("patched_sdk") {
+generate_vm_patched_sdk("flutter_patched_sdk") {
   libraries = [
     [
       "async",
