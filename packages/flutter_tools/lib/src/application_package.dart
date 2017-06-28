@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart' show required;
 import 'package:xml/xml.dart' as xml;
 
@@ -78,21 +80,21 @@ class AndroidApk extends ApplicationPackage {
   }
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
-  factory AndroidApk.fromCurrentDirectory() {
+  static Future<AndroidApk> fromCurrentDirectory() async {
     String manifestPath;
     String apkPath;
 
     if (isProjectUsingGradle()) {
-      if (fs.file(getGradleAppOut()).existsSync()) {
+      if (fs.file(await getGradleAppOut()).existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
-        return new AndroidApk.fromApk(getGradleAppOut());
+        return new AndroidApk.fromApk(await getGradleAppOut());
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
       // command will grab a new AndroidApk after building, to get the updated
       // IDs.
       manifestPath = gradleManifestPath;
-      apkPath = getGradleAppOut();
+      apkPath = await getGradleAppOut();
     } else {
       manifestPath = fs.path.join('android', 'AndroidManifest.xml');
       apkPath = fs.path.join(getAndroidBuildDirectory(), 'app.apk');
@@ -251,15 +253,15 @@ class PrebuiltIOSApp extends IOSApp {
   String get _bundlePath => bundleDir.path;
 }
 
-ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform, {
+Future<ApplicationPackage> getApplicationPackageForPlatform(TargetPlatform platform, {
   String applicationBinary
-}) {
+}) async {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       return applicationBinary == null
-          ? new AndroidApk.fromCurrentDirectory()
+          ? await AndroidApk.fromCurrentDirectory()
           : new AndroidApk.fromApk(applicationBinary);
     case TargetPlatform.ios:
       return applicationBinary == null
@@ -281,12 +283,12 @@ class ApplicationPackageStore {
 
   ApplicationPackageStore({ this.android, this.iOS });
 
-  ApplicationPackage getPackageForPlatform(TargetPlatform platform) {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        android ??= new AndroidApk.fromCurrentDirectory();
+        android ??= await AndroidApk.fromCurrentDirectory();
         return android;
       case TargetPlatform.ios:
         iOS ??= new IOSApp.fromCurrentDirectory();

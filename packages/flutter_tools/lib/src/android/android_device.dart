@@ -360,7 +360,7 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = new AndroidApk.fromCurrentDirectory();
+      package = await AndroidApk.fromCurrentDirectory();
     }
 
     printTrace("Stopping app '${package.name}' on $name.");

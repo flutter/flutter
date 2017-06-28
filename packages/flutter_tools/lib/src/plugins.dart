@@ -179,7 +179,7 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
 }
 
 /// Finds Flutter plugins in the pubspec.yaml, creates platform injection
-/// registries classes and add them to the build depedencies.
+/// registries classes and add them to the build dependencies.
 ///
 /// Returns whether any Flutter plugins are added.
 bool injectPlugins({String directory}) {
