@@ -115,8 +115,11 @@ abstract class SliverChildDelegate {
 ///
 /// Many slivers lazily construct their box children to avoid creating more
 /// children than are visible through the [Viewport]. This delegate provides
-/// children using an [IndexedWidgetBuilder] callback. The widgets returned from
-/// the builder callback are wrapped in [RepaintBoundary] widgets.
+/// children using an [IndexedWidgetBuilder] callback, so that the children do
+/// not even have to be built until they are displayed.
+///
+/// The widgets returned from the builder callback are automatically wrapped in
+/// [RepaintBoundary] widgets if [addRepaintBoundaries] is true (the default).
 ///
 /// See also:
 ///
@@ -124,8 +127,15 @@ abstract class SliverChildDelegate {
 ///    of children.
 class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
-  /// builder callback
-  const SliverChildBuilderDelegate(this.builder, { this.childCount });
+  /// builder callback.
+  ///
+  /// The [builder] and [addRepaintBoundaries] arguments must not be null.
+  const SliverChildBuilderDelegate(
+    this.builder, {
+    this.childCount,
+    this.addRepaintBoundaries: true,
+  }) : assert(builder != null),
+       assert(addRepaintBoundaries != null);
 
   /// Called to build children for the sliver.
   ///
@@ -145,6 +155,17 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// [builder] returns null.
   final int childCount;
 
+  /// Whether to wrap each child in a [RepaintBoundary].
+  ///
+  /// Typically, children in a scrolling container are wrapped in repaint
+  /// boundaries so that they do not need to be repainted as the list scrolls.
+  /// If the children are easy to repaint (e.g., solid color blocks or a short
+  /// snippet of text), it might be more efficient to not add a repaint boundary
+  /// and simply repaint the children during scrolling.
+  ///
+  /// Defaults to true.
+  final bool addRepaintBoundaries;
+
   @override
   Widget build(BuildContext context, int index) {
     assert(builder != null);
@@ -153,7 +174,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     final Widget child = builder(context, index);
     if (child == null)
       return null;
-    return new RepaintBoundary.wrap(child, index);
+    return addRepaintBoundaries ? new RepaintBoundary.wrap(child, index) : child;
   }
 
   @override
@@ -183,6 +204,9 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// demand). For example, the body of a dialog box might fit both of these
 /// conditions.
 ///
+/// The widgets in the given [children] list are automatically wrapped in
+/// [RepaintBoundary] widgets if [addRepaintBoundaries] is true (the default).
+///
 /// See also:
 ///
 ///  * [SliverChildBuilderDelegate], which is a delegate that uses a builder
@@ -190,7 +214,13 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 class SliverChildListDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
   /// list.
-  const SliverChildListDelegate(this.children, { this.addRepaintBoundaries: true });
+  ///
+  /// The [children] and [addRepaintBoundaries] arguments must not be null.
+  const SliverChildListDelegate(
+    this.children, {
+    this.addRepaintBoundaries: true,
+  }) : assert(children != null),
+       assert(addRepaintBoundaries != null);
 
   /// Whether to wrap each child in a [RepaintBoundary].
   ///
@@ -814,4 +844,45 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 
   @override
   RenderSliverFillRemaining createRenderObject(BuildContext context) => new RenderSliverFillRemaining();
+}
+
+/// Mark a child as needing to stay alive even when it's in a lazy list that
+/// would otherwise remove it.
+///
+/// This widget is for use in [SliverMultiBoxAdaptorWidget]s, such as
+/// [SliverGrid] or [SliverList].
+class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
+  /// Marks a child as needing to remain alive.
+  ///
+  /// The [child] and [keepAlive] arguments must not be null.
+  KeepAlive({
+    Key key,
+    @required this.keepAlive,
+    @required Widget child,
+  }) : assert(child != null),
+       assert(keepAlive != null),
+       super(key: key, child: child);
+
+  /// Whether to keep the child alive.
+  ///
+  /// If this is false, it is as if this widget was omitted.
+  final bool keepAlive;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is SliverMultiBoxAdaptorParentData);
+    final SliverMultiBoxAdaptorParentData parentData = renderObject.parentData;
+    if (parentData.keepAlive != keepAlive) {
+      parentData.keepAlive = keepAlive;
+      final AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject)
+        targetParent.markNeedsLayout();
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('keepAlive: $keepAlive');
+  }
 }

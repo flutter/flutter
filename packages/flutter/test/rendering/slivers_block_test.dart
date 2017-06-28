@@ -244,4 +244,23 @@ void main() {
 
     expect(inner.geometry.scrollOffsetCorrection, isNull);
   });
+
+  test('SliverMultiBoxAdaptorParentData.toString', () {
+    final SliverMultiBoxAdaptorParentData candidate = new SliverMultiBoxAdaptorParentData();
+    expect(candidate.keepAlive, isFalse);
+    expect(candidate.index, isNull);
+    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    candidate.keepAlive = null;
+    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    candidate.keepAlive = true;
+    expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=0.0');
+    candidate.keepAlive = false;
+    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    candidate.index = 0;
+    expect(candidate.toString(), 'index=0; layoutOffset=0.0');
+    candidate.index = 1;
+    expect(candidate.toString(), 'index=1; layoutOffset=0.0');
+    candidate.index = -1;
+    expect(candidate.toString(), 'index=-1; layoutOffset=0.0');
+  });
 }
