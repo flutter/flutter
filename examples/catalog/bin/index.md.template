@@ -1,0 +1,11 @@
+---
+layout: page
+title: "Sample App Catalog"
+permalink: /catalog/samples/
+---
+
+Complete applications that demonstrate how to get things done with Flutter. Each sample app features a few classes or an animation, a layout, or other feature of Flutter. The samples are short, just one file and usually only one or two pages of code. They should easy to try out with your favorite IDE.
+
+<div class="container-fluid">
+@(entries)
+</div>
