@@ -140,10 +140,11 @@ void Paragraph::AddRunsToLineBreaker(const std::string& rootdir) {
 
 void Paragraph::Layout(double width,
                        const std::string& rootdir,
+                       bool force,
                        const double x_offset,
                        const double y_offset) {
   // Do not allow calling layout multiple times without changing anything.
-  if (!needs_layout_)
+  if (!needs_layout_ && !force)
     return;
   needs_layout_ = false;
 
