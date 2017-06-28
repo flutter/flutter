@@ -61,6 +61,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId) {
         if (virtualViewId == View.NO_ID) {
             AccessibilityNodeInfo result = AccessibilityNodeInfo.obtain(mOwner);
