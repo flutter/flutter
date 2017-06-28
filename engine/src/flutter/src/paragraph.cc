@@ -214,12 +214,18 @@ void Paragraph::Layout(double width,
     }
     x_queue.clear();
   };
-
+  std::shared_ptr<minikin::FontCollection> collection = nullptr;
+  std::string prev_font_family = "";
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
-    auto collection =
-        FontCollection::GetFontCollection(rootdir)
-            .GetMinikinFontCollectionForFamily(run.style.font_family);
+
+    // Only obtain new font family if the font has changed between runs.
+    if (run.style.font_family != prev_font_family || collection == nullptr) {
+      collection =
+          FontCollection::GetFontCollection(rootdir)
+              .GetMinikinFontCollectionForFamily(run.style.font_family);
+    }
+    prev_font_family = run.style.font_family;
     GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
     GetPaint(run.style, &paint);
 
