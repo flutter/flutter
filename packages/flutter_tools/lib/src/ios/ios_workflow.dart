@@ -49,6 +49,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   Future<String> get cocoaPodsVersionText async => (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
 
+  Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
+
   Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
     if (!await hasIosDeploy)
       return false;
@@ -106,6 +108,14 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.'
         ));
       }
+      if ((await macDevMode).contains('disabled')) {
+        xcodeStatus = ValidationType.partial;
+        messages.add(new ValidationMessage.error(
+          'Your Mac needs to enabled for developer mode before using Xcode for the first time.\n'
+          'Run \'sudo DevToolsSecurity -enable\' or open Xcode'
+        ));
+      }
+
     } else {
       xcodeStatus = ValidationType.missing;
       if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
