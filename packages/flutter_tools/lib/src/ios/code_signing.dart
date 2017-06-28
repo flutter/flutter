@@ -80,7 +80,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=(
 ///
 /// Will return null if none are found, if the user cancels or if the Xcode
 /// project has a development team set in the project's build settings.
-Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) async{
+Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bool usesTerminalUi: true}) async{
   if (iosApp.buildSettings == null)
     return null;
 
@@ -115,7 +115,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
       .toSet() // Unique.
       .toList();
 
-  final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities);
+  final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities, usesTerminalUi);
 
   // If none are chosen, return null.
   if (signingIdentity == null)
@@ -153,7 +153,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
       ?.group(1);
 }
 
-Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) async {
+Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, bool usesTerminalUi) async {
   // The user has no valid code signing identities.
   if (validCodeSigningIdentities.isEmpty) {
     printError(noCertificatesInstruction, emphasis: true);
@@ -175,6 +175,11 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
         printError('Saved signing certificate "$savedCertChoice" is not a valid development certificate');
       }
     }
+
+    // If terminal UI can't be used, just attempt with the first valid certificate
+    // since we can't ask the user.
+    if (!usesTerminalUi)
+      return validCodeSigningIdentities.first;
 
     final int count = validCodeSigningIdentities.length;
     printStatus(

@@ -193,7 +193,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildMode mode,
   String target: flx.defaultMainPath,
   bool buildForDevice,
-  bool codesign: true
+  bool codesign: true,
+  bool usesTerminalUi: true,
 }) async {
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
@@ -205,7 +206,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   String developmentTeam;
   if (codesign && buildForDevice)
-    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
+    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.

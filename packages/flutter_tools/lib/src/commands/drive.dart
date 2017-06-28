@@ -260,6 +260,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       diagnosticPort: command.diagnosticPort,
     ),
     platformArgs: platformArgs,
+    usesTerminalUi: false,
   );
 
   if (!result.started) {
