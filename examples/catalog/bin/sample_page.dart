@@ -187,7 +187,7 @@ void generate(String commit) {
   // a file that's structurally the same as index.md but only contains samples
   // that feature one class. For example AnimatedList_index.md would only
   // include samples that had AnimatedList in their "Classes:" list.
-  Map<String, List<SampleInfo>> classToSamples = <String, List<SampleInfo>>{};
+  final Map<String, List<SampleInfo>> classToSamples = <String, List<SampleInfo>>{};
   for (SampleInfo sample in samples) {
     for (String className in sample.highlightedClasses) {
       classToSamples[className] ??= <SampleInfo>[];
