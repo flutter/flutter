@@ -6,6 +6,7 @@
 
 #include <fcntl.h>
 #include <magenta/device/vfs.h>
+#include <mxio/watcher.h>
 #include <unistd.h>
 
 #include <chrono>
@@ -23,26 +24,43 @@ namespace {
 
 constexpr char kDisplayDriverClass[] = "/dev/class/display";
 
-void WaitForFirstDisplayDriver() {
+bool WaitForFirstDisplayDriver() {
   ftl::UniqueFD fd(open(kDisplayDriverClass, O_DIRECTORY | O_RDONLY));
   if (fd.get() < 0) {
     FTL_DLOG(ERROR) << "Failed to open " << kDisplayDriverClass;
-    return;
+    return false;
   }
 
   // Create the directory watch channel.
-  mx_handle_t watcher;
-  if (ioctl_vfs_watch_dir(fd.get(), &watcher) < 0) {
-    FTL_DLOG(ERROR) << "Failed to create directory watcher for "
-                    << kDisplayDriverClass;
-    return;
+  vfs_watch_dir_t wd;
+  wd.mask = VFS_WATCH_MASK_ALL;
+  wd.options = 0;
+
+  mx::channel watcher;
+  mx_status_t status = mx_channel_create(0, &wd.channel, watcher.get_address());
+  if (status != MX_OK) {
+    FTL_DLOG(ERROR) << "Failed to create channel";
+    return false;
   }
 
+  status = ioctl_vfs_watch_dir_v2(fd.get(), &wd);
+  if (status != MX_OK) {
+    FTL_DLOG(ERROR) << "Failed to create directory watcher for "
+                    << kDisplayDriverClass;
+    return false;
+  }
+
+  mx_signals_t pending;
   // Wait for 1 second for the display driver to appear before falling back to
   // software.
-  mx_object_wait_one(watcher, MX_CHANNEL_READABLE | MX_CHANNEL_PEER_CLOSED,
-                     mx_deadline_after(MX_SEC(1)), nullptr);
-  mx_handle_close(watcher);
+  status = watcher.wait_one(MX_CHANNEL_READABLE | MX_CHANNEL_PEER_CLOSED,
+                            mx_deadline_after(MX_SEC(1)), &pending);
+  if (status != MX_OK) {
+    FTL_DLOG(ERROR) << "Failed to wait on file watcher channel ";
+    return false;
+  }
+
+  return pending & MX_CHANNEL_READABLE;
 }
 
 }  // namespace
@@ -415,14 +433,14 @@ bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
 }
 
 VulkanRasterizer::VulkanRasterizer() : compositor_context_(nullptr) {
-  WaitForFirstDisplayDriver();
+  valid_ = WaitForFirstDisplayDriver();
   surface_producer_.reset(new VulkanSurfaceProducer());
 }
 
 VulkanRasterizer::~VulkanRasterizer() = default;
 
 bool VulkanRasterizer::IsValid() const {
-  return surface_producer_ && surface_producer_->IsValid();
+  return valid_ && surface_producer_ && surface_producer_->IsValid();
 }
 
 void VulkanRasterizer::SetScene(fidl::InterfaceHandle<mozart::Scene> scene) {

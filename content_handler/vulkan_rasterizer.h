@@ -140,6 +140,7 @@ class VulkanRasterizer : public Rasterizer {
   flow::CompositorContext compositor_context_;
   mozart::ScenePtr scene_;
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
+  bool valid_;
 
   bool Draw(std::unique_ptr<flow::LayerTree> layer_tree);
 
