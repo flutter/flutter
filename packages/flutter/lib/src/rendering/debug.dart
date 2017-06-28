@@ -147,8 +147,9 @@ bool debugCheckIntrinsicSizes = false;
 ///  * [debugPrintLayouts], which does something similar for layout but using
 ///    console output.
 ///
-///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
-///    being rebuilt.
+///  * [debugProfileBuildsEnabled], which does something similar for widgets
+///    being rebuilt, and [debugPrintRebuildDirtyWidgets], its console
+///    equivalent.
 ///
 ///  * The discussion at [RendererBinding.drawFrame].
 bool debugProfilePaintsEnabled = false;

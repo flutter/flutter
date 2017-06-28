@@ -19,12 +19,18 @@ class _InputDecoratorChildGlobalKey extends GlobalObjectKey {
 
 /// Text and styles used to label an input field.
 ///
+/// The [TextField] and [InputDecorator] classes use [InputDecoration] objects
+/// to describe their decoration. (In fact, this class is merely the
+/// configuration of an [InputDecorator], which does all the heavy lifting.)
+///
 /// See also:
 ///
 ///  * [TextField], which is a text input widget that uses an
 ///    [InputDecoration].
 ///  * [InputDecorator], which is a widget that draws an [InputDecoration]
 ///    around an arbitrary child widget.
+///  * [Decoration] and [DecoratedBox], for drawing arbitrary decorations
+///    around other widgets.
 @immutable
 class InputDecoration {
   /// Creates a bundle of text and styles used to label an input field.
@@ -307,15 +313,22 @@ class InputDecoration {
 /// Use [InputDecorator] to create widgets that look and behave like a
 /// [TextField] but can be used to input information other than text.
 ///
+/// The configuration of this widget is primarily provided in the form of an
+/// [InputDecoration] object.
+///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
-/// * [TextField], which uses an [InputDecorator] to draw labels and other
+///  * [TextField], which uses an [InputDecorator] to draw labels and other
 ///    visual elements around a text entry widget.
+///  * [Decoration] and [DecoratedBox], for drawing arbitrary decorations
+///    around other widgets.
 class InputDecorator extends StatelessWidget {
   /// Creates a widget that displayes labels and other visual elements similar
   /// to a [TextField].
+  ///
+  /// The [isFocused] and [isEmpty] arguments must not be null.
   const InputDecorator({
     Key key,
     @required this.decoration,
@@ -324,7 +337,9 @@ class InputDecorator extends StatelessWidget {
     this.isFocused: false,
     this.isEmpty: false,
     this.child,
-  }) : super(key: key);
+  }) : assert(isFocused != null),
+       assert(isEmpty != null),
+       super(key: key);
 
   /// The text and styles to use when decorating the child.
   final InputDecoration decoration;

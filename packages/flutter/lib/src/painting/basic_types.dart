@@ -63,7 +63,7 @@ export 'dart:ui' show
 /// For example, [layout] (index 3) implies [paint] (2).
 enum RenderComparison {
   /// The two objects are identical (meaning deeply equal, not necessarily
-  /// [identical]).
+  /// [dart:core.identical]).
   identical,
 
   /// The two objects are identical for the purpose of layout, but may be different

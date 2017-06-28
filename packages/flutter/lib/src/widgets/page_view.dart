@@ -34,7 +34,7 @@ import 'viewport.dart';
 ///
 /// See also:
 ///
-///  - [PageView], which is the widget this object controls.
+///  * [PageView], which is the widget this object controls.
 class PageController extends ScrollController {
   /// Creates a page controller.
   ///
@@ -64,7 +64,7 @@ class PageController extends ScrollController {
   /// See also:
   ///
   ///  * [PageStorageKey], which should be used when more than one
-  ////   scrollable appears in the same route, to distinguish the [PageStorage]
+  ///    scrollable appears in the same route, to distinguish the [PageStorage]
   ///    locations used to save scroll offsets.
   final bool keepPage;
 
@@ -251,6 +251,12 @@ class _PagePosition extends ScrollPositionWithSingleContext {
 /// Scroll physics used by a [PageView].
 ///
 /// These physics cause the page view to snap to page boundaries.
+///
+/// See also:
+///
+///  * [ScrollPhysics], the base class which defines the API for scrolling
+///    physics.
+///  * [PageView.physics], which can override the physics used by a page view.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
   const PageScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
@@ -323,6 +329,8 @@ const PageScrollPhysics _kPagePhysics = const PageScrollPhysics();
 ///  * [SingleChildScrollView], when you need to make a single child scrollable.
 ///  * [ListView], for a scrollable list of boxes.
 ///  * [GridView], for a scrollable grid of boxes.
+///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 class PageView extends StatefulWidget {
   /// Creates a scrollable list that works page by page from an explicit [List]
   /// of widgets.

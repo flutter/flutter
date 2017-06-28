@@ -11,19 +11,6 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'text_style.dart';
 
-// TODO(ianh): This should be on List itself.
-bool _deepEquals(List<Object> a, List<Object> b) {
-  if (a == null)
-    return b == null;
-  if (b == null || a.length != b.length)
-    return false;
-  for (int i = 0; i < a.length; i += 1) {
-    if (a[i] != b[i])
-      return false;
-  }
-  return true;
-}
-
 /// An immutable span of text.
 ///
 /// A [TextSpan] object can be styled using its [style] property.
@@ -360,7 +347,7 @@ class TextSpan {
     return typedOther.text == text
         && typedOther.style == style
         && typedOther.recognizer == recognizer
-        && _deepEquals(typedOther.children, children);
+        && listEquals<TextSpan>(typedOther.children, children);
   }
 
   @override

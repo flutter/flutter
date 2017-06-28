@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 
-import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -2736,10 +2735,23 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+  /// If non-null, the set of actions to allow. Other actions will be omitted,
+  /// even if their callback is provided.
+  ///
+  /// For example, if [onTap] is non-null but [validActions] does not contain
+  /// [SemanticsAction.tap], then the semantic description of this node will
+  /// not claim to support taps.
+  ///
+  /// This is normally used to filter the actions made available by
+  /// [onHorizontalDragUpdate] and [onVerticalDragUpdate]. Normally, these make
+  /// both the right and left, or up and down, actions available. For example,
+  /// if [onHorizontalDragUpdate] is set but [validActions] only contains
+  /// [SemanticsAction.scrollLeft], then the [SemanticsAction.scrollRight]
+  /// action will be omitted.
   Set<SemanticsAction> get validActions => _validActions;
   Set<SemanticsAction> _validActions;
   set validActions(Set<SemanticsAction> value) {
-    if (const SetEquality<SemanticsAction>().equals(value, _validActions))
+    if (setEquals<SemanticsAction>(value, _validActions))
       return;
     _validActions = value;
     markNeedsSemanticsUpdate(onlyChanges: true);
