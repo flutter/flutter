@@ -434,16 +434,15 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
       );
       return;
     }
-    try {
-      final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
-      await runCheckedAsync(
-          <String>['pod', 'install'],
-          workingDirectory: bundle.path,
-          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-      );
-      status.stop();
-    } catch (e) {
-      throwToolExit('Error running pod install: $e');
+    final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
+    final ProcessResult result = await processManager.run(
+        <String>['pod', 'install'],
+        workingDirectory: bundle.path,
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+    );
+    status.stop();
+    if (result.exitCode != 0) {
+      throwToolExit('Error running pod install:\n${result.stdout}');
     }
   }
 }
