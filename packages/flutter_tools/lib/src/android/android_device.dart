@@ -341,6 +341,7 @@ class AndroidDevice extends Device {
     String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();

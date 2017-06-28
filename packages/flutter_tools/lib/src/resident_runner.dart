@@ -239,7 +239,8 @@ class FlutterDevice {
       route: route,
       prebuiltApplication: prebuiltMode,
       kernelPath: hotRunner.kernelFilePath,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
+      usesTerminalUi: hotRunner.usesTerminalUI,
     );
 
     final LaunchResult result = await futureResult;
@@ -298,7 +299,8 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
+      usesTerminalUi: coldRunner.usesTerminalUI,
     );
 
     if (!result.started) {
