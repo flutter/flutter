@@ -187,7 +187,7 @@ class IOSDevice extends Device {
           mode: mode,
           target: mainPath,
           buildForDevice: true,
-          usesTerminalUi: usesTerminalUi
+          usesTerminalUi: usesTerminalUi,
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
