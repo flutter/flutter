@@ -40,6 +40,7 @@ class Paragraph {
 
   void Layout(double width,
               const std::string& rootdir = "",
+              bool force = false,
               const double x_offset = 0.0,
               const double y_offset = 0.0);
 
