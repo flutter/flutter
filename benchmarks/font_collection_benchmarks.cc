@@ -39,9 +39,11 @@ static void BM_FontCollectionInit(benchmark::State& state) {
 }
 BENCHMARK(BM_FontCollectionInit);
 
-static void BM_FontCollectionGetMinikinFontCollectionForFamily(benchmark::State& state) {
+static void BM_FontCollectionGetMinikinFontCollectionForFamily(
+    benchmark::State& state) {
   while (state.KeepRunning()) {
-  FontCollection::GetFontCollection(txt::GetFontDir()).GetMinikinFontCollectionForFamily("Roboto");
+    FontCollection::GetFontCollection(txt::GetFontDir())
+        .GetMinikinFontCollectionForFamily("Roboto");
   }
 }
 BENCHMARK(BM_FontCollectionGetMinikinFontCollectionForFamily);
