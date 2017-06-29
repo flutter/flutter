@@ -875,10 +875,17 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
       final AbstractNode targetParent = renderObject.parent;
-      if (targetParent is RenderObject)
-        targetParent.markNeedsLayout();
+      if (targetParent is RenderObject && !keepAlive)
+        targetParent.markNeedsLayout(); // No need to redo layout if it became true.
     }
   }
+
+  // We only return true if [keepAlive] is true, because turning _off_ keep
+  // alive requires a layout to do the garbage collection (but turning it on
+  // requires nothing, since by definition the widget is already alive and won't
+  // go away _unless_ we do a layout).
+  @override
+  bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
   void debugFillDescription(List<String> description) {

@@ -26,6 +26,8 @@ typedef bool NotificationListenerCallback<T extends Notification>(T notification
 /// widgets with the appropriate type parameters that are ancestors of the given
 /// [BuildContext].
 abstract class Notification {
+  const Notification();
+
   /// Applied to each ancestor of the [dispatch] target.
   ///
   /// The [Notification] class implementation of this method dispatches the
@@ -89,7 +91,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   const NotificationListener({
     Key key,
     @required this.child,
-    this.onNotification
+    this.onNotification,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
