@@ -1418,6 +1418,19 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
   /// parent, as appropriate.
   @protected
   void applyParentData(RenderObject renderObject);
+
+  /// Whether the [ParentDataElement.applyWidgetOutOfTurn] method is allowed
+  /// with this widget.
+  ///
+  /// This should only return true if this widget represents a [ParentData]
+  /// configuration that will have no impact on the layout or paint phase.
+  ///
+  /// See also:
+  ///
+  ///  * [ParentDataElement.applyWidgetOutOfTurn], which verifies this in debug
+  ///    mode.
+  @protected
+  bool debugCanApplyOutOfTurn() => false;
 }
 
 /// Base class for widgets that efficiently propagate information down the tree.
@@ -2470,6 +2483,11 @@ abstract class Element implements BuildContext {
   ///
   /// There is no guaranteed order in which the children will be visited, though
   /// it should be consistent over time.
+  ///
+  /// Calling this during build is dangerous: the child list might still be
+  /// being updated at that point, so the children might not be constructed yet,
+  /// or might be old children that are going to be replaced. This method should
+  /// only be called if it is provable that the children are available.
   void visitChildren(ElementVisitor visitor) { }
 
   /// Calls the argument for each child that is relevant for semantics. By
@@ -2477,11 +2495,20 @@ abstract class Element implements BuildContext {
   /// to hide their children.
   void visitChildrenForSemantics(ElementVisitor visitor) => visitChildren(visitor);
 
-  /// Wrapper around visitChildren for BuildContext.
+  /// Wrapper around [visitChildren] for [BuildContext].
   @override
   void visitChildElements(ElementVisitor visitor) {
-    // don't allow visitChildElements() during build, since children aren't necessarily built yet
-    assert(owner == null || !owner._debugStateLocked);
+    assert(() {
+      if (owner == null || !owner._debugStateLocked)
+        return true;
+      throw new FlutterError(
+        'visitChildElements() called during build.\n'
+        'The BuildContext.visitChildElements() method can\'t be called during '
+        'build because the child list is still being updated at that point, '
+        'so the children might not be constructed yet, or might be old children '
+        'that are going to be replaced.'
+      );
+    });
     visitChildren(visitor);
   }
 
@@ -3685,18 +3712,60 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
     super.mount(parent, slot);
   }
 
-  void _notifyChildren(Element child) {
-    if (child is RenderObjectElement) {
-      child._updateParentData(widget);
-    } else {
-      assert(child is! ParentDataElement<RenderObjectWidget>);
-      child.visitChildren(_notifyChildren);
+  void _applyParentData(ParentDataWidget<T> widget) {
+    void applyParentDataToChild(Element child) {
+      if (child is RenderObjectElement) {
+        child._updateParentData(widget);
+      } else {
+        assert(child is! ParentDataElement<RenderObjectWidget>);
+        child.visitChildren(applyParentDataToChild);
+      }
     }
+    visitChildren(applyParentDataToChild);
+  }
+
+  /// Calls [ParentDataWidget.applyParentData] on the given widget, passing it
+  /// the [RenderObject] whose parent data this element is ultimately
+  /// responsible for.
+  ///
+  /// This allows a render object's [RenderObject.parentData] to be modified
+  /// without triggering a build. This is generally ill-advised, but makes sense
+  /// in situations such as the following:
+  ///
+  ///  * Build and layout are currently under way, but the [ParentData] in question
+  ///    does not affect layout, and the value to be applied could not be
+  ///    determined before build and layout (e.g. it depends on the layout of a
+  ///    descendant).
+  ///
+  ///  * Paint is currently under way, but the [ParentData] in question does not
+  ///    affect layour or paint, and the value to be applied could not be
+  ///    determined before paint (e.g. it depends on the compositing phase).
+  ///
+  /// In either case, the next build is expected to cause this element to be
+  /// configured with the given new widget (or a widget with equivalent data).
+  ///
+  /// Only [ParentDataWidget]s that return true for
+  /// [ParentDataWidget.debugCanApplyOutOfTurn] can be applied this way.
+  ///
+  /// The new widget must have the same child as the current widget.
+  ///
+  /// An example of when this is used is the [AutomaticKeepAlive] widget. If it
+  /// receives a notification during the build of one of its descendants saying
+  /// that its child must be kept alive, it will apply a [KeepAlive] widget out
+  /// of turn. This is safe, because by definition the child is already alive,
+  /// and therefore this will not change the behavior of the parent this frame.
+  /// It is more efficient than requesting an additional frame just for the
+  /// purpose of updating the [KeepAlive] widget.
+  void applyWidgetOutOfTurn(ParentDataWidget<T> newWidget) {
+    assert(newWidget != null);
+    assert(newWidget.debugCanApplyOutOfTurn());
+    assert(newWidget.child == widget.child);
+    _applyParentData(newWidget);
   }
 
   @override
   void notifyClients(ParentDataWidget<T> oldWidget) {
-    visitChildren(_notifyChildren);
+    _applyParentData(widget);
   }
 }
 
