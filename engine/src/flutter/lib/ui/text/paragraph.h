@@ -45,6 +45,8 @@ class Paragraph : public ftl::RefCountedThreadSafe<Paragraph>,
 
   RenderView* renderView() const { return m_renderView.get(); }
 
+  virtual size_t GetAllocationSize() override;
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
