@@ -552,6 +552,16 @@ class YearPicker extends StatefulWidget {
 
 class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
+  ScrollController scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = new ScrollController(
+      // Move the initial scroll position to the currently selected date's year.
+      initialScrollOffset: (widget.selectedDate.year - widget.firstDate.year) * _itemExtent,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -559,6 +569,7 @@ class _YearPickerState extends State<YearPicker> {
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = themeData.textTheme.body1;
     return new ListView.builder(
+      controller: scrollController,
       itemExtent: _itemExtent,
       itemCount: widget.lastDate.year - widget.firstDate.year + 1,
       itemBuilder: (BuildContext context, int index) {
