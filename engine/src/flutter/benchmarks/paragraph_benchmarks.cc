@@ -16,8 +16,12 @@
 
 #include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
+#include <minikin/Layout.h>
 #include "lib/ftl/command_line.h"
 #include "lib/ftl/logging.h"
+#include "lib/txt/libs/minikin/LayoutUtils.h"
+#include "lib/txt/src/font_collection.h"
+#include "lib/txt/src/font_skia.h"
 #include "lib/txt/src/font_style.h"
 #include "lib/txt/src/font_weight.h"
 #include "lib/txt/src/paragraph.h"
@@ -35,17 +39,18 @@ static void BM_ParagraphShortLayout(benchmark::State& state) {
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
 
-  while (state.KeepRunning()) {
-    txt::ParagraphStyle paragraph_style;
-    txt::ParagraphBuilder builder(paragraph_style);
+  txt::ParagraphStyle paragraph_style;
 
-    txt::TextStyle text_style;
-    text_style.color = SK_ColorBLACK;
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
 
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
     auto paragraph = builder.Build();
+
     paragraph->Layout(300, txt::GetFontDir(), true);
   }
 }
@@ -75,16 +80,17 @@ static void BM_ParagraphLongLayout(benchmark::State& state) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-
-  builder.PushStyle(text_style);
-  builder.AddText(u16_text);
-  builder.Pop();
-  auto paragraph = builder.Build();
   while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
+
+    builder.PushStyle(text_style);
+    builder.AddText(u16_text);
+    builder.Pop();
+    auto paragraph = builder.Build();
+
     paragraph->Layout(300, txt::GetFontDir(), true);
   }
 }
@@ -96,13 +102,12 @@ static void BM_ParagraphManyStylesLayout(benchmark::State& state) {
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
 
+  txt::ParagraphStyle paragraph_style;
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
   while (state.KeepRunning()) {
-    txt::ParagraphStyle paragraph_style;
     txt::ParagraphBuilder builder(paragraph_style);
-
-    txt::TextStyle text_style;
-    text_style.color = SK_ColorBLACK;
-
     for (int i = 0; i < 100; ++i) {
       builder.PushStyle(text_style);
       builder.AddText(u16_text);
@@ -112,5 +117,107 @@ static void BM_ParagraphManyStylesLayout(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_ParagraphManyStylesLayout);
+
+static void BM_ParagraphTextBigO(benchmark::State& state) {
+  std::string text(state.range(0), '-');
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
+
+    builder.PushStyle(text_style);
+    builder.AddText(u16_text);
+    builder.Pop();
+    auto paragraph = builder.Build();
+
+    paragraph->Layout(300, txt::GetFontDir(), true);
+  }
+  state.SetComplexityN(state.range(0));
+}
+BENCHMARK(BM_ParagraphTextBigO)
+    ->RangeMultiplier(20)
+    ->Range(1 << 4, 1 << 12)
+    ->Complexity(benchmark::oN);
+
+static void BM_ParagraphStylesBigO(benchmark::State& state) {
+  const char* text = "A short sentence. ";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
+
+    for (int i = 0; i < state.range(0); ++i) {
+      builder.PushStyle(text_style);
+      builder.AddText(u16_text);
+    }
+    auto paragraph = builder.Build();
+    paragraph->Layout(300, txt::GetFontDir(), true);
+  }
+  state.SetComplexityN(state.range(0));
+}
+BENCHMARK(BM_ParagraphStylesBigO)
+    ->RangeMultiplier(20)
+    ->Range(1 << 2, 1 << 8)
+    ->Complexity(benchmark::oN);
+
+// -----------------------------------------------------------------------------
+//
+// The following benchmarks break down the layout function and attempts to time
+// each of the components to more finely attribute latency.
+//
+// -----------------------------------------------------------------------------
+
+static void BM_ParagraphMinikinDoLayout(benchmark::State& state) {
+  std::vector<uint16_t> text;
+  for (uint16_t i = 0; i < 100; ++i) {
+    text.push_back(i);
+  }
+  minikin::FontStyle font;
+  txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
+  minikin::MinikinPaint paint;
+
+  font = minikin::FontStyle(4, false);
+  paint.size = text_style.font_size;
+  paint.letterSpacing = text_style.letter_spacing;
+  paint.wordSpacing = text_style.word_spacing;
+
+  auto collection =
+      FontCollection::GetFontCollection(txt::GetFontDir())
+          .GetMinikinFontCollectionForFamily(text_style.font_family);
+
+  while (state.KeepRunning()) {
+    minikin::Layout layout;
+    layout.doLayout(text.data(), 0, 50, text.size(), 0, font, paint,
+                    collection);
+  }
+}
+BENCHMARK(BM_ParagraphMinikinDoLayout);
+
+static void BM_ParagraphSkTextBlobAlloc(benchmark::State& state) {
+  SkPaint paint;
+  paint.setAntiAlias(true);
+  paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+  paint.setTextSize(14);
+  paint.setFakeBoldText(false);
+
+  while (state.KeepRunning()) {
+    SkTextBlobBuilder builder;
+    builder.allocRunPos(paint, 100);
+  }
+}
+BENCHMARK(BM_ParagraphSkTextBlobAlloc);
 
 }  // namespace txt
