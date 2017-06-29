@@ -14,7 +14,7 @@ bin/cache/dart-sdk/bin/pub global activate dartdoc 0.13.0+1
 # a custom index.html, placing everything into dev/docs/doc.
 (cd dev/tools; ../../bin/cache/dart-sdk/bin/pub get)
 FLUTTER_ROOT=$PWD bin/cache/dart-sdk/bin/dart dev/tools/dartdoc.dart
-FLUTTER_ROOT=$PWD bin/cache/dart-sdk/bin/dart dev/tools/javadoc.dart
+FLUTTER_ROOT=$PWD bin/cache/dart-sdk/bin/dart dev/tools/java_and_objc_doc.dart
 
 # Ensure google webmaster tools can verify our site.
 cp dev/docs/google2ed1af765c529f57.html dev/docs/doc

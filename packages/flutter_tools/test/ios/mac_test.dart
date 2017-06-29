@@ -100,10 +100,90 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('xcodeVersionText returns null when xcodebuild is not installed', () {
+    testUsingContext('xcodeVersionText returns formatted version text', () {
       when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
           .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcode.xcodeVersionText, 'Xcode 8.3.3, Build version 8E3004b');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeVersionText handles Xcode version string with unexpected format', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeVersionText, 'Xcode Ultra5000, Build version 8E3004b');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMajorVersion returns major version', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMajorVersion, 8);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMajorVersion is null when version has unexpected format', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMajorVersion, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMinorVersion returns minor version', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMinorVersion, 3);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMinorVersion returns 0 when minor version is unspecified', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMinorVersion, 0);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeMinorVersion is null when version has unexpected format', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode Ultra5000\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeMinorVersion, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 7.0.1\nBuild version 7A1001', ''));
+      expect(xcode.xcodeVersionSatisfactory, isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeVersionSatisfactory is false when version in unknown format', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode SuperHD\nBuild version 7A1001', ''));
+      expect(xcode.xcodeVersionSatisfactory, isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeVersionSatisfactory is true when version meets minimum', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
+      expect(xcode.xcodeVersionSatisfactory, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('xcodeVersionSatisfactory is true when version exceeds minimum', () {
+      when(mockProcessManager.runSync(<String>['/usr/bin/xcodebuild', '-version']))
+          .thenReturn(new ProcessResult(1, 0, 'Xcode 9.0\nBuild version 9M137d', ''));
+      expect(xcode.xcodeVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

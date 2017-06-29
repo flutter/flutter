@@ -68,6 +68,7 @@ class FuchsiaDevice extends Device {
     bool prebuiltApplication: false,
     String kernelPath,
     bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: false,
   }) => new Future<Null>.error('unimplemented');
 
   @override
