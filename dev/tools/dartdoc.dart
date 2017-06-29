@@ -200,6 +200,11 @@ void addHtmlBaseToIndex() {
     'href="Android/Android-library.html"',
     'href="https://docs.flutter.io/javadoc/"'
   );
+  indexContents = indexContents.replaceAll(
+      'href="iOS/iOS-library.html"',
+      'href="https://docs.flutter.io/objc/"'
+  );
+
   indexFile.writeAsStringSync(indexContents);
 }
 
@@ -243,10 +248,13 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   }
 
   // Add a fake package for platform integration APIs.
-  if (diskPath)
+  if (diskPath) {
     yield 'platform_integration/lib/android.dart';
-  else
+    yield 'platform_integration/lib/ios.dart';
+  } else {
     yield 'platform_integration/android.dart';
+    yield 'platform_integration/ios.dart';
+  }
 }
 
 void printStream(Stream<List<int>> stream) {

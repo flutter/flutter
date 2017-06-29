@@ -2755,7 +2755,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void debugFillDescription(List<String> description) {
     if (debugCreator != null)
       description.add('creator: $debugCreator');
-    description.add('parentData: $parentData${ _debugCanParentUseSize ? " (can use size)" : ""}');
+    description.add('parentData: $parentData${ _debugCanParentUseSize == true ? " (can use size)" : ""}');
     description.add('constraints: $constraints');
     if (_layer != null) // don't access it via the "layer" getter since that's only valid when we don't need paint
       description.add('layer: $_layer');

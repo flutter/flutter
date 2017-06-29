@@ -69,20 +69,18 @@ Future<Null> parseServiceConfigs(
 
     if (jars != null && serviceConfig['jars'] is Iterable) {
       for (String jar in serviceConfig['jars'])
-        jars.add(fs.file(await getServiceFromUrl(jar, serviceRoot, service, unzip: false)));
+        jars.add(fs.file(await getServiceFromUrl(jar, serviceRoot, service)));
     }
   }
 }
 
-Future<String> getServiceFromUrl(
-  String url, String rootDir, String serviceName, { bool unzip: false }
-) async {
+Future<String> getServiceFromUrl(String url, String rootDir, String serviceName) async {
   if (url.startsWith("android-sdk:") && androidSdk != null) {
     // It's something shipped in the standard android SDK.
     return url.replaceAll('android-sdk:', '${androidSdk.directory}/');
   } else if (url.startsWith("http")) {
     // It's a regular file to download.
-    return await cache.getThirdPartyFile(url, serviceName, unzip: unzip);
+    return await cache.getThirdPartyFile(url, serviceName);
   } else {
     // Assume url is a path relative to the service's root dir.
     return fs.path.join(rootDir, url);

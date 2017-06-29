@@ -121,37 +121,48 @@ class Xcode {
     return _eulaSigned;
   }
 
+  final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
+  void _updateXcodeVersion() {
+    try {
+      _xcodeVersionText = processManager.runSync(<String>['/usr/bin/xcodebuild', '-version']).stdout.replaceAll('\n', ', ');
+      final Match match = xcodeVersionRegex.firstMatch(xcodeVersionText);
+      if (match == null)
+        return;
+
+      final String version = match.group(1);
+      final List<String> components = version.split('.');
+      _xcodeMajorVersion = int.parse(components[0]);
+      _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
+    } on ProcessException {
+      // Ignore: leave values null.
+    }
+  }
+
   String _xcodeVersionText;
   String get xcodeVersionText {
-    if (_xcodeVersionText == null) {
-      try {
-        _xcodeVersionText = processManager.runSync(<String>['/usr/bin/xcodebuild', '-version']).stdout.replaceAll('\n', ', ');
-      } on ProcessException {
-        // Ignore: return null below.
-      }
-    }
+    if (_xcodeVersionText == null)
+      _updateXcodeVersion();
     return _xcodeVersionText;
   }
 
   int _xcodeMajorVersion;
-  int get xcodeMajorVersion => _xcodeMajorVersion;
+  int get xcodeMajorVersion {
+    if (_xcodeMajorVersion == null)
+      _updateXcodeVersion();
+    return _xcodeMajorVersion;
+  }
 
   int _xcodeMinorVersion;
-  int get xcodeMinorVersion => _xcodeMinorVersion;
-
-  final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
+  int get xcodeMinorVersion {
+    if (_xcodeMinorVersion == null)
+      _updateXcodeVersion();
+    return _xcodeMinorVersion;
+  }
 
   bool get xcodeVersionSatisfactory {
     if (xcodeVersionText == null || !xcodeVersionRegex.hasMatch(xcodeVersionText))
       return false;
-
-    final String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
-    final List<String> components = version.split('.');
-
-    _xcodeMajorVersion = int.parse(components[0]);
-    _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
-
-    return _xcodeVersionCheckValid(_xcodeMajorVersion, _xcodeMinorVersion);
+    return _xcodeVersionCheckValid(xcodeMajorVersion, xcodeMinorVersion);
   }
 
   Future<String> getAvailableDevices() async {
@@ -182,7 +193,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildMode mode,
   String target: flx.defaultMainPath,
   bool buildForDevice,
-  bool codesign: true
+  bool codesign: true,
+  bool usesTerminalUi: true,
 }) async {
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
@@ -194,7 +206,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   String developmentTeam;
   if (codesign && buildForDevice)
-    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
+    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -423,16 +435,15 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
       );
       return;
     }
-    try {
-      final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
-      await runCheckedAsync(
-          <String>['pod', 'install'],
-          workingDirectory: bundle.path,
-          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-      );
-      status.stop();
-    } catch (e) {
-      throwToolExit('Error running pod install: $e');
+    final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
+    final ProcessResult result = await processManager.run(
+        <String>['pod', 'install'],
+        workingDirectory: bundle.path,
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+    );
+    status.stop();
+    if (result.exitCode != 0) {
+      throwToolExit('Error running pod install:\n${result.stdout}');
     }
   }
 }

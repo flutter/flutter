@@ -45,7 +45,7 @@ class BuildIOSCommand extends BuildSubCommand {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       throwToolExit('Building for iOS is only supported on the Mac.');
 
-    final BuildableIOSApp app = applicationPackages.getPackageForPlatform(TargetPlatform.ios);
+    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios);
 
     if (app == null)
       throwToolExit('Application not configured for iOS');

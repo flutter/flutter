@@ -120,7 +120,7 @@ Future<Null> main() async {
             assert(block.isEmpty);
             startLine = new Line(file.path, lineNumber + 1, 3);
             inPreamble = true;
-          } else if (trimmedLine == '/// ## Sample code') {
+          } else if (trimmedLine == '/// ## Sample code' || trimmedLine == '/// ### Sample code') {
             inSampleSection = true;
             foundDart = false;
             sampleCodeSections += 1;
