@@ -161,7 +161,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
                 mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_LONG_PRESS);
                 return true;
             }
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
                 if ((object.actions & SEMANTICS_ACTION_SCROLL_UP) != 0) {
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_UP);
                 } else if ((object.actions & SEMANTICS_ACTION_SCROLL_LEFT) != 0) {
@@ -172,7 +172,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
                 }
                 return true;
             }
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD: {
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD: {
                 if ((object.actions & SEMANTICS_ACTION_SCROLL_DOWN) != 0) {
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_DOWN);
                 } else if ((object.actions & SEMANTICS_ACTION_SCROLL_RIGHT) != 0) {
