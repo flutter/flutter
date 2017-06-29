@@ -25,6 +25,7 @@ executable("benchmarks") {
     "font_collection_benchmarks.cc",
     "paragraph_benchmarks.cc",
     "paragraph_builder_benchmarks.cc",
+    "styled_runs_benchmarks.cc",
     "txt_run_all_benchmarks.cc",
     "utils.cc",
     "utils.h",
@@ -40,6 +41,5 @@ executable("benchmarks") {
     "//third_party/harfbuzz",
     "//lib/txt/libs/minikin",
   ]
-
 
 }

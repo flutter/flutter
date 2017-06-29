@@ -37,11 +37,11 @@ BENCHMARK(BM_ParagraphBuilderConstruction);
 
 static void BM_ParagraphBuilderPushStyle(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
   while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
     builder.PushStyle(text_style);
   }
 }
@@ -64,9 +64,9 @@ static void BM_ParagraphBuilderAddTextString(benchmark::State& state) {
   std::string text = "Hello World";
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
 
   while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
     builder.AddText(text);
   }
 }
@@ -76,9 +76,9 @@ static void BM_ParagraphBuilderAddTextChar(benchmark::State& state) {
   const char* text = "Hello World";
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
 
   while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
     builder.AddText(text);
   }
 }
@@ -91,9 +91,9 @@ static void BM_ParagraphBuilderAddTextU16stringShort(benchmark::State& state) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
 
   while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
     builder.AddText(u16_text);
   }
 }
@@ -123,9 +123,9 @@ static void BM_ParagraphBuilderAddTextU16stringLong(benchmark::State& state) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
 
   while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
     builder.AddText(u16_text);
   }
 }
@@ -139,12 +139,12 @@ static void BM_ParagraphBuilderShortParagraphConstruct(
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
 
   while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
@@ -177,12 +177,12 @@ static void BM_ParagraphBuilderLongParagraphConstruct(benchmark::State& state) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
 
   while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style);
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
