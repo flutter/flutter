@@ -125,24 +125,25 @@ void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
   breaker_.setText();
 }
 
-void Paragraph::AddRunsToLineBreaker(const std::string& rootdir) {
+void Paragraph::AddRunsToLineBreaker(
+    std::shared_ptr<minikin::FontCollection>& collection,
+    std::string& prev_font_family) {
   minikin::FontStyle font;
   minikin::MinikinPaint paint;
   for (size_t i = 0; i < runs_.size(); ++i) {
     auto run = runs_.GetRun(i);
-    auto collection =
-        FontCollection::GetFontCollection(rootdir)
-            .GetMinikinFontCollectionForFamily(run.style.font_family);
+    // Only obtain new font family if the font has changed between runs.
+    if (run.style.font_family != prev_font_family || collection == nullptr) {
+      collection = font_collection_->GetMinikinFontCollectionForFamily(
+          run.style.font_family);
+    }
+    prev_font_family = run.style.font_family;
     GetFontAndMinikinPaint(run.style, &font, &paint);
     breaker_.addStyleRun(&paint, collection, font, run.start, run.end, false);
   }
 }
 
-void Paragraph::Layout(double width,
-                       const std::string& rootdir,
-                       bool force,
-                       const double x_offset,
-                       const double y_offset) {
+void Paragraph::Layout(double width, bool force) {
   // Do not allow calling layout multiple times without changing anything.
   if (!needs_layout_ && !force)
     return;
@@ -150,8 +151,11 @@ void Paragraph::Layout(double width,
 
   width_ = width;
 
+  std::shared_ptr<minikin::FontCollection> collection = nullptr;
+  std::string prev_font_family = "";
+
   breaker_.setLineWidths(0.0f, 0, width_);
-  AddRunsToLineBreaker(rootdir);
+  AddRunsToLineBreaker(collection, prev_font_family);
   breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
@@ -170,8 +174,8 @@ void Paragraph::Layout(double width,
   max_intrinsic_width_ = 0.0f;
   lines_ = 0;
 
-  SkScalar x = x_offset;
-  SkScalar y = y_offset;
+  SkScalar x = 0.0f;
+  SkScalar y = 0.0f;
   size_t break_index = 0;
   double letter_spacing_offset = 0.0f;
   double max_line_spacing = 0.0f;
@@ -214,16 +218,13 @@ void Paragraph::Layout(double width,
     }
     x_queue.clear();
   };
-  std::shared_ptr<minikin::FontCollection> collection = nullptr;
-  std::string prev_font_family = "";
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
 
     // Only obtain new font family if the font has changed between runs.
     if (run.style.font_family != prev_font_family || collection == nullptr) {
-      collection =
-          FontCollection::GetFontCollection(rootdir)
-              .GetMinikinFontCollectionForFamily(run.style.font_family);
+      collection = font_collection_->GetMinikinFontCollectionForFamily(
+          run.style.font_family);
     }
     prev_font_family = run.style.font_family;
     GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
@@ -432,6 +433,10 @@ double Paragraph::GetHeight() const {
 void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
   needs_layout_ = true;
   paragraph_style_ = style;
+}
+
+void Paragraph::SetFontCollection(FontCollection* font_collection) {
+  font_collection_ = font_collection;
 }
 
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {

@@ -35,14 +35,25 @@ namespace txt {
 
 class FontCollection {
  public:
+  // Will be deprecated when full compatibility with Flutter Engine is complete.
   static FontCollection& GetDefaultFontCollection();
 
+  // Will be deprecated when full compatibility with Flutter Engine is complete.
   static FontCollection& GetFontCollection(std::string dir = "");
 
+  // Will be deprecated when full compatibility with Flutter Engine is complete.
   static FontCollection& GetFontCollection(std::vector<std::string> dirs);
 
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family);
+
+  FontCollection(const std::vector<std::string>& dirs);
+
+  FontCollection(std::string dir);
+
+  FontCollection();
+
+  ~FontCollection();
 
   // Provides a set of all available family names.
   std::set<std::string> GetFamilyNames();
@@ -62,12 +73,7 @@ class FontCollection {
     return DEFAULT_FAMILY_NAME;
   };
 
-  FontCollection(const std::vector<std::string>& dirs);
-
-  ~FontCollection();
-
   // TODO(chinmaygarde): Caches go here.
-  FTL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
 
 }  // namespace txt

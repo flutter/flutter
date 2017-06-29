@@ -28,11 +28,13 @@
 
 namespace txt {
 
+// Will be deprecated when full compatibility with Flutter Engine is complete.
 FontCollection& FontCollection::GetFontCollection(std::string dir) {
   std::vector<std::string> dirs = {dir};
   return GetFontCollection(std::move(dirs));
 }
 
+// Will be deprecated when full compatibility with Flutter Engine is complete.
 FontCollection& FontCollection::GetFontCollection(
     std::vector<std::string> dirs) {
   static FontCollection* collection = nullptr;
@@ -41,8 +43,18 @@ FontCollection& FontCollection::GetFontCollection(
   return *collection;
 }
 
+// Will be deprecated when full compatibility with Flutter Engine is complete.
 FontCollection& FontCollection::GetDefaultFontCollection() {
   return GetFontCollection("");
+}
+
+FontCollection::FontCollection() {
+  FontCollection("");
+}
+
+FontCollection::FontCollection(std::string dir) {
+  std::vector<std::string> dirs = {dir};
+  FontCollection(std::move(dirs));
 }
 
 FontCollection::FontCollection(const std::vector<std::string>& dirs) {

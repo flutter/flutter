@@ -21,6 +21,10 @@
 
 namespace txt {
 
+ParagraphBuilder::ParagraphBuilder(ParagraphStyle style,
+                                   FontCollection* font_collection)
+    : paragraph_style_(style), font_collection_(font_collection) {}
+
 ParagraphBuilder::ParagraphBuilder(ParagraphStyle style)
     : paragraph_style_(style) {}
 
@@ -28,6 +32,10 @@ ParagraphBuilder::ParagraphBuilder() {}
 
 void ParagraphBuilder::SetParagraphStyle(const ParagraphStyle& style) {
   paragraph_style_ = style;
+}
+
+void ParagraphBuilder::SetFontCollection(FontCollection* font_collection) {
+  font_collection_ = font_collection;
 }
 
 ParagraphBuilder::~ParagraphBuilder() = default;
@@ -71,10 +79,19 @@ void ParagraphBuilder::AddText(const char* text) {
 }
 
 std::unique_ptr<Paragraph> ParagraphBuilder::Build() {
+  if (font_collection_ == nullptr) {
+    // Will be deprecated when full compatibility with Flutter Engine is
+    // complete.
+    FTL_LOG(WARNING) << "No font collection provided. Falling back to default "
+                        "fonts.";
+    font_collection_ = &FontCollection::GetFontCollection("");
+  }
+
   runs_.EndRunIfNeeded(text_.size());
   std::unique_ptr<Paragraph> paragraph = std::make_unique<Paragraph>();
   paragraph->SetText(std::move(text_), std::move(runs_));
   paragraph->SetParagraphStyle(paragraph_style_);
+  paragraph->SetFontCollection(font_collection_);
   return paragraph;
 }
 

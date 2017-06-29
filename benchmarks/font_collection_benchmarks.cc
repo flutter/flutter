@@ -19,6 +19,8 @@
 #include "lib/ftl/command_line.h"
 #include "lib/ftl/logging.h"
 #include "lib/txt/src/font_collection.h"
+#include "third_party/skia/include/ports/SkFontMgr.h"
+#include "third_party/skia/include/ports/SkFontMgr_directory.h"
 #include "utils.h"
 
 namespace txt {
@@ -32,18 +34,33 @@ static void BM_FAKE_BENCHMARK(benchmark::State& state) {
 }
 BENCHMARK(BM_FAKE_BENCHMARK);
 
+static void BM_FontCollectionCustomInit(benchmark::State& state) {
+  while (state.KeepRunning()) {
+    benchmark::DoNotOptimize(
+        FontCollection::GetFontCollection(txt::GetFontDir()));
+  }
+}
+BENCHMARK(BM_FontCollectionCustomInit);
+
 static void BM_FontCollectionInit(benchmark::State& state) {
   while (state.KeepRunning()) {
-    FontCollection::GetFontCollection(txt::GetFontDir());
+    benchmark::DoNotOptimize(FontCollection::GetFontCollection());
   }
 }
 BENCHMARK(BM_FontCollectionInit);
 
+static void BM_FontCollectionSkFontMgr(benchmark::State& state) {
+  while (state.KeepRunning()) {
+    auto mgr = SkFontMgr_New_Custom_Directory(txt::GetFontDir().c_str());
+  }
+}
+BENCHMARK(BM_FontCollectionSkFontMgr);
+
 static void BM_FontCollectionGetMinikinFontCollectionForFamily(
     benchmark::State& state) {
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    FontCollection::GetFontCollection(txt::GetFontDir())
-        .GetMinikinFontCollectionForFamily("Roboto");
+    font_collection.GetMinikinFontCollectionForFamily("Roboto");
   }
 }
 BENCHMARK(BM_FontCollectionGetMinikinFontCollectionForFamily);

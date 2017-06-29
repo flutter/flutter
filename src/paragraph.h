@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "lib/ftl/macros.h"
+#include "lib/txt/src/font_collection.h"
 #include "lib/txt/src/paint_record.h"
 #include "lib/txt/src/paragraph_style.h"
 #include "lib/txt/src/styled_runs.h"
@@ -38,11 +39,7 @@ class Paragraph {
 
   ~Paragraph();
 
-  void Layout(double width,
-              const std::string& rootdir = "",
-              bool force = false,
-              const double x_offset = 0.0,
-              const double y_offset = 0.0);
+  void Layout(double width, bool force = false);
 
   void Paint(SkCanvas* canvas, double x, double y);
 
@@ -81,6 +78,7 @@ class Paragraph {
   std::vector<PaintRecord> records_;
   std::vector<double> line_widths_;
   ParagraphStyle paragraph_style_;
+  FontCollection* font_collection_;
   // TODO(garyq): Height of the paragraph after Layout().
   SkScalar height_ = 0.0f;
   double width_ = 0.0f;
@@ -95,7 +93,11 @@ class Paragraph {
 
   void SetParagraphStyle(const ParagraphStyle& style);
 
-  void AddRunsToLineBreaker(const std::string& rootdir = "");
+  void SetFontCollection(FontCollection* font_collection);
+
+  void AddRunsToLineBreaker(
+      std::shared_ptr<minikin::FontCollection>& collection,
+      std::string& prev_font_family);
 
   void JustifyLine(std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
                    std::vector<size_t>& buffer_sizes,
