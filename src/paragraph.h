@@ -96,8 +96,8 @@ class Paragraph {
   void SetFontCollection(FontCollection* font_collection);
 
   void AddRunsToLineBreaker(
-      std::shared_ptr<minikin::FontCollection>& collection,
-      std::string& prev_font_family);
+      std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
+          collection_map);
 
   void JustifyLine(std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
                    std::vector<size_t>& buffer_sizes,

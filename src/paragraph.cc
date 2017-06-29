@@ -126,20 +126,21 @@ void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
 }
 
 void Paragraph::AddRunsToLineBreaker(
-    std::shared_ptr<minikin::FontCollection>& collection,
-    std::string& prev_font_family) {
+    std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
+        collection_map) {
   minikin::FontStyle font;
   minikin::MinikinPaint paint;
   for (size_t i = 0; i < runs_.size(); ++i) {
     auto run = runs_.GetRun(i);
     // Only obtain new font family if the font has changed between runs.
-    if (run.style.font_family != prev_font_family || collection == nullptr) {
-      collection = font_collection_->GetMinikinFontCollectionForFamily(
-          run.style.font_family);
+    if (collection_map.count(run.style.font_family) == 0) {
+      collection_map[run.style.font_family] =
+          font_collection_->GetMinikinFontCollectionForFamily(
+              run.style.font_family);
     }
-    prev_font_family = run.style.font_family;
     GetFontAndMinikinPaint(run.style, &font, &paint);
-    breaker_.addStyleRun(&paint, collection, font, run.start, run.end, false);
+    breaker_.addStyleRun(&paint, collection_map.at(run.style.font_family), font,
+                         run.start, run.end, false);
   }
 }
 
@@ -151,11 +152,11 @@ void Paragraph::Layout(double width, bool force) {
 
   width_ = width;
 
-  std::shared_ptr<minikin::FontCollection> collection = nullptr;
-  std::string prev_font_family = "";
+  std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>
+      collection_map;
 
   breaker_.setLineWidths(0.0f, 0, width_);
-  AddRunsToLineBreaker(collection, prev_font_family);
+  AddRunsToLineBreaker(collection_map);
   breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
@@ -221,12 +222,6 @@ void Paragraph::Layout(double width, bool force) {
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
 
-    // Only obtain new font family if the font has changed between runs.
-    if (run.style.font_family != prev_font_family || collection == nullptr) {
-      collection = font_collection_->GetMinikinFontCollectionForFamily(
-          run.style.font_family);
-    }
-    prev_font_family = run.style.font_family;
     GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
     GetPaint(run.style, &paint);
 
@@ -244,7 +239,8 @@ void Paragraph::Layout(double width, bool force) {
 
       int bidiFlags = 0;
       layout.doLayout(text_.data(), layout_start, layout_end - layout_start,
-                      text_.size(), bidiFlags, font, minikin_paint, collection);
+                      text_.size(), bidiFlags, font, minikin_paint,
+                      collection_map.at(run.style.font_family));
       const size_t glyph_count = layout.nGlyphs();
       size_t blob_start = 0;
       // Each blob.
