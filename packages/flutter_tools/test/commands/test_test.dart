@@ -74,7 +74,7 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   while (_testExclusionLock != null)
     await _testExclusionLock;
 
-  ProcessResult exec = await _runFlutterTest(testName, workingDirectory, testDirectory);
+  final ProcessResult exec = await _runFlutterTest(testName, workingDirectory, testDirectory);
 
   expect(exec.exitCode, isNonZero);
   final List<String> output = exec.stdout.split('\n');
