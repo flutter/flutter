@@ -1,0 +1,12 @@
+  <div class="row" style="margin-bottom: 32px">
+    <a href="/catalog/samples/@(link)/">
+      <div class="col-md-3">
+        <img style="border:1px solid #000000" src="@(android screenshot)" alt="Android screenshot" class="img-responsive">
+      </div>
+   </a>
+    <div class="col-md-9">
+      <p>
+        @(summary)
+      </p>
+    </div>
+  </div>

@@ -80,7 +80,7 @@ class Upload {
       throw new UploadError('upload of "$fromPath" to "$largeName" and "$smallName" failed after 2 retries');
 
     largeImage ??= await new File(fromPath).readAsBytes();
-    smallImage ??= encodePng(copyResize(decodePng(largeImage), 400));
+    smallImage ??= encodePng(copyResize(decodePng(largeImage), 300));
 
     if (!largeImageSaved)
       largeImageSaved = await save(client, largeName, largeImage);
