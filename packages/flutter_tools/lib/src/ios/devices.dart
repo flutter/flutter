@@ -175,13 +175,20 @@ class IOSDevice extends Device {
     bool prebuiltApplication: false,
     String kernelPath,
     bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
   }) async {
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
       printTrace('Building ${app.name} for $id');
 
       // Step 1: Build the precompiled/DBC application if necessary.
-      final XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
+      final XcodeBuildResult buildResult = await buildXcodeProject(
+          app: app,
+          mode: mode,
+          target: mainPath,
+          buildForDevice: true,
+          usesTerminalUi: usesTerminalUi,
+      );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
         await diagnoseXcodeBuildFailure(buildResult, app);

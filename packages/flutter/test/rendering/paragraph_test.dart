@@ -6,7 +6,7 @@ import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -149,7 +149,6 @@ void main() {
     expect(paragraph.debugHasOverflowShader, isFalse);
   });
 
-
   test('maxLines', () {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(
@@ -177,5 +176,30 @@ void main() {
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
   });
-}
 
+  test('toStringDeep', () {
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(text: _kText),
+    );
+    // TODO(jacobr): the toStringDeep method for RenderParagraph needs to be
+    // fixed to not emit a spurious line of trailing whitespace and fixed so
+    // that the \n within the TextSpan content does not interfere with the box
+    // border.
+    expect(paragraph, isNot(hasAGoodToStringDeep));
+    expect(
+      paragraph.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderParagraph#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        ' │ parentData: null\n'
+        ' │ constraints: null\n'
+        ' │ size: MISSING\n'
+        ' ╘═╦══ text ═══\n'
+        '   ║ TextSpan:\n'
+        '   ║   "I polished up that handle so carefullee\n'
+        'That now I am the Ruler of the Queen\'s Navee!"\n'
+        '   ╚═══════════\n'
+        '\n',
+      ),
+    );
+  });
+}

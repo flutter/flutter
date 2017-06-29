@@ -21,7 +21,7 @@ Future<TaskResult> runEndToEndTests() async {
     if (deviceOperatingSystem == DeviceOperatingSystem.ios)
       await prepareProvisioningCertificates(testDirectory.path);
 
-    await flutter('drive', options: <String>['-d', deviceId, '-t', 'lib/keyboard_resize.dart']);
+    await flutter('drive', options: <String>['--verbose', '-d', deviceId, 'lib/keyboard_resize.dart']);
   });
 
   return new TaskResult.success(<String, dynamic>{});

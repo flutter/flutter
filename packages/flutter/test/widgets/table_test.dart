@@ -522,29 +522,31 @@ void main() {
       );
     await tester.pumpWidget(table);
     final RenderObjectElement element = key0.currentContext;
-
-    final String dump =
-        element.toStringDeep().replaceAll(new RegExp(r'#[0-9a-f]{5}'), '#000');
-    expect(dump, equals('''Table([GlobalKey#000]; renderObject: RenderTable#000)
-├Text("A")
-│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-├Text("B")
-│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-├Text("C")
-│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-├Text("D")
-│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-├Text("EEE")
-│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-├Text("F")
-│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-├Text("G")
-│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-├Text("H")
-│└RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-└Text("III")
- └RichText(renderObject: RenderParagraph#000 relayoutBoundary=up1)
-'''));
+    expect(element, hasAGoodToStringDeep);
+    expect(
+      element.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Table([GlobalKey#00000]; renderObject: RenderTable#00000)\n'
+        '├Text("A")\n'
+        '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '├Text("B")\n'
+        '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '├Text("C")\n'
+        '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '├Text("D")\n'
+        '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '├Text("EEE")\n'
+        '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '├Text("F")\n'
+        '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '├Text("G")\n'
+        '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '├Text("H")\n'
+        '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '└Text("III")\n'
+        ' └RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n',
+      ),
+    );
   });
 
   // TODO(ianh): Test handling of TableCell object

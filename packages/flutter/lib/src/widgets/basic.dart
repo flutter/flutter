@@ -1201,8 +1201,9 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
 
 /// Meta data for identifying children in a [CustomMultiChildLayout].
 ///
-/// The [MultiChildLayoutDelegate] hasChild, layoutChild, and positionChild
-/// methods use these identifiers.
+/// The [MultiChildLayoutDelegate.hasChild],
+/// [MultiChildLayoutDelegate.layoutChild], and
+/// [MultiChildLayoutDelegate.positionChild] methods use these identifiers.
 class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   /// Marks a child with a layout identifier.
   ///

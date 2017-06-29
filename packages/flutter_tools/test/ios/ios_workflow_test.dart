@@ -96,6 +96,20 @@ void main() {
       Xcode: () => xcode,
     });
 
+    testUsingContext('Emits partial status when Mac dev mode was never enabled', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.xcodeVersionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(macDevMode: 'Developer mode is currently disabled.');
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => iMobileDevice,
+      Xcode: () => xcode,
+    });
+
     testUsingContext('Emits partial status when python six not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.xcodeVersionText)
@@ -256,11 +270,13 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
     bool hasIDeviceInstaller: true,
     bool hasCocoaPods: true,
     String cocoaPodsVersionText: '1.2.0',
+    String macDevMode: 'Developer mode is already enabled.',
   }) : hasIosDeploy = new Future<bool>.value(hasIosDeploy),
        iosDeployVersionText = new Future<String>.value(iosDeployVersionText),
        hasIDeviceInstaller = new Future<bool>.value(hasIDeviceInstaller),
        hasCocoaPods = new Future<bool>.value(hasCocoaPods),
-       cocoaPodsVersionText = new Future<String>.value(cocoaPodsVersionText);
+       cocoaPodsVersionText = new Future<String>.value(cocoaPodsVersionText),
+       macDevMode = new Future<String>.value(macDevMode);
 
   @override
   final bool hasPythonSixModule;
@@ -282,4 +298,7 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
 
   @override
   final Future<String> cocoaPodsVersionText;
+
+  @override
+  final Future<String> macDevMode;
 }

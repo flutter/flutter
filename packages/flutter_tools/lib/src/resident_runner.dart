@@ -210,7 +210,7 @@ class FlutterDevice {
     printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    package = getApplicationPackageForPlatform(
+    package = await getApplicationPackageForPlatform(
       targetPlatform,
       applicationBinary: hotRunner.applicationBinary
     );
@@ -239,7 +239,8 @@ class FlutterDevice {
       route: route,
       prebuiltApplication: prebuiltMode,
       kernelPath: hotRunner.kernelFilePath,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
+      usesTerminalUi: hotRunner.usesTerminalUI,
     );
 
     final LaunchResult result = await futureResult;
@@ -260,7 +261,7 @@ class FlutterDevice {
     bool shouldBuild: true,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    package = getApplicationPackageForPlatform(
+    package = await getApplicationPackageForPlatform(
       targetPlatform,
       applicationBinary: coldRunner.applicationBinary
     );
@@ -298,7 +299,8 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
+      usesTerminalUi: coldRunner.usesTerminalUI,
     );
 
     if (!result.started) {
