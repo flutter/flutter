@@ -1,7 +1,7 @@
 ---
 layout: page
 title: "@(class) Sample Apps"
-permalink: /catalog/samples/@(link)
+permalink: /catalog/samples/@(link)/
 ---
 
 All of the sample apps listed here use the <a href="https://docs.flutter.io/flutter/material/@(class)-class.html">@(class)</a> class in an interesting way. The <a href="/catalog/samples/">Sample App Catalog</a> page lists all of the sample apps.
