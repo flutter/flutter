@@ -22,6 +22,7 @@ import 'android_studio.dart';
 const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
 const String gradleAppOutDirV1 = 'android/app/build/outputs/apk';
+const String gradleVersion = '3.3';
 
 String _cachedGradleAppOutDirV2;
 
@@ -104,16 +105,6 @@ String _calculateGradleAppOutDirV2() {
   return gradleAppOutDirV1;
 }
 
-String locateSystemGradle({ bool ensureExecutable: true }) {
-  final String gradle = gradleExecutable;
-  if (ensureExecutable && gradle != null) {
-    final File file = fs.file(gradle);
-    if (file.existsSync())
-      os.makeExecutable(file);
-  }
-  return gradle;
-}
-
 String locateProjectGradlew({ bool ensureExecutable: true }) {
   final String path = fs.path.join(
       'android', platform.isWindows ? 'gradlew.bat' : 'gradlew'
@@ -132,12 +123,25 @@ String locateProjectGradlew({ bool ensureExecutable: true }) {
 String ensureGradle() {
   String gradle = locateProjectGradlew();
   if (gradle == null) {
-    gradle = locateSystemGradle();
-    if (gradle == null)
-      throwToolExit('Unable to locate gradle. Please install Android Studio.');
+    _injectGradleWrapper();
+    gradle = locateProjectGradlew();
   }
-  printTrace('Using gradle from $gradle.');
   return gradle;
+}
+
+void _injectGradleWrapper() {
+  copyDirectorySync(cache.getArtifactDirectory('gradle_wrapper'), fs.directory('android'));
+  final String propertiesPath = fs.path.join('android', 'gradle', 'wrapper', 'gradle-wrapper.properties');
+  if (!fs.file(propertiesPath).existsSync()) {
+    fs.file(propertiesPath).writeAsStringSync('''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersion-all.zip
+''', flush: true,
+    );
+  }
 }
 
 /// Create android/local.properties if needed, and update Flutter settings.
@@ -226,7 +230,7 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   final String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
   // Run 'gradle assemble<BuildMode>'.
-  final Status status = logger.startProgress('Running \'gradle $assembleTask\'...', expectSlowOperation: true);
+  final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
   final String gradlePath = fs.file(gradle).absolute.path;
   final List<String> command = <String>[gradlePath];
   if (!logger.isVerbose) {
