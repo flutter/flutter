@@ -232,8 +232,8 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   final ApplicationPackage package = command.applicationPackages
       .getPackageForPlatform(await command.device.targetPlatform);
   if (await command.device.isAppInstalled(package))
-    command.device.uninstallApp(package);
-  command.device.installApp(package);
+    await command.device.uninstallApp(package);
+  await command.device.installApp(package);
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
   if (command.traceStartup)
