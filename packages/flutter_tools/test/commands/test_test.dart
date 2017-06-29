@@ -46,8 +46,8 @@ void main() {
 
     testUsingContext('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('simple', automatedTestsDirectory, flutterTestDirectory,
-        extraArgs: const <String>["--name", "f.*st"]);
+      final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
+        extraArgs: const <String>["--name", "inc.*de"]);
       if (!result.stdout.contains("+1: All tests passed"))
         fail("unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n");        
       expect(result.exitCode, 0);
@@ -55,8 +55,8 @@ void main() {
 
     testUsingContext('run a test when its name contains a string', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('simple', automatedTestsDirectory, flutterTestDirectory,
-        extraArgs: const <String>["--plain-name", "first"]);
+      final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
+        extraArgs: const <String>["--plain-name", "include"]);
       if (!result.stdout.contains("+1: All tests passed"))
         fail("unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n");        
       expect(result.exitCode, 0);
