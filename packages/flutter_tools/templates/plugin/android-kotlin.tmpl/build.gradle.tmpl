@@ -4,6 +4,9 @@ version '1.0-SNAPSHOT'
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
     }
 
     dependencies {
@@ -31,6 +34,10 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
     defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
