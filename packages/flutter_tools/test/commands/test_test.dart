@@ -18,63 +18,63 @@ import '../src/context.dart';
 Future<Null> _testExclusionLock;
 
 void main() {
-  group('test', () {
+  group('flutter test should', () {
 
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
-    testUsingContext('Exception handling in test harness', () async {
+    testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
     });
 
-    testUsingContext('TestAsyncUtils guarded function test', () async {
+    testUsingContext('report a nice error when a guarded function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
     });
 
-    testUsingContext('TestAsyncUtils unguarded function test', () async {
+    testUsingContext('report a nice error when an async function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
     });
 
-    testUsingContext('Missing flutter_test dependency', () async {
+    testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
       return _testFile('trivial', missingDependencyTests, missingDependencyTests);
     });
+
+    testUsingContext('run a test when its name matches a regexp', () async {
+      Cache.flutterRoot = '../..';
+      final ProcessResult result = await _runFlutterTest('simple', automatedTestsDirectory, flutterTestDirectory,
+        extraArgs: const <String>["--name", "f.*st"]);
+      if (!result.stdout.contains("+1: All tests passed"))
+        fail("unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n");        
+      expect(result.exitCode, 0);
+    });
+
+    testUsingContext('run a test when its name contains a string', () async {
+      Cache.flutterRoot = '../..';
+      final ProcessResult result = await _runFlutterTest('simple', automatedTestsDirectory, flutterTestDirectory,
+        extraArgs: const <String>["--plain-name", "first"]);
+      if (!result.stdout.contains("+1: All tests passed"))
+        fail("unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n");        
+      expect(result.exitCode, 0);
+    });
+
   }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_shell is available
 }
 
 Future<Null> _testFile(String testName, String workingDirectory, String testDirectory) async {
-  final String fullTestName = fs.path.join(testDirectory, '${testName}_test.dart');
-  final File testFile = fs.file(fullTestName);
-  expect(testFile.existsSync(), true);
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
-  expect(expectationFile.existsSync(), true);
+  if (!expectationFile.existsSync())
+    fail("missing expectation file: $expectationFile");
 
   while (_testExclusionLock != null)
     await _testExclusionLock;
 
-  ProcessResult exec;
-  final Completer<Null> testExclusionCompleter = new Completer<Null>();
-  _testExclusionLock = testExclusionCompleter.future;
-  try {
-    exec = await Process.run(
-      fs.path.join(dartSdkPath, 'bin', 'dart'),
-      <String>[
-        fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
-        'test',
-        '--no-color',
-        fullTestName,
-      ],
-      workingDirectory: workingDirectory,
-    );
-  } finally {
-    _testExclusionLock = null;
-    testExclusionCompleter.complete();
-  }
+  ProcessResult exec = await _runFlutterTest(testName, workingDirectory, testDirectory);
 
   expect(exec.exitCode, isNonZero);
   final List<String> output = exec.stdout.split('\n');
@@ -114,4 +114,35 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   expect(allowSkip, isFalse);
   if (!haveSeenStdErrMarker)
     expect(exec.stderr, '');
+}
+
+Future<ProcessResult> _runFlutterTest(String testName, String workingDirectory, String testDirectory,
+  {List<String> extraArgs = const <String>[]}) async {
+    
+  final String testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');
+  final File testFile = fs.file(testFilePath);
+  if (!testFile.existsSync())
+    fail("missing test file: $testFile");
+
+  final List<String> args = <String>[
+    fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
+    'test',
+    '--no-color'
+  ]..addAll(extraArgs)..add(testFilePath);
+
+  while (_testExclusionLock != null)
+    await _testExclusionLock;
+
+  final Completer<Null> testExclusionCompleter = new Completer<Null>();
+  _testExclusionLock = testExclusionCompleter.future;
+  try {
+    return await Process.run(
+      fs.path.join(dartSdkPath, 'bin', 'dart'),
+      args,
+      workingDirectory: workingDirectory,
+    );
+  } finally {
+    _testExclusionLock = null;
+    testExclusionCompleter.complete();
+  }
 }

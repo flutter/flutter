@@ -23,14 +23,16 @@ class TestCommand extends FlutterCommand {
   TestCommand({ bool verboseHelp: false }) {
     usesPubOption();
     argParser.addOption('name',
-      help: 'A regular expression matching substrings of the names of tests to run',
+      help: 'A regular expression matching substrings of the names of tests to run.',
+      valueHelp: 'regexp',
       allowMultiple: true,
-      splitCommas: false
+      splitCommas: false,
     );
     argParser.addOption('plain-name',
-      help: 'A plain-text substring of the names of tests to run',
+      help: 'A plain-text substring of the names of tests to run.',
+      valueHelp: 'substring',
       allowMultiple: true,
-      splitCommas: false
+      splitCommas: false,
     );
     argParser.addFlag('start-paused',
         defaultsTo: false,
