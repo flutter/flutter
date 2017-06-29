@@ -40,4 +40,12 @@ void CanvasImage::dispose() {
   ClearDartWrapper();
 }
 
+size_t CanvasImage::GetAllocationSize() {
+  if (image_) {
+    return image_->width() * image_->height() * 4;
+  } else {
+    return sizeof(CanvasImage);
+  }
+}
+
 }  // namespace blink

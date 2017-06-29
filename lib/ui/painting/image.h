@@ -32,6 +32,8 @@ class CanvasImage final : public ftl::RefCountedThreadSafe<CanvasImage>,
   const sk_sp<SkImage>& image() const { return image_; }
   void set_image(sk_sp<SkImage> image) { image_ = std::move(image); }
 
+  virtual size_t GetAllocationSize() override;
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:

@@ -31,6 +31,8 @@ class Picture : public ftl::RefCountedThreadSafe<Picture>,
 
   void dispose();
 
+  virtual size_t GetAllocationSize() override;
+
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:

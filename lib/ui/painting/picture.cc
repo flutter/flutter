@@ -48,4 +48,12 @@ void Picture::dispose() {
   ClearDartWrapper();
 }
 
+size_t Picture::GetAllocationSize() {
+  if (picture_) {
+    return picture_->approximateBytesUsed();
+  } else {
+    return sizeof(Picture);
+  }
+}
+
 }  // namespace blink
