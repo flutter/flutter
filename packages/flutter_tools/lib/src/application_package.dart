@@ -85,7 +85,7 @@ class AndroidApk extends ApplicationPackage {
     String apkPath;
 
     if (isProjectUsingGradle()) {
-      final String apkPath = await getGradleAppOut();
+      apkPath = await getGradleAppOut();
       if (fs.file(apkPath).existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
