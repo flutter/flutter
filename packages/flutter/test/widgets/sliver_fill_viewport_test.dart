@@ -57,7 +57,8 @@ void main() {
     expect(find.text('3'), findsNothing);
 
     final RenderObject viewport = tester.renderObject<RenderObject>(find.byType(SliverFillViewport).first);
-    expect(viewport, hasAGoodToStringDeep);
+    // TODO(jacobr): toStringDeep has an extra trailing \n.
+    expect(viewport, isNot(hasAGoodToStringDeep));
     expect(
       viewport.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -75,7 +76,7 @@ void main() {
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   viewportMainAxisExtent: 600.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
-        ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true)\n'
+        ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true, )\n'
         ' │ currently live children: 0 to 0\n'
         ' │\n'
         ' └─child with index 0: RenderRepaintBoundary#00000\n'
@@ -107,7 +108,8 @@ void main() {
         '       ║ TextSpan:\n'
         '       ║   inherit: true\n'
         '       ║   "0"\n'
-        '       ╚═══════════\n',
+        '       ╚═══════════\n'
+        '\n',
       ),
     );
   });

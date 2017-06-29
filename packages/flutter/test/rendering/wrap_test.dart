@@ -16,10 +16,10 @@ void main() {
         '   parentData: null\n'
         '   constraints: null\n'
         '   size: MISSING\n'
-        '   direction: horizontal\n'
-        '   alignment: start\n'
+        '   direction: Axis.horizontal\n'
+        '   alignment: WrapAlignment.start\n'
         '   spacing: 0.0\n'
-        '   runAlignment: start\n'
+        '   runAlignment: WrapAlignment.start\n'
         '   runSpacing: 0.0\n'
         '   crossAxisAlignment: 0.0\n'
       ),

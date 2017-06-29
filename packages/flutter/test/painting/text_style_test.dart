@@ -10,11 +10,9 @@ import 'package:test/test.dart';
 void main() {
   test("TextStyle control test", () {
     expect(const TextStyle(inherit: false).toString(), equals(
-        'inherit: false\n'
-            '<no style specified>'));
+        'inherit: false'));
     expect(const TextStyle(inherit: true).toString(), equals(
-        'inherit: true\n'
-            '<no style specified>'));
+        'inherit: true'));
 
     final TextStyle s1 = const TextStyle(
       fontSize: 10.0,
