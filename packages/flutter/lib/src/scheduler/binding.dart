@@ -16,6 +16,19 @@ import 'priority.dart';
 
 export 'dart:ui' show VoidCallback;
 
+/// Whether we've been built in release mode.
+const bool kReleaseMode = const bool.fromEnvironment("dart.vm.product");
+
+/// When running in profile mode (or debug mode), invoke the given function.
+///
+/// In release mode, the function is not invoked. In the future, we'd want the
+/// given closure - and the call to [profile] - to be tree-shaken out.
+void profile(VoidCallback function) {
+  if (kReleaseMode)
+    return;
+  function();
+}
+
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
 double _timeDilation = 1.0;
@@ -550,8 +563,8 @@ abstract class SchedulerBinding extends BindingBase {
   }
   Duration _currentFrameTimeStamp;
 
-  int _debugFrameNumber = 0;
-  Stopwatch _frameStopwatch;
+  int _profileFrameNumber = 0;
+  Stopwatch _profileFrameStopwatch = new Stopwatch();
   String _debugBanner;
 
   /// Called by the engine to prepare the framework to produce a new frame.
@@ -584,11 +597,13 @@ abstract class SchedulerBinding extends BindingBase {
     if (rawTimeStamp != null)
       _lastRawTimeStamp = rawTimeStamp;
 
+    profile(() {
+      _profileFrameNumber += 1;
+      _profileFrameStopwatch.reset();
+      _profileFrameStopwatch.start();
+    });
+
     assert(() {
-      _debugFrameNumber += 1;
-      _frameStopwatch ??= new Stopwatch();
-      _frameStopwatch.reset();
-      _frameStopwatch.start();
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
         final StringBuffer frameTimeStampDescription = new StringBuffer();
         if (rawTimeStamp != null) {
@@ -596,7 +611,7 @@ abstract class SchedulerBinding extends BindingBase {
         } else {
           frameTimeStampDescription.write('(warm-up frame)');
         }
-        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
+        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_profileFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
         if (debugPrintBeginFrameBanner)
           debugPrint(_debugBanner);
       }
@@ -649,13 +664,15 @@ abstract class SchedulerBinding extends BindingBase {
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
       developer.Timeline.finishSync(); // end the Frame
-      assert(() {
-        _frameStopwatch.stop();
+      profile(() {
+        _profileFrameStopwatch.stop();
         developer.postEvent('Flutter.Frame', <String, dynamic>{
-          'frameNumber': _debugFrameNumber,
+          'number': _profileFrameNumber,
           'startTime': _currentFrameTimeStamp.inMicroseconds,
-          'elapsed': _frameStopwatch.elapsedMicroseconds
+          'elapsed': _profileFrameStopwatch.elapsedMicroseconds
         });
+      });
+      assert(() {
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner.length);
         _debugBanner = null;
