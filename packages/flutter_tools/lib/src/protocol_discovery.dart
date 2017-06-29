@@ -22,10 +22,6 @@ class ProtocolDiscovery {
     assert(logReader != null);
     assert(portForwarder == null || defaultHostPort != null);
     _deviceLogSubscription = logReader.logLines.listen(_handleLine);
-    _timer = new Timer(const Duration(seconds: 60), () {
-      _stopScrapingLogs();
-      _completer.completeError(new ToolExit('Timeout while attempting to retrieve URL for $serviceName'));
-    });
   }
 
   factory ProtocolDiscovery.observatory(
@@ -66,7 +62,6 @@ class ProtocolDiscovery {
   final Completer<Uri> _completer = new Completer<Uri>();
 
   StreamSubscription<String> _deviceLogSubscription;
-  Timer _timer;
 
   /// The discovered service URI.
   Future<Uri> get uri => _completer.future;
@@ -74,8 +69,6 @@ class ProtocolDiscovery {
   Future<Null> cancel() => _stopScrapingLogs();
 
   Future<Null> _stopScrapingLogs() async {
-    _timer?.cancel();
-    _timer = null;
     await _deviceLogSubscription?.cancel();
     _deviceLogSubscription = null;
   }
@@ -106,11 +99,7 @@ class ProtocolDiscovery {
     if (portForwarder != null) {
       final int devicePort = deviceUri.port;
       int hostPort = this.hostPort ?? await portScanner.findPreferredPort(defaultHostPort);
-      hostPort = await portForwarder
-          .forward(devicePort, hostPort: hostPort)
-          .timeout(const Duration(seconds: 60), onTimeout: () {
-        throwToolExit('Timeout while atempting to foward device port $devicePort for $serviceName');
-      });
+      hostPort = await portForwarder.forward(devicePort, hostPort: hostPort);
       printTrace('Forwarded host port $hostPort to device port $devicePort for $serviceName');
       hostUri = deviceUri.replace(port: hostPort);
     }
