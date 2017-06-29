@@ -43,15 +43,16 @@ static void BM_ParagraphShortLayout(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
     auto paragraph = builder.Build();
 
-    paragraph->Layout(300, txt::GetFontDir(), true);
+    paragraph->Layout(300, true);
   }
 }
 BENCHMARK(BM_ParagraphShortLayout);
@@ -83,15 +84,16 @@ static void BM_ParagraphLongLayout(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
     auto paragraph = builder.Build();
 
-    paragraph->Layout(300, txt::GetFontDir(), true);
+    paragraph->Layout(300, true);
   }
 }
 BENCHMARK(BM_ParagraphLongLayout);
@@ -106,14 +108,15 @@ static void BM_ParagraphManyStylesLayout(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
-    for (int i = 0; i < 100; ++i) {
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+    for (int i = 0; i < 1000; ++i) {
       builder.PushStyle(text_style);
       builder.AddText(u16_text);
     }
     auto paragraph = builder.Build();
-    paragraph->Layout(300, txt::GetFontDir(), true);
+    paragraph->Layout(300, true);
   }
 }
 BENCHMARK(BM_ParagraphManyStylesLayout);
@@ -128,15 +131,16 @@ static void BM_ParagraphTextBigO(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
     auto paragraph = builder.Build();
 
-    paragraph->Layout(300, txt::GetFontDir(), true);
+    paragraph->Layout(300, true);
   }
   state.SetComplexityN(state.range(0));
 }
@@ -155,15 +159,16 @@ static void BM_ParagraphStylesBigO(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
     for (int i = 0; i < state.range(0); ++i) {
       builder.PushStyle(text_style);
       builder.AddText(u16_text);
     }
     auto paragraph = builder.Build();
-    paragraph->Layout(300, txt::GetFontDir(), true);
+    paragraph->Layout(300, true);
   }
   state.SetComplexityN(state.range(0));
 }

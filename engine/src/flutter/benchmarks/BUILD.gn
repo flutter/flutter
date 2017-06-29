@@ -23,6 +23,7 @@ executable("benchmarks") {
 
   sources = [
     "font_collection_benchmarks.cc",
+    "paint_record_benchmarks.cc",
     "paragraph_benchmarks.cc",
     "paragraph_builder_benchmarks.cc",
     "styled_runs_benchmarks.cc",

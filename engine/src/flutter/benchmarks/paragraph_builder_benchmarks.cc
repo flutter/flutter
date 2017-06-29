@@ -17,6 +17,7 @@
 #include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
 #include "lib/ftl/logging.h"
+#include "lib/txt/src/font_collection.h"
 #include "lib/txt/src/font_style.h"
 #include "lib/txt/src/font_weight.h"
 #include "lib/txt/src/paragraph.h"
@@ -24,6 +25,7 @@
 #include "lib/txt/src/text_align.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "utils.h"
 
 namespace txt {
 
@@ -40,8 +42,9 @@ static void BM_ParagraphBuilderPushStyle(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
     builder.PushStyle(text_style);
   }
 }
@@ -76,9 +79,9 @@ static void BM_ParagraphBuilderAddTextChar(benchmark::State& state) {
   const char* text = "Hello World";
 
   txt::ParagraphStyle paragraph_style;
-
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
     builder.AddText(text);
   }
 }
@@ -91,9 +94,9 @@ static void BM_ParagraphBuilderAddTextU16stringShort(benchmark::State& state) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
     builder.AddText(u16_text);
   }
 }
@@ -142,9 +145,9 @@ static void BM_ParagraphBuilderShortParagraphConstruct(
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
@@ -180,9 +183,9 @@ static void BM_ParagraphBuilderLongParagraphConstruct(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style);
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();

@@ -34,7 +34,8 @@ TEST_F(RenderTest, SimpleParagraph) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
@@ -44,7 +45,7 @@ TEST_F(RenderTest, SimpleParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth());
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
@@ -66,7 +67,8 @@ TEST_F(RenderTest, SimpleRedParagraph) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorRED;
@@ -77,7 +79,7 @@ TEST_F(RenderTest, SimpleRedParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth());
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
@@ -119,7 +121,8 @@ TEST_F(RenderTest, RainbowParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 2;
   paragraph_style.text_align = TextAlign::left;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style1;
   text_style1.color = SK_ColorRED;
@@ -162,7 +165,7 @@ TEST_F(RenderTest, RainbowParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth());
 
   paragraph->Paint(GetCanvas(), 10.0, 50.0);
 
@@ -191,7 +194,8 @@ TEST_F(RenderTest, DefaultStyleParagraph) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorRED;
@@ -201,7 +205,7 @@ TEST_F(RenderTest, DefaultStyleParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth());
 
   paragraph->Paint(GetCanvas(), 10.0, 15.0);
 
@@ -221,7 +225,8 @@ TEST_F(RenderTest, BoldParagraph) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.font_size = 60;
@@ -236,7 +241,7 @@ TEST_F(RenderTest, BoldParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth());
 
   paragraph->Paint(GetCanvas(), 10.0, 60.0);
 
@@ -277,7 +282,8 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::left;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -294,7 +300,7 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth() - 100, txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
@@ -363,7 +369,8 @@ TEST_F(RenderTest, RightAlignParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::right;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -380,7 +387,7 @@ TEST_F(RenderTest, RightAlignParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth() - 100, txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
@@ -464,7 +471,8 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::center;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -481,7 +489,7 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth() - 100, txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
@@ -569,7 +577,8 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::justify;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -586,7 +595,7 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth() - 100, txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
@@ -636,7 +645,8 @@ TEST_F(RenderTest, ItalicsParagraph) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style);
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorRED;
@@ -649,7 +659,7 @@ TEST_F(RenderTest, ItalicsParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth(), txt::GetFontDir());
+  paragraph->Layout(GetTestCanvasWidth());
 
   paragraph->Paint(GetCanvas(), 10.0, 35.0);
 

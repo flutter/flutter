@@ -21,6 +21,7 @@
 #include <string>
 
 #include "lib/ftl/macros.h"
+#include "lib/txt/src/font_collection.h"
 #include "lib/txt/src/paragraph.h"
 #include "lib/txt/src/paragraph_style.h"
 #include "lib/txt/src/styled_runs.h"
@@ -31,6 +32,8 @@ namespace txt {
 class ParagraphBuilder {
  public:
   explicit ParagraphBuilder(ParagraphStyle style);
+
+  ParagraphBuilder(ParagraphStyle style, FontCollection* font_collection);
 
   ParagraphBuilder();
 
@@ -48,6 +51,8 @@ class ParagraphBuilder {
 
   void SetParagraphStyle(const ParagraphStyle& style);
 
+  void SetFontCollection(FontCollection* font_collection);
+
   std::unique_ptr<Paragraph> Build();
 
  private:
@@ -55,6 +60,7 @@ class ParagraphBuilder {
   std::vector<size_t> style_stack_;
   StyledRuns runs_;
   ParagraphStyle paragraph_style_;
+  FontCollection* font_collection_ = nullptr;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
 };
