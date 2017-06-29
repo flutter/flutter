@@ -871,8 +871,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<dynamic> _routeNamed(
-      String name, { bool allowNull: false, Map<String, dynamic> arguments}) {
+  Route<dynamic> _routeNamed(String name, { bool allowNull: false, Map<String, dynamic> arguments}) {
     assert(!_debugLocked);
     assert(name != null);
     final RouteSettings settings = new RouteSettings(
@@ -1055,8 +1054,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  Future<dynamic> pushReplacementNamed(
-      String name, { dynamic result, Map<String, dynamic> arguments }) {
+  Future<dynamic> pushReplacementNamed(String name,
+      { dynamic result, Map<String, dynamic> arguments }) {
     return pushReplacement(_routeNamed(name, arguments: arguments), result: result);
   }
 
@@ -1159,8 +1158,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// To remove all the routes before the pushed route, use a [RoutePredicate]
   /// that always returns false.
-  Future<dynamic> pushNamedAndRemoveUntil(
-      String routeName, RoutePredicate predicate, {Map<String, dynamic> arguments}) {
+  Future<dynamic> pushNamedAndRemoveUntil(String routeName, RoutePredicate predicate,
+      {Map<String, dynamic> arguments}) {
     return pushAndRemoveUntil(_routeNamed(routeName, arguments: arguments), predicate);
   }
 
