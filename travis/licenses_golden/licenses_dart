@@ -1,4 +1,4 @@
-Signature: e340d89dea11ef56c6e266495ffa53b0
+Signature: 6cb33f49531d29e621f7ab4b0aa6bac1
 
 UNUSED LICENSES:
 
@@ -1051,6 +1051,7 @@ FILE: ../../../dart/runtime/observatory/lib/src/elements/class_tree.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/debugger.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/heap_map.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/isolate_reconnect.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/memory_dashboard.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/metrics.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/vm_connect.dart
 FILE: ../../../dart/runtime/observatory/lib/src/service/object.dart
@@ -1381,6 +1382,7 @@ FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/allocation_p
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/breakpoint.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/class.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/context.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/editor.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/eval.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/event.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/field.dart
@@ -1413,6 +1415,7 @@ FILE: ../../../dart/runtime/observatory/lib/src/repositories/allocation_profile.
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/breakpoint.dart
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/class.dart
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/context.dart
+FILE: ../../../dart/runtime/observatory/lib/src/repositories/editor.dart
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/eval.dart
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/event.dart
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/field.dart
