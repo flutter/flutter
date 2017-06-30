@@ -77,6 +77,8 @@ action("generate_snapshot_bin") {
     ":generate_dart_ui",
     "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
   ]
+  depfile = "$target_gen_dir/core_snapshot.d"
+
   inputs = [
              "//dart/runtime/tools/create_snapshot_bin.py",
              snapshot_dart,
@@ -127,6 +129,8 @@ action("generate_snapshot_bin") {
     "--isolate_instructions_output_bin",
     rebase_path(isolate_snapshot_instructions, root_build_dir),
     "--url_mapping=dart:ui,$rebased_dart_ui_path",
+    "--vm_flag",
+    "--dependencies=" + rebase_path(depfile),
   ]
 
   if (is_debug) {
