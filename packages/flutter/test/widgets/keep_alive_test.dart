@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class Leaf extends StatefulWidget {
-  Leaf({ Key key, this.index, this.child }) : super(key: key);
-  final int index;
+  Leaf({ Key key, this.child }) : super(key: key);
   final Widget child;
   @override
   _LeafState createState() => new _LeafState();
@@ -36,7 +35,6 @@ List<Widget> generateList(Widget child) {
     100,
     (int index) => new Leaf(
       key: new GlobalObjectKey<_LeafState>(index),
-      index: index,
       child: child,
     ),
     growable: false,
