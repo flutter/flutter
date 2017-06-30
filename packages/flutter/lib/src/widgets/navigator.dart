@@ -218,10 +218,12 @@ class RouteSettings {
   /// replaced with the new values.
   RouteSettings copyWith({
     String name,
+    dynamic arguments,
     bool isInitialRoute,
   }) {
     return new RouteSettings(
       name: name ?? this.name,
+      arguments: arguments ?? this.arguments,
       isInitialRoute: isInitialRoute ?? this.isInitialRoute,
     );
   }
@@ -428,9 +430,7 @@ abstract class NavigatorState<T extends BasicNavigator> extends State<T> with Ti
     assert(route != null);
     assert(route._navigatorState == null);
     setState(() {
-      final Route<dynamic> oldRoute = _history.isNotEmpty
-          ? _history.last
-          : null;
+      final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
       route._navigatorState = this;
       route.install(_currentOverlayEntry);
       _history.add(route);
@@ -585,12 +585,8 @@ abstract class NavigatorState<T extends BasicNavigator> extends State<T> with Ti
         !overlay.debugIsVisible(targetRoute.overlayEntries.last));
     setState(() {
       _history.removeAt(index);
-      final Route<dynamic> nextRoute = index < _history.length
-          ? _history[index]
-          : null;
-      final Route<dynamic> previousRoute = index > 0
-          ? _history[index - 1]
-          : null;
+      final Route<dynamic> nextRoute = index < _history.length ? _history[index] : null;
+      final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
       if (previousRoute != null)
         previousRoute.didChangeNext(nextRoute);
       if (nextRoute != null)
@@ -631,9 +627,7 @@ abstract class NavigatorState<T extends BasicNavigator> extends State<T> with Ti
     assert(newRoute._navigatorState == null);
     assert(newRoute.overlayEntries.isEmpty);
     setState(() {
-      final Route<dynamic> oldRoute = _history.isNotEmpty
-          ? _history.last
-          : null;
+      final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
       newRoute._navigatorState = this;
       newRoute.install(_currentOverlayEntry);
       _history.add(newRoute);
@@ -761,9 +755,7 @@ abstract class NavigatorState<T extends BasicNavigator> extends State<T> with Ti
     final int index = _history.indexOf(route);
     assert(index != -1);
     final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
-    final Route<dynamic> nextRoute = (index + 1 < _history.length)
-        ? _history[index + 1]
-        : null;
+    final Route<dynamic> nextRoute = (index + 1 < _history.length) ? _history[index + 1] : null;
     setState(() {
       _history.removeAt(index);
       previousRoute?.didChangeNext(nextRoute);
@@ -1618,13 +1610,13 @@ class _NavigatorState extends NavigatorState<Navigator> {
             new FlutterErrorDetails( // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/29952
                 exception:
                 'Could not navigate to initial route.\n'
-                    'The requested route name was: "/$initialRouteName"\n'
-                    'The following routes were therefore attempted:\n'
-                    ' * ${plannedInitialRouteNames.join("\n * ")}\n'
-                    'This resulted in the following objects:\n'
-                    ' * ${plannedInitialRoutes.join("\n * ")}\n'
-                    'One or more of those objects was null, and therefore the initial route specified will be '
-                    'ignored and "${Navigator.defaultRouteName}" will be used instead.'
+                'The requested route name was: "/$initialRouteName"\n'
+                'The following routes were therefore attempted:\n'
+                ' * ${plannedInitialRouteNames.join("\n * ")}\n'
+                'This resulted in the following objects:\n'
+                ' * ${plannedInitialRoutes.join("\n * ")}\n'
+                'One or more of those objects was null, and therefore the initial route specified will be '
+                'ignored and "${Navigator.defaultRouteName}" will be used instead.'
             ),
           );
           return true;
@@ -1657,11 +1649,11 @@ class _NavigatorState extends NavigatorState<Navigator> {
       assert(() {
         if (widget.onUnknownRoute == null) {
           throw new FlutterError(
-              'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
-                  'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
-                  'onUnknownRoute callback specified.\n'
-                  'The Navigator was:\n'
-                  '  $this'
+            'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
+            'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
+            'onUnknownRoute callback specified.\n'
+            'The Navigator was:\n'
+            '  $this'
           );
         }
         return true;
@@ -1670,11 +1662,11 @@ class _NavigatorState extends NavigatorState<Navigator> {
       assert(() {
         if (route == null) {
           throw new FlutterError(
-              'A Navigator\'s onUnknownRoute returned null.\n'
-                  'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
-                  'null. The onUnknownRoute callback should never return null.\n'
-                  'The Navigator was:\n'
-                  '  $this'
+            'A Navigator\'s onUnknownRoute returned null.\n'
+            'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
+            'null. The onUnknownRoute callback should never return null.\n'
+            'The Navigator was:\n'
+            '  $this'
           );
         }
         return true;
