@@ -238,11 +238,13 @@ class InkResponse extends StatefulWidget {
   }
 }
 
-class _InkResponseState<T extends InkResponse> extends State<T> {
-
+class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKeepAliveClientMixin {
   Set<InkSplash> _splashes;
   InkSplash _currentSplash;
   InkHighlight _lastHighlight;
+
+  @override
+  bool get wantKeepAlive => _lastHighlight != null || (_splashes != null && _splashes.isNotEmpty);
 
   void updateHighlight(bool value) {
     if (value == (_lastHighlight != null && _lastHighlight.active))
@@ -260,8 +262,10 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
           onRemoved: () {
             assert(_lastHighlight != null);
             _lastHighlight = null;
+            updateKeepAlive();
           },
         );
+        updateKeepAlive();
       } else {
         _lastHighlight.activate();
       }
@@ -292,12 +296,14 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
           _splashes.remove(splash);
           if (_currentSplash == splash)
             _currentSplash = null;
+          updateKeepAlive();
         } // else we're probably in deactivate()
       }
     );
     _splashes ??= new HashSet<InkSplash>();
     _splashes.add(splash);
     _currentSplash = splash;
+    updateKeepAlive();
     updateHighlight(true);
   }
 
@@ -353,6 +359,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   @override
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
+    super.build(context); // See AutomaticKeepAliveClientMixin.
     final ThemeData themeData = Theme.of(context);
     _lastHighlight?.color = widget.highlightColor ?? themeData.highlightColor;
     _currentSplash?.color = widget.splashColor ?? themeData.splashColor;

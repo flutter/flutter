@@ -482,7 +482,16 @@ class InputDecorator extends StatelessWidget {
       );
     }
 
-    Widget inputChild;
+    Widget inputChild = new KeyedSubtree(
+      // It's important that we maintain the state of our child subtree, as it
+      // may be stateful (e.g. containing text selections). Since our build
+      // function risks changing the depth of the tree, we preserve the subtree
+      // using global keys.
+      // GlobalObjectKey(context) will always be the same whenever we are built.
+      key: new GlobalObjectKey(context),
+      child: child,
+    );
+
     if (!hasInlineLabel && (!isEmpty || hintText == null) &&
         (decoration?.prefixText != null || decoration?.suffixText != null)) {
       final List<Widget> rowContents = <Widget>[];
@@ -492,7 +501,7 @@ class InputDecorator extends StatelessWidget {
             style: decoration.prefixStyle ?? hintStyle)
         );
       }
-      rowContents.add(new Expanded(child: child));
+      rowContents.add(new Expanded(child: inputChild));
       if (decoration.suffixText != null) {
         rowContents.add(
             new Text(decoration.suffixText,
@@ -500,8 +509,6 @@ class InputDecorator extends StatelessWidget {
         );
       }
       inputChild = new Row(children: rowContents);
-    } else {
-      inputChild = child;
     }
 
     if (isCollapsed) {

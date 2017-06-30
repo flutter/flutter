@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class Leaf extends StatefulWidget {
   Leaf({ Key key, this.child }) : super(key: key);
@@ -46,25 +47,29 @@ class _LeafState extends State<Leaf> {
   }
 }
 
-List<Widget> generateList(Widget child) {
+List<Widget> generateList(Widget child, { @required bool impliedMode }) {
   return new List<Widget>.generate(
     100,
-    (int index) => new AutomaticKeepAlive(
-      child: new Leaf(
+    (int index) {
+      final Widget result = new Leaf(
         key: new GlobalObjectKey<_LeafState>(index),
         child: child,
-      ),
-    ),
+      );
+      if (impliedMode)
+        return result;
+      return new AutomaticKeepAlive(child: result);
+    },
     growable: false,
   );
 }
 
-void main() {
+void tests({ @required bool impliedMode }) {
   testWidgets('AutomaticKeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
-      addRepaintBoundaries: false,
+      addAutomaticKeepAlives: impliedMode,
+      addRepaintBoundaries: impliedMode,
       itemExtent: 12.3, // about 50 widgets visible
-      children: generateList(const Placeholder()),
+      children: generateList(const Placeholder(), impliedMode: impliedMode),
     ));
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
@@ -101,8 +106,12 @@ void main() {
 
   testWidgets('AutomaticKeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
-      addRepaintBoundaries: false,
-      children: generateList(new Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
+      addAutomaticKeepAlives: impliedMode,
+      addRepaintBoundaries: impliedMode,
+      children: generateList(
+        new Container(height: 12.3, child: const Placeholder()), // about 50 widgets visible
+        impliedMode: impliedMode,
+      ),
     ));
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
@@ -139,10 +148,14 @@ void main() {
 
   testWidgets('AutomaticKeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(new GridView.count(
-      addRepaintBoundaries: false,
+      addAutomaticKeepAlives: impliedMode,
+      addRepaintBoundaries: impliedMode,
       crossAxisCount: 2,
       childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
-      children: generateList(new Container(child: const Placeholder())),
+      children: generateList(
+        new Container(child: const Placeholder()),
+        impliedMode: impliedMode,
+      ),
     ));
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(30)), findsOneWidget);
@@ -176,9 +189,15 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(61)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90)), findsNothing);
   });
+}
+
+void main() {
+  group('Explicit automatic keep-alive', () { tests(impliedMode: false); });
+  group('Implied automatic keep-alive', () { tests(impliedMode: true); });
 
   testWidgets('AutomaticKeepAlive double', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       children: <Widget>[
         new AutomaticKeepAlive(
@@ -249,6 +268,7 @@ void main() {
 
   testWidgets('AutomaticKeepAlive double', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       children: <Widget>[
         new AutomaticKeepAlive(
@@ -296,6 +316,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsOneWidget);
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       children: <Widget>[
         new AutomaticKeepAlive(
@@ -351,6 +372,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       children: <Widget>[
         new AutomaticKeepAlive(

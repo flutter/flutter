@@ -7,6 +7,7 @@ import 'dart:collection' show SplayTreeMap, HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'framework.dart';
 
@@ -43,7 +44,7 @@ abstract class SliverChildDelegate {
   /// exists.
   ///
   /// Subclasses typically override this function and wrap their children in
-  /// [RepaintBoundary] widgets.
+  /// [AutomaticKeepAlive] and [RepaintBoundary] widgets.
   Widget build(BuildContext context, int index);
 
   /// Returns an estimate of the number of children this delegate will build.
@@ -119,7 +120,9 @@ abstract class SliverChildDelegate {
 /// not even have to be built until they are displayed.
 ///
 /// The widgets returned from the builder callback are automatically wrapped in
-/// [RepaintBoundary] widgets if [addRepaintBoundaries] is true (the default).
+/// [AutomaticKeepAlive] widgets if [addAutomaticKeepAlives] is true (the
+/// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
+/// (also the default).
 ///
 /// See also:
 ///
@@ -129,12 +132,15 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
   /// builder callback.
   ///
-  /// The [builder] and [addRepaintBoundaries] arguments must not be null.
+  /// The [builder], [addAutomaticKeepAlives], and [addRepaintBoundaries]
+  /// arguments must not be null.
   const SliverChildBuilderDelegate(
     this.builder, {
     this.childCount,
+    this.addAutomaticKeepAlives: true,
     this.addRepaintBoundaries: true,
   }) : assert(builder != null),
+       assert(addAutomaticKeepAlives != null),
        assert(addRepaintBoundaries != null);
 
   /// Called to build children for the sliver.
@@ -155,6 +161,20 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// [builder] returns null.
   final int childCount;
 
+  /// Whether to wrap each child in an [AutomaticKeepAlive].
+  ///
+  /// Typically, children in lazy list are wrapped in [AutomaticKeepAlive]
+  /// widgets so that children can use [KeepAliveNotification]s to preserve
+  /// their state when they would otherwise be garbage collected off-screen.
+  ///
+  /// This feature (and [addRepaintBoundaries]) must be disabled if the children
+  /// are going to manually maintain their [KeepAlive] state. It may also be
+  /// more efficient to disable this feature if it is known ahead of time that
+  /// none of the children will ever try to keep themselves alive.
+  ///
+  /// Defaults to true.
+  final bool addAutomaticKeepAlives;
+
   /// Whether to wrap each child in a [RepaintBoundary].
   ///
   /// Typically, children in a scrolling container are wrapped in repaint
@@ -171,10 +191,14 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount))
       return null;
-    final Widget child = builder(context, index);
+    Widget child = builder(context, index);
     if (child == null)
       return null;
-    return addRepaintBoundaries ? new RepaintBoundary.wrap(child, index) : child;
+    if (addRepaintBoundaries)
+      child = new RepaintBoundary.wrap(child, index);
+    if (addAutomaticKeepAlives)
+      child = new AutomaticKeepAlive(child: child);
+    return child;
   }
 
   @override
@@ -205,7 +229,9 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// conditions.
 ///
 /// The widgets in the given [children] list are automatically wrapped in
-/// [RepaintBoundary] widgets if [addRepaintBoundaries] is true (the default).
+/// [AutomaticKeepAlive] widgets if [addAutomaticKeepAlives] is true (the
+/// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
+/// (also the default).
 ///
 /// See also:
 ///
@@ -215,12 +241,29 @@ class SliverChildListDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
   /// list.
   ///
-  /// The [children] and [addRepaintBoundaries] arguments must not be null.
+  /// The [children], [addAutomaticKeepAlives], and [addRepaintBoundaries]
+  /// arguments must not be null.
   const SliverChildListDelegate(
     this.children, {
+    this.addAutomaticKeepAlives: true,
     this.addRepaintBoundaries: true,
   }) : assert(children != null),
+       assert(addAutomaticKeepAlives != null),
        assert(addRepaintBoundaries != null);
+
+  /// Whether to wrap each child in an [AutomaticKeepAlive].
+  ///
+  /// Typically, children in lazy list are wrapped in [AutomaticKeepAlive]
+  /// widgets so that children can use [KeepAliveNotification]s to preserve
+  /// their state when they would otherwise be garbage collected off-screen.
+  ///
+  /// This feature (and [addRepaintBoundaries]) must be disabled if the children
+  /// are going to manually maintain their [KeepAlive] state. It may also be
+  /// more efficient to disable this feature if it is known ahead of time that
+  /// none of the children will ever try to keep themselves alive.
+  ///
+  /// Defaults to true.
+  final bool addAutomaticKeepAlives;
 
   /// Whether to wrap each child in a [RepaintBoundary].
   ///
@@ -241,9 +284,13 @@ class SliverChildListDelegate extends SliverChildDelegate {
     assert(children != null);
     if (index < 0 || index >= children.length)
       return null;
-    final Widget child = children[index];
+    Widget child = children[index];
     assert(child != null);
-    return addRepaintBoundaries ? new RepaintBoundary.wrap(child, index) : child;
+    if (addRepaintBoundaries)
+      child = new RepaintBoundary.wrap(child, index);
+    if (addAutomaticKeepAlives)
+      child = new AutomaticKeepAlive(child: child);
+    return child;
   }
 
   @override

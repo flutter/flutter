@@ -20,6 +20,8 @@ import 'sliver.dart';
 /// The subtree is kept alive whenever there is one or more descendant that has
 /// sent a [KeepAliveNotification] and not yet triggered its
 /// [KeepAliveNotification.handle].
+///
+/// To send these notifications, consider using [AutomaticKeepAliveClientMixin].
 class AutomaticKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
@@ -101,6 +103,17 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 
   VoidCallback _createCallback(Listenable handle) {
     return () {
+      assert(() {
+        if (!mounted) {
+          throw new FlutterError(
+            'AutomaticKeepAlive handle triggered after AutomaticKeepAlive was disposed.'
+            'Widgets should always trigger their KeepAliveNotification handle when they are '
+            'deactivated, so that they (or their handle) do not send spurious events later '
+            'when they are no longer in the tree.'
+          );
+        }
+        return true;
+      });
       _handles.remove(handle);
       if (_handles.isEmpty) {
         if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {
@@ -137,16 +150,33 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           //    information, but it may or may not get applied this frame,
           //    depending on whether said child is in the same layout scope.
           //
+          //  * A descendant is being moved from one position under us to
+          //    another position under us. They just notified us of the removal,
+          //    at some point in the future they will notify us of the addition.
+          //    We don't want to do anything. (This is why we check that
+          //    _handles is still empty below.)
+          //
           //  * We're being notified in the paint phase, or even in a post-frame
           //    callback. Either way it is far too late for us to make our
           //    parent lay out again this frame, so the garbage won't get
           //    collected this frame.
           //
+          //  * We are being torn out of the tree ourselves, as is our
+          //    descendant, and it notified us while it was being deactivated.
+          //    We don't need to do anything, but we don't know yet because we
+          //    haven't been deactivated yet. (This is why we check mounted
+          //    below before calling setState.)
+          //
           // Long story short, we have to schedule a new frame and request a
           // frame there, but this is generally a bad practice, and you should
           // avoid it if possible.
+          _keepingAlive = false;
           scheduleMicrotask(() {
-            setState(() { _keepingAlive = false; });
+            if (mounted && _handles.isEmpty) {
+              setState(() {
+                assert(!_keepingAlive);
+              });
+            }
           });
         }
       }
@@ -160,6 +190,19 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       keepAlive: _keepingAlive,
       child: _child,
     );
+  }
+
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (_keepingAlive)
+      description.add('keeping subtree alive');
+    if (_handles == null) {
+      description.add('no notifications ever received');
+    } else {
+      description.add('${_handles.length} active client${ _handles.length == 1 ? "" : "s" }');
+    }
   }
 }
 
@@ -196,6 +239,10 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 /// It is an error to use the same [handle] in two [KeepAliveNotification]s
 /// within the same [AutomaticKeepAlive] without triggering that [handle] before
 /// the second notification is sent.
+///
+/// For a more convenient way to interact with [AutomaticKeepAlive] widgets,
+/// consider using [AutomaticKeepAliveClientMixin], which uses
+/// [KeepAliveNotification] internally.
 class KeepAliveNotification extends Notification {
   /// Creates a notification to indicate that a subtree must be kept alive.
   ///
@@ -220,10 +267,86 @@ class KeepAliveNotification extends Notification {
 ///
 /// Used with [KeepAliveNotification] objects as their
 /// [KeepAliveNotification.handle].
+///
+/// For a more convenient way to interact with [AutomaticKeepAlive] widgets,
+/// consider using [AutomaticKeepAliveClientMixin], which uses a
+/// [KeepAliveHandle] internally.
 class KeepAliveHandle extends ChangeNotifier {
   /// Trigger the listeners to indicate that the widget
   /// no longer needs to be kept alive.
   void release() {
     notifyListeners();
+  }
+}
+
+/// A mixin with convenience methods for clients of [AutomaticKeepAlive].
+///
+/// Subclasses must implement [wantKeepAlive], and their [build] methods must
+/// call `super.build` (which will always return null).
+///
+/// Then, whenever [wantKeepAlive]'s value changes (or might change), the
+/// subclass should call [updateKeepAlive].
+///
+/// See also:
+///
+///  * [AutomaticKeepAlive], which listens to messages from this mixin.
+///  * [KeepAliveNotification], the notifications sent by this mixin.
+abstract class AutomaticKeepAliveClientMixin extends State<StatefulWidget> {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory AutomaticKeepAliveClientMixin._() => null;
+
+  KeepAliveHandle _keepAliveHandle;
+
+  void _ensureKeepAlive() {
+    _keepAliveHandle = new KeepAliveHandle();
+    new KeepAliveNotification(_keepAliveHandle).dispatch(context);
+  }
+
+  void _releaseKeepAlive() {
+    _keepAliveHandle.release();
+    _keepAliveHandle = null;
+  }
+
+  /// Whether the current instance should be kept alive.
+  ///
+  /// Call [updateKeepAlive] whenever this getter's value changes.
+  @protected
+  bool get wantKeepAlive;
+
+  /// Ensures that any [AutomaticKeepAlive] ancestors are in a good state, by
+  /// firing a [KeepAliveNotification] or triggering the [KeepAliveHandle] as
+  /// appropriate.
+  @protected
+  void updateKeepAlive() {
+    if (wantKeepAlive) {
+      if (_keepAliveHandle == null)
+        _ensureKeepAlive();
+    } else {
+      if (_keepAliveHandle != null)
+        _releaseKeepAlive();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (wantKeepAlive)
+      _ensureKeepAlive();
+  }
+
+  @override
+  void deactivate() {
+    if (_keepAliveHandle != null)
+      _releaseKeepAlive();
+    super.deactivate();
+  }
+
+  @mustCallSuper
+  @override
+  Widget build(BuildContext context) {
+    if (wantKeepAlive && _keepAliveHandle == null)
+      _ensureKeepAlive();
+    return null;
   }
 }

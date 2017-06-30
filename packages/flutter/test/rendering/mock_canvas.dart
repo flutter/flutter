@@ -36,7 +36,12 @@ import 'recording_canvas.dart';
 /// order).
 ///
 /// See [PaintPattern] for a discussion of the semantics of paint patterns.
+///
+/// To match something which paints nothing, see [paintsNothing].
 PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
+
+/// Matches objects or functions that paint an empty display list.
+Matcher get paintsNothing => new _TestRecordingCanvasPaintsNothingMatcher();
 
 /// Signature for [PaintPattern.something] predicate argument.
 ///
@@ -243,7 +248,73 @@ abstract class PaintPattern {
   void something(PaintPatternPredicate predicate);
 }
 
-class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern {
+abstract class _TestRecordingCanvasMatcher extends Matcher {
+  @override
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    final TestRecordingCanvas canvas = new TestRecordingCanvas();
+    final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
+    if (object is _ContextPainterFunction) {
+      final _ContextPainterFunction function = object;
+      function(context, Offset.zero);
+    } else if (object is _CanvasPainterFunction) {
+      final _CanvasPainterFunction function = object;
+      function(canvas);
+    } else {
+      if (object is Finder) {
+        TestAsyncUtils.guardSync();
+        final Finder finder = object;
+        object = finder.evaluate().single.renderObject;
+      }
+      if (object is RenderObject) {
+        final RenderObject renderObject = object;
+        renderObject.paint(context, Offset.zero);
+      } else {
+        matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
+        return false;
+      }
+    }
+    final StringBuffer description = new StringBuffer();
+    final bool result = _evaluatePredicates(canvas.invocations, description);
+    if (!result) {
+      const String indent = '\n            '; // the length of '   Which: ' in spaces, plus two more
+      if (canvas.invocations.isNotEmpty)
+        description.write(' The complete display list was:');
+        for (Invocation call in canvas.invocations)
+          description.write('$indent${_describeInvocation(call)}');
+    }
+    matchState[this] = description.toString();
+    return result;
+  }
+
+  bool _evaluatePredicates(Iterable<Invocation> calls, StringBuffer description);
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description description,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    return description.add(matchState[this]);
+  }
+}
+
+class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatcher {
+  @override
+  Description describe(Description description) {
+    return description.add('An object or closure that paints nothing.');
+  }
+
+  @override
+  bool _evaluatePredicates(Iterable<Invocation> calls, StringBuffer description) {
+    if (calls.isEmpty)
+      return true;
+    description.write('painted the following.');
+    return false;
+  }
+}
+
+class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher implements PaintPattern {
   final List<_PaintPredicate> _predicates = <_PaintPredicate>[];
 
   @override
@@ -327,43 +398,6 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   }
 
   @override
-  bool matches(Object object, Map<dynamic, dynamic> matchState) {
-    final TestRecordingCanvas canvas = new TestRecordingCanvas();
-    final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
-    if (object is _ContextPainterFunction) {
-      final _ContextPainterFunction function = object;
-      function(context, Offset.zero);
-    } else if (object is _CanvasPainterFunction) {
-      final _CanvasPainterFunction function = object;
-      function(canvas);
-    } else {
-      if (object is Finder) {
-        TestAsyncUtils.guardSync();
-        final Finder finder = object;
-        object = finder.evaluate().single.renderObject;
-      }
-      if (object is RenderObject) {
-        final RenderObject renderObject = object;
-        renderObject.paint(context, Offset.zero);
-      } else {
-        matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
-        return false;
-      }
-    }
-    final StringBuffer description = new StringBuffer();
-    final bool result = _evaluatePredicates(canvas.invocations, description);
-    if (!result) {
-      const String indent = '\n            '; // the length of '   Which: ' in spaces, plus two more
-      if (canvas.invocations.isNotEmpty)
-        description.write(' The complete display list was:');
-        for (Invocation call in canvas.invocations)
-          description.write('$indent${_describeInvocation(call)}');
-    }
-    matchState[this] = description.toString();
-    return result;
-  }
-
-  @override
   Description describe(Description description) {
     if (_predicates.isEmpty)
       return description.add('An object or closure and a paint pattern.');
@@ -375,27 +409,16 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   }
 
   @override
-  Description describeMismatch(
-    dynamic item,
-    Description description,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
-  ) {
-    return description.add(matchState[this]);
-  }
-
   bool _evaluatePredicates(Iterable<Invocation> calls, StringBuffer description) {
-    // If we ever want to have a matcher for painting nothing, create a separate
-    // paintsNothing matcher.
+    if (calls.isEmpty) {
+      description.write('painted nothing.');
+      return false;
+    }
     if (_predicates.isEmpty) {
       description.write(
         'painted something, but you must now add a pattern to the paints matcher '
         'in the test to verify that it matches the important parts of the following.'
       );
-      return false;
-    }
-    if (calls.isEmpty) {
-      description.write('painted nothing.');
       return false;
     }
     final Iterator<_PaintPredicate> predicate = _predicates.iterator;

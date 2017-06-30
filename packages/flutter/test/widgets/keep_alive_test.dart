@@ -44,6 +44,7 @@ List<Widget> generateList(Widget child) {
 void main() {
   testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       itemExtent: 12.3, // about 50 widgets visible
       children: generateList(const Placeholder()),
@@ -83,6 +84,7 @@ void main() {
 
   testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       children: generateList(new Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
     ));
@@ -121,6 +123,7 @@ void main() {
 
   testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(new GridView.count(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       crossAxisCount: 2,
       childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
@@ -161,6 +164,7 @@ void main() {
 
   testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       itemExtent: 400.0, // 2 visible children
       children: generateList(const Placeholder()),
