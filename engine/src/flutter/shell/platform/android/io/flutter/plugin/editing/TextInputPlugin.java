@@ -137,7 +137,8 @@ public class TextInputPlugin implements MethodCallHandler {
     private void applyStateToSelection(JSONObject state) throws JSONException {
         int selStart = state.getInt("selectionBase");
         int selEnd = state.getInt("selectionExtent");
-        if (selStart != -1 && selEnd != -1) {
+        if (selStart >= 0 && selStart <= mEditable.length() &&
+            selEnd >= 0 && selEnd <= mEditable.length()) {
             Selection.setSelection(mEditable, selStart, selEnd);
         } else {
             Selection.removeSelection(mEditable);
