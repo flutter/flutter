@@ -252,8 +252,10 @@ void Paragraph::Layout(double width, bool force) {
 
         // Check if we should remove trailing whitespace of blobs.
         size_t trailing_length = 0;
-        while (minikin::isWordSpace(
-            text_[character_index + blob_length - trailing_length - 1])) {
+        while (
+            minikin::isWordSpace(
+                text_[character_index + blob_length - trailing_length - 1]) &&
+            layout_end == next_break) {
           ++trailing_length;
         }
 
@@ -307,7 +309,7 @@ void Paragraph::Layout(double width, bool force) {
       paint.getFontMetrics(&metrics);
       // Apply additional word spacing if the text is justified.
       if (paragraph_style_.text_align == TextAlign::justify &&
-          buffer_sizes.size() > 0) {
+          buffer_sizes.size() > 0 && character_index != text_.size()) {
         JustifyLine(buffers, buffer_sizes, word_count, character_index);
       }
       records_.push_back(

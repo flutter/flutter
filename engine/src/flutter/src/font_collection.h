@@ -18,6 +18,7 @@
 #define LIB_TXT_SRC_FONT_COLLECTION_H_
 
 #define DEFAULT_FAMILY_NAME "Roboto"
+#define DEFAULT_CACHE_CAPACITY 20
 
 #include <list>
 #include <memory>
@@ -75,13 +76,17 @@ class FontCollection {
 
   void SetCacheCapacity(const size_t cap);
 
+  // Call this to limit memory usage by cached fonts. SetLowMemoryMode() will
+  // enable default LRU policy and flush fonts beyond capacity.
+  void SetLowMemoryMode(bool mode = true, size_t cap = DEFAULT_CACHE_CAPACITY);
+
  private:
   std::vector<sk_sp<SkFontMgr>> skia_font_managers_;
   // Cache the names because GetFamilyNames() can be frequently called.
   std::set<std::string> family_names_;
   CacheMethod cache_method_ = CacheMethod::kUnlimited;
   std::list<std::string> lru_tracker_;
-  size_t cache_capacity_ = 20;
+  size_t cache_capacity_ = DEFAULT_CACHE_CAPACITY;
 
   // Cache minikin font collections to prevent slow disk reads.
   // TODO(garyq): Implement optional low-memory optimized system to prevent
@@ -94,6 +99,8 @@ class FontCollection {
   FRIEND_TEST(FontCollection, GetFamilyNames);
 
   const std::string ProcessFamilyName(const std::string& family);
+
+  void TrimCache();
 
   static const std::string GetDefaultFamilyName() {
     return DEFAULT_FAMILY_NAME;
