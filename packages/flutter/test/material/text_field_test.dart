@@ -1574,4 +1574,22 @@ void main() {
       expect(controller1.selection, equals(TextRange.empty));
     }
   );
+
+  testWidgets(
+    'Selection is consistent with text length',
+    (WidgetTester tester) async {
+      final TextEditingController controller = new TextEditingController();
+
+      controller.text = 'abcde';
+      controller.selection = const TextSelection.collapsed(offset: 5);
+
+      controller.text = '';
+      expect(controller.selection.start, lessThanOrEqualTo(0));
+      expect(controller.selection.end, lessThanOrEqualTo(0));
+
+      expect(() {
+        controller.selection = const TextSelection.collapsed(offset: 10);
+      }, throwsFlutterError);
+    }
+  );
 }

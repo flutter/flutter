@@ -69,7 +69,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   set text(String newText) {
-    value = value.copyWith(text: newText, composing: TextRange.empty);
+    value = value.copyWith(text: newText,
+                           selection: const TextSelection.collapsed(offset: -1),
+                           composing: TextRange.empty);
   }
 
   /// The currently selected [text].
@@ -82,6 +84,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   set selection(TextSelection newSelection) {
+    if (newSelection.start > text.length || newSelection.end > text.length)
+      throw new FlutterError('invalid text selection: $newSelection');
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
