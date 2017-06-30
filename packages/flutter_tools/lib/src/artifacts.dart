@@ -124,6 +124,11 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
+  String _getFlutterPatchedSdkPath() {
+    final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+    return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk');
+  }
+
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform) {
     switch (artifact) {
       case Artifact.genSnapshot:
@@ -141,11 +146,9 @@ class CachedArtifacts extends Artifacts {
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
-        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-        return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk', _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-        return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk', 'lib', _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -212,6 +215,8 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
         return fs.path.join(engineOutPath, 'flutter_patched_sdk', _artifactToFileName(artifact));
+      case Artifact.platformLibrariesJson:
+        return fs.path.join(engineOutPath, 'flutter_patched_sdk', 'lib', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
     }

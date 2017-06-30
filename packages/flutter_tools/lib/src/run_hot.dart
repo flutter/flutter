@@ -39,11 +39,9 @@ HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
 const bool kHotReloadDefault = true;
 
 Map<String, Uri> loadDartLibraries() {
-  final libraries = new Uri.file(artifacts.getArtifactPath(Artifact.platformLibrariesJson));
-//  var sdkRoot = new Uri.file(cache.getCacheDir('flutter_patched_sdk').uri.toFilePath());
-//  var libraries = sdkRoot.resolve('lib/libraries.json');
+  Uri libraries = new Uri.file(artifacts.getArtifactPath(Artifact.platformLibrariesJson));
   dynamic map = JSON.decode(new io.File.fromUri(libraries).readAsStringSync())['libraries'];
-  var dartLibraries = <String, Uri>{};
+  Map<String, Uri> dartLibraries = <String, Uri>{};
   map.forEach((String k, String v) => dartLibraries[k] = libraries.resolve(v));
   return dartLibraries;
 }
