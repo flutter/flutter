@@ -8,6 +8,7 @@ import 'package:meta/meta.dart' show required;
 
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/process.dart';
@@ -34,7 +35,7 @@ Future<int> _createSnapshot({
   @required String snapshotPath,
   @required String depfilePath,
   @required String packages
-}) {
+}) async {
   assert(mainPath != null);
   assert(snapshotPath != null);
   assert(depfilePath != null);
@@ -53,8 +54,64 @@ Future<int> _createSnapshot({
     '--dependencies=$depfilePath',
     mainPath,
   ];
+
+  // Write the depfile path to disk.
   fs.file(depfilePath).parent.childFile('gen_snapshot.d').writeAsString('$depfilePath: $snapshotterPath\n');
-  return runCommandAndStreamOutput(args);
+
+  final File checksumFile = fs.file('$depfilePath.checksums');
+  final File snapshotFile = fs.file(snapshotPath);
+  final File depfile = fs.file(depfilePath);
+  if (snapshotFile.existsSync() && depfile.existsSync() && checksumFile.existsSync()) {
+    try {
+        final String json = await checksumFile.readAsString();
+        final Checksum oldChecksum = new Checksum.fromJson(json);
+        final Set<String> inputPaths = await _readDepfile(depfilePath);
+        inputPaths.add(snapshotPath);
+        final Checksum newChecksum = new Checksum.fromFiles(inputPaths);
+        if (oldChecksum == newChecksum) {
+          printTrace('Skipping snapshot build. Checksums match.');
+          return 0;
+        }
+    } catch (e, s) {
+      // Log exception and continue, this step is a performance improvement only.
+      printTrace('Error during snapshot checksum check: $e\n$s');
+    }
+  }
+
+  // Build the snapshot.
+  final int exitCode = await runCommandAndStreamOutput(args);
+  if (exitCode != 0)
+    return exitCode;
+
+  // Compute and record input file checksums.
+  try {
+    final Set<String> inputPaths = await _readDepfile(depfilePath);
+    inputPaths.add(snapshotPath);
+    final Checksum checksum = new Checksum.fromFiles(inputPaths);
+    await checksumFile.writeAsString(checksum.toJson());
+  } catch (e, s) {
+    // Log exception and continue, this step is a performance improvement only.
+    printTrace('Error during snapshot checksum output: $e\n$s');
+  }
+  return 0;
+}
+
+/// Parses a VM snapshot dependency file.
+///
+/// Snapshot dependency files are a single line mapping the output snapshot to a
+/// space-separated list of input files used to generate that output. e.g,
+///
+/// outfile : file1.dart file2.dart file3.dart
+Future<Set<String>> _readDepfile(String depfilePath) async {
+  // Depfile format:
+  // outfile : file1.dart file2.dart file3.dart
+  final String contents = await fs.file(depfilePath).readAsString();
+  final String dependencies = contents.split(': ')[1];
+  return dependencies
+      .split(' ')
+      .map((String path) => path.trim())
+      .where((String path) => path.isNotEmpty)
+      .toSet();
 }
 
 Future<Null> build({
