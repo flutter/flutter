@@ -453,7 +453,7 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
       }
     }
     if (result.exitCode != 0)
-      throwToolExit('Error running pod install:\n${result.stdout}');
+      throwToolExit('Error running pod install');
   }
 }
 
