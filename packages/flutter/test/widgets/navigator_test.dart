@@ -505,7 +505,8 @@ void main() {
     expect(routes['/'].isFirst, true);
     expect(routes['/B'].isCurrent, true);
 
-    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    final NavigatorState<BasicNavigator> navigator =
+        tester.state<NavigatorState<BasicNavigator>>(find.byType(Navigator));
     navigator.removeRoute(routes['/B']); // stack becomes /, /A
     await tester.pump();
     expect(find.text('/'), findsNothing);
@@ -562,7 +563,8 @@ void main() {
     await tester.pumpAndSettle();
     pageValue.then((String value) { assert(false); });
 
-    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    final NavigatorState<BasicNavigator> navigator =
+        tester.state<NavigatorState<BasicNavigator>>(find.byType(Navigator));
     navigator.removeRoute(routes['/A']); // stack becomes /, pageValue will not complete
   });
 
@@ -606,7 +608,8 @@ void main() {
     await tester.pumpAndSettle();
     pageValue.then((String value) { assert(false); });
 
-    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    final NavigatorState<BasicNavigator> navigator =
+        tester.state<NavigatorState<BasicNavigator>>(find.byType(Navigator));
     navigator.removeRoute(routes['/B']); // stack becomes /, /A, pageValue will not complete
   });
 }
