@@ -104,7 +104,7 @@ Sample Catalog
 
 Title: AppBar Basics
 
-Summary: A typcial AppBar with a title, actions, and an overflow dropdown menu.
+Summary: A basic AppBar with a title, actions, and an overflow dropdown menu.
 
 Description:
 An app that displays one of a half dozen choices with an icon and a title.

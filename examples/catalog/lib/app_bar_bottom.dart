@@ -123,6 +123,9 @@ Sample Catalog
 
 Title: AppBar with a custom bottom widget.
 
+Summary: An AppBar that includes a bottom widget. Any widget
+with a PreferredSize can appear at the bottom of an AppBar.
+
 Summary: Any widget with a PreferredSize can appear at the bottom of an AppBar.
 
 Description:
