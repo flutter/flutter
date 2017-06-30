@@ -16,9 +16,13 @@
 
 #include "lib/txt/src/font_collection.h"
 
+#include <list>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "lib/ftl/logging.h"
 #include "lib/txt/src/font_skia.h"
@@ -52,12 +56,17 @@ FontCollection::FontCollection() {
   FontCollection("");
 }
 
-FontCollection::FontCollection(std::string dir) {
-  std::vector<std::string> dirs = {dir};
-  FontCollection(std::move(dirs));
+FontCollection::FontCollection(CacheMethod cache_method) {
+  FontCollection("", cache_method);
 }
 
-FontCollection::FontCollection(const std::vector<std::string>& dirs) {
+FontCollection::FontCollection(std::string dir, CacheMethod cache_method) {
+  std::vector<std::string> dirs = {dir};
+  FontCollection(std::move(dirs), cache_method);
+}
+
+FontCollection::FontCollection(const std::vector<std::string>& dirs,
+                               CacheMethod cache_method) {
 #ifdef DIRECTORY_FONT_MANAGER_AVAILABLE
   for (std::string dir : dirs) {
     if (dir.length() != 0) {
@@ -75,12 +84,26 @@ FontCollection::FontCollection(const std::vector<std::string>& dirs) {
       family_names_.insert(std::string{str.writable_str()});
     }
   }
+
+  cache_method_ = cache_method;
 }
 
 FontCollection::~FontCollection() = default;
 
 std::set<std::string> FontCollection::GetFamilyNames() {
   return family_names_;
+}
+
+bool FontCollection::HasFamily(const std::string family) const {
+  return family_names_.count(family) == 1;
+}
+
+void FontCollection::FlushCache() {
+  minikin_font_collection_map_.clear();
+}
+
+void FontCollection::SetCacheCapacity(const size_t cap) {
+  cache_capacity_ = cap;
 }
 
 // TODO(garyq): Rework this to use font fallback system.
@@ -101,51 +124,70 @@ const std::string FontCollection::ProcessFamilyName(const std::string& family) {
 std::shared_ptr<minikin::FontCollection>
 FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
   FTL_DCHECK(skia_font_managers_.size() > 0);
+  std::string processed_family_name = ProcessFamilyName(family);
+  // Only obtain new font family if the font has changed between runs.
+  if (cache_method_ == CacheMethod::kNone ||
+      minikin_font_collection_map_.count(processed_family_name) == 0) {
+    // Ask Skia to resolve a font style set for a font family name.
+    // FIXME(chinmaygarde): CoreText crashes when passed a null string. This
+    // seems to be a bug in Skia as SkFontMgr explicitly says passing in
+    // nullptr gives the default font.
+    for (sk_sp<SkFontMgr> mgr : skia_font_managers_) {
+      FTL_DCHECK(mgr != nullptr);
+      auto font_style_set = mgr->matchFamily(processed_family_name.c_str());
+      if (font_style_set != nullptr) {
+        std::vector<minikin::Font> minikin_fonts;
 
-  // Ask Skia to resolve a font style set for a font family name.
-  // FIXME(chinmaygarde): The name "Coolvetica" is hardcoded because CoreText
-  // crashes when passed a null string. This seems to be a bug in Skia as
-  // SkFontMgr explicitly says passing in nullptr gives the default font.
-  for (sk_sp<SkFontMgr> mgr : skia_font_managers_) {
-    FTL_DCHECK(mgr != nullptr);
-    auto font_style_set = mgr->matchFamily(ProcessFamilyName(family).c_str());
-    FTL_DCHECK(font_style_set != nullptr);
+        // Add fonts to the Minikin font family.
+        for (int i = 0, style_count = font_style_set->count(); i < style_count;
+             ++i) {
+          // Create the skia typeface
+          auto skia_typeface =
+              sk_ref_sp<SkTypeface>(font_style_set->createTypeface(i));
+          if (skia_typeface == nullptr) {
+            continue;
+          }
 
-    std::vector<minikin::Font> minikin_fonts;
+          // Create the minikin font from the skia typeface.
+          minikin::Font minikin_font(
+              std::make_shared<FontSkia>(skia_typeface),
+              minikin::FontStyle{skia_typeface->fontStyle().weight(),
+                                 skia_typeface->isItalic()});
 
-    // Add fonts to the Minikin font family.
-    for (int i = 0, style_count = font_style_set->count(); i < style_count;
-         ++i) {
-      // Create the skia typeface
-      auto skia_typeface =
-          sk_ref_sp<SkTypeface>(font_style_set->createTypeface(i));
-      if (skia_typeface == nullptr) {
-        continue;
+          minikin_fonts.emplace_back(std::move(minikin_font));
+        }
+
+        // Create a Minikin font family.
+        auto minikin_family =
+            std::make_shared<minikin::FontFamily>(std::move(minikin_fonts));
+
+        // Create a vector of font families for the Minkin font collection. For
+        // now, we only have one family in our collection.
+        std::vector<std::shared_ptr<minikin::FontFamily>> minikin_families = {
+            minikin_family,
+        };
+
+        // Assign the font collection.
+        minikin_font_collection_map_[processed_family_name] =
+            std::make_shared<minikin::FontCollection>(minikin_families);
+        return minikin_font_collection_map_[processed_family_name];
       }
-
-      // Create the minikin font from the skia typeface.
-      minikin::Font minikin_font(
-          std::make_shared<FontSkia>(skia_typeface),
-          minikin::FontStyle{skia_typeface->fontStyle().weight(),
-                             skia_typeface->isItalic()});
-
-      minikin_fonts.emplace_back(std::move(minikin_font));
     }
-
-    // Create a Minikin font family.
-    auto minikin_family =
-        std::make_shared<minikin::FontFamily>(std::move(minikin_fonts));
-
-    // Create a vector of font families for the Minkin font collection. For now,
-    // we only have one family in our collection.
-    std::vector<std::shared_ptr<minikin::FontFamily>> minikin_families = {
-        minikin_family,
-    };
-
-    // Return the font collection.
-    return std::make_shared<minikin::FontCollection>(minikin_families);
+    // Uh oh! Font family not found in any of the font managers!
+    minikin_font_collection_map_[processed_family_name] = nullptr;
   }
-  return nullptr;
+
+  // Maintain LRU and evict old fonts no longer used.
+  if (cache_method_ == CacheMethod::kLRU) {
+    lru_tracker_.remove(processed_family_name);
+    lru_tracker_.push_front(processed_family_name);
+    if (lru_tracker_.size() > cache_capacity_) {
+      std::string family_to_evict = lru_tracker_.back();
+      lru_tracker_.pop_back();
+      minikin_font_collection_map_.erase(family_to_evict);
+    }
+  }
+  return minikin_font_collection_map_[processed_family_name];
 }
 
 }  // namespace txt
