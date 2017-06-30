@@ -146,7 +146,7 @@ static void BM_ParagraphTextBigO(benchmark::State& state) {
 }
 BENCHMARK(BM_ParagraphTextBigO)
     ->RangeMultiplier(20)
-    ->Range(1 << 4, 1 << 12)
+    ->Range(1 << 6, 1 << 14)
     ->Complexity(benchmark::oN);
 
 static void BM_ParagraphStylesBigO(benchmark::State& state) {
@@ -174,7 +174,7 @@ static void BM_ParagraphStylesBigO(benchmark::State& state) {
 }
 BENCHMARK(BM_ParagraphStylesBigO)
     ->RangeMultiplier(20)
-    ->Range(1 << 2, 1 << 8)
+    ->Range(1 << 4, 1 << 12)
     ->Complexity(benchmark::oN);
 
 // -----------------------------------------------------------------------------

@@ -19,9 +19,11 @@
 
 #define DEFAULT_FAMILY_NAME "Roboto"
 
+#include <list>
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "lib/ftl/macros.h"
@@ -35,6 +37,11 @@ namespace txt {
 
 class FontCollection {
  public:
+  enum CacheMethod {
+    kNone,
+    kLRU,  // Least Recently Used.
+    kUnlimited,
+  };
   // Will be deprecated when full compatibility with Flutter Engine is complete.
   static FontCollection& GetDefaultFontCollection();
 
@@ -47,9 +54,13 @@ class FontCollection {
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family);
 
-  FontCollection(const std::vector<std::string>& dirs);
+  FontCollection(const std::vector<std::string>& dirs,
+                 CacheMethod cache_method = CacheMethod::kUnlimited);
 
-  FontCollection(std::string dir);
+  FontCollection(std::string dir,
+                 CacheMethod cache_method = CacheMethod::kUnlimited);
+
+  FontCollection(CacheMethod cache_method);
 
   FontCollection();
 
@@ -58,10 +69,25 @@ class FontCollection {
   // Provides a set of all available family names.
   std::set<std::string> GetFamilyNames();
 
+  bool HasFamily(const std::string family) const;
+
+  void FlushCache();
+
+  void SetCacheCapacity(const size_t cap);
+
  private:
   std::vector<sk_sp<SkFontMgr>> skia_font_managers_;
   // Cache the names because GetFamilyNames() can be frequently called.
   std::set<std::string> family_names_;
+  CacheMethod cache_method_ = CacheMethod::kUnlimited;
+  std::list<std::string> lru_tracker_;
+  size_t cache_capacity_ = 20;
+
+  // Cache minikin font collections to prevent slow disk reads.
+  // TODO(garyq): Implement optional low-memory optimized system to prevent
+  // fonts building up in memory.
+  std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>
+      minikin_font_collection_map_;
 
   FRIEND_TEST(FontCollection, HasDefaultRegistrations);
   FRIEND_TEST(FontCollection, GetMinikinFontCollections);

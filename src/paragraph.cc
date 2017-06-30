@@ -132,15 +132,11 @@ void Paragraph::AddRunsToLineBreaker(
   minikin::MinikinPaint paint;
   for (size_t i = 0; i < runs_.size(); ++i) {
     auto run = runs_.GetRun(i);
-    // Only obtain new font family if the font has changed between runs.
-    if (collection_map.count(run.style.font_family) == 0) {
-      collection_map[run.style.font_family] =
-          font_collection_->GetMinikinFontCollectionForFamily(
-              run.style.font_family);
-    }
     GetFontAndMinikinPaint(run.style, &font, &paint);
-    breaker_.addStyleRun(&paint, collection_map.at(run.style.font_family), font,
-                         run.start, run.end, false);
+    breaker_.addStyleRun(&paint,
+                         font_collection_->GetMinikinFontCollectionForFamily(
+                             run.style.font_family),
+                         font, run.start, run.end, false);
   }
 }
 
@@ -240,7 +236,8 @@ void Paragraph::Layout(double width, bool force) {
       int bidiFlags = 0;
       layout.doLayout(text_.data(), layout_start, layout_end - layout_start,
                       text_.size(), bidiFlags, font, minikin_paint,
-                      collection_map.at(run.style.font_family));
+                      font_collection_->GetMinikinFontCollectionForFamily(
+                          run.style.font_family));
       const size_t glyph_count = layout.nGlyphs();
       size_t blob_start = 0;
       // Each blob.
@@ -445,6 +442,8 @@ void Paragraph::SetFontCollection(FontCollection* font_collection) {
   font_collection_ = font_collection;
 }
 
+// The x,y coordinates will be the very top left corner of the rendered
+// paragraph.
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   for (const auto& record : records_) {
     SkPaint paint;
