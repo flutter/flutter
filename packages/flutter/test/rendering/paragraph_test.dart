@@ -195,7 +195,7 @@ void main() {
         '   ║   "I polished up that handle so carefullee\n'
         'That now I am the Ruler of the Queen\'s Navee!"\n'
         '   ╚═══════════\n'
-        '\n'
+        '\n',
       ),
     );
   });

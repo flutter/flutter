@@ -67,8 +67,12 @@ void main() {
   });
 
   test('Border toString test', () {
-    expect(new Border.all(width: 4.0).toString(), equals(
-        'Border(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid))'));
+    expect(
+      new Border.all(width: 4.0).toString(),
+      equals(
+        'Border(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid))',
+      ),
+    );
   });
 
   test('BoxShadow control test', () {
@@ -153,14 +157,18 @@ void main() {
   });
 
   test('LinearGradient toString', () {
-    expect(const LinearGradient(
-      begin: FractionalOffset.topLeft,
-      end: FractionalOffset.bottomLeft,
-      colors: const <Color>[
-        const Color(0x33333333),
-        const Color(0x66666666),
-      ],
-    ).toString(),
-        equals('LinearGradient(FractionalOffset(0.0, 0.0), FractionalOffset(0.0, 1.0), [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)'));
+    expect(
+      const LinearGradient(
+        begin: FractionalOffset.topLeft,
+        end: FractionalOffset.bottomLeft,
+        colors: const <Color>[
+          const Color(0x33333333),
+          const Color(0x66666666),
+        ],
+      ).toString(),
+      equals(
+        'LinearGradient(FractionalOffset(0.0, 0.0), FractionalOffset(0.0, 1.0), [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
+      ),
+    );
   });
 }
