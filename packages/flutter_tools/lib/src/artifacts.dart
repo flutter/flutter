@@ -124,7 +124,7 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
-  String _getFlutterPatchedSdkPath() {
+  String _getHostFlutterPatchedSdkPath() {
     final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
     return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk');
   }
@@ -146,9 +146,9 @@ class CachedArtifacts extends Artifacts {
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
-        return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+        return fs.path.join(_getHostFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
+        return fs.path.join(_getHostFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -214,9 +214,9 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.vmSnapshotData:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
-        return fs.path.join(engineOutPath, 'flutter_patched_sdk', _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return fs.path.join(engineOutPath, 'flutter_patched_sdk', 'lib', _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
     }
@@ -227,6 +227,10 @@ class LocalEngineArtifacts extends Artifacts {
   @override
   String getEngineType(TargetPlatform platform, [BuildMode mode]) {
     return fs.path.basename(engineOutPath);
+  }
+
+  String _getFlutterPatchedSdkPath() {
+    return fs.path.join(engineOutPath, 'flutter_patched_sdk');
   }
 
   String _genSnapshotPath(TargetPlatform platform, BuildMode mode) {
