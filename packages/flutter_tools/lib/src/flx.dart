@@ -29,14 +29,15 @@ const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const String _kDylibKey = 'libapp.so';
 
-Future<int> createSnapshot({
+Future<int> _createSnapshot({
   @required String mainPath,
   @required String snapshotPath,
-  String depfilePath,
+  @required String depfilePath,
   @required String packages
 }) {
   assert(mainPath != null);
   assert(snapshotPath != null);
+  assert(depfilePath != null);
   assert(packages != null);
   final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, null, BuildMode.debug);
   final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
@@ -48,13 +49,11 @@ Future<int> createSnapshot({
     '--vm_snapshot_data=$vmSnapshotData',
     '--isolate_snapshot_data=$isolateSnapshotData',
     '--packages=$packages',
-    '--script_snapshot=$snapshotPath'
+    '--script_snapshot=$snapshotPath',
+    '--dependencies=$depfilePath',
+    mainPath,
   ];
-  if (depfilePath != null) {
-    args.add('--dependencies=$depfilePath');
-    fs.file(depfilePath).parent.childFile('gen_snapshot.d').writeAsString('$depfilePath: $snapshotterPath\n');
-  }
-  args.add(mainPath);
+  fs.file(depfilePath).parent.childFile('gen_snapshot.d').writeAsString('$depfilePath: $snapshotterPath\n');
   return runCommandAndStreamOutput(args);
 }
 
@@ -83,7 +82,7 @@ Future<Null> build({
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    final int result = await createSnapshot(
+    final int result = await _createSnapshot(
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath,
