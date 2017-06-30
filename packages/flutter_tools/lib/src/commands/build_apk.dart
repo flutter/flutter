@@ -59,7 +59,7 @@ class BuildApkCommand extends BuildSubCommand {
 Future<Null> buildApk({
   String target,
   BuildMode buildMode: BuildMode.debug,
-  String kernelPath,
+  bool previewDart2,
 }) async {
   if (!isProjectUsingGradle()) {
     throwToolExit(
@@ -80,5 +80,5 @@ Future<Null> buildApk({
     throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
-  return buildGradleProject(buildMode, target, kernelPath);
+  return buildGradleProject(buildMode, target, previewDart2);
 }

@@ -37,7 +37,8 @@ class DartDependencySetBuilder {
   final Uri _mainScriptUri;
 
   Set<String> build() {
-    final List<String> dependencies = <String>[_mainScriptPath, _packagesFilePath];
+    final List<String> dependencies = <String>[_mainScriptPath,
+        _mainScriptPath + ".dill", _packagesFilePath];
     final List<Uri> toProcess = <Uri>[_mainScriptUri];
     final PackageMap packageMap = new PackageMap(_packagesFilePath);
 

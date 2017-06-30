@@ -8,11 +8,15 @@ import 'package:meta/meta.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
+import 'package:front_end/compiler_options.dart' show CompilerOptions;
+import 'package:front_end/incremental_kernel_generator.dart' show IncrementalKernelGenerator;
+
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -39,7 +43,7 @@ class HotRunner extends ResidentRunner {
     bool usesTerminalUI: true,
     this.benchmarkMode: false,
     this.applicationBinary,
-    this.kernelFilePath,
+    this.previewDart2: false,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
@@ -53,6 +57,8 @@ class HotRunner extends ResidentRunner {
              projectAssets: projectAssets,
              stayResident: stayResident);
 
+  IncrementalKernelGenerator generator;
+
   final String applicationBinary;
   Set<String> _dartDependencies;
 
@@ -60,7 +66,7 @@ class HotRunner extends ResidentRunner {
   final Map<String, int> benchmarkData = <String, int>{};
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
-  String kernelFilePath;
+  bool previewDart2 = false;
 
   bool _refreshDartDependencies() {
     if (!hotRunnerConfig.computeDartDependencies) {
@@ -112,6 +118,16 @@ class HotRunner extends ResidentRunner {
 
     for (FlutterDevice device in flutterDevices)
       device.initLogReader();
+
+    if (previewDart2) {
+      if (generator == null) {
+        final CompilerOptions options = new CompilerOptions()
+          ..packagesFileUri = Uri.parse(packagesFilePath)
+          ..dartLibraries = loadDartLibraries();
+        generator = await IncrementalKernelGenerator.newInstance(
+            options, new Uri.file(mainPath));
+      }
+    }
 
     try {
       final List<Uri> baseUris = await _initDevFS();
@@ -251,9 +267,12 @@ class HotRunner extends ResidentRunner {
 
     for (FlutterDevice device in flutterDevices) {
       final bool result = await device.updateDevFS(
+        mainPath: mainPath,
+        target: target,
         bundle: assetBundle,
         bundleDirty: rebuildBundle,
         fileFilter: _dartDependencies,
+        generator: generator
       );
       if (!result)
         return false;
