@@ -253,13 +253,22 @@ void Paragraph::Layout(double width, bool force) {
         // TODO(abarth): Precompute when we can use allocRunPosH.
         paint.setTypeface(GetTypefaceForGlyph(layout, blob_start));
 
-        buffers.push_back(&builder.allocRunPos(paint, blob_length));
+        // Check if we should remove trailing whitespace of blobs.
+        size_t trailing_length = 0;
+        while (minikin::isWordSpace(
+            text_[character_index + blob_length - trailing_length - 1])) {
+          ++trailing_length;
+        }
+
+        buffers.push_back(
+            &builder.allocRunPos(paint, blob_length - trailing_length));
 
         letter_spacing_offset += run.style.letter_spacing;
 
         // Each Glyph/Letter.
         bool whitespace_ended = true;
-        for (size_t blob_index = 0; blob_index < blob_length; ++blob_index) {
+        for (size_t blob_index = 0; blob_index < blob_length - trailing_length;
+             ++blob_index) {
           const size_t glyph_index = blob_start + blob_index;
           buffers.back()->glyphs[blob_index] = layout.getGlyphId(glyph_index);
           // Check if the current Glyph is a whitespace and handle multiple
@@ -283,6 +292,7 @@ void Paragraph::Layout(double width, bool force) {
           letter_spacing_offset += run.style.letter_spacing;
         }
         blob_start += blob_length;
+        character_index += trailing_length;
 
         // Subtract letter offset to avoid big gap at end of run. This my be
         // removed depending on the specifications for letter spacing.
