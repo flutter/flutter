@@ -100,13 +100,31 @@ bool FontCollection::HasFamily(const std::string family) const {
 
 void FontCollection::FlushCache() {
   minikin_font_collection_map_.clear();
+  lru_tracker_.clear();
 }
 
 void FontCollection::SetCacheCapacity(const size_t cap) {
   cache_capacity_ = cap;
 }
 
-// TODO(garyq): Rework this to use font fallback system.
+void FontCollection::SetLowMemoryMode(bool mode, size_t cap) {
+  cache_capacity_ = cap;
+  if (mode) {
+    cache_method_ = CacheMethod::kLRU;
+    TrimCache();
+  } else {
+    cache_method_ = CacheMethod::kUnlimited;
+  }
+}
+
+void FontCollection::TrimCache() {
+  while (minikin_font_collection_map_.size() > cache_capacity_) {
+    std::string family_to_evict = lru_tracker_.back();
+    lru_tracker_.pop_back();
+    minikin_font_collection_map_.erase(family_to_evict);
+  }
+}
+
 const std::string FontCollection::ProcessFamilyName(const std::string& family) {
 #ifdef DIRECTORY_FONT_MANAGER_AVAILABLE
   return family.length() == 0 ? DEFAULT_FAMILY_NAME : family;
@@ -178,15 +196,13 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
   }
 
   // Maintain LRU and evict old fonts no longer used.
+
+  lru_tracker_.remove(processed_family_name);
+  lru_tracker_.push_front(processed_family_name);
   if (cache_method_ == CacheMethod::kLRU) {
-    lru_tracker_.remove(processed_family_name);
-    lru_tracker_.push_front(processed_family_name);
-    if (lru_tracker_.size() > cache_capacity_) {
-      std::string family_to_evict = lru_tracker_.back();
-      lru_tracker_.pop_back();
-      minikin_font_collection_map_.erase(family_to_evict);
-    }
+    TrimCache();
   }
+
   return minikin_font_collection_map_[processed_family_name];
 }
 
