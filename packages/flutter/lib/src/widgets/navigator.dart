@@ -585,8 +585,12 @@ abstract class NavigatorState<T extends BasicNavigator> extends State<T> with Ti
         !overlay.debugIsVisible(targetRoute.overlayEntries.last));
     setState(() {
       _history.removeAt(index);
-      final Route<dynamic> nextRoute = index < _history.length ? _history[index] : null;
-      final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
+      final Route<dynamic> nextRoute = index < _history.length
+          ? _history[index]
+          : null;
+      final Route<dynamic> previousRoute = index > 0
+          ? _history[index - 1]
+          : null;
       if (previousRoute != null)
         previousRoute.didChangeNext(nextRoute);
       if (nextRoute != null)
