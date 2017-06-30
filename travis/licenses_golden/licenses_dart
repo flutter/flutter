@@ -1,4 +1,4 @@
-Signature: 6cb33f49531d29e621f7ab4b0aa6bac1
+Signature: d34d7b97577a93492f2c39e07e679483
 
 UNUSED LICENSES:
 
@@ -1604,6 +1604,7 @@ FILE: ../../../dart/runtime/vm/dwarf.cc
 FILE: ../../../dart/runtime/vm/dwarf.h
 FILE: ../../../dart/runtime/vm/fixed_cache.h
 FILE: ../../../dart/runtime/vm/fixed_cache_test.cc
+FILE: ../../../dart/runtime/vm/gdb_helpers.cc
 FILE: ../../../dart/runtime/vm/kernel_binary.h
 FILE: ../../../dart/runtime/vm/kernel_binary_flowgraph.h
 FILE: ../../../dart/runtime/vm/malloc_hooks.h
