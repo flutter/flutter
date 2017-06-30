@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart' show required;
+import 'package:front_end/src/fasta/fasta.dart' show compile;
 
 import 'artifacts.dart';
 import 'asset.dart';
@@ -28,6 +29,7 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const String _kDylibKey = 'libapp.so';
+const String _kPlatformKernelKey = 'platform.dill';
 
 Future<int> createSnapshot({
   @required String mainPath,
@@ -67,7 +69,7 @@ Future<Null> build({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
-  String kernelPath,
+  bool isKernelMode : false,
   bool precompiledSnapshot: false,
   bool reportLicensedPackages: false
 }) async {
@@ -78,7 +80,7 @@ Future<Null> build({
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   File snapshotFile;
 
-  if (!precompiledSnapshot) {
+  if (!precompiledSnapshot && !isKernelMode) {
     ensureDirectoryExists(snapshotPath);
 
     // In a precompiled snapshot, the instruction buffer contains script
@@ -96,8 +98,20 @@ Future<Null> build({
   }
 
   DevFSContent kernelContent;
-  if (kernelPath != null)
+  if (isKernelMode) {
+    final String platformKernelDill = artifacts.getArtifactPath(
+        Artifact.platformKernelDill);
+    final Uri kernelPath = await compile([
+      "--packages=$packagesPath",
+      "--platform=$platformKernelDill",
+      "--target=flutter_fasta",
+      mainPath
+    ]);
+    if (kernelPath == null) {
+      throwToolExit('Failed to produce kernel output.');
+    }
     kernelContent = new DevFSFileContent(fs.file(kernelPath));
+  }
 
   return assemble(
     manifestPath: manifestPath,
@@ -149,8 +163,12 @@ Future<List<String>> assemble({
       .expand((DevFSContent content) => content.fileDependencies)
       .toList();
 
-  if (kernelContent != null)
+  if (kernelContent != null) {
+    final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
     zipBuilder.entries[_kKernelKey] = kernelContent;
+    zipBuilder.entries[_kPlatformKernelKey] =
+        new DevFSFileContent(fs.file(platformKernelDill));
+  }
   if (snapshotFile != null)
     zipBuilder.entries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
   if (dylibFile != null)

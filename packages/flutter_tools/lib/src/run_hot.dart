@@ -2,9 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show JSON;
 import 'dart:async';
+import 'dart:io' as io show File;
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:meta/meta.dart';
+
+import 'package:front_end/src/fasta/kernel/utils.dart' show writeProgramToFile;
+import 'package:front_end/src/incremental/byte_store.dart' show MemoryByteStore;
+import 'package:front_end/compiler_options.dart' show CompilerOptions;
+import 'package:front_end/incremental_kernel_generator.dart' show IncrementalKernelGenerator;
 
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -30,6 +38,16 @@ HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
 
 const bool kHotReloadDefault = true;
 
+Map<String, Uri> loadDartLibraries() {
+  final libraries = new Uri.file(artifacts.getArtifactPath(Artifact.platformLibrariesJson));
+//  var sdkRoot = new Uri.file(cache.getCacheDir('flutter_patched_sdk').uri.toFilePath());
+//  var libraries = sdkRoot.resolve('lib/libraries.json');
+  dynamic map = JSON.decode(new io.File.fromUri(libraries).readAsStringSync())['libraries'];
+  var dartLibraries = <String, Uri>{};
+  map.forEach((String k, String v) => dartLibraries[k] = libraries.resolve(v));
+  return dartLibraries;
+}
+
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -38,7 +56,7 @@ class HotRunner extends ResidentRunner {
     bool usesTerminalUI: true,
     this.benchmarkMode: false,
     this.applicationBinary,
-    this.kernelFilePath,
+    this.isKernelMode: false,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
@@ -52,6 +70,8 @@ class HotRunner extends ResidentRunner {
              projectAssets: projectAssets,
              stayResident: stayResident);
 
+  IncrementalKernelGenerator generator;
+
   final String applicationBinary;
   Set<String> _dartDependencies;
 
@@ -59,7 +79,7 @@ class HotRunner extends ResidentRunner {
   final Map<String, int> benchmarkData = <String, int>{};
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
-  String kernelFilePath;
+  bool isKernelMode = false;
 
   bool _refreshDartDependencies() {
     if (!hotRunnerConfig.computeDartDependencies) {
@@ -98,6 +118,18 @@ class HotRunner extends ResidentRunner {
 
     for (FlutterDevice device in flutterDevices)
       device.initLogReader();
+
+    if (isKernelMode) {
+      if (generator == null) {
+        var options = new CompilerOptions()
+          ..packagesFileUri = Uri.parse(packagesFilePath)
+          ..strongMode = false
+          ..dartLibraries = loadDartLibraries()
+          ..byteStore = new MemoryByteStore();
+        generator = await IncrementalKernelGenerator.newInstance(
+            options, new Uri.file(mainPath));
+      }
+    }
 
     try {
       final List<Uri> baseUris = await _initDevFS();
@@ -238,10 +270,13 @@ class HotRunner extends ResidentRunner {
 
     for (FlutterDevice device in flutterDevices) {
       final bool result = await device.updateDevFS(
+        mainPath: mainPath,
+        target: target,
         progressReporter: progressReporter,
         bundle: assetBundle,
         bundleDirty: rebuildBundle,
         fileFilter: _dartDependencies,
+        generator: generator
       );
       if (!result)
         return false;

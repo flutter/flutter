@@ -16,7 +16,9 @@ enum Artifact {
   snapshotDart,
   flutterFramework,
   vmSnapshotData,
-  isolateSnapshotData
+  isolateSnapshotData,
+  platformKernelDill,
+  platformLibrariesJson
 }
 
 String _artifactToFileName(Artifact artifact) {
@@ -37,6 +39,10 @@ String _artifactToFileName(Artifact artifact) {
       return 'vm_isolate_snapshot.bin';
     case Artifact.isolateSnapshotData:
       return 'isolate_snapshot.bin';
+    case Artifact.platformKernelDill:
+      return 'platform.dill';
+    case Artifact.platformLibrariesJson:
+      return 'libraries.json';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -134,6 +140,12 @@ class CachedArtifacts extends Artifacts {
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
+      case Artifact.platformKernelDill:
+        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+        return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk', _artifactToFileName(artifact));
+      case Artifact.platformLibrariesJson:
+        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+        return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk', 'lib', _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -198,6 +210,8 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
+      case Artifact.platformKernelDill:
+        return fs.path.join(engineOutPath, 'flutter_patched_sdk', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
     }

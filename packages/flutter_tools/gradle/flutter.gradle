@@ -185,9 +185,9 @@ class FlutterPlugin implements Plugin<Project> {
             project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
         }
 
-        File kernel
-        if (project.hasProperty('kernel')) {
-            kernel = project.file(project.property('kernel'))
+        Boolean isKernelModeValue = false
+        if (project.hasProperty('is-kernel-mode')) {
+            isKernelModeValue = project.property('is-kernel-mode')
         }
 
         project.android.applicationVariants.all { variant ->
@@ -202,7 +202,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
-                kernelFile kernel
+                isKernelMode isKernelModeValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -215,7 +215,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
-                kernelFile kernel
+                isKernelMode isKernelModeValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -244,8 +244,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String localEngineSrcPath
     @Input
     String targetPath
-    @Optional @InputFile
-    File kernelFile
+    @Optional
+    Boolean isKernelMode
     File sourceDir
     File intermediateDir
 
@@ -292,15 +292,17 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "build", "flx"
             args "--suppress-analytics"
             args "--target", targetPath
-            if (kernelFile != null) {
-                args "--kernel", kernelFile.absolutePath
+            if (isKernelMode) {
+                args "--is-kernel-mode"
             }
             args "--output-file", "${intermediateDir}/app.flx"
             if (buildMode != "debug") {
                 args "--precompiled"
             } else {
-                args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
-                args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
+                if (!isKernelMode) {
+                    args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
+                    args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
+                }
             }
             args "--working-dir", "${intermediateDir}/flx"
         }
