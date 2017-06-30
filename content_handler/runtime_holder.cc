@@ -635,7 +635,29 @@ void RuntimeHolder::DidUpdateState(mozart::TextInputStatePtr state,
 }
 
 void RuntimeHolder::OnAction(mozart::InputMethodAction action) {
-  // TODO
+  rapidjson::Document document;
+  auto& allocator = document.GetAllocator();
+
+  rapidjson::Value args(rapidjson::kArrayType);
+  args.PushBack(current_text_input_client_, allocator);
+
+  // Done is currently the only text input action defined by Flutter.
+  args.PushBack("TextInputAction.done", allocator);
+
+  document.SetObject();
+  document.AddMember("method",
+                     rapidjson::Value("TextInputClient.performAction"),
+                     allocator);
+  document.AddMember("args", args, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  document.Accept(writer);
+
+  const uint8_t* data = reinterpret_cast<const uint8_t*>(buffer.GetString());
+  runtime_->DispatchPlatformMessage(ftl::MakeRefCounted<blink::PlatformMessage>(
+      kTextInputChannel, std::vector<uint8_t>(data, data + buffer.GetSize()),
+      nullptr));
 }
 
 ftl::WeakPtr<RuntimeHolder> RuntimeHolder::GetWeakPtr() {
