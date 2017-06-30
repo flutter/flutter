@@ -443,6 +443,7 @@ class DevFS {
       }
     });
     if (dirtyEntries.isNotEmpty) {
+      printTrace('Updating files');
       if (generator != null) {
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           if (content is DevFSFileContent) {
