@@ -4,9 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
+import 'theme.dart';
 
 /// Provides platform-specific acoustic and/or haptic feedback for certain
 /// actions.

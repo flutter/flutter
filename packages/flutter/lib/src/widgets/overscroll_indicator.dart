@@ -5,11 +5,17 @@
 import 'dart:async' show Timer;
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
+
+import 'basic.dart';
+import 'framework.dart';
+import 'notification_listener.dart';
+import 'scroll_notification.dart';
+import 'ticker_provider.dart';
 
 /// A visual indication that a scroll view has overscrolled.
 ///

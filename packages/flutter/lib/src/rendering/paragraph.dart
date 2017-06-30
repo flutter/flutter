@@ -4,9 +4,9 @@
 
 import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'box.dart';
 import 'debug.dart';
