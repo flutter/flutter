@@ -32,7 +32,7 @@ class TestRoute extends LocalHistoryRoute<String> {
       opaque: true
     );
     _entries.add(entry);
-    navigator.overlay?.insert(entry, above: insertionPoint);
+    navigatorState.overlay?.insert(entry, above: insertionPoint);
     routes.add(this);
     super.install(insertionPoint);
   }
@@ -54,7 +54,7 @@ class TestRoute extends LocalHistoryRoute<String> {
     log('didPop $result');
     bool returnValue;
     if (returnValue = super.didPop(result))
-      navigator.finalizeRoute(this);
+      navigatorState.finalizeRoute(this);
     return returnValue;
   }
 
@@ -83,7 +83,7 @@ class TestRoute extends LocalHistoryRoute<String> {
 
 Future<Null> runNavigatorTest(
   WidgetTester tester,
-  NavigatorState host,
+  NavigatorState<BasicNavigator> host,
   VoidCallback test,
   List<String> expectations
 ) async {
@@ -107,12 +107,13 @@ void main() {
   });
 
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState<BasicNavigator>> navigatorKey =
+        new GlobalKey<NavigatorState<BasicNavigator>>();
     await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (_) => new TestRoute('initial')
     ));
-    final NavigatorState host = navigatorKey.currentState;
+    final NavigatorState<BasicNavigator> host = navigatorKey.currentState;
     await runNavigatorTest(
       tester,
       host,
@@ -185,12 +186,13 @@ void main() {
   });
 
   testWidgets('Route management - push, remove, pop', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState<BasicNavigator>> navigatorKey =
+        new GlobalKey<NavigatorState<BasicNavigator>>();
     await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (_) => new TestRoute('first')
     ));
-    final NavigatorState host = navigatorKey.currentState;
+    final NavigatorState<BasicNavigator> host = navigatorKey.currentState;
     await runNavigatorTest(
       tester,
       host,
@@ -291,12 +293,13 @@ void main() {
   });
 
   testWidgets('Route management - push, replace, popUntil', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState<BasicNavigator>> navigatorKey =
+        new GlobalKey<NavigatorState<BasicNavigator>>();
     await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (_) => new TestRoute('A')
     ));
-    final NavigatorState host = navigatorKey.currentState;
+    final NavigatorState<BasicNavigator> host = navigatorKey.currentState;
     await runNavigatorTest(
       tester,
       host,
@@ -368,12 +371,13 @@ void main() {
     routeA.addLocalHistoryEntry(new LocalHistoryEntry(
       onRemove: () { routeA.log('onRemove 1'); }
     ));
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState<BasicNavigator>> navigatorKey =
+        new GlobalKey<NavigatorState<BasicNavigator>>();
     await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (_) => routeA
     ));
-    final NavigatorState host = navigatorKey.currentState;
+    final NavigatorState<BasicNavigator> host = navigatorKey.currentState;
     await runNavigatorTest(
       tester,
       host,
