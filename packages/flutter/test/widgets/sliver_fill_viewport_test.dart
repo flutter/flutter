@@ -15,7 +15,7 @@ void main() {
       new CustomScrollView(
         slivers: <Widget>[
           new SliverFillViewport(
-            delegate: new SliverChildListDelegate(children),
+            delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
           ),
         ],
       ),

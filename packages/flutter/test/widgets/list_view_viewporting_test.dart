@@ -260,6 +260,7 @@ void main() {
 
   testWidgets('ListView underflow extents', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       children: <Widget>[
         new Container(height: 100.0),
         new Container(height: 100.0),
