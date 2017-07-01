@@ -229,42 +229,39 @@ class BouncingScrollPhysics extends ScrollPhysics {
   ///
   /// This factor starts at 0.54 and progressively becomes harder to overscroll
   /// as more of the area past the edge is dragged in.
-  double frictionFactor(double inViewFraction) => 0.54 * math.pow(inViewFraction.abs(), 2);
+  double frictionFactor(double inViewFraction) => 0.52 * math.pow(inViewFraction.abs(), 2);
 
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     assert(offset != 0.0);
     assert(position.minScrollExtent <= position.maxScrollExtent);
-    if (offset > 0.0)
-      return _applyFriction(
-        position.pixels,
-        position.minScrollExtent,
-        position.maxScrollExtent,
-        offset,
-        frictionFactor(position.extentInside / position.viewportDimension),
-      );
-    return -_applyFriction(
-      -position.pixels,
-      -position.maxScrollExtent,
-      -position.minScrollExtent,
-      -offset,
+    final double direction = offset.sign;
+    return direction * _applyFriction(
+      position.pixels,
+      position.minScrollExtent,
+      position.maxScrollExtent,
+      offset.abs(),
       frictionFactor(position.extentInside / position.viewportDimension),
     );
   }
 
-  static double _applyFriction(double start, double lowLimit, double highLimit, double delta, double gamma) {
+  static double _applyFriction(double start, double lowLimit, double highLimit, double absDelta, double gamma) {
     assert(lowLimit <= highLimit);
-    assert(delta > 0.0);
+    assert(absDelta > 0);
     double total = 0.0;
-    if (start < lowLimit) {
-      final double distanceToLimit = lowLimit - start;
-      final double deltaToLimit = distanceToLimit / gamma;
-      if (delta < deltaToLimit)
-        return total + delta * gamma;
-      total += distanceToLimit;
-      delta -= deltaToLimit;
+    final double distanceOutsideOfLimit = start < lowLimit
+        ? lowLimit - start
+        : start > highLimit
+            ? start - highLimit
+            : 0.0;
+    if (distanceOutsideOfLimit > 0) {
+      final double deltaToLimit = distanceOutsideOfLimit / gamma;
+      if (absDelta < deltaToLimit)
+        return absDelta * gamma;
+      total += distanceOutsideOfLimit;
+      absDelta -= deltaToLimit;
     }
-    return total + delta;
+    return total + absDelta;
   }
 
   @override
