@@ -22,6 +22,18 @@ import '../test/watcher.dart';
 class TestCommand extends FlutterCommand {
   TestCommand({ bool verboseHelp: false }) {
     usesPubOption();
+    argParser.addOption('name',
+      help: 'A regular expression matching substrings of the names of tests to run.',
+      valueHelp: 'regexp',
+      allowMultiple: true,
+      splitCommas: false,
+    );
+    argParser.addOption('plain-name',
+      help: 'A plain-text substring of the names of tests to run.',
+      valueHelp: 'substring',
+      allowMultiple: true,
+      splitCommas: false,
+    );
     argParser.addFlag('start-paused',
         defaultsTo: false,
         negatable: false,
@@ -141,6 +153,8 @@ class TestCommand extends FlutterCommand {
     }
 
     commandValidator();
+    final List<String> names = argResults['name'];
+    final List<String> plainNames = argResults['plain-name'];
 
     Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
@@ -189,6 +203,8 @@ class TestCommand extends FlutterCommand {
 
     final int result = await runTests(files,
         workDir: workDir,
+        names: names,
+        plainNames: plainNames,
         watcher: watcher,
         enableObservatory: collector != null || startPaused,
         startPaused: startPaused,

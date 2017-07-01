@@ -9,8 +9,8 @@
 import 'dart:async' show Future, Stream, StreamSubscription;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart' show required;
+
+import 'framework.dart';
 
 // Examples can assume:
 // dynamic _lot;

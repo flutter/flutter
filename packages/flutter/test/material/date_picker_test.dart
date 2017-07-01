@@ -186,9 +186,9 @@ void main() {
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.text('2016'));
       await tester.pump();
-      await tester.tap(find.text('2006'));
+      await tester.tap(find.text('2018'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2006, DateTime.JANUARY, 15)));
+      expect(await date, equals(new DateTime(2018, DateTime.JANUARY, 15)));
     });
   });
 
@@ -196,14 +196,25 @@ void main() {
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.text('2016'));
       await tester.pump();
-      await tester.tap(find.text('2005'));
+      await tester.tap(find.text('2017'));
       await tester.pump();
-      final String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2005, DateTime.JANUARY, 15));
+      final String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2017, DateTime.JANUARY, 15));
       await tester.tap(find.text(dayLabel));
       await tester.pump();
       await tester.tap(find.text('19'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2005, DateTime.JANUARY, 19)));
+      expect(await date, equals(new DateTime(2017, DateTime.JANUARY, 19)));
+    });
+  });
+
+  testWidgets('Current year is initially visible in year picker', (WidgetTester tester) async {
+    initialDate = new DateTime(2000);
+    firstDate = new DateTime(1900);
+    lastDate = new DateTime(2100);
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('2000'));
+      await tester.pump();
+      expect(find.text('2000'), findsNWidgets(2));
     });
   });
 
@@ -215,7 +226,7 @@ void main() {
       await tester.tap(find.text('10')); // Earlier than firstDate. Should be ignored.
       await tester.tap(find.text('20')); // Later than lastDate. Should be ignored.
       await tester.tap(find.text('OK'));
-      // We should still be on the inital date.
+      // We should still be on the initial date.
       expect(await date, equals(initialDate));
     });
   });

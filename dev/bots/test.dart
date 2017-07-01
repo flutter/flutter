@@ -53,6 +53,8 @@ Future<Null> _generateDocs() async {
 }
 
 Future<Null> _analyzeRepo() async {
+  await _verifyNoBadImports(flutterRoot);
+
   // Analyze all the Dart code in the repo.
   await _runFlutterAnalyze(flutterRoot,
     options: <String>['--flutter-repo'],
@@ -239,6 +241,132 @@ Future<Null> _runFlutterAnalyze(String workingDirectory, {
   return _runCommand(flutter, <String>['analyze']..addAll(options),
     workingDirectory: workingDirectory,
   );
+}
+
+Future<Null> _verifyNoBadImports(String workingDirectory) async {
+  final List<String> errors = <String>[];
+  final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
+  final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
+  // Verify there's one libPath/*.dart for each srcPath/*/.
+  <String>[];
+  final List<String> packages = new Directory(libPath).listSync()
+    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')
+    .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))
+    .toList()..sort();
+  final List<String> directories = new Directory(srcPath).listSync()
+    .where((FileSystemEntity entity) => entity is Directory)
+    .map<String>((FileSystemEntity entity) => path.basename(entity.path))
+    .toList()..sort();
+  if (!_matches(packages, directories)) {
+    errors.add(
+      'flutter/lib/*.dart does not match flutter/lib/src/*/:\n'
+      'These are the exported packages:\n' +
+      packages.map((String path) => '  lib/$path.dart').join('\n') +
+      'These are the directories:\n' +
+      directories.map((String path) => '  lib/src/$path/').join('\n')
+    );
+  }
+  // Verify that the imports are well-ordered.
+  final Map<String, Set<String>> dependencyMap = new Map<String, Set<String>>.fromIterable(
+    directories,
+    key: (String directory) => directory,
+    value: (String directory) => _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation'),
+  );
+  for (String package in dependencyMap.keys) {
+    if (dependencyMap[package].contains(package)) {
+      errors.add(
+        'One of the files in the $yellow$package$reset package imports that package recursively.'
+      );
+    }
+  }
+  for (String package in dependencyMap.keys) {
+    final List<String> loop = _deepSearch(dependencyMap, package);
+    if (loop != null) {
+      errors.add(
+        '${yellow}Dependency loop:$reset ' +
+        loop.join(' depends on ')
+      );
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    if (errors.length == 1) {
+      print('${bold}An error was detected when looking at import dependencies within the Flutter package:$reset\n');
+    } else {
+      print('${bold}Multiple errors were detected when looking at import dependencies within the Flutter package:$reset\n');
+    }
+    print(errors.join('\n\n'));
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n');
+    exit(1);
+  }
+}
+
+bool _matches<T>(List<T> a, List<T> b) {
+  assert(a != null);
+  assert(b != null);
+  if (a.length != b.length)
+    return false;
+  for (int index = 0; index < a.length; index += 1) {
+    if (a[index] != b[index])
+      return false;
+  }
+  return true;
+}
+
+final RegExp _importPattern = new RegExp(r"import 'package:flutter/([^.]+)\.dart'");
+final RegExp _importMetaPattern = new RegExp(r"import 'package:meta/meta.dart'");
+
+Set<String> _findDependencies(String srcPath, List<String> errors, { bool checkForMeta: false }) {
+  return new Directory(srcPath).listSync().where((FileSystemEntity entity) {
+    return entity is File && path.extension(entity.path) == '.dart';
+  }).map<Set<String>>((FileSystemEntity entity) {
+    final Set<String> result = new Set<String>();
+    final File file = entity;
+    for (String line in file.readAsLinesSync()) {
+      Match match = _importPattern.firstMatch(line);
+      if (match != null)
+        result.add(match.group(1));
+      if (checkForMeta) {
+        match = _importMetaPattern.firstMatch(line);
+        if (match != null) {
+          errors.add(
+            '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
+            'You should instead import the "foundation.dart" library.'
+          );
+        }
+      }
+    }
+    return result;
+  }).reduce((Set<String> value, Set<String> element) {
+    value ??= new Set<String>();
+    value.addAll(element);
+    return value;
+  });
+}
+
+List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
+  for (T key in map[start]) {
+    if (key == start)
+      continue; // we catch these separately
+    if (seen != null && seen.contains(key))
+      return <T>[start, key];
+    final List<T> result = _deepSearch(
+      map,
+      key,
+      (seen == null ? new Set<T>.from(<T>[start]) : new Set<T>.from(seen))..add(key),
+    );
+    if (result != null) {
+      result.insert(0, start);
+      // Only report the shortest chains.
+      // For example a->b->a, rather than c->a->b->a.
+      // Since we visit every node, we know the shortest chains are those
+      // that start and end on the loop.
+      if (result.first == result.last)
+        return result;
+    }
+  }
+  return null;
 }
 
 void _printProgress(String action, String workingDir, String command) {

@@ -20,6 +20,23 @@ void main() {
 
     expect(table.size.width, equals(800.0));
     expect(table.size.height, equals(600.0));
+
+    expect(table, hasAGoodToStringDeep);
+    expect(
+      table.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderTable#00000 NEEDS-PAINT\n'
+        ' │ parentData: <none>\n'
+        ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │ size: Size(800.0, 600.0)\n'
+        ' │ default column width: FlexColumnWidth(1.0)\n'
+        ' │ table size: 0×0\n'
+        ' │ column offsets: unknown\n'
+        ' │ row offsets: []\n'
+        ' │\n'
+        ' └─table is empty\n',
+      ),
+    );
   });
 
   test('Table control test; loose', () {

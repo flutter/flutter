@@ -4,7 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+
+import 'framework.dart';
+import 'notification_listener.dart';
 
 /// Indicates that the size of one of the descendants of the object receiving
 /// this notification has changed, and that therefore any assumptions about that
