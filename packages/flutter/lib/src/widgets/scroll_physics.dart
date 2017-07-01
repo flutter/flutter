@@ -227,17 +227,29 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// The multiple applied to overscroll to make it appear that scrolling past
   /// the edge of the scrollable contents is harder than scrolling the list.
   ///
-  /// By default this is 0.5, meaning that overscroll is twice as hard as normal
-  /// scroll.
-  double get frictionFactor => 0.5;
+  /// This factor starts at 0.54 and progressively becomes harder to overscroll
+  /// as more of the area past the edge is dragged in.
+  double frictionFactor(double inViewFraction) => 0.54 * math.pow(inViewFraction.abs(), 2);
 
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     assert(offset != 0.0);
     assert(position.minScrollExtent <= position.maxScrollExtent);
     if (offset > 0.0)
-      return _applyFriction(position.pixels, position.minScrollExtent, position.maxScrollExtent, offset, frictionFactor);
-    return -_applyFriction(-position.pixels, -position.maxScrollExtent, -position.minScrollExtent, -offset, frictionFactor);
+      return _applyFriction(
+        position.pixels,
+        position.minScrollExtent,
+        position.maxScrollExtent,
+        offset,
+        frictionFactor(position.extentInside / position.viewportDimension),
+      );
+    return -_applyFriction(
+      -position.pixels,
+      -position.maxScrollExtent,
+      -position.minScrollExtent,
+      -offset,
+      frictionFactor(position.extentInside / position.viewportDimension),
+    );
   }
 
   static double _applyFriction(double start, double lowLimit, double highLimit, double delta, double gamma) {
