@@ -4,7 +4,9 @@ title: "Sample App Catalog"
 permalink: /catalog/samples/
 ---
 
-Complete applications that demonstrate how to get things done with Flutter. Each sample app features a few classes or an animation, a layout, or other feature of Flutter. The samples are short, just one file and usually only one or two pages of code. They should easy to try out with your favorite IDE.
+This catalog lists applications that demonstrate how to implement common mobile design patterns with Flutter. Each sample demonstrates how a few Flutter widgets can be put together to implement a meaningful user interface. The samples are short - just one Dart file - but they're complete applications. They should be easy to try out and tweak with your favorite IDE/code editor.
+
+If there are other sample apps that you'd like to see we'd appreciate hearing from you on our [Gitter channel](https://gitter.im/flutter/flutter) or [mailing list](https://groups.google.com/d/forum/flutter-dev).
 
 <div class="container-fluid">
 @(entries)

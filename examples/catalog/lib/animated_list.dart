@@ -205,7 +205,7 @@ Sample Catalog
 
 Title: AnimatedList
 
-Summary: An AnimatedList that displays a list of cards which stay
+Summary: An AnimatedList for displaying a list of cards that stay
 in sync with an app-specific ListModel. When an item is added to or removed
 from the model, the corresponding card animates in or out of view.
 
