@@ -170,8 +170,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   void initState() {
     super.initState();
     _moveController = new AnimationController(duration: _kDismissDuration, vsync: this)
-      ..addStatusListener(_handleDismissStatusChanged)
-      ..addStatusListener((AnimationStatus status) => updateKeepAlive());
+      ..addStatusListener(_handleDismissStatusChanged);
     _updateMoveAnimation();
   }
 
@@ -328,6 +327,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   void _handleDismissStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.completed && !_dragUnderway)
       _startResizeAnimation();
+    updateKeepAlive();
   }
 
   void _startResizeAnimation() {

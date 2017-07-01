@@ -12,6 +12,11 @@ import 'theme.dart';
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
+// See the InputDecorator.build method, where this is used.
+class _InputDecoratorChildGlobalKey extends GlobalObjectKey {
+  const _InputDecoratorChildGlobalKey(BuildContext value) : super(value);
+}
+
 /// Text and styles used to label an input field.
 ///
 /// See also:
@@ -488,7 +493,10 @@ class InputDecorator extends StatelessWidget {
       // function risks changing the depth of the tree, we preserve the subtree
       // using global keys.
       // GlobalObjectKey(context) will always be the same whenever we are built.
-      key: new GlobalObjectKey(context),
+      // Additionally, we use a subclass of GlobalObjectKey to avoid clashes
+      // with anyone else using our BuildContext as their global object key
+      // value.
+      key: new _InputDecoratorChildGlobalKey(context),
       child: child,
     );
 

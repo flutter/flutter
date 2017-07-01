@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -173,6 +173,10 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           _keepingAlive = false;
           scheduleMicrotask(() {
             if (mounted && _handles.isEmpty) {
+              // If mounted is false, we went away as well, so there's nothing to do.
+              // If _handles is no longer empty, then another client (or the same
+              // client in a new place) registered itself before we had a chance to
+              // turn off keep-alive, so again there's nothing to do.
               setState(() {
                 assert(!_keepingAlive);
               });
@@ -299,6 +303,7 @@ abstract class AutomaticKeepAliveClientMixin extends State<StatefulWidget> {
   KeepAliveHandle _keepAliveHandle;
 
   void _ensureKeepAlive() {
+    assert(_keepAliveHandle == null);
     _keepAliveHandle = new KeepAliveHandle();
     new KeepAliveNotification(_keepAliveHandle).dispatch(context);
   }
