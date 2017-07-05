@@ -97,7 +97,7 @@ Sample Catalog
 
 Title: ExpansionTile
 
-Summary: ExpansionTiles can used to produce two-level or multi-level lists.
+Summary: An ExpansionTile for building nested lists, with two or more levels.
 
 Description:
 This app displays hierarchical data with ExpansionTiles. Tapping a tile

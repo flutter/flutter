@@ -8,8 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class Leaf extends StatefulWidget {
-  Leaf({ Key key, this.index, this.child }) : super(key: key);
-  final int index;
+  Leaf({ Key key, this.child }) : super(key: key);
   final Widget child;
   @override
   _LeafState createState() => new _LeafState();
@@ -36,7 +35,6 @@ List<Widget> generateList(Widget child) {
     100,
     (int index) => new Leaf(
       key: new GlobalObjectKey<_LeafState>(index),
-      index: index,
       child: child,
     ),
     growable: false,
@@ -46,6 +44,7 @@ List<Widget> generateList(Widget child) {
 void main() {
   testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       itemExtent: 12.3, // about 50 widgets visible
       children: generateList(const Placeholder()),
@@ -85,6 +84,7 @@ void main() {
 
   testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       children: generateList(new Container(height: 12.3, child: const Placeholder())), // about 50 widgets visible
     ));
@@ -123,6 +123,7 @@ void main() {
 
   testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
     await tester.pumpWidget(new GridView.count(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       crossAxisCount: 2,
       childAspectRatio: 400.0 / 24.6, // about 50 widgets visible
@@ -163,6 +164,7 @@ void main() {
 
   testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
+      addAutomaticKeepAlives: false,
       addRepaintBoundaries: false,
       itemExtent: 400.0, // 2 visible children
       children: generateList(const Placeholder()),

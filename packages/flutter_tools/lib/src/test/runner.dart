@@ -21,6 +21,8 @@ import 'watcher.dart';
 Future<int> runTests(
     List<String> testFiles, {
     Directory workDir,
+    List<String> names: const <String>[],
+    List<String> plainNames: const <String>[],
     bool enableObservatory: false,
     bool startPaused: false,
     bool ipv6: false,
@@ -39,6 +41,14 @@ Future<int> runTests(
 
   if (json) {
     testArgs.addAll(<String>['-r', 'json']);
+  }
+
+  for (String name in names) {
+    testArgs..add("--name")..add(name);
+  }
+
+  for (String plainName in plainNames) {
+    testArgs..add("--plain-name")..add(plainName);
   }
 
   testArgs.add('--');

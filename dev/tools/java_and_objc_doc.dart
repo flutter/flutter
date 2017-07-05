@@ -23,7 +23,7 @@ Future<Null> main(List<String> args) async {
   final String objcdocUrl =
       'https://storage.googleapis.com/flutter_infra/flutter/$engineVersion/ios-objcdoc.zip';
   generateDocs(
-      objcdocUrl, 'objcdoc', 'objc/Classes/FlutterViewController.html');
+      objcdocUrl, 'objcdoc', 'Classes/FlutterViewController.html');
 }
 
 Future<Null> generateDocs(

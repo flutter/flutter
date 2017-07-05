@@ -85,7 +85,7 @@ Sample Catalog
 
 Title: Tabbed AppBar
 
-Summary: An AppBar with a TabBar as its bottom widget.
+Summary: An AppBar with a TabBar for navigating pages just below it.
 
 Description:
 A TabBar can be used to navigate among the pages displayed in a TabBarView.

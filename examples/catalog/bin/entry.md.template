@@ -8,5 +8,11 @@
       <p>
         @(summary)
       </p>
+      <p>
+        This app features the following classes: @(classes).
+      </p>
+      <p>
+        <a href="/catalog/samples/@(link)/">Learn more</a>.
+      </p>
     </div>
   </div>

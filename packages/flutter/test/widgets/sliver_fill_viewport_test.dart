@@ -15,7 +15,7 @@ void main() {
       new CustomScrollView(
         slivers: <Widget>[
           new SliverFillViewport(
-            delegate: new SliverChildListDelegate(children),
+            delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
           ),
         ],
       ),
@@ -57,8 +57,7 @@ void main() {
     expect(find.text('3'), findsNothing);
 
     final RenderObject viewport = tester.renderObject<RenderObject>(find.byType(SliverFillViewport).first);
-    // Unfortunately this toStringDeep method currently has an extra line break
-    // at the end.
+    // TODO(jacobr): toStringDeep has an extra trailing \n.
     expect(viewport, isNot(hasAGoodToStringDeep));
     expect(
       viewport.toStringDeep(),

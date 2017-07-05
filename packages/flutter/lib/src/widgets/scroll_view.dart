@@ -515,8 +515,10 @@ class ListView extends BoxScrollView {
   /// It is usually more efficient to create children on demand using [new
   /// ListView.builder].
   ///
-  /// The `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildListDelegate.addRepaintBoundaries] property and must not be
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. Both must not be
   /// null.
   ListView({
     Key key,
@@ -528,10 +530,12 @@ class ListView extends BoxScrollView {
     bool shrinkWrap: false,
     EdgeInsets padding,
     this.itemExtent,
+    bool addAutomaticKeepAlives: true,
     bool addRepaintBoundaries: true,
     List<Widget> children: const <Widget>[],
   }) : childrenDelegate = new SliverChildListDelegate(
          children,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
        ), super(
     key: key,
@@ -563,9 +567,11 @@ class ListView extends BoxScrollView {
   /// Even more efficient, however, is to create the instances on demand using
   /// this constructor's `itemBuilder` callback.
   ///
-  /// The `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property and must not be
-  /// null.
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
+  /// be null.
   ListView.builder({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -578,10 +584,12 @@ class ListView extends BoxScrollView {
     this.itemExtent,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
+    bool addAutomaticKeepAlives: true,
     bool addRepaintBoundaries: true,
   }) : childrenDelegate = new SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
        ), super(
     key: key,
@@ -783,8 +791,10 @@ class GridView extends BoxScrollView {
   ///
   /// The [gridDelegate] argument must not be null.
   ///
-  /// The `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildListDelegate.addRepaintBoundaries] property and must not be
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. Both must not be
   /// null.
   GridView({
     Key key,
@@ -796,11 +806,13 @@ class GridView extends BoxScrollView {
     bool shrinkWrap: false,
     EdgeInsets padding,
     @required this.gridDelegate,
+    bool addAutomaticKeepAlives: true,
     bool addRepaintBoundaries: true,
     List<Widget> children: const <Widget>[],
   }) : assert(gridDelegate != null),
        childrenDelegate = new SliverChildListDelegate(
          children,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
        ),
        super(
@@ -828,9 +840,11 @@ class GridView extends BoxScrollView {
   ///
   /// The [gridDelegate] argument must not be null.
   ///
-  /// The `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property and must not be
-  /// null.
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
+  /// be null.
   GridView.builder({
     Key key,
     Axis scrollDirection: Axis.vertical,
@@ -843,11 +857,13 @@ class GridView extends BoxScrollView {
     @required this.gridDelegate,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
+    bool addAutomaticKeepAlives: true,
     bool addRepaintBoundaries: true,
   }) : assert(gridDelegate != null),
        childrenDelegate = new SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
        ),
        super(
@@ -897,8 +913,10 @@ class GridView extends BoxScrollView {
   ///
   /// Uses a [SliverGridDelegateWithFixedCrossAxisCount] as the [gridDelegate].
   ///
-  /// The `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildListDelegate.addRepaintBoundaries] property and must not be
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. Both must not be
   /// null.
   ///
   /// See also:
@@ -917,6 +935,7 @@ class GridView extends BoxScrollView {
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
     double childAspectRatio: 1.0,
+    bool addAutomaticKeepAlives: true,
     bool addRepaintBoundaries: true,
     List<Widget> children: const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
@@ -927,6 +946,7 @@ class GridView extends BoxScrollView {
        ),
        childrenDelegate = new SliverChildListDelegate(
          children,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
        ), super(
     key: key,
@@ -944,8 +964,10 @@ class GridView extends BoxScrollView {
   ///
   /// Uses a [SliverGridDelegateWithMaxCrossAxisExtent] as the [gridDelegate].
   ///
-  /// The `addRepaintBoundaries` argument corresponds to the
-  /// [SliverChildListDelegate.addRepaintBoundaries] property and must not be
+  /// The `addAutomaticKeepAlives` argument corresponds to the
+  /// [SliverChildListDelegate.addAutomaticKeepAlives] property. The
+  /// `addRepaintBoundaries` argument corresponds to the
+  /// [SliverChildListDelegate.addRepaintBoundaries] property. Both must not be
   /// null.
   ///
   /// See also:
@@ -964,6 +986,7 @@ class GridView extends BoxScrollView {
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
     double childAspectRatio: 1.0,
+    bool addAutomaticKeepAlives: true,
     bool addRepaintBoundaries: true,
     List<Widget> children: const <Widget>[],
   }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
@@ -974,6 +997,7 @@ class GridView extends BoxScrollView {
        ),
        childrenDelegate = new SliverChildListDelegate(
          children,
+         addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
        ), super(
     key: key,

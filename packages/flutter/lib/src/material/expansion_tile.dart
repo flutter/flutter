@@ -18,8 +18,9 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 ///
 /// This widget is typically used with [ListView] to create an
 /// "expand / collapse" list entry. When used with scrolling widgets like
-/// [ListView], a unique [key] must be specified to enable the [ExpansionTile] to
-/// save and restore its expanded state when it is scrolled in and out of view.
+/// [ListView], a unique [PageStorageKey] must be specified to enable the
+/// [ExpansionTile] to save and restore its expanded state when it is scrolled
+/// in and out of view.
 ///
 /// See also:
 ///

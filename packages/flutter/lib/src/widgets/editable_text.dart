@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
+import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -70,7 +70,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   set text(String newText) {
-    value = value.copyWith(text: newText, composing: TextRange.empty);
+    value = value.copyWith(text: newText,
+                           selection: const TextSelection.collapsed(offset: -1),
+                           composing: TextRange.empty);
   }
 
   /// The currently selected [text].
@@ -83,6 +85,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   set selection(TextSelection newSelection) {
+    if (newSelection.start > text.length || newSelection.end > text.length)
+      throw new FlutterError('invalid text selection: $newSelection');
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
@@ -249,7 +253,7 @@ class EditableText extends StatefulWidget {
     description.add('focusNode: $focusNode');
     if (obscureText != false)
       description.add('obscureText: $obscureText');
-    description.add('$style');
+    description.add('${style.toString().split("\n").join(", ")}');
     if (textAlign != null)
       description.add('$textAlign');
     if (textScaleFactor != null)
@@ -264,7 +268,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> implements TextInputClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
 
@@ -274,6 +278,9 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   final ScrollController _scrollController = new ScrollController();
   final LayerLink _layerLink = new LayerLink();
   bool _didAutoFocus = false;
+
+  @override
+  bool get wantKeepAlive => widget.focusNode.hasFocus;
 
   // State lifecycle:
 
@@ -305,6 +312,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       widget.focusNode.addListener(_handleFocusChanged);
+      updateKeepAlive();
     }
   }
 
@@ -546,11 +554,13 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       // Clear the selection and composition state if this widget lost focus.
       _value = new TextEditingValue(text: _value.text);
     }
+    updateKeepAlive();
   }
 
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
+    super.build(context); // See AutomaticKeepAliveClientMixin.
     return new Scrollable(
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
