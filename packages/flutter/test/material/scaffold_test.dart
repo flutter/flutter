@@ -459,22 +459,22 @@ void main() {
       drawer: new Drawer(child:new Semantics(label: drawerLabel, child: new Container())),
     )));
 
-    expect(semantics, includesNodeWithLabel(bodyLabel));
-    expect(semantics, includesNodeWithLabel(persistentFooterButtonLabel));
-    expect(semantics, includesNodeWithLabel(bottomNavigationBarLabel));
-    expect(semantics, includesNodeWithLabel(floatingActionButtonLabel));
-    expect(semantics, isNot(includesNodeWithLabel(drawerLabel)));
+    expect(semantics, includesNodeWith(label: bodyLabel));
+    expect(semantics, includesNodeWith(label: persistentFooterButtonLabel));
+    expect(semantics, includesNodeWith(label: bottomNavigationBarLabel));
+    expect(semantics, includesNodeWith(label: floatingActionButtonLabel));
+    expect(semantics, isNot(includesNodeWith(label: drawerLabel)));
 
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openDrawer();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(semantics, isNot(includesNodeWithLabel(bodyLabel)));
-    expect(semantics, isNot(includesNodeWithLabel(persistentFooterButtonLabel)));
-    expect(semantics, isNot(includesNodeWithLabel(bottomNavigationBarLabel)));
-    expect(semantics, isNot(includesNodeWithLabel(floatingActionButtonLabel)));
-    expect(semantics, includesNodeWithLabel(drawerLabel));
+    expect(semantics, isNot(includesNodeWith(label: bodyLabel)));
+    expect(semantics, isNot(includesNodeWith(label: persistentFooterButtonLabel)));
+    expect(semantics, isNot(includesNodeWith(label: bottomNavigationBarLabel)));
+    expect(semantics, isNot(includesNodeWith(label: floatingActionButtonLabel)));
+    expect(semantics, includesNodeWith(label: drawerLabel));
 
     semantics.dispose();
   });

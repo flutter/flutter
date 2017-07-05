@@ -212,7 +212,7 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWithLabel(buttonText));
+    expect(semantics, includesNodeWith(label: buttonText));
 
     final BuildContext context = tester.element(find.text(buttonText));
 
@@ -224,8 +224,8 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
-    expect(semantics, includesNodeWithLabel(alertText));
-    expect(semantics, isNot(includesNodeWithLabel(buttonText)));
+    expect(semantics, includesNodeWith(label: alertText));
+    expect(semantics, isNot(includesNodeWith(label: buttonText)));
 
     semantics.dispose();
   });

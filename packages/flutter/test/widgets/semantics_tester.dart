@@ -240,17 +240,21 @@ class _HasSemantics extends Matcher {
 /// Asserts that a [SemanticsTester] has a semantics tree that exactly matches the given semantics.
 Matcher hasSemantics(TestSemantics semantics) => new _HasSemantics(semantics);
 
-class _IncludesNodeWithLabel extends Matcher {
-  const _IncludesNodeWithLabel(this._label) : assert(_label != null);
+class _IncludesNodeWith extends Matcher {
+  const _IncludesNodeWith({
+    this.label,
+    this.actions,
+}) : assert(label != null || actions != null);
 
-  final String _label;
+  final String label;
+  final List<SemanticsAction> actions;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
     bool result = false;
     SemanticsNodeVisitor visitor;
     visitor = (SemanticsNode node) {
-      if (node.label == _label) {
+      if (checkNode(node)) {
         result = true;
       } else {
         node.visitChildren(visitor);
@@ -262,16 +266,43 @@ class _IncludesNodeWithLabel extends Matcher {
     return result;
   }
 
+  bool checkNode(SemanticsNode node) {
+    if (label != null && node.label != label)
+      return false;
+    if (actions != null) {
+      final int expectedActions = actions.fold(0, (int value, SemanticsAction action) => value | action.index);
+      final int actualActions = node.getSemanticsData().actions;
+      if (expectedActions != actualActions)
+        return false;
+    }
+    return true;
+  }
+
   @override
   Description describe(Description description) {
-    return description.add('includes node with label "$_label"');
+    return description.add('includes node with $_configAsString');
   }
 
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    return mismatchDescription.add('could not find node with label "$_label".\n$_matcherHelp');
+    return mismatchDescription.add('could not find node with $_configAsString.\n$_matcherHelp');
+  }
+
+  String get _configAsString {
+    String string = '';
+    if (label != null) {
+      string += 'label "$label"';
+      if (actions != null)
+        string += ' and ';
+    }
+    if (actions != null) {
+      string += ' actions "${actions.join(', ')}"';
+    }
+    return string;
   }
 }
 
-/// Asserts that a node in the semantics tree of [SemanticsTester] has [label].
-Matcher includesNodeWithLabel(String label) => new _IncludesNodeWithLabel(label);
+/// Asserts that a node in the semantics tree of [SemanticsTester] has [label] and [actions].
+///
+/// If `null` is provided for either argument it will match against any value.
+Matcher includesNodeWith({ String label, List<SemanticsAction> actions }) => new _IncludesNodeWith(label: label, actions: actions);
