@@ -273,7 +273,7 @@ Future<String> _buildAotSnapshot(
     try {
       final String json = await checksumFile.readAsString();
       final Checksum oldChecksum = new Checksum.fromJson(json);
-      final Set<String> snapshotInputPaths = readDepfile(dependencies);
+      final Set<String> snapshotInputPaths = await readDepfile(dependencies);
       snapshotInputPaths.addAll(outputPaths);
       final Checksum newChecksum = new Checksum.fromFiles(snapshotInputPaths);
       if (oldChecksum == newChecksum) {
@@ -350,7 +350,7 @@ Future<String> _buildAotSnapshot(
 
   // Compute and record checksums.
   try {
-    final Set<String> snapshotInputPaths = readDepfile(dependencies);
+    final Set<String> snapshotInputPaths = await readDepfile(dependencies);
     snapshotInputPaths..addAll(outputPaths);
     final Checksum checksum = new Checksum.fromFiles(snapshotInputPaths);
     await checksumFile.writeAsString(checksum.toJson());

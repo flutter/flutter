@@ -65,7 +65,7 @@ Future<int> _createSnapshot({
     try {
         final String json = await checksumFile.readAsString();
         final Checksum oldChecksum = new Checksum.fromJson(json);
-        final Set<String> inputPaths = readDepfile(depfilePath);
+        final Set<String> inputPaths = await readDepfile(depfilePath);
         inputPaths.add(snapshotPath);
         final Checksum newChecksum = new Checksum.fromFiles(inputPaths);
         if (oldChecksum == newChecksum) {
@@ -85,7 +85,7 @@ Future<int> _createSnapshot({
 
   // Compute and record input file checksums.
   try {
-    final Set<String> inputPaths = readDepfile(depfilePath);
+    final Set<String> inputPaths = await readDepfile(depfilePath);
     inputPaths.add(snapshotPath);
     final Checksum checksum = new Checksum.fromFiles(inputPaths);
     await checksumFile.writeAsString(checksum.toJson());
