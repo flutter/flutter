@@ -351,8 +351,7 @@ void Paragraph::Layout(double width, bool force) {
         letter_spacing_offset = 0.0f;
         word_count = 0;
         line_width = 0.0f;
-        // TODO(abarth): Use the line height, which is something like the max
-        // font_size for runs in this line times the paragraph's line height.
+        character_index = layout_end;
         break_index += 1;
         lines_++;
       } else {
@@ -472,9 +471,17 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     // This is set to 2 for the double line style
     int decoration_count = 1;
 
+    std::vector<WaveCoordinates> wave_coords;
+
+    double width = blob->bounds().fRight + blob->bounds().fLeft;
+
+    paint.setStrokeWidth(metrics.fUnderlineThickness *
+                         style.decoration_thickness);
+
     switch (style.decoration_style) {
-      case TextDecorationStyle::kSolid:
+      case TextDecorationStyle::kSolid: {
         break;
+      }
       case TextDecorationStyle::kDouble: {
         decoration_count = 2;
         break;
@@ -496,39 +503,68 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
         break;
       }
       case TextDecorationStyle::kWavy: {
-        // TODO(garyq): Wave currently does a random wave instead of an ordered
-        // wave.
-        const SkScalar intervals[] = {1};
-        size_t count = sizeof(intervals) / sizeof(intervals[0]);
-        paint.setPathEffect(SkPathEffect::MakeCompose(
-            SkDashPathEffect::Make(intervals, count, 0.0f),
-            SkDiscretePathEffect::Make(metrics.fAvgCharWidth / 10.0f,
-                                       metrics.fAvgCharWidth / 10.0f)));
+        int wave_count = 0;
+        double x_start = 0;
+        double y_top = -metrics.fUnderlineThickness;
+        double y_bottom = metrics.fUnderlineThickness;
+        while (x_start + metrics.fUnderlineThickness * 2 < x + width) {
+          wave_coords.push_back(
+              WaveCoordinates(x_start, wave_count % 2 == 0 ? y_bottom : y_top,
+                              x_start + metrics.fUnderlineThickness * 2,
+                              wave_count % 2 == 0 ? y_top : y_bottom));
+          x_start += metrics.fUnderlineThickness * 2;
+          ++wave_count;
+        }
         break;
       }
     }
 
-    double width = blob->bounds().fRight + blob->bounds().fLeft;
-
+    // Use a for loop for "kDouble" decoration style
     for (int i = 0; i < decoration_count; i++) {
       double y_offset = i * metrics.fUnderlineThickness * 3.0f;
+      // Underline
       if (style.decoration & 0x1) {
-        paint.setStrokeWidth(metrics.fUnderlineThickness);
-        canvas->drawLine(x, y + metrics.fUnderlineThickness + y_offset,
-                         x + width, y + metrics.fUnderlineThickness + y_offset,
-                         paint);
+        if (style.decoration_style != TextDecorationStyle::kWavy)
+          canvas->drawLine(x, y + metrics.fUnderlineThickness + y_offset,
+                           x + width,
+                           y + metrics.fUnderlineThickness + y_offset, paint);
+        else
+          PaintWavyDecoration(canvas, wave_coords, paint, x, y,
+                              metrics.fUnderlineThickness, width);
       }
+      // Overline
       if (style.decoration & 0x2) {
-        paint.setStrokeWidth(metrics.fUnderlineThickness);
-        canvas->drawLine(x, y + metrics.fAscent + y_offset, x + width,
-                         y + metrics.fAscent + y_offset, paint);
+        if (style.decoration_style != TextDecorationStyle::kWavy)
+          canvas->drawLine(x, y + metrics.fAscent + y_offset, x + width,
+                           y + metrics.fAscent + y_offset, paint);
+        else
+          PaintWavyDecoration(canvas, wave_coords, paint, x, y, metrics.fAscent,
+                              width);
       }
+      // Strikethrough
       if (style.decoration & 0x4) {
-        paint.setStrokeWidth(metrics.fUnderlineThickness);
-        canvas->drawLine(x, y - metrics.fXHeight / 2 + y_offset, x + width,
-                         y - metrics.fXHeight / 2 + y_offset, paint);
+        if (style.decoration_style != TextDecorationStyle::kWavy)
+          canvas->drawLine(x, y - metrics.fXHeight / 2 + y_offset, x + width,
+                           y - metrics.fXHeight / 2 + y_offset, paint);
+        else
+          PaintWavyDecoration(canvas, wave_coords, paint, x, y,
+                              -metrics.fXHeight / 2, width);
       }
     }
+  }
+}
+
+void Paragraph::PaintWavyDecoration(SkCanvas* canvas,
+                                    std::vector<WaveCoordinates> wave_coords,
+                                    SkPaint paint,
+                                    double x,
+                                    double y,
+                                    double y_offset,
+                                    double width) {
+  for (size_t i = 0; i < wave_coords.size(); ++i) {
+    WaveCoordinates coords = wave_coords[i];
+    canvas->drawLine(x + coords.x_start, y + y_offset + coords.y_start,
+                     x + coords.x_end, y + y_offset + coords.y_end, paint);
   }
 }
 
