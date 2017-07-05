@@ -149,13 +149,6 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (platform.isWindows) {
-      throwToolExit(
-          'The test command is currently not supported on Windows: '
-          'https://github.com/flutter/flutter/issues/8516'
-      );
-    }
-
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
 
