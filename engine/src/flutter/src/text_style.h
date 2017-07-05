@@ -33,6 +33,7 @@ class TextStyle {
   TextDecoration decoration = TextDecoration::kNone;
   SkColor decoration_color = SK_ColorWHITE;
   TextDecorationStyle decoration_style = TextDecorationStyle::kSolid;
+  double decoration_thickness = 1.0;
   FontWeight font_weight = FontWeight::w400;
   FontStyle font_style = FontStyle::normal;
   bool fake_bold = false;

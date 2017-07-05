@@ -24,6 +24,14 @@ namespace txt {
 bool TextStyle::equals(const TextStyle& other) const {
   if (color != other.color)
     return false;
+  if (decoration != other.decoration)
+    return false;
+  if (decoration_color != other.decoration_color)
+    return false;
+  if (decoration_style != other.decoration_style)
+    return false;
+  if (decoration_thickness != other.decoration_thickness)
+    return false;
   if (font_weight != other.font_weight)
     return false;
   if (font_style != other.font_style)

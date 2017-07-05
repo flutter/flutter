@@ -70,6 +70,7 @@ class Paragraph {
   FRIEND_TEST(RenderTest, RightAlignParagraph);
   FRIEND_TEST(RenderTest, CenterAlignParagraph);
   FRIEND_TEST(RenderTest, JustifyAlignParagraph);
+  FRIEND_TEST(RenderTest, DecorationsParagraph);
   FRIEND_TEST(RenderTest, ItalicsParagraph);
 
   std::vector<uint16_t> text_;
@@ -88,6 +89,16 @@ class Paragraph {
   double alphabetic_baseline_ = FLT_MAX;
   double ideographic_baseline_ = FLT_MAX;
   bool needs_layout_ = true;
+
+  struct WaveCoordinates {
+    double x_start;
+    double y_start;
+    double x_end;
+    double y_end;
+
+    WaveCoordinates(double x_s, double y_s, double x_e, double y_e)
+        : x_start(x_s), y_start(y_s), x_end(x_e), y_end(y_e) {}
+  };
 
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 
@@ -110,6 +121,14 @@ class Paragraph {
                         TextStyle style,
                         SkPaint::FontMetrics metrics,
                         SkTextBlob* blob);
+
+  void PaintWavyDecoration(SkCanvas* canvas,
+                           std::vector<WaveCoordinates> wave_coords,
+                           SkPaint paint,
+                           double x,
+                           double y,
+                           double y_offset,
+                           double width);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };

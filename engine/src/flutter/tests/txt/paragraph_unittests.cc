@@ -636,6 +636,84 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(RenderTest, DecorationsParagraph) {
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::left;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.font_size = 26;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 5;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 2;
+  text_style.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style.decoration_style = txt::TextDecorationStyle::kSolid;
+  text_style.decoration_color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+  builder.AddText("This text should be");
+
+  text_style.decoration_style = txt::TextDecorationStyle::kDouble;
+  text_style.decoration_color = SK_ColorBLUE;
+  builder.PushStyle(text_style);
+  builder.AddText(" decorated even when");
+
+  text_style.decoration_style = txt::TextDecorationStyle::kDotted;
+  text_style.decoration_color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+  builder.AddText(" wrapped around to");
+
+  text_style.decoration_style = txt::TextDecorationStyle::kDashed;
+  text_style.decoration_color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+  builder.AddText(" the next line.");
+
+  text_style.decoration_style = txt::TextDecorationStyle::kWavy;
+  text_style.decoration_color = SK_ColorRED;
+  builder.PushStyle(text_style);
+
+  builder.AddText(" Otherwise, bad things happen.");
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 100);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_EQ(paragraph->runs_.size(), 5ull);
+  ASSERT_EQ(paragraph->records_.size(), 6ull);
+
+  for (size_t i = 0; i < 6; ++i) {
+    ASSERT_EQ(paragraph->records_[i].style().decoration,
+              txt::TextDecoration(0x1 | 0x2 | 0x4));
+  }
+
+  ASSERT_EQ(paragraph->records_[0].style().decoration_style,
+            txt::TextDecorationStyle::kSolid);
+  ASSERT_EQ(paragraph->records_[1].style().decoration_style,
+            txt::TextDecorationStyle::kDouble);
+  ASSERT_EQ(paragraph->records_[2].style().decoration_style,
+            txt::TextDecorationStyle::kDotted);
+  ASSERT_EQ(paragraph->records_[3].style().decoration_style,
+            txt::TextDecorationStyle::kDashed);
+  ASSERT_EQ(paragraph->records_[4].style().decoration_style,
+            txt::TextDecorationStyle::kDashed);
+  ASSERT_EQ(paragraph->records_[5].style().decoration_style,
+            txt::TextDecorationStyle::kWavy);
+
+  ASSERT_EQ(paragraph->records_[0].style().decoration_color, SK_ColorBLACK);
+  ASSERT_EQ(paragraph->records_[1].style().decoration_color, SK_ColorBLUE);
+  ASSERT_EQ(paragraph->records_[2].style().decoration_color, SK_ColorBLACK);
+  ASSERT_EQ(paragraph->records_[3].style().decoration_color, SK_ColorBLACK);
+  ASSERT_EQ(paragraph->records_[4].style().decoration_color, SK_ColorBLACK);
+  ASSERT_EQ(paragraph->records_[5].style().decoration_color, SK_ColorRED);
+
+  ASSERT_TRUE(Snapshot());
+}
+
 TEST_F(RenderTest, ItalicsParagraph) {
   const char* text = "I am Italicized!                           ";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
