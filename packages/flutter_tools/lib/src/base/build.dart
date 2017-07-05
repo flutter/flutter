@@ -44,20 +44,27 @@ class Checksum {
   int get hashCode => _checksums.hashCode;
 }
 
+final RegExp _separatorExpr = new RegExp(r'([^\\]) ');
+final RegExp _escapeExpr = new RegExp(r'\\(.)');
+
 /// Parses a VM snapshot dependency file.
 ///
 /// Snapshot dependency files are a single line mapping the output snapshot to a
-/// space-separated list of input files used to generate that output. e.g,
+/// space-separated list of input files used to generate that output. Spaces and
+/// backslashes are escaped with a backslash. e.g,
 ///
-/// outfile : file1.dart file2.dart file3.dart
+/// outfile : file1.dart fil\\e2.dart fil\ e3.dart
+///
+/// will return a set containing: 'file1.dart', 'fil\e2.dart', 'fil e3.dart'.
 Future<Set<String>> readDepfile(String depfilePath) async {
   // Depfile format:
   // outfile1 outfile2 : file1.dart file2.dart file3.dart
   final String contents = await fs.file(depfilePath).readAsString();
   final String dependencies = contents.split(': ')[1];
   return dependencies
-      .split(' ')
-      .map((String path) => path.trim())
+      .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
+      .split('\n')
+      .map((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
       .where((String path) => path.isNotEmpty)
       .toSet();
 }
