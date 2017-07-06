@@ -84,7 +84,7 @@ void main() {
     });
 
     test('overscroll is progressively harder', () {
-      ScrollMetrics lessOverscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics lessOverscrolledPosition = new FixedScrollMetrics(
           minScrollExtent: 0.0,
           maxScrollExtent: 1000.0,
           pixels: -20.0,
@@ -92,7 +92,7 @@ void main() {
           axisDirection: AxisDirection.down,
       );
 
-      ScrollMetrics moreOverscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics moreOverscrolledPosition = new FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: -40.0,
@@ -117,7 +117,7 @@ void main() {
     });
 
     test('easing an overscroll still has resistance', () {
-      ScrollMetrics overscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics overscrolledPosition = new FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: -20.0,
@@ -133,7 +133,7 @@ void main() {
     });
 
     test('no resistance when not overscrolled', () {
-      ScrollMetrics scrollPosition = new FixedScrollMetrics(
+      final ScrollMetrics scrollPosition = new FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: 300.0,
@@ -146,7 +146,7 @@ void main() {
     });
 
     test('easing an overscroll meets less resistance than tensioning', () {
-      ScrollMetrics overscrolledPosition = new FixedScrollMetrics(
+      final ScrollMetrics overscrolledPosition = new FixedScrollMetrics(
         minScrollExtent: 0.0,
         maxScrollExtent: 1000.0,
         pixels: -20.0,
