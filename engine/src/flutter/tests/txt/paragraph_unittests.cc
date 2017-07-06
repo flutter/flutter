@@ -750,4 +750,48 @@ TEST_F(RenderTest, ItalicsParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(RenderTest, ChineseParagraph) {
+  const char* text =
+      "左線読設重説切後碁給能上目秘使約。満毎冠行来昼本可必図将発確年。今属場育"
+      "図情闘陰野高備込制詩西校客。審対江置講今固残必託地集済決維駆年策。立得庭"
+      "際輝求佐抗蒼提夜合逃表。注統天言件自謙雅載報紙喪。作画稿愛器灯女書利変探"
+      "訃第金線朝開化建。子戦年帝励害表月幕株漠新期刊人秘。図的海力生禁挙保天戦"
+      "聞条年所在口。";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  text_style.font_size = 35;
+  text_style.letter_spacing = 2;
+  text_style.font_family = "Source Han Serif CN";
+  text_style.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style.decoration_style = txt::TextDecorationStyle::kSolid;
+  text_style.decoration_color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 100);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(), 7ull);
+
+  ASSERT_TRUE(Snapshot());
+}
+
 }  // namespace txt

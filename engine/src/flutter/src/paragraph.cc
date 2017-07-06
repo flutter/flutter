@@ -98,7 +98,6 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   paint->size = style.font_size;
   paint->letterSpacing = style.letter_spacing;
   paint->wordSpacing = style.word_spacing;
-  // TODO(abarth):  word_spacing.
 }
 
 void GetPaint(const TextStyle& style, SkPaint* paint) {
@@ -187,8 +186,6 @@ void Paragraph::Layout(double width, bool force) {
     for (size_t i = 0; i < x_queue.size(); ++i) {
       record_index = records_.size() - (x_queue.size() - i);
       records_[record_index].SetOffset(SkPoint::Make(x_queue[i], y));
-      // TODO(garyq): Fix alignment for paragraphs with multiple styles per
-      // line.
       switch (paragraph_style_.text_align) {
         case TextAlign::left:
           break;
@@ -303,8 +300,6 @@ void Paragraph::Layout(double width, bool force) {
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
       // color stayed the same.
-      // TODO(garyq): Ensure that the typeface does not change throughout a
-      // run.
       SkPaint::FontMetrics metrics;
       paint.getFontMetrics(&metrics);
       // Apply additional word spacing if the text is justified.
@@ -471,6 +466,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     // This is set to 2 for the double line style
     int decoration_count = 1;
 
+    // Filled when drawing wavy decorations.
     std::vector<WaveCoordinates> wave_coords;
 
     double width = blob->bounds().fRight + blob->bounds().fLeft;
@@ -525,9 +521,9 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
       // Underline
       if (style.decoration & 0x1) {
         if (style.decoration_style != TextDecorationStyle::kWavy)
-          canvas->drawLine(x, y + metrics.fUnderlineThickness + y_offset,
-                           x + width,
-                           y + metrics.fUnderlineThickness + y_offset, paint);
+          canvas->drawLine(x, y + metrics.fUnderlinePosition + y_offset,
+                           x + width, y + metrics.fUnderlinePosition + y_offset,
+                           paint);
         else
           PaintWavyDecoration(canvas, wave_coords, paint, x, y,
                               metrics.fUnderlineThickness, width);

@@ -89,8 +89,6 @@ class FontCollection {
   size_t cache_capacity_ = DEFAULT_CACHE_CAPACITY;
 
   // Cache minikin font collections to prevent slow disk reads.
-  // TODO(garyq): Implement optional low-memory optimized system to prevent
-  // fonts building up in memory.
   std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>
       minikin_font_collection_map_;
 
@@ -105,8 +103,6 @@ class FontCollection {
   static const std::string GetDefaultFamilyName() {
     return DEFAULT_FAMILY_NAME;
   };
-
-  // TODO(chinmaygarde): Caches go here.
 };
 
 }  // namespace txt
