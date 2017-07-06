@@ -156,7 +156,9 @@ def to_gn_args(args):
       gn_args['skia_use_vulkan'] = True
       gn_args['skia_vulkan_headers'] = "//third_party/vulkan/src"
 
-    gn_args['enable_profiling'] = args.runtime_mode != 'release'
+    # We should not need a special case for x86, but this seems to introduce text relocations
+    # even with -fPIC everywhere.
+    gn_args['enable_profiling'] = args.runtime_mode != 'release' and args.android_cpu != 'x86'
 
     return gn_args
 
