@@ -73,6 +73,7 @@ class Paragraph {
   FRIEND_TEST(RenderTest, DecorationsParagraph);
   FRIEND_TEST(RenderTest, ItalicsParagraph);
   FRIEND_TEST(RenderTest, ChineseParagraph);
+  FRIEND_TEST(RenderTest, DISABLED_ArabicParagraph);
 
   std::vector<uint16_t> text_;
   StyledRuns runs_;
