@@ -328,7 +328,8 @@ void Paragraph::Layout(double width, bool force) {
           alphabetic_baseline_ = metrics.fCapHeight * run.style.height;
           // TODO(garyq): Properly implement ideographic_baseline_.
           ideographic_baseline_ =
-              (metrics.fDescent + metrics.fCapHeight) * run.style.height;
+              (metrics.fUnderlinePosition + metrics.fCapHeight) *
+              run.style.height;
         }
       }
       if (max_descent < metrics.fDescent * run.style.height)
@@ -412,7 +413,7 @@ double Paragraph::GetAlphabeticBaseline() const {
 }
 
 double Paragraph::GetIdeographicBaseline() const {
-  // TODO(garyq): Implement.
+  // TODO(garyq): Currently fCapHeight + fUnderlinePosition. Verify this.
   return ideographic_baseline_;
 }
 
@@ -421,8 +422,8 @@ double Paragraph::GetMaxIntrinsicWidth() const {
 }
 
 double Paragraph::GetMinIntrinsicWidth() const {
-  // TODO(garyq): Implement.
-  return min_intrinsic_width_;
+  // TODO(garyq): This is a lower bound. Actual value may be slightly higher.
+  return max_intrinsic_width_ / paragraph_style_.max_lines;
 }
 
 double Paragraph::GetHeight() const {
@@ -531,8 +532,8 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
       // Overline
       if (style.decoration & 0x2) {
         if (style.decoration_style != TextDecorationStyle::kWavy)
-          canvas->drawLine(x, y + metrics.fAscent + y_offset, x + width,
-                           y + metrics.fAscent + y_offset, paint);
+          canvas->drawLine(x, y + metrics.fAscent - y_offset, x + width,
+                           y + metrics.fAscent - y_offset, paint);
         else
           PaintWavyDecoration(canvas, wave_coords, paint, x, y, metrics.fAscent,
                               width);

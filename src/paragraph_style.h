@@ -34,7 +34,10 @@ class ParagraphStyle {
   double font_size = 14;
   size_t max_lines = 1;
   double line_height = 1.0;
-  std::string ellipsis;
+  std::string ellipsis = "...";
+  // TODO(garyq): Implement right to left.
+  // Right to left (Arabic, Hebrew, etc).
+  bool rtl = false;
 };
 
 }  // namespace txt

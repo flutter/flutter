@@ -763,6 +763,7 @@ TEST_F(RenderTest, ChineseParagraph) {
 
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::right;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
@@ -790,6 +791,57 @@ TEST_F(RenderTest, ChineseParagraph) {
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->records_.size(), 7ull);
+
+  ASSERT_TRUE(Snapshot());
+}
+
+// TODO(garyq): Support RTL languages.
+TEST_F(RenderTest, DISABLED_ArabicParagraph) {
+  const char* text =
+      "من أسر وإعلان الخاصّة وهولندا،, عل قائمة الضغوط بالمطالبة تلك. الصفحة "
+      "بمباركة التقليدية قام عن. تصفح";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::right;
+  paragraph_style.rtl = true;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  text_style.font_size = 35;
+  text_style.letter_spacing = 2;
+  text_style.font_family = "Katibeh";
+  text_style.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style.decoration_style = txt::TextDecorationStyle::kSolid;
+  text_style.decoration_color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 100);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_.size(), 2ull);
+  ASSERT_EQ(paragraph->paragraph_style_.rtl, true);
+
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[u16_text.length() - i]);
+  }
 
   ASSERT_TRUE(Snapshot());
 }
