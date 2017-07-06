@@ -17,6 +17,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../plugins.dart';
@@ -440,31 +441,36 @@ Future<bool> _checkPodCondition() async {
 }
 
 Future<Null> _createPodfile(Directory bundle) async {
-
+  final File podfileTemplate = fs.file(fs.path.join(
+    Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile'
+  ));
+  podfileTemplate.copySync(fs.path.join(bundle.path, 'Podfile'));
 }
 
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
-  if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
-    final ProcessResult result = await processManager.run(
-      <String>['pod', 'install', '--verbose'],
-      workingDirectory: bundle.path,
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-    );
-    status.stop();
-    if (logger.isVerbose || result.exitCode != 0) {
-      if (result.stdout.isNotEmpty) {
-        printStatus('CocoaPods\' output:\n↳');
-        printStatus(result.stdout, indent: 4);
-      }
-      if (result.stderr.isNotEmpty) {
-        printStatus('Error output from CocoaPods:\n↳');
-        printStatus(result.stderr, indent: 4);
-      }
-    }
-    if (result.exitCode != 0)
-      throwToolExit('Error running pod install');
+  if (!fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
+    await _createPodfile(bundle);
   }
+
+  final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
+  final ProcessResult result = await processManager.run(
+    <String>['pod', 'install', '--verbose'],
+    workingDirectory: bundle.path,
+    environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+  );
+  status.stop();
+  if (logger.isVerbose || result.exitCode != 0) {
+    if (result.stdout.isNotEmpty) {
+      printStatus('CocoaPods\' output:\n↳');
+      printStatus(result.stdout, indent: 4);
+    }
+    if (result.stderr.isNotEmpty) {
+      printStatus('Error output from CocoaPods:\n↳');
+      printStatus(result.stderr, indent: 4);
+    }
+  }
+  if (result.exitCode != 0)
+    throwToolExit('Error running pod install');
 }
 
 Future<Null> _addServicesToBundle(Directory bundle) async {
