@@ -66,6 +66,7 @@ class StyledRuns {
   FRIEND_TEST(RenderTest, JustifyAlignParagraph);
   FRIEND_TEST(RenderTest, DecorationsParagraph);
   FRIEND_TEST(RenderTest, ItalicsParagraph);
+  FRIEND_TEST(RenderTest, ChineseParagraph);
 
   struct IndexedRun {
     size_t style_index = 0;
