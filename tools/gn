@@ -156,6 +156,8 @@ def to_gn_args(args):
       gn_args['skia_use_vulkan'] = True
       gn_args['skia_vulkan_headers'] = "//third_party/vulkan/src"
 
+    gn_args['enable_profiling'] = args.runtime_mode != 'release'
+
     return gn_args
 
 def parse_args(args):
