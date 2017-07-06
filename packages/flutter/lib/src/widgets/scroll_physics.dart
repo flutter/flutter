@@ -226,33 +226,51 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   /// The multiple applied to overscroll to make it appear that scrolling past
   /// the edge of the scrollable contents is harder than scrolling the list.
+  /// This is done by reducing the ratio of the scroll effect output vs the
+  /// scroll gesture input.
   ///
-  /// By default this is 0.5, meaning that overscroll is twice as hard as normal
-  /// scroll.
-  double get frictionFactor => 0.5;
+  /// This factor starts at 0.52 and progressively becomes harder to overscroll
+  /// as more of the area past the edge is dragged in (represented by a reducing
+  /// `inViewFraction` which starts at 1 when there is no overscroll).
+  double frictionFactor(double inViewFraction) => 0.52 * math.pow(inViewFraction.abs(), 2);
 
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     assert(offset != 0.0);
     assert(position.minScrollExtent <= position.maxScrollExtent);
-    if (offset > 0.0)
-      return _applyFriction(position.pixels, position.minScrollExtent, position.maxScrollExtent, offset, frictionFactor);
-    return -_applyFriction(-position.pixels, -position.maxScrollExtent, -position.minScrollExtent, -offset, frictionFactor);
+
+    if (!position.outOfRange)
+      return offset;
+
+    final double overscrollPastStart = math.max(position.minScrollExtent - position.pixels, 0.0);
+    final double overscrollPastEnd = math.max(position.pixels - position.maxScrollExtent, 0.0);
+    final bool easing = (overscrollPastStart > 0.0 && offset < 0.0)
+        || (overscrollPastEnd > 0.0 && offset > 0.0);
+
+    final double friction = easing
+        // Apply less resistance when easing the overscroll vs tensioning.
+        ? frictionFactor(math.min((position.extentInside + offset.abs()) / position.viewportDimension, 1.0))
+        : frictionFactor(position.extentInside / position.viewportDimension);
+    final double direction = offset.sign;
+
+    return direction * _applyFriction(
+      math.max(overscrollPastStart, overscrollPastEnd),
+      offset.abs(),
+      friction,
+    );
   }
 
-  static double _applyFriction(double start, double lowLimit, double highLimit, double delta, double gamma) {
-    assert(lowLimit <= highLimit);
-    assert(delta > 0.0);
+  static double _applyFriction(double extentOutside, double absDelta, double gamma) {
+    assert(absDelta > 0);
     double total = 0.0;
-    if (start < lowLimit) {
-      final double distanceToLimit = lowLimit - start;
-      final double deltaToLimit = distanceToLimit / gamma;
-      if (delta < deltaToLimit)
-        return total + delta * gamma;
-      total += distanceToLimit;
-      delta -= deltaToLimit;
+    if (extentOutside > 0) {
+      final double deltaToLimit = extentOutside / gamma;
+      if (absDelta < deltaToLimit)
+        return absDelta * gamma;
+      total += extentOutside;
+      absDelta -= deltaToLimit;
     }
-    return total + delta;
+    return total + absDelta;
   }
 
   @override
