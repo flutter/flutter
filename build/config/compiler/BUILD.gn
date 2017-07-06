@@ -17,23 +17,13 @@ if (is_win) {
 }
 
 import("//build/toolchain/ccache.gni")
+import("//build/config/profiler.gni")
 import("//build/config/sanitizers/sanitizers.gni")
 
 declare_args() {
   # Normally, Android builds are lightly optimized, even for debug builds, to
   # keep binary size down. Setting this flag to true disables such optimization
   android_full_debug = false
-
-  # Compile in such a way as to enable profiling of the generated code. For
-  # example, don't omit the frame pointer and leave in symbols.
-  enable_profiling = false
-
-  # Compile in such a way as to make it possible for the profiler to unwind full
-  # stack frames. Setting this flag has a large effect on the performance of the
-  # generated code than just setting profiling, but gives the profiler more
-  # information to analyze.
-  # Requires profiling to be set to true.
-  enable_full_stack_frames_for_profiling = false
 }
 
 # default_include_dirs ---------------------------------------------------------
@@ -334,6 +324,7 @@ config("compiler") {
 
     cflags += [
       "-fno-omit-frame-pointer",
+      "-mno-omit-leaf-frame-pointer",
       "-g",
     ]
 
@@ -343,6 +334,10 @@ config("compiler") {
         "-fno-optimize-sibling-calls",
       ]
     }
+
+    # This flag is needed so that the call to dladdr() in Dart's native symbol
+    # resolver can report good symbol information for the CPU profiler.
+    ldflags += [ "-rdynamic" ]
   }
 
   # Linux/Android common flags setup.
@@ -887,7 +882,7 @@ if (is_win) {
   common_optimize_on_ldflags = []
 
   if (is_android) {
-    if (!using_sanitizer) {
+    if (!using_sanitizer && !enable_profiling) {
       common_optimize_on_cflags += [ "-fomit-frame-pointer" ]
     }
 
@@ -954,7 +949,7 @@ config("no_optimize") {
       "-fdata-sections",
       "-ffunction-sections",
     ]
-    if (!using_sanitizer) {
+    if (!using_sanitizer && !enable_profiling) {
       cflags += [ "-fomit-frame-pointer" ]
     }
     ldflags = common_optimize_on_ldflags

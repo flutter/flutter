@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/profiler.gni")
+
 # This config causes functions not to be automatically exported from shared
 # libraries. By default, all symbols are exported but this means there are
 # lots of exports that slow everything down. In general we explicitly mark
@@ -15,7 +17,9 @@
 config("symbol_visibility_hidden") {
   # Note that -fvisibility-inlines-hidden is set globally in the compiler
   # config since that can almost always be applied.
-  cflags = [ "-fvisibility=hidden" ]
+  if (!enable_profiling) {
+    cflags = [ "-fvisibility=hidden" ]
+  }
 }
 
 # Settings for executables and shared libraries.
