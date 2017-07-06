@@ -43,7 +43,7 @@ bool WaitForFirstDisplayDriver() {
     return false;
   }
 
-  status = ioctl_vfs_watch_dir_v2(fd.get(), &wd);
+  status = ioctl_vfs_watch_dir(fd.get(), &wd);
   if (status != MX_OK) {
     FTL_DLOG(ERROR) << "Failed to create directory watcher for "
                     << kDisplayDriverClass;
