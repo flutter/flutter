@@ -37,10 +37,16 @@ class CreateCommand extends FlutterCommand {
       help: 'Also add a flutter_driver dependency and generate a sample \'flutter drive\' test.'
     );
     argParser.addFlag(
-      'plugin',
+      'package',
       negatable: true,
       defaultsTo: false,
-      help: 'Generate a Flutter plugin project.'
+      help: 'Generate a Flutter package project.'
+    );
+    argParser.addFlag(
+        'plugin',
+        negatable: true,
+        defaultsTo: false,
+        help: 'Generate a Flutter plugin project.'
     );
     argParser.addOption(
       'description',
@@ -111,6 +117,9 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     final bool generatePlugin = argResults['plugin'];
+    final bool generatePackage = argResults['package'];
+    if (generatePlugin && generatePackage)
+      throwToolExit('Both --plugin and --package specified. Cannot generate both at the same time.');
 
     final Directory projectDir = fs.directory(argResults.rest.first);
     String dirPath = fs.path.normalize(projectDir.absolute.path);
@@ -142,6 +151,21 @@ class CreateCommand extends FlutterCommand {
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
     int generatedCount = 0;
+    if (generatePackage) {
+      final String description = argResults.wasParsed('description')
+          ? argResults['description']
+          : 'A new flutter package project.';
+      templateContext['description'] = description;
+      generatedCount += _renderTemplate('package', dirPath, templateContext);
+
+      if (argResults['pub'])
+        await pubGet(directory: dirPath);
+
+      printStatus('Wrote $generatedCount files.');
+      // TODO: Print next steps.
+      return;
+    }
+
     String appPath = dirPath;
     if (generatePlugin) {
       final String description = argResults.wasParsed('description')
