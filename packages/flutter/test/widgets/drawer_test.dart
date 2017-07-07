@@ -3,8 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
 
@@ -172,4 +176,60 @@ void main() {
     expect(buttonPressed, equals(true));
   });
 
+  testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+        new MaterialApp(
+            home: new Builder(
+                builder: (BuildContext context) {
+                  return new Scaffold(
+                      key: scaffoldKey,
+                      drawer: const Drawer(),
+                  );
+                }
+            )
+        )
+    );
+
+    // Open the drawer.
+    scaffoldKey.currentState.openDrawer();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap]));
+
+    semantics.dispose();
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+        new MaterialApp(
+            home: new Builder(
+                builder: (BuildContext context) {
+                  return new Scaffold(
+                      key: scaffoldKey,
+                      drawer: const Drawer(),
+                      body: new Container()
+                  );
+                }
+            )
+        )
+    );
+
+    // Open the drawer.
+    scaffoldKey.currentState.openDrawer();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(semantics, isNot(includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap])));
+
+    semantics.dispose();
+  });
 }

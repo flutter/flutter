@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'container.dart';
 import 'framework.dart';
@@ -28,7 +30,8 @@ class ModalBarrier extends StatelessWidget {
   Widget build(BuildContext context) {
     return new BlockSemantics(
       child: new ExcludeSemantics(
-        excluding: !dismissible,
+        // On Android, the back button is used to dismiss a modal.
+        excluding: !dismissible || defaultTargetPlatform == TargetPlatform.android,
         child: new Semantics(
           container: true,
           child: new GestureDetector(
