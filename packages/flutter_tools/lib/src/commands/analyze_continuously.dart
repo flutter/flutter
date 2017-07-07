@@ -39,7 +39,8 @@ class AnalyzeContinuously extends AnalyzeBase {
     if (argResults['dartdocs'])
       throwToolExit('The --dartdocs option is currently not supported when using --watch.');
 
-    if (argResults['flutter-repo']) {
+    final bool flutterRepo = argResults['flutter-repo'] || inRepo(null);
+    if (flutterRepo) {
       final PackageDependencyTracker dependencies = new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       directories = repoPackages.map((Directory dir) => dir.path).toList();
