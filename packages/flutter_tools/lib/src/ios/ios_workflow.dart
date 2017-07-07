@@ -42,12 +42,6 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasPythonSixModule => kPythonSix.isInstalled;
 
-  Future<bool> get hasCocoaPods => cocoaPods.hasCocoaPods;
-
-  String get cocoaPodsMinimumVersion => cocoaPods.cocoaPodsMinimumVersion;
-
-  Future<String> get cocoaPodsVersionText => cocoaPods.cocoaPodsVersionText;
-
   Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
 
   Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
