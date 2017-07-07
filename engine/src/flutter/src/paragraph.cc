@@ -169,6 +169,13 @@ void Paragraph::Layout(double width, bool force) {
   // Reset member variables so Layout still works when called more than once
   max_intrinsic_width_ = 0.0f;
   lines_ = 0;
+  line_widths_ = std::vector<double>();
+  line_heights_ = std::vector<double>();
+  line_heights_.push_back(0);
+  glyph_position_x_ = std::vector<std::vector<double>>();
+  glyph_position_x_.push_back(std::vector<double>());
+  std::vector<double> glyph_single_line_position_x;
+  glyph_single_line_position_x.push_back(0);
 
   SkScalar x = 0.0f;
   SkScalar y = 0.0f;
@@ -206,6 +213,32 @@ void Paragraph::Layout(double width, bool force) {
           break;
         }
         case TextAlign::justify: {
+          break;
+        }
+      }
+    }
+    // Correct positions stored in the member vars.
+    for (size_t y_index = 0; y_index < lines_; ++y_index) {
+      switch (paragraph_style_.text_align) {
+        case TextAlign::left:
+          break;
+        case TextAlign::right: {
+          for (size_t i = 0; i < glyph_position_x_[y_index].size(); ++i) {
+            glyph_position_x_[y_index][i] +=
+                width_ - breaker_.getWidths()[y_index];
+          }
+          break;
+        }
+        case TextAlign::center: {
+          for (size_t i = 0; i < glyph_position_x_[y_index].size(); ++i) {
+            glyph_position_x_[y_index][i] +=
+                (width_ - breaker_.getWidths()[y_index]) / 2;
+          }
+          break;
+        }
+        case TextAlign::justify: {
+          // TODO(garyq): Track position changes due to justify in justify
+          // method.
           break;
         }
       }
@@ -261,6 +294,7 @@ void Paragraph::Layout(double width, bool force) {
 
         letter_spacing_offset += run.style.letter_spacing;
 
+        // TODO(garyq): Implement RTL.
         // Each Glyph/Letter.
         bool whitespace_ended = true;
         for (size_t blob_index = 0; blob_index < blob_length - trailing_length;
@@ -283,6 +317,8 @@ void Paragraph::Layout(double width, bool force) {
 
           buffers.back()->pos[pos_index] =
               layout.getX(glyph_index) + letter_spacing_offset;
+          glyph_single_line_position_x.push_back(
+              buffers.back()->pos[pos_index]);
           buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
 
           letter_spacing_offset += run.style.letter_spacing;
@@ -337,6 +373,11 @@ void Paragraph::Layout(double width, bool force) {
 
       if (layout_end == next_break) {
         y += max_line_spacing + prev_max_descent;
+        line_heights_.push_back(
+            (line_heights_.empty() ? 0 : line_heights_.back()) +
+            max_line_spacing + max_descent);
+        glyph_single_line_position_x.push_back(FLT_MAX);
+        glyph_position_x_.push_back(glyph_single_line_position_x);
         prev_max_descent = max_descent;
         line_widths_.push_back(line_width);
         postprocess_line();
@@ -350,6 +391,8 @@ void Paragraph::Layout(double width, bool force) {
         character_index = layout_end;
         break_index += 1;
         lines_++;
+        glyph_single_line_position_x = std::vector<double>();
+        glyph_single_line_position_x.push_back(0);
       } else {
         x += layout.getAdvance();
       }
@@ -358,11 +401,14 @@ void Paragraph::Layout(double width, bool force) {
     }
   }
   y += max_line_spacing;
+  height_ = y + max_descent;
   postprocess_line();
   if (line_width != 0)
     line_widths_.push_back(line_width);
 
-  height_ = y + max_descent;
+  line_heights_.push_back(FLT_MAX);
+  glyph_single_line_position_x.push_back(FLT_MAX);
+  glyph_position_x_.push_back(glyph_single_line_position_x);
 }
 
 // Amends the buffers to incorporate justification.
@@ -563,6 +609,41 @@ void Paragraph::PaintWavyDecoration(SkCanvas* canvas,
     canvas->drawLine(x + coords.x_start, y + y_offset + coords.y_start,
                      x + coords.x_end, y + y_offset + coords.y_end, paint);
   }
+}
+
+std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
+                                                size_t end) const {
+  return std::vector<SkRect>();
+}
+
+size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
+  size_t offset = 0;
+  size_t y_index = 1;
+  size_t prev_count = 0;
+  for (y_index = 1; y_index < line_heights_.size(); ++y_index) {
+    if (dy < line_heights_[y_index]) {
+      offset += prev_count;
+      break;
+    } else {
+      offset += prev_count;
+      prev_count = glyph_position_x_[y_index].size() - 2;
+    }
+  }
+  prev_count = 0;
+  for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size();
+       ++x_index) {
+    if (dx < glyph_position_x_[y_index][x_index]) {
+      break;
+    } else {
+      offset += prev_count;
+      prev_count = 1;
+    }
+  }
+  return offset;
+}
+
+SkIPoint Paragraph::GetWordBoundary(size_t offset) const {
+  return SkIPoint::Make(0, 0);
 }
 
 int Paragraph::GetLineCount() const {
