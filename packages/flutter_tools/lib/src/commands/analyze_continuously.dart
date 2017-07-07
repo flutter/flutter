@@ -96,6 +96,20 @@ class AnalyzeContinuously extends AnalyzeBase {
         }
       }
 
+      // Summarize dartdoc issues rather than displaying each individually
+      int membersMissingDocumentation = 0;
+      if (flutterRepo && !showDartDocIssuesIndividually) {
+        errors.removeWhere((AnalysisError error) {
+          if (error.code == 'public_member_api_docs') {
+            // https://github.com/dart-lang/linter/issues/208
+            if (isFlutterLibrary(error.file))
+              ++membersMissingDocumentation;
+            return true;
+          }
+          return false;
+        });
+      }
+
       errors.sort();
 
       for (AnalysisError error in errors) {
@@ -105,6 +119,12 @@ class AnalyzeContinuously extends AnalyzeBase {
       }
 
       dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
+
+      if (membersMissingDocumentation != 0) {
+        printStatus(membersMissingDocumentation == 1
+          ? '1 public member lacks documentation'
+          : '$membersMissingDocumentation public members lack documentation');
+      }
 
       // Print an analysis summary.
       String errorsMessage;
