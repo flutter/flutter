@@ -37,7 +37,7 @@ bool WaitForFirstDisplayDriver() {
   wd.options = 0;
 
   mx::channel watcher;
-  mx_status_t status = mx_channel_create(0, &wd.channel, watcher.get_address());
+  mx_status_t status = mx_channel_create(0, &wd.channel, watcher.reset_and_get_address());
   if (status != MX_OK) {
     FTL_DLOG(ERROR) << "Failed to create channel";
     return false;
