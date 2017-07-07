@@ -186,7 +186,7 @@ template("flutter_app") {
       "--depfile",
       rebase_path(bundle_depfile),
       "--interpreter",
-      "file:///system/apps/flutter_runner",
+      "flutter_runner",
     ]
     if (defined(invoker.manifest)) {
       args += [
@@ -359,7 +359,7 @@ template("flutter_aot_app") {
       "--depfile",
       rebase_path(bundle_depfile),
       "--interpreter",
-      "file:///system/apps/flutter_aot_runner",
+      "flutter_aot_runner",
     ]
     if (defined(invoker.manifest)) {
       args += [
