@@ -15,6 +15,7 @@ import '../base/logger.dart';
 import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
 import '../device.dart';
@@ -450,10 +451,10 @@ class AndroidDevice extends Device {
       printError('Error waiting for a debug connection: $error');
       return new LaunchResult.failed();
     } finally {
-      await Future.wait(<Future<Null>>[
+      await waitGroup(<Future<Null>>[
         observatoryDiscovery.cancel(),
         diagnosticDiscovery.cancel(),
-      ].where((Future<Null> future) => future != null));
+      ]);
     }
   }
 
@@ -524,10 +525,10 @@ class AndroidDevice extends Device {
       'shell', 'am', 'broadcast', '-a', 'io.flutter.view.DISCOVER'
     ]));
 
-    await Future.wait(<Future<Null>>[
+    await waitGroup(<Future<Null>>[
       new Future<Null>.delayed(const Duration(seconds: 1)),
       logs.cancel(),
-    ].where((Future<Null> future) => future != null));
+    ]);
     return result;
   }
 }
