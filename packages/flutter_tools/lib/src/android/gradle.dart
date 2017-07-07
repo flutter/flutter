@@ -132,7 +132,7 @@ Future<String> _ensureGradle() async {
 // Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle() async {
-  final Status status = logger.startProgress('Initializing Gradle...', expectSlowOperation: true);
+  final Status status = logger.startProgress('Initializing gradle...', expectSlowOperation: true);
   String gradle = _locateProjectGradlew();
   if (gradle == null) {
     _injectGradleWrapper();
