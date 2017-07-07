@@ -391,22 +391,6 @@ class FuchsiaDeviceCommandRunner {
     if (result.exitCode != 0) {
       printStatus("Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}");
       return null;
-<<<<<<< HEAD
-=======
-    // Copy that file to the local filesystem.
-    result = await Process.run(netcp, <String>[':$remoteStdout', localStdout]);
-    // Try to delete the remote file. Don't care about the result.
-    Process.run(netruncmd, <String>[':', 'rm $remoteStdout']); // ignore: unawaited_futures
-    if (result.exitCode != 0)
-      return null;
-    // Read the local file.
-    final File f = fs.file(localStdout);
-    List<String> lines;
-    try {
-      lines = await f.readAsLines();
-    } finally {
-      await f.delete();
->>>>>>> round 3
     }
     printTrace(result.stdout);
     return result.stdout.split('\n');
