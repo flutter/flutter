@@ -31,15 +31,19 @@ class AnalyzeContinuously extends AnalyzeBase {
   Stopwatch analysisTimer;
   int lastErrorCount = 0;
   Status analysisStatus;
+  bool flutterRepo;
+  bool showDartDocIssuesIndividually;
 
   @override
   Future<Null> analyze() async {
     List<String> directories;
 
-    if (argResults['dartdocs'])
-      throwToolExit('The --dartdocs option is currently not supported when using --watch.');
+    flutterRepo = argResults['flutter-repo'] || inRepo(null);
+    showDartDocIssuesIndividually = argResults['dartdocs'];
 
-    final bool flutterRepo = argResults['flutter-repo'] || inRepo(null);
+    if (showDartDocIssuesIndividually && !flutterRepo)
+      throwToolExit('The --dartdocs option is only supported when using --watch --flutter-repo.');
+
     if (flutterRepo) {
       final PackageDependencyTracker dependencies = new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
@@ -53,7 +57,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fs.currentDirectory.path;
     }
 
-    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
+    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories, flutterRepo: flutterRepo);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
@@ -151,10 +155,11 @@ class AnalyzeContinuously extends AnalyzeBase {
 }
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories);
+  AnalysisServer(this.sdk, this.directories, {this.flutterRepo});
 
   final String sdk;
   final List<String> directories;
+  final bool flutterRepo;
 
   Process _process;
   final StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
@@ -170,6 +175,11 @@ class AnalysisServer {
       '--sdk',
       sdk,
     ];
+    // Let the analysis server know that the flutter repository is being analyzed
+    // so that it can turn on the public_member_api_docs lint even though
+    // the analysis_options file does not have that lint turned on.
+    if (flutterRepo)
+      command.add('--flutter-repo');
 
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
