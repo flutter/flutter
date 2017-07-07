@@ -17,13 +17,12 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
+import 'cocoapods.dart';
 import 'code_signing.dart';
-import 'ios_workflow.dart';
 import 'xcodeproj.dart';
 
 const int kXcodeRequiredVersionMajor = 8;
@@ -215,9 +214,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   await _addServicesToBundle(appDirectory);
   final bool hasFlutterPlugins = injectPlugins();
 
-  if (hasFlutterPlugins && await _checkPodCondition()) {
-    await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
-  }
+  if (hasFlutterPlugins)
+    await cocoaPods.processPods(appDirectory, flutterFrameworkDir(mode));
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -396,81 +394,6 @@ bool _checkXcodeVersion() {
     return false;
   }
   return true;
-}
-
-final String noCocoaPodsConsequence = '''
-  CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
-  Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
-  For more info, see https://flutter.io/platform-plugins''';
-
-final String cocoaPodsInstallInstructions = '''
-  brew update
-  brew install cocoapods
-  pod setup''';
-
-final String cocoaPodsUpgradeInstructions = '''
-  brew update
-  brew upgrade cocoapods
-  pod setup''';
-
-Future<bool> _checkPodCondition() async {
-  if (!await iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
-    final String minimumVersion = iosWorkflow.cocoaPodsMinimumVersion;
-    printError(
-      'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
-      '$noCocoaPodsConsequence\n'
-      'To install:\n'
-      '$cocoaPodsInstallInstructions\n',
-      emphasis: true,
-    );
-    return false;
-  }
-  if (!await iosWorkflow.isCocoaPodsInitialized) {
-    printError(
-      'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
-      '$noCocoaPodsConsequence\n'
-      'To initialize CocoaPods, run:\n'
-      '  pod setup\n'
-      'once to finalize CocoaPods\' installation.',
-      emphasis: true,
-    );
-    return false;
-  }
-
-  return true;
-}
-
-Future<Null> _createPodfile(Directory bundle) async {
-  final File podfileTemplate = fs.file(fs.path.join(
-    Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile'
-  ));
-  podfileTemplate.copySync(fs.path.join(bundle.path, 'Podfile'));
-}
-
-Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
-  if (!fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    await _createPodfile(bundle);
-  }
-
-  final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
-  final ProcessResult result = await processManager.run(
-    <String>['pod', 'install', '--verbose'],
-    workingDirectory: bundle.path,
-    environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-  );
-  status.stop();
-  if (logger.isVerbose || result.exitCode != 0) {
-    if (result.stdout.isNotEmpty) {
-      printStatus('CocoaPods\' output:\n↳');
-      printStatus(result.stdout, indent: 4);
-    }
-    if (result.stderr.isNotEmpty) {
-      printStatus('Error output from CocoaPods:\n↳');
-      printStatus(result.stderr, indent: 4);
-    }
-  }
-  if (result.exitCode != 0)
-    throwToolExit('Error running pod install');
 }
 
 Future<Null> _addServicesToBundle(Directory bundle) async {
