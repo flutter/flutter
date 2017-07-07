@@ -62,6 +62,8 @@ class CocoaPods {
       } // TODO(xster): Add more logic for handling merge conflicts.
 
       await _runPodInstall(appIosDir, iosEngineDir);
+    } else {
+      throwToolExit('CocoaPods not available for project using Flutter plugins');
     }
   }
 

@@ -31,7 +31,7 @@ void main() {
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Podfile template');
-    cocoaPodsUnderTest = new TestCocoaPods();
+    cocoaPodsUnderTest = const TestCocoaPods();
 
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
@@ -76,16 +76,41 @@ void main() {
       ProcessManager: () => mockProcessManager,
     },
   );
+
+  testUsingContext(
+    'missing CocoaPods throws',
+    () async {
+      cocoaPodsUnderTest = const TestCocoaPods(false);
+      try {
+        await cocoaPodsUnderTest.processPods(projectUnderTest, 'engine/path');
+        fail('Expected tool error');
+      } catch (ToolExit) {
+        verifyNever(mockProcessManager.run(
+          <String>['pod', 'install', '--verbose'],
+          workingDirectory: 'project/ios',
+          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path'},
+        ));
+      }
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    },
+  );
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class TestCocoaPods extends CocoaPods {
-  @override
-  Future<bool> get hasCocoaPods => new Future<bool>.value(true);
+  const TestCocoaPods([this._hasCocoaPods = true]);
+
+  final bool _hasCocoaPods;
 
   @override
-  Future<bool> get isCocoaPodsInstalledAndMeetsVersionCheck => new Future<bool>.value(true);
+  Future<bool> get hasCocoaPods => new Future<bool>.value(_hasCocoaPods);
+
+  @override
+  Future<String> get cocoaPodsVersionText async => new Future<String>.value('1.5.0');
 
   @override
   Future<bool> get isCocoaPodsInitialized => new Future<bool>.value(true);
