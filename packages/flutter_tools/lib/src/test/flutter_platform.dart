@@ -274,9 +274,8 @@ class _FlutterPlatform extends PlatformPlugin {
           subprocessActive = false;
           final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before connecting to test harness'), testPath, shellPath);
           controller.sink.addError(message);
-          // Waiting below.
-          // ignore: unawaited_futures
-          controller.sink.close();
+          // Awaited for with 'sink.done' below.
+          controller.sink.close(); // ignore: unawaited_futures
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           break;
@@ -284,9 +283,8 @@ class _FlutterPlatform extends PlatformPlugin {
           printTrace('test $ourTestCount: timed out waiting for process with pid ${process.pid} to connect to test harness');
           final String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
           controller.sink.addError(message);
-          // Waiting below.
-          // ignore: unawaited_futures
-          controller.sink.close();
+          // Awaited for with 'sink.done' below.
+          controller.sink.close(); // ignore: unawaited_futures
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           break;
@@ -350,9 +348,8 @@ class _FlutterPlatform extends PlatformPlugin {
               subprocessActive = false;
               final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before test harness closed its WebSocket'), testPath, shellPath);
               controller.sink.addError(message);
-              // Waiting below.
-              // ignore: unawaited_futures
-              controller.sink.close();
+              // Awaited for with 'sink.done' below.
+              controller.sink.close(); // ignore: unawaited_futures
               printTrace('test $ourTestCount: waiting for controller sink to close');
               await controller.sink.done;
               break;

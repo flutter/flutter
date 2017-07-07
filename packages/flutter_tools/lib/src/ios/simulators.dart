@@ -524,9 +524,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _systemProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
     _systemProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
 
-    // Callback hookups' Futures are uninteresting.
-    // ignore: unawaited_futures
-    _deviceProcess.exitCode.whenComplete(() {
+    // We don't want to wait for the process or its callback. Best effort
+    // cleanup in the callback.
+    _deviceProcess.exitCode.whenComplete(() { // ignore: unawaited_futures
       if (_linesController.hasListener)
         _linesController.close();
     });

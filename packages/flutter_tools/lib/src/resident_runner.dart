@@ -101,8 +101,7 @@ class FlutterDevice {
     for (FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
         // Manage waits specifically below.
-        // ignore: unawaited_futures
-        view.uiIsolate.flutterExit();
+        view.uiIsolate.flutterExit(); // ignore: unawaited_futures
       }
     }
     await new Future<Null>.delayed(const Duration(milliseconds: 100));
@@ -595,9 +594,10 @@ abstract class ResidentRunner {
     // Listen for service protocol connection to close.
     for (FlutterDevice device in flutterDevices) {
       for (VMService service in device.vmServices) {
-        // Callback hookups' Futures are uninteresting.
-        // ignore: unawaited_futures
-        service.done.then<Null>(
+        // This hooks up callbacks for when the connection stops in the future.
+        // We don't want to wait for them or handle errors in those callbacks'
+        // futures.
+        service.done.then<Null>( // ignore: unawaited_futures
           _serviceProtocolDone,
           onError: _serviceProtocolError
         ).whenComplete(_serviceDisconnected);
