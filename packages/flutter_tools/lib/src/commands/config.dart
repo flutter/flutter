@@ -27,7 +27,6 @@ class ConfigCommand extends FlutterCommand {
   }
 
   @override
-  @override
   final String name = 'config';
 
   @override
@@ -58,9 +57,8 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    if (argResults['machine']) {
+    if (argResults['machine'])
       return handleMachine();
-    }
 
     if (argResults.wasParsed('analytics')) {
       final bool value = argResults['analytics'];
