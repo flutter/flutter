@@ -27,6 +27,8 @@
 #include "lib/txt/src/styled_runs.h"
 #include "minikin/LineBreaker.h"
 #include "third_party/gtest/include/gtest/gtest_prod.h"
+#include "third_party/skia/include/core/SkPoint.h"
+#include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 class SkCanvas;
@@ -55,6 +57,12 @@ class Paragraph {
 
   double GetMinIntrinsicWidth() const;
 
+  std::vector<SkRect> GetRectsForRange(size_t start, size_t end) const;
+
+  size_t GetGlyphPositionAtCoordinate(double dx, double dy) const;
+
+  SkIPoint GetWordBoundary(size_t offset) const;
+
   int GetLineCount() const;
 
   bool DidExceedMaxLines() const;
@@ -80,9 +88,13 @@ class Paragraph {
   minikin::LineBreaker breaker_;
   std::vector<PaintRecord> records_;
   std::vector<double> line_widths_;
+
+  // TODO(garyq): Can we access this info without redundantly storing it here?
+  std::vector<double> line_heights_;
+  std::vector<std::vector<double>> glyph_position_x_;
+
   ParagraphStyle paragraph_style_;
   FontCollection* font_collection_;
-  // TODO(garyq): Height of the paragraph after Layout().
   SkScalar height_ = 0.0f;
   double width_ = 0.0f;
   size_t lines_ = 0;
