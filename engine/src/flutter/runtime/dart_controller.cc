@@ -72,23 +72,16 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
 
   // In order to support pausing the isolate at start, we indirectly invoke
   // main by sending a message to the isolate.
-  // Grab the 'dart:ui' library.
-  Dart_Handle ui_library = Dart_LookupLibrary(ToDart("dart:ui"));
-  DART_CHECK_VALID(ui_library);
+
+  // Get the closure of main().
+  Dart_Handle main_closure =
+      Dart_GetClosure(root_library, Dart_NewStringFromCString("main"));
+  if (LogIfError(main_closure))
+    return true;
 
   // Grab the 'dart:isolate' library.
   Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
   DART_CHECK_VALID(isolate_lib);
-
-  // Import the root library into the 'dart:ui' library so that we can
-  // reach main.
-  Dart_LibraryImportLibrary(ui_library, root_library, Dart_Null());
-
-  // Get the closure of main().
-  Dart_Handle main_closure =
-      Dart_Invoke(ui_library, ToDart("_getMainClosure"), 0, NULL);
-  if (LogIfError(main_closure))
-    return true;
 
   // Send the start message containing the entry point by calling
   // _startMainIsolate in dart:isolate.
