@@ -312,6 +312,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
+        isKernelMode: argResults['is-kernel-mode'],
         stayResident: stayResident,
       );
     }

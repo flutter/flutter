@@ -300,6 +300,7 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
+      isKernelMode: coldRunner.isKernelMode,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: coldRunner.usesTerminalUI,
     );

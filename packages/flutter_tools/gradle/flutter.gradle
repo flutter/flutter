@@ -278,6 +278,9 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--target", targetPath
                 args "--target-platform", "android-arm"
                 args "--output-dir", "${intermediateDir}"
+                if (isKernelMode) {
+                    args "--is-kernel-mode"
+                }
                 args "--${buildMode}"
             }
         }

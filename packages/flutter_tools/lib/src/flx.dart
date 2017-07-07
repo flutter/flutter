@@ -136,7 +136,7 @@ Future<Null> build({
   }
 
   DevFSContent kernelContent;
-  if (isKernelMode) {
+  if (!precompiledSnapshot && isKernelMode) {
     final String platformKernelDill = artifacts.getArtifactPath(
         Artifact.platformKernelDill);
     final Uri kernelPath = await compile([

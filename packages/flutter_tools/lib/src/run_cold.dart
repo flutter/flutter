@@ -20,6 +20,7 @@ class ColdRunner extends ResidentRunner {
     bool usesTerminalUI: true,
     this.traceStartup: false,
     this.applicationBinary,
+    this.isKernelMode: false,
     bool stayResident: true,
   }) : super(devices,
              target: target,
@@ -29,6 +30,7 @@ class ColdRunner extends ResidentRunner {
 
   final bool traceStartup;
   final String applicationBinary;
+  bool isKernelMode = false;
 
   @override
   Future<int> run({
