@@ -196,8 +196,10 @@ class AnalysisServer {
       sdk,
     ];
     // Let the analysis server know that the flutter repository is being analyzed
-    // so that it can turn on the public_member_api_docs lint even though
-    // the analysis_options file does not have that lint turned on.
+    // so that it can enable the public_member_api_docs lint even though
+    // the analysis_options file does not have that lint enabled.
+    // It is not enabled in the analysis_option file
+    // because doing so causes too much noise in the IDE.
     if (flutterRepo)
       command.add('--flutter-repo');
 
