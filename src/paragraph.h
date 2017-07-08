@@ -61,6 +61,8 @@ class Paragraph {
 
   size_t GetGlyphPositionAtCoordinate(double dx, double dy) const;
 
+  SkRect GetCoordinatesForGlyphPosition(size_t pos) const;
+
   SkIPoint GetWordBoundary(size_t offset) const;
 
   int GetLineCount() const;
