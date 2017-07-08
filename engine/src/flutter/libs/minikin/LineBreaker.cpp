@@ -113,7 +113,7 @@ static bool isLineEndSpace(uint16_t c) {
 // This method finds the candidate word breaks (using the ICU break iterator) and sends them
 // to addCandidate.
 float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCollection>& typeface,
-        FontStyle style, size_t start, size_t end, bool isRtl) {
+        FontStyle style, size_t start, size_t end, bool isRtl, double letterSpacing) {
     float width = 0.0f;
     int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;
 
@@ -138,6 +138,10 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
         }
     }
 
+    for (size_t i = start; i < end; ++i) {
+        mCharSpacing.push_back(letterSpacing);
+    }
+
     size_t current = (size_t)mWordBreaker.current();
     size_t afterWord = start;
     size_t lastBreak = start;
@@ -155,7 +159,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
             mStrategy = kBreakStrategy_Greedy;
         } else {
             if (isWordSpace(c)) mSpaceCount += 1;
-            mWidth += mCharWidths[i];
+            mWidth += mCharWidths[i] + mCharSpacing[i];
             if (!isLineEndSpace(c)) {
                 postBreak = mWidth;
                 postSpaceCount = mSpaceCount;
@@ -341,7 +345,7 @@ void LineBreaker::pushBreak(int offset, float width, uint8_t hyphenEdit) {
 void LineBreaker::addReplacement(size_t start, size_t end, float width) {
     mCharWidths[start] = width;
     std::fill(&mCharWidths[start + 1], &mCharWidths[end], 0.0f);
-    addStyleRun(nullptr, nullptr, FontStyle(), start, end, false);
+    addStyleRun(nullptr, nullptr, FontStyle(), start, end, false, 0);
 }
 
 // Get the width of a space. May return 0 if there are no spaces.

@@ -166,7 +166,7 @@ class LineBreaker {
         // is having some kind of callback (or virtual class, or maybe even template), which could
         // easily be instantiated with Minikin's Layout. Future work for when needed.
         float addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCollection>& typeface,
-                FontStyle style, size_t start, size_t end, bool isRtl);
+                FontStyle style, size_t start, size_t end, bool isRtl, double letterSpacing = 0);
 
         void addReplacement(size_t start, size_t end, float width);
 
@@ -230,6 +230,7 @@ class LineBreaker {
         icu::Locale mLocale;
         std::vector<uint16_t>mTextBuf;
         std::vector<float>mCharWidths;
+        std::vector<float>mCharSpacing;
 
         Hyphenator* mHyphenator;
         std::vector<HyphenationType> mHyphBuf;

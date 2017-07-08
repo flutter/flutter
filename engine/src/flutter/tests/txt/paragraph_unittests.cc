@@ -303,6 +303,9 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
+
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
@@ -343,11 +346,9 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   // Tests for GetGlyphPositionAtCoordinate()
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 1), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 30), 74ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 60), 142ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 30), 141ull);
-
-  ASSERT_TRUE(Snapshot());
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 30), 68ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 60), 134ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 30), 133ull);
 }
 
 TEST_F(RenderTest, RightAlignParagraph) {
@@ -856,7 +857,7 @@ TEST_F(RenderTest, DISABLED_ArabicParagraph) {
 TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   const char* text =
       "12345 67890 12345 67890 12345 67890 12345 67890 12345 67890 12345 "
-      "67890";
+      "67890 12345";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
@@ -880,27 +881,32 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth() - 500);
+  paragraph->Layout(550);
 
   paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
 
   // Tests for GetGlyphPositionAtCoordinate()
   // NOTE: resulting values can be a few off from their respective positions in
   // the original text because the final trailing whitespaces are sometimes not
   // drawn and therefore are not active glyphs.
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-10000, -10000), 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-1, -1), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(3, 3), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 1), 1ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20), 16ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 80), 33ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 80), 17ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 160), 34ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 160), 50ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(70, 160), 36ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 270), 51ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 80), 18ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 10000), 68ull);
-  ASSERT_TRUE(Snapshot());
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20), 17ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 80), 35ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-100000, 80), 18ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(20, -80), 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 80), 18ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 160), 36ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 160), 53ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(70, 160), 38ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 270), 54ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 80), 19ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 10000), 77ull);
 }
 
 }  // namespace txt

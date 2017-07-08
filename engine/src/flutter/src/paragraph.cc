@@ -135,7 +135,8 @@ void Paragraph::AddRunsToLineBreaker(
     breaker_.addStyleRun(&paint,
                          font_collection_->GetMinikinFontCollectionForFamily(
                              run.style.font_family),
-                         font, run.start, run.end, false);
+                         font, run.start, run.end, false,
+                         run.style.letter_spacing);
   }
 }
 
@@ -171,6 +172,8 @@ void Paragraph::Layout(double width, bool force) {
   lines_ = 0;
   line_widths_ = std::vector<double>();
   line_heights_ = std::vector<double>();
+
+  // Set padding elements to have a minimum point.
   line_heights_.push_back(0);
   glyph_position_x_ = std::vector<std::vector<double>>();
   glyph_position_x_.push_back(std::vector<double>());
@@ -283,6 +286,7 @@ void Paragraph::Layout(double width, bool force) {
         // Check if we should remove trailing whitespace of blobs.
         size_t trailing_length = 0;
         while (
+            paragraph_style_.text_align == TextAlign::justify &&
             minikin::isWordSpace(
                 text_[character_index + blob_length - trailing_length - 1]) &&
             layout_end == next_break) {
@@ -613,7 +617,43 @@ void Paragraph::PaintWavyDecoration(SkCanvas* canvas,
 
 std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
                                                 size_t end) const {
-  return std::vector<SkRect>();
+  std::vector<SkRect> rects;
+  end = fmin(end, text_.size() - 1);
+  while (start <= end) {
+    SkIPoint word_bounds = GetWordBoundary(start);
+    word_bounds.fY = fmin(end + 1, word_bounds.fY);
+    word_bounds.fX = fmax(start, word_bounds.fX);
+    start = word_bounds.fY;
+    SkRect left_limits = GetCoordinatesForGlyphPosition(word_bounds.fX + 1);
+    SkRect right_limits = GetCoordinatesForGlyphPosition(word_bounds.fY);
+    if (left_limits.top() < right_limits.top()) {
+      rects.push_back(SkRect::MakeLTRB(
+          0, right_limits.top(), right_limits.right(), right_limits.bottom()));
+    } else {
+      rects.push_back(SkRect::MakeLTRB(left_limits.left(), left_limits.top(),
+                                       right_limits.right(),
+                                       right_limits.bottom()));
+    }
+  }
+  return rects;
+}
+
+SkRect Paragraph::GetCoordinatesForGlyphPosition(size_t pos) const {
+  size_t remainder = fmin(pos, text_.size());
+  size_t line = 1;
+  for (line = 1; line < line_heights_.size() - 1; ++line) {
+    if (remainder > glyph_position_x_[line].size() - 2) {
+      remainder -= glyph_position_x_[line].size() - 2;
+    } else {
+      break;
+    }
+  }
+  return SkRect::MakeLTRB(glyph_position_x_[line][remainder],
+                          line_heights_[line - 1],
+                          remainder < glyph_position_x_[line].size() - 2
+                              ? glyph_position_x_[line][remainder + 1]
+                              : line_widths_[line - 1],
+                          line_heights_[line]);
 }
 
 size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
@@ -643,7 +683,8 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
 }
 
 SkIPoint Paragraph::GetWordBoundary(size_t offset) const {
-  return SkIPoint::Make(0, 0);
+  // TODO(garyq): Implement.
+  return SkIPoint::Make(0, offset + 1);
 }
 
 int Paragraph::GetLineCount() const {
