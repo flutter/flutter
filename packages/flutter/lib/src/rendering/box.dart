@@ -1833,7 +1833,7 @@ abstract class RenderBox extends RenderObject {
   /// position of the given child as determined during layout and stored on the
   /// child's [parentData] in the [BoxParentData.offset] field.
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+  void applyPaintTransform(covariant RenderObject child, Matrix4 transform) {
     assert(child != null);
     assert(child.parent == this);
     assert(() {
