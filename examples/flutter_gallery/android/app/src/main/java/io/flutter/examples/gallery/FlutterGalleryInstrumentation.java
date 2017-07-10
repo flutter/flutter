@@ -13,8 +13,8 @@ import io.flutter.view.FlutterView;
 /** Instrumentation for testing using Android Espresso framework. */
 public class FlutterGalleryInstrumentation implements MethodCallHandler {
 
-  private boolean testFinished;
-  private boolean testSuccessful;
+  private volatile boolean testFinished;
+  private volatile boolean testSuccessful;
 
   FlutterGalleryInstrumentation(FlutterView view) {
     new MethodChannel(view, "io.flutter.examples.gallery/TestLifecycleListener")
@@ -33,7 +33,7 @@ public class FlutterGalleryInstrumentation implements MethodCallHandler {
   }
 
   public void waitForTestToFinish() throws Exception {
-    while(!testFinished) {
+    while (!testFinished) {
       Thread.sleep(200);
     }
   }
