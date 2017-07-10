@@ -58,83 +58,97 @@ class _ListDemoState extends State<ListDemo> {
           shrinkWrap: true,
           primary: false,
           children: <Widget>[
-            new ListTile(
-              dense: true,
-              title: const Text('One-line'),
-              trailing: new Radio<_MaterialListType>(
-                value: _showAvatars ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
-                groupValue: _itemType,
-                onChanged: changeItemType,
-              )
-            ),
-            new ListTile(
-              dense: true,
-              title: const Text('Two-line'),
-              trailing: new Radio<_MaterialListType>(
-                value: _MaterialListType.twoLine,
-                groupValue: _itemType,
-                onChanged: changeItemType,
-              )
-            ),
-            new ListTile(
-              dense: true,
-              title: const Text('Three-line'),
-              trailing: new Radio<_MaterialListType>(
-                value: _MaterialListType.threeLine,
-                groupValue: _itemType,
-                onChanged: changeItemType,
+            new MergeSemantics(
+              child: new ListTile(
+                dense: true,
+                title: const Text('One-line'),
+                trailing: new Radio<_MaterialListType>(
+                  value: _showAvatars ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
+                  groupValue: _itemType,
+                  onChanged: changeItemType,
+                )
               ),
             ),
-            new ListTile(
-              dense: true,
-              title: const Text('Show avatar'),
-              trailing: new Checkbox(
-                value: _showAvatars,
-                onChanged: (bool value) {
-                  setState(() {
-                    _showAvatars = value;
-                  });
-                  _bottomSheet?.setState(() { });
-                },
+            new MergeSemantics(
+              child: new ListTile(
+                dense: true,
+                title: const Text('Two-line'),
+                trailing: new Radio<_MaterialListType>(
+                  value: _MaterialListType.twoLine,
+                  groupValue: _itemType,
+                  onChanged: changeItemType,
+                )
               ),
             ),
-            new ListTile(
-              dense: true,
-              title: const Text('Show icon'),
-              trailing: new Checkbox(
-                value: _showIcons,
-                onChanged: (bool value) {
-                  setState(() {
-                    _showIcons = value;
-                  });
-                  _bottomSheet?.setState(() { });
-                },
+            new MergeSemantics(
+              child: new ListTile(
+                dense: true,
+                title: const Text('Three-line'),
+                trailing: new Radio<_MaterialListType>(
+                  value: _MaterialListType.threeLine,
+                  groupValue: _itemType,
+                  onChanged: changeItemType,
+                ),
               ),
             ),
-            new ListTile(
-              dense: true,
-              title: const Text('Show dividers'),
-              trailing: new Checkbox(
-                value: _showDividers,
-                onChanged: (bool value) {
-                  setState(() {
-                    _showDividers = value;
-                  });
-                  _bottomSheet?.setState(() { });
-                },
+            new MergeSemantics(
+              child: new ListTile(
+                dense: true,
+                title: const Text('Show avatar'),
+                trailing: new Checkbox(
+                  value: _showAvatars,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _showAvatars = value;
+                    });
+                    _bottomSheet?.setState(() { });
+                  },
+                ),
               ),
             ),
-            new ListTile(
-              dense: true,
-              title: const Text('Dense layout'),
-              trailing: new Checkbox(
-                value: _dense,
-                onChanged: (bool value) {
-                  setState(() {
-                    _dense = value;
-                  });
-                  _bottomSheet?.setState(() { });
-                },
+            new MergeSemantics(
+              child: new ListTile(
+                dense: true,
+                title: const Text('Show icon'),
+                trailing: new Checkbox(
+                  value: _showIcons,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _showIcons = value;
+                    });
+                    _bottomSheet?.setState(() { });
+                  },
+                ),
+              ),
+            ),
+            new MergeSemantics(
+              child: new ListTile(
+                dense: true,
+                title: const Text('Show dividers'),
+                trailing: new Checkbox(
+                  value: _showDividers,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _showDividers = value;
+                    });
+                    _bottomSheet?.setState(() { });
+                  },
+                ),
+              ),
+            ),
+            new MergeSemantics(
+              child: new ListTile(
+                dense: true,
+                title: const Text('Dense layout'),
+                trailing: new Checkbox(
+                  value: _dense,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _dense = value;
+                    });
+                    _bottomSheet?.setState(() { });
+                  },
+                ),
               ),
             ),
           ],
