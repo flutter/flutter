@@ -244,7 +244,7 @@ class AndroidDevice extends Device {
     // This call takes 400ms - 600ms.
     try {
       final RunResult listOut = await runCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
-      return LineSplitter.split(listOut.stdout).contains("package:${app.id}");
+      return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
     } catch (error) {
       printTrace('$error');
       return false;
