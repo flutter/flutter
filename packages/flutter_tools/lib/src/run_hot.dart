@@ -313,7 +313,7 @@ class HotRunner extends ResidentRunner {
     restartTimer.start();
     final bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
-      return new OperationResult(1, 'DevFS Synchronization Failed');
+      return new OperationResult(1, 'DevFS synchronization failed');
     // Check if the isolate is paused and resume it.
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
@@ -394,7 +394,7 @@ class HotRunner extends ResidentRunner {
         timer.stop();
         status.cancel();
         if (result.isOk)
-          printStatus("Reloaded ${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.");
+          printStatus("${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.");
         return result;
       } catch (error) {
         status.cancel();
@@ -436,7 +436,7 @@ class HotRunner extends ResidentRunner {
     }
     final bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
-      return new OperationResult(1, 'DevFS Synchronization Failed');
+      return new OperationResult(1, 'DevFS synchronization failed');
     if (benchmarkMode) {
       devFSTimer.stop();
       // Record time it took to synchronize to DevFS.
@@ -444,7 +444,7 @@ class HotRunner extends ResidentRunner {
             devFSTimer.elapsed.inMilliseconds;
     }
     if (!updatedDevFS)
-      return new OperationResult(1, 'Dart Source Error');
+      return new OperationResult(1, 'Dart source error');
     String reloadMessage;
     try {
       final String entryPath = fs.path.relative(mainPath, from: projectRootPath);
@@ -464,13 +464,13 @@ class HotRunner extends ResidentRunner {
       if (!validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
-        return new OperationResult(1, 'reload rejected');
+        return new OperationResult(1, 'Reload rejected');
       } else {
         flutterUsage.sendEvent('hot', 'reload');
         final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
         final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
         printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
-        reloadMessage = '$loadedLibraryCount of $finalLibraryCount libraries';
+        reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
       }
     } catch (error, st) {
       printError("Hot reload failed: $error\n$st");
