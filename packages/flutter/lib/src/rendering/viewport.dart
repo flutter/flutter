@@ -52,6 +52,9 @@ abstract class RenderAbstractViewport extends RenderObject {
   /// descendant of the viewport and there must not be any other
   /// [RenderAbstractViewport] objects between the target and this object.
   double getOffsetToReveal(RenderObject target, double alignment);
+
+  /// Adjust the visible part of the viewport to show [child] on screen.
+  void showOnScreen(RenderObject child);
 }
 
 /// A base class for render objects that are bigger on the inside.
@@ -355,6 +358,19 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       }
     }
     return false;
+  }
+
+  @override
+  void showOnScreen(RenderObject child) {
+    final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
+    final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
+    final double currentOffset = offset.pixels;
+    // Scroll the smallest distance to bring element on screen.
+    if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
+      offset.jumpTo(leadingEdgeOffset);
+    } else {
+      offset.jumpTo(trailingEdgeOffset);
+    }
   }
 
   @override
