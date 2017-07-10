@@ -47,6 +47,8 @@ class Paragraph {
 
   const ParagraphStyle& GetParagraphStyle() const;
 
+  size_t TextSize() const;
+
   double GetHeight() const;
 
   double GetAlphabeticBaseline() const;
