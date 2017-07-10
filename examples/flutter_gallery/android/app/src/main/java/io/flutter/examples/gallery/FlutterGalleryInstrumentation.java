@@ -4,6 +4,7 @@
 
 package io.flutter.examples.gallery;
 
+import android.os.ConditionVariable;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -13,7 +14,7 @@ import io.flutter.view.FlutterView;
 /** Instrumentation for testing using Android Espresso framework. */
 public class FlutterGalleryInstrumentation implements MethodCallHandler {
 
-  private volatile boolean testFinished;
+  private final ConditionVariable testFinished = new ConditionVariable();
   private volatile boolean testSuccessful;
 
   FlutterGalleryInstrumentation(FlutterView view) {
@@ -24,7 +25,7 @@ public class FlutterGalleryInstrumentation implements MethodCallHandler {
   @Override
   public void onMethodCall(MethodCall call, Result result) {
     testSuccessful = call.method.equals("success");
-    testFinished = true;
+    testFinished.open();
     result.success(null);
   }
 
@@ -33,8 +34,6 @@ public class FlutterGalleryInstrumentation implements MethodCallHandler {
   }
 
   public void waitForTestToFinish() throws Exception {
-    while (!testFinished) {
-      Thread.sleep(200);
-    }
+    testFinished.block();
   }
 }

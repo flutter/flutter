@@ -12,4 +12,4 @@ cd android
 # OK as in the devicelab we have one device per host.
 #
 # See also: https://goo.gl/oe5aUW
-./gradlew connectedAndroidTest -Ptarget=test/live_smoke_test.dart
+./gradlew connectedAndroidTest -Ptarget=test/live_smoketest.dart
