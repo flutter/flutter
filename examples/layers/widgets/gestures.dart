@@ -69,7 +69,27 @@ class _GestureDemoState extends State<GestureDemo> {
   double _previousZoom;
   double _zoom = 1.0;
 
-  MaterialColor _swatch = Colors.blue;
+  static const List<MaterialColor> _swatches = const <MaterialColor>[
+    Colors.red,
+    Colors.pink,
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.indigo,
+    Colors.blue,
+    Colors.lightBlue,
+    Colors.cyan,
+    Colors.green,
+    Colors.lightGreen,
+    Colors.lime,
+    Colors.yellow,
+    Colors.amber,
+    Colors.orange,
+    Colors.deepOrange,
+    Colors.brown,
+    Colors.grey,
+    Colors.blueGrey,
+  ];
+  MaterialColor _swatch = _swatches.first;
 
   bool _forward = true;
   bool _scaleEnabled = true;
@@ -104,42 +124,11 @@ class _GestureDemoState extends State<GestureDemo> {
 
   void _handleColorChange() {
     setState(() {
-      if (_swatch == Colors.blueGrey)
-        _swatch = Colors.red;
-      else if (_swatch == Colors.red)
-        _swatch = Colors.pink;
-      else if (_swatch == Colors.pink)
-        _swatch = Colors.purple;
-      else if (_swatch == Colors.purple)
-        _swatch = Colors.deepPurple;
-      else if (_swatch == Colors.deepPurple)
-        _swatch = Colors.indigo;
-      else if (_swatch == Colors.indigo)
-        _swatch = Colors.blue;
-      else if (_swatch == Colors.blue)
-        _swatch = Colors.lightBlue;
-      else if (_swatch == Colors.lightBlue)
-        _swatch = Colors.cyan;
-      else if (_swatch == Colors.cyan)
-        _swatch = Colors.green;
-      else if (_swatch == Colors.green)
-        _swatch = Colors.lightGreen;
-      else if (_swatch == Colors.lightGreen)
-        _swatch = Colors.lime;
-      else if (_swatch == Colors.lime)
-        _swatch = Colors.yellow;
-      else if (_swatch == Colors.yellow)
-        _swatch = Colors.amber;
-      else if (_swatch == Colors.amber)
-        _swatch = Colors.orange;
-      else if (_swatch == Colors.orange)
-        _swatch = Colors.deepOrange;
-      else if (_swatch == Colors.deepOrange)
-        _swatch = Colors.brown;
-      else if (_swatch == Colors.brown)
-        _swatch = Colors.grey;
-      else if (_swatch == Colors.grey)
-        _swatch = Colors.blueGrey;
+      if (_swatch == _swatches.last) {
+        _swatch = _swatches.first;
+      } else {
+        _swatch = _swatches[_swatches.indexOf(_swatch) + 1];
+      }
     });
   }
 
