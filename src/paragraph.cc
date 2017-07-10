@@ -476,6 +476,10 @@ double Paragraph::GetMinIntrinsicWidth() const {
   return max_intrinsic_width_ / paragraph_style_.max_lines;
 }
 
+size_t Paragraph::TextSize() const {
+  return text_.size();
+}
+
 double Paragraph::GetHeight() const {
   return height_;
 }
@@ -683,8 +687,10 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
 }
 
 SkIPoint Paragraph::GetWordBoundary(size_t offset) const {
-  // TODO(garyq): Implement.
-  return SkIPoint::Make(0, offset + 1);
+  // TODO(garyq): Consider punctuation as separate words.
+  return SkIPoint::Make(
+      minikin::getPrevWordBreakForCache(text_.data(), offset, text_.size()),
+      minikin::getNextWordBreakForCache(text_.data(), offset, text_.size()));
 }
 
 int Paragraph::GetLineCount() const {

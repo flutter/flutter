@@ -890,7 +890,8 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   // Tests for GetGlyphPositionAtCoordinate()
   // NOTE: resulting values can be a few off from their respective positions in
   // the original text because the final trailing whitespaces are sometimes not
-  // drawn and therefore are not active glyphs.
+  // drawn (namely, when using "justify" alignment) and therefore are not active
+  // glyphs.
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-10000, -10000), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-1, -1), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0), 0ull);
@@ -907,6 +908,119 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 270), 54ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 80), 19ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 10000), 77ull);
+}
+
+TEST_F(RenderTest, GetRectsForRangeParagraph) {
+  const char* text =
+      "12345,  \"67890\" 12345 67890 12345 67890 12345 67890 12345 67890 12345 "
+      "67890 12345";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 10;
+  paragraph_style.text_align = TextAlign::left;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.font_size = 50;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 0;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(550);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+
+  // Tests for GetRectsForRange()
+  // NOTE: The base truth values may still need adjustment as the specifics
+  // are adjusted.
+  paint.setColor(SK_ColorRED);
+  std::vector<SkRect> rects = paragraph->GetRectsForRange(0, 0);
+  for (size_t i = 0; i < rects.size(); ++i) {
+    GetCanvas()->drawRect(rects[i], paint);
+  }
+  EXPECT_EQ(rects.size(), 1ull);
+  EXPECT_FLOAT_EQ(rects[0].left(), 0);
+  EXPECT_FLOAT_EQ(rects[0].top(), 0);
+  EXPECT_FLOAT_EQ(rects[0].right(), 28);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 47.7539);
+
+  paint.setColor(SK_ColorBLUE);
+  rects = paragraph->GetRectsForRange(2, 7);
+  for (size_t i = 0; i < rects.size(); ++i) {
+    GetCanvas()->drawRect(rects[i], paint);
+  }
+  ASSERT_EQ(rects.size(), 3ull);
+  EXPECT_FLOAT_EQ(rects[0].left(), 56);
+  EXPECT_FLOAT_EQ(rects[0].top(), 0);
+  EXPECT_FLOAT_EQ(rects[0].right(), 151);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 47.7539);
+
+  EXPECT_FLOAT_EQ(rects[1].left(), 151);
+  EXPECT_FLOAT_EQ(rects[1].top(), 0);
+  EXPECT_FLOAT_EQ(rects[1].right(), 163);
+  EXPECT_FLOAT_EQ(rects[1].bottom(), 47.7539);
+
+  EXPECT_FLOAT_EQ(rects[2].left(), 163);
+  EXPECT_FLOAT_EQ(rects[2].top(), 0);
+  EXPECT_FLOAT_EQ(rects[2].right(), 175);
+  EXPECT_FLOAT_EQ(rects[2].bottom(), 47.7539);
+
+  paint.setColor(SK_ColorGREEN);
+  rects = paragraph->GetRectsForRange(8, 20);
+  for (size_t i = 0; i < rects.size(); ++i) {
+    GetCanvas()->drawRect(rects[i], paint);
+  }
+  ASSERT_EQ(rects.size(), 3ull);
+  EXPECT_FLOAT_EQ(rects[0].left(), 175);
+  EXPECT_FLOAT_EQ(rects[0].top(), 0);
+  EXPECT_FLOAT_EQ(rects[0].right(), 347);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 47.7539);
+
+  EXPECT_FLOAT_EQ(rects[1].left(), 347);
+  EXPECT_FLOAT_EQ(rects[1].top(), 0);
+  EXPECT_FLOAT_EQ(rects[1].right(), 359);
+  EXPECT_FLOAT_EQ(rects[1].bottom(), 47.7539);
+
+  EXPECT_FLOAT_EQ(rects[2].left(), 359);
+  EXPECT_FLOAT_EQ(rects[2].top(), 0);
+  EXPECT_FLOAT_EQ(rects[2].right(), 499);
+  EXPECT_FLOAT_EQ(rects[2].bottom(), 47.7539);
+
+  paint.setColor(SK_ColorRED);
+  rects = paragraph->GetRectsForRange(30, 100);
+  for (size_t i = 0; i < rects.size(); ++i) {
+    GetCanvas()->drawRect(rects[i], paint);
+  }
+  ASSERT_EQ(rects.size(), 17ull);
+  EXPECT_FLOAT_EQ(rects[0].left(), 208);
+  EXPECT_FLOAT_EQ(rects[0].top(), 47.753906);
+  EXPECT_FLOAT_EQ(rects[0].right(), 292);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 106.34766);
+
+  // TODO(garyq): The following set of vals are definetly wrong and
+  // end of paragraph handling needs to be fixed in a later patch.
+  EXPECT_FLOAT_EQ(rects[16].left(),  0);
+  EXPECT_FLOAT_EQ(rects[16].top(), 223.53516);
+  EXPECT_FLOAT_EQ(rects[16].right(), 133.875);
+  EXPECT_FLOAT_EQ(rects[16].bottom(), 282.12891);
+
+  ASSERT_TRUE(Snapshot());
 }
 
 }  // namespace txt
