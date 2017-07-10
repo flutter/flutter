@@ -7,4 +7,9 @@ if [ ! -f "./pubspec.yaml" ]; then
 fi
 
 cd android
-./gradlew connectedAndroidTestProfile -Ptarget=test/live_smoke_test.dart
+
+# Currently there's no non-hacky way to pass a device ID to gradlew, but it's
+# OK as in the devicelab we have one device per host.
+#
+# See also: https://goo.gl/oe5aUW
+./gradlew connectedAndroidTest -Ptarget=test/live_smoke_test.dart
