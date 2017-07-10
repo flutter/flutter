@@ -8,10 +8,11 @@ import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'node.dart';
+import 'object.dart';
+import 'viewport.dart';
 
 export 'dart:ui' show SemanticsAction;
 
