@@ -24,7 +24,7 @@ env:
 before_script:
   - ./dev/bots/travis_setup.sh
 script:
-  - ulimit -S -n 2048
+  - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
   - (./bin/cache/dart-sdk/bin/dart ./dev/bots/test.dart && ./dev/bots/travis_upload.sh)
 cache:
   directories:
