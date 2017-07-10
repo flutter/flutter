@@ -164,13 +164,15 @@ class _ListDemoState extends State<ListDemo> {
         "Even more additional list item information appears on line three.",
       );
     }
-    return new ListTile(
-      isThreeLine: _itemType == _MaterialListType.threeLine,
-      dense: _dense,
-      leading: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
-      title: new Text('This item represents $item.'),
-      subtitle: secondary,
-      trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+    return new MergeSemantics(
+      child: new ListTile(
+        isThreeLine: _itemType == _MaterialListType.threeLine,
+        dense: _dense,
+        leading: _showAvatars ? new ExcludeSemantics(child: new CircleAvatar(child: new Text(item))) : null,
+        title: new Text('This item represents $item.'),
+        subtitle: secondary,
+        trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
+      ),
     );
   }
 
