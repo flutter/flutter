@@ -175,7 +175,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 }
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories, {this.flutterRepo});
+  AnalysisServer(this.sdk, this.directories, {this.flutterRepo: false});
 
   final String sdk;
   final List<String> directories;
