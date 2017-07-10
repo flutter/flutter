@@ -120,7 +120,7 @@ class _GestureDemoState extends State<GestureDemo> {
         _swatch = Colors.lightBlue;
       else if (_swatch == Colors.lightBlue)
         _swatch = Colors.cyan;
-      else if (_swatch == Colors.teal)
+      else if (_swatch == Colors.cyan)
         _swatch = Colors.green;
       else if (_swatch == Colors.green)
         _swatch = Colors.lightGreen;
@@ -153,22 +153,24 @@ class _GestureDemoState extends State<GestureDemo> {
   Widget build(BuildContext context) {
     return new Stack(
       children: <Widget>[
-        new GestureDetector(
-          onScaleStart: _scaleEnabled ? _handleScaleStart : null,
-          onScaleUpdate: _scaleEnabled ? _handleScaleUpdate : null,
-          onTap: _tapEnabled ? _handleColorChange : null,
-          onDoubleTap: _doubleTapEnabled ? _handleScaleReset : null,
-          onLongPress: _longPressEnabled ? _handleDirectionChange : null,
-          child: new CustomPaint(
-            painter: new _GesturePainter(
-              zoom: _zoom,
-              offset: _offset,
-              swatch: _swatch,
-              forward: _forward,
-              scaleEnabled: _scaleEnabled,
-              tapEnabled: _tapEnabled,
-              doubleTapEnabled: _doubleTapEnabled,
-              longPressEnabled: _longPressEnabled
+        new Positioned.fill(
+          child: new GestureDetector(
+            onScaleStart: _scaleEnabled ? _handleScaleStart : null,
+            onScaleUpdate: _scaleEnabled ? _handleScaleUpdate : null,
+            onTap: _tapEnabled ? _handleColorChange : null,
+            onDoubleTap: _doubleTapEnabled ? _handleScaleReset : null,
+            onLongPress: _longPressEnabled ? _handleDirectionChange : null,
+            child: new CustomPaint(
+              painter: new _GesturePainter(
+                zoom: _zoom,
+                offset: _offset,
+                swatch: _swatch,
+                forward: _forward,
+                scaleEnabled: _scaleEnabled,
+                tapEnabled: _tapEnabled,
+                doubleTapEnabled: _doubleTapEnabled,
+                longPressEnabled: _longPressEnabled
+              )
             )
           )
         ),
