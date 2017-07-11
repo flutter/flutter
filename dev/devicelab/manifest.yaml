@@ -133,6 +133,15 @@ tasks:
     required_agent_capabilities: ["linux/android"]
     flaky: true
 
+  flutter_gallery_instrumentation_test:
+    description: >
+      Same as flutter_gallery__transition_perf but uses Android instrumentation
+      framework, and therefore does not require a host computer to run. This
+      test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   # iOS on-device tests
 
   channels_integration_test_ios:
