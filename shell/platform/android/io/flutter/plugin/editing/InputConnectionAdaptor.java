@@ -139,7 +139,9 @@ class InputConnectionAdaptor extends BaseInputConnection {
                 }
             } else {
                 // Enter a character.
-                commitText(String.valueOf(event.getNumber()), 1);
+                int character = event.getUnicodeChar();
+                if (character != 0)
+                    commitText(String.valueOf((char) character), 1);
             }
         }
         return result;
