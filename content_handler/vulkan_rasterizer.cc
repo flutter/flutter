@@ -24,6 +24,13 @@ namespace {
 
 constexpr char kDisplayDriverClass[] = "/dev/class/display";
 
+static mx_status_t DriverWatcher(int dirfd, int event, const char* fn, void* cookie) {
+    if (event == WATCH_EVENT_ADD_FILE && !strcmp(fn, "000")) {
+        return MX_ERR_STOP;
+    }
+    return MX_OK;
+}
+
 bool WaitForFirstDisplayDriver() {
   ftl::UniqueFD fd(open(kDisplayDriverClass, O_DIRECTORY | O_RDONLY));
   if (fd.get() < 0) {
@@ -31,36 +38,10 @@ bool WaitForFirstDisplayDriver() {
     return false;
   }
 
-  // Create the directory watch channel.
-  vfs_watch_dir_t wd;
-  wd.mask = VFS_WATCH_MASK_ALL;
-  wd.options = 0;
-
-  mx::channel watcher;
-  mx_status_t status = mx_channel_create(0, &wd.channel, watcher.reset_and_get_address());
-  if (status != MX_OK) {
-    FTL_DLOG(ERROR) << "Failed to create channel";
-    return false;
-  }
-
-  status = ioctl_vfs_watch_dir(fd.get(), &wd);
-  if (status != MX_OK) {
-    FTL_DLOG(ERROR) << "Failed to create directory watcher for "
-                    << kDisplayDriverClass;
-    return false;
-  }
-
-  mx_signals_t pending;
-  // Wait for 1 second for the display driver to appear before falling back to
-  // software.
-  status = watcher.wait_one(MX_CHANNEL_READABLE | MX_CHANNEL_PEER_CLOSED,
-                            mx_deadline_after(MX_SEC(1)), &pending);
-  if (status != MX_OK) {
-    FTL_DLOG(ERROR) << "Failed to wait on file watcher channel ";
-    return false;
-  }
-
-  return pending & MX_CHANNEL_READABLE;
+  mx_status_t status = mxio_watch_directory(fd.get(), DriverWatcher,
+                                            mx_deadline_after(MX_SEC(1)),
+                                            nullptr);
+  return status == MX_ERR_STOP;
 }
 
 }  // namespace
