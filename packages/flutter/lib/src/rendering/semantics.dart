@@ -11,6 +11,8 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'node.dart';
+import 'object.dart';
+import 'viewport.dart';
 
 export 'dart:ui' show SemanticsAction;
 
@@ -143,18 +145,22 @@ class SemanticsNode extends AbstractNode {
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
   SemanticsNode({
-    SemanticsActionHandler handler
+    SemanticsActionHandler handler,
+    @required RenderObject renderObject,
   }) : id = _generateNewId(),
-       _actionHandler = handler;
+       _actionHandler = handler,
+       _renderObject = renderObject;
 
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
     SemanticsActionHandler handler,
-    SemanticsOwner owner
+    SemanticsOwner owner,
+    @required RenderObject renderObject,
   }) : id = 0,
-       _actionHandler = handler {
+       _actionHandler = handler,
+       _renderObject = renderObject {
     attach(owner);
   }
 
@@ -171,6 +177,7 @@ class SemanticsNode extends AbstractNode {
   final int id;
 
   final SemanticsActionHandler _actionHandler;
+  final RenderObject _renderObject;
 
   // GEOMETRY
   // These are automatically handled by RenderObject's own logic
@@ -735,6 +742,19 @@ class SemanticsOwner extends ChangeNotifier {
     assert(action != null);
     final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
     handler?.performAction(action);
+
+    // Default actions if no [handler] defined.
+    if (handler == null && action == SemanticsAction.showOnScreen) {
+      RenderObject renderObject = _nodes[id]?._renderObject;
+      if (renderObject != null) {
+        RenderAbstractViewport viewport = RenderAbstractViewport.of(renderObject);
+        while (viewport != null) {
+          viewport.showOnScreen(renderObject);
+          renderObject = viewport;
+          viewport = RenderAbstractViewport.of(renderObject.parent);
+        }
+      }
+    }
   }
 
   SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {

@@ -186,6 +186,10 @@ abstract class ViewportOffset extends ChangeNotifier {
   void debugFillDescription(List<String> description) {
     description.add('offset: ${pixels?.toStringAsFixed(1)}');
   }
+
+  /// Jumps the scroll position from its current value to the given value,
+  /// without animation, and without checking if the new value is in range.
+  void jumpTo(double pixels);
 }
 
 class _FixedViewportOffset extends ViewportOffset {
@@ -206,6 +210,11 @@ class _FixedViewportOffset extends ViewportOffset {
   @override
   void correctBy(double correction) {
     _pixels += correction;
+  }
+
+  @override
+  void jumpTo(double pixels) {
+    _pixels = pixels;
   }
 
   @override
