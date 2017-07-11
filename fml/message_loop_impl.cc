@@ -111,33 +111,19 @@ void MessageLoopImpl::RegisterTask(ftl::Closure task,
     // |task| synchronously within this function.
     return;
   }
-
-  ftl::TimePoint previous_wakeup, new_wakeup;
-  {
-    ftl::MutexLocker lock(&delayed_tasks_mutex_);
-    if (delayed_tasks_.empty()) {
-      previous_wakeup = ftl::TimePoint::Max();
-    } else {
-      previous_wakeup = delayed_tasks_.top().target_time;
-    }
-    delayed_tasks_.push({++order_, std::move(task), target_time});
-    new_wakeup = delayed_tasks_.top().target_time;
-  }
-  if (new_wakeup < previous_wakeup) {
-    WakeUp(new_wakeup);
-  }
+  ftl::MutexLocker lock(&delayed_tasks_mutex_);
+  delayed_tasks_.push({++order_, std::move(task), target_time});
+  WakeUp(delayed_tasks_.top().target_time);
 }
 
 void MessageLoopImpl::RunExpiredTasks() {
   TRACE_EVENT0("fml", "MessageLoop::RunExpiredTasks");
   std::vector<ftl::Closure> invocations;
 
-  ftl::TimePoint new_wakeup;
   {
     ftl::MutexLocker lock(&delayed_tasks_mutex_);
 
     if (delayed_tasks_.empty()) {
-      FTL_DCHECK(terminated_);  // No spurious wakeups except shutdown.
       return;
     }
 
@@ -151,13 +137,9 @@ void MessageLoopImpl::RunExpiredTasks() {
       delayed_tasks_.pop();
     }
 
-    if (delayed_tasks_.empty()) {
-      new_wakeup = ftl::TimePoint::Max();
-    } else {
-      new_wakeup = delayed_tasks_.top().target_time;
-    }
+    WakeUp(delayed_tasks_.empty() ? ftl::TimePoint::Max()
+                                  : delayed_tasks_.top().target_time);
   }
-  WakeUp(new_wakeup);
 
   for (const auto& invocation : invocations) {
     invocation();
