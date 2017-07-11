@@ -140,34 +140,6 @@ TEST(MessageLoop, CheckRunsTaskOnCurrentThread) {
   thread.join();
 }
 
-TEST(MessageLoop, TIME_SENSITIVE(NewTaskDueBeforePendingTask)) {
-  intptr_t tasks_run = 0;
-  std::thread thread([&tasks_run]() {
-    fml::MessageLoop::EnsureInitializedForCurrentThread();
-    auto& loop = fml::MessageLoop::GetCurrent();
-    auto begin = ftl::TimePoint::Now();
-    loop.GetTaskRunner()->PostDelayedTask(
-        [&tasks_run]() {
-          ASSERT_EQ(tasks_run, 1);
-          tasks_run++;
-          fml::MessageLoop::GetCurrent().Terminate();
-        },
-        ftl::TimeDelta::FromMilliseconds(15));
-    loop.GetTaskRunner()->PostDelayedTask(
-        [begin, &tasks_run]() {
-          ASSERT_EQ(tasks_run, 0);
-          tasks_run++;
-          auto delta = ftl::TimePoint::Now() - begin;
-          auto ms = delta.ToMillisecondsF();
-          ASSERT_LE(ms, 15);  // Did not wait for previous wakeup time.
-        },
-        ftl::TimeDelta::FromMilliseconds(5));
-    loop.Run();
-  });
-  thread.join();
-  ASSERT_EQ(tasks_run, 2);
-}
-
 TEST(MessageLoop, TIME_SENSITIVE(SingleDelayedTaskByDelta)) {
   bool checked = false;
   std::thread thread([&checked]() {
