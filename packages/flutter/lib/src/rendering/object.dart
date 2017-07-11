@@ -739,7 +739,8 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(parentSemantics == null);
     renderObjectOwner._semantics ??= new SemanticsNode.root(
       handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-      owner: renderObjectOwner.owner.semanticsOwner
+      owner: renderObjectOwner.owner.semanticsOwner,
+      showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
@@ -768,7 +769,8 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     renderObjectOwner._semantics ??= new SemanticsNode(
-      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
+      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+      showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
     if (geometry != null) {
@@ -812,7 +814,8 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     _haveConcreteNode = currentSemantics == null && annotator != null;
     if (haveConcreteNode) {
       renderObjectOwner._semantics ??= new SemanticsNode(
-        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
+        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+        showOnScreen: renderObjectOwner.showOnScreen,
       );
       node = renderObjectOwner._semantics;
     } else {
@@ -2777,6 +2780,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   @protected
   String debugDescribeChildren(String prefix) => '';
 
+
+  /// Attempt to make this or a descendant RenderObject visible on screen.
+  ///
+  /// If [child] is provided, that RenderObject is made visible. If [child] is
+  /// omitted, this RenderObject is made visible.
+  void showOnScreen([RenderObject child]) {
+    if (parent is RenderObject) {
+      final RenderObject renderParent = parent;
+      renderParent.showOnScreen(child ?? this);
+    }
+  }
 }
 
 /// Generic mixin for render objects with one child.

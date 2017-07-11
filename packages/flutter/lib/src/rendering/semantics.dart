@@ -143,8 +143,10 @@ class SemanticsNode extends AbstractNode {
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
   SemanticsNode({
-    SemanticsActionHandler handler
+    SemanticsActionHandler handler,
+    VoidCallback showOnScreen,
   }) : id = _generateNewId(),
+       _showOnScreen = showOnScreen,
        _actionHandler = handler;
 
   /// Creates a semantic node to represent the root of the semantics tree.
@@ -152,8 +154,10 @@ class SemanticsNode extends AbstractNode {
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
     SemanticsActionHandler handler,
-    SemanticsOwner owner
+    VoidCallback showOnScreen,
+    SemanticsOwner owner,
   }) : id = 0,
+        _showOnScreen = showOnScreen,
        _actionHandler = handler {
     attach(owner);
   }
@@ -171,6 +175,7 @@ class SemanticsNode extends AbstractNode {
   final int id;
 
   final SemanticsActionHandler _actionHandler;
+  final VoidCallback _showOnScreen;
 
   // GEOMETRY
   // These are automatically handled by RenderObject's own logic
@@ -735,6 +740,11 @@ class SemanticsOwner extends ChangeNotifier {
     assert(action != null);
     final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
     handler?.performAction(action);
+
+    // Default actions if no [handler] was provided.
+    if (handler == null && action == SemanticsAction.showOnScreen && _nodes[id]._showOnScreen != null) {
+      _nodes[id]._showOnScreen();
+    }
   }
 
   SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
