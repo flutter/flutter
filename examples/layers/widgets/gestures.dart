@@ -127,7 +127,11 @@ class _GestureDemoState extends State<GestureDemo> {
       if (_swatch == _swatches.last) {
         _swatch = _swatches.first;
       } else {
-        _swatch = _swatches[_swatches.indexOf(_swatch) + 1];
+        // take the next color in _swatches list
+        _swatch = _swatches
+            .skipWhile((MaterialColor swatch) => swatch != _swatch)
+            .skip(1)
+            .first;
       }
     });
   }
@@ -141,25 +145,24 @@ class _GestureDemoState extends State<GestureDemo> {
   @override
   Widget build(BuildContext context) {
     return new Stack(
+      fit: StackFit.expand,
       children: <Widget>[
-        new Positioned.fill(
-          child: new GestureDetector(
-            onScaleStart: _scaleEnabled ? _handleScaleStart : null,
-            onScaleUpdate: _scaleEnabled ? _handleScaleUpdate : null,
-            onTap: _tapEnabled ? _handleColorChange : null,
-            onDoubleTap: _doubleTapEnabled ? _handleScaleReset : null,
-            onLongPress: _longPressEnabled ? _handleDirectionChange : null,
-            child: new CustomPaint(
-              painter: new _GesturePainter(
-                zoom: _zoom,
-                offset: _offset,
-                swatch: _swatch,
-                forward: _forward,
-                scaleEnabled: _scaleEnabled,
-                tapEnabled: _tapEnabled,
-                doubleTapEnabled: _doubleTapEnabled,
-                longPressEnabled: _longPressEnabled
-              )
+        new GestureDetector(
+          onScaleStart: _scaleEnabled ? _handleScaleStart : null,
+          onScaleUpdate: _scaleEnabled ? _handleScaleUpdate : null,
+          onTap: _tapEnabled ? _handleColorChange : null,
+          onDoubleTap: _doubleTapEnabled ? _handleScaleReset : null,
+          onLongPress: _longPressEnabled ? _handleDirectionChange : null,
+          child: new CustomPaint(
+            painter: new _GesturePainter(
+              zoom: _zoom,
+              offset: _offset,
+              swatch: _swatch,
+              forward: _forward,
+              scaleEnabled: _scaleEnabled,
+              tapEnabled: _tapEnabled,
+              doubleTapEnabled: _doubleTapEnabled,
+              longPressEnabled: _longPressEnabled
             )
           )
         ),
