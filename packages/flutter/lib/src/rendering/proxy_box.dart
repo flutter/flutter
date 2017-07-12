@@ -1286,6 +1286,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     if (elevation == value)
       return;
     _elevation = value;
+    markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
@@ -1324,6 +1325,11 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
 
   static final Paint _defaultPaint = new Paint();
   static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
+
+  // On Fuchsia, the system compositor is responsible for drawing shadows
+  // for physical model layers with non-zero elevation.
+  @override
+  bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
 
   @override
   void paint(PaintingContext context, Offset offset) {
