@@ -124,7 +124,7 @@ class Xcode {
   final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
   void _updateXcodeVersion() {
     try {
-      _xcodeVersionText = processManager.runSync(<String>['/usr/bin/xcodebuild', '-version']).stdout.replaceAll('\n', ', ');
+      _xcodeVersionText = processManager.runSync(<String>['/usr/bin/xcodebuild', '-version']).stdout.trim().replaceAll('\n', ', ');
       final Match match = xcodeVersionRegex.firstMatch(xcodeVersionText);
       if (match == null)
         return;

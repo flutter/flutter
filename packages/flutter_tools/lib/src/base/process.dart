@@ -211,7 +211,7 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
       environment: environment
   );
   if (result.exitCode != 0)
-    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}';
+    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}:\n$result';
   return result;
 }
 

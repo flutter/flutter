@@ -221,7 +221,7 @@ class VerboseLogger extends Logger {
     stopwatch.reset();
 
     String prefix;
-    const int prefixWidth = 12;
+    const int prefixWidth = 8;
     if (millis == 0) {
       prefix = ''.padLeft(prefixWidth);
     } else {

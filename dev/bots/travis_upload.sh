@@ -6,7 +6,8 @@ export PATH="$PWD/bin:$PWD/bin/cache/dart-sdk/bin:$PATH"
 
 LCOV_FILE=./packages/flutter/coverage/lcov.info
 
-if [ "$SHARD" = "coverage" ] && \
+if [ "$TRAVIS_OS_NAME" = "linux" ] && \
+   [ "$SHARD" = "coverage" ] && \
    [ "$TRAVIS_PULL_REQUEST" = "false" ] && \
    [ "$TRAVIS_BRANCH" = "master" ] && \
    [ -f "$LCOV_FILE" ]; then
@@ -20,7 +21,8 @@ if [ "$SHARD" = "coverage" ] && \
   (cd packages/flutter && coveralls-lcov coverage/lcov.info)
 fi
 
-if [ "$SHARD" = "docs" ]; then
+if [ "$TRAVIS_OS_NAME" = "linux" ] && \
+   [ "$SHARD" = "docs" ]; then
   # generate the API docs, upload them
   ./dev/bots/docs.sh
   exit_code=$?
