@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -55,10 +57,14 @@ class CocoaPods {
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
   Future<bool> get isCocoaPodsInitialized => fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
 
-  Future<Null> processPods(Directory appIosDir, String iosEngineDir) async {
+  Future<Null> processPods({
+    @required Directory appIosDir,
+    @required String iosEngineDir,
+    bool isSwift: false,
+  }) async {
     if (await _checkPodCondition()) {
       if (!fs.file(fs.path.join(appIosDir.path, 'Podfile')).existsSync()) {
-        await _createPodfile(appIosDir);
+        await _createPodfile(appIosDir, isSwift);
       } // TODO(xster): Add more logic for handling merge conflicts.
 
       await _runPodInstall(appIosDir, iosEngineDir);
@@ -94,9 +100,14 @@ class CocoaPods {
     return true;
   }
 
-  Future<Null> _createPodfile(Directory bundle) async {
+  Future<Null> _createPodfile(Directory bundle, bool isSwift) async {
     final File podfileTemplate = fs.file(fs.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile'
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+      'templates',
+      'cocoapods',
+      isSwift ? 'Podfile-swift' : 'Podfile-objc',
     ));
     podfileTemplate.copySync(fs.path.join(bundle.path, 'Podfile'));
   }

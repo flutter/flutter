@@ -215,7 +215,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   final bool hasFlutterPlugins = injectPlugins();
 
   if (hasFlutterPlugins)
-    await cocoaPods.processPods(appDirectory, flutterFrameworkDir(mode));
+    await cocoaPods.processPods(
+      appIosDir: appDirectory,
+      iosEngineDir: flutterFrameworkDir(mode),
+      isSwift: app.isSwift,
+    );
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,

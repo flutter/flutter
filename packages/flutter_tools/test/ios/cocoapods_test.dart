@@ -27,10 +27,15 @@ void main() {
     mockProcessManager = new MockProcessManager();
     projectUnderTest = fs.directory(fs.path.join('project', 'ios'))..createSync(recursive: true);
     fs.file(fs.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile'
+      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc'
     ))
         ..createSync(recursive: true)
-        ..writeAsStringSync('Podfile template');
+        ..writeAsStringSync('Objective-C podfile template');
+    fs.file(fs.path.join(
+      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-swift'
+    ))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('Swift podfile template');
     cocoaPodsUnderTest = const TestCocoaPods();
 
     when(mockProcessManager.run(
@@ -41,10 +46,34 @@ void main() {
   });
 
   testUsingContext(
-    'create Podfile when not present',
+    'create objective-c Podfile when not present',
     () async {
-      await cocoaPodsUnderTest.processPods(projectUnderTest, 'engine/path');
-      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Podfile template');
+      await cocoaPodsUnderTest.processPods(
+        appIosDir: projectUnderTest,
+        iosEngineDir: 'engine/path',
+      );
+      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Objective-C podfile template');
+      verify(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path'},
+      ));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    },
+  );
+
+  testUsingContext(
+    'create swift Podfile if swift',
+    () async {
+      await cocoaPodsUnderTest.processPods(
+        appIosDir: projectUnderTest,
+        iosEngineDir: 'engine/path',
+        isSwift: true,
+      );
+      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Swift podfile template');
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
@@ -63,8 +92,10 @@ void main() {
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsString('Existing Podfile');
-      await cocoaPodsUnderTest.processPods(projectUnderTest, 'engine/path');
-      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
+      await cocoaPodsUnderTest.processPods(
+        appIosDir: projectUnderTest,
+        iosEngineDir: 'engine/path',
+      );      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
@@ -82,7 +113,10 @@ void main() {
     () async {
       cocoaPodsUnderTest = const TestCocoaPods(false);
       try {
-        await cocoaPodsUnderTest.processPods(projectUnderTest, 'engine/path');
+        await cocoaPodsUnderTest.processPods(
+          appIosDir: projectUnderTest,
+          iosEngineDir: 'engine/path',
+        );
         fail('Expected tool error');
       } catch (ToolExit) {
         verifyNever(mockProcessManager.run(
