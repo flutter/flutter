@@ -25,7 +25,7 @@ class PlatformViewIOS : public PlatformView {
 
   ~PlatformViewIOS() override;
 
-  void Attach();
+  virtual void Attach() override;
 
   void NotifyCreated();
 

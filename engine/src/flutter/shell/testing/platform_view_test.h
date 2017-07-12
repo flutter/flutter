@@ -19,7 +19,7 @@ class PlatformViewTest : public PlatformView {
 
   ~PlatformViewTest();
 
-  void Attach();
+  virtual void Attach() override;
 
   bool ResourceContextMakeCurrent() override;
 
