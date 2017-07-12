@@ -16,6 +16,7 @@
 
 #include "lib/txt/src/paragraph.h"
 
+#include <hb.h>
 #include <algorithm>
 #include <limits>
 #include <tuple>
@@ -24,6 +25,7 @@
 
 #include <minikin/Layout.h>
 #include "lib/ftl/logging.h"
+#include "lib/txt/libs/minikin/HbFontCache.h"
 #include "lib/txt/libs/minikin/LayoutUtils.h"
 #include "lib/txt/src/font_collection.h"
 #include "lib/txt/src/font_skia.h"
@@ -140,6 +142,18 @@ void Paragraph::AddRunsToLineBreaker(
   }
 }
 
+void Paragraph::FillWhitespaceSet(size_t start,
+                                  size_t end,
+                                  hb_font_t* hb_font) {
+  uint32_t unusedGlyph;
+  for (size_t i = start; i < end; ++i) {
+    if (minikin::isWordSpace(text_[i])) {
+      hb_font_get_glyph(hb_font, text_[i], 0, &unusedGlyph);
+      whitespace_set_.insert(unusedGlyph);
+    }
+  }
+}
+
 void Paragraph::Layout(double width, bool force) {
   // Do not allow calling layout multiple times without changing anything.
   if (!needs_layout_ && !force)
@@ -189,7 +203,12 @@ void Paragraph::Layout(double width, bool force) {
   double prev_max_descent = 0.0f;
   double line_width = 0.0f;
   std::vector<SkScalar> x_queue;
-  size_t character_index = 0;
+  double justify_spacing = 0;
+
+  // Each blob.
+  std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
+  std::vector<size_t> buffer_sizes;
+  int word_count = 0;
 
   auto postprocess_line = [this, &x_queue, &y]() -> void {
     size_t record_index = 0;
@@ -271,12 +290,17 @@ void Paragraph::Layout(double width, bool force) {
                       text_.size(), bidiFlags, font, minikin_paint,
                       font_collection_->GetMinikinFontCollectionForFamily(
                           run.style.font_family));
+
+      FillWhitespaceSet(run.start, run.end,
+                        minikin::getHbFontLocked(layout.getFont(run_index)));
+
       const size_t glyph_count = layout.nGlyphs();
       size_t blob_start = 0;
+
       // Each blob.
-      std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
-      std::vector<size_t> buffer_sizes;
-      int word_count = 0;
+      buffers = std::vector<const SkTextBlobBuilder::RunBuffer*>();
+      buffer_sizes = std::vector<size_t>();
+      word_count = 0;
       while (blob_start < glyph_count) {
         const size_t blob_length = GetBlobLength(layout, blob_start);
         buffer_sizes.push_back(blob_length);
@@ -285,11 +309,10 @@ void Paragraph::Layout(double width, bool force) {
 
         // Check if we should remove trailing whitespace of blobs.
         size_t trailing_length = 0;
-        while (
-            paragraph_style_.text_align == TextAlign::justify &&
-            minikin::isWordSpace(
-                text_[character_index + blob_length - trailing_length - 1]) &&
-            layout_end == next_break) {
+        while (paragraph_style_.text_align == TextAlign::justify &&
+               minikin::isWordSpace(
+                   text_[blob_start + blob_length - trailing_length - 1]) &&
+               layout_end == next_break) {
           ++trailing_length;
         }
 
@@ -307,7 +330,7 @@ void Paragraph::Layout(double width, bool force) {
           buffers.back()->glyphs[blob_index] = layout.getGlyphId(glyph_index);
           // Check if the current Glyph is a whitespace and handle multiple
           // whitespaces in a row.
-          if (minikin::isWordSpace(text_[character_index])) {
+          if (whitespace_set_.count(layout.getGlyphId(glyph_index)) > 0) {
             // Only increment word_count if it is the first in a series of
             // whitespaces.
             if (whitespace_ended)
@@ -316,7 +339,7 @@ void Paragraph::Layout(double width, bool force) {
           } else {
             whitespace_ended = true;
           }
-          ++character_index;
+
           const size_t pos_index = 2 * blob_index;
 
           buffers.back()->pos[pos_index] =
@@ -328,7 +351,6 @@ void Paragraph::Layout(double width, bool force) {
           letter_spacing_offset += run.style.letter_spacing;
         }
         blob_start += blob_length;
-        character_index += trailing_length;
 
         // Subtract letter offset to avoid big gap at end of run. This my be
         // removed depending on the specifications for letter spacing.
@@ -344,8 +366,8 @@ void Paragraph::Layout(double width, bool force) {
       paint.getFontMetrics(&metrics);
       // Apply additional word spacing if the text is justified.
       if (paragraph_style_.text_align == TextAlign::justify &&
-          buffer_sizes.size() > 0 && character_index != text_.size()) {
-        JustifyLine(buffers, buffer_sizes, word_count, character_index);
+          buffer_sizes.size() > 0) {
+        JustifyLine(buffers, buffer_sizes, word_count, justify_spacing);
       }
       records_.push_back(
           PaintRecord{run.style, builder.make(), metrics, lines_});
@@ -390,9 +412,8 @@ void Paragraph::Layout(double width, bool force) {
         max_descent = 0.0f;
         x = 0.0f;
         letter_spacing_offset = 0.0f;
-        word_count = 0;
+        // word_count = 0;
         line_width = 0.0f;
-        character_index = layout_end;
         break_index += 1;
         lines_++;
         glyph_single_line_position_x = std::vector<double>();
@@ -413,6 +434,12 @@ void Paragraph::Layout(double width, bool force) {
   line_heights_.push_back(FLT_MAX);
   glyph_single_line_position_x.push_back(FLT_MAX);
   glyph_position_x_.push_back(glyph_single_line_position_x);
+
+  // Remove justification on the last line.
+  if (paragraph_style_.text_align == TextAlign::justify &&
+      buffer_sizes.size() > 0) {
+    JustifyLine(buffers, buffer_sizes, word_count, justify_spacing, -1);
+  }
 }
 
 // Amends the buffers to incorporate justification.
@@ -420,36 +447,34 @@ void Paragraph::JustifyLine(
     std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
     std::vector<size_t>& buffer_sizes,
     int word_count,
-    size_t character_index) {
-  // TODO(garyq): Add letter_spacing_offset back in. It is Temporarily
-  // removed.
-  double justify_spacing =
-      (width_ - breaker_.getWidths()[lines_]) / (word_count - 1);
+    double& justify_spacing,
+    double multiplier) {
+  // We will use the previous justification spacing when undoing justification.
+  if (multiplier > 0) {
+    justify_spacing =
+        (width_ - breaker_.getWidths()[lines_]) / (word_count - 1);
+  }
   word_count = 0;
-  // Set up index to properly access text_ because minikin::isWordSpace()
-  // takes uint_16 instead of GlyphIDs.
-  size_t line_character_index = character_index;
-  for (size_t i = 0; i < buffers.size(); ++i)
-    line_character_index -= buffer_sizes[i];
   bool whitespace_ended = true;
   for (size_t i = 0; i < buffers.size(); ++i) {
     for (size_t glyph_index = 0; glyph_index < buffer_sizes[i]; ++glyph_index) {
       // Check if the current Glyph is a whitespace and handle multiple
       // whitespaces in a row.
-      if (minikin::isWordSpace(text_[line_character_index])) {
+      if (whitespace_set_.count(buffers[i]->glyphs[glyph_index]) > 0) {
         // Only increment word_count and add justification spacing to
         // whitespace if it is the first in a series of whitespaces.
         if (whitespace_ended) {
           ++word_count;
-          buffers[i]->pos[glyph_index * 2] += justify_spacing * word_count;
+          buffers[i]->pos[glyph_index * 2] +=
+              justify_spacing * multiplier * word_count;
         }
         whitespace_ended = false;
       } else {
         // Add justification spacing for all non-whitespace glyphs.
-        buffers[i]->pos[glyph_index * 2] += justify_spacing * word_count;
+        buffers[i]->pos[glyph_index * 2] +=
+            justify_spacing * multiplier * word_count;
         whitespace_ended = true;
       }
-      ++line_character_index;
     }
   }
 }
