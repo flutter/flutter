@@ -40,6 +40,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
     private static final int SEMANTICS_ACTION_SCROLL_DOWN = 1 << 5;
     private static final int SEMANTICS_ACTION_INCREASE = 1 << 6;
     private static final int SEMANTICS_ACTION_DECREASE = 1 << 7;
+    private static final int SEMANTICS_ACTION_SHOW_ON_SCREEN = 1 << 8;
 
     private static final int SEMANTICS_ACTION_SCROLLABLE = SEMANTICS_ACTION_SCROLL_LEFT |
                                                            SEMANTICS_ACTION_SCROLL_RIGHT |
@@ -77,7 +78,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
 
         AccessibilityNodeInfo result = AccessibilityNodeInfo.obtain(mOwner, virtualViewId);
         result.setPackageName(mOwner.getContext().getPackageName());
-        result.setClassName("Flutter"); // Prettier than the more conventional node.getClass().getName()
+        result.setClassName("Flutter"); // TODO(goderbauer): Set proper class names
         result.setSource(mOwner, virtualViewId);
 
         if (object.parent != null) {
@@ -117,6 +118,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
             result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
             result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             result.setScrollable(true);
+            // This tells Android's a11y to send scroll events when reaching the end of
+            // the visible viewport of a scrollable.
+            result.setClassName("android.widget.ScrollView");
         }
 
         result.setCheckable((object.flags & SEMANTICS_FLAG_HAS_CHECKED_STATE) != 0);
@@ -197,6 +201,12 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
                     mOwner.invalidate();
                 }
                 mFocusedObject = object;
+                return true;
+            }
+            // TODO(goderbauer): Use ACTION_SHOW_ON_SCREEN from Android Support Library after
+            //     https://github.com/flutter/flutter/issues/11099 is resolved.
+            case 16908342: { // ACTION_SHOW_ON_SCREEN, added in API level 23
+                mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SHOW_ON_SCREEN);
                 return true;
             }
         }

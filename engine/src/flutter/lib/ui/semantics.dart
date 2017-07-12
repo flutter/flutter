@@ -17,6 +17,7 @@ class SemanticsAction {
   static const int _kScrollDownIndex = 1 << 5;
   static const int _kIncreaseIndex = 1 << 6;
   static const int _kDecreaseIndex = 1 << 7;
+  static const int _kShowOnScreen = 1 << 8;
 
   /// The numerical value for this action.
   ///
@@ -69,6 +70,12 @@ class SemanticsAction {
   /// For example, this action might be recognized by a slider control.
   static const SemanticsAction decrease = const SemanticsAction._(_kDecreaseIndex);
 
+  /// A request to fully show the semantics node on screen.
+  ///
+  /// For example, this action might be send to a node in a scrollable list that
+  /// is partially off screen to bring it on screen.
+  static const SemanticsAction showOnScreen = const SemanticsAction._(_kShowOnScreen);
+
   /// The possible semantics actions.
   ///
   /// The map's key is the [index] of the action and the value is the action
@@ -82,6 +89,7 @@ class SemanticsAction {
     _kScrollDownIndex: scrollDown,
     _kIncreaseIndex: increase,
     _kDecreaseIndex: decrease,
+    _kShowOnScreen: showOnScreen,
   };
 
   @override
@@ -103,6 +111,8 @@ class SemanticsAction {
         return 'SemanticsAction.increase';
       case _kDecreaseIndex:
         return 'SemanticsAction.decrease';
+      case _kShowOnScreen:
+        return 'SemanticsAction.showOnScreen';
     }
     return null;
   }
