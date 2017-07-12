@@ -28,6 +28,8 @@ class PlatformViewAndroid : public PlatformView {
 
   ~PlatformViewAndroid() override;
 
+  void Attach();
+
   void Detach();
 
   void SurfaceCreated(JNIEnv* env, jobject jsurface, jint backgroundColor);

@@ -15,6 +15,8 @@
 #include "lib/ftl/synchronization/waitable_event.h"
 #include "lib/ftl/tasks/task_runner.h"
 
+#include <mutex>
+
 namespace shell {
 
 class PlatformView;
@@ -43,10 +45,10 @@ class Shell {
   // List of PlatformViews.
 
   // These APIs must only be accessed on UI thread.
-  void AddPlatformView(const ftl::WeakPtr<PlatformView>& platform_view);
+  void AddPlatformView(const std::shared_ptr<PlatformView>& platform_view);
   void PurgePlatformViews();
   void GetPlatformViews(
-      std::vector<ftl::WeakPtr<PlatformView>>* platform_views);
+      std::vector<std::weak_ptr<PlatformView>>* platform_views);
 
   struct PlatformViewInfo {
     uintptr_t view_id;
@@ -76,10 +78,6 @@ class Shell {
   void InitGpuThread();
   void InitUIThread();
 
-  void WaitForPlatformViewsIdsUIThread(
-      std::vector<PlatformViewInfo>* platform_views,
-      ftl::AutoResetWaitableEvent* latch);
-
   void RunInPlatformViewUIThread(uintptr_t view_id,
                                  const std::string& main,
                                  const std::string& packages,
@@ -101,7 +99,9 @@ class Shell {
   TracingController tracing_controller_;
 
   std::vector<ftl::WeakPtr<Rasterizer>> rasterizers_;
-  std::vector<ftl::WeakPtr<PlatformView>> platform_views_;
+  std::vector<std::weak_ptr<PlatformView>> platform_views_;
+
+  std::mutex platform_views_mutex_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Shell);
 };

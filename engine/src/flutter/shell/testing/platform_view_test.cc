@@ -11,6 +11,9 @@ namespace shell {
 
 PlatformViewTest::PlatformViewTest()
     : PlatformView(std::unique_ptr<Rasterizer>(new NullRasterizer())) {
+}
+
+void PlatformViewTest::Attach() {
   CreateEngine();
   PostAddToShellTask();
 }

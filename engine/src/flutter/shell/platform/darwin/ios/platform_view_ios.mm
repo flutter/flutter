@@ -21,11 +21,14 @@ PlatformViewIOS::PlatformViewIOS(CALayer* layer)
     : PlatformView(std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
       ios_surface_(IOSSurface::Create(surface_config_, layer)),
       weak_factory_(this) {
-  CreateEngine();
-  PostAddToShellTask();
 }
 
 PlatformViewIOS::~PlatformViewIOS() = default;
+
+void PlatformViewIOS::Attach() {
+  CreateEngine();
+  PostAddToShellTask();
+}
 
 void PlatformViewIOS::NotifyCreated() {
   PlatformView::NotifyCreated(ios_surface_->CreateGPUSurface());

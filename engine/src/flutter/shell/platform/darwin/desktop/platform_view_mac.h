@@ -21,6 +21,8 @@ class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
 
   ~PlatformViewMac() override;
 
+  void Attach();
+
   void SetupAndLoadDart();
 
   bool GLContextMakeCurrent() override;

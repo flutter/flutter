@@ -13,7 +13,8 @@
 
 namespace shell {
 
-TestRunner::TestRunner() : platform_view_(new PlatformViewTest()) {
+TestRunner::TestRunner() : platform_view_(std::make_unique<PlatformViewTest>()) {
+  platform_view_->Attach();
   blink::ViewportMetrics metrics;
   metrics.device_pixel_ratio = 3.0;
   metrics.physical_width = 2400; // 800 at 3x resolution

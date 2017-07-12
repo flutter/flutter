@@ -22,7 +22,7 @@ namespace shell {
 
 class Rasterizer;
 
-class PlatformView {
+class PlatformView : public std::enable_shared_from_this<PlatformView> {
  public:
   struct SurfaceConfig {
     uint8_t red_bits = 8;
@@ -48,7 +48,7 @@ class PlatformView {
 
   void NotifyDestroyed();
 
-  ftl::WeakPtr<PlatformView> GetWeakPtr();
+  std::weak_ptr<PlatformView> GetWeakPtr();
 
   // The VsyncWaiter will live at least as long as the PlatformView.
   virtual VsyncWaiter* GetVsyncWaiter();
@@ -81,8 +81,7 @@ class PlatformView {
   std::unique_ptr<VsyncWaiter> vsync_waiter_;
   SkISize size_;
 
- private:
-  ftl::WeakPtrFactory<PlatformView> weak_factory_;
+private:
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformView);
 };

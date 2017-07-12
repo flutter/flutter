@@ -19,6 +19,8 @@ class PlatformViewTest : public PlatformView {
 
   ~PlatformViewTest();
 
+  void Attach();
+
   bool ResourceContextMakeCurrent() override;
 
   void RunFromSource(const std::string& assets_directory,

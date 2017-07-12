@@ -24,11 +24,14 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
       opengl_view_([gl_view retain]),
       resource_loading_context_([[NSOpenGLContext alloc] initWithFormat:gl_view.pixelFormat
                                                            shareContext:gl_view.openGLContext]) {
-  CreateEngine();
-  PostAddToShellTask();
 }
 
 PlatformViewMac::~PlatformViewMac() = default;
+
+void PlatformViewMac::Attach() {
+  CreateEngine();
+  PostAddToShellTask();
+}
 
 void PlatformViewMac::SetupAndLoadDart() {
   if (AttemptLaunchFromCommandLineSwitches(&engine())) {

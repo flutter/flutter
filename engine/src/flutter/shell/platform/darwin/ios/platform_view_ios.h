@@ -25,6 +25,8 @@ class PlatformViewIOS : public PlatformView {
 
   ~PlatformViewIOS() override;
 
+  void Attach();
+
   void NotifyCreated();
 
   void ToggleAccessibility(UIView* view, bool enabled);

@@ -33,8 +33,8 @@ bool IsInvalid(const ftl::WeakPtr<Rasterizer>& rasterizer) {
   return !rasterizer;
 }
 
-bool IsViewInvalid(const ftl::WeakPtr<PlatformView>& platform_view) {
-  return !platform_view;
+bool IsViewInvalid(const std::weak_ptr<PlatformView>& platform_view) {
+  return !(platform_view.expired());
 }
 
 template <typename T>
@@ -242,58 +242,41 @@ void Shell::GetRasterizers(std::vector<ftl::WeakPtr<Rasterizer>>* rasterizers) {
   *rasterizers = rasterizers_;
 }
 
-void Shell::AddPlatformView(const ftl::WeakPtr<PlatformView>& platform_view) {
-  FTL_DCHECK(ui_thread_checker_ &&
-             ui_thread_checker_->IsCreationThreadCurrent());
+void Shell::AddPlatformView(const std::shared_ptr<PlatformView>& platform_view) {
+  std::lock_guard<std::mutex> lk(platform_views_mutex_);
   if (platform_view) {
     platform_views_.push_back(platform_view);
   }
 }
 
 void Shell::PurgePlatformViews() {
-  FTL_DCHECK(ui_thread_checker_ &&
-             ui_thread_checker_->IsCreationThreadCurrent());
+  std::lock_guard<std::mutex> lk(platform_views_mutex_);
   platform_views_.erase(std::remove_if(platform_views_.begin(),
                                        platform_views_.end(), IsViewInvalid),
                         platform_views_.end());
 }
 
 void Shell::GetPlatformViews(
-    std::vector<ftl::WeakPtr<PlatformView>>* platform_views) {
-  FTL_DCHECK(ui_thread_checker_ &&
-             ui_thread_checker_->IsCreationThreadCurrent());
+    std::vector<std::weak_ptr<PlatformView>>* platform_views) {
+  std::lock_guard<std::mutex> lk(platform_views_mutex_);
   *platform_views = platform_views_;
 }
 
 void Shell::WaitForPlatformViewIds(
     std::vector<PlatformViewInfo>* platform_view_ids) {
-  ftl::AutoResetWaitableEvent latch;
-
-  blink::Threads::UI()->PostTask([this, platform_view_ids, &latch]() {
-    WaitForPlatformViewsIdsUIThread(platform_view_ids, &latch);
-  });
-
-  latch.Wait();
-}
-
-void Shell::WaitForPlatformViewsIdsUIThread(
-    std::vector<PlatformViewInfo>* platform_view_ids,
-    ftl::AutoResetWaitableEvent* latch) {
-  std::vector<ftl::WeakPtr<PlatformView>> platform_views;
-  GetPlatformViews(&platform_views);
-  for (auto it = platform_views.begin(); it != platform_views.end(); it++) {
-    PlatformView* view = it->get();
+  std::lock_guard<std::mutex> lk(platform_views_mutex_);
+  for (auto it = platform_views_.begin(); it != platform_views_.end(); it++) {
+    std::shared_ptr <PlatformView> view{*it};
     if (!view) {
       // Skip dead views.
       continue;
     }
     PlatformViewInfo info;
-    info.view_id = reinterpret_cast<uintptr_t>(view);
+    info.view_id = reinterpret_cast<uintptr_t>(view.get());
     info.isolate_id = view->engine().GetUIIsolateMainPort();
     info.isolate_name = view->engine().GetUIIsolateName();
     platform_view_ids->push_back(info);
   }
-  latch->Signal();
 }
 
 void Shell::RunInPlatformView(uintptr_t view_id,
@@ -334,8 +317,9 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
   *view_existed = false;
 
   for (auto it = platform_views_.begin(); it != platform_views_.end(); it++) {
-    PlatformView* view = it->get();
-    if (reinterpret_cast<uintptr_t>(view) == view_id) {
+    std::shared_ptr<PlatformView> view{*it};
+    if (!view) continue;
+    if (reinterpret_cast<uintptr_t>(view.get()) == view_id) {
       *view_existed = true;
       view->RunFromSource(assets_directory, main, packages);
       *dart_isolate_id = view->engine().GetUIIsolateMainPort();

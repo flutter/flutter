@@ -120,6 +120,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   _statusBarStyle = UIStatusBarStyleDefault;
   _platformView =
       std::make_unique<shell::PlatformViewIOS>(reinterpret_cast<CAEAGLLayer*>(self.view.layer));
+  _platformView->Attach();
   _platformView->SetupResourceContextOnIOThread();
 
   _localizationChannel.reset([[FlutterMethodChannel alloc]
