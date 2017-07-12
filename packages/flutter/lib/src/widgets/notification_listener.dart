@@ -94,7 +94,9 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
     this.onNotification,
   }) : super(key: key);
 
-  /// The widget below this widget in the tree.
+  /// The widget directly below this widget in the tree.
+  ///
+  /// This is not necessarily the widget that dispatched the notification.
   final Widget child;
 
   /// Called when a notification of the appropriate type arrives at this
