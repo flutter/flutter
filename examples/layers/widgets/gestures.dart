@@ -89,6 +89,7 @@ class GestureDemoState extends State<GestureDemo> {
     Colors.grey,
     Colors.blueGrey,
   ];
+  int _swatchIndex = 0;
   MaterialColor _swatch = kSwatches.first;
   MaterialColor get swatch => _swatch;
 
@@ -125,15 +126,10 @@ class GestureDemoState extends State<GestureDemo> {
 
   void _handleColorChange() {
     setState(() {
-      if (_swatch == kSwatches.last) {
-        _swatch = kSwatches.first;
-      } else {
-        // take the next color in _swatches list
-        _swatch = kSwatches
-            .skipWhile((MaterialColor swatch) => swatch != _swatch)
-            .skip(1)
-            .first;
+      if (++_swatchIndex == kSwatches.length) {
+        _swatchIndex = 0;
       }
+      _swatch = kSwatches[_swatchIndex];
     });
   }
 
@@ -158,7 +154,7 @@ class GestureDemoState extends State<GestureDemo> {
             painter: new _GesturePainter(
               zoom: _zoom,
               offset: _offset,
-              swatch: _swatch,
+              swatch: swatch,
               forward: _forward,
               scaleEnabled: _scaleEnabled,
               tapEnabled: _tapEnabled,
