@@ -1,4 +1,4 @@
-# <img src="//flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status - Travis](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter) [![Build Status - AppVeyor](https://ci.appveyor.com/api/projects/status/meyi9evcny64a2mg/branch/master?svg=true)](https://ci.appveyor.com/project/flutter/flutter/branch/master) [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
+# <img src="https://flutter.io/images/flutter-mark-square-100.png" alt="Flutter" width="40" height="40" /> Flutter [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build Status - Travis](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter) [![Build Status - AppVeyor](https://ci.appveyor.com/api/projects/status/meyi9evcny64a2mg/branch/master?svg=true)](https://ci.appveyor.com/project/flutter/flutter/branch/master) [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
 Flutter is a new mobile app SDK to help developers and designers build modern mobile apps for iOS and Android. Flutter is an alpha, open-source project.
 
@@ -18,7 +18,7 @@ without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="//flutter.io/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app is changed instantly.">
+<img src="https://flutter.io/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app is changed instantly.">
 
 ## Expressive, beautiful UIs
 
@@ -27,11 +27,11 @@ beautiful Material Design and
 Cupertino (iOS-flavor) widgets, rich motion APIs,
 smooth natural scrolling, and platform awareness.
 
-<img src="//flutter.io/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">
-<img src="//flutter.io/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">
+<img src="https://flutter.io/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">
+<img src="https://flutter.io/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">
 
-<img src="//flutter.io/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">
-<img src="//flutter.io/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">
+<img src="https://flutter.io/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">
+<img src="https://flutter.io/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">
 
 Browse the <a href="https://flutter.io/widgets/">widget catalog</a>.
 
