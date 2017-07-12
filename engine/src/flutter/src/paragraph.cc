@@ -290,9 +290,8 @@ void Paragraph::Layout(double width, bool force) {
                       text_.size(), bidiFlags, font, minikin_paint,
                       font_collection_->GetMinikinFontCollectionForFamily(
                           run.style.font_family));
-
       FillWhitespaceSet(run.start, run.end,
-                        minikin::getHbFontLocked(layout.getFont(run_index)));
+                        minikin::getHbFontLocked(layout.getFont(0)));
 
       const size_t glyph_count = layout.nGlyphs();
       size_t blob_start = 0;
