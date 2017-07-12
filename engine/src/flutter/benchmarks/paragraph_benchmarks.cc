@@ -98,6 +98,48 @@ static void BM_ParagraphLongLayout(benchmark::State& state) {
 }
 BENCHMARK(BM_ParagraphLongLayout);
 
+static void BM_ParagraphJustifyLayout(benchmark::State& state) {
+  const char* text =
+      "This is a very long sentence to test if the text will properly wrap "
+      "around and go to the next line. Sometimes, short sentence. Longer "
+      "sentences are okay too because they are necessary. Very short. "
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
+      "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
+      "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea "
+      "commodo consequat. Duis aute irure dolor in reprehenderit in voluptate "
+      "velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint "
+      "occaecat cupidatat non proident, sunt in culpa qui officia deserunt "
+      "mollit anim id est laborum. "
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
+      "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
+      "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea "
+      "commodo consequat. Duis aute irure dolor in reprehenderit in voluptate "
+      "velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint "
+      "occaecat cupidatat non proident, sunt in culpa qui officia deserunt "
+      "mollit anim id est laborum.";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.text_align = TextAlign::justify;
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  while (state.KeepRunning()) {
+    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+    builder.PushStyle(text_style);
+    builder.AddText(u16_text);
+    builder.Pop();
+    auto paragraph = builder.Build();
+
+    paragraph->Layout(300, true);
+  }
+}
+BENCHMARK(BM_ParagraphJustifyLayout);
+
 static void BM_ParagraphManyStylesLayout(benchmark::State& state) {
   const char* text = "A short sentence. ";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
@@ -145,7 +187,7 @@ static void BM_ParagraphTextBigO(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(BM_ParagraphTextBigO)
-    ->RangeMultiplier(20)
+    ->RangeMultiplier(10)
     ->Range(1 << 6, 1 << 14)
     ->Complexity(benchmark::oN);
 

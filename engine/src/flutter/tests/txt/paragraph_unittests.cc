@@ -588,7 +588,7 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
-  text_style.letter_spacing = 1;
+  text_style.letter_spacing = 0;
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;

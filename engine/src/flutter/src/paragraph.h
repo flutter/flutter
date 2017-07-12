@@ -35,6 +35,8 @@ class SkCanvas;
 
 namespace txt {
 
+using GlyphID = uint32_t;
+
 class Paragraph {
  public:
   Paragraph();
@@ -97,6 +99,9 @@ class Paragraph {
   std::vector<double> line_heights_;
   std::vector<std::vector<double>> glyph_position_x_;
 
+  // Set of glyph IDs that correspond to whitespace.
+  std::set<GlyphID> whitespace_set_;
+
   ParagraphStyle paragraph_style_;
   FontCollection* font_collection_;
   SkScalar height_ = 0.0f;
@@ -128,10 +133,13 @@ class Paragraph {
       std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
           collection_map);
 
+  void FillWhitespaceSet(size_t start, size_t end, hb_font_t* hb_font);
+
   void JustifyLine(std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
                    std::vector<size_t>& buffer_sizes,
                    int word_count,
-                   size_t character_index);
+                   double& justify_spacing,
+                   double multiplier = 1);
 
   void PaintDecorations(SkCanvas* canvas,
                         double x,
