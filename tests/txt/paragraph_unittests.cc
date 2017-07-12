@@ -1015,12 +1015,102 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
 
   // TODO(garyq): The following set of vals are definetly wrong and
   // end of paragraph handling needs to be fixed in a later patch.
-  EXPECT_FLOAT_EQ(rects[16].left(),  0);
+  EXPECT_FLOAT_EQ(rects[16].left(), 0);
   EXPECT_FLOAT_EQ(rects[16].top(), 223.53516);
   EXPECT_FLOAT_EQ(rects[16].right(), 133.875);
   EXPECT_FLOAT_EQ(rects[16].bottom(), 282.12891);
 
   ASSERT_TRUE(Snapshot());
+}
+
+TEST_F(RenderTest, SpacingParagraph) {
+  const char* text = "H";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 10;
+  paragraph_style.text_align = TextAlign::left;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.font_size = 50;
+  text_style.letter_spacing = 20;
+  text_style.word_spacing = 0;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1;
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  builder.Pop();
+
+  text_style.font_size = 50;
+  text_style.letter_spacing = 10;
+  text_style.word_spacing = 0;
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  builder.Pop();
+
+  text_style.font_size = 50;
+  text_style.letter_spacing = 20;
+  text_style.word_spacing = 0;
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  builder.Pop();
+
+  text_style.font_size = 50;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 0;
+  builder.PushStyle(text_style);
+  builder.AddText("|");
+  builder.Pop();
+
+  text_style.font_size = 50;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 20;
+  builder.PushStyle(text_style);
+  builder.AddText("H ");
+  builder.Pop();
+
+  text_style.font_size = 50;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 0;
+  builder.PushStyle(text_style);
+  builder.AddText("H ");
+  builder.Pop();
+
+  text_style.font_size = 50;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 20;
+  builder.PushStyle(text_style);
+  builder.AddText("H ");
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(550);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+  paint.setColor(SK_ColorRED);
+
+  ASSERT_TRUE(Snapshot());
+
+  ASSERT_EQ(paragraph->records_.size(), 7ull);
+  ASSERT_EQ(paragraph->records_[0].style().letter_spacing, 20);
+  ASSERT_EQ(paragraph->records_[1].style().letter_spacing, 10);
+  ASSERT_EQ(paragraph->records_[2].style().letter_spacing, 20);
+
+  ASSERT_EQ(paragraph->records_[4].style().word_spacing, 20);
+  ASSERT_EQ(paragraph->records_[5].style().word_spacing, 0);
+  ASSERT_EQ(paragraph->records_[6].style().word_spacing, 20);
+
+
+
 }
 
 }  // namespace txt
