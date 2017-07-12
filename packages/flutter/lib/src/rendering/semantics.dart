@@ -739,10 +739,13 @@ class SemanticsOwner extends ChangeNotifier {
   void performAction(int id, SemanticsAction action) {
     assert(action != null);
     final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
-    handler?.performAction(action);
+    if (handler != null) {
+      handler.performAction(action);
+      return;
+    }
 
     // Default actions if no [handler] was provided.
-    if (handler == null && action == SemanticsAction.showOnScreen && _nodes[id]._showOnScreen != null) {
+    if (action == SemanticsAction.showOnScreen && _nodes[id]._showOnScreen != null) {
       _nodes[id]._showOnScreen();
     }
   }

@@ -214,7 +214,7 @@ class _FixedViewportOffset extends ViewportOffset {
 
   @override
   void jumpTo(double pixels) {
-    _pixels = pixels;
+    // Do nothing, viewport is fixed.
   }
 
   @override
