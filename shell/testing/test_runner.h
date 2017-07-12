@@ -32,7 +32,7 @@ class TestRunner {
   TestRunner();
   ~TestRunner();
 
-  std::unique_ptr<PlatformView> platform_view_;
+  std::shared_ptr<PlatformView> platform_view_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(TestRunner);
 };

@@ -13,7 +13,7 @@
 
 namespace shell {
 
-TestRunner::TestRunner() : platform_view_(std::make_unique<PlatformViewTest>()) {
+TestRunner::TestRunner() : platform_view_(std::make_shared<PlatformViewTest>()) {
   platform_view_->Attach();
   blink::ViewportMetrics metrics;
   metrics.device_pixel_ratio = 3.0;
