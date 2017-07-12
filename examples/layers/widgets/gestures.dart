@@ -56,10 +56,10 @@ class _GesturePainter extends CustomPainter {
 
 class GestureDemo extends StatefulWidget {
   @override
-  _GestureDemoState createState() => new _GestureDemoState();
+  GestureDemoState createState() => new GestureDemoState();
 }
 
-class _GestureDemoState extends State<GestureDemo> {
+class GestureDemoState extends State<GestureDemo> {
 
   Offset _startingFocalPoint;
 
@@ -69,7 +69,7 @@ class _GestureDemoState extends State<GestureDemo> {
   double _previousZoom;
   double _zoom = 1.0;
 
-  static const List<MaterialColor> _swatches = const <MaterialColor>[
+  static const List<MaterialColor> kSwatches = const <MaterialColor>[
     Colors.red,
     Colors.pink,
     Colors.purple,
@@ -89,7 +89,8 @@ class _GestureDemoState extends State<GestureDemo> {
     Colors.grey,
     Colors.blueGrey,
   ];
-  MaterialColor _swatch = _swatches.first;
+  MaterialColor _swatch = kSwatches.first;
+  MaterialColor get swatch => _swatch;
 
   bool _forward = true;
   bool _scaleEnabled = true;
@@ -124,11 +125,11 @@ class _GestureDemoState extends State<GestureDemo> {
 
   void _handleColorChange() {
     setState(() {
-      if (_swatch == _swatches.last) {
-        _swatch = _swatches.first;
+      if (_swatch == kSwatches.last) {
+        _swatch = kSwatches.first;
       } else {
         // take the next color in _swatches list
-        _swatch = _swatches
+        _swatch = kSwatches
             .skipWhile((MaterialColor swatch) => swatch != _swatch)
             .skip(1)
             .first;
