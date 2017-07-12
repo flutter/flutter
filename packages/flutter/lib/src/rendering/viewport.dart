@@ -594,16 +594,17 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   void showOnScreen([RenderObject child]) {
-    // Move viewport the smallest distance to bring [child] on screen.
-    final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
-    final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
-    final double currentOffset = offset.pixels;
-    if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
-      offset.jumpTo(leadingEdgeOffset);
-    } else {
-      offset.jumpTo(trailingEdgeOffset);
+    if (child != null) {
+      // Move viewport the smallest distance to bring [child] on screen.
+      final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
+      final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
+      final double currentOffset = offset.pixels;
+      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
+        offset.jumpTo(leadingEdgeOffset);
+      } else {
+        offset.jumpTo(trailingEdgeOffset);
+      }
     }
-
     // Make sure the viewport itself is on screen.
     super.showOnScreen();
   }
