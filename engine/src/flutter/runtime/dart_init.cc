@@ -107,6 +107,11 @@ static const char* kDartEndlessTraceBufferArgs[]{
     "--timeline_recorder=endless",
 };
 
+static const char* kDartFuchsiaTraceArgs[] FTL_ALLOW_UNUSED_TYPE = {
+   "--systrace_timeline",
+   "--timeline_streams=VM,Isolate,Compiler,Dart,GC",
+};
+
 constexpr char kFileUriPrefix[] = "file://";
 constexpr size_t kFileUriPrefixLength = sizeof(kFileUriPrefix) - 1;
 
@@ -494,6 +499,10 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
   if (settings.trace_startup) {
     PushBackAll(&args, kDartTraceStartupArgs, arraysize(kDartTraceStartupArgs));
   }
+
+#if defined(OS_FUCHSIA)
+  PushBackAll(&args, kDartFuchsiaTraceArgs, arraysize(kDartFuchsiaTraceArgs));
+#endif
 
   for (size_t i = 0; i < settings.dart_flags.size(); i++)
     args.push_back(settings.dart_flags[i].c_str());
