@@ -18,8 +18,6 @@ without losing state, on
 emulators, simulators, and hardware for iOS
 and Android.
 
-<img src="https://flutter.io/images/intellij/hot-reload.gif" alt="Make a change in your code, and your app is changed instantly.">
-
 ## Expressive, beautiful UIs
 
 Delight your users with Flutter's built-in
