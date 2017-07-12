@@ -41,6 +41,7 @@ class TextFormField extends FormField<String> {
     TextStyle style,
     bool autofocus: false,
     bool obscureText: false,
+    bool autocorrect: true,
     int maxLines: 1,
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
@@ -48,6 +49,7 @@ class TextFormField extends FormField<String> {
   }) : assert(keyboardType != null),
        assert(autofocus != null),
        assert(obscureText != null),
+       assert(autocorrect != null),
        assert(maxLines == null || maxLines > 0),
        super(
     key: key,
@@ -63,6 +65,7 @@ class TextFormField extends FormField<String> {
         style: style,
         autofocus: autofocus,
         obscureText: obscureText,
+        autocorrect: autocorrect,
         maxLines: maxLines,
         onChanged: field.onChanged,
         inputFormatters: inputFormatters,
