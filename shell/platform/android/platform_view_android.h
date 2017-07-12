@@ -28,7 +28,7 @@ class PlatformViewAndroid : public PlatformView {
 
   ~PlatformViewAndroid() override;
 
-  void Attach();
+  virtual void Attach() override;
 
   void Detach();
 
