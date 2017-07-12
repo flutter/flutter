@@ -11,7 +11,7 @@
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/logging.h"
 
-#define PLATFORM_VIEW reinterpret_cast<PlatformViewAndroid*>(platform_view)
+#define PLATFORM_VIEW (*reinterpret_cast<std::shared_ptr<PlatformViewAndroid>*>(platform_view))
 
 namespace shell {
 
@@ -52,15 +52,18 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
 // Called By Java
 
 static jlong Attach(JNIEnv* env, jclass clazz, jobject flutterView) {
-  PlatformViewAndroid* view = new PlatformViewAndroid();
+  auto view = new PlatformViewAndroid();
+  auto storage = new std::shared_ptr<PlatformViewAndroid>(view);
   // Create a weak reference to the flutterView Java object so that we can make
   // calls into it later.
+  view->Attach();
   view->set_flutter_view(fml::jni::JavaObjectWeakGlobalRef(env, flutterView));
-  return reinterpret_cast<jlong>(view);
+  return reinterpret_cast<jlong>(storage);
 }
 
 static void Detach(JNIEnv* env, jobject jcaller, jlong platform_view) {
-  return PLATFORM_VIEW->Detach();
+  PLATFORM_VIEW->Detach();
+  delete &PLATFORM_VIEW;
 }
 
 static jstring GetObservatoryUri(JNIEnv* env, jclass clazz) {

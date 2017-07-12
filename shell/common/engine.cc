@@ -474,7 +474,7 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 
 void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
   blink::Threads::Platform()->PostTask(ftl::MakeCopyable(
-      [ platform_view = platform_view_, update = std::move(update) ]() mutable {
+      [ platform_view = std::shared_ptr<PlatformView>{platform_view_}, update = std::move(update) ]() mutable {
         if (platform_view)
           platform_view->UpdateSemantics(std::move(update));
       }));
@@ -487,7 +487,7 @@ void Engine::HandlePlatformMessage(
     return;
   }
   blink::Threads::Platform()->PostTask([
-    platform_view = platform_view_, message = std::move(message)
+    platform_view = std::shared_ptr<PlatformView>{platform_view_}, message = std::move(message)
   ]() mutable {
     if (platform_view)
       platform_view->HandlePlatformMessage(std::move(message));

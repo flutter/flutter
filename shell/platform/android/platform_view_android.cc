@@ -37,9 +37,10 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
     ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
     blink::Threads::Platform()->PostTask(
         ftl::MakeCopyable([ self, data = std::move(data) ]() mutable {
-          if (!self->view_)
+          std::shared_ptr<PlatformView> view{self->view_};
+          if (!view)
             return;
-          static_cast<PlatformViewAndroid*>(self->view_.get())
+          static_cast<PlatformViewAndroid*>(view.get())
               ->HandlePlatformMessageResponse(self->response_id_,
                                               std::move(data));
         }));
@@ -48,20 +49,21 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
   void CompleteEmpty() override {
     ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
     blink::Threads::Platform()->PostTask(ftl::MakeCopyable([self]() mutable {
-      if (!self->view_)
+      std::shared_ptr<PlatformView> view{self->view_};
+      if (!view)
         return;
-      static_cast<PlatformViewAndroid*>(self->view_.get())
+      static_cast<PlatformViewAndroid*>(view.get())
           ->HandlePlatformMessageEmptyResponse(self->response_id_);
     }));
   }
 
  private:
   PlatformMessageResponseAndroid(int response_id,
-                                 ftl::WeakPtr<PlatformView> view)
+                                 std::weak_ptr<PlatformView> view)
       : response_id_(response_id), view_(view) {}
 
   int response_id_;
-  ftl::WeakPtr<PlatformView> view_;
+  std::weak_ptr<PlatformView> view_;
 };
 
 static std::unique_ptr<AndroidSurface> InitializePlatformSurfaceGL() {
@@ -125,6 +127,11 @@ static std::unique_ptr<AndroidSurface> InitializePlatformSurface() {
 PlatformViewAndroid::PlatformViewAndroid()
     : PlatformView(std::make_unique<GPURasterizer>(nullptr)),
       android_surface_(InitializePlatformSurface()) {
+}
+
+PlatformViewAndroid::~PlatformViewAndroid() = default;
+
+void PlatformViewAndroid::Attach() {
   CreateEngine();
 
   // Eagerly setup the IO thread context. We have already setup the surface.
@@ -135,11 +142,8 @@ PlatformViewAndroid::PlatformViewAndroid()
   PostAddToShellTask();
 }
 
-PlatformViewAndroid::~PlatformViewAndroid() = default;
-
 void PlatformViewAndroid::Detach() {
   ReleaseSurface();
-  delete this;
 }
 
 void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,

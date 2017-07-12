@@ -95,7 +95,7 @@ class Engine : public blink::RuntimeDelegate {
   void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 
-  ftl::WeakPtr<PlatformView> platform_view_;
+  std::weak_ptr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;
   std::unique_ptr<blink::RuntimeController> runtime_;
   tonic::DartErrorHandleType load_script_error_;

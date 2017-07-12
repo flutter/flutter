@@ -56,6 +56,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
   FTL_DCHECK(_platformView == nullptr) << "The platform view must not already be set.";
 
   _platformView.reset(new shell::PlatformViewMac(self.renderSurface));
+  _platformView->Attach();
   _platformView->SetupResourceContextOnIOThread();
   _platformView->NotifyCreated(std::make_unique<shell::GPUSurfaceGL>(_platformView.get()));
 }
