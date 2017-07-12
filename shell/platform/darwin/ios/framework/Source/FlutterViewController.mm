@@ -62,7 +62,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   UIStatusBarStyle _statusBarStyle;
   blink::ViewportMetrics _viewportMetrics;
   shell::TouchMapper _touchMapper;
-  std::unique_ptr<shell::PlatformViewIOS> _platformView;
+  std::shared_ptr<shell::PlatformViewIOS> _platformView;
   fml::scoped_nsprotocol<FlutterPlatformPlugin*> _platformPlugin;
   fml::scoped_nsprotocol<FlutterTextInputPlugin*> _textInputPlugin;
   fml::scoped_nsprotocol<FlutterMethodChannel*> _localizationChannel;
@@ -119,7 +119,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
   _platformView =
-      std::make_unique<shell::PlatformViewIOS>(reinterpret_cast<CAEAGLLayer*>(self.view.layer));
+      std::make_shared<shell::PlatformViewIOS>(reinterpret_cast<CAEAGLLayer*>(self.view.layer));
   _platformView->Attach();
   _platformView->SetupResourceContextOnIOThread();
 
