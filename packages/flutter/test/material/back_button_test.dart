@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   testWidgets('BackButton control test', (WidgetTester tester) async {
@@ -33,6 +34,31 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
   });
 
+  testWidgets('BackButton platform navigation test', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(
+        new MaterialApp(
+            home: const Material(
+                child: const Center(
+                  child: const BackButton(),
+                )
+            ),
+        )
+    );
+
+    await tester.tap(find.byType(BackButton));
+
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton), findsOneWidget);
+    expect(log.contains(const MethodCall('SystemNavigator.pop')), true);
+  });
+  
   testWidgets('BackButton icon', (WidgetTester tester) async {
     final Key iOSKey = new UniqueKey();
     final Key androidKey = new UniqueKey();
