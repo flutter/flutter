@@ -306,7 +306,8 @@ void VulkanRasterizer::VulkanSurfaceProducer::Tick() {
 
 void VulkanRasterizer::VulkanSurfaceProducer::OnHandleReady(
     mx_handle_t handle,
-    mx_signals_t pending) {
+    mx_signals_t pending,
+    uint64_t count) {
   FTL_DCHECK(pending & MX_EPAIR_PEER_CLOSED);
 
   auto it = pending_surfaces_.find(handle);

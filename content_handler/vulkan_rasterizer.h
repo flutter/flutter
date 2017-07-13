@@ -49,7 +49,9 @@ class VulkanRasterizer : public Rasterizer {
 
    private:
     // |mtl::MessageLoopHandler|
-    void OnHandleReady(mx_handle_t handle, mx_signals_t pending) override;
+    void OnHandleReady(mx_handle_t handle,
+                       mx_signals_t pending,
+                       uint64_t count) override;
 
     struct Surface {
       sk_sp<GrVkBackendContext> backend_context;
