@@ -79,7 +79,7 @@ public class TextInputPlugin implements MethodCallHandler {
 
     private static int inputTypeFromTextInputType(String inputType,
                                                   boolean obscureText,
-                                                  boolean noAutoCorrect) {
+                                                  boolean autocorrect) {
         if (inputType.equals("TextInputType.datetime"))
             return InputType.TYPE_CLASS_DATETIME;
         if (inputType.equals("TextInputType.number"))
@@ -96,7 +96,7 @@ public class TextInputPlugin implements MethodCallHandler {
             // Note: both required. Some devices ignore TYPE_TEXT_FLAG_NO_SUGGESTIONS.
             textType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
             textType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
-        } else if (!noAutoCorrect) {
+        } else if (autocorrect) {
             textType |= InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
         }
         return textType;
@@ -110,7 +110,7 @@ public class TextInputPlugin implements MethodCallHandler {
         outAttrs.inputType = inputTypeFromTextInputType(
             mConfiguration.getString("inputType"),
             mConfiguration.optBoolean("obscureText"),
-            mConfiguration.optBoolean("noAutoCorrect"));
+            mConfiguration.optBoolean("autocorrect", true));
         if (!mConfiguration.isNull("actionLabel"))
           outAttrs.actionLabel = mConfiguration.getString("actionLabel");
         outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
