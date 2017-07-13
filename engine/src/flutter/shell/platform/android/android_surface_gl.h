@@ -47,21 +47,12 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate, public AndroidSurface {
 
   intptr_t GLContextFBO() const override;
 
-  sk_sp<SkColorSpace> ColorSpace() const override {
-    // TODO:
-    // We can render more consistently across devices when Android makes it
-    // possible to query for the color space of the display.
-    return onscreen_context_->SupportsSRGB() ? SkColorSpace::MakeSRGB()
-                                             : nullptr;
-  }
-
   void SetFlutterView(
       const fml::jni::JavaObjectWeakGlobalRef& flutter_view) override;
 
  private:
   ftl::RefPtr<AndroidContextGL> onscreen_context_;
   ftl::RefPtr<AndroidContextGL> offscreen_context_;
-  sk_sp<GrContext> gr_context_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
 };
