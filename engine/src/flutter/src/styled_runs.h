@@ -24,6 +24,8 @@
 
 namespace txt {
 
+// This holds and handles the start/end positions of discrete chunks of text
+// that use different styles (a 'run').
 class StyledRuns {
  public:
   struct Run {

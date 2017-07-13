@@ -348,6 +348,8 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 30), 68ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 60), 134ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 30), 133ull);
+
+  ASSERT_TRUE(Snapshot());
 }
 
 TEST_F(RenderTest, RightAlignParagraph) {
@@ -397,6 +399,8 @@ TEST_F(RenderTest, RightAlignParagraph) {
   paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
@@ -499,6 +503,8 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
@@ -603,6 +609,8 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   paragraph->Layout(GetTestCanvasWidth() - 100);
 
   paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);

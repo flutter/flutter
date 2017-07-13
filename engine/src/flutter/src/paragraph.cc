@@ -299,6 +299,7 @@ void Paragraph::Layout(double width, bool force) {
       buffers = std::vector<const SkTextBlobBuilder::RunBuffer*>();
       buffer_sizes = std::vector<size_t>();
       word_count = 0;
+      double temp_line_spacing = 0;
       while (blob_start < glyph_count) {
         const size_t blob_length = GetBlobLength(layout, blob_start);
         buffer_sizes.push_back(blob_length);
@@ -378,11 +379,11 @@ void Paragraph::Layout(double width, bool force) {
       // finished.
       x_queue.push_back(x);
 
-      if (max_line_spacing <
-          (-metrics.fAscent + metrics.fLeading) * run.style.height) {
-        max_line_spacing = lines_ == 0 ? metrics.fCapHeight * run.style.height
-                                       : (-metrics.fAscent + metrics.fLeading) *
-                                             run.style.height;
+      temp_line_spacing = lines_ == 0 ? metrics.fCapHeight * run.style.height
+                                      : (-metrics.fAscent + metrics.fLeading) *
+                                            run.style.height;
+      if (max_line_spacing < temp_line_spacing) {
+        max_line_spacing = temp_line_spacing;
         // Record the alphabetic_baseline_:
         if (lines_ == 0) {
           alphabetic_baseline_ = metrics.fCapHeight * run.style.height;
@@ -392,8 +393,9 @@ void Paragraph::Layout(double width, bool force) {
               run.style.height;
         }
       }
-      if (max_descent < metrics.fDescent * run.style.height)
-        max_descent = metrics.fDescent * run.style.height;
+      temp_line_spacing = metrics.fDescent * run.style.height;
+      if (max_descent < temp_line_spacing)
+        max_descent = temp_line_spacing;
 
       if (layout_end == next_break) {
         y += max_line_spacing + prev_max_descent;
@@ -504,7 +506,7 @@ size_t Paragraph::TextSize() const {
 }
 
 double Paragraph::GetHeight() const {
-  return height_;
+  return line_heights_[line_heights_.size() - 2];
 }
 
 void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {

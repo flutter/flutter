@@ -20,15 +20,15 @@
 namespace txt {
 
 enum class FontWeight {
-  w100,
-  w200,
-  w300,
-  w400,
-  w500,
-  w600,
-  w700,
-  w800,
-  w900,
+  w100,  // Thin
+  w200,  // Extra-Light
+  w300,  // Light
+  w400,  // Normal/Regular
+  w500,  // Medium
+  w600,  // Semi-bold
+  w700,  // Bold
+  w800,  // Extra-Bold
+  w900,  // Black
 };
 
 }  // namespace txt

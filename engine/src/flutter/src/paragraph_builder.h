@@ -39,8 +39,21 @@ class ParagraphBuilder {
 
   ~ParagraphBuilder();
 
+  // Push a style to the stack. The corresponding text added with AddText will
+  // use the top-most style.
   void PushStyle(const TextStyle& style);
 
+  // Remove a style from the stack. Useful to apply different styles to chunks
+  // of text such as bolding.
+  // Example:
+  //   builder.PushStyle(normal_style);
+  //   builder.AddText("Hello this is normal. ");
+  //
+  //   builder.PushStyle(bold_style);
+  //   builder.AddText("And this is BOLD. ");
+  //
+  //   builder.Pop();
+  //   builder.AddText(" Back to normal again.");
   void Pop();
 
   void AddText(const std::u16string& text);
@@ -51,8 +64,12 @@ class ParagraphBuilder {
 
   void SetParagraphStyle(const ParagraphStyle& style);
 
+  // It is recommended to initialize the ParagraphBuilder with a font collection
+  // as default font collection fallback will be deprecated.
   void SetFontCollection(FontCollection* font_collection);
 
+  // Constructs a Paragraph object that can be used to layout and paint the text
+  // to a SkCanvas.
   std::unique_ptr<Paragraph> Build();
 
  private:

@@ -61,12 +61,19 @@ class Paragraph {
 
   double GetMinIntrinsicWidth() const;
 
+  // Returns a vector of bounding boxes that enclose all text between start and
+  // end glyph indexes.
   std::vector<SkRect> GetRectsForRange(size_t start, size_t end) const;
 
+  // Returns the index of the glyph that corresponds to the provided coordinate,
+  // with the top left corner as the origin, and +y direction as down.
   size_t GetGlyphPositionAtCoordinate(double dx, double dy) const;
 
+  // Returns a bounding box that encloses the glyph at the index pos.
   SkRect GetCoordinatesForGlyphPosition(size_t pos) const;
 
+  // Finds the first and last glyphs that define a word containing the glyph at
+  // index offset.
   SkIPoint GetWordBoundary(size_t offset) const;
 
   int GetLineCount() const;
@@ -134,6 +141,9 @@ class Paragraph {
       std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
           collection_map);
 
+  // Calculates the GlyphIDs of all whitespace characters present in the text
+  // between start and end. THis is used to correctly add extra whitespace when
+  // justifying.
   void FillWhitespaceSet(size_t start, size_t end, hb_font_t* hb_font);
 
   void JustifyLine(std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
