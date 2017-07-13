@@ -104,7 +104,6 @@ void GetFontAndMinikinPaint(const TextStyle& style,
 
 void GetPaint(const TextStyle& style, SkPaint* paint) {
   paint->setTextSize(style.font_size);
-  paint->setFakeBoldText(style.fake_bold);
 }
 
 }  // namespace
