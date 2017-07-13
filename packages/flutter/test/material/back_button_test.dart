@@ -34,7 +34,7 @@ void main() {
     expect(find.text('Home'), findsOneWidget);
   });
 
-  testWidgets('BackButton platform navigation test', (WidgetTester tester) async {
+  testWidgets('BackButton platform navigation', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -42,13 +42,13 @@ void main() {
     });
 
     await tester.pumpWidget(
-        new MaterialApp(
-            home: const Material(
-                child: const Center(
-                  child: const BackButton(),
-                )
-            ),
-        )
+      new MaterialApp(
+        home: const Material(
+          child: const Center(
+            child: const BackButton(),
+          ),
+        ),
+      ),
     );
 
     await tester.tap(find.byType(BackButton));
@@ -58,7 +58,7 @@ void main() {
     expect(find.byType(BackButton), findsOneWidget);
     expect(log.contains(const MethodCall('SystemNavigator.pop')), true);
   });
-  
+
   testWidgets('BackButton icon', (WidgetTester tester) async {
     final Key iOSKey = new UniqueKey();
     final Key androidKey = new UniqueKey();
