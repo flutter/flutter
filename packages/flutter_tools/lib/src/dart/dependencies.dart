@@ -15,7 +15,7 @@ final List<String> _configurationConstants = <String>['dart.library.io'];
 
 String _dottedNameToString(analyzer.DottedName dottedName) {
   String result = '';
-  for (var identifier in dottedName.components) {
+  for (analyzer.SimpleIdentifier identifier in dottedName.components) {
     if (result.isEmpty) {
       result += identifier.token.lexeme;
     } else {
