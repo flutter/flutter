@@ -31,18 +31,20 @@ class GalleryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListTile(
-      title: new Text(title),
-      subtitle: new Text(subtitle),
-      onTap: () {
-        if (routeName != null) {
-          Timeline.instantSync('Start Transition', arguments: <String, String>{
-            'from': '/',
-            'to': routeName
-          });
-          Navigator.pushNamed(context, routeName);
+    return new MergeSemantics(
+      child: new ListTile(
+        title: new Text(title),
+        subtitle: new Text(subtitle),
+        onTap: () {
+          if (routeName != null) {
+            Timeline.instantSync('Start Transition', arguments: <String, String>{
+              'from': '/',
+              'to': routeName
+            });
+            Navigator.pushNamed(context, routeName);
+          }
         }
-      }
+      ),
     );
   }
 }
