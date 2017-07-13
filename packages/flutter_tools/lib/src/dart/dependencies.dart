@@ -45,7 +45,8 @@ class DartDependencySetBuilder {
       final Uri currentUri = toProcess.removeLast();
       final analyzer.CompilationUnit unit = _parse(currentUri.toFilePath());
       for (analyzer.Directive directive in unit.directives) {
-        if (!(directive is analyzer.UriBasedDirective)) continue;
+        if (!(directive is analyzer.UriBasedDirective))
+          continue;
 
         String uriAsString;
         if (directive is analyzer.NamespaceDirective) {
