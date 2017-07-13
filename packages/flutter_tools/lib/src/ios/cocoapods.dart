@@ -117,7 +117,12 @@ class CocoaPods {
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: bundle.path,
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+      environment: <String, String>{
+        'FLUTTER_FRAMEWORK_DIR': engineDirectory,
+        // See https://github.com/flutter/flutter/issues/10873.
+        // CocoaPods analytics adds a lot of latency.
+        'COCOAPODS_DISABLE_STATS': 'true',
+      },
     );
     status.stop();
     if (logger.isVerbose || result.exitCode != 0) {
