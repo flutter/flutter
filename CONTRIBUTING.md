@@ -167,13 +167,15 @@ To send us a pull request:
 
 Please make sure all your checkins have detailed commit messages explaining the patch.
 
-Once you've gotten an LGTM from a project maintainer, submit your changes to the
-`master` branch using one of the following methods:
+Once you've gotten an LGTM from a project maintainer and once your PR has received
+the green light from all our automated testing (Travis, Appveyor, etc), and once
+the tree is green (see the [design principles](https://flutter.io/design-principles/)
+document for more details), submit your changes to the `master` branch using one of
+the following methods:
 
 * Wait for one of the project maintainers to submit it for you.
 * Click the green "Merge pull request" button on the GitHub UI of your pull
   request (requires commit access)
-* `git push upstream name_of_your_branch:master` (requires commit access)
 
 You must complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).

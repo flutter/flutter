@@ -56,10 +56,10 @@ class _GesturePainter extends CustomPainter {
 
 class GestureDemo extends StatefulWidget {
   @override
-  _GestureDemoState createState() => new _GestureDemoState();
+  GestureDemoState createState() => new GestureDemoState();
 }
 
-class _GestureDemoState extends State<GestureDemo> {
+class GestureDemoState extends State<GestureDemo> {
 
   Offset _startingFocalPoint;
 
@@ -69,7 +69,29 @@ class _GestureDemoState extends State<GestureDemo> {
   double _previousZoom;
   double _zoom = 1.0;
 
-  MaterialColor _swatch = Colors.blue;
+  static const List<MaterialColor> kSwatches = const <MaterialColor>[
+    Colors.red,
+    Colors.pink,
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.indigo,
+    Colors.blue,
+    Colors.lightBlue,
+    Colors.cyan,
+    Colors.green,
+    Colors.lightGreen,
+    Colors.lime,
+    Colors.yellow,
+    Colors.amber,
+    Colors.orange,
+    Colors.deepOrange,
+    Colors.brown,
+    Colors.grey,
+    Colors.blueGrey,
+  ];
+  int _swatchIndex = 0;
+  MaterialColor _swatch = kSwatches.first;
+  MaterialColor get swatch => _swatch;
 
   bool _forward = true;
   bool _scaleEnabled = true;
@@ -104,42 +126,10 @@ class _GestureDemoState extends State<GestureDemo> {
 
   void _handleColorChange() {
     setState(() {
-      if (_swatch == Colors.blueGrey)
-        _swatch = Colors.red;
-      else if (_swatch == Colors.red)
-        _swatch = Colors.pink;
-      else if (_swatch == Colors.pink)
-        _swatch = Colors.purple;
-      else if (_swatch == Colors.purple)
-        _swatch = Colors.deepPurple;
-      else if (_swatch == Colors.deepPurple)
-        _swatch = Colors.indigo;
-      else if (_swatch == Colors.indigo)
-        _swatch = Colors.blue;
-      else if (_swatch == Colors.blue)
-        _swatch = Colors.lightBlue;
-      else if (_swatch == Colors.lightBlue)
-        _swatch = Colors.cyan;
-      else if (_swatch == Colors.teal)
-        _swatch = Colors.green;
-      else if (_swatch == Colors.green)
-        _swatch = Colors.lightGreen;
-      else if (_swatch == Colors.lightGreen)
-        _swatch = Colors.lime;
-      else if (_swatch == Colors.lime)
-        _swatch = Colors.yellow;
-      else if (_swatch == Colors.yellow)
-        _swatch = Colors.amber;
-      else if (_swatch == Colors.amber)
-        _swatch = Colors.orange;
-      else if (_swatch == Colors.orange)
-        _swatch = Colors.deepOrange;
-      else if (_swatch == Colors.deepOrange)
-        _swatch = Colors.brown;
-      else if (_swatch == Colors.brown)
-        _swatch = Colors.grey;
-      else if (_swatch == Colors.grey)
-        _swatch = Colors.blueGrey;
+      _swatchIndex += 1;
+      if (_swatchIndex == kSwatches.length)
+        _swatchIndex = 0;
+      _swatch = kSwatches[_swatchIndex];
     });
   }
 
@@ -152,6 +142,7 @@ class _GestureDemoState extends State<GestureDemo> {
   @override
   Widget build(BuildContext context) {
     return new Stack(
+      fit: StackFit.expand,
       children: <Widget>[
         new GestureDetector(
           onScaleStart: _scaleEnabled ? _handleScaleStart : null,
@@ -163,7 +154,7 @@ class _GestureDemoState extends State<GestureDemo> {
             painter: new _GesturePainter(
               zoom: _zoom,
               offset: _offset,
-              swatch: _swatch,
+              swatch: swatch,
               forward: _forward,
               scaleEnabled: _scaleEnabled,
               tapEnabled: _tapEnabled,

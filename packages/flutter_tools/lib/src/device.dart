@@ -111,7 +111,8 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingDuration = const Duration(seconds: 4);
+  static const Duration _pollingInterval = const Duration(seconds: 4);
+  static const Duration _pollingTimeout = const Duration(seconds: 30);
 
   final String name;
   ItemListNotifier<Device> _items;
@@ -122,8 +123,21 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   void startPolling() {
     if (_timer == null) {
       _items ??= new ItemListNotifier<Device>();
-      _timer = new Timer.periodic(_pollingDuration, (Timer timer) async {
-        _items.updateWithNewList(await pollingGetDevices());
+      bool _fetchingDevices = false;
+      _timer = new Timer.periodic(_pollingInterval, (Timer timer) async {
+        if (_fetchingDevices) {
+          printTrace('Skipping device poll: already in progress');
+          return;
+        }
+        _fetchingDevices = true;
+        try {
+          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+          _items.updateWithNewList(devices);
+        } on TimeoutException {
+          printTrace('Device poll timed out.');
+        } finally {
+          _fetchingDevices = false;
+        }
       });
     }
   }

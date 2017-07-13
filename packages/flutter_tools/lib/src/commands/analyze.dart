@@ -23,7 +23,7 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addOption('dart-sdk', valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: !verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
-    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp, help: 'Also output the analysis time');
+    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp, help: 'Also output the analysis time.');
 
     usesPubOption();
 

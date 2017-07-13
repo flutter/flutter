@@ -7,6 +7,24 @@ import 'package:analyzer/analyzer.dart' as analyzer;
 import '../base/file_system.dart';
 import '../dart/package_map.dart';
 
+// List of flutter specific environment configurations.
+// See https://github.com/munificent/dep-interface-libraries/blob/master/Proposal.md
+// We will populate this list as required. Potentially, all of dart:* libraries
+// supported by flutter would end up here.
+final List<String> _configurationConstants = <String>['dart.library.io'];
+
+String _dottedNameToString(analyzer.DottedName dottedName) {
+  String result = '';
+  for (analyzer.SimpleIdentifier identifier in dottedName.components) {
+    if (result.isEmpty) {
+      result += identifier.token.lexeme;
+    } else {
+      result += '.' + identifier.token.lexeme;
+    }
+  }
+  return result;
+}
+
 class DartDependencySetBuilder {
   DartDependencySetBuilder(String mainScriptPath, String packagesFilePath) :
     _mainScriptPath = canonicalizePath(mainScriptPath),
@@ -28,10 +46,27 @@ class DartDependencySetBuilder {
       final Uri currentUri = toProcess.removeLast();
       final analyzer.CompilationUnit unit = _parse(currentUri.toFilePath());
       for (analyzer.Directive directive in unit.directives) {
-        if (!(directive is analyzer.UriBasedDirective))
+        if (!(directive is analyzer.UriBasedDirective)) {
           continue;
-        final analyzer.UriBasedDirective uriBasedDirective = directive;
-        final String uriAsString = uriBasedDirective.uri.stringValue;
+        }
+
+        String uriAsString;
+        if (directive is analyzer.NamespaceDirective) {
+         final analyzer.NamespaceDirective namespaceDirective = directive;
+          // If the directive is a conditional import directive, we should
+          // select the imported uri based on the condition.
+          for (analyzer.Configuration configuration in namespaceDirective.configurations) {
+            if (_configurationConstants.contains(_dottedNameToString(configuration.name))) {
+              uriAsString = configuration.uri.stringValue;
+              break;
+            }
+          }
+        }
+        if (uriAsString == null) {
+          final analyzer.UriBasedDirective uriBasedDirective = directive;
+          uriAsString = uriBasedDirective.uri.stringValue;
+        }
+
         Uri resolvedUri = analyzer.resolveRelativeUri(currentUri, Uri.parse(uriAsString));
         if (resolvedUri.scheme.startsWith('dart'))
           continue;

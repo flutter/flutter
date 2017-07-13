@@ -39,7 +39,7 @@ void main() {
         .transform(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
-          if (line == '[            ] For a more detailed help message, press "h". To quit, press "q".') {
+          if (line.contains(new RegExp(r'^\[\s+\] For a more detailed help message, press "h"\. To quit, press "q"\.'))) {
             print('run: ready!');
             ready.complete();
             ok ??= true;
