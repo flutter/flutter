@@ -46,6 +46,7 @@ class AnalysisDriver {
   DriverOptions options;
 
   String get sdkDir {
+    // ignore: deprecated_member_use
     return options.dartSdkPath ?? fs.path.absolute(cli_util.getSdkDir().path);
   }
 
