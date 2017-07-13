@@ -165,7 +165,37 @@ class Xcode {
     return _xcodeVersionCheckValid(xcodeMajorVersion, xcodeMinorVersion);
   }
 
+  final RegExp _processRegExp = new RegExp(r'^(\S+)\s+1\s+(\d+)\s+(.+)$');
+
+  /// Kills any orphaned Instruments processes belonging to the user.
+  ///
+  /// In some cases, we've seen interactions between Instruments and the iOS
+  /// simulator that cause hung instruments and DTServiceHub processes. If
+  /// enough instances pile up, the host machine eventually becomes
+  /// unresponsive. Until the underlying issue is resolved, manually kill any
+  /// orphaned instances (where the parent process has died and PPID is 1)
+  /// before launching another instruments run.
+  Future<Null> _killOrphanedInstrumentsProcesses() async {
+    final ProcessResult result = await processManager.run(<String>['ps', '-e', '-o', 'user,ppid,pid,comm']);
+    if (result.exitCode != 0)
+      return;
+    for (String line in result.stdout.split('\n')) {
+      final Match match = _processRegExp.firstMatch(line.trim());
+      if (match == null || match[1] != platform.environment['USER'])
+        continue;
+      if (<String>['/instruments', '/DTServiceHub'].any(match[3].endsWith)) {
+        try {
+          printTrace('Killing orphaned Instruments process: ${match[2]}');
+          processManager.killPid(int.parse(match[2]));
+        } catch (_) {
+          printTrace('Failed to kill orphaned Instruments process:\n$line');
+        }
+      }
+    }
+  }
+
   Future<String> getAvailableDevices() async {
+    await _killOrphanedInstrumentsProcesses();
     try {
       final ProcessResult result = await processManager.run(
           <String>['/usr/bin/instruments', '-s', 'devices']);
