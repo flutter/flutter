@@ -169,7 +169,7 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
           // Create the minikin font from the skia typeface.
           minikin::Font minikin_font(
               std::make_shared<FontSkia>(skia_typeface),
-              minikin::FontStyle{skia_typeface->fontStyle().weight(),
+              minikin::FontStyle{skia_typeface->fontStyle().weight() / 100,
                                  skia_typeface->isItalic()});
 
           minikin_fonts.emplace_back(std::move(minikin_font));

@@ -36,7 +36,6 @@ class TextStyle {
   double decoration_thickness = 1.0;
   FontWeight font_weight = FontWeight::w400;
   FontStyle font_style = FontStyle::normal;
-  bool fake_bold = false;
   TextBaseline text_baseline = TextBaseline::kAlphabetic;
   std::string font_family = "";
   double font_size = 14.0;

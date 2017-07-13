@@ -136,7 +136,6 @@ TEST_F(RenderTest, RainbowParagraph) {
   text_style2.letter_spacing = 10;
   text_style2.word_spacing = 30;
   text_style2.font_weight = txt::FontWeight::w600;
-  text_style2.fake_bold = true;
   text_style2.color = SK_ColorGREEN;
   text_style2.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
   text_style2.decoration_color = SK_ColorBLACK;
@@ -229,10 +228,10 @@ TEST_F(RenderTest, BoldParagraph) {
   txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
   text_style.font_size = 60;
-  text_style.letter_spacing = 10;
-  text_style.font_weight = txt::FontWeight::w700;
-  text_style.fake_bold = true;
+  text_style.letter_spacing = 0;
+  text_style.font_weight = txt::FontWeight::w900;
   text_style.color = SK_ColorRED;
   builder.PushStyle(text_style);
 
@@ -927,6 +926,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   txt::TextStyle text_style;
   text_style.font_size = 50;
   text_style.letter_spacing = 0;
+  text_style.font_weight = FontWeight::w500;
   text_style.word_spacing = 0;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
