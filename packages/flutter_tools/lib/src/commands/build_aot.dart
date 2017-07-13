@@ -142,7 +142,12 @@ Future<String> _buildAotSnapshot(
   final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
   final String dependencies = fs.path.join(outputDir.path, 'snapshot.d');
 
-  final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
+  final String vmEntryPoints = artifacts.getArtifactPath(
+      buildMode == BuildMode.release
+          ? Artifact.dartReleaseVmEntryPointsTxt
+          : Artifact.dartVmEntryPointsTxt,
+      platform,
+      buildMode);
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
