@@ -21,7 +21,7 @@ class CompositorContext {
  public:
   class ScopedFrame {
    public:
-    SkCanvas* canvas() { return canvas_; }
+    SkCanvas& canvas() { return *canvas_; }
 
     CompositorContext& context() const { return context_; }
 

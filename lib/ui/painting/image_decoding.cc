@@ -32,10 +32,9 @@ sk_sp<SkImage> DecodeImage(sk_sp<SkData> buffer) {
 
   GrContext* context = ResourceContext::Get();
   if (context) {
-    // This acts as a flag to indicate that we want a color space aware decode.
-    sk_sp<SkColorSpace> dstColorSpace = SkColorSpace::MakeSRGB();
+    // TODO: Supply actual destination color space once available
     return SkImage::MakeCrossContextFromEncoded(context, std::move(buffer),
-                                                false, dstColorSpace.get());
+                                                false, nullptr);
   } else {
     return SkImage::MakeFromEncoded(std::move(buffer));
   }
