@@ -167,8 +167,10 @@ To send us a pull request:
 
 Please make sure all your checkins have detailed commit messages explaining the patch.
 
-Once you've gotten an LGTM from a project maintainer, submit your changes to the
-`master` branch using one of the following methods:
+Once you've gotten an LGTM from a project maintainer, verify that all of the automated
+checks on your pull request have successfully completed. You can see the results
+of the checks on your pull request page. When all checks pass, submit your changes
+to the `master` branch using one of the following methods:
 
 * Wait for one of the project maintainers to submit it for you.
 * Click the green "Merge pull request" button on the GitHub UI of your pull
