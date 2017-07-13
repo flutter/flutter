@@ -36,6 +36,8 @@
 
 namespace txt {
 
+// FontCollection holds a vector of Skia Font Managers and handles font
+// fallback.
 class FontCollection {
  public:
   enum CacheMethod {
@@ -52,6 +54,10 @@ class FontCollection {
   // Will be deprecated when full compatibility with Flutter Engine is complete.
   static FontCollection& GetFontCollection(std::vector<std::string> dirs);
 
+  // Provides a pointer to the minikin FontCollection for the given font family.
+  // If the famly is not in any font manager, this will return a nullptr. Once a
+  // font is loaded, it is cached and future calls will be very efficient (until
+  // the font is flushed).
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family);
 
@@ -70,10 +76,16 @@ class FontCollection {
   // Provides a set of all available family names.
   std::set<std::string> GetFamilyNames();
 
+  // Returns true when the supplied font family exists in any of the font
+  // managers.
   bool HasFamily(const std::string family) const;
 
+  // Removes all fonts that do not fit in the cache capacity from memory.
   void FlushCache();
 
+  // When in LRU mode, the cache will only hold the <cap> most recently used
+  // fonts. This may be used when the application becomes low on memory or a
+  // very large number of fonts are used.
   void SetCacheCapacity(const size_t cap);
 
   // Call this to limit memory usage by cached fonts. SetLowMemoryMode() will
