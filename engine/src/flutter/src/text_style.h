@@ -29,9 +29,9 @@ namespace txt {
 
 class TextStyle {
  public:
-  SkColor color = SK_ColorWHITE;
+  SkColor color = SK_ColorBLACK;
   TextDecoration decoration = TextDecoration::kNone;
-  SkColor decoration_color = SK_ColorWHITE;
+  SkColor decoration_color = SK_ColorTRANSPARENT;
   TextDecorationStyle decoration_style = TextDecorationStyle::kSolid;
   double decoration_thickness = 1.0;
   FontWeight font_weight = FontWeight::w400;

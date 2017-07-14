@@ -20,7 +20,7 @@ config("txt_config") {
   ]
 }
 
-static_library("txt") {
+source_set("txt") {
   if (current_toolchain == host_toolchain) {
     defines = [ "DIRECTORY_FONT_MANAGER_AVAILABLE" ]
   }

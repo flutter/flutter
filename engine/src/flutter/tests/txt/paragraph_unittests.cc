@@ -313,7 +313,7 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
-  double expected_y = 18.484375;
+  double expected_y = 24.12109375;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
@@ -345,9 +345,9 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   // Tests for GetGlyphPositionAtCoordinate()
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 1), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 30), 68ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 60), 134ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 30), 133ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 35), 68ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 70), 134ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 35), 133ull);
 
   ASSERT_TRUE(Snapshot());
 }
@@ -409,7 +409,7 @@ TEST_F(RenderTest, RightAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
-  double expected_y = 18.484375;
+  double expected_y = 24.12109375;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
@@ -513,7 +513,7 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
-  double expected_y = 18.484375;
+  double expected_y = 24.12109375;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
@@ -619,7 +619,7 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
-  double expected_y = 18.484375;
+  double expected_y = 24.12109375;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
@@ -905,15 +905,15 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(3, 3), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 1), 1ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20), 17ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 80), 35ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-100000, 80), 18ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 90), 35ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-100000, 90), 18ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(20, -80), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 80), 18ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 160), 36ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 160), 53ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(70, 160), 38ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 90), 18ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 180), 36ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 180), 53ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(70, 180), 38ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 270), 54ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 80), 19ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 90), 19ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 10000), 77ull);
 }
 
@@ -966,7 +966,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[0].left(), 0);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 28);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 47.7539);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
   paint.setColor(SK_ColorBLUE);
   rects = paragraph->GetRectsForRange(2, 7);
@@ -977,17 +977,17 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[0].left(), 56);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 151);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 47.7539);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
   EXPECT_FLOAT_EQ(rects[1].left(), 151);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
   EXPECT_FLOAT_EQ(rects[1].right(), 163);
-  EXPECT_FLOAT_EQ(rects[1].bottom(), 47.7539);
+  EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
 
   EXPECT_FLOAT_EQ(rects[2].left(), 163);
   EXPECT_FLOAT_EQ(rects[2].top(), 0);
   EXPECT_FLOAT_EQ(rects[2].right(), 175);
-  EXPECT_FLOAT_EQ(rects[2].bottom(), 47.7539);
+  EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
 
   paint.setColor(SK_ColorGREEN);
   rects = paragraph->GetRectsForRange(8, 20);
@@ -998,17 +998,17 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[0].left(), 175);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 347);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 47.7539);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
   EXPECT_FLOAT_EQ(rects[1].left(), 347);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
   EXPECT_FLOAT_EQ(rects[1].right(), 359);
-  EXPECT_FLOAT_EQ(rects[1].bottom(), 47.7539);
+  EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
 
   EXPECT_FLOAT_EQ(rects[2].left(), 359);
   EXPECT_FLOAT_EQ(rects[2].top(), 0);
   EXPECT_FLOAT_EQ(rects[2].right(), 499);
-  EXPECT_FLOAT_EQ(rects[2].bottom(), 47.7539);
+  EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
 
   paint.setColor(SK_ColorRED);
   rects = paragraph->GetRectsForRange(30, 100);
@@ -1017,16 +1017,16 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   }
   ASSERT_EQ(rects.size(), 17ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 208);
-  EXPECT_FLOAT_EQ(rects[0].top(), 47.753906);
+  EXPECT_FLOAT_EQ(rects[0].top(), 58.59375);
   EXPECT_FLOAT_EQ(rects[0].right(), 292);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 106.34766);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 117.1875);
 
   // TODO(garyq): The following set of vals are definetly wrong and
   // end of paragraph handling needs to be fixed in a later patch.
   EXPECT_FLOAT_EQ(rects[16].left(), 0);
-  EXPECT_FLOAT_EQ(rects[16].top(), 223.53516);
+  EXPECT_FLOAT_EQ(rects[16].top(), 234.375);
   EXPECT_FLOAT_EQ(rects[16].right(), 133.875);
-  EXPECT_FLOAT_EQ(rects[16].bottom(), 282.12891);
+  EXPECT_FLOAT_EQ(rects[16].bottom(), 292.96875);
 
   ASSERT_TRUE(Snapshot());
 }
