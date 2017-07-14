@@ -254,9 +254,10 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   @override
   void performLayout() {
     final double maxExtent = this.maxExtent;
+    final double minExtent = this.minExtent;
     layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: constraints.overlap > 0.0);
     geometry = new SliverGeometry(
-      scrollExtent: maxExtent,
+      scrollExtent: maxExtent - minExtent,
       paintOrigin: constraints.overlap,
       paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
       layoutExtent: (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent),
@@ -449,14 +450,13 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
     FloatingHeaderSnapConfiguration snapConfiguration,
   }) : super(child: child, snapConfiguration: snapConfiguration);
 
-  @override
   double updateGeometry() {
-    final double minExtent = this.maxExtent;
+    final double minExtent = this.minExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = (maxExtent - _effectiveScrollOffset);
     final double layoutExtent = (maxExtent - constraints.scrollOffset);
     geometry = new SliverGeometry(
-      scrollExtent: maxExtent,
+      scrollExtent: maxExtent - minExtent,
       paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent - minExtent),
       maxPaintExtent: maxExtent,
