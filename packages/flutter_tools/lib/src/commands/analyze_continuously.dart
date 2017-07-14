@@ -42,7 +42,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     showDartDocIssuesIndividually = argResults['dartdocs'];
 
     if (showDartDocIssuesIndividually && !flutterRepo)
-      throwToolExit('The --dartdocs option is only supported when using --watch --flutter-repo.');
+      throwToolExit('The --dartdocs option is only supported when using --flutter-repo.');
 
     if (flutterRepo) {
       final PackageDependencyTracker dependencies = new PackageDependencyTracker();
@@ -87,10 +87,10 @@ class AnalyzeContinuously extends AnalyzeBase {
       logger.printStatus(terminal.clearScreen(), newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
-      final List<AnalysisError> errors = <AnalysisError>[];
+      final List<AnalysisError> allErrors = <AnalysisError>[];
       for (String path in analysisErrors.keys.toList()) {
         if (fs.isFileSync(path)) {
-          errors.addAll(analysisErrors[path]);
+          allErrors.addAll(analysisErrors[path]);
         } else {
           analysisErrors.remove(path);
         }
@@ -98,27 +98,30 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       // Summarize dartdoc issues rather than displaying each individually
       int membersMissingDocumentation = 0;
+      List<AnalysisError> detailErrors;
       if (flutterRepo && !showDartDocIssuesIndividually) {
-        errors.removeWhere((AnalysisError error) {
+        detailErrors = allErrors.where((AnalysisError error) {
           if (error.code == 'public_member_api_docs') {
             // https://github.com/dart-lang/linter/issues/208
             if (isFlutterLibrary(error.file))
-              ++membersMissingDocumentation;
+              membersMissingDocumentation += 1;
             return true;
           }
           return false;
-        });
+        }).toList();
+      } else {
+        detailErrors = allErrors;
       }
 
-      errors.sort();
+      detailErrors.sort();
 
-      for (AnalysisError error in errors) {
+      for (AnalysisError error in detailErrors) {
         printStatus(error.toString());
         if (error.code != null)
           printTrace('error code: ${error.code}');
       }
 
-      dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
+      dumpErrors(detailErrors.map<String>((AnalysisError error) => error.toLegacyString()));
 
       if (membersMissingDocumentation != 0) {
         printStatus(membersMissingDocumentation == 1
@@ -129,7 +132,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       // Print an analysis summary.
       String errorsMessage;
 
-      final int issueCount = errors.length;
+      final int issueCount = detailErrors.length;
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
 
@@ -175,7 +178,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 }
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories, {this.flutterRepo: false});
+  AnalysisServer(this.sdk, this.directories, { this.flutterRepo: false });
 
   final String sdk;
   final List<String> directories;
