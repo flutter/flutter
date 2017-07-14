@@ -36,10 +36,10 @@ class OrientationBuilder extends StatelessWidget {
 
   /// Builds the widgets below this widget given this widget's orientation.
   ///
-  /// A widget's orientation is simply a factor its constrained width relative
-  /// to its constrained height. For example, a [Column] widget will have a
-  /// landscape orientation if its width exceeds its height, even though it
-  /// displays its children in a vertical array.
+  /// A widget's orientation is simply a factor of its width relative to its
+  /// height. For example, a [Column] widget will have a landscape orientation
+  /// if its width exceeds its height, even though it displays its children in
+  /// a vertical array.
   final OrientationWidgetBuilder builder;
 
   Widget _buildWithConstraints(BuildContext context, BoxConstraints constraints) {
