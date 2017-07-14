@@ -117,7 +117,6 @@ void SceneUpdateContext::ExecutePaintTasks(
     canvas->translate(-task.left, -task.top);
     for (Layer* layer : task.layers)
       layer->Paint(context);
-    canvas->flush();
   }
 
   paint_tasks_.clear();
