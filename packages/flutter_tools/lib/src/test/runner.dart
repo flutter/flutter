@@ -66,6 +66,7 @@ Future<int> runTests(
     shellPath: shellPath,
     watcher: watcher,
     enableObservatory: enableObservatory,
+    machine: json,
     startPaused: startPaused,
     serverType: serverType,
   );
