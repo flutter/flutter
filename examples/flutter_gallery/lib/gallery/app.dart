@@ -139,7 +139,7 @@ class GalleryAppState extends State<GalleryApp> {
     }
 
     return new MaterialApp(
-      title: 'Flutter Galllery',
+      title: 'Flutter Gallery',
       color: Colors.grey,
       theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: _platform ?? defaultTargetPlatform),
       showPerformanceOverlay: _showPerformanceOverlay,

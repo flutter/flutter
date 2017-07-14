@@ -12,8 +12,6 @@
 #
 # -------------------------------------------------------------------------- #
 
-echo $*
-
 set -e
 
 function follow_links() {
@@ -95,7 +93,7 @@ fi
 ) 3< "$PROG_NAME"
 
 set +e
-"$DART" $FLUTTER_TOOL_ARGS  --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH" "$@"
+"$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
 
 # The VM exits with code 253 if the snapshot version is out-of-date.
 # If it is, we need to snapshot it again.

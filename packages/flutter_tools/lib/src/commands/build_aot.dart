@@ -284,6 +284,8 @@ Future<String> _buildAotSnapshot(
       mainPath
     ]);
     mainPath = uriDill.toFilePath();
+
+    genSnapshotCmd.add("--no_causal_async_stacks");
   }
 
   genSnapshotCmd.add(mainPath);
