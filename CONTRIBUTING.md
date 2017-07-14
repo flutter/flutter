@@ -134,7 +134,7 @@ flutter_tools' tests run inside the Dart command line VM rather than in the
 flutter shell. To run the test:
 
 * `cd packages/flutter_tools`
-* `dart --checked test/all.dart`
+* `pub run test -j1`
 
 The pre-built flutter tool runs in release mode with the observatory off by default.
 To enable debugging mode and the observatory on the `flutter` tool, uncomment the
