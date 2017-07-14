@@ -45,7 +45,12 @@ class FlutterDevice {
   }
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
-  /// will be registered
+  /// will be registered.
+  /// The 'reloadSources' service can be used by other Service Protocol clients
+  /// connected to the VM (e.g. Observatory) to request a reload of the source
+  /// code of the running application (a.k.a. HotReload).
+  /// This ensures that the reload process follows the normal orchestration of
+  /// the Flutter Tools and not just the VM internal service.
   void connect({ReloadSources reloadSources}) {
     if (vmServices != null)
       return;

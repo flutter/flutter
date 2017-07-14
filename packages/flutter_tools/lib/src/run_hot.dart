@@ -85,8 +85,8 @@ class HotRunner extends ResidentRunner {
   }
 
   Future _reloadSourcesService(String isolateId,
-      {bool force: false, bool pause: false}) async {
-    // TODO(cbernaschina): check that isolateId is the id of the UI isolate
+      { bool force: false, bool pause: false }) async {
+    // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     return restart(pauseAfterRestart: pause);
   }
 
@@ -511,10 +511,6 @@ class HotRunner extends ResidentRunner {
     _runningFromSnapshot = false;
     // Check if the isolate is paused.
 
-    if (pause) {
-      printTrace('Skipping reassemble because all isolates are paused.');
-      return new OperationResult(OperationResult.ok.code, reloadMessage);
-    }
     final List<FlutterView> reassembleViews = <FlutterView>[];
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {

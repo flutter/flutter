@@ -24,9 +24,9 @@ typedef StreamChannel<String> _OpenChannel(Uri uri);
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
-/// A function that reacts to the invocation of the 'reloadSources' service
+/// A function that reacts to the invocation of the 'reloadSources' service.
 typedef Future ReloadSources(String isolateId,
-    {bool force, bool pause});
+    { bool force, bool pause });
 
 const String _kRecordingType = 'vmservice';
 
@@ -55,8 +55,8 @@ class VMService {
 
     if (reloadSources != null) {
       _peer.registerMethod('reloadSources', (rpc.Parameters params) async {
-        const kInvalidParams = -32602;
-        const kServerError = -32000;
+        const int kInvalidParams = -32602;
+        const int kServerError = -32000;
 
         final String isolateId = params['isolateId'].value;
         final bool force = params.asMap['force'] ?? false;
@@ -70,8 +70,7 @@ class VMService {
           throw new rpc.RpcException.invalidParams('Invalid \'pause\'');
 
         try {
-          await reloadSources(isolateId, force: force ?? false,
-              pause: pause ?? false);
+          await reloadSources(isolateId, force: force, pause: pause);
           return {'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
@@ -120,11 +119,11 @@ class VMService {
   /// Requests made via the returns [VMService] time out after [requestTimeout]
   /// amount of time, which is [kDefaultRequestTimeout] by default.
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
-  /// will be registered
+  /// will be registered.
   static VMService connect(
     Uri httpUri, {
     Duration requestTimeout: kDefaultRequestTimeout,
-    ReloadSources reloadSources
+    ReloadSources reloadSources,
   }) {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = _openChannel(wsUri);
