@@ -10,7 +10,9 @@ import 'package:flutter/services.dart';
 
 import 'button.dart';
 
-const double _kHandleSize = 22.0; // pixels
+// Padding around the line at the edge of the text selection that has 0 width and
+// the height of the text font.
+const double _selectionHandlesPadding = 10.0;
 const double _kToolbarScreenPadding = 8.0; // pixels
 const double _kToolbarHeight = 36.0;
 
@@ -175,15 +177,31 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   }
 }
 
-/// Draws a single text selection handle. The [type] determines where the handle
-/// points (e.g. the [left] handle points up and to the right).
+/// Draws a single text selection handle with a bar and a ball.
+///
+/// Draws from a point of origin somewhere inside the size of the painter
+/// such that the ball is below the point of origin and the bar is above the
+/// point of origin.
 class _TextSelectionHandlePainter extends CustomPainter {
+  _TextSelectionHandlePainter({this.origin});
+
+  final Offset origin;
+
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = new Paint()..color = _selectionHandlesBlue;
-    final double radius = size.width/2.0;
-    canvas.drawCircle(new Offset(radius, radius), radius, paint);
-    canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
+    paint.strokeWidth = 2.0;
+    // Draw circle that slightly overlaps the bar.
+    canvas.drawCircle(origin.translate(0.0, 4.0), 5.5, paint);
+    // Draw up from origin leaving 10 pixels of margin.
+    canvas.drawLine(
+      origin,
+      origin.translate(
+        0.0,
+        -(size.height - 2 * _selectionHandlesPadding),
+      ),
+      paint
+    );
   }
 
   @override
@@ -194,7 +212,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
   @override
-  Size handleSize = const Size(_kHandleSize, _kHandleSize);
+  Size handleSize = const Size(20.0, 40.0);
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
@@ -219,38 +237,56 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     );
   }
 
-  /// Builder for material-style text selection handles.
+  /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type) {
-    final Widget handle = new SizedBox(
-      width: _kHandleSize,
-      height: _kHandleSize,
-      child: new CustomPaint(
-        painter: new _TextSelectionHandlePainter(),
-      )
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
+    // We want a size that's a vertical line the height of the text plus a 10.0
+    // padding in every direction that will constitute the selection drag area.
+    final Size desiredSize = new Size(
+      2 * _selectionHandlesPadding,
+      textHeight + 2 * _selectionHandlesPadding
     );
 
-    // [handle] is a circle, with a rectangle in the top left quadrant of that
-    // circle (an onion pointing to 10:30). We rotate [handle] to point
-    // straight up or up-right depending on the handle type.
+    final Widget handle = new SizedBox.fromSize(
+      size: desiredSize,
+      child: new CustomPaint(
+        painter: new _TextSelectionHandlePainter(
+          // We give the painter a point of origin that's at the bottom baseline
+          // of the selection cursor position.
+          //
+          // We give it in the form of an offset from the top left of the
+          // SizedBox.
+          origin: new Offset(_selectionHandlesPadding, textHeight + _selectionHandlesPadding),
+        ),
+      ),
+    );
+
+    // [buildHandle]'s widget is positioned at the selection cursor's bottom
+    // baseline. We transform the handle such that the SizedBox is superimposed
+    // on top of the text selection endpoints.
     switch (type) {
-      case TextSelectionHandleType.left:  // points up-right
+      case TextSelectionHandleType.left: // Also flipped for iOS.
         return new Transform(
-          transform: new Matrix4.rotationZ(math.PI / 2.0),
+          transform: new Matrix4.rotationZ(math.PI)
+              ..translate(-_selectionHandlesPadding, -_selectionHandlesPadding),
           child: handle
         );
-      case TextSelectionHandleType.right:  // points up-left
-        return handle;
-      case TextSelectionHandleType.collapsed:  // points up
+      case TextSelectionHandleType.right:
         return new Transform(
-          transform: new Matrix4.rotationZ(math.PI / 4.0),
+          transform: new Matrix4.translationValues(
+            -_selectionHandlesPadding,
+            -(textHeight + _selectionHandlesPadding),
+            0.0
+          ),
           child: handle
         );
+      case TextSelectionHandleType.collapsed:  // iOS doesn't draw anything for collapsed selections.
+        return new Container();
     }
     assert(type != null);
     return null;
   }
 }
 
-/// Text selection controls that follow the Material Design specification.
+/// Text selection controls that follows iOS design conventions.
 final TextSelectionControls cupertinoTextSelectionControls = new _CupertinoTextSelectionControls();

@@ -72,7 +72,10 @@ abstract class TextSelectionDelegate {
 /// Override text operations such as [handleCut] if needed.
 abstract class TextSelectionControls {
   /// Builds a selection handle of the given type.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type);
+  ///
+  /// The top left corner of this widget is positioned at the bottom of the
+  /// selection position.
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -471,7 +474,11 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
             new Positioned(
               left: point.dx,
               top: point.dy,
-              child: widget.selectionControls.buildHandle(context, type),
+              child: widget.selectionControls.buildHandle(
+                context,
+                type,
+                widget.renderObject.size.height,
+              ),
             ),
           ],
         ),

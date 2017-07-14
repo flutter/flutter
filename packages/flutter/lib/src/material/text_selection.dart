@@ -158,7 +158,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
     final Widget handle = new SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
