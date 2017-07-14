@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,16 +8,47 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import 'flat_button.dart';
-import 'material.dart';
-import 'theme.dart';
+import 'button.dart';
 
 const double _kHandleSize = 22.0; // pixels
 const double _kToolbarScreenPadding = 8.0; // pixels
+const double _kToolbarHeight = 36.0;
+
+const Color _selectionToolbarBackgroundBlack = const Color(0xFF2E2E2E);
+const Color _selectionToolbarDividerGray = const Color(0xFFB9B9B9);
+const Color _selectionHandlesBlue = const Color(0xFF146DDE);
+
+const EdgeInsets _kToolbarButtonPadding = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
+
+const TextStyle _kToolbarButtonFontStyle = const TextStyle(
+  fontSize: 14.0,
+  letterSpacing: -0.11,
+  fontWeight: FontWeight.w300,
+);
+
+/// Paints a triangle below the toolbar.
+class _TextSelectionToolbarNotchPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = new Paint()..color = _selectionToolbarBackgroundBlack;
+    final Path triangle = new Path();
+    triangle.lineTo(9.0, 0.0);
+    triangle.lineTo(0.0, 9.0);
+    triangle.lineTo(-9.0, 0.0);
+    triangle.close();
+    paint.style = PaintingStyle.fill;
+    canvas.drawPath(triangle, paint);
+  }
+
+  @override
+  bool shouldRepaint(_TextSelectionToolbarNotchPainter oldPainter) {
+    return false;
+  }
+}
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
-  const _TextSelectionToolbar(
+    const _TextSelectionToolbar(
     this.delegate,
     this._handleCut,
     this._handleCopy,
@@ -38,26 +69,62 @@ class _TextSelectionToolbar extends StatelessWidget {
     final List<Widget> items = <Widget>[];
 
     if (!value.selection.isCollapsed) {
-      items.add(new FlatButton(child: const Text('CUT'), onPressed: _handleCut));
-      items.add(new FlatButton(child: const Text('COPY'), onPressed: _handleCopy));
-    }
-    items.add(new FlatButton(
-      child: const Text('PASTE'),
-      // TODO(mpcomplete): This should probably be grayed-out if there is nothing to paste.
-      onPressed: _handlePaste,
-    ));
-    if (value.text.isNotEmpty) {
-      if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: _handleSelectAll));
+      _addButton(items, 'Cut', _handleCut);
+      _addButton(items, 'Copy', _handleCopy);
     }
 
-    return new Material(
-      elevation: 1.0,
-      child: new Container(
-        height: 44.0,
-        child: new Row(mainAxisSize: MainAxisSize.min, children: items)
+    // TODO(xster): This should probably be grayed-out if there is nothing to paste.
+    _addButton(items, 'Paste', _handlePaste);
+
+    if (value.text.isNotEmpty)
+      if (value.selection.isCollapsed)
+        _addButton(items, 'Select All', _handleSelectAll);
+
+    // Remove the last divider.
+    if (items.last.runtimeType == SizedBox)
+      items.removeLast();
+
+    final Widget triangle = new SizedBox(
+      width: 18.0,
+      height: 9.0,
+      child: new CustomPaint(
+        painter: new _TextSelectionToolbarNotchPainter(),
       )
     );
+
+    return new Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        new ClipRRect(
+          borderRadius: new BorderRadius.circular(7.5),
+          child: new Row(mainAxisSize: MainAxisSize.min, children: items),
+        ),
+        // TODO(xster): position the triangle based on the layout delegate.
+        // And avoid letting the triangle line up with any dividers.
+        triangle,
+      ],
+    );
+  }
+
+  /// Adds a themed button and a divider to the list.
+  void _addButton(List<Widget> list, String text, VoidCallback onPressed) {
+    list.add(new CupertinoButton(
+      child: new Text(text, style: _kToolbarButtonFontStyle),
+      color: _selectionToolbarBackgroundBlack,
+      minSize: _kToolbarHeight,
+      padding: _kToolbarButtonPadding,
+      borderRadius: null,
+      onPressed: onPressed,
+    ));
+    // Insert a 1 pixel divider.
+    list.add(const DecoratedBox(
+      decoration: const BoxDecoration(
+        color: _selectionToolbarDividerGray,
+      ),
+      child: const SizedBox(
+        width: 0.5,
+      ),
+    ));
   }
 }
 
@@ -111,13 +178,9 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 /// Draws a single text selection handle. The [type] determines where the handle
 /// points (e.g. the [left] handle points up and to the right).
 class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({ this.color });
-
-  final Color color;
-
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()..color = color;
+    final Paint paint = new Paint()..color = _selectionHandlesBlue;
     final double radius = size.width/2.0;
     canvas.drawCircle(new Offset(radius, radius), radius, paint);
     canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
@@ -125,15 +188,15 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_TextSelectionHandlePainter oldPainter) {
-    return color != oldPainter.color;
+    return false;
   }
 }
 
-class _MaterialTextSelectionControls extends TextSelectionControls {
+class _CupertinoTextSelectionControls extends TextSelectionControls {
   @override
   Size handleSize = const Size(_kHandleSize, _kHandleSize);
 
-  /// Builder for material-style copy/paste text selection toolbar.
+  /// Builder for iOS-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
@@ -163,9 +226,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
       width: _kHandleSize,
       height: _kHandleSize,
       child: new CustomPaint(
-        painter: new _TextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor
-        )
+        painter: new _TextSelectionHandlePainter(),
       )
     );
 
@@ -192,4 +253,4 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 }
 
 /// Text selection controls that follow the Material Design specification.
-final TextSelectionControls materialTextSelectionControls = new _MaterialTextSelectionControls();
+final TextSelectionControls cupertinoTextSelectionControls = new _CupertinoTextSelectionControls();
