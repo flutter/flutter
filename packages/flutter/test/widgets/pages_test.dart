@@ -44,8 +44,8 @@ void main() {
   });
 }
 
-class MockPageRoute extends Mock implements PageRoute<dynamic> {}
+class MockPageRoute extends Mock implements PageRoute<dynamic> { }
 
-class MockRoute extends Mock implements Route<dynamic> {}
+class MockRoute extends Mock implements Route<dynamic> { }
 
-class MockRouteAware extends Mock implements PageRouteAware {}
+class MockRouteAware extends Mock implements PageRouteAware { }
