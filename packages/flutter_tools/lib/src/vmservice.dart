@@ -24,6 +24,10 @@ typedef StreamChannel<String> _OpenChannel(Uri uri);
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
+/// A function that reacts to the invocation of the 'reloadSources' service
+typedef Future ReloadSources(String isolateId,
+    {bool force, bool pause});
+
 const String _kRecordingType = 'vmservice';
 
 StreamChannel<String> _defaultOpenChannel(Uri uri) =>
@@ -40,13 +44,50 @@ const Duration kShortRequestTimeout = const Duration(seconds: 5);
 
 /// A connection to the Dart VM Service.
 class VMService {
-  VMService._(this._peer, this.httpAddress, this.wsAddress, this._requestTimeout) {
+  VMService._(this._peer, this.httpAddress, this.wsAddress, this._requestTimeout,
+      ReloadSources reloadSources) {
     _vm = new VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
 
     _peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
     });
+
+    if (reloadSources != null) {
+      _peer.registerMethod('reloadSources', (rpc.Parameters params) async {
+        const kInvalidParams = -32602;
+        const kServerError = -32000;
+
+        final String isolateId = params['isolateId'].value;
+        final bool force = params.asMap['force'] ?? false;
+        final bool pause = params.asMap['pause'] ?? false;
+
+        if (isolateId is! String || isolateId == '')
+          throw new rpc.RpcException.invalidParams('Invalid \'isolateId\'');
+        if (force is! bool)
+          throw new rpc.RpcException.invalidParams('Invalid \'force\'');
+        if (force is! bool)
+          throw new rpc.RpcException.invalidParams('Invalid \'pause\'');
+
+        try {
+          await reloadSources(isolateId, force: force ?? false,
+              pause: pause ?? false);
+          return {'type': 'Success'};
+        } on rpc.RpcException {
+          rethrow;
+        } catch (e, st) {
+          throw new rpc.RpcException(kServerError,
+              'Error during Sources Reload: $e$st');
+        }
+      });
+
+      // If the Flutter Engine doesn't support service registration this will
+      // have no effect
+      _peer.sendNotification('_registerService', {
+        'service': 'reloadSources',
+        'alias': 'Flutter Tools'
+      });
+    }
   }
 
   /// Enables recording of VMService JSON-rpc activity to the specified base
@@ -78,14 +119,17 @@ class VMService {
   ///
   /// Requests made via the returns [VMService] time out after [requestTimeout]
   /// amount of time, which is [kDefaultRequestTimeout] by default.
+  /// If the [reloadSources] parameter is not null the 'reloadSources' service
+  /// will be registered
   static VMService connect(
     Uri httpUri, {
     Duration requestTimeout: kDefaultRequestTimeout,
+    ReloadSources reloadSources
   }) {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = _openChannel(wsUri);
     final rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel));
-    return new VMService._(peer, httpUri, wsUri, requestTimeout);
+    return new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources);
   }
 
   final Uri httpAddress;

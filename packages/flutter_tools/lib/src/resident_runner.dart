@@ -44,12 +44,15 @@ class FlutterDevice {
     _viewsCache = null;
   }
 
-  void connect() {
+  /// If the [reloadSources] parameter is not null the 'reloadSources' service
+  /// will be registered
+  void connect({ReloadSources reloadSources}) {
     if (vmServices != null)
       return;
     vmServices = new List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
-      vmServices[i] = VMService.connect(observatoryUris[i]);
+      vmServices[i] = VMService.connect(observatoryUris[i],
+          reloadSources: reloadSources);
       printTrace('Connected to service protocol: ${observatoryUris[i]}');
     }
   }
@@ -528,14 +531,17 @@ abstract class ResidentRunner {
       device.stopEchoingDeviceLog();
   }
 
-  Future<Null> connectToServiceProtocol({String viewFilter}) async {
+  /// If the [reloadSources] parameter is not null the 'reloadSources' service
+  /// will be registered
+  Future<Null> connectToServiceProtocol({String viewFilter,
+      ReloadSources reloadSources}) async {
     if (!debuggingOptions.debuggingEnabled)
       return new Future<Null>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
       device.viewFilter = viewFilter;
-      device.connect();
+      device.connect(reloadSources: reloadSources);
       await device.getVMs();
       await device.waitForViews();
       if (device.views == null)

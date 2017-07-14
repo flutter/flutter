@@ -84,13 +84,20 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
+  Future _reloadSourcesService(String isolateId,
+      {bool force: false, bool pause: false}) async {
+    // TODO(cbernaschina): check that isolateId is the id of the UI isolate
+    return restart(pauseAfterRestart: pause);
+  }
+
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String viewFilter,
   }) async {
     try {
-      await connectToServiceProtocol(viewFilter: viewFilter);
+      await connectToServiceProtocol(viewFilter: viewFilter,
+          reloadSources: _reloadSourcesService);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -504,6 +511,10 @@ class HotRunner extends ResidentRunner {
     _runningFromSnapshot = false;
     // Check if the isolate is paused.
 
+    if (pause) {
+      printTrace('Skipping reassemble because all isolates are paused.');
+      return new OperationResult(OperationResult.ok.code, reloadMessage);
+    }
     final List<FlutterView> reassembleViews = <FlutterView>[];
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
