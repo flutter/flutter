@@ -56,7 +56,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(BackButton), findsOneWidget);
-    expect(log.contains(const MethodCall('SystemNavigator.pop')), true);
+    expect(log, contains(const MethodCall('SystemNavigator.pop')));
   });
 
   testWidgets('BackButton icon', (WidgetTester tester) async {

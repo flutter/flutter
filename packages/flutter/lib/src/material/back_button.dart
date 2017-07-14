@@ -88,9 +88,8 @@ class BackButton extends StatelessWidget {
       tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
       onPressed: () {
         Navigator.of(context).maybePop().then((bool didPop) {
-          if (didPop)
-            return;
-          SystemNavigator.pop();
+          if (!didPop)
+            SystemNavigator.pop();
         }).catchError((dynamic error) {});
       }
     );
