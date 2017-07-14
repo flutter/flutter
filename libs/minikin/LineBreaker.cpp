@@ -367,7 +367,7 @@ float LineBreaker::currentLineWidth() const {
 void LineBreaker::computeBreaksGreedy() {
     // All breaks but the last have been added in addCandidate already.
     size_t nCand = mCandidates.size();
-    if (nCand == 1 || mLastBreak != nCand - 1) {
+    if (nCand > 0 && (nCand == 1 || mLastBreak != nCand - 1)) {
         pushBreak(mCandidates[nCand - 1].offset, mCandidates[nCand - 1].postBreak - mPreBreak,
                 mLastHyphenation);
         // don't need to update mBestScore, because we're done

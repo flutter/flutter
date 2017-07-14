@@ -16,7 +16,7 @@ config("minikin_config") {
   include_dirs = [ "../../include" ]
 }
 
-static_library("minikin") {
+source_set("minikin") {
   defines = [ "WIP_NEEDS_ICU_UPDATE" ]
 
   sources = [
