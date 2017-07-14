@@ -12,7 +12,7 @@ import 'button.dart';
 
 // Padding around the line at the edge of the text selection that has 0 width and
 // the height of the text font.
-const double _selectionHandlesPadding = 10.0;
+const double _selectionHandlesPadding = 18.0;
 const double _kToolbarScreenPadding = 8.0; // pixels
 const double _kToolbarHeight = 36.0;
 
@@ -21,6 +21,7 @@ const Color _selectionToolbarDividerGray = const Color(0xFFB9B9B9);
 const Color _selectionHandlesBlue = const Color(0xFF146DDE);
 
 const EdgeInsets _kToolbarButtonPadding = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
+const Size _selectionToolbarTriangleSize = const Size(18.0, 9.0);
 
 const TextStyle _kToolbarButtonFontStyle = const TextStyle(
   fontSize: 14.0,
@@ -34,9 +35,9 @@ class _TextSelectionToolbarNotchPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = new Paint()..color = _selectionToolbarBackgroundBlack;
     final Path triangle = new Path();
-    triangle.lineTo(9.0, 0.0);
-    triangle.lineTo(0.0, 9.0);
-    triangle.lineTo(-9.0, 0.0);
+    triangle.lineTo(_selectionToolbarTriangleSize.width / 2, 0.0);
+    triangle.lineTo(0.0, _selectionToolbarTriangleSize.height);
+    triangle.lineTo(-(_selectionToolbarTriangleSize.width / 2), 0.0);
     triangle.close();
     paint.style = PaintingStyle.fill;
     canvas.drawPath(triangle, paint);
@@ -86,9 +87,8 @@ class _TextSelectionToolbar extends StatelessWidget {
     if (items.last.runtimeType == SizedBox)
       items.removeLast();
 
-    final Widget triangle = new SizedBox(
-      width: 18.0,
-      height: 9.0,
+    final Widget triangle = new SizedBox.fromSize(
+      size: _selectionToolbarTriangleSize,
       child: new CustomPaint(
         painter: new _TextSelectionToolbarNotchPainter(),
       )
@@ -108,7 +108,7 @@ class _TextSelectionToolbar extends StatelessWidget {
     );
   }
 
-  /// Adds a themed button and a divider to the list.
+  /// Adds a themed [CupertinoButton] and a divider to the list.
   void _addButton(List<Widget> list, String text, VoidCallback onPressed) {
     list.add(new CupertinoButton(
       child: new Text(text, style: _kToolbarButtonFontStyle),
@@ -191,9 +191,9 @@ class _TextSelectionHandlePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = new Paint()..color = _selectionHandlesBlue;
     paint.strokeWidth = 2.0;
-    // Draw circle that slightly overlaps the bar.
+    // Draw circle below the origin that slightly overlaps the bar.
     canvas.drawCircle(origin.translate(0.0, 4.0), 5.5, paint);
-    // Draw up from origin leaving 10 pixels of margin.
+    // Draw up from origin leaving 10 pixels of margin on top.
     canvas.drawLine(
       origin,
       origin.translate(
@@ -240,7 +240,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   /// Builder for iOS text selection edges.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    // We want a size that's a vertical line the height of the text plus a 10.0
+    // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
     final Size desiredSize = new Size(
       2 * _selectionHandlesPadding,
