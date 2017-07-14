@@ -209,7 +209,7 @@ class TestCommand extends FlutterCommand {
         enableObservatory: collector != null || startPaused,
         startPaused: startPaused,
         ipv6: argResults['ipv6'],
-        json: machine,
+        machine: machine,
         );
 
     if (collector != null) {
