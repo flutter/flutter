@@ -203,8 +203,8 @@ void Paragraph::Layout(double width, bool force) {
   double line_width = 0.0f;
   std::vector<SkScalar> x_queue;
   double justify_spacing = 0;
+  double prev_word_pos = 0;
 
-  // Each blob.
   std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
   std::vector<size_t> buffer_sizes;
   int word_count = 0;
@@ -327,17 +327,6 @@ void Paragraph::Layout(double width, bool force) {
              ++blob_index) {
           const size_t glyph_index = blob_start + blob_index;
           buffers.back()->glyphs[blob_index] = layout.getGlyphId(glyph_index);
-          // Check if the current Glyph is a whitespace and handle multiple
-          // whitespaces in a row.
-          if (whitespace_set_.count(layout.getGlyphId(glyph_index)) > 0) {
-            // Only increment word_count if it is the first in a series of
-            // whitespaces.
-            if (whitespace_ended)
-              ++word_count;
-            whitespace_ended = false;
-          } else {
-            whitespace_ended = true;
-          }
 
           const size_t pos_index = 2 * blob_index;
 
@@ -347,9 +336,35 @@ void Paragraph::Layout(double width, bool force) {
               buffers.back()->pos[pos_index]);
           buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
 
+          // Check if the current Glyph is a whitespace and handle multiple
+          // whitespaces in a row.
+          if (whitespace_set_.count(layout.getGlyphId(glyph_index)) > 0) {
+            // Only increment word_count if it is the first in a series of
+            // whitespaces.
+            if (whitespace_ended) {
+              ++word_count;
+              word_widths_.push_back(buffers.back()->pos[pos_index] +
+                                     layout.getCharAdvance(glyph_index) -
+                                     prev_word_pos);
+              prev_word_pos = buffers.back()->pos[pos_index] +
+                              layout.getCharAdvance(glyph_index);
+            }
+            whitespace_ended = false;
+          } else {
+            whitespace_ended = true;
+          }
+
           letter_spacing_offset += run.style.letter_spacing;
         }
         blob_start += blob_length;
+
+        // Add on the last word if the blob break was not on whitespace.
+        if (whitespace_ended) {
+          word_widths_.push_back(
+              layout.getX(blob_start - 1) + letter_spacing_offset -
+              run.style.letter_spacing + layout.getCharAdvance(blob_start - 1) -
+              prev_word_pos);
+        }
 
         // Subtract letter offset to avoid big gap at end of run. This my be
         // removed depending on the specifications for letter spacing.
@@ -412,7 +427,7 @@ void Paragraph::Layout(double width, bool force) {
         max_descent = 0.0f;
         x = 0.0f;
         letter_spacing_offset = 0.0f;
-        // word_count = 0;
+        prev_word_pos = 0;
         line_width = 0.0f;
         break_index += 1;
         lines_++;
@@ -440,6 +455,7 @@ void Paragraph::Layout(double width, bool force) {
       buffer_sizes.size() > 0) {
     JustifyLine(buffers, buffer_sizes, word_count, justify_spacing, -1);
   }
+  CalculateIntrinsicWidths();
 }
 
 // Amends the buffers to incorporate justification.
@@ -492,13 +508,22 @@ double Paragraph::GetIdeographicBaseline() const {
   return ideographic_baseline_;
 }
 
+void Paragraph::CalculateIntrinsicWidths() {
+  for (size_t i = 0; i < word_widths_.size(); ++i) {
+    max_intrinsic_width_ += word_widths_[i];
+  }
+
+  // TODO(garyq): Implement the DP algorithm version instead of this stand in!
+  min_intrinsic_width_ = max_intrinsic_width_ / paragraph_style_.max_lines;
+}
+
 double Paragraph::GetMaxIntrinsicWidth() const {
   return max_intrinsic_width_;
 }
 
 double Paragraph::GetMinIntrinsicWidth() const {
   // TODO(garyq): This is a lower bound. Actual value may be slightly higher.
-  return max_intrinsic_width_ / paragraph_style_.max_lines;
+  return min_intrinsic_width_;
 }
 
 size_t Paragraph::TextSize() const {
