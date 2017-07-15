@@ -109,11 +109,11 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
-    argParser.addOption('kernel',
+    argParser.addFlag('is-kernel-mode',
         hide: !verboseHelp,
-        help: 'Path to a pre-built kernel blob to use when running.\n'
-              'This option only exists for testing new kernel code execution on devices\n'
-              'and is not needed during normal application development.');
+        defaultsTo: false,
+        help: 'Use kernel format for compiled files transferred from host\n'
+              'workstation to device.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Specify the path to the .packages file.');
@@ -309,7 +309,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
-        kernelFilePath: argResults['kernel'],
+        isKernelMode: argResults['is-kernel-mode'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: argResults['packages'],
         projectAssets: argResults['project-assets'],
@@ -322,6 +322,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
+        isKernelMode: argResults['is-kernel-mode'],
         stayResident: stayResident,
       );
     }

@@ -14,6 +14,9 @@ import 'base/io.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
+import 'package:front_end/incremental_kernel_generator.dart';
+import 'package:front_end/src/fasta/kernel/utils.dart';
+import 'package:kernel/kernel.dart';
 import 'vmservice.dart';
 
 typedef void DevFSProgressReporter(int progress, int max);
@@ -372,10 +375,13 @@ class DevFS {
   }
 
   /// Update files on the device and return the number of bytes sync'd
-  Future<int> update({ DevFSProgressReporter progressReporter,
-                           AssetBundle bundle,
-                           bool bundleDirty: false,
-                           Set<String> fileFilter}) async {
+  Future<int> update({ String mainPath,
+                       String target,
+                       DevFSProgressReporter progressReporter,
+                       AssetBundle bundle,
+                       bool bundleDirty: false,
+                       Set<String> fileFilter,
+                       IncrementalKernelGenerator generator}) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
       content._exists = false;
@@ -438,6 +444,19 @@ class DevFS {
     });
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
+      if (generator != null) {
+        dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
+          if (content is DevFSFileContent) {
+            generator.invalidate(content.file.uri);
+          }
+        });
+        final DeltaProgram delta = await generator.computeDelta();
+        final Program program = delta.newProgram;
+        writeProgramToFile(program, Uri.parse(mainPath + ".dill"));
+        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
+                () => new DevFSFileContent(fs.file(mainPath + ".dill")));
+      }
+
       if (_httpWriter != null) {
         try {
           await _httpWriter.write(dirtyEntries,

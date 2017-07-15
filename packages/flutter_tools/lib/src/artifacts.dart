@@ -11,12 +11,15 @@ import 'globals.dart';
 enum Artifact {
   dartIoEntriesTxt,
   dartVmEntryPointsTxt,
+  dartReleaseVmEntryPointsTxt,
   genSnapshot,
   flutterTester,
   snapshotDart,
   flutterFramework,
   vmSnapshotData,
-  isolateSnapshotData
+  isolateSnapshotData,
+  platformKernelDill,
+  platformLibrariesJson
 }
 
 String _artifactToFileName(Artifact artifact) {
@@ -25,6 +28,8 @@ String _artifactToFileName(Artifact artifact) {
       return 'dart_io_entries.txt';
     case Artifact.dartVmEntryPointsTxt:
       return 'dart_vm_entry_points.txt';
+    case Artifact.dartReleaseVmEntryPointsTxt:
+      return 'dart_release_vm_entry_points.txt';
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
@@ -37,6 +42,10 @@ String _artifactToFileName(Artifact artifact) {
       return 'vm_isolate_snapshot.bin';
     case Artifact.isolateSnapshotData:
       return 'isolate_snapshot.bin';
+    case Artifact.platformKernelDill:
+      return 'platform.dill';
+    case Artifact.platformLibrariesJson:
+      return 'libraries.json';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -91,6 +100,7 @@ class CachedArtifacts extends Artifacts {
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
+      case Artifact.dartReleaseVmEntryPointsTxt:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.genSnapshot:
@@ -108,6 +118,7 @@ class CachedArtifacts extends Artifacts {
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
+      case Artifact.dartReleaseVmEntryPointsTxt:
       case Artifact.genSnapshot:
       case Artifact.snapshotDart:
       case Artifact.flutterFramework:
@@ -116,6 +127,11 @@ class CachedArtifacts extends Artifacts {
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
+  }
+
+  String _getHostFlutterPatchedSdkPath() {
+    final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+    return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk');
   }
 
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform) {
@@ -134,6 +150,10 @@ class CachedArtifacts extends Artifacts {
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
+      case Artifact.platformKernelDill:
+        return fs.path.join(_getHostFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+      case Artifact.platformLibrariesJson:
+        return fs.path.join(_getHostFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -188,6 +208,7 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.dartIoEntriesTxt:
         return fs.path.join(_engineSrcPath, 'dart', 'runtime', 'bin', _artifactToFileName(artifact));
       case Artifact.dartVmEntryPointsTxt:
+      case Artifact.dartReleaseVmEntryPointsTxt:
         return fs.path.join(_engineSrcPath, 'flutter', 'runtime', _artifactToFileName(artifact));
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
@@ -198,6 +219,10 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
+      case Artifact.platformKernelDill:
+        return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+      case Artifact.platformLibrariesJson:
+        return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
     }
@@ -208,6 +233,10 @@ class LocalEngineArtifacts extends Artifacts {
   @override
   String getEngineType(TargetPlatform platform, [BuildMode mode]) {
     return fs.path.basename(engineOutPath);
+  }
+
+  String _getFlutterPatchedSdkPath() {
+    return fs.path.join(engineOutPath, 'flutter_patched_sdk');
   }
 
   String _genSnapshotPath(TargetPlatform platform, BuildMode mode) {

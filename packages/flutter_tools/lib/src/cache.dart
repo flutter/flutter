@@ -255,6 +255,8 @@ class FlutterEngine extends CachedArtifact {
   List<List<String>> _getBinaryDirs() {
     final List<List<String>> binaryDirs = <List<String>>[];
 
+    binaryDirs.add(<String>['common', 'flutter_patched_sdk.zip']);
+
     if (cache.includeAllPlatforms)
       binaryDirs
         ..addAll(_osxBinaryDirs)
