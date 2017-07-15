@@ -115,8 +115,11 @@ class Paragraph {
   SkScalar height_ = 0.0f;
   double width_ = 0.0f;
   size_t lines_ = 0;
-  double max_intrinsic_width_ = 0.0f;
-  double min_intrinsic_width_ = 0.0f;
+  double max_intrinsic_width_ = -1;
+  double min_intrinsic_width_ = -1;
+  // TODO(garyq): Instead of using whitespace to delimit "words", use the
+  // results of minikin breaker.
+  std::vector<double> word_widths_;
   double alphabetic_baseline_ = FLT_MAX;
   double ideographic_baseline_ = FLT_MAX;
   bool needs_layout_ = true;
@@ -166,6 +169,8 @@ class Paragraph {
                            double y,
                            double y_offset,
                            double width);
+
+  void CalculateIntrinsicWidths();
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };
