@@ -967,3 +967,85 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
     super.didChangeNext(nextRoute);
   }
 }
+
+/// A [Navigator] observer that notifies [RouteAware]s of changes to the
+/// state of their [Route].
+///
+/// To make a [StatefulWidget] aware of its current [Route] state, implement
+/// [RouteAware] in its [State] and subscribe it to the [RouteObserver]:
+///
+/// ```dart
+/// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+///   @override
+///   void didChangeDependencies() {
+///     super.didChangeDependencies();
+///     routeObserver.subscribe(this, ModalRoute.of(context));
+///   }
+///
+///   @override
+///   void dispose() {
+///     routeObserver.unsubscribe(this);
+///     super.dispose();
+///   }
+///
+///   @override
+///   void didPush() {
+///     // Do something
+///   }
+///
+///   @override
+///   void didPopNext() {
+///     // Do something
+///   }
+///
+/// }
+/// ```
+class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
+  final Map<T, RouteAware> _listeners = <T, RouteAware>{};
+
+  void subscribe(RouteAware routeAware, T route) {
+    assert(routeAware != null);
+    assert(route != null);
+    if (!_listeners.containsKey(route)) {
+      routeAware.didPush();
+      _listeners[route] = routeAware;
+    }
+  }
+
+  void unsubscribe(RouteAware routeAware) {
+    assert(routeAware != null);
+    _listeners.remove(routeAware);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route is T && previousRoute is T) {
+      _listeners[previousRoute]?.didPopNext();
+      _listeners[route]?.didPop();
+    }
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route is T && previousRoute is T) {
+      _listeners[previousRoute]?.didPushNext();
+    }
+  }
+}
+
+/// A interface that is aware of its current Route.
+abstract class RouteAware {
+  /// Called when the top route has been popped off, and the current route
+  /// shows up.
+  void didPopNext() { }
+
+  /// Called when the current route has been pushed.
+  void didPush() { }
+
+  /// Called when the current route has been popped off.
+  void didPop() { }
+
+  /// Called when a new route has been pushed, and the current route is no
+  /// longer visible.
+  void didPushNext() { }
+}
