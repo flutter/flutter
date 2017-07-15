@@ -230,9 +230,9 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// scroll gesture input.
   ///
   /// This factor starts at 0.52 and progressively becomes harder to overscroll
-  /// as more of the area past the edge is dragged in (represented by a reducing
-  /// `inViewFraction` which starts at 1 when there is no overscroll).
-  double frictionFactor(double inViewFraction) => 0.52 * math.pow(inViewFraction.abs(), 2);
+  /// as more of the area past the edge is dragged in (represented by an increasing
+  /// `overscrollFraction` which starts at 0 when there is no overscroll).
+  double frictionFactor(double overscrollFraction) => 0.52 * math.pow(1 - overscrollFraction, 2);
 
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
@@ -244,20 +244,17 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
     final double overscrollPastStart = math.max(position.minScrollExtent - position.pixels, 0.0);
     final double overscrollPastEnd = math.max(position.pixels - position.maxScrollExtent, 0.0);
+    final double overscrollPast = math.max(overscrollPastStart, overscrollPastEnd);
     final bool easing = (overscrollPastStart > 0.0 && offset < 0.0)
         || (overscrollPastEnd > 0.0 && offset > 0.0);
 
     final double friction = easing
         // Apply less resistance when easing the overscroll vs tensioning.
-        ? frictionFactor(math.min((position.extentInside + offset.abs()) / position.viewportDimension, 1.0))
-        : frictionFactor(position.extentInside / position.viewportDimension);
+        ? frictionFactor((overscrollPast - offset.abs()) / position.viewportDimension)
+        : frictionFactor(overscrollPast / position.viewportDimension);
     final double direction = offset.sign;
 
-    return direction * _applyFriction(
-      math.max(overscrollPastStart, overscrollPastEnd),
-      offset.abs(),
-      friction,
-    );
+    return direction * _applyFriction(overscrollPast, offset.abs(), friction);
   }
 
   static double _applyFriction(double extentOutside, double absDelta, double gamma) {

@@ -161,5 +161,34 @@ void main() {
 
       expect(easingApplied.abs(), greaterThan(tensioningApplied.abs()));
     });
+
+    test('overscroll a small list and a big list works the same way', () {
+      final ScrollMetrics smallListOverscrolledPosition = new FixedScrollMetrics(
+          minScrollExtent: 0.0,
+          maxScrollExtent: 10.0,
+          pixels: -20.0,
+          viewportDimension: 100.0,
+          axisDirection: AxisDirection.down,
+      );
+
+      final ScrollMetrics bigListOverscrolledPosition = new FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
+      );
+
+      final double smallListOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(smallListOverscrolledPosition, 10.0);
+
+      final double bigListOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(bigListOverscrolledPosition, 10.0);
+
+      expect(smallListOverscrollApplied, equals(bigListOverscrollApplied));
+
+      expect(smallListOverscrollApplied, greaterThan(1.0));
+      expect(smallListOverscrollApplied, lessThan(20.0));
+    });
   });
 }
