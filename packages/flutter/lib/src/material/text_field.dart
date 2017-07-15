@@ -159,8 +159,9 @@ class TextField extends StatefulWidget {
   /// field.
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides. Formatters are run
-  /// in the provided order when the text input changes.
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
   @override

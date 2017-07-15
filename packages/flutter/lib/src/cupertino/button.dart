@@ -47,7 +47,7 @@ class CupertinoButton extends StatefulWidget {
     this.color,
     this.minSize: 44.0,
     this.pressedOpacity: 0.1,
-    this.borderRadius: 8.0,
+    this.borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity >= 0.0 && pressedOpacity <= 1.0);
 
@@ -87,9 +87,10 @@ class CupertinoButton extends StatefulWidget {
   /// This defaults to 0.1.
   final double pressedOpacity;
 
-  /// The radius of the rounded corners of the button when it has a background
-  /// color. Defaults to 8 logical pixels.
-  final double borderRadius;
+  /// The radius of the button's corners when it has a background color.
+  ///
+  /// Defaults to round corners of 8 logical pixels.
+  final BorderRadius borderRadius;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
@@ -180,9 +181,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             )),
             child: new DecoratedBox(
               decoration: new BoxDecoration(
-                borderRadius: widget.borderRadius == null
-                    ? null
-                    : new BorderRadius.all(new Radius.circular(widget.borderRadius)),
+                borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
                     ? _kDisabledBackground
                     : backgroundColor,

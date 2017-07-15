@@ -75,7 +75,7 @@ abstract class TextSelectionControls {
   ///
   /// The top left corner of this widget is positioned at the bottom of the
   /// selection position.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -86,26 +86,28 @@ abstract class TextSelectionControls {
   Size get handleSize;
 
   void handleCut(TextSelectionDelegate delegate) {
+    final TextEditingValue value = delegate.textEditingValue;
     Clipboard.setData(new ClipboardData(
-      text: delegate.textEditingValue.selection.textInside(delegate.textEditingValue.text),
+      text: value.selection.textInside(value.text),
     ));
     delegate.textEditingValue = new TextEditingValue(
-      text: delegate.textEditingValue.selection.textBefore(delegate.textEditingValue.text)
-          + delegate.textEditingValue.selection.textAfter(delegate.textEditingValue.text),
+      text: value.selection.textBefore(value.text)
+          + value.selection.textAfter(value.text),
       selection: new TextSelection.collapsed(
-        offset: delegate.textEditingValue.selection.start
+        offset: value.selection.start
       ),
     );
     delegate.hideToolbar();
   }
 
   void handleCopy(TextSelectionDelegate delegate) {
+    final TextEditingValue value = delegate.textEditingValue;
     Clipboard.setData(new ClipboardData(
-      text: delegate.textEditingValue.selection.textInside(delegate.textEditingValue.text),
+      text: value.selection.textInside(value.text),
     ));
     delegate.textEditingValue = new TextEditingValue(
-      text: delegate.textEditingValue.text,
-      selection: new TextSelection.collapsed(offset: delegate.textEditingValue.selection.end),
+      text: value.text,
+      selection: new TextSelection.collapsed(offset: value.selection.end),
     );
     delegate.hideToolbar();
   }
@@ -477,7 +479,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
-                widget.renderObject.size.height,
+                widget.renderObject.size.height / widget.renderObject.maxLines,
               ),
             ),
           ],

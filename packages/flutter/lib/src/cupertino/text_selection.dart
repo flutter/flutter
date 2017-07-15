@@ -12,16 +12,23 @@ import 'button.dart';
 
 // Padding around the line at the edge of the text selection that has 0 width and
 // the height of the text font.
-const double _selectionHandlesPadding = 18.0;
-const double _kToolbarScreenPadding = 8.0; // pixels
+const double _kHandlesPadding = 18.0;
+// Minimal padding from all edges of the selection toolbar to all edges of the
+// viewport.
+const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 36.0;
 
-const Color _selectionToolbarBackgroundBlack = const Color(0xFF2E2E2E);
-const Color _selectionToolbarDividerGray = const Color(0xFFB9B9B9);
-const Color _selectionHandlesBlue = const Color(0xFF146DDE);
+const Color _kToolbarBackgroundColor = const Color(0xFF2E2E2E);
+const Color _kHandlesColor = const Color(0xFF146DDE);
 
 const EdgeInsets _kToolbarButtonPadding = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
-const Size _selectionToolbarTriangleSize = const Size(18.0, 9.0);
+
+// This offset is used to determine the center of the selection during a drag.
+// It's slightly below the center of the text so the finger isn't entirely
+// covering the text being selected.
+const Size _kSelectionOffset = const Size(20.0, 30.0);
+const Size _kToolbarTriangleSize = const Size(18.0, 9.0);
+const double _kToolbarBorderRadius = 7.5;
 
 const TextStyle _kToolbarButtonFontStyle = const TextStyle(
   fontSize: 14.0,
@@ -29,66 +36,83 @@ const TextStyle _kToolbarButtonFontStyle = const TextStyle(
   fontWeight: FontWeight.w300,
 );
 
+const Widget _kOnePhysicalPixelVerticalDivider = const DecoratedBox(
+  decoration: const BoxDecoration(
+    border: const Border(
+      left: const BorderSide(
+        color: const Color(0xFFB9B9B9),
+        width: 0.5,
+      ),
+    ),
+  ),
+  child: const SizedBox(width: 0.5),
+);
+
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()..color = _selectionToolbarBackgroundBlack;
-    final Path triangle = new Path();
-    triangle.lineTo(_selectionToolbarTriangleSize.width / 2, 0.0);
-    triangle.lineTo(0.0, _selectionToolbarTriangleSize.height);
-    triangle.lineTo(-(_selectionToolbarTriangleSize.width / 2), 0.0);
-    triangle.close();
-    paint.style = PaintingStyle.fill;
+    final Paint paint = new Paint()
+        ..color = _kToolbarBackgroundColor
+        ..style = PaintingStyle.fill;
+    final Path triangle = new Path()
+        ..lineTo(_kToolbarTriangleSize.width / 2, 0.0)
+        ..lineTo(0.0, _kToolbarTriangleSize.height)
+        ..lineTo(-(_kToolbarTriangleSize.width / 2), 0.0)
+        ..close();
     canvas.drawPath(triangle, paint);
   }
 
   @override
-  bool shouldRepaint(_TextSelectionToolbarNotchPainter oldPainter) {
-    return false;
-  }
+  bool shouldRepaint(_TextSelectionToolbarNotchPainter oldPainter) => false;
 }
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
-    const _TextSelectionToolbar(
+  const _TextSelectionToolbar({
+    Key key,
     this.delegate,
-    this._handleCut,
-    this._handleCopy,
-    this._handlePaste,
-    this._handleSelectAll,
-    {Key key}) : super(key: key);
+    this.handleCut,
+    this.handleCopy,
+    this.handlePaste,
+    this.handleSelectAll,
+  }) : super(key: key);
 
   final TextSelectionDelegate delegate;
   TextEditingValue get value => delegate.textEditingValue;
 
-  final VoidCallback _handleCut;
-  final VoidCallback _handleCopy;
-  final VoidCallback _handlePaste;
-  final VoidCallback _handleSelectAll;
+  final VoidCallback handleCut;
+  final VoidCallback handleCopy;
+  final VoidCallback handlePaste;
+  final VoidCallback handleSelectAll;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
 
     if (!value.selection.isCollapsed) {
-      _addButton(items, 'Cut', _handleCut);
-      _addButton(items, 'Copy', _handleCopy);
+      items.add(_buildToolbarButton('Cut', handleCut));
+      items.add(_kOnePhysicalPixelVerticalDivider);
+      items.add(_buildToolbarButton('Copy', handleCopy));
     }
 
-    // TODO(xster): This should probably be grayed-out if there is nothing to paste.
-    _addButton(items, 'Paste', _handlePaste);
+    // TODO(https://github.com/flutter/flutter/issues/11254):
+    // This should probably be grayed-out if there is nothing to paste.
+    if (items.isNotEmpty)
+      items.add(_kOnePhysicalPixelVerticalDivider);
+    items.add(_buildToolbarButton('Paste', handlePaste));
 
-    if (value.text.isNotEmpty)
-      if (value.selection.isCollapsed)
-        _addButton(items, 'Select All', _handleSelectAll);
+    if (value.text.isNotEmpty && value.selection.isCollapsed) {
+      items.add(_kOnePhysicalPixelVerticalDivider);
+      items.add(_buildToolbarButton('Select All', handleSelectAll));
+    }
 
     // Remove the last divider.
     if (items.last.runtimeType == SizedBox)
       items.removeLast();
 
     final Widget triangle = new SizedBox.fromSize(
-      size: _selectionToolbarTriangleSize,
+      size: _kToolbarTriangleSize,
       child: new CustomPaint(
         painter: new _TextSelectionToolbarNotchPainter(),
       )
@@ -98,7 +122,7 @@ class _TextSelectionToolbar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         new ClipRRect(
-          borderRadius: new BorderRadius.circular(7.5),
+          borderRadius: new BorderRadius.circular(_kToolbarBorderRadius),
           child: new Row(mainAxisSize: MainAxisSize.min, children: items),
         ),
         // TODO(xster): position the triangle based on the layout delegate.
@@ -109,24 +133,15 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   /// Adds a themed [CupertinoButton] and a divider to the list.
-  void _addButton(List<Widget> list, String text, VoidCallback onPressed) {
-    list.add(new CupertinoButton(
+  CupertinoButton _buildToolbarButton(String text, VoidCallback onPressed) {
+    return new CupertinoButton(
       child: new Text(text, style: _kToolbarButtonFontStyle),
-      color: _selectionToolbarBackgroundBlack,
+      color: _kToolbarBackgroundColor,
       minSize: _kToolbarHeight,
       padding: _kToolbarButtonPadding,
       borderRadius: null,
       onPressed: onPressed,
-    ));
-    // Insert a 1 pixel divider.
-    list.add(const DecoratedBox(
-      decoration: const BoxDecoration(
-        color: _selectionToolbarDividerGray,
-      ),
-      child: const SizedBox(
-        width: 0.5,
-      ),
-    ));
+    );
   }
 }
 
@@ -173,7 +188,9 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_TextSelectionToolbarLayout oldDelegate) {
-    return position != oldDelegate.position;
+    return screenSize != oldDelegate.screenSize
+        || globalEditableRegion != oldDelegate.globalEditableRegion
+        || position != oldDelegate.position;
   }
 }
 
@@ -189,8 +206,9 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()..color = _selectionHandlesBlue;
-    paint.strokeWidth = 2.0;
+    final Paint paint = new Paint()
+        ..color = _kHandlesColor
+        ..strokeWidth = 2.0;
     // Draw circle below the origin that slightly overlaps the bar.
     canvas.drawCircle(origin.translate(0.0, 4.0), 5.5, paint);
     // Draw up from origin leaving 10 pixels of margin on top.
@@ -198,21 +216,19 @@ class _TextSelectionHandlePainter extends CustomPainter {
       origin,
       origin.translate(
         0.0,
-        -(size.height - 2 * _selectionHandlesPadding),
+        -(size.height - 2 * _kHandlesPadding),
       ),
-      paint
+      paint,
     );
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) {
-    return false;
-  }
+  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => false;
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
   @override
-  Size handleSize = const Size(20.0, 40.0);
+  Size handleSize = _kSelectionOffset; // Used for drag selection offset.
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
@@ -227,11 +243,11 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           position,
         ),
         child: new _TextSelectionToolbar(
-          delegate,
-          () => handleCut(delegate),
-          () => handleCopy(delegate),
-          () => handlePaste(delegate),
-          () => handleSelectAll(delegate),
+          delegate: delegate,
+          handleCut: () => handleCut(delegate),
+          handleCopy: () => handleCopy(delegate),
+          handlePaste: () => handlePaste(delegate),
+          handleSelectAll: () => handleSelectAll(delegate),
         ),
       )
     );
@@ -239,12 +255,12 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
     final Size desiredSize = new Size(
-      2 * _selectionHandlesPadding,
-      textHeight + 2 * _selectionHandlesPadding
+      2 * _kHandlesPadding,
+      textLineHeight + 2 * _kHandlesPadding
     );
 
     final Widget handle = new SizedBox.fromSize(
@@ -256,7 +272,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
           //
           // We give it in the form of an offset from the top left of the
           // SizedBox.
-          origin: new Offset(_selectionHandlesPadding, textHeight + _selectionHandlesPadding),
+          origin: new Offset(_kHandlesPadding, textLineHeight + _kHandlesPadding),
         ),
       ),
     );
@@ -268,14 +284,14 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       case TextSelectionHandleType.left: // Also flipped for iOS.
         return new Transform(
           transform: new Matrix4.rotationZ(math.PI)
-              ..translate(-_selectionHandlesPadding, -_selectionHandlesPadding),
+              ..translate(-_kHandlesPadding, -_kHandlesPadding),
           child: handle
         );
       case TextSelectionHandleType.right:
         return new Transform(
           transform: new Matrix4.translationValues(
-            -_selectionHandlesPadding,
-            -(textHeight + _selectionHandlesPadding),
+            -_kHandlesPadding,
+            -(textLineHeight + _kHandlesPadding),
             0.0
           ),
           child: handle

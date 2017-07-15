@@ -12,43 +12,47 @@ import 'flat_button.dart';
 import 'material.dart';
 import 'theme.dart';
 
-const double _kHandleSize = 22.0; // pixels
-const double _kToolbarScreenPadding = 8.0; // pixels
+const double _kHandleSize = 22.0;
+// Minimal padding from all edges of the selection toolbar to all edges of the
+// viewport.
+const double _kToolbarScreenPadding = 8.0;
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
-  const _TextSelectionToolbar(
+  const _TextSelectionToolbar({
+    Key key,
     this.delegate,
-    this._handleCut,
-    this._handleCopy,
-    this._handlePaste,
-    this._handleSelectAll,
-    {Key key}) : super(key: key);
+    this.handleCut,
+    this.handleCopy,
+    this.handlePaste,
+    this.handleSelectAll,
+  }) : super(key: key);
 
   final TextSelectionDelegate delegate;
   TextEditingValue get value => delegate.textEditingValue;
 
-  final VoidCallback _handleCut;
-  final VoidCallback _handleCopy;
-  final VoidCallback _handlePaste;
-  final VoidCallback _handleSelectAll;
+  final VoidCallback handleCut;
+  final VoidCallback handleCopy;
+  final VoidCallback handlePaste;
+  final VoidCallback handleSelectAll;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
 
     if (!value.selection.isCollapsed) {
-      items.add(new FlatButton(child: const Text('CUT'), onPressed: _handleCut));
-      items.add(new FlatButton(child: const Text('COPY'), onPressed: _handleCopy));
+      items.add(new FlatButton(child: const Text('CUT'), onPressed: handleCut));
+      items.add(new FlatButton(child: const Text('COPY'), onPressed: handleCopy));
     }
     items.add(new FlatButton(
       child: const Text('PASTE'),
-      // TODO(mpcomplete): This should probably be grayed-out if there is nothing to paste.
-      onPressed: _handlePaste,
+      // TODO(https://github.com/flutter/flutter/issues/11254):
+      // This should probably be grayed-out if there is nothing to paste.
+      onPressed: handlePaste,
     ));
     if (value.text.isNotEmpty) {
       if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: _handleSelectAll));
+        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: handleSelectAll));
     }
 
     return new Material(
@@ -146,11 +150,11 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
           position,
         ),
         child: new _TextSelectionToolbar(
-          delegate,
-          () => handleCut(delegate),
-          () => handleCopy(delegate),
-          () => handlePaste(delegate),
-          () => handleSelectAll(delegate),
+          delegate: delegate,
+          handleCut: () => handleCut(delegate),
+          handleCopy: () => handleCopy(delegate),
+          handlePaste: () => handlePaste(delegate),
+          handleSelectAll: () => handleSelectAll(delegate),
         ),
       )
     );
