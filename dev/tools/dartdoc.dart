@@ -202,7 +202,7 @@ void addHtmlBaseToIndex() {
   );
   indexContents = indexContents.replaceAll(
       'href="iOS/iOS-library.html"',
-      'href="https://docs.flutter.io/objc/"'
+      'href="https://docs.flutter.io/objcdoc/"'
   );
 
   indexFile.writeAsStringSync(indexContents);
