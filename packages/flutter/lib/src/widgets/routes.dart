@@ -971,15 +971,32 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the
 /// state of their [Route].
 ///
+/// [RouteObserver] informs subscribers whenever a route of type `T` is pushed
+/// on top of their own route of type `T` or popped from it. This is for example
+/// useful to keep track of page transitions, e.i. a `RouteObserver<PageRoute>`
+/// will inform subscribed [RouteAware]s whenever the user navigates away from
+/// the current page route to another page route.
+///
+/// If you want to be informed about route changes of any type, you should
+/// instantiate a `RouteObserver<Route>`.
+///
 /// ## Sample code
 ///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
 /// [RouteAware] in its [State] and subscribe it to the [RouteObserver]:
 ///
 /// ```dart
-/// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+/// // Register the RouteObserver as a  navigation observer.
+/// final RouteObserver<PageRoute> routeObserver = new RouteObserver<PageRoute>();
+/// void main() {
+///   runApp(new MaterialApp(
+///     home: new Container(),
+///     navigatorObservers: [routeObserver],
+///   ));
+/// }
 ///
-///   final RouteObserver routeObserver = new RouteObserver();
+/// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
+/// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
 ///
 ///   @override
 ///   void didChangeDependencies() {
@@ -995,12 +1012,12 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 ///   @override
 ///   void didPush() {
-///     // Do something
+///     // Route was pushed onto navigator and is now topmost route.
 ///   }
 ///
 ///   @override
 ///   void didPopNext() {
-///     // Do something
+///     // Covering route was popped off the navigator.
 ///   }
 ///
 ///   @override
