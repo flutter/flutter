@@ -790,6 +790,18 @@ void main() {
     expect(find.byIcon(Icons.menu), findsOneWidget);
   });
 
+  testWidgets('AppBar doesn't draw menu if NoLeadingWidget is given', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          drawer: const Drawer(),
+          appBar: new AppBar(leading: const NoLeadingWidget()),
+        ),
+      ),
+    );
+    expect(find.byIcon(Icons.menu), findsNothing);
+  });
+
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
