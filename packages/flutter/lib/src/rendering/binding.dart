@@ -309,12 +309,12 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
 
 /// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
-  debugPrint(RendererBinding.instance?.renderView?.toStringDeep());
+  debugPrint(RendererBinding.instance?.renderView?.toStringDeep() ?? 'Render tree unavailable.');
 }
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
+  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
 }
 
 /// Prints a textual representation of the entire semantics tree.
