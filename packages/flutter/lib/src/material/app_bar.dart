@@ -84,7 +84,9 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// If the [leading] widget is omitted, but the [AppBar] is in a [Scaffold] with
 /// a [Drawer], then a button will be inserted to open the drawer. Otherwise, if
 /// the nearest [Navigator] has any previous routes, a [BackButton] is inserted
-/// instead.
+/// instead. A [NoLeadingWidget] instance can be passed here which will cause title
+/// widget to stretch all the way to start. For apps which want to manage their own
+/// app bar layout, this is a good option.
 ///
 /// ## Sample code
 ///
@@ -157,6 +159,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// [Scaffold] will fill this widget with an [IconButton] that opens the
   /// drawer. If there's no [Drawer] and the parent [Navigator] can go back, the
   /// [AppBar] will use a [BackButton] that calls [Navigator.maybePop].
+  /// 
+  /// A [NoLeadingWidget] instance can be passed here which will cause title
+  /// widget to stretch all the way to start.
   final Widget leading;
 
   /// The primary widget displayed in the appbar.
@@ -343,7 +348,11 @@ class _AppBarState extends State<AppBar> {
         if (canPop)
           leading = useCloseButton ? const CloseButton() : const BackButton();
       }
+    } else if (leading is NoLeadingWidget) {
+      // We don't want a leading widget at all.
+      leading = null;
     }
+    // If there's a leading widget, it needs to fit into [_kLeadingWidth].
     if (leading != null) {
       leading = new ConstrainedBox(
         constraints: const BoxConstraints.tightFor(width: _kLeadingWidth),
@@ -914,4 +923,12 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
       ),
     );
   }
+}
+
+/// Pass this to leading parameter of [AppBar] to turn off the leading widget completely.
+class NoLeadingWidget extends StatelessWidget {
+  const NoLeadingWidget();
+
+  @override
+  Widget build() => null;
 }
