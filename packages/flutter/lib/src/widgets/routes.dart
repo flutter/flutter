@@ -971,11 +971,16 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the
 /// state of their [Route].
 ///
+/// ## Sample code
+///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
 /// [RouteAware] in its [State] and subscribe it to the [RouteObserver]:
 ///
 /// ```dart
 /// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+///
+///   final RouteObserver routeObserver = new RouteObserver();
+///
 ///   @override
 ///   void didChangeDependencies() {
 ///     super.didChangeDependencies();
@@ -998,6 +1003,13 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///     // Do something
 ///   }
 ///
+///   @override
+///   Widget build(BuildContext context) => new Container();
+///
+/// }
+///
+/// class RouteAwareWidget extends StatefulWidget {
+///   State<RouteAwareWidget> createState() => new RouteAwareWidgetState();
 /// }
 /// ```
 class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
