@@ -84,7 +84,9 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// If the [leading] widget is omitted, but the [AppBar] is in a [Scaffold] with
 /// a [Drawer], then a button will be inserted to open the drawer. Otherwise, if
 /// the nearest [Navigator] has any previous routes, a [BackButton] is inserted
-/// instead.
+/// instead. This behavior can be turned off by setting the [automaticallyImplyLeading]
+/// to false. In that case a null leading widget will result in the middle/title widget
+/// stretching to start.
 ///
 /// ## Sample code
 ///
@@ -130,6 +132,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   AppBar({
     Key key,
     this.leading,
+    this.automaticallyImplyLeading: true,
     this.title,
     this.actions,
     this.flexibleSpace,
@@ -158,6 +161,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// drawer. If there's no [Drawer] and the parent [Navigator] can go back, the
   /// [AppBar] will use a [BackButton] that calls [Navigator.maybePop].
   final Widget leading;
+
+  /// Controls whether we should try to imply the leading widget if null.
+  ///
+  /// If true and leading is null, automatically try to deduce what the leading
+  /// widget should be. If false and leading is null, leading space is given to title.
+  /// If leading widget is not null, this parameter has no effect.
+  final bool automaticallyImplyLeading;
 
   /// The primary widget displayed in the appbar.
   ///
@@ -332,7 +342,7 @@ class _AppBarState extends State<AppBar> {
     }
 
     Widget leading = widget.leading;
-    if (leading == null) {
+    if (leading == null && widget.automaticallyImplyLeading) {
       if (hasDrawer) {
         leading = new IconButton(
           icon: const Icon(Icons.menu),
