@@ -17,6 +17,7 @@
 #ifndef LIB_TXT_SRC_PARAGRAPH_STYLE_H_
 #define LIB_TXT_SRC_PARAGRAPH_STYLE_H_
 
+#include <climits>
 #include <string>
 
 #include "lib/txt/src/font_style.h"
@@ -32,7 +33,7 @@ class ParagraphStyle {
   FontStyle font_style = FontStyle::normal;
   std::string font_family = "";
   double font_size = 14;
-  size_t max_lines = 1;
+  size_t max_lines = UINT_MAX;
   double line_height = 1.0;
   std::string ellipsis = "...";
   // TODO(garyq): Implement right to left.

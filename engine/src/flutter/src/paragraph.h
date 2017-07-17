@@ -53,6 +53,12 @@ class Paragraph {
 
   double GetHeight() const;
 
+  // Returns the actual max width of the longest line after Layout().
+  double GetLayoutWidth() const;
+
+  // Returns the width provided in the Layout() method.
+  double GetMaxWidth() const;
+
   double GetAlphabeticBaseline() const;
 
   double GetIdeographicBaseline() const;
@@ -115,8 +121,8 @@ class Paragraph {
   SkScalar height_ = 0.0f;
   double width_ = 0.0f;
   size_t lines_ = 0;
-  double max_intrinsic_width_ = -1;
-  double min_intrinsic_width_ = -1;
+  double max_intrinsic_width_ = 0;
+  double min_intrinsic_width_ = 0;
   // TODO(garyq): Instead of using whitespace to delimit "words", use the
   // results of minikin breaker.
   std::vector<double> word_widths_;

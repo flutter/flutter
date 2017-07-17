@@ -401,11 +401,10 @@ void Paragraph::Layout(double width, bool force) {
         max_line_spacing = temp_line_spacing;
         // Record the alphabetic_baseline_:
         if (lines_ == 0) {
-          alphabetic_baseline_ = metrics.fCapHeight * run.style.height;
+          alphabetic_baseline_ = -metrics.fAscent * run.style.height;
           // TODO(garyq): Properly implement ideographic_baseline_.
           ideographic_baseline_ =
-              (metrics.fUnderlinePosition + metrics.fCapHeight) *
-              run.style.height;
+              (metrics.fUnderlinePosition - metrics.fAscent) * run.style.height;
         }
       }
       temp_line_spacing = metrics.fDescent * run.style.height;
@@ -455,6 +454,8 @@ void Paragraph::Layout(double width, bool force) {
       buffer_sizes.size() > 0) {
     JustifyLine(buffers, buffer_sizes, word_count, justify_spacing, -1);
   }
+  line_widths_ =
+      std::vector<double>(breaker_.getWidths(), breaker_.getWidths() + lines_);
   CalculateIntrinsicWidths();
 }
 
@@ -509,12 +510,25 @@ double Paragraph::GetIdeographicBaseline() const {
 }
 
 void Paragraph::CalculateIntrinsicWidths() {
-  for (size_t i = 0; i < word_widths_.size(); ++i) {
-    max_intrinsic_width_ += word_widths_[i];
+  // TODO(garyq): Investigate correctness of the following implementation of max
+  // intrinsic width. This is currently the sum of all the widths of each line
+  // after layout.
+  max_intrinsic_width_ = 0;
+  for (size_t i = 0; i < line_widths_.size(); ++i) {
+    max_intrinsic_width_ += line_widths_[i];
   }
 
-  // TODO(garyq): Implement the DP algorithm version instead of this stand in!
-  min_intrinsic_width_ = max_intrinsic_width_ / paragraph_style_.max_lines;
+  // TODO(garyq): Investigate correctness of the following implementation of max
+  // intrinsic width. This is currently the longest line in the text after
+  // layout.
+  min_intrinsic_width_ = 0;
+  for (size_t i = 0; i < line_widths_.size(); ++i) {
+    min_intrinsic_width_ = std::max(min_intrinsic_width_, line_widths_[i]);
+  }
+
+  // Ensure that min < max widths.
+  min_intrinsic_width_ = std::min(max_intrinsic_width_, min_intrinsic_width_);
+  max_intrinsic_width_ = std::max(max_intrinsic_width_, min_intrinsic_width_);
 }
 
 double Paragraph::GetMaxIntrinsicWidth() const {
@@ -532,6 +546,18 @@ size_t Paragraph::TextSize() const {
 
 double Paragraph::GetHeight() const {
   return line_heights_[line_heights_.size() - 2];
+}
+
+double Paragraph::GetLayoutWidth() const {
+  double w = 0;
+  for (size_t i = 0; i < line_widths_.size(); ++i) {
+    w = std::max(w, line_widths_[i]);
+  }
+  return w;
+}
+
+double Paragraph::GetMaxWidth() const {
+  return width_;
 }
 
 void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
