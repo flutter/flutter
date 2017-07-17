@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildTest([ScrollController controller]) {
+Widget buildTest({ ScrollController controller, String title:'TTTTTTTT' }) {
   return new MediaQuery(
     data: const MediaQueryData(),
     child: new Scaffold(
@@ -17,7 +17,7 @@ Widget buildTest([ScrollController controller]) {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               new SliverAppBar(
-                title: const Text('TTTTTTTT'),
+                title: new Text(title),
                 pinned: true,
                 expandedHeight: 200.0,
                 forceElevated: innerBoxIsScrolled,
@@ -193,7 +193,7 @@ void main() {
       scrollOffset = controller.offset;
     });
 
-    await tester.pumpWidget(buildTest(controller));
+    await tester.pumpWidget(buildTest(controller: controller));
     expect(controller.position.minScrollExtent, 0.0);
     expect(controller.position.pixels, 50.0);
     expect(controller.position.maxScrollExtent, 200.0);
@@ -239,6 +239,50 @@ void main() {
     await tester.tap(find.text('DD'));
     await tester.pumpAndSettle();
     expect(find.text('ddd1'), findsOneWidget);
+  });
+
+  testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
+    await tester.pumpWidget(
+      new PageView(
+        children: <Widget>[
+          buildTest(controller: controller, title: 'Page0'),
+          buildTest(controller: controller, title: 'Page1'),
+          buildTest(controller: controller, title: 'Page2'),
+        ],
+      ),
+    );
+
+    // Initially Page0 is visible and  Page0's appbar is fully expanded (height = 200.0).
+    expect(find.text('Page0'), findsOneWidget);
+    expect(find.text('Page1'), findsNothing);
+    expect(find.text('Page2'), findsNothing);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
+
+    // A scroll collapses Page0's appbar to 150.0.
+    controller.jumpTo(50.0);
+    await(tester.pumpAndSettle());
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 150.0);
+
+    // Fling to Page1. Page1's appbar height is the same as the appbar for Page0.
+    await tester.fling(find.text('Page0'), const Offset(-100.0, 0.0), 10000.0);
+    await(tester.pumpAndSettle());
+    expect(find.text('Page0'), findsNothing);
+    expect(find.text('Page1'), findsOneWidget);
+    expect(find.text('Page2'), findsNothing);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 150.0);
+
+    // Expand Page1's appbar and then fling to Page2.  Page2's appbar appears
+    // fully expanded.
+    controller.jumpTo(0.0);
+    await(tester.pumpAndSettle());
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
+    await tester.fling(find.text('Page1'), const Offset(-100.0, 0.0), 10000.0);
+    await(tester.pumpAndSettle());
+    expect(find.text('Page0'), findsNothing);
+    expect(find.text('Page1'), findsNothing);
+    expect(find.text('Page2'), findsOneWidget);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
   });
 
 }
