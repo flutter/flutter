@@ -12,7 +12,6 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
-import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
@@ -223,7 +222,7 @@ class HotRunner extends ResidentRunner {
     return devFSUris;
   }
 
-  Future<bool> _updateDevFS({ DevFSProgressReporter progressReporter }) async {
+  Future<bool> _updateDevFS() async {
     if (!_refreshDartDependencies()) {
       // Did not update DevFS because of a Dart source error.
       return false;
@@ -238,7 +237,6 @@ class HotRunner extends ResidentRunner {
 
     for (FlutterDevice device in flutterDevices) {
       final bool result = await device.updateDevFS(
-        progressReporter: progressReporter,
         bundle: assetBundle,
         bundleDirty: rebuildBundle,
         fileFilter: _dartDependencies,
