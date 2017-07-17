@@ -24,6 +24,23 @@ typedef StreamChannel<String> _OpenChannel(Uri uri);
 
 _OpenChannel _openChannel = _defaultOpenChannel;
 
+/// A function that reacts to the invocation of the 'reloadSources' service.
+///
+/// The VM Service Protocol allows clients to register custom services that
+/// can be invoked by other clients through the service protocol itself.
+///
+/// Clients like Observatory use external 'reloadSources' services,
+/// when available, instead of the VM internal one. This allows these clients to
+/// invoke Flutter HotReload when connected to a Flutter Application started in
+/// hot mode.
+///
+/// See: https://github.com/dart-lang/sdk/issues/30023
+typedef Future<Null> ReloadSources(
+  String isolateId, {
+  bool force,
+  bool pause,
+});
+
 const String _kRecordingType = 'vmservice';
 
 StreamChannel<String> _defaultOpenChannel(Uri uri) =>
@@ -40,13 +57,51 @@ const Duration kShortRequestTimeout = const Duration(seconds: 5);
 
 /// A connection to the Dart VM Service.
 class VMService {
-  VMService._(this._peer, this.httpAddress, this.wsAddress, this._requestTimeout) {
+  VMService._(
+    this._peer,
+    this.httpAddress,
+    this.wsAddress,
+    this._requestTimeout,
+    ReloadSources reloadSources,
+  ) {
     _vm = new VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
 
     _peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
     });
+
+    if (reloadSources != null) {
+      _peer.registerMethod('reloadSources', (rpc.Parameters params) async {
+        final String isolateId = params['isolateId'].value;
+        final bool force = params.asMap['force'] ?? false;
+        final bool pause = params.asMap['pause'] ?? false;
+
+        if (isolateId is! String || isolateId.isEmpty)
+          throw new rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
+        if (force is! bool)
+          throw new rpc.RpcException.invalidParams('Invalid \'force\': $force');
+        if (pause is! bool)
+          throw new rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
+
+        try {
+          await reloadSources(isolateId, force: force, pause: pause);
+          return {'type': 'Success'};
+        } on rpc.RpcException {
+          rethrow;
+        } catch (e, st) {
+          throw new rpc.RpcException(rpc_error_code.SERVER_ERROR,
+              'Error during Sources Reload: $e\n$st');
+        }
+      });
+
+      // If the Flutter Engine doesn't support service registration this will
+      // have no effect
+      _peer.sendNotification('_registerService', {
+        'service': 'reloadSources',
+        'alias': 'Flutter Tools'
+      });
+    }
   }
 
   /// Enables recording of VMService JSON-rpc activity to the specified base
@@ -76,16 +131,24 @@ class VMService {
 
   /// Connect to a Dart VM Service at [httpUri].
   ///
-  /// Requests made via the returns [VMService] time out after [requestTimeout]
+  /// Requests made via the returned [VMService] time out after [requestTimeout]
   /// amount of time, which is [kDefaultRequestTimeout] by default.
+  ///
+  /// If the [reloadSources] parameter is not null, the 'reloadSources' service
+  /// will be registered. The VM Service Protocol allows clients to register
+  /// custom services that can be invoked by other clients through the service
+  /// protocol itself.
+  ///
+  /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
   static VMService connect(
     Uri httpUri, {
     Duration requestTimeout: kDefaultRequestTimeout,
+    ReloadSources reloadSources,
   }) {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = _openChannel(wsUri);
     final rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel));
-    return new VMService._(peer, httpUri, wsUri, requestTimeout);
+    return new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources);
   }
 
   final Uri httpAddress;
