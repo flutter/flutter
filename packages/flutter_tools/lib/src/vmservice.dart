@@ -91,7 +91,7 @@ class VMService {
           rethrow;
         } catch (e, st) {
           throw new rpc.RpcException(rpc_error_code.SERVER_ERROR,
-              'Error during Sources Reload: $e$st');
+              'Error during Sources Reload: $e\n$st');
         }
       });
 
