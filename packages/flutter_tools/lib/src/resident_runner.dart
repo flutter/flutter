@@ -314,7 +314,6 @@ class FlutterDevice {
   }
 
   Future<bool> updateDevFS({
-    DevFSProgressReporter progressReporter,
     AssetBundle bundle,
     bool bundleDirty: false,
     Set<String> fileFilter
@@ -326,7 +325,6 @@ class FlutterDevice {
     int bytes = 0;
     try {
       bytes = await devFS.update(
-        progressReporter: progressReporter,
         bundle: bundle,
         bundleDirty: bundleDirty,
         fileFilter: fileFilter
