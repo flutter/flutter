@@ -6,13 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildTest() {
+Widget buildTest([ScrollController controller]) {
   return new MediaQuery(
     data: const MediaQueryData(),
     child: new Scaffold(
       body: new DefaultTabController(
         length: 4,
         child: new NestedScrollView(
+          controller: controller,
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return <Widget>[
               new SliverAppBar(
@@ -183,4 +184,61 @@ void main() {
     expect(find.text('ccc1'), findsOneWidget);
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
   });
+
+  testWidgets('NestedScrollView with a ScrollController', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController(initialScrollOffset: 50.0);
+
+    double scrollOffset;
+    controller.addListener(() {
+      scrollOffset = controller.offset;
+    });
+
+    await tester.pumpWidget(buildTest(controller));
+    expect(controller.position.minScrollExtent, 0.0);
+    expect(controller.position.pixels, 50.0);
+    expect(controller.position.maxScrollExtent, 200.0);
+
+    // The appbar's expandedHeight - initialScrollOffset = 150.
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 150.0);
+
+    // Fully expand the appbar by scrolling (no animation) to 0.0.
+    controller.jumpTo(0.0);
+    await(tester.pumpAndSettle());
+    expect(scrollOffset, 0.0);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
+
+    // Scroll back to 50.0 animating over 100ms.
+    controller.animateTo(50.0, duration: const Duration(milliseconds: 100), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump();
+    expect(scrollOffset, 0.0);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
+    await tester.pump(const Duration(milliseconds: 50)); // 50ms - halfway to scroll offset = 50.0.
+    expect(scrollOffset, 25.0);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 175.0);
+    await tester.pump(const Duration(milliseconds: 50)); // 100ms - all the way to scroll offset = 50.0.
+    expect(scrollOffset, 50.0);
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 150.0);
+
+    // Scroll to the end, (we're not scrolling to the end of the list that contains aaa1,
+    // just to the end of the outer scrollview). Verify that the first item in each tab
+    // is still visible.
+    controller.jumpTo(controller.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+    expect(scrollOffset, 200.0);
+    expect(find.text('aaa1'), findsOneWidget);
+
+    await tester.tap(find.text('BB'));
+    await tester.pumpAndSettle();
+    expect(find.text('bbb1'), findsOneWidget);
+
+    await tester.tap(find.text('CC'));
+    await tester.pumpAndSettle();
+    expect(find.text('ccc1'), findsOneWidget);
+
+    await tester.tap(find.text('DD'));
+    await tester.pumpAndSettle();
+    expect(find.text('ddd1'), findsOneWidget);
+  });
+
 }
