@@ -7,6 +7,7 @@ import 'dart:ui' show SemanticsFlags, SemanticsAction;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/physics.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
@@ -126,6 +127,24 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
     if (paint.color == indicatorColor)
       indicatorRect = rect;
   }
+}
+
+class TestScrollPhysics extends ScrollPhysics {
+  const TestScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
+  
+  @override
+  TestScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return new TestScrollPhysics(parent: buildParent(ancestor));
+  }
+  
+  static final SpringDescription _kDefaultSpring = new SpringDescription.withDampingRatio(
+    mass: 0.5,
+    springConstant: 500.0,
+    ratio: 1.1,
+  );
+  
+  @override
+  SpringDescription get spring => _kDefaultSpring;
 }
 
 void main() {
@@ -781,6 +800,53 @@ void main() {
             height: 400.0,
             child: new TabBarView(
               controller: tabController,
+              children: <Widget>[
+                const Center(child: const Text('0')),
+                const Center(child: const Text('1')),
+                const Center(child: const Text('2')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tabController.index, 1);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+
+    expect(position.pixels, 400.0);
+
+    // Not close enough to switch to page 2
+    pageController.jumpTo(800.0 - 1.25 * position.physics.tolerance.distance);
+    expect(tabController.index, 1);
+
+    // Close enough to switch to page 2
+    pageController.jumpTo(800.0 - 0.75 * position.physics.tolerance.distance);
+    expect(tabController.index, 2);
+  });
+
+  testWidgets('TabBarView scrolls end very close to a new page with custom physics', (WidgetTester tester) async {
+    final TabController tabController = new TabController(
+      vsync: const TestVSync(),
+      initialIndex: 1,
+      length: 3,
+    );
+
+    await tester.pumpWidget(
+      new SizedBox.expand(
+        child: new Center(
+          child: new SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: new TabBarView(
+              controller: tabController,
+              physics: const TestScrollPhysics(),
               children: <Widget>[
                 const Center(child: const Text('0')),
                 const Center(child: const Text('1')),
