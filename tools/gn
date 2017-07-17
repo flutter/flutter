@@ -94,10 +94,9 @@ def to_gn_args(args):
             gn_args['target_cpu'] = 'x64'
         else:
             gn_args['target_cpu'] = 'arm64'
-
-    gn_args['flutter_aot'] = aot
-    if aot:
-        gn_args['dart_target_arch'] = gn_args['target_cpu']
+    else:
+        # Building host artifacts
+        gn_args['target_cpu'] = 'x64'
 
     # No cross-compilation on Windows (for now).
     if sys.platform.startswith(('cygwin', 'win')):
@@ -114,20 +113,24 @@ def to_gn_args(args):
       gn_args['dart_target_arch'] = 'dbc'
 
     # Modify host_toolchain into dart_host_toolchain so it matches word size of target_cpu
-    if args.target_os == 'android' and aot and gn_args['target_cpu'] == 'arm':
+    target_is_32_bit = gn_args['target_cpu'] == 'arm' or gn_args['target_cpu'] == 'x86'
+    if target_is_32_bit:
       if sys.platform.startswith('linux'):
         gn_args['dart_host_toolchain'] = "//build/toolchain/linux:clang_x86"
       elif sys.platform.startswith('darwin'):
         gn_args['dart_host_toolchain'] = "//build/toolchain/mac:clang_i386"
       elif sys.platform.startswith('win'):
         gn_args['dart_host_toolchain'] = "//build/toolchain/win:x86"
-    elif args.target_os == "ios" and not args.simulator:
-      if gn_args['target_cpu'] == 'arm':
-        gn_args['dart_host_toolchain'] = '//build/toolchain/mac:clang_i386'
-      elif gn_args['target_cpu'] == 'arm64':
-        gn_args['dart_host_toolchain'] = '//build/toolchain/mac:clang_x64'
+    else:
+      if sys.platform.startswith('linux'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/linux:clang_x64"
+      elif sys.platform.startswith('darwin'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/mac:clang_x64"
+      elif sys.platform.startswith('win'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/win:x64"
 
     gn_args['flutter_runtime_mode'] = args.runtime_mode
+    gn_args['flutter_aot'] = aot
 
     if args.target_sysroot:
       gn_args['target_sysroot'] = args.target_sysroot

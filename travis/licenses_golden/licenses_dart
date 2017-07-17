@@ -1,4 +1,4 @@
-Signature: 8f6268ccc2b376c8399cd9acc27b4e1c
+Signature: b30e56ad696f2fcb5da1a00579e68a5b
 
 UNUSED LICENSES:
 
@@ -1203,7 +1203,6 @@ FILE: ../../../dart/client/idea/.idea/.name
 FILE: ../../../dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../dart/client/idea/.idea/vcs.xml
 FILE: ../../../dart/runtime/CPPLINT.cfg
-FILE: ../../../dart/runtime/bin/vmservice_sdk/lib/libraries.json
 FILE: ../../../dart/runtime/bin/vmserviceio_dartium.dart
 FILE: ../../../dart/runtime/observatory/.analysis_options
 FILE: ../../../dart/runtime/observatory/.packages
