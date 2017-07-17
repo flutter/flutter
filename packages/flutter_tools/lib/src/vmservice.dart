@@ -25,8 +25,21 @@ typedef StreamChannel<String> _OpenChannel(Uri uri);
 _OpenChannel _openChannel = _defaultOpenChannel;
 
 /// A function that reacts to the invocation of the 'reloadSources' service.
-typedef Future ReloadSources(String isolateId,
-    { bool force, bool pause });
+///
+/// The VM Service Protocol allows clients to register custom services that
+/// can be invoked by other clients through the service protocol itself.
+///
+/// Clients like Observatory use external 'reloadSources' services,
+/// when available, instead of the VM internal one. This allows these clients to
+/// invoke Flutter HotReload when connected to a Flutter Application started in
+/// hot mode.
+///
+/// See: https://github.com/dart-lang/sdk/issues/30023
+typedef Future<Null> ReloadSources(
+  String isolateId, {
+  bool force,
+  bool pause,
+});
 
 const String _kRecordingType = 'vmservice';
 
@@ -44,8 +57,13 @@ const Duration kShortRequestTimeout = const Duration(seconds: 5);
 
 /// A connection to the Dart VM Service.
 class VMService {
-  VMService._(this._peer, this.httpAddress, this.wsAddress, this._requestTimeout,
-      ReloadSources reloadSources) {
+  VMService._(
+    this._peer,
+    this.httpAddress,
+    this.wsAddress,
+    this._requestTimeout,
+    ReloadSources reloadSources,
+  ) {
     _vm = new VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
 
@@ -55,19 +73,16 @@ class VMService {
 
     if (reloadSources != null) {
       _peer.registerMethod('reloadSources', (rpc.Parameters params) async {
-        const int kInvalidParams = -32602;
-        const int kServerError = -32000;
-
         final String isolateId = params['isolateId'].value;
         final bool force = params.asMap['force'] ?? false;
         final bool pause = params.asMap['pause'] ?? false;
 
-        if (isolateId is! String || isolateId == '')
-          throw new rpc.RpcException.invalidParams('Invalid \'isolateId\'');
+        if (isolateId is! String || isolateId.isEmpty)
+          throw new rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
         if (force is! bool)
-          throw new rpc.RpcException.invalidParams('Invalid \'force\'');
-        if (force is! bool)
-          throw new rpc.RpcException.invalidParams('Invalid \'pause\'');
+          throw new rpc.RpcException.invalidParams('Invalid \'force\': $force');
+        if (pause is! bool)
+          throw new rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
 
         try {
           await reloadSources(isolateId, force: force, pause: pause);
@@ -75,7 +90,7 @@ class VMService {
         } on rpc.RpcException {
           rethrow;
         } catch (e, st) {
-          throw new rpc.RpcException(kServerError,
+          throw new rpc.RpcException(rpc_error_code.SERVER_ERROR,
               'Error during Sources Reload: $e$st');
         }
       });
@@ -116,10 +131,15 @@ class VMService {
 
   /// Connect to a Dart VM Service at [httpUri].
   ///
-  /// Requests made via the returns [VMService] time out after [requestTimeout]
+  /// Requests made via the returned [VMService] time out after [requestTimeout]
   /// amount of time, which is [kDefaultRequestTimeout] by default.
-  /// If the [reloadSources] parameter is not null the 'reloadSources' service
-  /// will be registered.
+  ///
+  /// If the [reloadSources] parameter is not null, the 'reloadSources' service
+  /// will be registered. The VM Service Protocol allows clients to register
+  /// custom services that can be invoked by other clients through the service
+  /// protocol itself.
+  ///
+  /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
   static VMService connect(
     Uri httpUri, {
     Duration requestTimeout: kDefaultRequestTimeout,

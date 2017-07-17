@@ -17,6 +17,8 @@ import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
 import 'usage.dart';
+import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'vmservice.dart';
 
 class HotRunnerConfig {
@@ -84,10 +86,16 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
-  Future _reloadSourcesService(String isolateId,
+  Future<Null> _reloadSourcesService(String isolateId,
       { bool force: false, bool pause: false }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
-    return restart(pauseAfterRestart: pause);
+    final OperationResult result = await restart(pauseAfterRestart: pause);
+    if (result != OperationResult.ok) {
+      throw new rpc.RpcException(
+        rpc_error_code.INTERNAL_ERROR,
+        'Unable to reload sources',
+      );
+    };
   }
 
   Future<int> attach({
