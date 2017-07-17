@@ -212,7 +212,7 @@ class LocalEngineArtifacts extends Artifacts {
 
   String _genSnapshotPath(TargetPlatform platform, BuildMode mode) {
     String clang;
-    if (platform == TargetPlatform.ios) {
+    if (platform == TargetPlatform.ios || mode == BuildMode.debug) {
       clang = 'clang_x64';
     } else {
       clang = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
