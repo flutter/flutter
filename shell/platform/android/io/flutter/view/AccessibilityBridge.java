@@ -122,6 +122,16 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
             // the visible viewport of a scrollable.
             result.setClassName("android.widget.ScrollView");
         }
+        if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0 || (object.actions & SEMANTICS_ACTION_DECREASE) != 0 ) {
+            result.setFocusable(true);
+            result.setClassName("android.widget.SeekBar");
+            if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0) {
+                result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+            if ((object.actions & SEMANTICS_ACTION_DECREASE) != 0) {
+                result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
+        }
 
         result.setCheckable((object.flags & SEMANTICS_FLAG_HAS_CHECKED_STATE) != 0);
         result.setChecked((object.flags & SEMANTICS_FLAG_IS_CHECKED) != 0);
@@ -171,6 +181,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
                 } else if ((object.actions & SEMANTICS_ACTION_SCROLL_LEFT) != 0) {
                     // TODO(ianh): bidi support
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_LEFT);
+                } else if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0) {
+                    mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_INCREASE);
                 } else {
                     return false;
                 }
@@ -182,6 +194,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
                 } else if ((object.actions & SEMANTICS_ACTION_SCROLL_RIGHT) != 0) {
                     // TODO(ianh): bidi support
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_RIGHT);
+                } else if ((object.actions & SEMANTICS_ACTION_DECREASE) != 0) {
+                    mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_DECREASE);
                 } else {
                     return false;
                 }
