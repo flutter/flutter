@@ -1025,7 +1025,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   // end of paragraph handling needs to be fixed in a later patch.
   EXPECT_FLOAT_EQ(rects[16].left(), 0);
   EXPECT_FLOAT_EQ(rects[16].top(), 234.375);
-  EXPECT_FLOAT_EQ(rects[16].right(), 133.875);
+  EXPECT_FLOAT_EQ(rects[16].right(), 140);
   EXPECT_FLOAT_EQ(rects[16].bottom(), 292.96875);
 
   ASSERT_TRUE(Snapshot());
