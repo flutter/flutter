@@ -40,7 +40,7 @@ class ConfigCommand extends FlutterCommand {
   final List<String> aliases = <String>['configure'];
 
   @override
-  bool get shouldUpdateCache => true;
+  bool get shouldUpdateCache => false;
 
   @override
   String get usageFooter {
