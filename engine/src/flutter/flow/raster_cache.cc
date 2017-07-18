@@ -78,8 +78,8 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
 
   const SkRect logical_rect = picture->cullRect();
   const SkRect physical_rect =
-      SkRect::MakeWH(std::ceil(std::labs(logical_rect.width() * scale.x())),
-                     std::ceil(std::labs(logical_rect.height() * scale.y())));
+      SkRect::MakeWH(std::ceil(std::fabs(logical_rect.width() * scale.x())),
+                     std::ceil(std::fabs(logical_rect.height() * scale.y())));
 
   const SkImageInfo image_info =
       SkImageInfo::MakeN32Premul(physical_rect.width(),   // physical width
