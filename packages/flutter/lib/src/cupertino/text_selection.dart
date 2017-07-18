@@ -19,16 +19,16 @@ const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 36.0;
 
 const Color _kToolbarBackgroundColor = const Color(0xFF2E2E2E);
+const Color _kToolbarDividerColor = const Color(0xFFB9B9B9);
 const Color _kHandlesColor = const Color(0xFF146DDE);
-
-const EdgeInsets _kToolbarButtonPadding = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
 
 // This offset is used to determine the center of the selection during a drag.
 // It's slightly below the center of the text so the finger isn't entirely
 // covering the text being selected.
 const Size _kSelectionOffset = const Size(20.0, 30.0);
 const Size _kToolbarTriangleSize = const Size(18.0, 9.0);
-const double _kToolbarBorderRadius = 7.5;
+const EdgeInsets _kToolbarButtonPadding = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
+const BorderRadius _kToolbarBorderRadius = const BorderRadius.all(const Radius.circular(7.5));
 
 const TextStyle _kToolbarButtonFontStyle = const TextStyle(
   fontSize: 14.0,
@@ -36,17 +36,7 @@ const TextStyle _kToolbarButtonFontStyle = const TextStyle(
   fontWeight: FontWeight.w300,
 );
 
-const Widget _kOnePhysicalPixelVerticalDivider = const DecoratedBox(
-  decoration: const BoxDecoration(
-    border: const Border(
-      left: const BorderSide(
-        color: const Color(0xFFB9B9B9),
-        width: 0.5,
-      ),
-    ),
-  ),
-  child: const SizedBox(width: 0.5),
-);
+const SizedBox _kOnePhysicalPixelVerticalDivider = const SizedBox(width: 0.5);
 
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
@@ -122,8 +112,13 @@ class _TextSelectionToolbar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         new ClipRRect(
-          borderRadius: new BorderRadius.circular(_kToolbarBorderRadius),
-          child: new Row(mainAxisSize: MainAxisSize.min, children: items),
+          borderRadius: _kToolbarBorderRadius,
+          child: new Container(
+            decoration: const BoxDecoration(
+              color: _kToolbarDividerColor,
+            ),
+            child: new Row(mainAxisSize: MainAxisSize.min, children: items),
+          ),
         ),
         // TODO(xster): position the triangle based on the layout delegate.
         // And avoid letting the triangle line up with any dividers.
