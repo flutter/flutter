@@ -288,22 +288,22 @@ class ScrollController extends ChangeNotifier {
 /// new PageView(
 ///   children: <Widget>[
 ///     new ListView(
-///       controller: trackingScrollController,
+///       controller: _trackingScrollController,
 ///       children: new List<Widget>.generate(100, (int i) => new Text('page 0 item $i')).toList(),
 ///     ),
 ///    new ListView(
-///      controller: trackingScrollController,
+///      controller: _trackingScrollController,
 ///      children: new List<Widget>.generate(200, (int i) => new Text('page 1 item $i')).toList(),
 ///    ),
 ///    new ListView(
-///      controller: trackingScrollController,
+///      controller: _trackingScrollController,
 ///      children: new List<Widget>.generate(300, (int i) => new Text('page 2 item $i')).toList(),
 ///     ),
 ///   ],
 /// )
 /// ```
 ///
-/// In this example the `trackingController` would have been created by the
+/// In this example the `_trackingController` would have been created by the
 /// stateful widget that built the widget tree.
 class TrackingScrollController extends ScrollController {
   Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
