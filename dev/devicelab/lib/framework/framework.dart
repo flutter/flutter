@@ -134,7 +134,8 @@ class _TaskRunner {
       // are catching errors coming from arbitrary (and untrustworthy) task
       // code. Our goal is to convert the failure into a readable message.
       // Propagating it further is not useful.
-      completer.complete(new TaskResult.failure(message));
+      if (!completer.isCompleted)
+        completer.complete(new TaskResult.failure(message));
     });
     return completer.future;
   }

@@ -86,6 +86,7 @@ class FlutterDriverExtension {
       'set_semantics': _setSemantics,
       'tap': _tap,
       'waitFor': _waitFor,
+      'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
     });
 
@@ -100,6 +101,7 @@ class FlutterDriverExtension {
       'set_semantics': (Map<String, String> params) => new SetSemantics.deserialize(params),
       'tap': (Map<String, String> params) => new Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
+      'waitForAbsent': (Map<String, String> params) => new WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => new WaitUntilNoTransientCallbacks.deserialize(params),
     });
 
@@ -107,6 +109,7 @@ class FlutterDriverExtension {
       'ByText': _createByTextFinder,
       'ByTooltipMessage': _createByTooltipMessageFinder,
       'ByValueKey': _createByValueKeyFinder,
+      'ByType': _createByTypeFinder,
     });
   }
 
@@ -195,6 +198,19 @@ class FlutterDriverExtension {
     return finder;
   }
 
+  /// Runs `finder` repeatedly until it finds zero [Element]s.
+  Future<Finder> _waitForAbsentElement(Finder finder) async {
+    if (_frameSync)
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+
+    await _waitUntilFrame(() => !finder.precache());
+
+    if (_frameSync)
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+
+    return finder;
+  }
+
   Finder _createByTextFinder(ByText arguments) {
     return find.text(arguments.text);
   }
@@ -219,6 +235,12 @@ class FlutterDriverExtension {
     }
   }
 
+  Finder _createByTypeFinder(ByType arguments) {
+    return find.byElementPredicate((Element element) {
+      return element.widget.runtimeType.toString() == arguments.type;
+    }, description: 'widget with runtimeType "${arguments.type}"');
+  }
+
   Finder _createFinder(SerializableFinder finder) {
     final FinderConstructor constructor = _finders[finder.finderType];
 
@@ -240,6 +262,12 @@ class FlutterDriverExtension {
       return new WaitForResult();
     else
       return null;
+  }
+
+  Future<WaitForAbsentResult> _waitForAbsent(Command command) async {
+    final WaitForAbsent waitForAbsentCommand = command;
+    await _waitForAbsentElement(_createFinder(waitForAbsentCommand.finder));
+    return new WaitForAbsentResult();
   }
 
   Future<Null> _waitUntilNoTransientCallbacks(Command command) async {
