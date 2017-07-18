@@ -164,9 +164,7 @@ class Paragraph {
   void PaintDecorations(SkCanvas* canvas,
                         double x,
                         double y,
-                        TextStyle style,
-                        SkPaint::FontMetrics metrics,
-                        SkTextBlob* blob);
+                        size_t record_index);
 
   void PaintWavyDecoration(SkCanvas* canvas,
                            std::vector<WaveCoordinates> wave_coords,

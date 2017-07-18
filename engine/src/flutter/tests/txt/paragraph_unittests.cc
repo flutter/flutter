@@ -150,9 +150,11 @@ TEST_F(RenderTest, RainbowParagraph) {
   builder.AddText(u16_text3);
 
   txt::TextStyle text_style4;
-  text_style4.font_size = 10;
+  text_style4.font_size = 14;
   text_style4.color = SK_ColorBLUE;
   text_style4.font_family = "Roboto";
+  text_style4.decoration = txt::TextDecoration(0x1 | 0x2 | 0x4);
+  text_style4.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style4);
 
   builder.AddText(u16_text4);
@@ -166,7 +168,7 @@ TEST_F(RenderTest, RainbowParagraph) {
   auto paragraph = builder.Build();
   paragraph->Layout(GetTestCanvasWidth());
 
-  paragraph->Paint(GetCanvas(), 10.0, 50.0);
+  paragraph->Paint(GetCanvas(), 0, 0);
 
   u16_text1 += u16_text2 + u16_text3 + u16_text4;
   for (size_t i = 0; i < u16_text1.length(); i++) {
@@ -290,7 +292,7 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
-  text_style.decoration = txt::TextDecoration(0x0);
+  text_style.decoration = txt::TextDecoration(0x1);
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -387,7 +389,7 @@ TEST_F(RenderTest, RightAlignParagraph) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
-  text_style.decoration = txt::TextDecoration(0x0);
+  text_style.decoration = txt::TextDecoration(0x1);
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -491,7 +493,7 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
-  text_style.decoration = txt::TextDecoration(0x0);
+  text_style.decoration = txt::TextDecoration(0x1);
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -597,7 +599,7 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
-  text_style.decoration = txt::TextDecoration(0x0);
+  text_style.decoration = txt::TextDecoration(0x1);
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
 
@@ -905,6 +907,7 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(3, 3), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 1), 1ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20), 17ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(450, 20), 16ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 90), 35ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-100000, 90), 18ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(20, -80), 0ull);
@@ -1027,6 +1030,24 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[16].top(), 234.375);
   EXPECT_FLOAT_EQ(rects[16].right(), 140);
   EXPECT_FLOAT_EQ(rects[16].bottom(), 292.96875);
+
+  paint.setColor(SK_ColorBLUE);
+  rects = paragraph->GetRectsForRange(19, 21);
+  for (size_t i = 0; i < rects.size(); ++i) {
+    GetCanvas()->drawRect(rects[i], paint);
+  }
+  ASSERT_EQ(rects.size(), 2ull);
+  EXPECT_FLOAT_EQ(rects[1].left(), 499);
+  EXPECT_FLOAT_EQ(rects[1].top(), 0);
+  EXPECT_FLOAT_EQ(rects[1].right(), 511);
+  EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
+
+  paint.setColor(SK_ColorRED);
+  rects = paragraph->GetRectsForRange(21, 21);
+  for (size_t i = 0; i < rects.size(); ++i) {
+    GetCanvas()->drawRect(rects[i], paint);
+  }
+  ASSERT_EQ(rects.size(), 1ull);
 
   ASSERT_TRUE(Snapshot());
 }

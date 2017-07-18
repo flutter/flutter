@@ -108,6 +108,8 @@ void GetPaint(const TextStyle& style, SkPaint* paint) {
 
 }  // namespace
 
+static const float kDoubleDecorationSpacing = 3.0f;
+
 Paragraph::Paragraph() = default;
 
 Paragraph::~Paragraph() = default;
@@ -202,8 +204,9 @@ void Paragraph::Layout(double width, bool force) {
   double prev_max_descent = 0.0f;
   double line_width = 0.0f;
   std::vector<SkScalar> x_queue;
-  double justify_spacing = 0;
-  double prev_word_pos = 0;
+  double justify_spacing = 0.0f;
+  double prev_word_pos = 0.0f;
+  double prev_char_advance = 0.0f;
 
   std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
   std::vector<size_t> buffer_sizes;
@@ -214,6 +217,7 @@ void Paragraph::Layout(double width, bool force) {
     for (size_t i = 0; i < x_queue.size(); ++i) {
       record_index = records_.size() - (x_queue.size() - i);
       records_[record_index].SetOffset(SkPoint::Make(x_queue[i], y));
+      // Adjust the offsets for each of the different alignments.
       switch (paragraph_style_.text_align) {
         case TextAlign::left:
           break;
@@ -222,6 +226,9 @@ void Paragraph::Layout(double width, bool force) {
               records_[record_index].offset().x() + width_ -
                   breaker_.getWidths()[records_[record_index].line()],
               records_[record_index].offset().y()));
+          records_[record_index].SetWidthModifier(
+              records_[record_index].GetWidthModifier() + width_ -
+              breaker_.getWidths()[records_[record_index].line()]);
           break;
         }
         case TextAlign::center: {
@@ -231,9 +238,18 @@ void Paragraph::Layout(double width, bool force) {
                    breaker_.getWidths()[records_[record_index].line()]) /
                       2,
               records_[record_index].offset().y()));
+
+          records_[record_index].SetWidthModifier(
+              records_[record_index].GetWidthModifier() +
+              (width_ - breaker_.getWidths()[records_[record_index].line()]) /
+                  2);
           break;
         }
         case TextAlign::justify: {
+          records_[record_index].SetWidthModifier(
+              records_[record_index].GetWidthModifier() +
+              records_[record_index].GetWidthModifier() + width_ -
+              breaker_.getWidths()[records_[record_index].line()]);
           break;
         }
       }
@@ -300,6 +316,7 @@ void Paragraph::Layout(double width, bool force) {
       buffer_sizes = std::vector<size_t>();
       word_count = 0;
       double temp_line_spacing = 0;
+      double prev_letter_spacing_offset = letter_spacing_offset;
       while (blob_start < glyph_count) {
         const size_t blob_length = GetBlobLength(layout, blob_start);
         buffer_sizes.push_back(blob_length);
@@ -354,6 +371,8 @@ void Paragraph::Layout(double width, bool force) {
             whitespace_ended = true;
           }
 
+          prev_char_advance = layout.getCharAdvance(glyph_index);
+
           letter_spacing_offset += run.style.letter_spacing;
         }
         blob_start += blob_length;
@@ -388,7 +407,7 @@ void Paragraph::Layout(double width, bool force) {
       line_width +=
           std::abs(records_[records_.size() - 1].text()->bounds().fRight +
                    records_[records_.size() - 1].text()->bounds().fLeft);
-
+      records_.back().SetLetterSpacingOffset(prev_letter_spacing_offset);
       // Must adjust each line to the largest text in the line, so cannot
       // directly push the offset property of PaintRecord until line is
       // finished.
@@ -416,17 +435,23 @@ void Paragraph::Layout(double width, bool force) {
         line_heights_.push_back(
             (line_heights_.empty() ? 0 : line_heights_.back()) +
             max_line_spacing + max_descent);
+        glyph_single_line_position_x.push_back(
+            glyph_single_line_position_x.back() + prev_char_advance);
         glyph_single_line_position_x.push_back(FLT_MAX);
         glyph_position_x_.push_back(glyph_single_line_position_x);
         prev_max_descent = max_descent;
         line_widths_.push_back(line_width);
         postprocess_line();
 
+        records_.back().SetLetterSpacingOffset(0);
+
+        // Reset Variables for next line.
         max_line_spacing = 0.0f;
         max_descent = 0.0f;
         x = 0.0f;
         letter_spacing_offset = 0.0f;
         prev_word_pos = 0;
+        prev_char_advance = 0.0f;
         line_width = 0.0f;
         break_index += 1;
         lines_++;
@@ -439,6 +464,7 @@ void Paragraph::Layout(double width, bool force) {
       layout_start = layout_end;
     }
   }
+  // Handle last line tasks.
   y += max_line_spacing;
   height_ = y + max_descent;
   postprocess_line();
@@ -446,6 +472,8 @@ void Paragraph::Layout(double width, bool force) {
     line_widths_.push_back(line_width);
 
   line_heights_.push_back(FLT_MAX);
+  glyph_single_line_position_x.push_back(glyph_single_line_position_x.back() +
+                                         prev_char_advance);
   glyph_single_line_position_x.push_back(FLT_MAX);
   glyph_position_x_.push_back(glyph_single_line_position_x);
 
@@ -453,6 +481,12 @@ void Paragraph::Layout(double width, bool force) {
   if (paragraph_style_.text_align == TextAlign::justify &&
       buffer_sizes.size() > 0) {
     JustifyLine(buffers, buffer_sizes, word_count, justify_spacing, -1);
+    // Remove decoration extra width if the last line.
+    size_t i = records_.size() - 1;
+    while (records_[i].line() == lines_ - 1) {
+      records_[i].SetWidthModifier(0);
+      --i;
+    }
   }
   line_widths_ =
       std::vector<double>(breaker_.getWidths(), breaker_.getWidths() + lines_);
@@ -536,7 +570,6 @@ double Paragraph::GetMaxIntrinsicWidth() const {
 }
 
 double Paragraph::GetMinIntrinsicWidth() const {
-  // TODO(garyq): This is a lower bound. Actual value may be slightly higher.
   return min_intrinsic_width_;
 }
 
@@ -573,13 +606,13 @@ void Paragraph::SetFontCollection(FontCollection* font_collection) {
 // paragraph.
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   canvas->translate(x, y);
-  for (const auto& record : records_) {
+  for (size_t index = 0; index < records_.size(); ++index) {
+    PaintRecord& record = records_[index];
     SkPaint paint;
     paint.setColor(record.style().color);
     SkPoint offset = record.offset();
     canvas->drawTextBlob(record.text(), offset.x(), offset.y(), paint);
-    PaintDecorations(canvas, offset.x(), offset.y(), record.style(),
-                     record.metrics(), record.text());
+    PaintDecorations(canvas, offset.x(), offset.y(), index);
   }
   canvas->translate(-x, -y);
 }
@@ -587,13 +620,13 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
 void Paragraph::PaintDecorations(SkCanvas* canvas,
                                  double x,
                                  double y,
-                                 TextStyle style,
-                                 SkPaint::FontMetrics metrics,
-                                 SkTextBlob* blob) {
-  if (style.decoration != TextDecoration::kNone) {
+                                 size_t record_index) {
+  PaintRecord& record = records_[record_index];
+  if (record.style().decoration != TextDecoration::kNone) {
+    const SkPaint::FontMetrics& metrics = record.metrics();
     SkPaint paint;
     paint.setStyle(SkPaint::kStroke_Style);
-    paint.setColor(style.decoration_color);
+    paint.setColor(record.style().decoration_color);
     paint.setAntiAlias(true);
 
     // This is set to 2 for the double line style
@@ -602,12 +635,25 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     // Filled when drawing wavy decorations.
     std::vector<WaveCoordinates> wave_coords;
 
-    double width = blob->bounds().fRight + blob->bounds().fLeft;
+    x +=
+        (record_index != 0 ? records_[record_index - 1].GetLetterSpacingOffset()
+                           : 0);
+
+    double width = 0;
+    if (record_index == records_.size() - 1 ||
+        record.line() < records_[record_index + 1].line()) {
+      width = line_widths_[record.line()] - x;
+    } else {
+      width = record.text()->bounds().fRight + record.text()->bounds().fLeft;
+    }
+
+    width += record.GetWidthModifier();
 
     paint.setStrokeWidth(metrics.fUnderlineThickness *
-                         style.decoration_thickness);
+                         record.style().decoration_thickness);
 
-    switch (style.decoration_style) {
+    // Setup the decorations.
+    switch (record.style().decoration_style) {
       case TextDecorationStyle::kSolid: {
         break;
       }
@@ -615,16 +661,28 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
         decoration_count = 2;
         break;
       }
+      // Note: the intervals are scaled by the thickness of the line, so it is
+      // possible to change spacing by changing the decoration_thickness
+      // property of TextStyle.
       case TextDecorationStyle::kDotted: {
-        const SkScalar intervals[] = {3.0f, 5.0f, 3.0f, 5.0f};
+        // Divide by 14pt as it is the default size.
+        const float scale = record.style().font_size / 14.0f;
+        const SkScalar intervals[] = {1.0f * scale, 2.0f * scale, 1.0f * scale,
+                                      2.0f * scale};
         size_t count = sizeof(intervals) / sizeof(intervals[0]);
         paint.setPathEffect(SkPathEffect::MakeCompose(
             SkDashPathEffect::Make(intervals, count, 0.0f),
             SkDiscretePathEffect::Make(0, 0)));
         break;
       }
+      // Note: the intervals are scaled by the thickness of the line, so it is
+      // possible to change spacing by changing the decoration_thickness
+      // property of TextStyle.
       case TextDecorationStyle::kDashed: {
-        const SkScalar intervals[] = {10.0f, 5.0f, 10.0f, 5.0f};
+        // Divide by 14pt as it is the default size.
+        const float scale = record.style().font_size / 14.0f;
+        const SkScalar intervals[] = {6.0f * scale, 3.0f * scale, 6.0f * scale,
+                                      3.0f * scale};
         size_t count = sizeof(intervals) / sizeof(intervals[0]);
         paint.setPathEffect(SkPathEffect::MakeCompose(
             SkDashPathEffect::Make(intervals, count, 0.0f),
@@ -636,7 +694,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
         double x_start = 0;
         double y_top = -metrics.fUnderlineThickness;
         double y_bottom = metrics.fUnderlineThickness;
-        while (x_start + metrics.fUnderlineThickness * 2 < x + width) {
+        while (x_start + metrics.fUnderlineThickness * 2 < width) {
           wave_coords.push_back(
               WaveCoordinates(x_start, wave_count % 2 == 0 ? y_bottom : y_top,
                               x_start + metrics.fUnderlineThickness * 2,
@@ -648,12 +706,14 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
       }
     }
 
+    // Draw the decorations.
     // Use a for loop for "kDouble" decoration style
     for (int i = 0; i < decoration_count; i++) {
-      double y_offset = i * metrics.fUnderlineThickness * 3.0f;
+      double y_offset =
+          i * metrics.fUnderlineThickness * kDoubleDecorationSpacing;
       // Underline
-      if (style.decoration & 0x1) {
-        if (style.decoration_style != TextDecorationStyle::kWavy)
+      if (record.style().decoration & 0x1) {
+        if (record.style().decoration_style != TextDecorationStyle::kWavy)
           canvas->drawLine(x, y + metrics.fUnderlinePosition + y_offset,
                            x + width, y + metrics.fUnderlinePosition + y_offset,
                            paint);
@@ -662,8 +722,8 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
                               metrics.fUnderlineThickness, width);
       }
       // Overline
-      if (style.decoration & 0x2) {
-        if (style.decoration_style != TextDecorationStyle::kWavy)
+      if (record.style().decoration & 0x2) {
+        if (record.style().decoration_style != TextDecorationStyle::kWavy)
           canvas->drawLine(x, y + metrics.fAscent - y_offset, x + width,
                            y + metrics.fAscent - y_offset, paint);
         else
@@ -671,13 +731,16 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
                               width);
       }
       // Strikethrough
-      if (style.decoration & 0x4) {
-        if (style.decoration_style != TextDecorationStyle::kWavy)
-          canvas->drawLine(x, y - metrics.fXHeight / 2 + y_offset, x + width,
-                           y - metrics.fXHeight / 2 + y_offset, paint);
+      if (record.style().decoration & 0x4) {
+        // Make sure the double line is "centered" vertically.
+        y_offset -= (decoration_count - 1.0) * metrics.fUnderlineThickness *
+                    kDoubleDecorationSpacing / 2.0;
+        if (record.style().decoration_style != TextDecorationStyle::kWavy)
+          canvas->drawLine(x, y - metrics.fXHeight / 2.0 + y_offset, x + width,
+                           y - metrics.fXHeight / 2.0 + y_offset, paint);
         else
           PaintWavyDecoration(canvas, wave_coords, paint, x, y,
-                              -metrics.fXHeight / 2, width);
+                              -metrics.fXHeight / 2.0, width);
       }
     }
   }
@@ -724,8 +787,8 @@ SkRect Paragraph::GetCoordinatesForGlyphPosition(size_t pos) const {
   size_t remainder = fmin(pos, text_.size());
   size_t line = 1;
   for (line = 1; line < line_heights_.size() - 1; ++line) {
-    if (remainder > glyph_position_x_[line].size() - 2) {
-      remainder -= glyph_position_x_[line].size() - 2;
+    if (remainder > glyph_position_x_[line].size() - 3) {
+      remainder -= glyph_position_x_[line].size() - 3;
     } else {
       break;
     }
@@ -748,11 +811,11 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
       break;
     } else {
       offset += prev_count;
-      prev_count = glyph_position_x_[y_index].size() - 2;
+      prev_count = glyph_position_x_[y_index].size() - 3;
     }
   }
   prev_count = 0;
-  for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size();
+  for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size() - 2;
        ++x_index) {
     if (dx < glyph_position_x_[y_index][x_index]) {
       break;
