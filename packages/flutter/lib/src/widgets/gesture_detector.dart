@@ -446,13 +446,14 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology. This can be controlled using
-  /// [excludeFromSemantics].
+  /// [excludeFromSemantics] and [semanticsActionsChangeNotifier].
   const RawGestureDetector({
     Key key,
     this.child,
     this.gestures: const <Type, GestureRecognizerFactory>{},
     this.behavior,
-    this.excludeFromSemantics: false
+    this.excludeFromSemantics: false,
+    this.semanticsActionsChangeNotifier: null,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key);
@@ -478,6 +479,15 @@ class RawGestureDetector extends StatefulWidget {
   /// tree directly and so having a gesture to show it would result in
   /// duplication of information.
   final bool excludeFromSemantics;
+
+  /// Determines which [SemanticsAction]s are exposed to the semantics tree
+  /// and updates them should they change.
+  ///
+  /// Only used if [excludeFromSemantics] is set to `false`.
+  ///
+  /// If this is set to `null`, the set of exposed [SemanticsAction] will be
+  /// calculated based on the provided [gestures].
+  final SemanticsActionsChangeNotifier semanticsActionsChangeNotifier;
 
   @override
   RawGestureDetectorState createState() => new RawGestureDetectorState();
@@ -579,7 +589,11 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       child: widget.child
     );
     if (!widget.excludeFromSemantics)
-      result = new _GestureSemantics(owner: this, child: result);
+      result = new _GestureSemantics(
+        owner: this,
+        child: result,
+        semanticsActionsChangeNotifier: widget.semanticsActionsChangeNotifier,
+      );
     return result;
   }
 
@@ -612,10 +626,13 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
     Key key,
     Widget child,
-    this.owner
+    this.owner,
+    this.semanticsActionsChangeNotifier: null,
   }) : super(key: key, child: child);
 
   final RawGestureDetectorState owner;
+
+  final SemanticsActionsChangeNotifier semanticsActionsChangeNotifier;
 
   void _handleTap() {
     final TapGestureRecognizer recognizer = owner._recognizers[TapGestureRecognizer];
@@ -706,6 +723,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   void _updateHandlers(RenderSemanticsGestureHandler renderObject, Map<Type, GestureRecognizer> recognizers) {
     renderObject
+      ..semanticsActionsChangeNotifier = semanticsActionsChangeNotifier
       ..onTap = recognizers.containsKey(TapGestureRecognizer) ? _handleTap : null
       ..onLongPress = recognizers.containsKey(LongPressGestureRecognizer) ? _handleLongPress : null
       ..onHorizontalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||

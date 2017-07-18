@@ -2738,6 +2738,21 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
       markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
   }
 
+  SemanticsActionsChangeNotifier get semanticsActionsChangeNotifier => _semanticsActionsChangeNotifier;
+  SemanticsActionsChangeNotifier  _semanticsActionsChangeNotifier;
+  set semanticsActionsChangeNotifier(SemanticsActionsChangeNotifier value) {
+    if (_semanticsActionsChangeNotifier == value)
+      return;
+    _semanticsActionsChangeNotifier?.removeListener(_semanticsActionsChanged);
+    value.addListener(_semanticsActionsChanged);
+    _semanticsActionsChangeNotifier = value;
+    _semanticsActionsChanged();
+  }
+
+  void _semanticsActionsChanged() {
+    markNeedsSemanticsUpdate(onlyChanges: true);
+  }
+
   /// Called when the user presses on the render object for a long period of time.
   GestureLongPressCallback get onLongPress => _onLongPress;
   GestureLongPressCallback _onLongPress;
@@ -2796,14 +2811,27 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
+    List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
-      node.addAction(SemanticsAction.tap);
+      actions.add(SemanticsAction.tap);
     if (onLongPress != null)
-      node.addAction(SemanticsAction.longPress);
-    if (onHorizontalDragUpdate != null)
-      node.addHorizontalScrollingActions();
-    if (onVerticalDragUpdate != null)
-      node.addVerticalScrollingActions();
+      actions.add(SemanticsAction.longPress);
+    if (onHorizontalDragUpdate != null) {
+      actions.add(SemanticsAction.scrollRight);
+      actions.add(SemanticsAction.scrollLeft);
+    }
+    if (onVerticalDragUpdate != null) {
+      actions.add(SemanticsAction.scrollUp);
+      actions.add(SemanticsAction.scrollDown);
+    }
+
+    // If a semanticsActionsChangeNotifier was provided, check that we only
+    // expose SemanticsActions that are currently valid.
+    if (semanticsActionsChangeNotifier != null) {
+      final List<SemanticsAction> enabledActions = semanticsActionsChangeNotifier.availableActions;
+      actions = actions.where((SemanticsAction action) => enabledActions.contains(action)).toList();
+    }
+    actions.forEach(node.addAction);
   }
 
   @override
