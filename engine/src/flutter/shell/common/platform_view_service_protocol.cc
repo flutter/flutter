@@ -246,7 +246,7 @@ static sk_sp<SkData> EncodeBitmapAsPNG(const SkBitmap& bitmap) {
   }
 
   PngPixelSerializer serializer;
-  sk_sp<SkData> data(serializer.encodeToData(pixmap));
+  sk_sp<SkData> data(serializer.encode(pixmap));
 
   return data;
 }
