@@ -144,9 +144,13 @@ void main() {
 
     expect(sliderBox, paints..rect(color: theme.accentColor)..rect(color: theme.unselectedWidgetColor));
     expect(sliderBox, paints..circle(color: theme.accentColor));
+    expect(sliderBox, isNot(paints..circle(color: customColor)));
+    expect(sliderBox, isNot(paints..circle(color: theme.unselectedWidgetColor)));
     await tester.pumpWidget(buildApp(customColor));
     expect(sliderBox, paints..rect(color: customColor)..rect(color: theme.unselectedWidgetColor));
     expect(sliderBox, paints..circle(color: customColor));
+    expect(sliderBox, isNot(paints..circle(color: theme.accentColor)));
+    expect(sliderBox, isNot(paints..circle(color: theme.unselectedWidgetColor)));
   });
 
   testWidgets('Slider has a customizable inactive color',
@@ -178,33 +182,6 @@ void main() {
     await tester.pumpWidget(buildApp(customColor));
     expect(sliderBox, paints..rect(color: theme.accentColor)..rect(color: customColor));
     expect(sliderBox, paints..circle(color: theme.accentColor));
-  });
-
-  testWidgets('Slider can be drawn with and without a thumb',
-      (WidgetTester tester) async {
-
-    Widget buildApp(bool showThumb) {
-      return new Material(
-        child: new Center(
-          child: new Slider(
-            value: 0.5,
-            showThumb: showThumb,
-            onChanged: (double newValue) {},
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(buildApp(false));
-
-    final RenderBox sliderBox =
-        tester.firstRenderObject<RenderBox>(find.byType(Slider));
-
-    expect(sliderBox, isNot(paints..circle(style: PaintingStyle.fill)));
-    expect(sliderBox, isNot(paints..circle()..circle()));
-    await tester.pumpWidget(buildApp(true));
-    expect(sliderBox, paints..circle(style: PaintingStyle.fill));
-    expect(sliderBox, isNot(paints..circle()..circle()));
   });
 
   testWidgets('Slider can draw an open thumb at min',

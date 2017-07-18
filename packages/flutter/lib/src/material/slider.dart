@@ -65,7 +65,6 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
-    this.showThumb: true,
     this.thumbOpenAtMin: false,
   }) : assert(value != null),
        assert(min != null),
@@ -73,7 +72,6 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
-       assert(showThumb != null),
        assert(thumbOpenAtMin != null),
        super(key: key);
 
@@ -146,13 +144,6 @@ class Slider extends StatefulWidget {
   /// Defaults to the unselected widget color of the current [Theme].
   final Color inactiveColor;
 
-  /// Whether to show the thumb (circle).
-  ///
-  /// When this property is false, the thumb is hidden.
-  ///
-  /// Defaults to true.
-  final bool showThumb;
-
   /// Whether the thumb should be an open circle when the slider is at its minimum position.
   ///
   /// When this property is false, the thumb does not change when it the slider
@@ -194,7 +185,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       label: widget.label,
       activeColor: widget.activeColor ?? theme.accentColor,
       inactiveColor: widget.inactiveColor ?? theme.unselectedWidgetColor,
-      showThumb: widget.showThumb,
       thumbOpenAtMin: widget.thumbOpenAtMin,
       textTheme: theme.accentTextTheme,
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
@@ -211,7 +201,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.label,
     this.activeColor,
     this.inactiveColor,
-    this.showThumb,
     this.thumbOpenAtMin,
     this.textTheme,
     this.onChanged,
@@ -223,7 +212,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final String label;
   final Color activeColor;
   final Color inactiveColor;
-  final bool showThumb;
   final bool thumbOpenAtMin;
   final TextTheme textTheme;
   final ValueChanged<double> onChanged;
@@ -237,7 +225,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       label: label,
       activeColor: activeColor,
       inactiveColor: inactiveColor,
-      showThumb: showThumb,
       thumbOpenAtMin: thumbOpenAtMin,
       textTheme: textTheme,
       onChanged: onChanged,
@@ -253,7 +240,6 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..label = label
       ..activeColor = activeColor
       ..inactiveColor = inactiveColor
-      ..showThumb = showThumb
       ..thumbOpenAtMin = thumbOpenAtMin
       ..textTheme = textTheme
       ..onChanged = onChanged;
@@ -300,7 +286,6 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     String label,
     Color activeColor,
     Color inactiveColor,
-    bool showThumb,
     bool thumbOpenAtMin,
     TextTheme textTheme,
     this.onChanged,
@@ -310,7 +295,6 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
        _divisions = divisions,
        _activeColor = activeColor,
        _inactiveColor = inactiveColor,
-       _showThumb = showThumb,
        _thumbOpenAtMin = thumbOpenAtMin,
        _textTheme = textTheme {
     this.label = label;
@@ -405,15 +389,6 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     if (value == _thumbOpenAtMin)
       return;
     _thumbOpenAtMin = value;
-    markNeedsPaint();
-  }
-
-  bool get showThumb => _showThumb;
-  bool _showThumb;
-  set showThumb(bool value) {
-    if (value == _showThumb)
-      return;
-    _showThumb = value;
     markNeedsPaint();
   }
 
@@ -555,13 +530,9 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
       if (value > 0.0)
         canvas.drawRect(new Rect.fromLTRB(trackLeft, trackTop, trackActive, trackBottom), primaryPaint);
       if (value < 1.0) {
-        if (showThumb) {
-          final bool hasBalloon = _reaction.status != AnimationStatus.dismissed && label != null;
-          final double trackActiveDelta = hasBalloon ? 0.0 : thumbRadius - 1.0;
-          canvas.drawRect(new Rect.fromLTRB(trackActive + trackActiveDelta, trackTop, trackRight, trackBottom), trackPaint);
-        } else {
-          canvas.drawRect(new Rect.fromLTRB(trackActive, trackTop, trackRight, trackBottom), trackPaint);
-        }
+        final bool hasBalloon = _reaction.status != AnimationStatus.dismissed && label != null;
+        final double trackActiveDelta = hasBalloon ? 0.0 : thumbRadius - 1.0;
+        canvas.drawRect(new Rect.fromLTRB(trackActive + trackActiveDelta, trackTop, trackRight, trackBottom), trackPaint);
       }
     } else {
       if (value > 0.0)
@@ -612,19 +583,17 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
       }
     }
 
-    if (showThumb) {
-      Paint thumbPaint = primaryPaint;
-      double thumbRadiusDelta = 0.0;
-      if (value == 0.0 && thumbOpenAtMin) {
-        thumbPaint = trackPaint;
-        // This is destructive to trackPaint.
-        thumbPaint
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
-        thumbRadiusDelta = -1.0;
-      }
-      canvas.drawCircle(thumbCenter, thumbRadius + thumbRadiusDelta, thumbPaint);
+    Paint thumbPaint = primaryPaint;
+    double thumbRadiusDelta = 0.0;
+    if (value == 0.0 && thumbOpenAtMin) {
+      thumbPaint = trackPaint;
+      // This is destructive to trackPaint.
+      thumbPaint
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.0;
+      thumbRadiusDelta = -1.0;
     }
+    canvas.drawCircle(thumbCenter, thumbRadius + thumbRadiusDelta, thumbPaint);
   }
 
   @override
