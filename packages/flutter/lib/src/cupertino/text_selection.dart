@@ -97,10 +97,6 @@ class _TextSelectionToolbar extends StatelessWidget {
       items.add(_buildToolbarButton('Select All', handleSelectAll));
     }
 
-    // Remove the last divider.
-    if (items.last.runtimeType == SizedBox)
-      items.removeLast();
-
     final Widget triangle = new SizedBox.fromSize(
       size: _kToolbarTriangleSize,
       child: new CustomPaint(
@@ -113,21 +109,22 @@ class _TextSelectionToolbar extends StatelessWidget {
       children: <Widget>[
         new ClipRRect(
           borderRadius: _kToolbarBorderRadius,
-          child: new Container(
+          child: new DecoratedBox(
             decoration: const BoxDecoration(
               color: _kToolbarDividerColor,
             ),
             child: new Row(mainAxisSize: MainAxisSize.min, children: items),
           ),
         ),
-        // TODO(xster): position the triangle based on the layout delegate.
+        // TODO(https://github.com/flutter/flutter/issues/11274):
+        // Position the triangle based on the layout delegate.
         // And avoid letting the triangle line up with any dividers.
         triangle,
       ],
     );
   }
 
-  /// Adds a themed [CupertinoButton] and a divider to the list.
+  /// Builds a themed [CupertinoButton] for the toolbar.
   CupertinoButton _buildToolbarButton(String text, VoidCallback onPressed) {
     return new CupertinoButton(
       child: new Text(text, style: _kToolbarButtonFontStyle),
@@ -135,6 +132,7 @@ class _TextSelectionToolbar extends StatelessWidget {
       minSize: _kToolbarHeight,
       padding: _kToolbarButtonPadding,
       borderRadius: null,
+      pressedOpacity: 0.7,
       onPressed: onPressed,
     );
   }
@@ -218,7 +216,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => false;
+  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => origin != oldPainter.origin;
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
