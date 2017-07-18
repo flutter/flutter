@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
@@ -28,5 +29,44 @@ void main() {
     painted = false;
     layout(makeFittedBox(), constraints: new BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
     expect(painted, equals(false));
+  });
+
+  test('RenderPhysicalModel compositing on Fuchsia', () {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+
+    final root = new RenderPhysicalModel(color: new Color(0xffff00ff));
+    layout(root, phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    // On Fuchsia, the system compositor is responsible for drawing shadows
+    // for physical model layers with non-zero elevation.
+    root.elevation = 1.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isTrue);
+
+    root.elevation = 0.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  test('RenderPhysicalModel compositing on non-Fuchsia', () {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final root = new RenderPhysicalModel(color: new Color(0xffff00ff));
+    layout(root, phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    // On non-Fuchsia platforms, Flutter draws its own shadows.
+    root.elevation = 1.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    root.elevation = 0.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    debugDefaultTargetPlatformOverride = null;
   });
 }
