@@ -42,6 +42,7 @@ source_set("ui") {
     "painting/rrect.h",
     "painting/shader.cc",
     "painting/shader.h",
+    "painting/utils.cc",
     "painting/utils.h",
     "painting/vertices.cc",
     "painting/vertices.h",
