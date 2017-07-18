@@ -61,6 +61,7 @@ def to_gn_args(args):
     gn_args = {}
 
     # Skia GN args.
+    gn_args['skia_enable_flutter_defines'] = True # Enable Flutter API guards in Skia.
     gn_args['skia_use_dng_sdk'] = False    # RAW image handling.
     gn_args['skia_use_sfntly'] = False     # PDF handling.
     gn_args['skia_use_libwebp'] = False    # Needs third_party/libwebp.
