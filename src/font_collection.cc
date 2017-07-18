@@ -129,11 +129,13 @@ const std::string FontCollection::ProcessFamilyName(const std::string& family) {
 #ifdef DIRECTORY_FONT_MANAGER_AVAILABLE
   return family.length() == 0 ? DEFAULT_FAMILY_NAME : family;
 #else
-  if (family.length() == 0) {
-    return *GetFamilyNames().begin();
-  } else if (GetFamilyNames().count(family) > 0) {  // Ensure family exists.
+  if (family.length() > 0 &&
+      GetFamilyNames().count(family) > 0) {  // Ensure family exists.
     return family;
   } else {
+    if (GetFamilyNames().count(DEFAULT_FAMILY_NAME) > 0) {
+      return DEFAULT_FAMILY_NAME;
+    }
     return *GetFamilyNames().begin();  // First family available.
   }
 #endif
@@ -167,6 +169,7 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
           }
 
           // Create the minikin font from the skia typeface.
+          // Divide by 100 because the weights are given as "100", "200", etc.
           minikin::Font minikin_font(
               std::make_shared<FontSkia>(skia_typeface),
               minikin::FontStyle{skia_typeface->fontStyle().weight() / 100,
