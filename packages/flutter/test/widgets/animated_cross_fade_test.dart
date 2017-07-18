@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -131,4 +132,77 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
   });
 
+  Widget crossFadeWithWatcher({bool towardsSecond: false}) {
+    return new AnimatedCrossFade(
+      firstChild: const _TickerWatchingWidget(),
+      secondChild: new Container(),
+      crossFadeState: towardsSecond ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      duration: const Duration(milliseconds: 50),
+    );
+  }
+
+  testWidgets('AnimatedCrossFade preserves widget state', (WidgetTester tester) async {
+    await tester.pumpWidget(crossFadeWithWatcher());
+
+    _TickerWatchingWidgetState findState() => tester.state(find.byType(_TickerWatchingWidget));
+    final _TickerWatchingWidgetState state = findState();
+
+    await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
+    for (int i = 0; i < 3; i += 1) {
+      await tester.pump(const Duration(milliseconds: 25));
+      expect(findState(), same(state));
+    }
+  });
+
+  testWidgets('AnimatedCrossFade switches off TickerMode and semantics on faded out widget', (WidgetTester tester) async {
+    ExcludeSemantics findSemantics() {
+      return tester.widget(find.descendant(
+        of: find.byKey(const Key('first-child')),
+        matching: find.byType(ExcludeSemantics),
+      ));
+    }
+
+    await tester.pumpWidget(crossFadeWithWatcher());
+
+    final _TickerWatchingWidgetState state = tester.state(find.byType(_TickerWatchingWidget));
+    expect(state.ticker.muted, false);
+    expect(findSemantics().excluding, false);
+
+    await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
+    for (int i = 0; i < 2; i += 1) {
+      await tester.pump(const Duration(milliseconds: 25));
+      expect(state.ticker.muted, false);
+      expect(findSemantics().excluding, false);
+    }
+
+    await tester.pump(const Duration(milliseconds: 25));
+    expect(state.ticker.muted, true);
+    expect(findSemantics().excluding, true);
+  });
+}
+
+class _TickerWatchingWidget extends StatefulWidget {
+  const _TickerWatchingWidget();
+
+  @override
+  State<StatefulWidget> createState() => new _TickerWatchingWidgetState();
+}
+
+class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with SingleTickerProviderStateMixin {
+  Ticker ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    ticker = createTicker((_) {})..start();
+  }
+
+  @override
+  Widget build(BuildContext context) => new Container();
+
+  @override
+  void dispose() {
+    ticker.dispose();
+    super.dispose();
+  }
 }

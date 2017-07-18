@@ -151,15 +151,23 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   Animation<double> _initAnimation(Curve curve, bool inverted) {
-    final CurvedAnimation animation = new CurvedAnimation(
+    Animation<double> animation = new CurvedAnimation(
       parent: _controller,
       curve: curve
     );
 
-    return inverted ? new Tween<double>(
+    animation = inverted ? new Tween<double>(
       begin: 1.0,
       end: 0.0
     ).animate(animation) : animation;
+
+    animation.addStatusListener((AnimationStatus status) {
+      setState(() {
+        // This just triggers a rebuild. The state lives in the animation controller.
+      });
+    });
+
+    return animation;
   }
 
   @override
@@ -189,49 +197,73 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    List<Widget> children;
+  /// Whether we're in the middle of cross-fading right this frame.
+  bool get _isTransitioning => _controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.reverse;
 
-    if (_controller.status == AnimationStatus.completed ||
-        _controller.status == AnimationStatus.forward) {
-      children = <Widget>[
-        new FadeTransition(
-          opacity: _secondAnimation,
-          child: widget.secondChild,
-        ),
-        new Positioned(
-          // TODO(dragostis): Add a way to crop from top right for
-          // right-to-left languages.
-          left: 0.0,
-          top: 0.0,
-          right: 0.0,
-          child: new FadeTransition(
-            opacity: _firstAnimation,
-            child: widget.firstChild,
-          ),
-        ),
-      ];
+  List<Widget> _buildCrossFadedChildren() {
+    const Key kFirstChildKey = const Key('first-child');
+    const Key kSecondChildKey = const Key('second-child');
+    final bool transitioningForwards = _controller.status == AnimationStatus.completed || _controller.status == AnimationStatus.forward;
+
+    Key topKey;
+    Widget topChild;
+    Animation<double> topAnimation;
+    Key bottomKey;
+    Widget bottomChild;
+    Animation<double> bottomAnimation;
+    if (transitioningForwards) {
+      topKey = kSecondChildKey;
+      topChild = widget.secondChild;
+      topAnimation = _secondAnimation;
+      bottomKey = kFirstChildKey;
+      bottomChild = widget.firstChild;
+      bottomAnimation = _firstAnimation;
     } else {
-      children = <Widget>[
-        new FadeTransition(
-          opacity: _firstAnimation,
-          child: widget.firstChild,
-        ),
-        new Positioned(
-          // TODO(dragostis): Add a way to crop from top right for
-          // right-to-left languages.
-          left: 0.0,
-          top: 0.0,
-          right: 0.0,
-          child: new FadeTransition(
-            opacity: _secondAnimation,
-            child: widget.secondChild,
-          ),
-        ),
-      ];
+      topKey = kFirstChildKey;
+      topChild = widget.firstChild;
+      topAnimation = _firstAnimation;
+      bottomKey = kSecondChildKey;
+      bottomChild = widget.secondChild;
+      bottomAnimation = _secondAnimation;
     }
 
+    return <Widget>[
+      new TickerMode(
+        key: bottomKey,
+        enabled: _isTransitioning,
+        child: new Positioned(
+          // TODO(dragostis): Add a way to crop from top right for
+          // right-to-left languages.
+          left: 0.0,
+          top: 0.0,
+          right: 0.0,
+          child: new ExcludeSemantics(
+            excluding: !_isTransitioning,
+            child: new FadeTransition(
+              opacity: bottomAnimation,
+              child: bottomChild,
+            ),
+          ),
+        ),
+      ),
+      new TickerMode(
+        key: topKey,
+        enabled: true,  // top widget always has its animations enabled
+        child: new Positioned(
+          child: new ExcludeSemantics(
+            excluding: false,  // always publish semantics for the top widget
+            child: new FadeTransition(
+              opacity: topAnimation,
+              child: topChild,
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return new ClipRect(
       child: new AnimatedSize(
         key: new ValueKey<Key>(widget.key),
@@ -241,7 +273,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         vsync: this,
         child: new Stack(
           overflow: Overflow.visible,
-          children: children,
+          children: _buildCrossFadedChildren(),
         ),
       ),
     );
