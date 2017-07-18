@@ -173,7 +173,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   _NestedScrollCoordinator(this._context, this._parent) {
     final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     _outerController = new _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'outer');
-    _innerController = new _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'inner');
+    _innerController = new _NestedScrollController(this, initialScrollOffset: 0.0, debugLabel: 'inner');
   }
 
   final BuildContext _context;

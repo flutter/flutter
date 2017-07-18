@@ -288,16 +288,16 @@ class ScrollController extends ChangeNotifier {
 /// new PageView(
 ///   children: <Widget>[
 ///     new ListView(
-///       controller: trackingController,
-///       children: new List.generate(100, (int i) => new Text('page 0 item $i')).toList(),
+///       controller: trackingScrollController,
+///       children: new List<Widget>.generate(100, (int i) => new Text('page 0 item $i')).toList(),
 //     ),
 ///    new ListView(
-///      controller: trackingController,
-///      children: new List.generate(200, (int i) => new Text('page 1 item $i')).toList(),
+///      controller: trackingScrollController,
+///      children: new List<Widget>.generate(200, (int i) => new Text('page 1 item $i')).toList(),
 ///    ),
 ///    new ListView(
-///      controller: trackingController,
-///      children: new List.generate(300, (int i) => new Text('page 2 item $i')).toList(),
+///      controller: trackingScrollController,
+///      children: new List<Widget>.generate(300, (int i) => new Text('page 2 item $i')).toList(),
 ///     ),
 ///   ],
 /// )
