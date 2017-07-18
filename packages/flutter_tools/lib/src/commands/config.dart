@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -37,6 +38,9 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   final List<String> aliases = <String>['configure'];
+
+  @override
+  bool get shouldUpdateCache => true;
 
   @override
   String get usageFooter {
@@ -90,8 +94,11 @@ class ConfigCommand extends FlutterCommand {
     if (results['android-studio-dir'] == null && androidStudio != null) {
       results['android-studio-dir'] = androidStudio.directory;
     }
+    if (results['android-sdk'] == null && androidSdk != null) {
+      results['android-sdk'] = androidSdk.directory;
+    }
 
-    printStatus(JSON.encode(results));
+    printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
   void _updateConfig(String keyName, String keyValue) {
