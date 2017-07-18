@@ -2113,6 +2113,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (!_needsCompositingBitsUpdate)
       return;
     final bool oldNeedsCompositing = _needsCompositing;
+    _needsCompositing = false;
     visitChildren((RenderObject child) {
       child._updateCompositingBits();
       if (child.needsCompositing)
