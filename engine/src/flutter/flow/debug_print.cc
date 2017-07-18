@@ -53,6 +53,17 @@ std::ostream& operator<<(std::ostream& os, const SkVector4& v) {
   return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const SkRect& r) {
+  os << "LTRB: " << r.fLeft << ", " << r.fTop << ", " << r.fRight << ", "
+     << r.fBottom;
+  return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const SkPoint& r) {
+  os << "XY: " << r.fX << ", " << r.fY;
+  return os;
+}
+
 std::ostream& operator<<(std::ostream& os, const flow::RasterCacheKey& k) {
   os << "Picture: " << k.picture_id() << " Scale: " << k.scale_key().width()
      << ", " << k.scale_key().height();
