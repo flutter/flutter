@@ -242,7 +242,10 @@ void main() {
   });
 
   testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final TrackingScrollController controller = new TrackingScrollController();
+    expect(controller.mostRecentlyUpdatedPosition, isNull);
+    expect(controller.initialScrollOffset, 0.0);
+
     await tester.pumpWidget(
       new PageView(
         children: <Widget>[

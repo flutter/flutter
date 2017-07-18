@@ -45,11 +45,12 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
-    this.initialScrollOffset: 0.0,
+    double initialScrollOffset: 0.0,
     this.keepScrollOffset: true,
     this.debugLabel,
   }) : assert(initialScrollOffset != null),
-       assert(keepScrollOffset != null);
+       assert(keepScrollOffset != null),
+       _initialScrollOffset = initialScrollOffset;
 
   /// The initial value to use for [offset].
   ///
@@ -58,7 +59,8 @@ class ScrollController extends ChangeNotifier {
   /// if [keepScrollOffset] is false or a scroll offset hasn't been saved yet.
   ///
   /// Defaults to 0.0.
-  final double initialScrollOffset;
+  final double _initialScrollOffset;
+  double get initialScrollOffset => _initialScrollOffset;
 
   /// Each time a scroll completes, save the current scroll [offset] with
   /// [PageStorage] and restore it if this controller's scrollable is recreated.
@@ -85,6 +87,7 @@ class ScrollController extends ChangeNotifier {
   ///
   /// This should not be mutated directly. [ScrollPosition] objects can be added
   /// and removed using [attach] and [detach].
+  @protected
   Iterable<ScrollPosition> get positions => _positions;
   final List<ScrollPosition> _positions = <ScrollPosition>[];
 
@@ -263,5 +266,80 @@ class ScrollController extends ChangeNotifier {
     } else {
       description.add('${_positions.length} clients');
     }
+  }
+}
+
+/// A [ScrollController] whose `initialScrollOffset` tracks its most recently
+/// updated [ScrollPosition].
+///
+/// This class can be used to synchronize the scroll offset of two or more
+/// lazily created scroll views that share a single [TrackingScrollController].
+/// It tracks the most recently updated scroll position and reports it as its
+/// `initialScrollOffset`.
+///
+/// ## Sample code
+///
+/// In this example each [PageView] page contains a [ListView] and all three
+/// [ListView]'s share a [TrackingController]. The scroll offsets of all three
+/// list views will track each other, to the extent that's possible given the
+/// different list lengths.
+///
+/// ```dart
+/// new PageView(
+///   children: <Widget>[
+///     new ListView(
+///       controller: trackingController,
+///       children: new List.generate(100, (int i) => new Text('page 0 item $i')).toList(),
+//     ),
+///    new ListView(
+///      controller: trackingController,
+///      children: new List.generate(200, (int i) => new Text('page 1 item $i')).toList(),
+///    ),
+///    new ListView(
+///      controller: trackingController,
+///      children: new List.generate(300, (int i) => new Text('page 2 item $i')).toList(),
+///     ),
+///   ],
+/// )
+/// ```
+///
+/// In this example the `trackingController` would have been created by the
+/// stateful widget that built the widget tree.
+class TrackingScrollController extends ScrollController {
+  Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
+  ScrollPosition _lastUpdated;
+
+  /// The last [ScrollPosition] to change. Returns null if there aren't any
+  /// attached scroll positions or there hasn't been any scrolling yet.
+  ScrollPosition get mostRecentlyUpdatedPosition => _lastUpdated;
+
+  /// Returns the scroll offset of the [mostRecentlyUpdatedPosition] or 0.0.
+  @override
+  double get initialScrollOffset => _lastUpdated?.pixels ?? 0.0;
+
+  @override
+  void attach(ScrollPosition position) {
+    super.attach(position);
+    assert(!_positionToListener.containsKey(position));
+    _positionToListener[position] = () { _lastUpdated = position; };
+    position.addListener(_positionToListener[position]);
+  }
+
+  @override
+  void detach(ScrollPosition position) {
+    super.detach(position);
+    assert(_positionToListener.containsKey(position));
+    position.removeListener(_positionToListener[position]);
+    _positionToListener.remove(position);
+  }
+
+  @override
+  void dispose() {
+    for (ScrollPosition position in positions) {
+      assert(_positionToListener.containsKey(position));
+      position.removeListener(_positionToListener[position]);
+    }
+    _positionToListener.clear();
+    super.dispose();
   }
 }

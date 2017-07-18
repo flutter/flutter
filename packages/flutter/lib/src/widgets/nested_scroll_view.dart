@@ -135,7 +135,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
     return new CustomScrollView(
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
-      physics: widget.physics ?? const ClampingScrollPhysics(),
+      physics: new ClampingScrollPhysics(parent: widget.physics),
       controller: _coordinator._outerController,
       slivers: widget._buildSlivers(context, _coordinator._innerController, _coordinator.hasScrolledBody),
     );
@@ -171,9 +171,7 @@ typedef ScrollActivity _NestedScrollActivityGetter(_NestedScrollPosition positio
 
 class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
   _NestedScrollCoordinator(this._context, this._parent) {
-    double initialScrollOffset = 0.0;
-    if (_parent != null)
-      initialScrollOffset = _parent.hasClients ? _parent.positions.first.pixels : _parent.initialScrollOffset;
+    final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     _outerController = new _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'outer');
     _innerController = new _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'inner');
   }
