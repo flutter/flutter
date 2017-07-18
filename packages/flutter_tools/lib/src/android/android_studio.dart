@@ -128,7 +128,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             .listSync()
             .where((FileSystemEntity e) => e is Directory);
         for (Directory directory in directories) {
-          if (directory.basename == 'Android Studio.app') {
+          final String name = directory.basename;
+          // An exact match, or something like 'Android Studio 3.0 Preview.app'.
+          if (name.startsWith('Android Studio') && name.endsWith('.app')) {
             candidatePaths.add(directory);
           } else if (!directory.path.endsWith('.app')) {
             _checkForStudio(directory.path);

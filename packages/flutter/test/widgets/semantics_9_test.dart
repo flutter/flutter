@@ -28,7 +28,7 @@ void main() {
         ],
       ));
 
-      expect(semantics, isNot(includesNodeWithLabel('layer#1')));
+      expect(semantics, isNot(includesNodeWith(label: 'layer#1')));
 
       await tester.pumpWidget(new Stack(
         children: <Widget>[
@@ -39,7 +39,7 @@ void main() {
         ],
       ));
 
-      expect(semantics, includesNodeWithLabel('layer#1'));
+      expect(semantics, includesNodeWith(label: 'layer#1'));
 
       semantics.dispose();
     });
@@ -86,13 +86,13 @@ void main() {
         ],
       ));
 
-      expect(semantics, includesNodeWithLabel('#1'));
-      expect(semantics, includesNodeWithLabel('#2'));
-      expect(semantics, isNot(includesNodeWithLabel('NOT#2.1')));
-      expect(semantics, includesNodeWithLabel('#2.2'));
-      expect(semantics, includesNodeWithLabel('#2.2.1'));
-      expect(semantics, includesNodeWithLabel('#2.3'));
-      expect(semantics, includesNodeWithLabel('#3'));
+      expect(semantics, includesNodeWith(label: '#1'));
+      expect(semantics, includesNodeWith(label: '#2'));
+      expect(semantics, isNot(includesNodeWith(label:'NOT#2.1')));
+      expect(semantics, includesNodeWith(label: '#2.2'));
+      expect(semantics, includesNodeWith(label: '#2.2.1'));
+      expect(semantics, includesNodeWith(label: '#2.3'));
+      expect(semantics, includesNodeWith(label: '#3'));
 
       semantics.dispose();
     });
@@ -121,9 +121,9 @@ void main() {
         ],
       ));
 
-      expect(semantics, isNot(includesNodeWithLabel('NOT#1')));
-      expect(semantics, includesNodeWithLabel('#2.1'));
-      expect(semantics, includesNodeWithLabel('#3'));
+      expect(semantics, isNot(includesNodeWith(label: 'NOT#1')));
+      expect(semantics, includesNodeWith(label: '#2.1'));
+      expect(semantics, includesNodeWith(label: '#3'));
 
       semantics.dispose();
     });

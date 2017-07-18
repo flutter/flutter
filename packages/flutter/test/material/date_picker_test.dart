@@ -337,6 +337,7 @@ void main() {
         expect(feedback.hapticCount, 2);
       });
     });
+
   });
 
   test('days in month', () {
@@ -346,5 +347,18 @@ void main() {
     expect(DayPicker.getDaysInMonth(2016, 2), 29);
     expect(DayPicker.getDaysInMonth(2000, 2), 29);
     expect(DayPicker.getDaysInMonth(1900, 2), 28);
+  });
+
+  testWidgets('month header tap', (WidgetTester tester) async {
+    selectableDayPredicate = null;
+    await preparePicker(tester, (Future<DateTime> date) async {
+      // Switch into the year selector.
+      await tester.tap(find.text('January 2016'));
+      await tester.pump();
+      expect(find.text('2020'), isNotNull);
+
+      await tester.tap(find.text('CANCEL'));
+      expect(await date, isNull);
+    });
   });
 }

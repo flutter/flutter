@@ -69,7 +69,7 @@ class NoAndroidStudioValidator extends DoctorValidator {
               'but Android Studio not found at this location.'));
     }
     messages.add(new ValidationMessage(
-        'Android Studio not found. Download from https://developer.android.com/studio/index.html\n'
+        'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
         '(or visit https://flutter.io/setup/#android-setup for detailed instructions).'));
 
     return new ValidationResult(ValidationType.missing, messages,

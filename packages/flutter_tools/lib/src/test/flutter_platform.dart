@@ -54,6 +54,7 @@ void installHook({
   @required String shellPath,
   TestWatcher watcher,
   bool enableObservatory: false,
+  bool machine: false,
   bool startPaused: false,
   int observatoryPort,
   int diagnosticPort,
@@ -66,6 +67,7 @@ void installHook({
     () => new _FlutterPlatform(
       shellPath: shellPath,
       watcher: watcher,
+      machine: machine,
       enableObservatory: enableObservatory,
       startPaused: startPaused,
       explicitObservatoryPort: observatoryPort,
@@ -84,6 +86,7 @@ class _FlutterPlatform extends PlatformPlugin {
     @required this.shellPath,
     this.watcher,
     this.enableObservatory,
+    this.machine,
     this.startPaused,
     this.explicitObservatoryPort,
     this.explicitDiagnosticPort,
@@ -95,6 +98,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final String shellPath;
   final TestWatcher watcher;
   final bool enableObservatory;
+  final bool machine;
   final bool startPaused;
   final int explicitObservatoryPort;
   final int explicitDiagnosticPort;
@@ -230,7 +234,7 @@ class _FlutterPlatform extends PlatformPlugin {
           assert(processObservatoryUri == null);
           assert(explicitObservatoryPort == null ||
                  explicitObservatoryPort == detectedUri.port);
-          if (startPaused) {
+          if (startPaused && !machine) {
             printStatus('The test process has been started.');
             printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
             printStatus('  $detectedUri');

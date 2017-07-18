@@ -11,6 +11,7 @@ void main() {
       final TextInputConfiguration configuration = const TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.obscureText, false);
+      expect(configuration.autocorrect, true);
       expect(configuration.actionLabel, null);
     });
 
@@ -18,11 +19,13 @@ void main() {
       final TextInputConfiguration configuration = const TextInputConfiguration(
         inputType: TextInputType.number,
         obscureText: true,
+        autocorrect: false,
         actionLabel: 'xyzzy'
       );
       final Map<String, dynamic> json = configuration.toJSON();
       expect(json['inputType'], 'TextInputType.number');
       expect(json['obscureText'], true);
+      expect(json['autocorrect'], false);
       expect(json['actionLabel'], 'xyzzy');
     });
   });

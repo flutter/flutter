@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/ios/cocoapods.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
@@ -22,13 +23,18 @@ void main() {
     MockIMobileDevice iMobileDevice;
     MockXcode xcode;
     MockProcessManager processManager;
+    MockCocoaPods cocoaPods;
     FileSystem fs;
 
     setUp(() {
       iMobileDevice = new MockIMobileDevice();
       xcode = new MockXcode();
       processManager = new MockProcessManager();
+      cocoaPods = new MockCocoaPods();
       fs = new MemoryFileSystem();
+
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(cocoaPods.isCocoaPodsInitialized).thenReturn(true);
     });
 
     testUsingContext('Emit missing status when nothing is installed', () async {
@@ -44,6 +50,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when Xcode is not installed', () async {
@@ -55,6 +62,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when Xcode is partially installed', () async {
@@ -66,6 +74,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when Xcode version too low', () async {
@@ -80,6 +89,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when Xcode EULA not signed', () async {
@@ -94,6 +104,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when Mac dev mode was never enabled', () async {
@@ -108,6 +119,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when python six not installed', () async {
@@ -122,6 +134,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when homebrew not installed', () async {
@@ -136,6 +149,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when libimobiledevice is not installed', () async {
@@ -150,6 +164,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => new MockIMobileDevice(isWorking: false),
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when ios-deploy is not installed', () async {
@@ -164,6 +179,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when ios-deploy version is too low', () async {
@@ -178,6 +194,7 @@ void main() {
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when CocoaPods is not installed', () async {
@@ -186,12 +203,15 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(hasCocoaPods: false);
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(false);
+      when(cocoaPods.hasCocoaPods).thenReturn(false);
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when CocoaPods version is too low', () async {
@@ -200,12 +220,16 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget(cocoaPodsVersionText: '0.39.0');
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(false);
+      when(cocoaPods.hasCocoaPods).thenReturn(true);
+      when(cocoaPods.cocoaPodsVersionText).thenReturn('0.39.0');
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
     });
 
     testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
@@ -214,6 +238,9 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+      when(cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck).thenReturn(false);
+      when(cocoaPods.hasCocoaPods).thenReturn(true);
+      when(cocoaPods.isCocoaPodsInitialized).thenReturn(false);
 
       final ValidationResult result = await new IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.partial);
@@ -221,6 +248,7 @@ void main() {
       FileSystem: () => fs,
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
       ProcessManager: () => processManager,
     });
 
@@ -239,6 +267,7 @@ void main() {
       FileSystem: () => fs,
       IMobileDevice: () => iMobileDevice,
       Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
       ProcessManager: () => processManager,
     });
   });
@@ -260,6 +289,7 @@ class MockIMobileDevice extends IMobileDevice {
 
 class MockXcode extends Mock implements Xcode {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockCocoaPods extends Mock implements CocoaPods {}
 
 class IOSWorkflowTestTarget extends IOSWorkflow {
   IOSWorkflowTestTarget({
@@ -268,14 +298,10 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
     bool hasIosDeploy: true,
     String iosDeployVersionText: '1.9.0',
     bool hasIDeviceInstaller: true,
-    bool hasCocoaPods: true,
-    String cocoaPodsVersionText: '1.2.0',
     String macDevMode: 'Developer mode is already enabled.',
   }) : hasIosDeploy = new Future<bool>.value(hasIosDeploy),
        iosDeployVersionText = new Future<String>.value(iosDeployVersionText),
        hasIDeviceInstaller = new Future<bool>.value(hasIDeviceInstaller),
-       hasCocoaPods = new Future<bool>.value(hasCocoaPods),
-       cocoaPodsVersionText = new Future<String>.value(cocoaPodsVersionText),
        macDevMode = new Future<String>.value(macDevMode);
 
   @override
@@ -292,12 +318,6 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
 
   @override
   final Future<bool> hasIDeviceInstaller;
-
-  @override
-  final Future<bool> hasCocoaPods;
-
-  @override
-  final Future<String> cocoaPodsVersionText;
 
   @override
   final Future<String> macDevMode;

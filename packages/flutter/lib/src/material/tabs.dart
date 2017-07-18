@@ -795,6 +795,7 @@ class TabBarView extends StatefulWidget {
     Key key,
     @required this.children,
     this.controller,
+    this.physics,
   }) : assert(children != null), super(key: key);
 
   /// This widget's selection and animation state.
@@ -805,6 +806,17 @@ class TabBarView extends StatefulWidget {
 
   /// One widget per tab.
   final List<Widget> children;
+
+  /// How the page view should respond to user input.
+  ///
+  /// For example, determines how the page view continues to animate after the
+  /// user stops dragging the page view.
+  ///
+  /// The physics are modified to snap to page boundaries using
+  /// [PageScrollPhysics] prior to being used.
+  ///
+  /// Defaults to matching platform conventions.
+  final ScrollPhysics physics;
 
   @override
   _TabBarViewState createState() => new _TabBarViewState();
@@ -954,7 +966,7 @@ class _TabBarViewState extends State<TabBarView> {
       onNotification: _handleScrollNotification,
       child: new PageView(
         controller: _pageController,
-        physics: _kTabBarViewPhysics,
+        physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
         children: _children,
       ),
     );

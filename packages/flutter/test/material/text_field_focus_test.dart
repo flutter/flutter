@@ -132,4 +132,78 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
+  testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new ListView(
+            children: <Widget>[
+              new TextField(
+                focusNode: focusNode,
+              ),
+              new Container(
+                height: 1000.0,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(TextField), findsOneWidget);
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    FocusScope.of(tester.element(find.byType(TextField))).requestFocus(focusNode);
+    await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
+    await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    focusNode.unfocus();
+    await tester.pump();
+
+    expect(find.byType(TextField), findsNothing);
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
+  testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
+    final FocusNode focusNode = new FocusNode();
+
+    Widget makeTest(String prefix) {
+      return new MaterialApp(
+        home: new Material(
+          child: new ListView(
+            children: <Widget>[
+              new TextField(
+                focusNode: focusNode,
+                decoration: new InputDecoration(
+                  prefixText: prefix,
+                ),
+              ),
+              new Container(
+                height: 1000.0,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(makeTest(null));
+    FocusScope.of(tester.element(find.byType(TextField))).requestFocus(focusNode);
+    await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
+    await tester.pump();
+    expect(find.byType(TextField), findsOneWidget);
+    await tester.pumpWidget(makeTest('test'));
+    await tester.pump(); // in case the AutomaticKeepAlive widget thinks it needs a cleanup frame
+    expect(find.byType(TextField), findsOneWidget);
+  });
 }

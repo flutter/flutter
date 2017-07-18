@@ -172,7 +172,7 @@ class TestCommand extends FlutterCommand {
       workDir = fs.directory('test');
       if (!workDir.existsSync())
         throwToolExit('Test directory "${workDir.path}" not found.');
-      files = _findTests(workDir);
+      files = _findTests(workDir).toList();
       if (files.isEmpty) {
         throwToolExit(
             'Test directory "${workDir.path}" does not appear to contain any test files.\n'
@@ -209,7 +209,7 @@ class TestCommand extends FlutterCommand {
         enableObservatory: collector != null || startPaused,
         startPaused: startPaused,
         ipv6: argResults['ipv6'],
-        json: machine,
+        machine: machine,
         );
 
     if (collector != null) {

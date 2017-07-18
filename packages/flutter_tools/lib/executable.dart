@@ -68,7 +68,7 @@ Future<Null> main(List<String> args) async {
     new AnalyzeCommand(verboseHelp: verboseHelp),
     new BuildCommand(verboseHelp: verboseHelp),
     new ChannelCommand(),
-    new ConfigCommand(),
+    new ConfigCommand(verboseHelp: verboseHelp),
     new CreateCommand(),
     new DaemonCommand(hidden: !verboseHelp),
     new DevicesCommand(),

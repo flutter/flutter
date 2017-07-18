@@ -67,13 +67,15 @@ enum TextInputAction {
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
-  /// The [inputType] and [obscureText] arguments must not be null.
+  /// The [inputType], [obscureText], and [autocorrect] arguments must not be null.
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
     this.obscureText: false,
+    this.autocorrect: true,
     this.actionLabel,
   }) : assert(inputType != null),
-       assert(obscureText != null);
+       assert(obscureText != null),
+       assert(autocorrect != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -83,6 +85,11 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true.
+  final bool autocorrect;
+
   /// What text to display in the text input control's action button.
   final String actionLabel;
 
@@ -91,6 +98,7 @@ class TextInputConfiguration {
     return <String, dynamic>{
       'inputType': inputType.toString(),
       'obscureText': obscureText,
+      'autocorrect': autocorrect,
       'actionLabel': actionLabel,
     };
   }

@@ -14,7 +14,8 @@ import 'media_query.dart';
 /// Used by [OrientationBuilder.builder].
 typedef Widget OrientationWidgetBuilder(BuildContext context, Orientation orientation);
 
-/// Builds a widget tree that can depend on the parent widget's orientation.
+/// Builds a widget tree that can depend on the parent widget's orientation
+/// (distinct from the device orientation).
 ///
 /// See also:
 ///
@@ -34,6 +35,11 @@ class OrientationBuilder extends StatelessWidget {
        super(key: key);
 
   /// Builds the widgets below this widget given this widget's orientation.
+  ///
+  /// A widget's orientation is simply a factor of its width relative to its
+  /// height. For example, a [Column] widget will have a landscape orientation
+  /// if its width exceeds its height, even though it displays its children in
+  /// a vertical array.
   final OrientationWidgetBuilder builder;
 
   Widget _buildWithConstraints(BuildContext context, BoxConstraints constraints) {
