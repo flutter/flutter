@@ -216,7 +216,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
       origin,
       origin.translate(
         0.0,
-        -(size.height - 2 * _kHandlesPadding),
+        -(size.height - 2.0 * _kHandlesPadding),
       ),
       paint,
     );
@@ -259,8 +259,8 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
     final Size desiredSize = new Size(
-      2 * _kHandlesPadding,
-      textLineHeight + 2 * _kHandlesPadding
+      2.0 * _kHandlesPadding,
+      textLineHeight + 2.0 * _kHandlesPadding
     );
 
     final Widget handle = new SizedBox.fromSize(
@@ -281,7 +281,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // baseline. We transform the handle such that the SizedBox is superimposed
     // on top of the text selection endpoints.
     switch (type) {
-      case TextSelectionHandleType.left: // Also flipped for iOS.
+      case TextSelectionHandleType.left: // The left handle is upside down on iOS.
         return new Transform(
           transform: new Matrix4.rotationZ(math.PI)
               ..translate(-_kHandlesPadding, -_kHandlesPadding),
