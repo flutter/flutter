@@ -75,14 +75,17 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
   TRACE_EVENT0("flutter", "RasterCachePopulate");
 
   const SkVector3& scale = matrix.scale();
-  SkRect logical_rect = picture->cullRect();
 
-  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(
-      std::ceil(logical_rect.width() * std::abs(scale.x())),  // physical width
-      std::ceil(logical_rect.height() *
-                std::abs(scale.y())),  // physical height
-      nullptr                          // colorspace
-      );
+  const SkRect logical_rect = picture->cullRect();
+  const SkRect physical_rect =
+      SkRect::MakeWH(std::ceil(std::labs(logical_rect.width() * scale.x())),
+                     std::ceil(std::labs(logical_rect.height() * scale.y())));
+
+  const SkImageInfo image_info =
+      SkImageInfo::MakeN32Premul(physical_rect.width(),   // physical width
+                                 physical_rect.height(),  // physical height
+                                 nullptr                  // colorspace
+                                 );
 
   sk_sp<SkSurface> surface =
       context
@@ -107,10 +110,8 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
 
   return {
       surface->makeImageSnapshot(),  // image
-      SkRect::MakeWH(
-          logical_rect.width() * std::abs(scale.x()),
-          logical_rect.height() * std::abs(scale.y())),  // source rect
-      logical_rect                                       // destination rect
+      physical_rect,                 // source rect
+      logical_rect                   // destination rect
   };
 }
 
