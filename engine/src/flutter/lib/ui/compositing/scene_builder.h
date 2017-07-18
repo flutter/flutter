@@ -11,6 +11,7 @@
 
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/lib/ui/compositing/scene.h"
+#include "flutter/lib/ui/compositing/scene_host.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/path.h"
 #include "flutter/lib/ui/painting/picture.h"
@@ -61,7 +62,7 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
                      double devicePixelRatio,
                      int physicalWidth,
                      int physicalHeight,
-                     uint32_t sceneToken,
+                     SceneHost* sceneHost,
                      bool hitTestable);
 
   void setRasterizerTracingThreshold(uint32_t frameInterval);

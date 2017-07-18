@@ -11,12 +11,11 @@ namespace flow {
 
 LayerTree::LayerTree()
     : frame_size_{},
-      scene_version_(0),
       rasterizer_tracing_threshold_(0),
       checkerboard_raster_cache_images_(false),
       checkerboard_offscreen_layers_(false) {}
 
-LayerTree::~LayerTree() {}
+LayerTree::~LayerTree() = default;
 
 void LayerTree::Raster(CompositorContext::ScopedFrame& frame,
                        bool ignore_raster_cache) {
@@ -40,15 +39,21 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
 
 #if defined(OS_FUCHSIA)
 void LayerTree::UpdateScene(SceneUpdateContext& context,
-                            mozart::Node* container) {
+                            mozart::client::ContainerNode& container) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
 
+  SceneUpdateContext::Frame frame(
+      context,
+      SkRRect::MakeRect(
+          SkRect::MakeIWH(frame_size_.width(), frame_size_.height())),
+      SK_ColorTRANSPARENT, 0.f, 1.f, 1.f);
   if (root_layer_->needs_system_composite()) {
-    root_layer_->UpdateScene(context, container);
-  } else {
-    context.AddLayerToCurrentPaintTask(root_layer_.get());
+    root_layer_->UpdateScene(context);
   }
-  context.FinalizeCurrentPaintTaskIfNeeded(container, SkMatrix::I());
+  if (root_layer_->needs_painting()) {
+    frame.AddPaintedLayer(root_layer_.get());
+  }
+  container.AddChild(frame.entity_node());
 }
 #endif
 
@@ -58,7 +63,9 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame) {
                                  frame.context().memory_usage(),
                                  checkerboard_offscreen_layers_};
   TRACE_EVENT0("flutter", "LayerTree::Paint");
-  root_layer_->Paint(context);
+
+  if (root_layer_->needs_painting())
+    root_layer_->Paint(context);
 }
 
 }  // namespace flow

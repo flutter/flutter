@@ -4,39 +4,37 @@
 
 #include "flutter/flow/layers/transform_layer.h"
 
-#if defined(OS_FUCHSIA)
-#include "apps/mozart/lib/skia/type_converters.h" // nogncheck
-#include "apps/mozart/services/composition/nodes.fidl.h" // nogncheck
-#endif  // defined(OS_FUCHSIA)
-
 namespace flow {
 
-TransformLayer::TransformLayer() {}
+TransformLayer::TransformLayer() = default;
 
-TransformLayer::~TransformLayer() {}
+TransformLayer::~TransformLayer() = default;
 
 void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  SkMatrix childMatrix;
-  childMatrix.setConcat(matrix, transform_);
-  PrerollChildren(context, childMatrix);
-  transform_.mapRect(&context->child_paint_bounds);
-  set_paint_bounds(context->child_paint_bounds);
+  SkMatrix child_matrix;
+  child_matrix.setConcat(matrix, transform_);
+
+  SkRect child_paint_bounds = SkRect::MakeEmpty();
+  PrerollChildren(context, child_matrix, &child_paint_bounds);
+
+  transform_.mapRect(&child_paint_bounds);
+  set_paint_bounds(child_paint_bounds);
 }
 
 #if defined(OS_FUCHSIA)
 
-void TransformLayer::UpdateScene(SceneUpdateContext& context,
-                                 mozart::Node* container) {
-  auto node = mozart::Node::New();
-  node->content_transform = mozart::Transform::From(transform_);
-  UpdateSceneChildrenInsideNode(context, container, std::move(node));
+void TransformLayer::UpdateScene(SceneUpdateContext& context) {
+  FTL_DCHECK(needs_system_composite());
+
+  SceneUpdateContext::Transform transform(context, transform_);
+  UpdateSceneChildren(context);
 }
 
 #endif  // defined(OS_FUCHSIA)
 
 void TransformLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "TransformLayer::Paint");
-  FTL_DCHECK(!needs_system_composite());
+  FTL_DCHECK(needs_painting());
 
   SkAutoCanvasRestore save(&context.canvas, true);
   context.canvas.concat(transform_);

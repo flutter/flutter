@@ -74,16 +74,16 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
   ACQUIRE_PROC(CreateDevice, handle);
   ACQUIRE_PROC(DestroyDevice, handle);
   ACQUIRE_PROC(DestroyInstance, handle);
+  ACQUIRE_PROC(DestroySurfaceKHR, handle);
   ACQUIRE_PROC(EnumerateDeviceLayerProperties, handle);
   ACQUIRE_PROC(EnumeratePhysicalDevices, handle);
+  ACQUIRE_PROC(GetDeviceProcAddr, handle);
   ACQUIRE_PROC(GetPhysicalDeviceFeatures, handle);
   ACQUIRE_PROC(GetPhysicalDeviceQueueFamilyProperties, handle);
   ACQUIRE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR, handle);
   ACQUIRE_PROC(GetPhysicalDeviceSurfaceFormatsKHR, handle);
   ACQUIRE_PROC(GetPhysicalDeviceSurfacePresentModesKHR, handle);
   ACQUIRE_PROC(GetPhysicalDeviceSurfaceSupportKHR, handle);
-  ACQUIRE_PROC(GetDeviceProcAddr, handle);
-  ACQUIRE_PROC(DestroySurfaceKHR, handle);
 
 #if OS_ANDROID
   ACQUIRE_PROC(CreateAndroidSurfaceKHR, handle);
@@ -92,10 +92,10 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
 #if OS_FUCHSIA
   [this, &handle]() -> bool {
     ACQUIRE_PROC(CreateMagmaSurfaceKHR, handle);
+    ACQUIRE_PROC(ExportDeviceMemoryMAGMA, handle);
     ACQUIRE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR, handle);
     return true;
   }();
-
 #endif  // OS_FUCHSIA
 
   // The debug report functions are optional. We don't want proc acquisition to
@@ -116,28 +116,37 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
 bool VulkanProcTable::SetupDeviceProcAddresses(
     const VulkanHandle<VkDevice>& handle) {
   ACQUIRE_PROC(AcquireNextImageKHR, handle);
-  ACQUIRE_PROC(CreateSwapchainKHR, handle);
-  ACQUIRE_PROC(DestroySwapchainKHR, handle);
-  ACQUIRE_PROC(GetSwapchainImagesKHR, handle);
-  ACQUIRE_PROC(QueuePresentKHR, handle);
   ACQUIRE_PROC(AllocateCommandBuffers, handle);
+  ACQUIRE_PROC(AllocateMemory, handle);
   ACQUIRE_PROC(BeginCommandBuffer, handle);
+  ACQUIRE_PROC(BindImageMemory, handle);
   ACQUIRE_PROC(CmdPipelineBarrier, handle);
   ACQUIRE_PROC(CreateCommandPool, handle);
   ACQUIRE_PROC(CreateFence, handle);
+  ACQUIRE_PROC(CreateImage, handle);
   ACQUIRE_PROC(CreateSemaphore, handle);
+  ACQUIRE_PROC(CreateSwapchainKHR, handle);
   ACQUIRE_PROC(DestroyCommandPool, handle);
   ACQUIRE_PROC(DestroyFence, handle);
+  ACQUIRE_PROC(DestroyImage, handle);
   ACQUIRE_PROC(DestroySemaphore, handle);
+  ACQUIRE_PROC(DestroySwapchainKHR, handle);
   ACQUIRE_PROC(DeviceWaitIdle, handle);
   ACQUIRE_PROC(EndCommandBuffer, handle);
   ACQUIRE_PROC(FreeCommandBuffers, handle);
+  ACQUIRE_PROC(FreeMemory, handle);
   ACQUIRE_PROC(GetDeviceQueue, handle);
+  ACQUIRE_PROC(GetImageMemoryRequirements, handle);
+  ACQUIRE_PROC(GetSwapchainImagesKHR, handle);
+  ACQUIRE_PROC(QueuePresentKHR, handle);
   ACQUIRE_PROC(QueueSubmit, handle);
+  ACQUIRE_PROC(QueueWaitIdle, handle);
   ACQUIRE_PROC(ResetCommandBuffer, handle);
   ACQUIRE_PROC(ResetFences, handle);
   ACQUIRE_PROC(WaitForFences, handle);
-
+#if OS_FUCHSIA
+  ACQUIRE_PROC(ExportDeviceMemoryMAGMA, handle);
+#endif  // OS_FUCHSIA
   device_ = {handle, nullptr};
   return true;
 }

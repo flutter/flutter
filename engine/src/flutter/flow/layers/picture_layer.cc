@@ -9,7 +9,7 @@
 
 namespace flow {
 
-PictureLayer::PictureLayer() {}
+PictureLayer::PictureLayer() = default;
 
 PictureLayer::~PictureLayer() {
   // The picture may contain references to textures that are associated
@@ -29,13 +29,12 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 
   SkRect bounds = picture_->cullRect().makeOffset(offset_.x(), offset_.y());
   set_paint_bounds(bounds);
-  context->child_paint_bounds = bounds;
 }
 
 void PictureLayer::Paint(PaintContext& context) {
-  FTL_DCHECK(picture_);
-
   TRACE_EVENT0("flutter", "PictureLayer::Paint");
+  FTL_DCHECK(picture_);
+  FTL_DCHECK(needs_painting());
 
   SkAutoCanvasRestore save(&context.canvas, true);
   context.canvas.translate(offset_.x(), offset_.y());

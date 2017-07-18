@@ -64,6 +64,7 @@ void DartUI::InitForGlobal() {
     PictureRecorder::RegisterNatives(g_natives);
     Scene::RegisterNatives(g_natives);
     SceneBuilder::RegisterNatives(g_natives);
+    SceneHost::RegisterNatives(g_natives);
     SemanticsUpdate::RegisterNatives(g_natives);
     SemanticsUpdateBuilder::RegisterNatives(g_natives);
     Vertices::RegisterNatives(g_natives);

@@ -47,8 +47,6 @@ source_set("flow") {
     "raster_cache.h",
     "raster_cache_key.cc",
     "raster_cache_key.h",
-    "scene_update_context.cc",
-    "scene_update_context.h",
   ]
 
   deps = [
@@ -62,12 +60,21 @@ source_set("flow") {
 
   if (is_fuchsia) {
     sources += [
+      "export_node.cc",
+      "export_node.h",
       "layers/child_scene_layer.cc",
       "layers/child_scene_layer.h",
+      "scene_update_context.cc",
+      "scene_update_context.h",
     ]
+
+    deps += [
+      "//apps/mozart/lib/scene:client",
+      "//apps/mozart/services/scene",
+    ]
+
     public_deps = [
-      "//apps/mozart/lib/skia",
-      "//apps/mozart/services/composition",
+      "//magenta/system/ulib/mx",
     ]
   }
 }

@@ -7,45 +7,63 @@
 #include "flutter/flow/paint_utils.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 
-#if defined(OS_FUCHSIA)
-#include "apps/mozart/lib/skia/type_converters.h" // nogncheck
-#include "apps/mozart/services/composition/nodes.fidl.h" // nogncheck
-#endif  // defined(OS_FUCHSIA)
-
 namespace flow {
 
-PhysicalModelLayer::PhysicalModelLayer()
-    : rrect_(SkRRect::MakeEmpty()) {}
+PhysicalModelLayer::PhysicalModelLayer() : rrect_(SkRRect::MakeEmpty()) {}
 
-PhysicalModelLayer::~PhysicalModelLayer() {}
+PhysicalModelLayer::~PhysicalModelLayer() = default;
 
-void PhysicalModelLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  PrerollChildren(context, matrix);
+void PhysicalModelLayer::Preroll(PrerollContext* context,
+                                 const SkMatrix& matrix) {
+  SkRect child_paint_bounds;
+  PrerollChildren(context, matrix, &child_paint_bounds);
 
-  // Add some margin to the paint bounds to leave space for the shadow.
-  // The margin is hardcoded to an arbitrary maximum for now because Skia
-  // doesn't provide a way to calculate it.
-  SkRect bounds(rrect_.getBounds());
-  bounds.outset(20.0, 20.0);
-  set_paint_bounds(bounds);
+  if (elevation_ == 0) {
+    set_paint_bounds(rrect_.getBounds());
+  } else {
+#if defined(OS_FUCHSIA)
+    // Let the system compositor draw all shadows for us.
+    set_needs_system_composite(true);
+#else
+    // Add some margin to the paint bounds to leave space for the shadow.
+    // The margin is hardcoded to an arbitrary maximum for now because Skia
+    // doesn't provide a way to calculate it.  We fill this whole region
+    // and clip children to it so we don't need to join the child paint bounds.
+    SkRect bounds(rrect_.getBounds());
+    bounds.outset(20.0, 20.0);
+    set_paint_bounds(bounds);
+#endif  // defined(OS_FUCHSIA)
+  }
 
-  context->child_paint_bounds = bounds;
+#if defined(OS_FUCHSIA)
+  if (needs_system_composite()) {
+    scale_x_ = matrix.getScaleX();
+    scale_y_ = matrix.getScaleY();
+  }
+#endif  // defined(OS_FUCHSIA)
 }
 
 #if defined(OS_FUCHSIA)
 
-void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context,
-                                     mozart::Node* container) {
-  context.AddLayerToCurrentPaintTask(this);
-  auto node = mozart::Node::New();
-  node->content_clip = mozart::RectF::From(rrect_.getBounds());
-  UpdateSceneChildrenInsideNode(context, container, std::move(node));
+void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context) {
+  FTL_DCHECK(needs_system_composite());
+
+  SceneUpdateContext::Frame frame(context, rrect_, color_, elevation_, scale_x_,
+                                  scale_y_);
+  for (auto& layer : layers()) {
+    if (layer->needs_painting()) {
+      frame.AddPaintedLayer(layer.get());
+    }
+  }
+
+  UpdateSceneChildren(context);
 }
 
 #endif  // defined(OS_FUCHSIA)
 
 void PhysicalModelLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "PhysicalModelLayer::Paint");
+  FTL_DCHECK(needs_painting());
 
   SkPath path;
   path.addRRect(rrect_);
@@ -54,9 +72,6 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
     DrawShadow(&context.canvas, path, SK_ColorBLACK, elevation_,
                SkColorGetA(color_) != 0xff);
   }
-
-  if (needs_system_composite())
-    return;
 
   SkPaint paint;
   paint.setColor(color_);
@@ -74,22 +89,20 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
     DrawCheckerboard(&context.canvas, rrect_.getBounds());
 }
 
-void PhysicalModelLayer::DrawShadow(SkCanvas* canvas, const SkPath& path,
-                                    SkColor color, double elevation,
+void PhysicalModelLayer::DrawShadow(SkCanvas* canvas,
+                                    const SkPath& path,
+                                    SkColor color,
+                                    float elevation,
                                     bool transparentOccluder) {
-    SkShadowFlags flags = transparentOccluder ?
-        SkShadowFlags::kTransparentOccluder_ShadowFlag :
-        SkShadowFlags::kNone_ShadowFlag;
-    const SkRect& bounds = path.getBounds();
-    SkScalar shadow_x = (bounds.left() + bounds.right()) / 2;
-    SkScalar shadow_y = bounds.top() - 600.0f;
-    SkShadowUtils::DrawShadow(canvas, path,
-                              elevation,
-                              SkPoint3::Make(shadow_x, shadow_y, 600.0f),
-                              800.0f,
-                              0.039f, 0.25f,
-                              color,
-                              flags);
+  SkShadowFlags flags = transparentOccluder
+                            ? SkShadowFlags::kTransparentOccluder_ShadowFlag
+                            : SkShadowFlags::kNone_ShadowFlag;
+  const SkRect& bounds = path.getBounds();
+  SkScalar shadow_x = (bounds.left() + bounds.right()) / 2;
+  SkScalar shadow_y = bounds.top() - 600.0f;
+  SkShadowUtils::DrawShadow(canvas, path, elevation,
+                            SkPoint3::Make(shadow_x, shadow_y, 600.0f), 800.0f,
+                            0.039f, 0.25f, color, flags);
 }
 
 }  // namespace flow

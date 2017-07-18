@@ -6,12 +6,14 @@
 
 namespace flow {
 
-ColorFilterLayer::ColorFilterLayer() {}
+ColorFilterLayer::ColorFilterLayer() = default;
 
-ColorFilterLayer::~ColorFilterLayer() {}
+ColorFilterLayer::~ColorFilterLayer() = default;
 
 void ColorFilterLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
+  FTL_DCHECK(needs_painting());
+
   sk_sp<SkColorFilter> color_filter =
       SkColorFilter::MakeModeFilter(color_, blend_mode_);
   SkPaint paint;

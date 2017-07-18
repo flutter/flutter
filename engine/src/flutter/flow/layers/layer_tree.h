@@ -31,10 +31,8 @@ class LayerTree {
                bool ignore_raster_cache = false);
 
 #if defined(OS_FUCHSIA)
-  // TODO(abarth): Integrate scene updates with the rasterization pass so that
-  // we can draw on top of child scenes (and so that we can apply clips and
-  // blending operations to child scene).
-  void UpdateScene(SceneUpdateContext& context, mozart::Node* container);
+  void UpdateScene(SceneUpdateContext& context,
+                   mozart::client::ContainerNode& container);
 #endif
 
   void Paint(CompositorContext::ScopedFrame& frame);
@@ -48,12 +46,6 @@ class LayerTree {
   const SkISize& frame_size() const { return frame_size_; }
 
   void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }
-
-  uint32_t scene_version() const { return scene_version_; }
-
-  void set_scene_version(uint32_t scene_version) {
-    scene_version_ = scene_version;
-  }
 
   void set_construction_time(const ftl::TimeDelta& delta) {
     construction_time_ = delta;
@@ -82,7 +74,6 @@ class LayerTree {
 
  private:
   SkISize frame_size_;  // Physical pixels.
-  uint32_t scene_version_;
   std::unique_ptr<Layer> root_layer_;
   ftl::TimeDelta construction_time_;
   uint32_t rasterizer_tracing_threshold_;

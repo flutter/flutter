@@ -5,8 +5,8 @@
 #ifndef FLUTTER_FLOW_LAYERS_CHILD_SCENE_LAYER_H_
 #define FLUTTER_FLOW_LAYERS_CHILD_SCENE_LAYER_H_
 
+#include "flutter/flow/export_node.h"
 #include "flutter/flow/layers/layer.h"
-#include "apps/mozart/services/composition/scenes.fidl.h"
 
 namespace flow {
 
@@ -25,22 +25,24 @@ class ChildSceneLayer : public Layer {
     physical_size_ = physical_size;
   }
 
-  void set_scene_token(uint32_t scene_token) { scene_token_ = scene_token; }
+  void set_export_node(ftl::RefPtr<ExportNode> export_node) {
+    export_node_ = std::move(export_node);
+  }
 
   void set_hit_testable(bool hit_testable) { hit_testable_ = hit_testable; }
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+
   void Paint(PaintContext& context) override;
-  void UpdateScene(SceneUpdateContext& context,
-                   mozart::Node* container) override;
+
+  void UpdateScene(SceneUpdateContext& context) override;
 
  private:
   SkPoint offset_;
   float device_pixel_ratio_ = 1.0;
   SkISize physical_size_;
-  uint32_t scene_token_ = 0;
+  ftl::RefPtr<ExportNode> export_node_;
   bool hit_testable_ = true;
-  SkMatrix transform_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
 };
