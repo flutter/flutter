@@ -40,11 +40,14 @@ App::App() {
 
   tracing::InitializeTracer(context_.get(), {});
 
-  gpu_thread_ = std::make_unique<Thread>();
-  io_thread_ = std::make_unique<Thread>();
+  gpu_thread_ = std::make_unique<mtl::Thread>();
+  io_thread_ = std::make_unique<mtl::Thread>();
 
-  FTL_CHECK(gpu_thread_->IsValid()) << "Must be able to create the GPU thread";
-  FTL_CHECK(io_thread_->IsValid()) << "Must be able to create the IO thread";
+  auto gpu_thread_success = gpu_thread_->Run();
+  auto io_thread_success = io_thread_->Run();
+
+  FTL_CHECK(gpu_thread_success) << "Must be able to create the GPU thread";
+  FTL_CHECK(io_thread_success) << "Must be able to create the IO thread";
 
   auto ui_task_runner = mtl::MessageLoop::GetCurrent()->task_runner();
   auto gpu_task_runner = gpu_thread_->TaskRunner();

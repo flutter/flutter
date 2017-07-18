@@ -7,10 +7,11 @@
 
 #include <memory>
 
-#include "apps/mozart/services/composition/scenes.fidl.h"
+#include "apps/mozart/services/scene/session.fidl.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
+#include "magenta/system/ulib/mx/include/mx/eventpair.h"
 
 namespace flutter_runner {
 
@@ -20,7 +21,8 @@ class Rasterizer {
 
   static std::unique_ptr<Rasterizer> Create();
 
-  virtual void SetScene(fidl::InterfaceHandle<mozart::Scene> scene) = 0;
+  virtual void SetSession(fidl::InterfaceHandle<mozart2::Session> session,
+                          mx::eventpair import_token) = 0;
 
   virtual void Draw(std::unique_ptr<flow::LayerTree> layer_tree,
                     ftl::Closure callback) = 0;

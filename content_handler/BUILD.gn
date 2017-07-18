@@ -6,11 +6,6 @@ assert(is_fuchsia)
 
 import("//build/vulkan/config.gni")
 
-declare_args() {
-  flutter_enable_vulkan = fuchsia_use_vulkan
-  flutter_use_vulkan_native_surface = false
-}
-
 template("flutter_content_handler") {
   invoker_output_name = invoker.output_name
   extra_deps = invoker.extra_deps
@@ -27,8 +22,6 @@ template("flutter_content_handler") {
       "app.h",
       "application_controller_impl.cc",
       "application_controller_impl.h",
-      "content_handler_thread.cc",
-      "content_handler_thread.h",
       "main.cc",
       "rasterizer.cc",
       "rasterizer.h",
@@ -36,66 +29,46 @@ template("flutter_content_handler") {
       "runtime_holder.h",
       "service_protocol_hooks.cc",
       "service_protocol_hooks.h",
-      "software_rasterizer.cc",
-      "software_rasterizer.h",
+      "session_connection.cc",
+      "session_connection.h",
+      "vulkan_rasterizer.cc",
+      "vulkan_rasterizer.h",
+      "vulkan_surface.cc",
+      "vulkan_surface.h",
+      "vulkan_surface_pool.cc",
+      "vulkan_surface_pool.h",
+      "vulkan_surface_producer.cc",
+      "vulkan_surface_producer.h",
     ]
 
     deps = [
-      "//application/lib/app",
-      "//application/lib/svc",
-      "//apps/icu_data/lib",
-      "//apps/mozart/lib/flutter/sdk_ext",
-      "//apps/mozart/lib/skia:vmo",
-      "//apps/mozart/services/buffers",
-      "//apps/mozart/services/buffers/cpp",
-      "//apps/mozart/services/composition",
-      "//apps/mozart/services/input",
-      "//apps/mozart/services/views",
-      "//apps/tracing/lib/trace:provider",
-
-      # TODO(abarth): We shouldn't need to depend on libdart_builtin but we fail
-      # to link otherwise.
-      "//dart/runtime/bin:libdart_builtin",
-      "//dart/runtime/vm:libdart_platform",
-      "//flutter/assets",
-      "//flutter/common",
-      "//flutter/flow",
-      "//flutter/glue",
-      "//flutter/lib/ui",
-      "//flutter/runtime",
-      "//flutter/sky/engine/platform",
-      "//lib/fidl/dart/sdk_ext",
-      "//lib/ftl",
-      "//lib/mtl",
-      "//lib/tonic/mx",
-      "//lib/zip",
-      "//third_party/rapidjson",
-      "//third_party/skia",
-    ]
-    deps += extra_deps
-
-    if (flutter_enable_vulkan) {
-      defines += [ "FLUTTER_ENABLE_VULKAN=1" ]
-
-      if (flutter_use_vulkan_native_surface) {
-        defines += [ "FLUTTER_USE_VULKAN_NATIVE_SURFACE=1" ]
-        sources += [
-          "vulkan_native_rasterizer.cc",
-          "vulkan_native_rasterizer.h",
-        ]
-        libs += [ "hid" ]
-      } else {
-        sources += [
-          "vulkan_rasterizer.cc",
-          "vulkan_rasterizer.h",
-        ]
-      }
-
-      deps += [
-        "//flutter/vulkan",
-        "//magma:vulkan",
-      ]
-    }
+             "//application/lib/app",
+             "//application/lib/svc",
+             "//apps/icu_data/lib",
+             "//apps/mozart/lib/flutter/sdk_ext",
+             "//apps/mozart/lib/scene:client",
+             "//apps/mozart/services/input",
+             "//apps/mozart/services/views",
+             "//apps/tracing/lib/trace:provider",
+             "//dart/runtime/bin:libdart_builtin",
+             "//dart/runtime/vm:libdart_platform",
+             "//flutter/assets",
+             "//flutter/common",
+             "//flutter/flow",
+             "//flutter/glue",
+             "//flutter/lib/ui",
+             "//flutter/runtime",
+             "//flutter/sky/engine/platform",
+             "//flutter/vulkan",
+             "//lib/fidl/dart/sdk_ext",
+             "//lib/ftl",
+             "//lib/mtl",
+             "//lib/tonic/mx",
+             "//lib/zip",
+             "//magma:vulkan",
+             "//third_party/rapidjson",
+             "//third_party/skia",
+           ] + extra_deps
 
     # The flags below are needed so that Dart's CPU profiler can walk the
     # C++ stack.
@@ -103,6 +76,7 @@ template("flutter_content_handler") {
       "-mno-omit-leaf-frame-pointer",
       "-fno-omit-frame-pointer",
     ]
+
     # This flag is needed so that the call to dladdr() in Dart's native symbol
     # resolver can report good symbol information for the CPU profiler.
     ldflags = [ "-rdynamic" ]

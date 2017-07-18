@@ -8,6 +8,8 @@ source_set("ui") {
     "compositing/scene.h",
     "compositing/scene_builder.cc",
     "compositing/scene_builder.h",
+    "compositing/scene_host.cc",
+    "compositing/scene_host.h",
     "dart_runtime_hooks.cc",
     "dart_runtime_hooks.h",
     "dart_ui.cc",

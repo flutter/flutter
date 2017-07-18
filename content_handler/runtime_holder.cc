@@ -44,13 +44,6 @@ constexpr char kAssetChannel[] = "flutter/assets";
 constexpr char kKeyEventChannel[] = "flutter/keyevent";
 constexpr char kTextInputChannel[] = "flutter/textinput";
 
-// Maximum number of frames in flight.
-constexpr int kMaxPipelineDepth = 3;
-
-// When the max pipeline depth is exceeded, drain to this number of frames
-// to recover before acknowleding the invalidation and scheduling more frames.
-constexpr int kRecoveryPipelineDepth = 1;
-
 blink::PointerData::Change GetChangeFromPointerEventPhase(
     mozart::PointerEvent::Phase phase) {
   switch (phase) {
@@ -98,10 +91,6 @@ RuntimeHolder::~RuntimeHolder() {
       ftl::MakeCopyable([rasterizer = std::move(rasterizer_)](){
           // Deletes rasterizer.
       }));
-  if (deferred_invalidation_callback_) {
-    // Must be called before being destroyed.
-    deferred_invalidation_callback_();
-  }
 }
 
 void RuntimeHolder::Init(
@@ -192,14 +181,23 @@ void RuntimeHolder::CreateView(
     }
   }
 
+  // Create the view.
+  mx::eventpair import_token, export_token;
+  mx_status_t status = mx::eventpair::create(0u, &import_token, &export_token);
+  if (status != MX_OK) {
+    FTL_LOG(ERROR) << "Could not create an event pair.";
+    return;
+  }
   mozart::ViewListenerPtr view_listener;
-  view_listener_binding_.Bind(fidl::GetProxy(&view_listener));
-  view_manager_->CreateView(fidl::GetProxy(&view_),
-                            std::move(view_owner_request),
-                            std::move(view_listener), script_uri);
-
+  view_listener_binding_.Bind(view_listener.NewRequest());
+  view_manager_->CreateView(view_.NewRequest(),             // view
+                            std::move(view_owner_request),  // view owner
+                            std::move(view_listener),       // view listener
+                            std::move(export_token),        // export token
+                            script_uri                      // diagnostic label
+                            );
   app::ServiceProviderPtr view_services;
-  view_->GetServiceProvider(fidl::GetProxy(&view_services));
+  view_->GetServiceProvider(view_services.NewRequest());
 
   // Listen for input events.
   ConnectToService(view_services.get(), fidl::GetProxy(&input_connection_));
@@ -207,11 +205,20 @@ void RuntimeHolder::CreateView(
   input_listener_binding_.Bind(GetProxy(&input_listener));
   input_connection_->SetEventListener(std::move(input_listener));
 
-  mozart::ScenePtr scene;
-  view_->CreateScene(fidl::GetProxy(&scene));
+  // Setup the session.
+  mozart2::SessionPtr session;
+  mozart2::SceneManagerPtr scene_manager;
+  view_manager_->GetSceneManager(scene_manager.NewRequest());
+  scene_manager->CreateSession(session.NewRequest(),
+                               nullptr /* session listener */);
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([
-    rasterizer = rasterizer_.get(), scene = std::move(scene)
-  ]() mutable { rasterizer->SetScene(std::move(scene)); }));
+    rasterizer = rasterizer_.get(),           //
+    session = session.PassInterfaceHandle(),  //
+    import_token = std::move(import_token)    //
+  ]() mutable {
+    ASSERT_IS_GPU_THREAD;
+    rasterizer->SetSession(std::move(session), std::move(import_token));
+  }));
 
   runtime_ = blink::RuntimeController::Create(this);
 
@@ -259,30 +266,50 @@ std::string RuntimeHolder::DefaultRouteName() {
 }
 
 void RuntimeHolder::ScheduleFrame() {
-  if (pending_invalidation_ || deferred_invalidation_callback_)
-    return;
-  pending_invalidation_ = true;
-  view_->Invalidate();
+  ASSERT_IS_UI_THREAD;
+  if (!frame_scheduled_) {
+    frame_scheduled_ = true;
+    if (!frame_outstanding_)
+      PostBeginFrame();
+  }
 }
 
 void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
-  if (!is_ready_to_draw_)
-    return;  // Only draw once per frame.
-  is_ready_to_draw_ = false;
+  if (!frame_outstanding_ || frame_rendering_) {
+    // TODO(MZ-193): We probably shouldn't be discarding the layer tree here.
+    // But then, Flutter shouldn't be calling Render() if we didn't call
+    // BeginFrame().
+    return;  // Spurious.
+  }
+
+  frame_rendering_ = true;
 
   layer_tree->set_construction_time(ftl::TimePoint::Now() -
                                     last_begin_frame_time_);
   layer_tree->set_frame_size(SkISize::Make(viewport_metrics_.physical_width,
                                            viewport_metrics_.physical_height));
-  layer_tree->set_scene_version(scene_version_);
 
+  // We are on the Platform/UI thread. Post to the GPU thread to render.
+  ASSERT_IS_PLATFORM_THREAD;
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([
-    rasterizer = rasterizer_.get(), layer_tree = std::move(layer_tree),
-    self = GetWeakPtr()
+    rasterizer = rasterizer_.get(),      //
+    layer_tree = std::move(layer_tree),  //
+    weak_runtime_holder = GetWeakPtr()   //
   ]() mutable {
-    rasterizer->Draw(std::move(layer_tree), [self]() {
-      if (self)
-        self->OnFrameComplete();
+    // On the GPU Thread.
+    ASSERT_IS_GPU_THREAD;
+    rasterizer->Draw(std::move(layer_tree), [weak_runtime_holder]() {
+      // This is on the GPU thread thread. Post to the Platform/UI thread for
+      // the completion callback.
+      ASSERT_IS_GPU_THREAD;
+      blink::Threads::Platform()->PostTask([weak_runtime_holder]() {
+        // On the Platform/UI thread.
+        ASSERT_IS_UI_THREAD;
+        if (weak_runtime_holder) {
+          weak_runtime_holder->frame_rendering_ = false;
+          weak_runtime_holder->OnFrameComplete();
+        }
+      });
     });
   }));
 }
@@ -550,41 +577,27 @@ void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
   callback(handled);
 }
 
-void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
-                                   const OnInvalidationCallback& callback) {
-  FTL_DCHECK(invalidation);
-  pending_invalidation_ = false;
+void RuntimeHolder::OnPropertiesChanged(
+    mozart::ViewPropertiesPtr properties,
+    const OnPropertiesChangedCallback& callback) {
+  FTL_DCHECK(properties);
+
+  // Attempt to read the device pixel ratio.
+  float pixel_ratio = 1.0;
+  if (auto& metrics = properties->display_metrics) {
+    pixel_ratio = metrics->device_pixel_ratio;
+  }
 
   // Apply view property changes.
-  if (invalidation->properties) {
-    view_properties_ = std::move(invalidation->properties);
-    viewport_metrics_.physical_width =
-        view_properties_->view_layout->size->width;
-    viewport_metrics_.physical_height =
-        view_properties_->view_layout->size->height;
-    viewport_metrics_.device_pixel_ratio = 2.0;
-    // TODO(abarth): Use view_properties_->display_metrics->device_pixel_ratio
-    // once that's reasonable.
+  if (auto& layout = properties->view_layout) {
+    viewport_metrics_.physical_width = layout->size->width;
+    viewport_metrics_.physical_height = layout->size->height;
+    viewport_metrics_.device_pixel_ratio = pixel_ratio;
     runtime_->SetViewportMetrics(viewport_metrics_);
   }
 
-  // Remember the scene version for rendering.
-  scene_version_ = invalidation->scene_version;
+  ScheduleFrame();
 
-  // TODO(jeffbrown): Flow the frame time through the rendering pipeline.
-  if (outstanding_requests_ >= kMaxPipelineDepth) {
-    FTL_DCHECK(!deferred_invalidation_callback_);
-    deferred_invalidation_callback_ = callback;
-    return;
-  }
-
-  ++outstanding_requests_;
-  BeginFrame();
-
-  // TODO(jeffbrown): Consider running the callback earlier.
-  // Note that this may result in the view processing stale view properties
-  // (such as size) if it prematurely acks the frame but takes too long
-  // to handle it.
   callback();
 }
 
@@ -645,9 +658,8 @@ void RuntimeHolder::OnAction(mozart::InputMethodAction action) {
   args.PushBack("TextInputAction.done", allocator);
 
   document.SetObject();
-  document.AddMember("method",
-                     rapidjson::Value("TextInputClient.performAction"),
-                     allocator);
+  document.AddMember(
+      "method", rapidjson::Value("TextInputClient.performAction"), allocator);
   document.AddMember("args", args, allocator);
 
   rapidjson::StringBuffer buffer;
@@ -664,39 +676,32 @@ ftl::WeakPtr<RuntimeHolder> RuntimeHolder::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
-void RuntimeHolder::BeginFrame() {
-  FTL_DCHECK(outstanding_requests_ > 0);
-  FTL_DCHECK(outstanding_requests_ <= kMaxPipelineDepth)
-      << outstanding_requests_;
+void RuntimeHolder::PostBeginFrame() {
+  blink::Threads::Platform()->PostTask([weak_runtime_holder = GetWeakPtr()]() {
+    // On the Platform/UI thread.
+    ASSERT_IS_UI_THREAD;
+    if (weak_runtime_holder) {
+      weak_runtime_holder->BeginFrame();
+    }
+  });
+}
 
-  FTL_DCHECK(!is_ready_to_draw_);
-  is_ready_to_draw_ = true;
+void RuntimeHolder::BeginFrame() {
+  ASSERT_IS_UI_THREAD
+  FTL_DCHECK(frame_scheduled_);
+  FTL_DCHECK(!frame_outstanding_);
+  frame_scheduled_ = false;
+  frame_outstanding_ = true;
   last_begin_frame_time_ = ftl::TimePoint::Now();
   runtime_->BeginFrame(last_begin_frame_time_);
-  const bool was_ready_to_draw = is_ready_to_draw_;
-  is_ready_to_draw_ = false;
-
-  // If we were still ready to draw when done with the frame, that means we
-  // didn't draw anything this frame and we should acknowledge the frame
-  // ourselves instead of waiting for the rasterizer to acknowledge it.
-  if (was_ready_to_draw)
-    OnFrameComplete();
 }
 
 void RuntimeHolder::OnFrameComplete() {
-  FTL_DCHECK(outstanding_requests_ > 0);
-  --outstanding_requests_;
-
-  if (deferred_invalidation_callback_ &&
-      outstanding_requests_ <= kRecoveryPipelineDepth) {
-    // Schedule frame first to avoid potentially generating a second
-    // invalidation in case the view manager already has one pending
-    // awaiting acknowledgement of the deferred invalidation.
-    OnInvalidationCallback callback =
-        std::move(deferred_invalidation_callback_);
-    ScheduleFrame();
-    callback();
-  }
+  ASSERT_IS_UI_THREAD
+  FTL_DCHECK(frame_outstanding_);
+  frame_outstanding_ = false;
+  if (frame_scheduled_)
+    PostBeginFrame();
 }
 
 }  // namespace flutter_runner

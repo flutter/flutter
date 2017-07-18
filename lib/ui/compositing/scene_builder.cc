@@ -52,7 +52,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, addChildScene)                    \
   V(SceneBuilder, addPerformanceOverlay)            \
   V(SceneBuilder, setRasterizerTracingThreshold)    \
-  V(SceneBuilder, setCheckerboardOffscreenLayers) \
+  V(SceneBuilder, setCheckerboardOffscreenLayers)   \
   V(SceneBuilder, setCheckerboardRasterCacheImages) \
   V(SceneBuilder, build)
 
@@ -163,7 +163,8 @@ void SceneBuilder::pushPhysicalModel(const RRect& rrect,
   if (!cullRect.intersect(rrect.sk_rrect.rect(), m_cullRects.top()))
     cullRect = SkRect::MakeEmpty();
 
-  std::unique_ptr<flow::PhysicalModelLayer> layer(new flow::PhysicalModelLayer());
+  std::unique_ptr<flow::PhysicalModelLayer> layer(
+      new flow::PhysicalModelLayer());
   layer->set_rrect(rrect.sk_rrect);
   layer->set_elevation(elevation);
   layer->set_color(color);
@@ -221,7 +222,7 @@ void SceneBuilder::addChildScene(double dx,
                                  double devicePixelRatio,
                                  int physicalWidth,
                                  int physicalHeight,
-                                 uint32_t sceneToken,
+                                 SceneHost* sceneHost,
                                  bool hitTestable) {
 #if defined(OS_FUCHSIA)
   if (!m_currentLayer)
@@ -236,7 +237,7 @@ void SceneBuilder::addChildScene(double dx,
   layer->set_offset(SkPoint::Make(dx, dy));
   layer->set_device_pixel_ratio(devicePixelRatio);
   layer->set_physical_size(SkISize::Make(physicalWidth, physicalHeight));
-  layer->set_scene_token(sceneToken);
+  layer->set_export_node(sceneHost->exportNode());
   layer->set_hit_testable(hitTestable);
   m_currentLayer->Add(std::move(layer));
 #endif

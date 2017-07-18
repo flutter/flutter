@@ -65,12 +65,15 @@ class VulkanProcTable : public ftl::RefCountedThreadSafe<VulkanProcTable> {
 
   DEFINE_PROC(AcquireNextImageKHR);
   DEFINE_PROC(AllocateCommandBuffers);
+  DEFINE_PROC(AllocateMemory);
   DEFINE_PROC(BeginCommandBuffer);
+  DEFINE_PROC(BindImageMemory);
   DEFINE_PROC(CmdPipelineBarrier);
   DEFINE_PROC(CreateCommandPool);
   DEFINE_PROC(CreateDebugReportCallbackEXT);
   DEFINE_PROC(CreateDevice);
   DEFINE_PROC(CreateFence);
+  DEFINE_PROC(CreateImage);
   DEFINE_PROC(CreateInstance);
   DEFINE_PROC(CreateSemaphore);
   DEFINE_PROC(CreateSwapchainKHR);
@@ -78,6 +81,7 @@ class VulkanProcTable : public ftl::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(DestroyDebugReportCallbackEXT);
   DEFINE_PROC(DestroyDevice);
   DEFINE_PROC(DestroyFence);
+  DEFINE_PROC(DestroyImage);
   DEFINE_PROC(DestroyInstance);
   DEFINE_PROC(DestroySemaphore);
   DEFINE_PROC(DestroySurfaceKHR);
@@ -89,26 +93,30 @@ class VulkanProcTable : public ftl::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(EnumerateInstanceLayerProperties);
   DEFINE_PROC(EnumeratePhysicalDevices);
   DEFINE_PROC(FreeCommandBuffers);
+  DEFINE_PROC(FreeMemory);
   DEFINE_PROC(GetDeviceProcAddr);
   DEFINE_PROC(GetDeviceQueue);
+  DEFINE_PROC(GetImageMemoryRequirements);
   DEFINE_PROC(GetInstanceProcAddr);
   DEFINE_PROC(GetPhysicalDeviceFeatures);
   DEFINE_PROC(GetPhysicalDeviceQueueFamilyProperties);
   DEFINE_PROC(GetPhysicalDeviceSurfaceCapabilitiesKHR);
   DEFINE_PROC(GetPhysicalDeviceSurfaceFormatsKHR);
   DEFINE_PROC(GetPhysicalDeviceSurfacePresentModesKHR);
+  DEFINE_PROC(GetPhysicalDeviceSurfaceSupportKHR);
   DEFINE_PROC(GetSwapchainImagesKHR);
   DEFINE_PROC(QueuePresentKHR);
   DEFINE_PROC(QueueSubmit);
+  DEFINE_PROC(QueueWaitIdle);
   DEFINE_PROC(ResetCommandBuffer);
   DEFINE_PROC(ResetFences);
   DEFINE_PROC(WaitForFences);
-  DEFINE_PROC(GetPhysicalDeviceSurfaceSupportKHR);
 #if OS_ANDROID
   DEFINE_PROC(CreateAndroidSurfaceKHR);
 #endif  // OS_ANDROID
 #if OS_FUCHSIA
   DEFINE_PROC(CreateMagmaSurfaceKHR);
+  DEFINE_PROC(ExportDeviceMemoryMAGMA);
   DEFINE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR);
 #endif  // OS_FUCHSIA
 

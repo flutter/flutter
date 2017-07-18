@@ -11,9 +11,9 @@
 #include "application/lib/app/application_context.h"
 #include "application/services/application_runner.fidl.h"
 #include "flutter/content_handler/application_controller_impl.h"
-#include "flutter/content_handler/content_handler_thread.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/mtl/threading/thread.h"
 
 namespace flutter_runner {
 
@@ -26,10 +26,10 @@ class App : public app::ApplicationRunner {
 
   // |app::ApplicationRunner| implementation:
 
-  void StartApplication(app::ApplicationPackagePtr application,
-                        app::ApplicationStartupInfoPtr startup_info,
-                        fidl::InterfaceRequest<app::ApplicationController>
-                            controller) override;
+  void StartApplication(
+      app::ApplicationPackagePtr application,
+      app::ApplicationStartupInfoPtr startup_info,
+      fidl::InterfaceRequest<app::ApplicationController> controller) override;
 
   void Destroy(ApplicationControllerImpl* controller);
 
@@ -43,13 +43,13 @@ class App : public app::ApplicationRunner {
 
  private:
   void WaitForPlatformViewsIdsUIThread(
-    std::vector<PlatformViewInfo>* platform_view_ids,
-    ftl::AutoResetWaitableEvent* latch);
+      std::vector<PlatformViewInfo>* platform_view_ids,
+      ftl::AutoResetWaitableEvent* latch);
   void UpdateProcessLabel();
 
   std::unique_ptr<app::ApplicationContext> context_;
-  std::unique_ptr<Thread> gpu_thread_;
-  std::unique_ptr<Thread> io_thread_;
+  std::unique_ptr<mtl::Thread> gpu_thread_;
+  std::unique_ptr<mtl::Thread> io_thread_;
   fidl::BindingSet<app::ApplicationRunner> runner_bindings_;
   std::unordered_map<ApplicationControllerImpl*,
                      std::unique_ptr<ApplicationControllerImpl>>

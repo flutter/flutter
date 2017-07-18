@@ -8,15 +8,16 @@
 
 namespace flow {
 
-BackdropFilterLayer::BackdropFilterLayer() {}
+BackdropFilterLayer::BackdropFilterLayer() = default;
 
-BackdropFilterLayer::~BackdropFilterLayer() {}
+BackdropFilterLayer::~BackdropFilterLayer() = default;
 
 void BackdropFilterLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
-  Layer::AutoSaveLayer(
-      context,
-      SkCanvas::SaveLayerRec{&paint_bounds(), nullptr, filter_.get(), 0});
+  FTL_DCHECK(needs_painting());
+
+  Layer::AutoSaveLayer(context, SkCanvas::SaveLayerRec{&paint_bounds(), nullptr,
+                                                       filter_.get(), 0});
   PaintChildren(context);
 }
 

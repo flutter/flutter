@@ -7,6 +7,15 @@
 
 #include "lib/ftl/tasks/task_runner.h"
 
+#define ASSERT_IS_PLATFORM_THREAD \
+  FTL_DCHECK(::blink::Threads::Platform()->RunsTasksOnCurrentThread());
+#define ASSERT_IS_GPU_THREAD \
+  FTL_DCHECK(::blink::Threads::Gpu()->RunsTasksOnCurrentThread());
+#define ASSERT_IS_UI_THREAD \
+  FTL_DCHECK(::blink::Threads::UI()->RunsTasksOnCurrentThread());
+#define ASSERT_IS_IO_THREAD \
+  FTL_DCHECK(::blink::Threads::IO()->RunsTasksOnCurrentThread());
+
 namespace blink {
 
 class Threads {

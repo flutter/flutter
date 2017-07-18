@@ -15,25 +15,31 @@ class PhysicalModelLayer : public ContainerLayer {
   ~PhysicalModelLayer() override;
 
   void set_rrect(const SkRRect& rrect) { rrect_ = rrect; }
-  void set_elevation(double elevation) { elevation_ = elevation; }
+  void set_elevation(float elevation) { elevation_ = elevation; }
   void set_color(SkColor color) { color_ = color; }
 
-  static void DrawShadow(SkCanvas* canvas, const SkPath& path,
-                         SkColor color, double elevation, bool transparentOccluder);
+  static void DrawShadow(SkCanvas* canvas,
+                         const SkPath& path,
+                         SkColor color,
+                         float elevation,
+                         bool transparentOccluder);
 
- protected:
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) override;
 
 #if defined(OS_FUCHSIA)
-  void UpdateScene(SceneUpdateContext& context,
-                   mozart::Node* container) override;
+  void UpdateScene(SceneUpdateContext& context) override;
 #endif  // defined(OS_FUCHSIA)
 
  private:
   SkRRect rrect_;
-  double elevation_;
+  float elevation_;
   SkColor color_;
+
+#if defined(OS_FUCHSIA)
+  SkScalar scale_x_;
+  SkScalar scale_y_;
+#endif  // defined(OS_FUCHSIA)
 };
 
 }  // namespace flow
