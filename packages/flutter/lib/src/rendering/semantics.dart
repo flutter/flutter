@@ -783,18 +783,3 @@ class SemanticsOwner extends ChangeNotifier {
   @override
   String toString() => describeIdentity(this);
 }
-
-/// A [ChangeNotifier] that notifies listeners to changes of the currently
-/// available and valid [SemanticsAction]s.
-///
-/// The list of currently valid [SemanticsAction]s can be obtained via
-/// [availableActions]. This should only be called during the semantics phase of
-/// the [PipelineOwner]!
-abstract class SemanticsActionsChangeNotifier extends ChangeNotifier {
-
-  /// Returns the list of the currently valid [SemanticsAction]s.
-  ///
-  /// This should only be called during the semantics phase of the
-  /// [PipelineOwner]!
-  List<SemanticsAction> get availableActions;
-}

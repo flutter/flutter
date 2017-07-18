@@ -487,7 +487,10 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// If this is set to `null`, the set of exposed [SemanticsAction] will be
   /// calculated based on the provided [gestures].
-  final SemanticsActionsChangeNotifier semanticsActionsChangeNotifier;
+  ///
+  /// The provided [ValueNotifier] is required to hold a valid value at the
+  /// start of the semantics phase of [PipelineOwner].
+  final ValueNotifier<List<SemanticsAction>> semanticsActionsChangeNotifier;
 
   @override
   RawGestureDetectorState createState() => new RawGestureDetectorState();
@@ -632,7 +635,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   final RawGestureDetectorState owner;
 
-  final SemanticsActionsChangeNotifier semanticsActionsChangeNotifier;
+  final ValueNotifier<List<SemanticsAction>> semanticsActionsChangeNotifier;
 
   void _handleTap() {
     final TapGestureRecognizer recognizer = owner._recognizers[TapGestureRecognizer];

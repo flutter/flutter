@@ -2738,9 +2738,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
       markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
   }
 
-  SemanticsActionsChangeNotifier get semanticsActionsChangeNotifier => _semanticsActionsChangeNotifier;
-  SemanticsActionsChangeNotifier  _semanticsActionsChangeNotifier;
-  set semanticsActionsChangeNotifier(SemanticsActionsChangeNotifier value) {
+  ValueNotifier<List<SemanticsAction>> get semanticsActionsChangeNotifier => _semanticsActionsChangeNotifier;
+  ValueNotifier<List<SemanticsAction>>  _semanticsActionsChangeNotifier;
+  set semanticsActionsChangeNotifier(ValueNotifier<List<SemanticsAction>> value) {
     if (_semanticsActionsChangeNotifier == value)
       return;
     _semanticsActionsChangeNotifier?.removeListener(_semanticsActionsChanged);
@@ -2828,7 +2828,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     // If a semanticsActionsChangeNotifier was provided, check that we only
     // expose SemanticsActions that are currently valid.
     if (semanticsActionsChangeNotifier != null) {
-      final List<SemanticsAction> enabledActions = semanticsActionsChangeNotifier.availableActions;
+      final List<SemanticsAction> enabledActions = semanticsActionsChangeNotifier.value;
+      assert(enabledActions != null);
       actions = actions.where((SemanticsAction action) => enabledActions.contains(action)).toList();
     }
     actions.forEach(node.addAction);

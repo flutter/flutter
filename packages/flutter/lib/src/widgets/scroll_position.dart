@@ -382,6 +382,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _haveDimensions = true;
       applyNewDimensions();
       _didChangeViewportDimension = false;
+      _semanticsActionsChangeNotifier?.update();
     }
     return true;
   }
@@ -596,31 +597,17 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Manages the list of currently valid semantic scroll actions and informs
   /// listener about changes to that list.
-  ScrollSemanticsActionsChangeNotifier get semanticsActionsChangeNotifier => _semanticsActionsChangeNotifier ??= new ScrollSemanticsActionsChangeNotifier(this);
-  ScrollSemanticsActionsChangeNotifier _semanticsActionsChangeNotifier;
+  ValueNotifier<List<SemanticsAction>> get semanticsActionsChangeNotifier => _semanticsActionsChangeNotifier ??= new _ScrollSemanticsActionsChangeNotifier(this);
+  _ScrollSemanticsActionsChangeNotifier _semanticsActionsChangeNotifier;
 }
 
-/// A [SemanticsActionsChangeNotifier] that manages the list of currently
-/// valid semantic scroll actions.
-class ScrollSemanticsActionsChangeNotifier extends SemanticsActionsChangeNotifier {
+class _ScrollSemanticsActionsChangeNotifier extends ValueNotifier<List<SemanticsAction>> {
 
-  ScrollSemanticsActionsChangeNotifier(this._position);
+  _ScrollSemanticsActionsChangeNotifier(this._position) : super(null);
 
   ScrollPosition _position;
 
-  @override
-  List<SemanticsAction> get availableActions => _availableActions ??= _calculateAvailableActions();
-  List<SemanticsAction> _availableActions;
-
   void update() {
-    final List<SemanticsAction> actions = _calculateAvailableActions();
-    if (!const ListEquality<SemanticsAction>().equals(actions, _availableActions)) {
-      _availableActions = actions;
-      notifyListeners();
-    }
-  }
-
-  List<SemanticsAction> _calculateAvailableActions() {
     SemanticsAction forward;
     SemanticsAction backward;
     switch (_position.axisDirection) {
@@ -642,6 +629,9 @@ class ScrollSemanticsActionsChangeNotifier extends SemanticsActionsChangeNotifie
     if (_position.pixels < _position.maxScrollExtent)
       actions.add(forward);
 
-    return actions;
+    if (!const ListEquality<SemanticsAction>().equals(value, actions)) {
+      value = actions;
+      notifyListeners();
+    }
   }
 }
