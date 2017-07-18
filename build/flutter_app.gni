@@ -4,6 +4,7 @@
 
 assert(is_fuchsia)
 
+import("//build/toolchain/shared.gni")
 import("//build/dart/dart_package.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
@@ -307,7 +308,7 @@ template("flutter_aot_app") {
   dylib_label = target_name + "_dylib"
 
   outer_target_name = target_name
-  shared_library(dylib_label) {
+  fuchsia_shared_library(dylib_label) {
     deps = [
       ":$assembly_label",
     ]
@@ -321,7 +322,9 @@ template("flutter_aot_app") {
     output_name = outer_target_name
   }
 
-  dylib_path = "$root_out_dir/lib.unstripped/lib$target_name.so"
+  dylib_path =
+      get_label_info(":$dylib_label(${target_toolchain}-shared)",
+                     "root_out_dir") + "/lib.unstripped/lib$target_name.so"
 
   action(target_name) {
     depfile = bundle_depfile
