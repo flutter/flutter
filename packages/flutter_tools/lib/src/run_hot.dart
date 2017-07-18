@@ -153,7 +153,6 @@ class HotRunner extends ResidentRunner {
       // Measure time to perform a hot restart.
       printStatus('Benchmarking hot restart');
       await restart(fullRestart: true);
-      await refreshViews();
       // TODO(johnmccutchan): Modify script entry point.
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
@@ -313,6 +312,11 @@ class HotRunner extends ResidentRunner {
                           deviceEntryUri,
                           devicePackagesUri,
                           deviceAssetsDirectoryUri);
+      if (benchmarkMode) {
+        for (FlutterDevice device in flutterDevices)
+          for (FlutterView view in device.views)
+            await view.waitUIThreadIdle();
+      }
     }
   }
 
