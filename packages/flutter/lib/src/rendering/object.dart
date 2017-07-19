@@ -1743,6 +1743,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisLayout = true;
       debugPreviousActiveLayout = _debugActiveLayout;
       _debugActiveLayout = this;
+      if (debugPrintLayouts)
+        debugPrint('Laying out (without resize) $this');
       return true;
     });
     try {
@@ -1849,6 +1851,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_doingThisLayoutWithCallback);
     assert(() {
       _debugMutationsLocked = true;
+      if (debugPrintLayouts)
+        debugPrint('Laying out (${sizedByParent ? "with separate resize" : "with resize allowed"}) $this');
       return true;
     });
     if (sizedByParent) {
