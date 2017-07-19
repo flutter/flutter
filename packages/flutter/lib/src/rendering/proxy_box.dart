@@ -2732,10 +2732,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
-  List<SemanticsAction> get validActions => _validActions;
-  List<SemanticsAction> _validActions;
-  set validActions(List<SemanticsAction> value) {
-    if (const ListEquality<SemanticsAction>().equals(value, _validActions))
+  Set<SemanticsAction> get validActions => _validActions;
+  Set<SemanticsAction> _validActions;
+  set validActions(Set<SemanticsAction> value) {
+    if (const SetEquality<SemanticsAction>().equals(value, _validActions))
       return;
     _validActions = value;
     markNeedsSemanticsUpdate(onlyChanges: true);

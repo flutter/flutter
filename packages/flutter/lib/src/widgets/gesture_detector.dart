@@ -535,7 +535,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
-  void replaceSemanticsActions(List<SemanticsAction> actions) {
+  void replaceSemanticsActions(Set<SemanticsAction> actions) {
     assert(() {
       if (!context.findRenderObject().owner.debugDoingLayout) {
         throw new FlutterError(
@@ -733,7 +733,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
           recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
   }
 
-  void _updateSemanticsActions(RenderSemanticsGestureHandler renderObject, List<SemanticsAction> actions) {
+  void _updateSemanticsActions(RenderSemanticsGestureHandler renderObject, Set<SemanticsAction> actions) {
     renderObject.validActions = actions;
   }
 

@@ -58,5 +58,5 @@ abstract class ScrollContext {
   void setCanDrag(bool value);
 
   /// Set the [SemanticsAction]s that should be expose to the semantics tree.
-  void setSemanticsActions(List<SemanticsAction> actions);
+  void setSemanticsActions(Set<SemanticsAction> actions);
 }

@@ -368,7 +368,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     return true;
   }
 
-  List<SemanticsAction> _semanticActions;
+  Set<SemanticsAction> _semanticActions;
 
   void _updateSemanticActions() {
     SemanticsAction forward;
@@ -384,13 +384,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         break;
     }
 
-    final List<SemanticsAction> actions = <SemanticsAction>[];
+    final Set<SemanticsAction> actions = new Set<SemanticsAction>();
     if (pixels > minScrollExtent)
       actions.add(backward);
     if (pixels < maxScrollExtent)
       actions.add(forward);
 
-    if (const ListEquality<SemanticsAction>().equals(actions, _semanticActions))
+    if (const SetEquality<SemanticsAction>().equals(actions, _semanticActions))
       return;
 
     _semanticActions = actions;
