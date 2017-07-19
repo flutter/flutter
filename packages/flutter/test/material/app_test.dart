@@ -25,23 +25,6 @@ class StateMarkerState extends State<StateMarker> {
   }
 }
 
-class PopWidget extends StatelessWidget {
-  final dynamic value;
-  final String name;
-  final BuildContext context;
-
-  const PopWidget(this.context, this.name, this.value);
-
-  void pop() {
-    Navigator.of(context).pop(value);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Text(name);
-  }
-}
-
 void main() {
   testWidgets('Can nest apps', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -189,18 +172,20 @@ void main() {
   });
 
   testWidgets('Return value with pop works', (WidgetTester tester) async {
-    PopWidget popWidget;
+    BuildContext contextA;
     await tester.pumpWidget(
         new MaterialApp(
           initialRoute: '/a',
           routes: <String, WidgetBuilder>{
             '/': (BuildContext context) => const Text('route "/"'),
-            '/a': (BuildContext context) =>
-                popWidget = new PopWidget(context, 'route "/a"', "done"),
+            '/a': (BuildContext context) {
+              contextA = context;
+              return new Text('route "/a"');
+            }
           },
         )
     );
-    popWidget.pop();
+    Navigator.of(contextA).pop("done");
 
     expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
