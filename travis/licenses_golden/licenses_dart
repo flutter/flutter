@@ -1,4 +1,4 @@
-Signature: b30e56ad696f2fcb5da1a00579e68a5b
+Signature: c931e7e92b0f1f1872a60b8f1a18b0aa
 
 UNUSED LICENSES:
 
@@ -1580,12 +1580,14 @@ FILE: ../../../dart/runtime/bin/sync_socket_patch.dart
 FILE: ../../../dart/runtime/bin/sync_socket_unsupported.cc
 FILE: ../../../dart/runtime/bin/sync_socket_win.cc
 FILE: ../../../dart/runtime/lib/async.cc
+FILE: ../../../dart/runtime/observatory/lib/src/elements/nav/reload.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_ref.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_view.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/subtypetestcache_ref.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/subtypetestcache_view.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/unlinkedcall_ref.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/unlinkedcall_view.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/objects/service.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/objects/single_target_cache.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/objects/subtype_test_cache.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/objects/unlinked_call.dart
@@ -1622,6 +1624,7 @@ FILE: ../../../dart/runtime/vm/stack_trace.h
 FILE: ../../../dart/runtime/vm/zone_text_buffer.cc
 FILE: ../../../dart/runtime/vm/zone_text_buffer.h
 FILE: ../../../dart/sdk/lib/io/sync_socket.dart
+FILE: ../../../dart/sdk/lib/vmservice/named_lookup.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved. Use of this source code is governed by a
