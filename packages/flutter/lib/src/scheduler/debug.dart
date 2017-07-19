@@ -21,7 +21,16 @@ import 'package:flutter/foundation.dart';
 /// intra-frame output from inter-frame output, set [debugPrintEndFrameBanner]
 /// to true as well.
 ///
-/// See [SchedulerBinding.handleBeginFrame].
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which does something similar for
+///    painting but using the timeline view.
+///
+///  * [debugPrintLayouts], which does something similar for layout but using
+///    console output.
+///
+///  * The discussions at [WidgetsBinding.drawFrame] and at
+///    [SchedulerBinding.handleBeginFrame].
 bool debugPrintBeginFrameBanner = false;
 
 /// Print a banner at the end of each frame.
