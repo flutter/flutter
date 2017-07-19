@@ -307,6 +307,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   // SEMANTICS ACTIONS
 
   @override
+  @protected
   void setSemanticsActions(List<SemanticsAction> actions) {
     if (_gestureDetectorKey.currentState != null)
       _gestureDetectorKey.currentState.replaceSemanticsActions(actions);

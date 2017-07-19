@@ -2827,9 +2827,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     }
 
     // If a set of validActions has been provided only expose those.
-    if (validActions != null) {
+    if (validActions != null)
       actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
-    }
+
     actions.forEach(node.addAction);
   }
 
