@@ -535,6 +535,25 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
+  void replaceSemanticsActions(Set<SemanticsAction> actions) {
+    assert(() {
+      if (!context.findRenderObject().owner.debugDoingLayout) {
+        throw new FlutterError(
+          'Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.\n'
+          'The replaceSemanticsActions() method can only be called during the layout phase.'
+        );
+      }
+      return true;
+    });
+    if (!widget.excludeFromSemantics) {
+      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
+      context.visitChildElements((Element element) {
+        final _GestureSemantics widget = element.widget;
+        widget._updateSemanticsActions(semanticsGestureHandler, actions);
+      });
+    }
+  }
+
   @override
   void dispose() {
     for (GestureRecognizer recognizer in _recognizers.values)
@@ -712,6 +731,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
           recognizers.containsKey(PanGestureRecognizer) ? _handleHorizontalDragUpdate : null
       ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
           recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
+  }
+
+  void _updateSemanticsActions(RenderSemanticsGestureHandler renderObject, Set<SemanticsAction> actions) {
+    renderObject.validActions = actions;
   }
 
   @override

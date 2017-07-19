@@ -56,4 +56,7 @@ abstract class ScrollContext {
 
   /// Whether the user can drag the widget, for example to initiate a scroll.
   void setCanDrag(bool value);
+
+  /// Set the [SemanticsAction]s that should be expose to the semantics tree.
+  void setSemanticsActions(Set<SemanticsAction> actions);
 }
