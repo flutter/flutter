@@ -1342,11 +1342,24 @@ class RRect {
 
   @override
   String toString() {
-    return 'RRect.fromLTRBAndCorners(${left.toStringAsFixed(1)}, '
-           '${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, '
-           '${bottom.toStringAsFixed(1)}, '
-           'topLeft: $tlRadius, topRight: $trRadius, '
-           'bottomRight: $brRadius, bottomLeft: $blRadius)';
+    final String rect = '${left.toStringAsFixed(1)}, '
+                        '${top.toStringAsFixed(1)}, '
+                        '${right.toStringAsFixed(1)}, '
+                        '${bottom.toStringAsFixed(1)}';
+    if (tlRadius == trRadius &&
+        trRadius == brRadius &&
+        brRadius == blRadius) {
+      if (tlRadius.x == tlRadius.y)
+        return 'RRect.fromLTRBR($rect, ${tlRadius.x.toStringAsFixed(1)})';
+      return 'RRect.fromLTRBXY($rect, ${tlRadius.x.toStringAsFixed(1)}, ${tlRadius.y.toStringAsFixed(1)})';
+    }
+    return 'RRect.fromLTRBAndCorners('
+             '$rect, '
+             'topLeft: $tlRadius, '
+             'topRight: $trRadius, '
+             'bottomRight: $brRadius, '
+             'bottomLeft: $blRadius'
+           ')';
   }
 }
 
