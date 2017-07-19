@@ -2783,8 +2783,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// Attempt to make this or a descendant RenderObject visible on screen.
   ///
-  /// If [child] is provided, that RenderObject is made visible. If [child] is
-  /// omitted, this RenderObject is made visible.
+  /// If [child] is provided, that [RenderObject] is made visible. If [child] is
+  /// omitted, this [RenderObject] is made visible.
   void showOnScreen([RenderObject child]) {
     if (parent is RenderObject) {
       final RenderObject renderParent = parent;
