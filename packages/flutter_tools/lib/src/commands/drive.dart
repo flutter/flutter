@@ -60,6 +60,18 @@ class DriveCommand extends RunCommandBase {
       valueHelp:
         'url'
     );
+
+    argParser.addOption(
+      'driver',
+      help:
+        'The test file to run on the host (as opposed to the target file to run on\n'
+        'the device). By default, this file has the same base name as the target\n'
+        'file, but in the "test_driver/" directory instead, and with "_test" inserted\n'
+        'just before the extension, so e.g. if the target is "lib/main.dart", the\n'
+        'driver will be "test_driver/main_test.dart".',
+      valueHelp:
+        'path'
+    );
   }
 
   @override
@@ -139,6 +151,11 @@ class DriveCommand extends RunCommandBase {
   }
 
   String _getTestFile() {
+    if (argResults['driver'] != null)
+      return argResults['driver'];
+
+    // If the --driver argument wasn't provided, then derive the value from
+    // the target file.
     String appFile = fs.path.normalize(targetFile);
 
     // This command extends `flutter run` and therefore CWD == package dir

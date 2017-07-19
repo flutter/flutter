@@ -348,6 +348,12 @@ class FlutterDriver {
     return null;
   }
 
+  /// Waits until [finder] can no longer locate the target.
+  Future<Null> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
+    await _sendCommand(new WaitForAbsent(finder, timeout: timeout));
+    return null;
+  }
+
   /// Waits until there are no more transient callbacks in the queue.
   ///
   /// Use this method when you need to wait for the moment when the application
@@ -597,9 +603,12 @@ class CommonFinders {
   /// Finds [Text] widgets containing string equal to [text].
   SerializableFinder text(String text) => new ByText(text);
 
-  /// Finds widgets by [key].
+  /// Finds widgets by [key]. Only [String] and [int] values can be used.
   SerializableFinder byValueKey(dynamic key) => new ByValueKey(key);
 
   /// Finds widgets with a tooltip with the given [message].
   SerializableFinder byTooltip(String message) => new ByTooltipMessage(message);
+
+  /// Finds widgets whose class name matches the given string.
+  SerializableFinder byType(String type) => new ByType(type);
 }
