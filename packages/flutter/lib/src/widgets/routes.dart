@@ -983,16 +983,20 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// ## Sample code
 ///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
-/// [RouteAware] in its [State] and subscribe it to the [RouteObserver]:
+/// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
 ///
 /// ```dart
-/// // Register the RouteObserver as a  navigation observer.
+/// // Register the RouteObserver as a navigation observer.
 /// final RouteObserver<PageRoute> routeObserver = new RouteObserver<PageRoute>();
 /// void main() {
 ///   runApp(new MaterialApp(
 ///     home: new Container(),
 ///     navigatorObservers: [routeObserver],
 ///   ));
+/// }
+///
+/// class RouteAwareWidget extends StatefulWidget {
+///   State<RouteAwareWidget> createState() => new RouteAwareWidgetState();
 /// }
 ///
 /// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
@@ -1025,9 +1029,6 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 /// }
 ///
-/// class RouteAwareWidget extends StatefulWidget {
-///   State<RouteAwareWidget> createState() => new RouteAwareWidgetState();
-/// }
 /// ```
 class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
   final Map<T, RouteAware> _listeners = <T, RouteAware>{};
