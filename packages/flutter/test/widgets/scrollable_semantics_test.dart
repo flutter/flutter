@@ -55,7 +55,7 @@ void main() {
 
     expect(scrollController.offset, kItemHeight / 2);
 
-    int firstContainerId = tester.renderObject(find.byWidget(containers.first)).debugSemantics.id;
+    final int firstContainerId = tester.renderObject(find.byWidget(containers.first)).debugSemantics.id;
     tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
