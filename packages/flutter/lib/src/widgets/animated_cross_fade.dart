@@ -46,7 +46,7 @@ enum CrossFadeState {
 /// ## Sample code
 ///
 /// This code fades between two representations of the Flutter logo. It depends
-/// on a boolean field `_on`; when `_on` is true, the first logo is shown,
+/// on a boolean field `_first`; when `_first` is true, the first logo is shown,
 /// otherwise the second logo is shown. When the field changes state, the
 /// [AnimatedCrossFade] widget cross-fades between the two forms of the logo
 /// over three seconds.
