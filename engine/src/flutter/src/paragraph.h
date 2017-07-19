@@ -68,7 +68,7 @@ class Paragraph {
   double GetMinIntrinsicWidth() const;
 
   // Returns a vector of bounding boxes that enclose all text between start and
-  // end glyph indexes.
+  // end glyph indexes, including start and excluding end.
   std::vector<SkRect> GetRectsForRange(size_t start, size_t end) const;
 
   // Returns the index of the glyph that corresponds to the provided coordinate,
