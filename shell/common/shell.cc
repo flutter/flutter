@@ -262,7 +262,7 @@ void Shell::GetPlatformViews(
   *platform_views = platform_views_;
 }
 
-void Shell::WaitForPlatformViewIds(
+void Shell::GetPlatformViewIds(
     std::vector<PlatformViewInfo>* platform_view_ids) {
   std::lock_guard<std::mutex> lk(platform_views_mutex_);
   for (auto it = platform_views_.begin(); it != platform_views_.end(); it++) {

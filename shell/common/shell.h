@@ -44,7 +44,7 @@ class Shell {
 
   // List of PlatformViews.
 
-  // These APIs must only be accessed on UI thread.
+  // These APIs can be called from any thread.
   void AddPlatformView(const std::shared_ptr<PlatformView>& platform_view);
   void PurgePlatformViews();
   void GetPlatformViews(
@@ -58,7 +58,7 @@ class Shell {
 
   // These APIs can be called from any thread.
   // Return the list of platform view ids at the time of this call.
-  void WaitForPlatformViewIds(std::vector<PlatformViewInfo>* platform_view_ids);
+  void GetPlatformViewIds(std::vector<PlatformViewInfo>* platform_view_ids);
 
   // Attempt to run a script inside a flutter view indicated by |view_id|.
   // Will set |view_existed| to true if the view was found and false otherwise.
