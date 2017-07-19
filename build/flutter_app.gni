@@ -10,6 +10,10 @@ import("//flutter/lib/ui/dart_ui.gni")
 import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
 import("//lib/fidl/dart/sdk_ext/sdk_ext.gni")
 
+declare_args() {
+  flutter_app_default_is_jit = true
+}
+
 gen_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
 gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
 gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
@@ -19,33 +23,7 @@ flutter_tools_label = "$flutter_root/packages/flutter_tools:fuchsia_builder($hos
 flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
 flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/fuchsia_builder"
 
-# Defines a Flutter application
-#
-# Parameters
-#
-#   main_dart (required)
-#     Name of the Dart file containing the main function.
-#
-#   package_name (optional)
-#     Name of the Dart package.
-#
-#   output_name (optional)
-#     Name of output to generate. Defaults to $target_name.flx.
-#
-#   deps (optional)
-#     List of Dart packages the application depends on.
-#
-#   manifest (optional)
-#     Path to the manifest file
-#
-#   analysis_options (optional)
-#     By default, a script to run the analyzer on the contents of the package is
-#     generated in the output directory. This parameter contains the path to an
-#     analysis options file for this target.
-#
-#   disable_analysis (optional)
-#     Prevents the analysis script from being generated.
-template("flutter_app") {
+template("flutter_jit_app") {
   assert(defined(invoker.main_dart), "Must define main_dart")
 
   dart_package_name = target_name + "_dart_package"
@@ -375,5 +353,61 @@ template("flutter_aot_app") {
       ":$dylib_label",
       flutter_tools_label,
     ]
+  }
+}
+
+# Defines a Flutter application
+#
+# Parameters
+#
+#   main_dart (required)
+#     Name of the Dart file containing the main function.
+#
+#   package_name (optional)
+#     Name of the Dart package.
+#
+#   output_name (optional)
+#     Name of output to generate. Defaults to $target_name.flx.
+#
+#   deps (optional)
+#     List of Dart packages the application depends on.
+#
+#   manifest (optional)
+#     Path to the manifest file
+#
+#   analysis_options (optional)
+#     By default, a script to run the analyzer on the contents of the package is
+#     generated in the output directory. This parameter contains the path to an
+#     analysis options file for this target.
+#
+#   disable_analysis (optional)
+#     Prevents the analysis script from being generated.
+template("flutter_app") {
+  if (flutter_app_default_is_jit) {
+    flutter_jit_app(target_name) {
+      forward_variables_from(invoker,
+                             [
+                               "main_dart",
+                               "package_name",
+                               "output_name",
+                               "deps",
+                               "manifest",
+                               "analysis_options",
+                               "source_dir"
+                             ])
+    }
+  } else {
+    flutter_aot_app(target_name) {
+      forward_variables_from(invoker,
+                             [
+                               "main_dart",
+                               "package_name",
+                               "output_name",
+                               "deps",
+                               "manifest",
+                               "analysis_options",
+                               "source_dir"
+                             ])
+    }
   }
 }

@@ -4,7 +4,7 @@
 
 import("//flutter/build/flutter_app.gni")
 
-flutter_app("hello_flutter") {
+flutter_jit_app("hello_flutter") {
   main_dart = "lib/main.dart"
 
   deps = [
