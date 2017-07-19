@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildTest({ ScrollController controller, String title:'TTTTTTTT' }) {
+Widget buildTest({ ScrollController controller, String title: 'TTTTTTTT' }) {
   return new MediaQuery(
     data: const MediaQueryData(),
     child: new Scaffold(

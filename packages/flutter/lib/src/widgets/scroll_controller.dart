@@ -306,6 +306,14 @@ class ScrollController extends ChangeNotifier {
 /// In this example the `_trackingController` would have been created by the
 /// stateful widget that built the widget tree.
 class TrackingScrollController extends ScrollController {
+  TrackingScrollController({
+    double initialScrollOffset: 0.0,
+    bool keepScrollOffset: true,
+    String debugLabel,
+  }) : super(initialScrollOffset: initialScrollOffset,
+             keepScrollOffset: keepScrollOffset,
+             debugLabel: debugLabel);
+
   Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
   ScrollPosition _lastUpdated;
 
@@ -315,7 +323,7 @@ class TrackingScrollController extends ScrollController {
 
   /// Returns the scroll offset of the [mostRecentlyUpdatedPosition] or 0.0.
   @override
-  double get initialScrollOffset => _lastUpdated?.pixels ?? 0.0;
+  double get initialScrollOffset => _lastUpdated?.pixels ?? super.initialScrollOffset;
 
   @override
   void attach(ScrollPosition position) {
