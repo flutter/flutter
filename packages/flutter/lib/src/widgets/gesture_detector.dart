@@ -727,7 +727,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     renderObject
       ..onTap = recognizers.containsKey(TapGestureRecognizer) ? _handleTap : null
       ..onLongPress = recognizers.containsKey(LongPressGestureRecognizer) ? _handleLongPress : null
-      ..onHorizontalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
+      ..onHorizontalDragUpdate = recognizers.containsKey(HorizontalDragGestureRecognizer) ||
           recognizers.containsKey(PanGestureRecognizer) ? _handleHorizontalDragUpdate : null
       ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
           recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
