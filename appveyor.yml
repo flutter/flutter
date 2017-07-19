@@ -9,3 +9,7 @@ build: off
 
 test_script:
 - cmd: bin\cache\dart-sdk\bin\dart.exe -c dev\bots\test.dart
+
+# TODO(goderbauer): remove this workaround for outage reported on 2017-07-18.
+init:
+- ps: '[System.IO.File]::AppendAllText("C:\Windows\System32\drivers\etc\hosts", "`n93.184.221.200`tapi.nuget.org")'
