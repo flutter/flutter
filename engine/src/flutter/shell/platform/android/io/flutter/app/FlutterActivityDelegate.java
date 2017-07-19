@@ -289,6 +289,11 @@ public final class FlutterActivityDelegate
             return flutterView;
         }
 
+        @Override
+        public FlutterView view() {
+            return flutterView;
+        }
+
         /**
          * Publishes a value associated with the plugin being registered.
          *
