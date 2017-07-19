@@ -39,6 +39,25 @@ abstract class AnalyzeBase {
     }
   }
 
+  List<String> flutterRootComponents;
+  bool isFlutterLibrary(String filename) {
+    flutterRootComponents ??= fs.path.normalize(fs.path.absolute(Cache.flutterRoot)).split(fs.path.separator);
+    final List<String> filenameComponents = fs.path.normalize(fs.path.absolute(filename)).split(fs.path.separator);
+    if (filenameComponents.length < flutterRootComponents.length + 4) // the 4: 'packages', package_name, 'lib', file_name
+      return false;
+    for (int index = 0; index < flutterRootComponents.length; index += 1) {
+      if (flutterRootComponents[index] != filenameComponents[index])
+        return false;
+    }
+    if (filenameComponents[flutterRootComponents.length] != 'packages')
+      return false;
+    if (filenameComponents[flutterRootComponents.length + 1] == 'flutter_tools')
+      return false;
+    if (filenameComponents[flutterRootComponents.length + 2] != 'lib')
+      return false;
+    return true;
+  }
+
   void writeBenchmark(Stopwatch stopwatch, int errorCount, int membersMissingDocumentation) {
     final String benchmarkOut = 'analysis_benchmark.json';
     final Map<String, dynamic> data = <String, dynamic>{
