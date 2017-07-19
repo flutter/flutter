@@ -25,7 +25,6 @@ class StateMarkerState extends State<StateMarker> {
   }
 }
 
-// Designed to pop itself off the stack when created.
 class PopWidget extends StatelessWidget {
   final dynamic value;
   final String name;
