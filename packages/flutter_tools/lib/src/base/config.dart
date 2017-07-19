@@ -24,6 +24,8 @@ class Config {
 
   Iterable<String> get keys => _values.keys;
 
+  bool containsKey(String key) => _values.containsKey(key);
+
   dynamic getValue(String key) => _values[key];
 
   void setValue(String key, String value) {
