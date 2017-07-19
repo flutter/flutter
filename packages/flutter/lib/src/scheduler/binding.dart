@@ -552,7 +552,15 @@ abstract class SchedulerBinding extends BindingBase {
 
   int _profileFrameNumber = 0;
   Stopwatch _profileFrameStopwatch = new Stopwatch();
+  StreamController<FrameInfo> _frameInfoController = new StreamController<FrameInfo>.broadcast();
   String _debugBanner;
+
+  /// Returns a stream of frame information events.
+  ///
+  /// These events are created after a frame is rendered and contain performance related
+  /// information. Events are only fired when the app is running in debug or profile mode;
+  /// no frame information events are fired in release mode.
+  Stream<FrameInfo> get onFrameInfo => _frameInfoController.stream;
 
   /// Called by the engine to prepare the framework to produce a new frame.
   ///
@@ -653,10 +661,16 @@ abstract class SchedulerBinding extends BindingBase {
       developer.Timeline.finishSync(); // end the Frame
       profile(() {
         _profileFrameStopwatch.stop();
+        final FrameInfo frameInfo = new FrameInfo(
+          _profileFrameNumber,
+          _currentFrameTimeStamp.inMicroseconds,
+          _profileFrameStopwatch.elapsedMicroseconds
+        );
+        _frameInfoController.add(frameInfo);
         developer.postEvent('Flutter.Frame', <String, dynamic>{
-          'number': _profileFrameNumber,
-          'startTime': _currentFrameTimeStamp.inMicroseconds,
-          'elapsed': _profileFrameStopwatch.elapsedMicroseconds
+          'number': frameInfo.number,
+          'startTime': frameInfo.startTime,
+          'elapsed': frameInfo.elapsed
         });
       });
       assert(() {
@@ -729,4 +743,19 @@ bool defaultSchedulingStrategy({ int priority, SchedulerBinding scheduler }) {
   if (scheduler.transientCallbackCount > 0)
     return priority >= Priority.animation.value;
   return true;
+}
+
+/// Performance information for a Flutter frame.
+class FrameInfo {
+  FrameInfo(this.number, this.startTime, this.elapsed);
+
+  /// The frame number.
+  final int number;
+  /// The start time in microseconds.
+  final int startTime;
+  /// The elapsed time in microseconds.
+  final int elapsed;
+
+  @override
+  String toString() => 'frame $number, elapsed time: $elapsed micros';
 }
