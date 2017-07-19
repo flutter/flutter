@@ -134,6 +134,14 @@ void main() {
       );
     });
 
+    testUsingContext('project with-widget-test', () async {
+      return _createAndAnalyzeProject(
+        projectDir,
+        <String>['--with-widget-test'],
+        <String>['lib/main.dart', 'test/widget_test.dart'],
+      );
+    });
+
     // Verify content and formatting
     testUsingContext('content', () async {
       Cache.flutterRoot = '../..';
