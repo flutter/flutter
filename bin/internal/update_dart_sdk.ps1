@@ -43,7 +43,7 @@ $dartSdkZip = "$cachePath\dart-sdk.zip"
 # TODO(goderbauer): remove (slow and backwards-incompatible) appveyor work around
 if (Test-Path Env:\APPVEYOR) {
     curl $dartSdkUrl -OutFile $dartSdkZip
-} else{
+} else {
     Import-Module BitsTransfer
     Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
 }
