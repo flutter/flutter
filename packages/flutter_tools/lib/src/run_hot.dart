@@ -315,7 +315,7 @@ class HotRunner extends ResidentRunner {
       if (benchmarkMode) {
         for (FlutterDevice device in flutterDevices)
           for (FlutterView view in device.views)
-            await view.waitUIThreadIdle();
+            await view.flushUIThreadTasks();
       }
     }
   }
