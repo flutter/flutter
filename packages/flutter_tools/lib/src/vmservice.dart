@@ -1069,11 +1069,11 @@ class Isolate extends ServiceObjectOwner {
     return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTree', timeout: kLongRequestTimeout);
   }
 
-  Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() async {
-    Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.debugPaint');
+  Future<Map<String, dynamic>> _flutterToggle(String name) async {
+    Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.$name');
     if (state != null && state.containsKey('enabled') && state['enabled'] is String) {
       state = await invokeFlutterExtensionRpcRaw(
-        'ext.flutter.debugPaint',
+        'ext.flutter.$name',
         params: <String, dynamic>{ 'enabled': state['enabled'] == 'true' ? 'false' : 'true' },
         timeout: const Duration(milliseconds: 150),
         timeoutFatal: false,
@@ -1081,6 +1081,10 @@ class Isolate extends ServiceObjectOwner {
     }
     return state;
   }
+
+  Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() => _flutterToggle('debugPaint');
+
+  Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride() => _flutterToggle('showPerformanceOverlay');
 
   Future<Null> flutterDebugAllowBanner(bool show) async {
     await invokeFlutterExtensionRpcRaw(
