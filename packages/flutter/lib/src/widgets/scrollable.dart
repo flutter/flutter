@@ -448,6 +448,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
     final Widget result = new RawGestureDetector(
+      semanticsActionsChangeNotifier: _position.semanticsActionsChangeNotifier,
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,

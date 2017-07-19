@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -212,6 +213,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _pixels = newPixels - overscroll;
       if (_pixels != oldPixels) {
         notifyListeners();
+        _semanticsActionsChangeNotifier?.update();
         didUpdateScrollPositionBy(_pixels - oldPixels);
       }
       if (overscroll != 0.0) {
@@ -248,11 +250,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// see the discussion there for why that might still be a bad idea.)
   void correctPixels(double value) {
     _pixels = value;
+    _semanticsActionsChangeNotifier?.update();
   }
 
   @override
   void correctBy(double correction) {
     _pixels += correction;
+    _semanticsActionsChangeNotifier?.update();
   }
 
   /// Change the value of [pixels] to the new value, and notify any customers,
@@ -282,6 +286,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(pixels != null);
     _pixels = value;
     notifyListeners();
+    _semanticsActionsChangeNotifier?.update();
   }
 
   /// Called whenever scrolling ends, to store the current scroll offset in a
@@ -377,6 +382,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       _haveDimensions = true;
       applyNewDimensions();
       _didChangeViewportDimension = false;
+      _semanticsActionsChangeNotifier?.update();
     }
     return true;
   }
@@ -587,5 +593,45 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     super.debugFillDescription(description);
     description.add('range: ${minScrollExtent?.toStringAsFixed(1)}..${maxScrollExtent?.toStringAsFixed(1)}');
     description.add('viewport: ${viewportDimension?.toStringAsFixed(1)}');
+  }
+
+  /// Manages the list of currently valid semantic scroll actions and informs
+  /// listener about changes to that list.
+  ValueNotifier<List<SemanticsAction>> get semanticsActionsChangeNotifier => _semanticsActionsChangeNotifier ??= new _ScrollSemanticsActionsChangeNotifier(this);
+  _ScrollSemanticsActionsChangeNotifier _semanticsActionsChangeNotifier;
+}
+
+class _ScrollSemanticsActionsChangeNotifier extends ValueNotifier<List<SemanticsAction>> {
+
+  _ScrollSemanticsActionsChangeNotifier(this._position) : super(null);
+
+  ScrollPosition _position;
+
+  void update() {
+    SemanticsAction forward;
+    SemanticsAction backward;
+    switch (_position.axisDirection) {
+      case AxisDirection.down:
+      case AxisDirection.up:
+        forward = SemanticsAction.scrollUp;
+        backward = SemanticsAction.scrollDown;
+        break;
+      case AxisDirection.right:
+      case AxisDirection.left:
+        forward = SemanticsAction.scrollLeft;
+        backward = SemanticsAction.scrollRight;
+        break;
+    }
+
+    final List<SemanticsAction> actions = <SemanticsAction>[];
+    if (_position.pixels > _position.minScrollExtent)
+      actions.add(backward);
+    if (_position.pixels < _position.maxScrollExtent)
+      actions.add(forward);
+
+    if (!const ListEquality<SemanticsAction>().equals(value, actions)) {
+      value = actions;
+      notifyListeners();
+    }
   }
 }
