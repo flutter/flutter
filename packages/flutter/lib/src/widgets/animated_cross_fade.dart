@@ -156,14 +156,17 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       curve: curve
     );
 
-    animation = inverted ? new Tween<double>(
-      begin: 1.0,
-      end: 0.0
-    ).animate(animation) : animation;
+    if (inverted) {
+      animation = new Tween<double>(
+          begin: 1.0,
+          end: 0.0
+      ).animate(animation);
+    }
 
     animation.addStatusListener((AnimationStatus status) {
       setState(() {
-        // This just triggers a rebuild. The state lives in the animation controller.
+        // Trigger a rebuild because it depends on _isTransitioning, which
+        // changes its value together with animation status.
       });
     });
 
@@ -197,12 +200,12 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     }
   }
 
-  /// Whether we're in the middle of cross-fading right this frame.
+  /// Whether we're in the middle of cross-fading this frame.
   bool get _isTransitioning => _controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.reverse;
 
   List<Widget> _buildCrossFadedChildren() {
-    const Key kFirstChildKey = const Key('first-child');
-    const Key kSecondChildKey = const Key('second-child');
+    const Key kFirstChildKey = const ValueKey<CrossFadeState>(CrossFadeState.showFirst);
+    const Key kSecondChildKey = const ValueKey<CrossFadeState>(CrossFadeState.showSecond);
     final bool transitioningForwards = _controller.status == AnimationStatus.completed || _controller.status == AnimationStatus.forward;
 
     Key topKey;
@@ -238,7 +241,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
           top: 0.0,
           right: 0.0,
           child: new ExcludeSemantics(
-            excluding: !_isTransitioning,
+            excluding: true,  // always exclude the semantics of the widget that's fading out
             child: new FadeTransition(
               opacity: bottomAnimation,
               child: bottomChild,
@@ -251,7 +254,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         enabled: true,  // top widget always has its animations enabled
         child: new Positioned(
           child: new ExcludeSemantics(
-            excluding: false,  // always publish semantics for the top widget
+            excluding: false,  // always publish semantics for the widget that's fading in
             child: new FadeTransition(
               opacity: topAnimation,
               child: topChild,
