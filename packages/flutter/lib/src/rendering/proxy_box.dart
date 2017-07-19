@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 
+import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -2731,6 +2732,15 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+  List<SemanticsAction> get validActions => _validActions;
+  List<SemanticsAction> _validActions;
+  set validActions(List<SemanticsAction> value) {
+    if (const ListEquality<SemanticsAction>().equals(value, _validActions))
+      return;
+    _validActions = value;
+    markNeedsSemanticsUpdate(onlyChanges: true);
+  }
+
    /// Called when the user taps on the render object.
   GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
@@ -2802,14 +2812,25 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
+    List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
-      node.addAction(SemanticsAction.tap);
+      actions.add(SemanticsAction.tap);
     if (onLongPress != null)
-      node.addAction(SemanticsAction.longPress);
-    if (onHorizontalDragUpdate != null)
-      node.addHorizontalScrollingActions();
-    if (onVerticalDragUpdate != null)
-      node.addVerticalScrollingActions();
+      actions.add(SemanticsAction.longPress);
+    if (onHorizontalDragUpdate != null) {
+      actions.add(SemanticsAction.scrollRight);
+      actions.add(SemanticsAction.scrollLeft);
+    }
+    if (onVerticalDragUpdate != null) {
+      actions.add(SemanticsAction.scrollUp);
+      actions.add(SemanticsAction.scrollDown);
+    }
+
+    // If a set of validActions has been provided only expose those.
+    if (validActions != null) {
+      actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
+    }
+    actions.forEach(node.addAction);
   }
 
   @override
