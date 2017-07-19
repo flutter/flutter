@@ -762,13 +762,18 @@ void Paragraph::PaintWavyDecoration(SkCanvas* canvas,
 
 std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
                                                 size_t end) const {
+  FTL_DCHECK(end >= start && end >= 0 && start >= 0);
   std::vector<SkRect> rects;
-  end = fmin(end, text_.size() - 1);
-  while (start <= end) {
+  end = fmax(start, end);
+  start = fmin(start, end);
+  if (end == start)
+    end = start + 1;
+  end = fmin(end, text_.size());
+  while (start < end) {
     SkIPoint word_bounds = GetWordBoundary(start);
-    word_bounds.fY = fmin(end + 1, word_bounds.fY);
     word_bounds.fX = fmax(start, word_bounds.fX);
-    start = word_bounds.fY;
+    word_bounds.fY = fmin(end, word_bounds.fY);
+    start = fmax(word_bounds.fY, start + 1);
     SkRect left_limits = GetCoordinatesForGlyphPosition(word_bounds.fX + 1);
     SkRect right_limits = GetCoordinatesForGlyphPosition(word_bounds.fY);
     if (left_limits.top() < right_limits.top()) {
@@ -815,7 +820,7 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
     }
   }
   prev_count = 0;
-  for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size() - 2;
+  for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size() - 1;
        ++x_index) {
     if (dx < glyph_position_x_[y_index][x_index]) {
       break;
@@ -830,7 +835,7 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
 SkIPoint Paragraph::GetWordBoundary(size_t offset) const {
   // TODO(garyq): Consider punctuation as separate words.
   return SkIPoint::Make(
-      minikin::getPrevWordBreakForCache(text_.data(), offset, text_.size()),
+      minikin::getPrevWordBreakForCache(text_.data(), offset + 1, text_.size()),
       minikin::getNextWordBreakForCache(text_.data(), offset, text_.size()));
 }
 

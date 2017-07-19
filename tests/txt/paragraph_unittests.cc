@@ -349,7 +349,7 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 1), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 35), 68ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 70), 134ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 35), 133ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 35), 134ull);
 
   ASSERT_TRUE(Snapshot());
 }
@@ -906,14 +906,14 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(3, 3), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 1), 1ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20), 17ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20), 18ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(450, 20), 16ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 90), 35ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 90), 36ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-100000, 90), 18ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(20, -80), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 90), 18ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 180), 36ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 180), 53ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 180), 54ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(70, 180), 38ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 270), 54ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 90), 19ull);
@@ -971,12 +971,22 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[0].right(), 28);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
-  paint.setColor(SK_ColorBLUE);
-  rects = paragraph->GetRectsForRange(2, 7);
+  rects = paragraph->GetRectsForRange(0, 1);
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  ASSERT_EQ(rects.size(), 3ull);
+  EXPECT_EQ(rects.size(), 1ull);
+  EXPECT_FLOAT_EQ(rects[0].left(), 0);
+  EXPECT_FLOAT_EQ(rects[0].top(), 0);
+  EXPECT_FLOAT_EQ(rects[0].right(), 28);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
+
+  paint.setColor(SK_ColorBLUE);
+  rects = paragraph->GetRectsForRange(2, 8);
+  for (size_t i = 0; i < rects.size(); ++i) {
+    GetCanvas()->drawRect(rects[i], paint);
+  }
+  EXPECT_EQ(rects.size(), 3ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 56);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 151);
@@ -993,11 +1003,11 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
 
   paint.setColor(SK_ColorGREEN);
-  rects = paragraph->GetRectsForRange(8, 20);
+  rects = paragraph->GetRectsForRange(8, 21);
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  ASSERT_EQ(rects.size(), 3ull);
+  EXPECT_EQ(rects.size(), 3ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 175);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 347);
@@ -1018,7 +1028,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  ASSERT_EQ(rects.size(), 17ull);
+  EXPECT_EQ(rects.size(), 17ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 208);
   EXPECT_FLOAT_EQ(rects[0].top(), 58.59375);
   EXPECT_FLOAT_EQ(rects[0].right(), 292);
@@ -1032,11 +1042,11 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[16].bottom(), 292.96875);
 
   paint.setColor(SK_ColorBLUE);
-  rects = paragraph->GetRectsForRange(19, 21);
+  rects = paragraph->GetRectsForRange(19, 22);
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  ASSERT_EQ(rects.size(), 2ull);
+  EXPECT_EQ(rects.size(), 2ull);
   EXPECT_FLOAT_EQ(rects[1].left(), 499);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
   EXPECT_FLOAT_EQ(rects[1].right(), 511);
@@ -1047,9 +1057,62 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  ASSERT_EQ(rects.size(), 1ull);
+  EXPECT_EQ(rects.size(), 1ull);
 
   ASSERT_TRUE(Snapshot());
+}
+
+TEST_F(RenderTest, GetWordBoundaryParagraph) {
+  const char* text =
+      "12345  67890 12345 67890 12345 67890 12345 67890 12345 67890 12345 "
+      "67890 12345";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 10;
+  paragraph_style.text_align = TextAlign::left;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.font_size = 50;
+  text_style.letter_spacing = 1;
+  text_style.word_spacing = 5;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1.5;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(550);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
+
+  EXPECT_EQ(paragraph->GetWordBoundary(0), SkIPoint::Make(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(1), SkIPoint::Make(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(2), SkIPoint::Make(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(3), SkIPoint::Make(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(4), SkIPoint::Make(0, 5));
+
+  EXPECT_EQ(paragraph->GetWordBoundary(5), SkIPoint::Make(5, 6));
+  EXPECT_EQ(paragraph->GetWordBoundary(6), SkIPoint::Make(6, 7));
+
+  EXPECT_EQ(paragraph->GetWordBoundary(7), SkIPoint::Make(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(8), SkIPoint::Make(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(9), SkIPoint::Make(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(10), SkIPoint::Make(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(11), SkIPoint::Make(7, 12));
+
+  EXPECT_EQ(paragraph->GetWordBoundary(12), SkIPoint::Make(12, 13));
+
+  EXPECT_EQ(paragraph->GetWordBoundary(13), SkIPoint::Make(13, 18));
 }
 
 TEST_F(RenderTest, SpacingParagraph) {

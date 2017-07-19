@@ -82,8 +82,6 @@ std::unique_ptr<Paragraph> ParagraphBuilder::Build() {
   if (font_collection_ == nullptr) {
     // Will be deprecated when full compatibility with Flutter Engine is
     // complete.
-    FTL_LOG(WARNING) << "No font collection provided. Falling back to default "
-                        "fonts.";
     font_collection_ = &FontCollection::GetFontCollection("");
   }
 
