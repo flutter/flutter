@@ -45,6 +45,15 @@
 #define TRACE_EVENT_INSTANT0(category_group, name) \
   ::fml::tracing::TraceEventInstant0(category_group, name);
 
+#define TRACE_FLOW_BEGIN(category, name, id, args...) \
+  ::fml::tracing::TraceEventFlowBegin0(category, name, id);
+
+#define TRACE_FLOW_STEP(category, name, id, args...) \
+  ::fml::tracing::TraceEventFlowStep0(category, name, id);
+
+#define TRACE_FLOW_END(category, name, id, args...) \
+  ::fml::tracing::TraceEventFlowEnd0(category, name, id);
+
 #endif  // TRACE_EVENT_HIDE_MACROS
 
 namespace fml {
@@ -88,6 +97,14 @@ void TraceEventAsyncEnd1(TraceArg category_group,
                          TraceArg arg1_val);
 
 void TraceEventInstant0(TraceArg category_group, TraceArg name);
+
+void TraceEventFlowBegin0(TraceArg category_group,
+                          TraceArg name,
+                          TraceIDArg id);
+
+void TraceEventFlowStep0(TraceArg category_group, TraceArg name, TraceIDArg id);
+
+void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id);
 
 class ScopedInstantEnd {
  public:

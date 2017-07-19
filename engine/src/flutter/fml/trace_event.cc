@@ -136,5 +136,42 @@ void TraceEventInstant0(TraceArg category_group, TraceArg name) {
                      );
 }
 
+void TraceEventFlowBegin0(TraceArg category_group,
+                          TraceArg name,
+                          TraceIDArg id) {
+  Dart_TimelineEvent(name,                            // label
+                     Dart_TimelineGetMicros(),        // timestamp0
+                     id,                              // timestamp1_or_async_id
+                     Dart_Timeline_Event_Flow_Begin,  // event type
+                     0,                               // argument_count
+                     nullptr,                         // argument_names
+                     nullptr                          // argument_values
+                     );
+}
+
+void TraceEventFlowStep0(TraceArg category_group,
+                         TraceArg name,
+                         TraceIDArg id) {
+  Dart_TimelineEvent(name,                           // label
+                     Dart_TimelineGetMicros(),       // timestamp0
+                     id,                             // timestamp1_or_async_id
+                     Dart_Timeline_Event_Flow_Step,  // event type
+                     0,                              // argument_count
+                     nullptr,                        // argument_names
+                     nullptr                         // argument_values
+                     );
+}
+
+void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
+  Dart_TimelineEvent(name,                          // label
+                     Dart_TimelineGetMicros(),      // timestamp0
+                     id,                            // timestamp1_or_async_id
+                     Dart_Timeline_Event_Flow_End,  // event type
+                     0,                             // argument_count
+                     nullptr,                       // argument_names
+                     nullptr                        // argument_values
+                     );
+}
+
 }  // namespace tracing
 }  // namespace fml
