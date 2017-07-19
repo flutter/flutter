@@ -36,8 +36,6 @@ const TextStyle _kToolbarButtonFontStyle = const TextStyle(
   fontWeight: FontWeight.w300,
 );
 
-const SizedBox _kOnePhysicalPixelVerticalDivider = const SizedBox(width: 0.5);
-
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
   @override
@@ -79,21 +77,23 @@ class _TextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
+    final Widget onePhysicalPixelVerticalDivider =
+        new SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
 
     if (!value.selection.isCollapsed) {
       items.add(_buildToolbarButton('Cut', handleCut));
-      items.add(_kOnePhysicalPixelVerticalDivider);
+      items.add(onePhysicalPixelVerticalDivider);
       items.add(_buildToolbarButton('Copy', handleCopy));
     }
 
     // TODO(https://github.com/flutter/flutter/issues/11254):
     // This should probably be grayed-out if there is nothing to paste.
     if (items.isNotEmpty)
-      items.add(_kOnePhysicalPixelVerticalDivider);
+      items.add(onePhysicalPixelVerticalDivider);
     items.add(_buildToolbarButton('Paste', handlePaste));
 
     if (value.text.isNotEmpty && value.selection.isCollapsed) {
-      items.add(_kOnePhysicalPixelVerticalDivider);
+      items.add(onePhysicalPixelVerticalDivider);
       items.add(_buildToolbarButton('Select All', handleSelectAll));
     }
 
