@@ -172,16 +172,17 @@ dependencies:
     int errorCount = 0;
     for (String error in errors) {
       const String kBullet = ' • ';
-      const String kAt = ' at main.dart:';
       const String kColon = ':';
+      final RegExp atRegExp = new RegExp(r' at .*main.dart:');
       final int start = error.indexOf(kBullet);
-      final int end = error.indexOf(kAt);
+      final int end = error.indexOf(atRegExp);
       if (start >= 0 && end >= 0) {
         final String message = error.substring(start + kBullet.length, end);
-        final int colon2 = error.indexOf(kColon, end + kAt.length);
+        final String atMatch = atRegExp.firstMatch(error)[0];
+        final int colon2 = error.indexOf(kColon, end + atMatch.length);
         if (colon2 < 0)
           throw 'failed to parse error message: $error';
-        final String line = error.substring(end + kAt.length, colon2);
+        final String line = error.substring(end + atMatch.length, colon2);
         final int bullet2 = error.indexOf(kBullet, colon2);
         if (bullet2 < 0)
           throw 'failed to parse error message: $error';

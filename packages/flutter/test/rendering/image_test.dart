@@ -5,7 +5,7 @@
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -15,6 +15,9 @@ class SquareImage implements ui.Image {
 
   @override
   int get height => 10;
+
+  @override
+  String toString() => '[$width\u00D7$height]';
 
   @override
   void dispose() { }
@@ -28,6 +31,9 @@ class WideImage implements ui.Image {
   int get height => 10;
 
   @override
+  String toString() => '[$width\u00D7$height]';
+
+  @override
   void dispose() { }
 }
 
@@ -37,6 +43,9 @@ class TallImage implements ui.Image {
 
   @override
   int get height => 20;
+
+  @override
+  String toString() => '[$width\u00D7$height]';
 
   @override
   void dispose() { }
@@ -55,6 +64,18 @@ void main() {
               maxHeight: 100.0));
     expect(image.size.width, equals(25.0));
     expect(image.size.height, equals(25.0));
+
+    expect(image, hasAGoodToStringDeep);
+    expect(
+      image.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderImage#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
+        '   parentData: <none> (can use size)\n'
+        '   constraints: BoxConstraints(25.0<=w<=100.0, 25.0<=h<=100.0)\n'
+        '   size: Size(25.0, 25.0)\n'
+        '   image: [10×10]\n'
+      ),
+    );
 
     image = new RenderImage(image: new WideImage());
     layout(image,

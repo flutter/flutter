@@ -8,6 +8,7 @@ import 'package:meta/meta.dart' show required;
 
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/process.dart';
@@ -29,14 +30,15 @@ const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const String _kDylibKey = 'libapp.so';
 
-Future<int> createSnapshot({
+Future<int> _createSnapshot({
   @required String mainPath,
   @required String snapshotPath,
-  String depfilePath,
+  @required String depfilePath,
   @required String packages
-}) {
+}) async {
   assert(mainPath != null);
   assert(snapshotPath != null);
+  assert(depfilePath != null);
   assert(packages != null);
   final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, null, BuildMode.debug);
   final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
@@ -48,14 +50,50 @@ Future<int> createSnapshot({
     '--vm_snapshot_data=$vmSnapshotData',
     '--isolate_snapshot_data=$isolateSnapshotData',
     '--packages=$packages',
-    '--script_snapshot=$snapshotPath'
+    '--script_snapshot=$snapshotPath',
+    '--dependencies=$depfilePath',
+    mainPath,
   ];
-  if (depfilePath != null) {
-    args.add('--dependencies=$depfilePath');
-    fs.file(depfilePath).parent.childFile('gen_snapshot.d').writeAsString('$depfilePath: $snapshotterPath\n');
+
+  // Write the depfile path to disk.
+  fs.file(depfilePath).parent.childFile('gen_snapshot.d').writeAsString('$depfilePath: $snapshotterPath\n');
+
+  final File checksumFile = fs.file('$depfilePath.checksums');
+  final File snapshotFile = fs.file(snapshotPath);
+  final File depfile = fs.file(depfilePath);
+  if (snapshotFile.existsSync() && depfile.existsSync() && checksumFile.existsSync()) {
+    try {
+        final String json = await checksumFile.readAsString();
+        final Checksum oldChecksum = new Checksum.fromJson(json);
+        final Set<String> inputPaths = await readDepfile(depfilePath);
+        inputPaths.add(snapshotPath);
+        final Checksum newChecksum = new Checksum.fromFiles(inputPaths);
+        if (oldChecksum == newChecksum) {
+          printTrace('Skipping snapshot build. Checksums match.');
+          return 0;
+        }
+    } catch (e, s) {
+      // Log exception and continue, this step is a performance improvement only.
+      printTrace('Error during snapshot checksum check: $e\n$s');
+    }
   }
-  args.add(mainPath);
-  return runCommandAndStreamOutput(args);
+
+  // Build the snapshot.
+  final int exitCode = await runCommandAndStreamOutput(args);
+  if (exitCode != 0)
+    return exitCode;
+
+  // Compute and record input file checksums.
+  try {
+    final Set<String> inputPaths = await readDepfile(depfilePath);
+    inputPaths.add(snapshotPath);
+    final Checksum checksum = new Checksum.fromFiles(inputPaths);
+    await checksumFile.writeAsString(checksum.toJson());
+  } catch (e, s) {
+    // Log exception and continue, this step is a performance improvement only.
+    printTrace('Error during snapshot checksum output: $e\n$s');
+  }
+  return 0;
 }
 
 Future<Null> build({
@@ -83,7 +121,7 @@ Future<Null> build({
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    final int result = await createSnapshot(
+    final int result = await _createSnapshot(
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath,

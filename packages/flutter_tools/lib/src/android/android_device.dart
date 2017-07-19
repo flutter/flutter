@@ -35,6 +35,7 @@ const Map<String, _HardwareType> _knownHardware = const <String, _HardwareType>{
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
   'samsungexynos7420': _HardwareType.physical,
+  'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
 };
 
@@ -242,8 +243,13 @@ class AndroidDevice extends Device {
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     // This call takes 400ms - 600ms.
-    final RunResult listOut = await runCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
-    return LineSplitter.split(listOut.stdout).contains("package:${app.id}");
+    try {
+      final RunResult listOut = await runCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
+      return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
+    } catch (error) {
+      printTrace('$error');
+      return false;
+    }
   }
 
   @override

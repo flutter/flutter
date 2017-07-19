@@ -270,6 +270,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Config: () => mockConfig,
       AnsiTerminal: () => testTerminal,
     });
 

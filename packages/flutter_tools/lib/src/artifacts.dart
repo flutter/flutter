@@ -212,7 +212,7 @@ class LocalEngineArtifacts extends Artifacts {
 
   String _genSnapshotPath(TargetPlatform platform, BuildMode mode) {
     String clang;
-    if (platform == TargetPlatform.ios || mode == BuildMode.debug) {
+    if (platform == TargetPlatform.ios) {
       clang = 'clang_x64';
     } else {
       clang = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
@@ -224,7 +224,7 @@ class LocalEngineArtifacts extends Artifacts {
     if (getCurrentHostPlatform() == HostPlatform.linux_x64) {
       return fs.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
     } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
-      return fs.path.join(engineOutPath, 'FlutterTester.app', 'Contents', 'MacOS', 'FlutterTester');
+      return fs.path.join(engineOutPath, 'flutter_tester');
     }
     throw new Exception('Unsupported platform $platform.');
   }

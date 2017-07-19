@@ -75,14 +75,23 @@ class Usage {
   /// reports coming from the same computer.
   String get clientId => _analytics.clientId;
 
-  void sendCommand(String command) {
-    if (!suppressAnalytics)
-      _analytics.sendScreenView(command);
+  void sendCommand(String command, { Map<String, String> parameters }) {
+    if (suppressAnalytics)
+      return;
+
+    parameters ??= const <String, String>{};
+
+    _analytics.sendScreenView(command, parameters: parameters);
   }
 
-  void sendEvent(String category, String parameter) {
-    if (!suppressAnalytics)
-      _analytics.sendEvent(category, parameter);
+  void sendEvent(String category, String parameter,
+      { Map<String, String> parameters }) {
+    if (suppressAnalytics)
+      return;
+
+    parameters ??= const <String, String>{};
+
+    _analytics.sendEvent(category, parameter, parameters: parameters);
   }
 
   void sendTiming(

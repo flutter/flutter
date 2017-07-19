@@ -167,6 +167,25 @@ void main() {
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
 
+    expect(parentFocusScope, hasAGoodToStringDeep);
+    expect(
+      parentFocusScope.toStringDeep(),
+      equalsIgnoringHashCodes(
+          'FocusScopeNode#00000\n'
+          '   focus: FocusNode#00000(FOCUSED)\n'
+      ),
+    );
+
+    expect(WidgetsBinding.instance.focusManager.rootScope, hasAGoodToStringDeep);
+    expect(
+      WidgetsBinding.instance.focusManager.rootScope.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FocusScopeNode#00000\n'
+        ' └─child 1: FocusScopeNode#00000\n'
+        '     focus: FocusNode#00000(FOCUSED)\n'
+      ),
+    );
+
     parentFocusScope.setFirstFocus(childFocusScope);
     await tester.idle();
 

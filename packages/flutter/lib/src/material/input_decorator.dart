@@ -12,6 +12,11 @@ import 'theme.dart';
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
+// See the InputDecorator.build method, where this is used.
+class _InputDecoratorChildGlobalKey extends GlobalObjectKey {
+  const _InputDecoratorChildGlobalKey(BuildContext value) : super(value);
+}
+
 /// Text and styles used to label an input field.
 ///
 /// See also:
@@ -482,7 +487,19 @@ class InputDecorator extends StatelessWidget {
       );
     }
 
-    Widget inputChild;
+    Widget inputChild = new KeyedSubtree(
+      // It's important that we maintain the state of our child subtree, as it
+      // may be stateful (e.g. containing text selections). Since our build
+      // function risks changing the depth of the tree, we preserve the subtree
+      // using global keys.
+      // GlobalObjectKey(context) will always be the same whenever we are built.
+      // Additionally, we use a subclass of GlobalObjectKey to avoid clashes
+      // with anyone else using our BuildContext as their global object key
+      // value.
+      key: new _InputDecoratorChildGlobalKey(context),
+      child: child,
+    );
+
     if (!hasInlineLabel && (!isEmpty || hintText == null) &&
         (decoration?.prefixText != null || decoration?.suffixText != null)) {
       final List<Widget> rowContents = <Widget>[];
@@ -492,7 +509,7 @@ class InputDecorator extends StatelessWidget {
             style: decoration.prefixStyle ?? hintStyle)
         );
       }
-      rowContents.add(new Expanded(child: child));
+      rowContents.add(new Expanded(child: inputChild));
       if (decoration.suffixText != null) {
         rowContents.add(
             new Text(decoration.suffixText,
@@ -500,8 +517,6 @@ class InputDecorator extends StatelessWidget {
         );
       }
       inputChild = new Row(children: rowContents);
-    } else {
-      inputChild = child;
     }
 
     if (isCollapsed) {

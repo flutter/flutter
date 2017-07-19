@@ -14,7 +14,8 @@ export 'package:meta/meta.dart' show
   mustCallSuper,
   optionalTypeArgs,
   protected,
-  required;
+  required,
+  visibleForTesting;
 
 // Examples can assume:
 // String _name;

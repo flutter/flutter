@@ -388,7 +388,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
-/// Cache headers from the server are ignored.
+/// The image will be cached regardless of cache headers from the server.
 // TODO(ianh): Find some way to honour cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.

@@ -550,6 +550,12 @@ class RenderIndexedStack extends RenderStack {
     alignment: alignment
   );
 
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (index != null)
+      visitor(_childAtIndex());
+  }
+
   /// The index of the child to show, null if nothing is to be displayed.
   int get index => _index;
   int _index;

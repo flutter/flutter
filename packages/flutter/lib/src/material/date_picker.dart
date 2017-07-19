@@ -22,6 +22,7 @@ import 'flat_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'material.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -101,15 +102,32 @@ class _DatePickerHeader extends StatelessWidget {
     switch (orientation) {
       case Orientation.portrait:
         height = _kDatePickerHeaderPortraitHeight;
-        padding = const EdgeInsets.symmetric(horizontal: 24.0);
+        padding = const EdgeInsets.symmetric(horizontal: 16.0);
         mainAxisAlignment = MainAxisAlignment.center;
         break;
       case Orientation.landscape:
         width = _kDatePickerHeaderLandscapeWidth;
-        padding = const EdgeInsets.all(16.0);
+        padding = const EdgeInsets.all(8.0);
         mainAxisAlignment = MainAxisAlignment.start;
         break;
     }
+
+    Widget yearButton = new _DateHeaderButton(
+      color: backgroundColor,
+      onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.year), context),
+      child: new Text(new DateFormat('yyyy').format(selectedDate), style: yearStyle),
+    );
+    Widget dayButton = new _DateHeaderButton(
+      color: backgroundColor,
+      onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.day), context),
+      child: new Text(new DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle),
+    );
+
+    // Disable the button for the current mode.
+    if (mode == _DatePickerMode.day)
+      dayButton = new IgnorePointer(child: dayButton);
+    else
+      yearButton = new IgnorePointer(child: yearButton);
 
     return new Container(
       width: width,
@@ -119,16 +137,40 @@ class _DatePickerHeader extends StatelessWidget {
       child: new Column(
         mainAxisAlignment: mainAxisAlignment,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new GestureDetector(
-            onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.year), context),
-            child: new Text(new DateFormat('yyyy').format(selectedDate), style: yearStyle),
-          ),
-          new GestureDetector(
-            onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.day), context),
-            child: new Text(new DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle),
-          ),
-        ],
+        children: <Widget>[yearButton, dayButton],
+      ),
+    );
+  }
+}
+
+class _DateHeaderButton extends StatelessWidget {
+  _DateHeaderButton({
+    Key key,
+    this.onTap,
+    this.color,
+    this.child,
+  }) : super(key: key);
+
+  final VoidCallback onTap;
+  final Color color;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+
+    return new Material(
+      type: MaterialType.button,
+      color: color,
+      child: new InkWell(
+        borderRadius: kMaterialEdges[MaterialType.button],
+        highlightColor: theme.highlightColor,
+        splashColor: theme.splashColor,
+        onTap: onTap,
+        child: new Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: child,
+        ),
       ),
     );
   }
@@ -181,6 +223,7 @@ class DayPicker extends StatelessWidget {
     @required this.firstDate,
     @required this.lastDate,
     @required this.displayedMonth,
+    this.onMonthHeaderTap,
     this.selectableDayPredicate,
   }) : assert(selectedDate != null),
        assert(currentDate != null),
@@ -200,6 +243,9 @@ class DayPicker extends StatelessWidget {
 
   /// Called when the user picks a day.
   final ValueChanged<DateTime> onChanged;
+
+  /// Called when the user taps on the header that displays the current month.
+  final VoidCallback onMonthHeaderTap;
 
   /// The earliest date the user is permitted to pick.
   final DateTime firstDate;
@@ -300,8 +346,11 @@ class DayPicker extends StatelessWidget {
           new Container(
             height: _kDayPickerRowHeight,
             child: new Center(
-              child: new Text(new DateFormat('yMMMM').format(displayedMonth),
-                style: themeData.textTheme.subhead,
+              child: new GestureDetector(
+                onTap: onMonthHeaderTap != null ? Feedback.wrapForTap(onMonthHeaderTap, context) : null,
+                child: new Text(new DateFormat('yMMMM').format(displayedMonth),
+                  style: themeData.textTheme.subhead,
+                ),
               ),
             ),
           ),
@@ -341,6 +390,7 @@ class MonthPicker extends StatefulWidget {
     @required this.firstDate,
     @required this.lastDate,
     this.selectableDayPredicate,
+    this.onMonthHeaderTap,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -354,6 +404,9 @@ class MonthPicker extends StatefulWidget {
 
   /// Called when the user picks a month.
   final ValueChanged<DateTime> onChanged;
+
+  /// Called when the user taps on the header that displays the current month.
+  final VoidCallback onMonthHeaderTap;
 
   /// The earliest date the user is permitted to pick.
   final DateTime firstDate;
@@ -426,6 +479,7 @@ class _MonthPickerState extends State<MonthPicker> {
       lastDate: widget.lastDate,
       displayedMonth: month,
       selectableDayPredicate: widget.selectableDayPredicate,
+      onMonthHeaderTap: widget.onMonthHeaderTap,
     );
   }
 
@@ -553,6 +607,16 @@ class YearPicker extends StatefulWidget {
 
 class _YearPickerState extends State<YearPicker> {
   static const double _itemExtent = 50.0;
+  ScrollController scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = new ScrollController(
+      // Move the initial scroll position to the currently selected date's year.
+      initialScrollOffset: (widget.selectedDate.year - widget.firstDate.year) * _itemExtent,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -560,6 +624,7 @@ class _YearPickerState extends State<YearPicker> {
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = themeData.textTheme.body1;
     return new ListView.builder(
+      controller: scrollController,
       itemExtent: _itemExtent,
       itemCount: widget.lastDate.year - widget.firstDate.year + 1,
       itemBuilder: (BuildContext context, int index) {
@@ -661,6 +726,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
           selectableDayPredicate: widget.selectableDayPredicate,
+          onMonthHeaderTap: () { _handleModeChanged(_DatePickerMode.year); },
         );
       case _DatePickerMode.year:
         return new YearPicker(

@@ -10,14 +10,6 @@ import 'item.dart';
 
 const double _kFlexibleSpaceMaxHeight = 256.0;
 
-List<GalleryItem> _itemsWithCategory(String category) {
-  return kAllGalleryItems.where((GalleryItem item) => item.category == category).toList();
-}
-
-final List<GalleryItem> _demoItems = _itemsWithCategory('Demos');
-final List<GalleryItem> _componentItems = _itemsWithCategory('Components');
-final List<GalleryItem> _styleItems = _itemsWithCategory('Style');
-
 class _BackgroundLayer {
   _BackgroundLayer({ int level, double parallax })
     : assetName = 'packages/flutter_gallery_assets/appbar/appbar_background_layer$level.png',
@@ -138,11 +130,13 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         if (category != null)
           listItems.add(const Divider());
         listItems.add(
-          new Container(
-            height: 48.0,
-            padding: const EdgeInsets.only(left: 16.0),
-            alignment: FractionalOffset.centerLeft,
-            child: new Text(galleryItem.category, style: headerStyle)
+          new MergeSemantics(
+            child: new Container(
+              height: 48.0,
+              padding: const EdgeInsets.only(left: 16.0),
+              alignment: FractionalOffset.centerLeft,
+              child: new Text(galleryItem.category, style: headerStyle)
+            ),
           )
         );
         category = galleryItem.category;

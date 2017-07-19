@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
+import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
@@ -70,7 +70,9 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   set text(String newText) {
-    value = value.copyWith(text: newText, composing: TextRange.empty);
+    value = value.copyWith(text: newText,
+                           selection: const TextSelection.collapsed(offset: -1),
+                           composing: TextRange.empty);
   }
 
   /// The currently selected [text].
@@ -83,6 +85,8 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   set selection(TextSelection newSelection) {
+    if (newSelection.start > text.length || newSelection.end > text.length)
+      throw new FlutterError('invalid text selection: $newSelection');
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
@@ -143,6 +147,7 @@ class EditableText extends StatefulWidget {
     @required this.controller,
     @required this.focusNode,
     this.obscureText: false,
+    this.autocorrect: true,
     @required this.style,
     @required this.cursorColor,
     this.textAlign,
@@ -159,6 +164,7 @@ class EditableText extends StatefulWidget {
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
+       assert(autocorrect != null),
        assert(style != null),
        assert(cursorColor != null),
        assert(maxLines == null || maxLines > 0),
@@ -181,6 +187,11 @@ class EditableText extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool obscureText;
+
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true.
+  final bool autocorrect;
 
   /// The text style to use for the editable text.
   final TextStyle style;
@@ -249,7 +260,9 @@ class EditableText extends StatefulWidget {
     description.add('focusNode: $focusNode');
     if (obscureText != false)
       description.add('obscureText: $obscureText');
-    description.add('$style');
+    if (autocorrect != true)
+      description.add('autocorrect: $autocorrect');
+    description.add('${style.toString().split("\n").join(", ")}');
     if (textAlign != null)
       description.add('$textAlign');
     if (textScaleFactor != null)
@@ -264,7 +277,7 @@ class EditableText extends StatefulWidget {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends State<EditableText> implements TextInputClient {
+class EditableTextState extends State<EditableText> with AutomaticKeepAliveClientMixin implements TextInputClient {
   Timer _cursorTimer;
   final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
 
@@ -274,6 +287,9 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   final ScrollController _scrollController = new ScrollController();
   final LayerLink _layerLink = new LayerLink();
   bool _didAutoFocus = false;
+
+  @override
+  bool get wantKeepAlive => widget.focusNode.hasFocus;
 
   // State lifecycle:
 
@@ -305,6 +321,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       widget.focusNode.addListener(_handleFocusChanged);
+      updateKeepAlive();
     }
   }
 
@@ -380,7 +397,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: widget.keyboardType, obscureText: widget.obscureText))
+      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: widget.keyboardType, obscureText: widget.obscureText, autocorrect: widget.autocorrect))
         ..setEditingState(localValue);
     }
     _textInputConnection.show();
@@ -546,11 +563,13 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       // Clear the selection and composition state if this widget lost focus.
       _value = new TextEditingValue(text: _value.text);
     }
+    updateKeepAlive();
   }
 
   @override
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
+    super.build(context); // See AutomaticKeepAliveClientMixin.
     return new Scrollable(
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
@@ -568,6 +587,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
             textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
             textAlign: widget.textAlign,
             obscureText: widget.obscureText,
+            autocorrect: widget.autocorrect,
             offset: offset,
             onSelectionChanged: _handleSelectionChanged,
             onCaretChanged: _handleCaretChanged,
@@ -590,6 +610,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textScaleFactor,
     this.textAlign,
     this.obscureText,
+    this.autocorrect,
     this.offset,
     this.onSelectionChanged,
     this.onCaretChanged,
@@ -604,6 +625,7 @@ class _Editable extends LeafRenderObjectWidget {
   final double textScaleFactor;
   final TextAlign textAlign;
   final bool obscureText;
+  final bool autocorrect;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
   final CaretChangedHandler onCaretChanged;

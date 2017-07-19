@@ -25,7 +25,9 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
     if (isIosDevice)
       await prepareProvisioningCertificates(catalogDirectory.path);
 
-    await dart(<String>['bin/sample_page.dart']);
+    final String commit = await getCurrentFlutterRepoCommit();
+
+    await dart(<String>['bin/sample_page.dart', commit]);
 
     await flutter('drive', options: <String>[
       '--target',
@@ -36,7 +38,7 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
 
     await saveCatalogScreenshots(
       directory: dir('${flutterDirectory.path}/examples/catalog/.generated'),
-      commit: await getCurrentFlutterRepoCommit(),
+      commit: commit,
       token: authorizationToken,
       prefix: isIosDevice ? 'ios_' : '',
     );

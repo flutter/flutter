@@ -272,6 +272,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
             children: <Widget>[
               new BlockSemantics(
                 child: new GestureDetector(
+                  // On Android, the back button is used to dismiss a modal.
+                  excludeFromSemantics: defaultTargetPlatform == TargetPlatform.android,
                   onTap: close,
                   child: new Container(
                     color: _color.evaluate(_controller)

@@ -2113,6 +2113,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (!_needsCompositingBitsUpdate)
       return;
     final bool oldNeedsCompositing = _needsCompositing;
+    _needsCompositing = false;
     visitChildren((RenderObject child) {
       child._updateCompositingBits();
       if (child.needsCompositing)
@@ -2512,8 +2513,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
-        if (owner != null)
+        if (owner != null) {
           owner._nodesNeedingSemantics.add(node);
+          owner.requestVisualUpdate();
+        }
       }
     } else {
       // The shape of the semantics tree around us may have changed.
@@ -2532,8 +2535,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       node._semantics?.reset();
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
-        if (owner != null)
+        if (owner != null) {
           owner._nodesNeedingSemantics.add(node);
+          owner.requestVisualUpdate();
+        }
       }
     }
   }
