@@ -185,6 +185,16 @@ abstract class SchedulerBinding extends BindingBase {
         timeDilation = value;
       }
     );
+
+    profile(() {
+      onFrameInfo.listen((FrameInfo frameInfo) {
+        developer.postEvent('Flutter.Frame', <String, dynamic>{
+          'number': frameInfo.number,
+          'startTime': frameInfo.startTime,
+          'elapsed': frameInfo.elapsed
+        });
+      });
+    });
   }
 
   /// The strategy to use when deciding whether to run a task or not.
@@ -667,11 +677,6 @@ abstract class SchedulerBinding extends BindingBase {
           _profileFrameStopwatch.elapsedMicroseconds
         );
         _frameInfoController.add(frameInfo);
-        developer.postEvent('Flutter.Frame', <String, dynamic>{
-          'number': frameInfo.number,
-          'startTime': frameInfo.startTime,
-          'elapsed': frameInfo.elapsed
-        });
       });
       assert(() {
         if (debugPrintEndFrameBanner)
