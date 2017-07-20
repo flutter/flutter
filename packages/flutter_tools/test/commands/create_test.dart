@@ -255,7 +255,7 @@ void main() {
 
 Future<Null> _createAndAnalyzeProject(
     Directory dir, List<String> createArgs, List<String> expectedPaths,
-    {List<String> unexpectedPaths = const <String>[], bool plugin = false}) async {
+    { List<String> unexpectedPaths = const <String>[], bool plugin = false }) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = new CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
@@ -286,9 +286,8 @@ void _analyze(String workingDir, {String target}) {
   ));
 
   final List<String> args = <String>[flutterToolsPath, 'analyze'];
-  if (target != null) {
+  if (target != null)
     args.add(target);
-  }
 
   final ProcessResult exec = Process.runSync(
     '$dartSdkPath/bin/dart',
