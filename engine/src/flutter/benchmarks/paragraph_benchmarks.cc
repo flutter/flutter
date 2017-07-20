@@ -232,7 +232,7 @@ BENCHMARK(BM_ParagraphStylesBigO)
 
 static void BM_ParagraphMinikinDoLayout(benchmark::State& state) {
   std::vector<uint16_t> text;
-  for (uint16_t i = 0; i < state.range(0) * 3; ++i) {
+  for (uint16_t i = 0; i < 16000 * 2; ++i) {
     text.push_back(i % 5 == 0 ? ' ' : i);
   }
   minikin::FontStyle font;
@@ -251,12 +251,50 @@ static void BM_ParagraphMinikinDoLayout(benchmark::State& state) {
 
   while (state.KeepRunning()) {
     minikin::Layout layout;
-    layout.doLayout(text.data(), 0, state.range(0), text.size(), 0, font, paint,
-                    collection);
+    layout.doLayout(text.data(), 0, state.range(0), state.range(0), 0, font,
+                    paint, collection);
   }
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(BM_ParagraphMinikinDoLayout)
+    ->RangeMultiplier(4)
+    ->Range(1 << 7, 1 << 14)
+    ->Complexity(benchmark::oN);
+
+static void BM_ParagraphMinikinAddStyleRun(benchmark::State& state) {
+  std::vector<uint16_t> text;
+  for (uint16_t i = 0; i < 16000 * 2; ++i) {
+    text.push_back(i % 5 == 0 ? ' ' : i);
+  }
+  minikin::FontStyle font;
+  txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
+  minikin::MinikinPaint paint;
+
+  font = minikin::FontStyle(4, false);
+  paint.size = text_style.font_size;
+  paint.letterSpacing = text_style.letter_spacing;
+  paint.wordSpacing = text_style.word_spacing;
+
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+
+  minikin::LineBreaker breaker;
+  breaker.setLocale(icu::Locale(), nullptr);
+  breaker.resize(text.size());
+  memcpy(breaker.buffer(), text.data(), text.size() * sizeof(text[0]));
+  breaker.setText();
+
+  while (state.KeepRunning()) {
+    for (int i = 0; i < 20; ++i) {
+      breaker.addStyleRun(
+          &paint, font_collection.GetMinikinFontCollectionForFamily("Roboto"),
+          font, state.range(0) / 20 * i, state.range(0) / 20 * (i + 1), false,
+          0);
+    }
+  }
+  state.SetComplexityN(state.range(0));
+}
+BENCHMARK(BM_ParagraphMinikinAddStyleRun)
     ->RangeMultiplier(4)
     ->Range(1 << 7, 1 << 14)
     ->Complexity(benchmark::oN);

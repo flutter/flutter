@@ -127,6 +127,11 @@ void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
   breaker_.setText();
 }
 
+// NOTE: Minikin LineBreaker addStyleRun() has an O(N^2) (according to
+// benchmarks) time complexity where N is the total number of characters.
+// However, this is not significant for reasonably sized paragraphs. It is
+// currently recommended to break up very long paragraphs (10k+ characters) to
+// ensure speedy layout.
 void Paragraph::AddRunsToLineBreaker(
     std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
         collection_map) {
@@ -300,6 +305,11 @@ void Paragraph::Layout(double width, bool force) {
       const size_t layout_end = std::min(run.end, next_break);
 
       bool bidiFlags = paragraph_style_.rtl;
+      // NOTE: Minikin Layout doLayout() has an O(N^2) (according to
+      // benchmarks) time complexity where N is the total number of characters.
+      // However, this is not significant for reasonably sized paragraphs. It is
+      // currently recommended to break up very long paragraphs (10k+
+      // characters) to ensure speedy layout.
       layout.doLayout(text_.data() + layout_start, 0, layout_end - layout_start,
                       layout_end - layout_start, bidiFlags, font, minikin_paint,
                       font_collection_->GetMinikinFontCollectionForFamily(
