@@ -267,6 +267,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         onHorizontalDragUpdate: _move,
         onHorizontalDragEnd: _settle,
         onHorizontalDragCancel: _handleDragCancel,
+        excludeFromSemantics: true,
         child: new RepaintBoundary(
           child: new Stack(
             children: <Widget>[
