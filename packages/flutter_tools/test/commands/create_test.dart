@@ -172,7 +172,7 @@ void main() {
         fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
         'test',
         '--no-color',
-        projectDir.path + '/test/widget_test.dart'
+        fs.path.join(projectDir.path, 'test', 'widget_test.dart'),
       ];
 
       final ProcessResult result = await Process.run(
