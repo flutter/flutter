@@ -1033,6 +1033,11 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
   final Map<T, RouteAware> _listeners = <T, RouteAware>{};
 
+  /// Subscribe [routeAware] to be informed about changes to [route].
+  ///
+  /// Going forward, [routeAware] will be informed about qualifying changes
+  /// to [route], e.g. when [route] is covered by another route or when [route]
+  /// is popped off the [Navigator] stack.
   void subscribe(RouteAware routeAware, T route) {
     assert(routeAware != null);
     assert(route != null);
@@ -1042,6 +1047,9 @@ class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
     }
   }
 
+  /// Unsubscribe [routeAware].
+  ///
+  /// [routeAware] is no longer informed about changes to its route.
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
     _listeners.remove(routeAware);
