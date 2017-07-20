@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -167,20 +168,23 @@ void main() {
         }
       }
 
-      // Verify that the sample widget test runs cleanly.
-      final List<String> args = <String>[
-        fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
-        'test',
-        '--no-color',
-        fs.path.join(projectDir.path, 'test', 'widget_test.dart'),
-      ];
+      // TODO(pq): enable when sky_shell is available
+      if (!io.Platform.isWindows) {
+        // Verify that the sample widget test runs cleanly.
+        final List<String> args = <String>[
+          fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
+          'test',
+          '--no-color',
+          fs.path.join(projectDir.path, 'test', 'widget_test.dart'),
+        ];
 
-      final ProcessResult result = await Process.run(
-        fs.path.join(dartSdkPath, 'bin', 'dart'),
-        args,
-        workingDirectory: projectDir.path,
-      );
-      expect(result.exitCode, 0);
+        final ProcessResult result = await Process.run(
+          fs.path.join(dartSdkPath, 'bin', 'dart'),
+          args,
+          workingDirectory: projectDir.path,
+        );
+        expect(result.exitCode, 0);
+      }
 
       // Generated Xcode settings
       final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
