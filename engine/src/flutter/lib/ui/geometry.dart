@@ -1149,6 +1149,15 @@ class RRect {
   /// Negative areas are considered empty.
   bool get isEmpty => left >= right || top >= bottom;
 
+  /// Whether this rounded rectangle is a simple rectangle with zero
+  /// corner radii.
+  bool get isRect {
+    return (tlRadiusX == 0.0 || tlRadiusY == 0.0) &&
+           (trRadiusX == 0.0 || trRadiusY == 0.0) &&
+           (blRadiusX == 0.0 || blRadiusY == 0.0) &&
+           (brRadiusX == 0.0 || brRadiusY == 0.0);
+  }
+
   /// Whether this rounded rectangle has a side with no straight section.
   bool get isStadium {
     return (
