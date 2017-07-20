@@ -88,6 +88,11 @@ class Paragraph {
 
   bool DidExceedMaxLines() const;
 
+  // Sets the needs_layout_ to dirty. When Layout() is called, a new Layout will
+  // be performed when this is set to true. Can also be used to prevent a new
+  // Layout from being calculated by setting to false.
+  void SetDirty(bool dirty = true);
+
  private:
   friend class ParagraphBuilder;
   FRIEND_TEST(RenderTest, SimpleParagraph);
