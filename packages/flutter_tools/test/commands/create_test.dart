@@ -281,7 +281,7 @@ void _analyze(String workingDir, {String target}) {
     'flutter_tools.dart',
   ));
 
-  final List<String> args = [flutterToolsPath, 'analyze'];
+  final List<String> args = <String>[flutterToolsPath, 'analyze'];
   if (target != null) {
     args.add(target);
   }
