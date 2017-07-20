@@ -292,7 +292,6 @@ void Paragraph::Layout(double width, bool force) {
     letter_spacing_offset -= run.style.letter_spacing;
 
     size_t layout_start = run.start;
-
     // Layout until the end of the run or too many lines.
     while (layout_start < run.end && lines_ < paragraph_style_.max_lines) {
       const size_t next_break = (break_index > breaks_count - 1)
@@ -605,6 +604,7 @@ void Paragraph::SetFontCollection(FontCollection* font_collection) {
 // The x,y coordinates will be the very top left corner of the rendered
 // paragraph.
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
+  SkAutoCanvasRestore canvas_restore(canvas, true);
   canvas->translate(x, y);
   for (size_t index = 0; index < records_.size(); ++index) {
     PaintRecord& record = records_[index];
@@ -614,7 +614,6 @@ void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
     canvas->drawTextBlob(record.text(), offset.x(), offset.y(), paint);
     PaintDecorations(canvas, offset.x(), offset.y(), index);
   }
-  canvas->translate(-x, -y);
 }
 
 void Paragraph::PaintDecorations(SkCanvas* canvas,
