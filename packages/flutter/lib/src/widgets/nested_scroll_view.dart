@@ -135,7 +135,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
     return new CustomScrollView(
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
-      physics: new ClampingScrollPhysics(parent: widget.physics),
+      physics: widget.physics ?? const ClampingScrollPhysics(),
       controller: _coordinator._outerController,
       slivers: widget._buildSlivers(context, _coordinator._innerController, _coordinator.hasScrolledBody),
     );
