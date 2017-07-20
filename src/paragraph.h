@@ -45,6 +45,8 @@ class Paragraph {
 
   void Layout(double width, bool force = false);
 
+  // Paints the Laid out text onto the supplied SkCanvas at (x, y) offset from
+  // the origin. Only valid after Layout() is called.
   void Paint(SkCanvas* canvas, double x, double y);
 
   const ParagraphStyle& GetParagraphStyle() const;
