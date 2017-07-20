@@ -270,9 +270,13 @@ static void BM_ParagraphSkTextBlobAlloc(benchmark::State& state) {
 
   while (state.KeepRunning()) {
     SkTextBlobBuilder builder;
-    builder.allocRunPos(paint, 100);
+    builder.allocRunPos(paint, state.range(0));
   }
+  state.SetComplexityN(state.range(0));
 }
-BENCHMARK(BM_ParagraphSkTextBlobAlloc);
+BENCHMARK(BM_ParagraphSkTextBlobAlloc)
+    ->RangeMultiplier(4)
+    ->Range(1 << 7, 1 << 14)
+    ->Complexity(benchmark::oN);
 
 }  // namespace txt

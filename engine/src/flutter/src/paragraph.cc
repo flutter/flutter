@@ -300,8 +300,8 @@ void Paragraph::Layout(double width, bool force) {
       const size_t layout_end = std::min(run.end, next_break);
 
       bool bidiFlags = paragraph_style_.rtl;
-      layout.doLayout(text_.data(), layout_start, layout_end - layout_start,
-                      text_.size(), bidiFlags, font, minikin_paint,
+      layout.doLayout(text_.data() + layout_start, 0, layout_end - layout_start,
+                      layout_end - layout_start, bidiFlags, font, minikin_paint,
                       font_collection_->GetMinikinFontCollectionForFamily(
                           run.style.font_family));
       FillWhitespaceSet(layout_start, layout_end,
