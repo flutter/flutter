@@ -327,6 +327,12 @@ bool Engine::HandleLifecyclePlatformMessage(blink::PlatformMessage* message) {
     activity_running_ = true;
     StartAnimatorIfPossible();
   }
+
+  // Always schedule a frame when the app does become active as per API
+  // recommendation https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1622956-applicationdidbecomeactive?language=objc
+  if (state == "AppLifecycleState.resumed" && have_surface_) {
+    ScheduleFrame();
+  }
   return false;
 }
 
