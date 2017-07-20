@@ -1364,7 +1364,11 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           );
         }
         canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
-        canvas.saveLayer(offsetBounds, _defaultPaint);
+        if (offsetClipRRect.isRect) {
+          canvas.save();
+        } else {
+          canvas.saveLayer(offsetBounds, _defaultPaint);
+        }
         canvas.clipRRect(offsetClipRRect);
         super.paint(context, offset);
         canvas.restore();
