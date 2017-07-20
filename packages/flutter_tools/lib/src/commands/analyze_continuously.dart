@@ -31,20 +31,15 @@ class AnalyzeContinuously extends AnalyzeBase {
   Stopwatch analysisTimer;
   int lastErrorCount = 0;
   Status analysisStatus;
-  bool flutterRepo;
-  bool showDartDocIssuesIndividually;
 
   @override
   Future<Null> analyze() async {
     List<String> directories;
 
-    flutterRepo = argResults['flutter-repo'] || inRepo(null);
-    showDartDocIssuesIndividually = argResults['dartdocs'];
+    if (argResults['dartdocs'])
+      throwToolExit('The --dartdocs option is currently not supported when using --watch.');
 
-    if (showDartDocIssuesIndividually && !flutterRepo)
-      throwToolExit('The --dartdocs option is only supported when using --flutter-repo.');
-
-    if (flutterRepo) {
+    if (argResults['flutter-repo']) {
       final PackageDependencyTracker dependencies = new PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       directories = repoPackages.map((Directory dir) => dir.path).toList();
@@ -57,7 +52,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fs.currentDirectory.path;
     }
 
-    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories, flutterRepo: flutterRepo);
+    final AnalysisServer server = new AnalysisServer(dartSdkPath, directories);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
@@ -87,52 +82,29 @@ class AnalyzeContinuously extends AnalyzeBase {
       logger.printStatus(terminal.clearScreen(), newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
-      final List<AnalysisError> allErrors = <AnalysisError>[];
+      final List<AnalysisError> errors = <AnalysisError>[];
       for (String path in analysisErrors.keys.toList()) {
         if (fs.isFileSync(path)) {
-          allErrors.addAll(analysisErrors[path]);
+          errors.addAll(analysisErrors[path]);
         } else {
           analysisErrors.remove(path);
         }
       }
 
-      // Summarize dartdoc issues rather than displaying each individually
-      int membersMissingDocumentation = 0;
-      List<AnalysisError> detailErrors;
-      if (flutterRepo && !showDartDocIssuesIndividually) {
-        detailErrors = allErrors.where((AnalysisError error) {
-          if (error.code == 'public_member_api_docs') {
-            // https://github.com/dart-lang/linter/issues/208
-            if (isFlutterLibrary(error.file))
-              membersMissingDocumentation += 1;
-            return true;
-          }
-          return false;
-        }).toList();
-      } else {
-        detailErrors = allErrors;
-      }
+      errors.sort();
 
-      detailErrors.sort();
-
-      for (AnalysisError error in detailErrors) {
+      for (AnalysisError error in errors) {
         printStatus(error.toString());
         if (error.code != null)
           printTrace('error code: ${error.code}');
       }
 
-      dumpErrors(detailErrors.map<String>((AnalysisError error) => error.toLegacyString()));
-
-      if (membersMissingDocumentation != 0) {
-        printStatus(membersMissingDocumentation == 1
-          ? '1 public member lacks documentation'
-          : '$membersMissingDocumentation public members lack documentation');
-      }
+      dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
       // Print an analysis summary.
       String errorsMessage;
 
-      final int issueCount = detailErrors.length;
+      final int issueCount = errors.length;
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
 
@@ -178,11 +150,10 @@ class AnalyzeContinuously extends AnalyzeBase {
 }
 
 class AnalysisServer {
-  AnalysisServer(this.sdk, this.directories, { this.flutterRepo: false });
+  AnalysisServer(this.sdk, this.directories);
 
   final String sdk;
   final List<String> directories;
-  final bool flutterRepo;
 
   Process _process;
   final StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
@@ -198,13 +169,6 @@ class AnalysisServer {
       '--sdk',
       sdk,
     ];
-    // Let the analysis server know that the flutter repository is being analyzed
-    // so that it can enable the public_member_api_docs lint even though
-    // the analysis_options file does not have that lint enabled.
-    // It is not enabled in the analysis_option file
-    // because doing so causes too much noise in the IDE.
-    if (flutterRepo)
-      command.add('--flutter-repo');
 
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
