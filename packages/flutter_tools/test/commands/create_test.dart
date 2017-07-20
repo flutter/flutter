@@ -45,6 +45,7 @@ void main() {
           'ios/Runner/AppDelegate.m',
           'ios/Runner/main.m',
           'lib/main.dart',
+          'test/widget_test.dart'
         ],
       );
     });
@@ -59,7 +60,7 @@ void main() {
           'ios/Runner/Runner-Bridging-Header.h',
           'lib/main.dart',
         ],
-        <String>[
+        unexpectedPaths: <String>[
           'android/app/src/main/java/com/yourcompany/flutterproject/MainActivity.java',
           'ios/Runner/AppDelegate.h',
           'ios/Runner/AppDelegate.m',
@@ -83,6 +84,7 @@ void main() {
           'example/ios/Runner/main.m',
           'example/lib/main.dart',
         ],
+        plugin: true,
       );
     });
 
@@ -101,13 +103,14 @@ void main() {
           'example/ios/Runner/Runner-Bridging-Header.h',
           'example/lib/main.dart',
         ],
-        <String>[
+        unexpectedPaths: <String>[
           'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
           'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
           'example/ios/Runner/AppDelegate.h',
           'example/ios/Runner/AppDelegate.m',
           'example/ios/Runner/main.m',
         ],
+        plugin: true,
       );
     });
 
@@ -119,10 +122,11 @@ void main() {
             'android/src/main/java/com/bar/foo/flutterproject/FlutterProjectPlugin.java',
             'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
           ],
-          <String>[
+          unexpectedPaths: <String>[
             'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
             'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
           ],
+          plugin: true,
       );
     });
 
@@ -131,14 +135,6 @@ void main() {
         projectDir,
         <String>['--with-driver-test'],
         <String>['lib/main.dart'],
-      );
-    });
-
-    testUsingContext('project with-widget-test', () async {
-      return _createAndAnalyzeProject(
-        projectDir,
-        <String>['--with-widget-test'],
-        <String>['lib/main.dart', 'test/widget_test.dart'],
       );
     });
 
@@ -170,6 +166,21 @@ void main() {
           expect(original, formatted, reason: file.path);
         }
       }
+
+      // Verify that the sample widget test runs cleanly.
+      final List<String> args = <String>[
+        fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
+        'test',
+        '--no-color',
+        projectDir.path + '/test/widget_test.dart'
+      ];
+
+      final ProcessResult result = await Process.run(
+        fs.path.join(dartSdkPath, 'bin', 'dart'),
+        args,
+        workingDirectory: projectDir.path,
+      );
+      expect(result.exitCode, 0);
 
       // Generated Xcode settings
       final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
@@ -240,7 +251,7 @@ void main() {
 
 Future<Null> _createAndAnalyzeProject(
     Directory dir, List<String> createArgs, List<String> expectedPaths,
-    [List<String> unexpectedPaths = const <String>[]]) async {
+    {List<String> unexpectedPaths = const <String>[], bool plugin = false}) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = new CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
@@ -255,14 +266,30 @@ Future<Null> _createAndAnalyzeProject(
   for (String path in unexpectedPaths) {
     expect(fs.file(fs.path.join(dir.path, path)).existsSync(), false, reason: '$path exists');
   }
+
+  if (plugin) {
+    _analyze(dir.path, target: fs.path.join(dir.path, 'lib', 'flutter_project.dart'));
+    _analyze(fs.path.join(dir.path, 'example'));
+  } else {
+    _analyze(dir.path);
+  }
+}
+
+void _analyze(String workingDir, {String target}) {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
   ));
+
+  final List<String> args = [flutterToolsPath, 'analyze'];
+  if (target != null) {
+    args.add(target);
+  }
+
   final ProcessResult exec = Process.runSync(
     '$dartSdkPath/bin/dart',
-    <String>[flutterToolsPath, 'analyze'],
-    workingDirectory: dir.path,
+    args,
+    workingDirectory: workingDir,
   );
   if (exec.exitCode != 0) {
     print(exec.stdout);

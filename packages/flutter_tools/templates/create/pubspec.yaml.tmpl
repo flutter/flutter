@@ -4,17 +4,14 @@ description: {{description}}
 dependencies:
   flutter:
     sdk: flutter
-{{#withTest}}
+
 dev_dependencies:
-{{/withTest}}
+  flutter_test:
+    sdk: flutter
 {{#withDriverTest}}
   flutter_driver:
     sdk: flutter
 {{/withDriverTest}}
-{{#withWidgetTest}}
-  flutter_test:
-    sdk: flutter
-{{/withWidgetTest}}
 
 {{#withPluginHook}}
   {{pluginProjectName}}:

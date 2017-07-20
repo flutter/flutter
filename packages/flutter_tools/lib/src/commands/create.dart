@@ -36,10 +36,6 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: false,
       help: 'Also add a flutter_driver dependency and generate a sample \'flutter drive\' test.'
     );
-    argParser.addFlag('with-widget-test',
-      negatable: true,
-      defaultsTo: false,
-      help: 'Also add a flutter_test dependency and generate a sample \'flutter test\' unit test.');
     argParser.addFlag(
       'plugin',
       negatable: true,
@@ -139,7 +135,6 @@ class CreateCommand extends FlutterCommand {
       dirPath: dirPath,
       flutterRoot: flutterRoot,
       renderDriverTest: argResults['with-driver-test'],
-      renderWidgetTest: argResults['with-widget-test'],
       withPluginHook: generatePlugin,
       androidLanguage: argResults['android-language'],
       iosLanguage: argResults['ios-language'],
@@ -180,10 +175,6 @@ class CreateCommand extends FlutterCommand {
     if (argResults['with-driver-test']) {
       final String testPath = fs.path.join(appPath, 'test_driver');
       generatedCount += _renderTemplate('driver', testPath, templateContext);
-    }
-    if (argResults['with-widget-test']) {
-      final String testPath = fs.path.join(appPath, 'test');
-      generatedCount += _renderTemplate('widget_test', testPath, templateContext);
     }
 
     printStatus('Wrote $generatedCount files.');
@@ -254,7 +245,6 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
     String dirPath,
     String flutterRoot,
     bool renderDriverTest: false,
-    bool renderWidgetTest: false,
     bool withPluginHook: false,
   }) {
     flutterRoot = fs.path.normalize(flutterRoot);
@@ -275,8 +265,6 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'androidFlutterJar': "$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar",
       'withDriverTest': renderDriverTest,
-      'withWidgetTest': renderWidgetTest,
-      'withTest': renderDriverTest || renderWidgetTest,
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
