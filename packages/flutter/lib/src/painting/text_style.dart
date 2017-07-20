@@ -387,6 +387,33 @@ class TextStyle {
     );
   }
 
+  /// Describe the difference between this style and another, in terms of how
+  /// much damage it will make to the rendering.
+  ///
+  /// See also:
+  ///
+  ///  * [TextSpan.compareTo], which does the same thing for entire [TextSpan]s.
+  RenderComparison compareTo(TextStyle other) {
+    if (identical(this, other))
+      return RenderComparison.identical;
+    if (inherit != other.inherit ||
+        fontFamily != other.fontFamily ||
+        fontSize != other.fontSize ||
+        fontWeight != other.fontWeight ||
+        fontStyle != other.fontStyle ||
+        letterSpacing != other.letterSpacing ||
+        wordSpacing != other.wordSpacing ||
+        textBaseline != other.textBaseline ||
+        height != other.height)
+      return RenderComparison.layout;
+    if (color != other.color ||
+        decoration != other.decoration ||
+        decorationColor != other.decorationColor ||
+        decorationStyle != other.decorationStyle)
+      return RenderComparison.paint;
+    return RenderComparison.identical;
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))

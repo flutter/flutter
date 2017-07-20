@@ -52,3 +52,41 @@ export 'dart:ui' show
 //  - window, WindowPadding
 //      These are generally wrapped by other APIs so we always refer to them directly
 //      as ui.* to avoid making them seem like high-level APIs.
+
+/// The description of the difference between two objects, in the context of how
+/// it will affect the rendering.
+///
+/// Used by [TextSpan.compareTo] and [TextStyle.compareTo].
+///
+/// The values in this enum are ordered such that they are in increasing order
+/// of cost. A value with index N implies all the values with index less than N.
+/// For example, [layout] (index 3) implies [paint] (2).
+enum RenderComparison {
+  /// The two objects are identical (meaning deeply equal, not necessarily
+  /// [identical]).
+  identical,
+
+  /// The two objects are identical for the purpose of layout, but may be different
+  /// in other ways.
+  ///
+  /// For example, maybe some event handlers changed.
+  metadata,
+
+  /// The two objects are different but only in ways that affect paint, not layout.
+  ///
+  /// For example, only the color is changed.
+  ///
+  /// [RenderObject.markNeedsPaint] would be necessary to handle this kind of
+  /// change in a render object.
+  paint,
+
+  /// The two objects are different in ways that affect layout (and therefore paint).
+  ///
+  /// For example, the size is changed.
+  ///
+  /// This is the most drastic level of change possible.
+  ///
+  /// [RenderObject.markNeedsLayout] would be necessary to handle this kind of
+  /// change in a render object.
+  layout,
+}
