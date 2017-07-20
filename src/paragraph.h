@@ -43,6 +43,14 @@ class Paragraph {
 
   ~Paragraph();
 
+  // NOTE: Minikin Layout doLayout() and LineBreaker addStyleRun() has an
+  // O(N^2) (according to benchmarks) time complexity where N is the total
+  // number of characters. However, this is not significant for reasonably sized
+  // paragraphs. It is currently recommended to break up very long paragraphs
+  // (10k+ characters) to ensure speedy layout.
+  //
+  // Layout calculates the positioning of all the glyphs. Must call this method
+  // before Painting and getting any statistics from this class.
   void Layout(double width, bool force = false);
 
   // Paints the Laid out text onto the supplied SkCanvas at (x, y) offset from
