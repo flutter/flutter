@@ -44,14 +44,14 @@ static void BM_ParagraphShortLayout(benchmark::State& state) {
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  builder.Pop();
+  auto paragraph = builder.Build();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
-
-    builder.PushStyle(text_style);
-    builder.AddText(u16_text);
-    builder.Pop();
-    auto paragraph = builder.Build();
-
+    paragraph->SetDirty();
     paragraph->Layout(300, true);
   }
 }
@@ -85,14 +85,14 @@ static void BM_ParagraphLongLayout(benchmark::State& state) {
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  builder.Pop();
+  auto paragraph = builder.Build();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
-
-    builder.PushStyle(text_style);
-    builder.AddText(u16_text);
-    builder.Pop();
-    auto paragraph = builder.Build();
-
+    paragraph->SetDirty();
     paragraph->Layout(300, true);
   }
 }
@@ -127,14 +127,14 @@ static void BM_ParagraphJustifyLayout(benchmark::State& state) {
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  builder.Pop();
+  auto paragraph = builder.Build();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
-
-    builder.PushStyle(text_style);
-    builder.AddText(u16_text);
-    builder.Pop();
-    auto paragraph = builder.Build();
-
+    paragraph->SetDirty();
     paragraph->Layout(300, true);
   }
 }
@@ -151,48 +151,51 @@ static void BM_ParagraphManyStylesLayout(benchmark::State& state) {
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  for (int i = 0; i < 1000; ++i) {
+    builder.PushStyle(text_style);
+    builder.AddText(u16_text);
+  }
+  auto paragraph = builder.Build();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
-    for (int i = 0; i < 1000; ++i) {
-      builder.PushStyle(text_style);
-      builder.AddText(u16_text);
-    }
-    auto paragraph = builder.Build();
+    paragraph->SetDirty();
     paragraph->Layout(300, true);
   }
 }
 BENCHMARK(BM_ParagraphManyStylesLayout);
 
 static void BM_ParagraphTextBigO(benchmark::State& state) {
-  std::string text(state.range(0), '-');
-  auto icu_text = icu::UnicodeString::fromUTF8(text);
-  std::u16string u16_text(icu_text.getBuffer(),
-                          icu_text.getBuffer() + icu_text.length());
+  std::vector<uint16_t> text;
+  for (uint16_t i = 0; i < state.range(0); ++i) {
+    text.push_back(i % 5 == 0 ? ' ' : i);
+  }
+  std::u16string u16_text(text.data(), text.data() + text.size());
 
   txt::ParagraphStyle paragraph_style;
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  builder.Pop();
+  auto paragraph = builder.Build();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
-
-    builder.PushStyle(text_style);
-    builder.AddText(u16_text);
-    builder.Pop();
-    auto paragraph = builder.Build();
-
+    paragraph->SetDirty();
     paragraph->Layout(300, true);
   }
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(BM_ParagraphTextBigO)
-    ->RangeMultiplier(10)
+    ->RangeMultiplier(4)
     ->Range(1 << 6, 1 << 14)
-    ->Complexity(benchmark::oNSquared);
+    ->Complexity(benchmark::oN);
 
 static void BM_ParagraphStylesBigO(benchmark::State& state) {
-  const char* text = "A short sentence. ";
+  const char* text = "vry shrt ";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
@@ -202,22 +205,23 @@ static void BM_ParagraphStylesBigO(benchmark::State& state) {
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
-    for (int i = 0; i < state.range(0); ++i) {
-      builder.PushStyle(text_style);
-      builder.AddText(u16_text);
-    }
-    auto paragraph = builder.Build();
+  for (int i = 0; i < state.range(0); ++i) {
+    builder.PushStyle(text_style);
+    builder.AddText(u16_text);
+  }
+  auto paragraph = builder.Build();
+  while (state.KeepRunning()) {
+    paragraph->SetDirty();
     paragraph->Layout(300, true);
   }
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(BM_ParagraphStylesBigO)
-    ->RangeMultiplier(20)
-    ->Range(1 << 4, 1 << 12)
-    ->Complexity(benchmark::oNSquared);
+    ->RangeMultiplier(4)
+    ->Range(1 << 3, 1 << 12)
+    ->Complexity(benchmark::oN);
 
 // -----------------------------------------------------------------------------
 //
@@ -228,8 +232,8 @@ BENCHMARK(BM_ParagraphStylesBigO)
 
 static void BM_ParagraphMinikinDoLayout(benchmark::State& state) {
   std::vector<uint16_t> text;
-  for (uint16_t i = 0; i < state.range(0); ++i) {
-    text.push_back(i);
+  for (uint16_t i = 0; i < state.range(0) * 3; ++i) {
+    text.push_back(i % 5 == 0 ? ' ' : i);
   }
   minikin::FontStyle font;
   txt::TextStyle text_style;
@@ -247,13 +251,13 @@ static void BM_ParagraphMinikinDoLayout(benchmark::State& state) {
 
   while (state.KeepRunning()) {
     minikin::Layout layout;
-    layout.doLayout(text.data(), 0, 50, text.size(), 0, font, paint,
+    layout.doLayout(text.data(), 0, state.range(0), text.size(), 0, font, paint,
                     collection);
   }
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(BM_ParagraphMinikinDoLayout)
-    ->RangeMultiplier(10)
+    ->RangeMultiplier(4)
     ->Range(1 << 7, 1 << 14)
     ->Complexity(benchmark::oN);
 

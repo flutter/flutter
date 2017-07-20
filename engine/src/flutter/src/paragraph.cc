@@ -299,12 +299,12 @@ void Paragraph::Layout(double width, bool force) {
                                     : breaks[break_index];
       const size_t layout_end = std::min(run.end, next_break);
 
-      int bidiFlags = 0;
+      bool bidiFlags = paragraph_style_.rtl;
       layout.doLayout(text_.data(), layout_start, layout_end - layout_start,
                       text_.size(), bidiFlags, font, minikin_paint,
                       font_collection_->GetMinikinFontCollectionForFamily(
                           run.style.font_family));
-      FillWhitespaceSet(run.start, run.end,
+      FillWhitespaceSet(layout_start, layout_end,
                         minikin::getHbFontLocked(layout.getFont(0)));
 
       const size_t glyph_count = layout.nGlyphs();
@@ -846,6 +846,10 @@ bool Paragraph::DidExceedMaxLines() const {
   if (lines_ > paragraph_style_.max_lines)
     return true;
   return false;
+}
+
+void Paragraph::SetDirty(bool dirty) {
+  needs_layout_ = dirty;
 }
 
 }  // namespace txt
