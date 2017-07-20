@@ -12,6 +12,7 @@
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_counted.h"
 #include "lib/ftl/synchronization/mutex.h"
+#include "lib/ftl/synchronization/thread_annotations.h"
 
 #include <memory>
 #include <queue>
@@ -142,7 +143,8 @@ class Pipeline : public ftl::RefCountedThreadSafe<Pipeline<R>> {
   Semaphore empty_;
   Semaphore available_;
   ftl::Mutex queue_mutex_;
-  std::queue<std::pair<ResourcePtr, size_t>> queue_;
+  std::queue<std::pair<ResourcePtr, size_t>> queue_
+      FTL_GUARDED_BY(queue_mutex_);
   std::atomic_size_t last_trace_id_;
 
   void ProducerCommit(ResourcePtr resource, size_t trace_id) {
