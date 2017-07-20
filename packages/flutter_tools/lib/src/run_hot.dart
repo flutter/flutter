@@ -89,7 +89,7 @@ class HotRunner extends ResidentRunner {
       { bool force: false, bool pause: false }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
-    if (result != OperationResult.ok) {
+    if (!result.isOk) {
       throw new rpc.RpcException(
         rpc_error_code.INTERNAL_ERROR,
         'Unable to reload sources',
