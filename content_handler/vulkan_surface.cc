@@ -39,7 +39,7 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProcTable& p_vk,
   }
 
   event_handler_key_ = mtl::MessageLoop::GetCurrent()->AddHandler(
-      this, release_event_.get(), MX_USER_SIGNAL_0);
+      this, release_event_.get(), MX_EVENT_SIGNALED);
 
   // Probably not necessary as the events should be in the unsignalled state
   // already.
@@ -302,7 +302,7 @@ void VulkanSurface::SignalWritesFinished(
          "has not yet been acknowledged by the compositor.";
 
   // Signal the acquire end to the compositor.
-  if (acquire_event_.signal(0u, MX_USER_SIGNAL_0) != MX_OK) {
+  if (acquire_event_.signal(0u, MX_EVENT_SIGNALED) != MX_OK) {
     on_writes_committed();
     return;
   }
@@ -313,8 +313,8 @@ void VulkanSurface::SignalWritesFinished(
 void VulkanSurface::Reset() {
   ASSERT_IS_GPU_THREAD;
 
-  if (acquire_event_.signal(MX_USER_SIGNAL_0, 0u) != MX_OK ||
-      release_event_.signal(MX_USER_SIGNAL_0, 0u) != MX_OK) {
+  if (acquire_event_.signal(MX_EVENT_SIGNALED, 0u) != MX_OK ||
+      release_event_.signal(MX_EVENT_SIGNALED, 0u) != MX_OK) {
     valid_ = false;
     FTL_DLOG(ERROR)
         << "Could not reset fences. The surface is no longer valid.";
@@ -332,7 +332,7 @@ void VulkanSurface::OnHandleReady(mx_handle_t handle,
                                   mx_signals_t pending,
                                   uint64_t count) {
   ASSERT_IS_GPU_THREAD;
-  FTL_DCHECK(pending & MX_USER_SIGNAL_0);
+  FTL_DCHECK(pending & MX_EVENT_SIGNALED);
   FTL_DCHECK(handle == release_event_.get());
   Reset();
 }
