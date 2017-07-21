@@ -180,7 +180,7 @@ void main() {
             '/': (BuildContext context) => const Text('route "/"'),
             '/a': (BuildContext context) {
               contextA = context;
-              return new Text('route "/a"');
+              return const Text('route "/a"');
             }
           },
         )
