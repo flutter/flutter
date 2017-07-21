@@ -185,7 +185,7 @@ void main() {
           },
         )
     );
-    Navigator.of(contextA).pop("done");
+    Navigator.of(contextA).pop("all done");
 
     expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
