@@ -1200,7 +1200,49 @@ TEST_F(RenderTest, SpacingParagraph) {
   ASSERT_EQ(paragraph->records_[4].style().word_spacing, 20);
   ASSERT_EQ(paragraph->records_[5].style().word_spacing, 0);
   ASSERT_EQ(paragraph->records_[6].style().word_spacing, 20);
+}
 
+TEST_F(RenderTest, LongWordParagraph) {
+  const char* text =
+      "A "
+      "veryverylongwordtoseewherethiswillwraporifitwillatallandifitdoesthenthat"
+      "wouldbeagoodthingbecausethebreakingisworking.";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.font_size = 30;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 0;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1;
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() / 2);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
+  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->GetLineCount(), 4);
+  ASSERT_TRUE(Snapshot());
 }
 
 }  // namespace txt

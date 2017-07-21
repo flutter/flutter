@@ -177,8 +177,16 @@ void Paragraph::Layout(double width, bool force) {
       collection_map;
 
   breaker_.setLineWidths(0.0f, 0, width_);
+  // TODO(garyq): Get hyphenator working. Hyphenator should be created with
+  // a pattern binary dataset. Should be something along these lines:
+  //
+  //   minikin::Hyphenator* hyph =
+  //   minikin::Hyphenator::loadBinary(<paramsgohere>);
+  //      breaker_.setLocale(icu::Locale::getRoot(), &hyph);
+  //
   AddRunsToLineBreaker(collection_map);
   breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
+  breaker_.setStrategy(paragraph_style_.break_strategy);
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
 

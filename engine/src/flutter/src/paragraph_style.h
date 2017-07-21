@@ -20,6 +20,7 @@
 #include <climits>
 #include <string>
 
+#include "lib/txt/include/minikin/LineBreaker.h"
 #include "lib/txt/src/font_style.h"
 #include "lib/txt/src/font_weight.h"
 #include "lib/txt/src/text_align.h"
@@ -36,6 +37,12 @@ class ParagraphStyle {
   size_t max_lines = UINT_MAX;
   double line_height = 1.0;
   std::string ellipsis = "...";
+  // Default strategy is kBreakStrategy_Greedy. Sometimes,
+  // kBreakStrategy_HighQuality will produce more desireable layouts (eg, very
+  // long words are more likely to be reasonably placed).
+  // kBreakStrategy_Balanced will balance between the two.
+  minikin::BreakStrategy break_strategy =
+      minikin::BreakStrategy::kBreakStrategy_Greedy;
   // TODO(garyq): Implement right to left.
   // Right to left (Arabic, Hebrew, etc).
   bool rtl = false;
