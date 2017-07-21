@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
 import 'converter.dart';
+import 'debug.dart';
 import 'events.dart';
 import 'hit_test.dart';
 import 'pointer_router.dart';
@@ -75,6 +76,11 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
       result = new HitTestResult();
       hitTest(result, event.position);
       _hitTests[event.pointer] = result;
+      assert(() {
+        if (debugPrintHitTestResults)
+          debugPrint('$event: $result');
+        return true;
+      });
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       result = _hitTests.remove(event.pointer);
     } else if (event.down) {

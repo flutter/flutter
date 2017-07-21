@@ -463,6 +463,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       'The value of a foundation debug variable was changed by the test.',
       debugPrintOverride: debugPrintOverride,
     ));
+    assert(debugAssertAllGesturesVarsUnset(
+      'The value of a gestures debug variable was changed by the test.',
+    ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.',
       debugCheckIntrinsicSizesOverride: checkIntrinsicSizes,
