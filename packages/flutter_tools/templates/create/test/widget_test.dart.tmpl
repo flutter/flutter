@@ -7,38 +7,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../lib/main.dart';
+
 void main() {
-  testWidgets('my first widget test', (WidgetTester tester) async {
-    // You can use keys to locate the widget you need to test
-    var sliderKey = new UniqueKey();
-    var value = 0.0;
-
-    // Tells the tester to build a UI based on the widget tree passed to it
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
     await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new Slider(
-                key: sliderKey,
-                value: value,
-                onChanged: (double newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                },
-              ),
-            ),
-          );
-        },
-      ),
+      new MyApp(),
     );
-    expect(value, 0.0);
 
-    // Taps on the widget found by key
-    await tester.tap(find.byKey(sliderKey));
+    // Verify that our counter starts at 0.
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
 
-    // Verifies that the widget updated the value correctly
-    expect(value, 0.5);
+    // Tap the '+' icon and trigger a frame.
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
+
+    // Verify that our counter has incremented.
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
   });
 }
