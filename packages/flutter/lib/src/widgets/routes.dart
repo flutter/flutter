@@ -971,11 +971,37 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// A [Navigator] observer that notifies [RouteAware]s of changes to the
 /// state of their [Route].
 ///
+/// [RouteObserver] informs subscribers whenever a route of type `T` is pushed
+/// on top of their own route of type `T` or popped from it. This is for example
+/// useful to keep track of page transitions, e.i. a `RouteObserver<PageRoute>`
+/// will inform subscribed [RouteAware]s whenever the user navigates away from
+/// the current page route to another page route.
+///
+/// If you want to be informed about route changes of any type, you should
+/// instantiate a `RouteObserver<Route>`.
+///
+/// ## Sample code
+///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
-/// [RouteAware] in its [State] and subscribe it to the [RouteObserver]:
+/// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
 ///
 /// ```dart
+/// // Register the RouteObserver as a navigation observer.
+/// final RouteObserver<PageRoute> routeObserver = new RouteObserver<PageRoute>();
+/// void main() {
+///   runApp(new MaterialApp(
+///     home: new Container(),
+///     navigatorObservers: [routeObserver],
+///   ));
+/// }
+///
+/// class RouteAwareWidget extends StatefulWidget {
+///   State<RouteAwareWidget> createState() => new RouteAwareWidgetState();
+/// }
+///
+/// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
 /// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+///
 ///   @override
 ///   void didChangeDependencies() {
 ///     super.didChangeDependencies();
@@ -990,19 +1016,28 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///
 ///   @override
 ///   void didPush() {
-///     // Do something
+///     // Route was pushed onto navigator and is now topmost route.
 ///   }
 ///
 ///   @override
 ///   void didPopNext() {
-///     // Do something
+///     // Covering route was popped off the navigator.
 ///   }
 ///
+///   @override
+///   Widget build(BuildContext context) => new Container();
+///
 /// }
+///
 /// ```
 class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
   final Map<T, RouteAware> _listeners = <T, RouteAware>{};
 
+  /// Subscribe [routeAware] to be informed about changes to [route].
+  ///
+  /// Going forward, [routeAware] will be informed about qualifying changes
+  /// to [route], e.g. when [route] is covered by another route or when [route]
+  /// is popped off the [Navigator] stack.
   void subscribe(RouteAware routeAware, T route) {
     assert(routeAware != null);
     assert(route != null);
@@ -1012,6 +1047,9 @@ class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
     }
   }
 
+  /// Unsubscribe [routeAware].
+  ///
+  /// [routeAware] is no longer informed about changes to its route.
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
     _listeners.remove(routeAware);

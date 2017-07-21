@@ -739,7 +739,8 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(parentSemantics == null);
     renderObjectOwner._semantics ??= new SemanticsNode.root(
       handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-      owner: renderObjectOwner.owner.semanticsOwner
+      owner: renderObjectOwner.owner.semanticsOwner,
+      showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
@@ -768,7 +769,8 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     renderObjectOwner._semantics ??= new SemanticsNode(
-      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
+      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+      showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
     if (geometry != null) {
@@ -812,7 +814,8 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     _haveConcreteNode = currentSemantics == null && annotator != null;
     if (haveConcreteNode) {
       renderObjectOwner._semantics ??= new SemanticsNode(
-        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
+        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+        showOnScreen: renderObjectOwner.showOnScreen,
       );
       node = renderObjectOwner._semantics;
     } else {
@@ -1556,6 +1559,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
   /// out and painted.
+  ///
+  /// It is intended to be used by tests and asserts.
   bool get debugNeedsLayout {
     bool result;
     assert(() {
@@ -1740,6 +1745,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisLayout = true;
       debugPreviousActiveLayout = _debugActiveLayout;
       _debugActiveLayout = this;
+      if (debugPrintLayouts)
+        debugPrint('Laying out (without resize) $this');
       return true;
     });
     try {
@@ -1846,6 +1853,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_doingThisLayoutWithCallback);
     assert(() {
       _debugMutationsLocked = true;
+      if (debugPrintLayouts)
+        debugPrint('Laying out (${sizedByParent ? "with separate resize" : "with resize allowed"}) $this');
       return true;
     });
     if (sizedByParent) {
@@ -2126,6 +2135,28 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _needsCompositingBitsUpdate = false;
   }
 
+  /// Whether this render object's paint information is dirty.
+  ///
+  /// This is only set in debug mode. In general, render objects should not need
+  /// to condition their runtime behavior on whether they are dirty or not,
+  /// since they should only be marked dirty immediately prior to being laid
+  /// out and painted.
+  ///
+  /// It is intended to be used by tests and asserts.
+  ///
+  /// It is possible (and indeed, quite common) for [debugNeedsPaint] to be
+  /// false and [debugNeedsLayout] to be true. The render object will still be
+  /// repainted in the next frame when this is the case, because the
+  /// [markNeedsPaint] method is implicitly called by the framework after a
+  /// render object is laid out, prior to the paint phase.
+  bool get debugNeedsPaint {
+    bool result;
+    assert(() {
+      result = _needsPaint;
+      return true;
+    });
+    return result;
+  }
   bool _needsPaint = true;
 
   /// Mark this render object as having changed its visual appearance.
@@ -2138,6 +2169,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This mechanism batches the painting work so that multiple sequential
   /// writes are coalesced, removing redundant computation.
+  ///
+  /// Once [markNeedsPaint] has been called on a render object,
+  /// [debugNeedsPaint] returns true for that render object until just after
+  /// the pipeline owner has called [paint] on the render object.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
     if (_needsPaint)
@@ -2777,6 +2812,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   @protected
   String debugDescribeChildren(String prefix) => '';
 
+
+  /// Attempt to make this or a descendant RenderObject visible on screen.
+  ///
+  /// If [child] is provided, that [RenderObject] is made visible. If [child] is
+  /// omitted, this [RenderObject] is made visible.
+  void showOnScreen([RenderObject child]) {
+    if (parent is RenderObject) {
+      final RenderObject renderParent = parent;
+      renderParent.showOnScreen(child ?? this);
+    }
+  }
 }
 
 /// Generic mixin for render objects with one child.
