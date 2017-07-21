@@ -524,7 +524,7 @@ class HotRunner extends ResidentRunner {
     final List<FlutterView> reassembleViews = <FlutterView>[];
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
-        // Check if the isolate is paused, and if so, don't reassemble; ignore the
+        // Check if the isolate is paused, and if so, don't reassemble. Ignore the
         // PostPauseEvent event - the client requesting the pause will resume the app.
         final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
         if (pauseEvent != null && pauseEvent.isPauseEvent && pauseEvent.kind != ServiceEvent.kPausePostRequest) {
