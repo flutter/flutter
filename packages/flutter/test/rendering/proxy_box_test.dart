@@ -34,7 +34,7 @@ void main() {
   test('RenderPhysicalModel compositing on Fuchsia', () {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
 
-    final root = new RenderPhysicalModel(color: new Color(0xffff00ff));
+    final RenderPhysicalModel root = new RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
     expect(root.needsCompositing, isFalse);
 
@@ -54,7 +54,7 @@ void main() {
   test('RenderPhysicalModel compositing on non-Fuchsia', () {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
-    final root = new RenderPhysicalModel(color: new Color(0xffff00ff));
+    final RenderPhysicalModel root = new RenderPhysicalModel(color: const Color(0xffff00ff));
     layout(root, phase: EnginePhase.composite);
     expect(root.needsCompositing, isFalse);
 

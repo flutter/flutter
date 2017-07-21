@@ -79,7 +79,10 @@ abstract class FlutterCommand extends Command<Null> {
     argParser.addOption('target',
       abbr: 't',
       defaultsTo: flx.defaultMainPath,
-      help: 'Target app path / main entry-point file.');
+      help: 'The main entry-point file of the application, as run on the device.\n'
+            'If the --target option is omitted, but a file name is provided on\n'
+            'the command line, then that is used instead.',
+      valueHelp: 'path');
     _usesTargetOption = true;
   }
 

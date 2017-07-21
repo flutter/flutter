@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -19,6 +20,7 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('gradle-dir', help: 'The gradle install directory.');
+    argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
     argParser.addFlag('machine',
       negatable: false,
@@ -37,6 +39,9 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   final List<String> aliases = <String>['configure'];
+
+  @override
+  bool get shouldUpdateCache => false;
 
   @override
   String get usageFooter {
@@ -69,6 +74,9 @@ class ConfigCommand extends FlutterCommand {
     if (argResults.wasParsed('gradle-dir'))
       _updateConfig('gradle-dir', argResults['gradle-dir']);
 
+    if (argResults.wasParsed('android-sdk'))
+      _updateConfig('android-sdk', argResults['android-sdk']);
+
     if (argResults.wasParsed('android-studio-dir'))
       _updateConfig('android-studio-dir', argResults['android-studio-dir']);
 
@@ -90,8 +98,11 @@ class ConfigCommand extends FlutterCommand {
     if (results['android-studio-dir'] == null && androidStudio != null) {
       results['android-studio-dir'] = androidStudio.directory;
     }
+    if (results['android-sdk'] == null && androidSdk != null) {
+      results['android-sdk'] = androidSdk.directory;
+    }
 
-    printStatus(JSON.encode(results));
+    printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
   void _updateConfig(String keyName, String keyValue) {

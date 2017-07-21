@@ -317,6 +317,39 @@ class TextSpan {
     return true;
   }
 
+  /// Describe the difference between this text span and another, in terms of
+  /// how much damage it will make to the rendering. The comparison is deep.
+  ///
+  /// See also:
+  ///
+  ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
+  RenderComparison compareTo(TextSpan other) {
+    if (identical(this, other))
+      return RenderComparison.identical;
+    if (other.text != text ||
+        children?.length != other.children?.length ||
+        (style == null) != (other.style == null))
+      return RenderComparison.layout;
+    RenderComparison result = recognizer == other.recognizer ? RenderComparison.identical : RenderComparison.metadata;
+    if (style != null) {
+      final RenderComparison candidate = style.compareTo(other.style);
+      if (candidate.index > result.index)
+        result = candidate;
+      if (result == RenderComparison.layout)
+        return result;
+    }
+    if (children != null) {
+      for (int index = 0; index < children.length; index += 1) {
+        final RenderComparison candidate = children[index].compareTo(other.children[index]);
+        if (candidate.index > result.index)
+          result = candidate;
+        if (result == RenderComparison.layout)
+          return result;
+      }
+    }
+    return result;
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))

@@ -64,11 +64,20 @@ class RenderParagraph extends RenderBox {
   TextSpan get text => _textPainter.text;
   set text(TextSpan value) {
     assert(value != null);
-    if (_textPainter.text == value)
-      return;
-    _textPainter.text = value;
-    _overflowShader = null;
-    markNeedsLayout();
+    switch (_textPainter.text.compareTo(value)) {
+      case RenderComparison.identical:
+      case RenderComparison.metadata:
+        return;
+      case RenderComparison.paint:
+        _textPainter.text = value;
+        markNeedsPaint();
+        break;
+      case RenderComparison.layout:
+        _textPainter.text = value;
+        _overflowShader = null;
+        markNeedsLayout();
+        break;
+    }
   }
 
   /// How the text should be aligned horizontally.

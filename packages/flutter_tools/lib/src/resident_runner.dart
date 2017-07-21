@@ -171,6 +171,11 @@ class FlutterDevice {
       await view.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
+  Future<Null> debugTogglePerformanceOverlayOverride() async {
+    for (FlutterView view in views)
+      await view.uiIsolate.flutterTogglePerformanceOverlayOverride();
+  }
+
   Future<String> togglePlatform({ String from }) async {
     String to;
     switch (from) {
@@ -451,6 +456,12 @@ abstract class ResidentRunner {
       await device.toggleDebugPaintSizeEnabled();
   }
 
+  Future<Null> _debugTogglePerformanceOverlayOverride() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices)
+      await device.debugTogglePerformanceOverlayOverride();
+  }
+
   Future<Null> _screenshot(FlutterDevice device) async {
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...');
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
@@ -606,9 +617,14 @@ abstract class ResidentRunner {
         await _debugDumpSemanticsTree();
         return true;
       }
-    } else if (lower == 'p') {
+    } else if (character == 'p') {
       if (supportsServiceProtocol && isRunningDebug) {
         await _debugToggleDebugPaintSizeEnabled();
+        return true;
+      }
+    } else if (character == 'P') {
+      if (supportsServiceProtocol) {
+        await _debugTogglePerformanceOverlayOverride();
         return true;
       }
     } else if (character == 's') {
@@ -726,11 +742,14 @@ abstract class ResidentRunner {
     if (supportsServiceProtocol) {
       printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
       printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
-      printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S".');
       if (isRunningDebug) {
+        printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S".');
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
+      } else {
+        printStatus('To dump the accessibility tree (debugDumpSemantics), press "S".');
       }
+      printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot))
       printStatus('To save a screenshot to flutter.png, press "s".');

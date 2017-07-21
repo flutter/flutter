@@ -754,6 +754,8 @@ class PhysicalModelLayer extends ContainerLayer {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('clipRRect: $clipRRect');
+    description.add('elevation: $elevation');
+    description.add('color: $color');
   }
 }
 
