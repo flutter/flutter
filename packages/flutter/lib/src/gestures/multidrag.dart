@@ -62,7 +62,10 @@ abstract class MultiDragPointerState {
 
   void _move(PointerMoveEvent event) {
     assert(_arenaEntry != null);
-    _velocityTracker.addPosition(event.timeStamp, event.position);
+    // PointerMoveEvent from platform's gesture up events are positionally redundant
+    // vs the last PointerMoveEvent. Do not use in velocity calculation.
+    if (event.sourceEventType != PointerChange.up)
+      _velocityTracker.addPosition(event.timeStamp, event.position);
     if (_client != null) {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.

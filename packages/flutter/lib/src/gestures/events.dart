@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Offset, PointerDeviceKind;
+import 'dart:ui' show Offset, PointerDeviceKind, PointerChange;
 
 import 'package:flutter/foundation.dart';
 
-export 'dart:ui' show Offset, PointerDeviceKind;
+export 'dart:ui' show Offset, PointerDeviceKind, PointerChange;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
 ///
@@ -97,6 +97,7 @@ abstract class PointerEvent {
     this.timeStamp: Duration.ZERO,
     this.pointer: 0,
     this.kind: PointerDeviceKind.touch,
+    this.sourceEventType,
     this.device: 0,
     this.position: Offset.zero,
     this.delta: Offset.zero,
@@ -124,6 +125,11 @@ abstract class PointerEvent {
 
   /// The kind of input device for which the event was generated.
   final PointerDeviceKind kind;
+
+  /// The original event type detected from the platform.
+  ///
+  /// Can be null for synthesized events not from the platform.
+  final PointerChange sourceEventType;
 
   /// Unique identifier for the pointing device, reused across interactions.
   final int device;
@@ -277,6 +283,7 @@ class PointerAddedEvent extends PointerEvent {
   const PointerAddedEvent({
     Duration timeStamp: Duration.ZERO,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    PointerChange sourceEventType,
     int device: 0,
     Offset position: Offset.zero,
     bool obscured: false,
@@ -291,6 +298,7 @@ class PointerAddedEvent extends PointerEvent {
   }) : super(
     timeStamp: timeStamp,
     kind: kind,
+    sourceEventType: sourceEventType,
     device: device,
     position: position,
     obscured: obscured,
@@ -316,6 +324,7 @@ class PointerRemovedEvent extends PointerEvent {
   const PointerRemovedEvent({
     Duration timeStamp: Duration.ZERO,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    PointerChange sourceEventType,
     int device: 0,
     bool obscured: false,
     double pressureMin: 1.0,
@@ -326,6 +335,7 @@ class PointerRemovedEvent extends PointerEvent {
   }) : super(
     timeStamp: timeStamp,
     kind: kind,
+    sourceEventType: sourceEventType,
     device: device,
     position: null,
     obscured: obscured,
@@ -351,6 +361,7 @@ class PointerHoverEvent extends PointerEvent {
   const PointerHoverEvent({
     Duration timeStamp: Duration.ZERO,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    PointerChange sourceEventType,
     int device: 0,
     Offset position: Offset.zero,
     Offset delta: Offset.zero,
@@ -369,6 +380,7 @@ class PointerHoverEvent extends PointerEvent {
   }) : super(
     timeStamp: timeStamp,
     kind: kind,
+    sourceEventType: sourceEventType,
     device: device,
     position: position,
     delta: delta,
@@ -397,6 +409,7 @@ class PointerDownEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    PointerChange sourceEventType,
     int device: 0,
     Offset position: Offset.zero,
     int buttons: 0,
@@ -415,6 +428,7 @@ class PointerDownEvent extends PointerEvent {
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
+    sourceEventType: sourceEventType,
     device: device,
     position: position,
     buttons: buttons,
@@ -449,6 +463,7 @@ class PointerMoveEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    PointerChange sourceEventType,
     int device: 0,
     Offset position: Offset.zero,
     Offset delta: Offset.zero,
@@ -468,6 +483,7 @@ class PointerMoveEvent extends PointerEvent {
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
+    sourceEventType: sourceEventType,
     device: device,
     position: position,
     delta: delta,
@@ -497,6 +513,7 @@ class PointerUpEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    PointerChange sourceEventType,
     int device: 0,
     Offset position: Offset.zero,
     int buttons: 0,
@@ -513,6 +530,7 @@ class PointerUpEvent extends PointerEvent {
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
+    sourceEventType: sourceEventType,
     device: device,
     position: position,
     buttons: buttons,
@@ -538,6 +556,7 @@ class PointerCancelEvent extends PointerEvent {
     Duration timeStamp: Duration.ZERO,
     int pointer: 0,
     PointerDeviceKind kind: PointerDeviceKind.touch,
+    PointerChange sourceEventType,
     int device: 0,
     Offset position: Offset.zero,
     int buttons: 0,
@@ -554,6 +573,7 @@ class PointerCancelEvent extends PointerEvent {
     timeStamp: timeStamp,
     pointer: pointer,
     kind: kind,
+    sourceEventType: sourceEventType,
     device: device,
     position: position,
     buttons: buttons,
