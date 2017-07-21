@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:test/test.dart';
-import 'package:collection/collection.dart';
+import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 

@@ -33,6 +33,9 @@ import 'ticker_provider.dart';
 typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
 
 class NestedScrollView extends StatefulWidget {
+  /// Creates a nested scroll view.
+  ///
+  /// The [reverse], [headerSliverBuilder], and [body] arguments must not be null.
   const NestedScrollView({
     Key key,
     this.controller,
@@ -73,9 +76,18 @@ class NestedScrollView extends StatefulWidget {
   /// How the scroll view should respond to user input.
   ///
   /// For example, determines how the scroll view continues to animate after the
-  /// user stops dragging the scroll view.
+  /// user stops dragging the scroll view (providing a custom implementation of
+  /// [ScrollPhysics.createBallisticSimulation] allows this particular aspect of
+  /// the physics to be overridden).
   ///
   /// Defaults to matching platform conventions.
+  ///
+  /// The [ScrollPhysics.applyBoundaryConditions] implementation of the provided
+  /// object should not allow scrolling outside the scroll extent range
+  /// described by the [ScrollMetrics.minScrollExtent] and
+  /// [ScrollMetrics.maxScrollExtent] properties passed to that method. If that
+  /// invariant is not maintained, the nested scroll view may respond to user
+  /// scrolling erratically.
   final ScrollPhysics physics;
 
   /// A builder for any widgets that are to precede the inner scroll views (as

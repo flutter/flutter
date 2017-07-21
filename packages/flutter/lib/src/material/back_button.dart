@@ -59,7 +59,8 @@ class BackButtonIcon extends StatelessWidget {
 /// See also:
 ///
 ///  * [AppBar], which automatically uses a [BackButton] in its
-///    [AppBar.leading] slot when appropriate.
+///    [AppBar.leading] slot when the [Scaffold] has no [Drawer] and the
+///    current [Route] is not the [Navigator]'s first route.
 ///  * [BackButtonIcon], which is useful if you need to create a back button
 ///    that responds differently to being pressed.
 ///  * [IconButton], which is a more general widget for creating buttons with

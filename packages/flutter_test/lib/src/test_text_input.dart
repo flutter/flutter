@@ -27,6 +27,13 @@ class TestTextInput {
   }
 
   int _client = 0;
+
+  /// The last set of arguments that [TextInputConnection.setEditingState] sent
+  /// to the embedder.
+  ///
+  /// This is a map representation of a [TextEditingValue] object. For example,
+  /// it will have a `text` entry whose value matches the most recent
+  /// [TextEditingValue.text] that was sent to the embedder.
   Map<String, dynamic> editingState;
 
   Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {

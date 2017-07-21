@@ -10,8 +10,9 @@ MatchResult match(dynamic value, Matcher matcher) {
   if (matcher.matches(value, matchState)) {
     return new MatchResult._matched();
   } else {
-    final Description description =
-        matcher.describeMismatch(value, new _TextDescription(), matchState, false);
+    final Description description = matcher.describeMismatch(
+      value, new _TextDescription(), matchState, false,
+    );
     return new MatchResult._mismatched(description.toString());
   }
 }

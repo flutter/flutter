@@ -40,6 +40,8 @@ import 'scroll_position_with_single_context.dart';
 ///    [PageView].
 ///  * [ScrollPosition], which manages the scroll offset for an individual
 ///    scrolling widget.
+///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
   ///
@@ -59,8 +61,8 @@ class ScrollController extends ChangeNotifier {
   /// if [keepScrollOffset] is false or a scroll offset hasn't been saved yet.
   ///
   /// Defaults to 0.0.
-  final double _initialScrollOffset;
   double get initialScrollOffset => _initialScrollOffset;
+  final double _initialScrollOffset;
 
   /// Each time a scroll completes, save the current scroll [offset] with
   /// [PageStorage] and restore it if this controller's scrollable is recreated.
@@ -272,7 +274,7 @@ class ScrollController extends ChangeNotifier {
 // Examples can assume:
 // TrackingScrollController _trackingScrollController;
 
-/// A [ScrollController] whose `initialScrollOffset` tracks its most recently
+/// A [ScrollController] whose [initialScrollOffset] tracks its most recently
 /// updated [ScrollPosition].
 ///
 /// This class can be used to synchronize the scroll offset of two or more
@@ -309,6 +311,8 @@ class ScrollController extends ChangeNotifier {
 /// In this example the `_trackingController` would have been created by the
 /// stateful widget that built the widget tree.
 class TrackingScrollController extends ScrollController {
+  /// Creates a scroll controller that continually updates its
+  /// [initialScrollOffset] to match the last scroll notification it received.
   TrackingScrollController({
     double initialScrollOffset: 0.0,
     bool keepScrollOffset: true,
@@ -317,14 +321,20 @@ class TrackingScrollController extends ScrollController {
              keepScrollOffset: keepScrollOffset,
              debugLabel: debugLabel);
 
-  Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
+  final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
   ScrollPosition _lastUpdated;
 
   /// The last [ScrollPosition] to change. Returns null if there aren't any
-  /// attached scroll positions or there hasn't been any scrolling yet.
+  /// attached scroll positions, or there hasn't been any scrolling yet, or the
+  /// last [ScrollPosition] to change has since been removed.
   ScrollPosition get mostRecentlyUpdatedPosition => _lastUpdated;
 
-  /// Returns the scroll offset of the [mostRecentlyUpdatedPosition] or 0.0.
+  /// Returns the scroll offset of the [mostRecentlyUpdatedPosition] or, if that
+  /// is null, the initial scroll offset provided to the constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollController.initialScrollOffset], which this overrides.
   @override
   double get initialScrollOffset => _lastUpdated?.pixels ?? super.initialScrollOffset;
 
@@ -342,6 +352,8 @@ class TrackingScrollController extends ScrollController {
     assert(_positionToListener.containsKey(position));
     position.removeListener(_positionToListener[position]);
     _positionToListener.remove(position);
+    if (_lastUpdated == position)
+      _lastUpdated = null;
   }
 
   @override
@@ -350,7 +362,6 @@ class TrackingScrollController extends ScrollController {
       assert(_positionToListener.containsKey(position));
       position.removeListener(_positionToListener[position]);
     }
-    _positionToListener.clear();
     super.dispose();
   }
 }

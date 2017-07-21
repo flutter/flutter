@@ -24,6 +24,10 @@ import 'table.dart';
 /// Combined with [debugPrintScheduleBuildForStacks], this lets you watch a
 /// widget's dirty/clean lifecycle.
 ///
+/// To get similar information but showing it on the timeline available from the
+/// Observatory rather than getting it in the console (where it can be
+/// overwhelming), consider [debugProfileBuildsEnabled].
+///
 /// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintRebuildDirtyWidgets = false;
 
@@ -63,6 +67,10 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///
 /// For details on how to use [Timeline] events in the Dart Observatory to
 /// optimize your app, see https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
+///
+/// See also [debugProfilePaintsEnabled], which does something similar but for
+/// painting, and [debugPrintRebuildDirtyWidgets], which does something similar
+/// but reporting the builds to the console.
 bool debugProfileBuildsEnabled = false;
 
 /// Show banners for deprecated widgets.

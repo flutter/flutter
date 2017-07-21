@@ -29,6 +29,9 @@ import 'viewport.dart';
 /// [ScrollView] helps orchestrate these pieces by creating the [Scrollable] and
 /// the viewport and defering to its subclass to create the slivers.
 ///
+/// To control the initial scroll offset of the scroll view, provide a
+/// [controller] with its [ScrollController.initialScrollOffset] property set.
+///
 /// See also:
 ///
 ///  * [ListView], which is a commonly used [ScrollView] that displays a
@@ -39,6 +42,8 @@ import 'viewport.dart';
 ///    of child widgets.
 ///  * [CustomScrollView], which is a [ScrollView] that creates custom scroll
 ///    effects using slivers.
+///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
   ///
@@ -84,6 +89,14 @@ abstract class ScrollView extends StatelessWidget {
   /// view is scrolled.
   ///
   /// Must be null if [primary] is true.
+  ///
+  /// A [ScrollController] serves several purposes. It can be used to control
+  /// the initial scroll position (see [ScrollController.initialScrollOffset]).
+  /// It can be used to control whether the scroll view should automatically
+  /// save and restore its scroll position in the [PageStorage] (see
+  /// [ScrollController.keepScrollOffset]). It can be used to read the current
+  /// scroll position (see [ScrollController.offset]), or change it (see
+  /// [ScrollController.animateTo]).
   final ScrollController controller;
 
   /// Whether this is the primary scroll view associated with the parent
@@ -233,6 +246,9 @@ abstract class ScrollView extends StatelessWidget {
 /// list and a grid, use a list of three slivers: [SliverAppBar], [SliverList],
 /// and [SliverGrid].
 ///
+/// To control the initial scroll offset of the scroll view, provide a
+/// [controller] with its [ScrollController.initialScrollOffset] property set.
+///
 /// ## Sample code
 ///
 /// This sample code shows a scroll view that contains a flexible pinned app
@@ -292,6 +308,8 @@ abstract class ScrollView extends StatelessWidget {
 ///    sliver.
 ///  * [SliverAppBar], which is a sliver that displays a header that can expand
 ///    and float as the scroll view scrolls.
+///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 class CustomScrollView extends ScrollView {
   /// Creates a [ScrollView] that creates custom scroll effects using slivers.
   ///
@@ -406,6 +424,9 @@ abstract class BoxScrollView extends ScrollView {
 ///     a [SliverChildDelegate] can control the algorithm used to estimate the
 ///     size of children that are not actually visible.
 ///
+/// To control the initial scroll offset of the scroll view, provide a
+/// [controller] with its [ScrollController.initialScrollOffset] property set.
+///
 /// ## Sample code
 ///
 /// An infinite list of children:
@@ -504,6 +525,8 @@ abstract class BoxScrollView extends ScrollView {
 ///    scroll effects using slivers.
 ///  * [ListBody], which arranges its children in a similar manner, but without
 ///    scrolling.
+///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 class ListView extends BoxScrollView {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
   ///
@@ -686,6 +709,9 @@ class ListView extends BoxScrollView {
 ///
 /// To create a linear array of children, use a [ListView].
 ///
+/// To control the initial scroll offset of the scroll view, provide a
+/// [controller] with its [ScrollController.initialScrollOffset] property set.
+///
 /// ## Transitioning to [CustomScrollView]
 ///
 /// A [GridView] is basically a [CustomScrollView] with a single [SliverGrid] in
@@ -785,6 +811,8 @@ class ListView extends BoxScrollView {
 ///    a fixed number of tiles in the cross axis.
 ///  * [SliverGridDelegateWithMaxCrossAxisExtent], which creates a layout with
 ///    tiles that have a maximum cross-axis extent.
+///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 class GridView extends BoxScrollView {
   /// Creates a scrollable, 2D array of widgets with a custom
   /// [SliverGridDelegate].

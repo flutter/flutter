@@ -113,11 +113,15 @@ class FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_serviceClient], [_peer] and [_appIsolate].
   @visibleForTesting
-  FlutterDriver.connectedTo(this._serviceClient, this._peer, this._appIsolate,
-      { bool printCommunication: false, bool logCommunicationToFile: true })
-      : _printCommunication = printCommunication,
-        _logCommunicationToFile = logCommunicationToFile,
-        _driverId = _nextDriverId++;
+  FlutterDriver.connectedTo(
+    this._serviceClient,
+    this._peer,
+    this._appIsolate, {
+    bool printCommunication: false,
+    bool logCommunicationToFile: true,
+  }) : _printCommunication = printCommunication,
+       _logCommunicationToFile = logCommunicationToFile,
+       _driverId = _nextDriverId++;
 
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
