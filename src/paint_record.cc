@@ -45,7 +45,6 @@ PaintRecord::PaintRecord(PaintRecord&& other) {
   metrics_ = other.metrics_;
   line_ = other.line_;
   width_modifier_ = other.width_modifier_;
-  letter_spacing_offset_ = other.letter_spacing_offset_;
 }
 
 PaintRecord& PaintRecord::operator=(PaintRecord&& other) {
@@ -55,7 +54,6 @@ PaintRecord& PaintRecord::operator=(PaintRecord&& other) {
   metrics_ = other.metrics_;
   line_ = other.line_;
   width_modifier_ = other.width_modifier_;
-  letter_spacing_offset_ = other.letter_spacing_offset_;
   return *this;
 }
 
@@ -65,10 +63,6 @@ void PaintRecord::SetOffset(SkPoint pt) {
 
 void PaintRecord::SetWidthModifier(double val) {
   width_modifier_ = val;
-}
-
-void PaintRecord::SetLetterSpacingOffset(double val) {
-  letter_spacing_offset_ = val;
 }
 
 }  // namespace txt

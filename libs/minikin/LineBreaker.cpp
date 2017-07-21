@@ -138,10 +138,6 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
         }
     }
 
-    for (size_t i = start; i < end; ++i) {
-        mCharSpacing.push_back(letterSpacing);
-    }
-
     size_t current = (size_t)mWordBreaker.current();
     size_t afterWord = start;
     size_t lastBreak = start;
@@ -159,7 +155,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
             mStrategy = kBreakStrategy_Greedy;
         } else {
             if (isWordSpace(c)) mSpaceCount += 1;
-            mWidth += mCharWidths[i] + mCharSpacing[i];
+            mWidth += mCharWidths[i];
             if (!isLineEndSpace(c)) {
                 postBreak = mWidth;
                 postSpaceCount = mSpaceCount;

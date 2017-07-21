@@ -138,9 +138,6 @@ class Paragraph {
   size_t lines_ = 0;
   double max_intrinsic_width_ = 0;
   double min_intrinsic_width_ = 0;
-  // TODO(garyq): Instead of using whitespace to delimit "words", use the
-  // results of minikin breaker.
-  std::vector<double> word_widths_;
   double alphabetic_baseline_ = FLT_MAX;
   double ideographic_baseline_ = FLT_MAX;
   bool needs_layout_ = true;

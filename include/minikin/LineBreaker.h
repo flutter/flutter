@@ -230,7 +230,6 @@ class LineBreaker {
         icu::Locale mLocale;
         std::vector<uint16_t>mTextBuf;
         std::vector<float>mCharWidths;
-        std::vector<float>mCharSpacing;
 
         Hyphenator* mHyphenator;
         std::vector<HyphenationType> mHyphBuf;
