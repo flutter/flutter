@@ -200,7 +200,7 @@ void main() {
     expect(settingsOffset.dy, 100.0);
   });
 
-  testWidgets('Check back gesture doesnt start during transitions', (WidgetTester tester) async {
+  testWidgets('Check back gesture doesn\'t start during transitions', (WidgetTester tester) async {
     final GlobalKey containerKey1 = new GlobalKey();
     final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{

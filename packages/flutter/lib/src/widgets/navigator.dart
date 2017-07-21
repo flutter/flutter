@@ -443,10 +443,10 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// ### Popup routes
 ///
-/// Routes don't have to obscure the entire screen. [PopupRoute]s cover
-/// the screen with a barrierColor that can be only partially opaque to
-/// allow the current screen to show through. Popup routes are "modal"
-/// because they block input to the widgets below.
+/// Routes don't have to obscure the entire screen. [PopupRoute]s cover the
+/// screen with a [ModalRoute.barrierColor] that can be only partially opaque to
+/// allow the current screen to show through. Popup routes are "modal" because
+/// they block input to the widgets below.
 ///
 /// There are functions which create and show popup routes. For
 /// example: [showDialog], [showMenu], and [showModalBottomSheet]. These

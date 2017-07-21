@@ -722,6 +722,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
+  ///
+  /// The color is ignored, and the barrier made invisible, when [offstage] is
+  /// true.
   Color get barrierColor;
 
   /// Whether the route should remain in memory when it is inactive. If this is
@@ -741,6 +744,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// non-interactive, but each widget has its final size and position. This
   /// mechanism lets the [HeroController] determine the final local of any hero
   /// widgets being animated as part of the transition.
+  ///
+  /// The modal barrier, if any, is not rendered if [offstage] is true (see
+  /// [barrierColor]).
   bool get offstage => _offstage;
   bool _offstage = false;
   set offstage(bool value) {
@@ -910,7 +916,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // one of the builders
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
-    if (barrierColor != null) {
+    if (barrierColor != null && !offstage) {
       assert(barrierColor != _kTransparent);
       final Animation<Color> color = new ColorTween(
         begin: _kTransparent,
