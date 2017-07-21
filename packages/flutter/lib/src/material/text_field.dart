@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -166,8 +167,9 @@ class TextField extends StatefulWidget {
   /// field.
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides. Formatters are run 
-  /// in the provided order when the text input changes.
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
   @override
@@ -257,7 +259,9 @@ class _TextFieldState extends State<TextField> {
         maxLines: widget.maxLines,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: materialTextSelectionControls,
+        selectionControls: themeData.platform == TargetPlatform.iOS
+            ? cupertinoTextSelectionControls
+            : materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
