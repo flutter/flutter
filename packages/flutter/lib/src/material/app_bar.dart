@@ -128,9 +128,9 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
-  /// Arguments [elevation], [primary], [toolbarOpacity], [bottomOpacity],
-  /// [automaticallyImplyLeading], must not be null.
-  /// 
+  /// The arguments [elevation], [primary], [toolbarOpacity], [bottomOpacity]
+  /// and [automaticallyImplyLeading] must not be null.
+  ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
     Key key,
@@ -149,17 +149,17 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.centerTitle,
     this.toolbarOpacity: 1.0,
     this.bottomOpacity: 1.0,
-  }) : assert(elevation != null),
+  }) : assert(automaticallyImplyLeading != null),
+       assert(elevation != null),
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
-       assert(automaticallyImplyLeading != null),
        preferredSize = new Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
        super(key: key);
 
   /// A widget to display before the [title].
   ///
-  /// If this is null and automaticallyImplyLeading is set to true, the [AppBar] will
+  /// If this is null and [automaticallyImplyLeading] is set to true, the [AppBar] will
   /// imply an appropriate widget. For example, if the [AppBar] is in a [Scaffold]
   /// that also has a [Drawer], the [Scaffold] will fill this widget with an
   /// [IconButton] that opens the drawer. If there's no [Drawer] and the parent
@@ -169,8 +169,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Controls whether we should try to imply the leading widget if null.
   ///
-  /// If true and leading is null, automatically try to deduce what the leading
-  /// widget should be. If false and leading is null, leading space is given to title.
+  /// If true and [leading] is null, automatically try to deduce what the leading
+  /// widget should be. If false and [leading] is null, leading space is given to [title].
   /// If leading widget is not null, this parameter has no effect.
   final bool automaticallyImplyLeading;
 
@@ -679,6 +679,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///  * <https://material.google.com/layout/structure.html#structure-toolbars>
 class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
+  ///
+  /// The arguments [forceElevated], [primary], [floating], [pinned], [snap]
+  /// and [automaticallyImplyLeading] must not be null.
   const SliverAppBar({
     Key key,
     this.leading,
@@ -699,19 +702,19 @@ class SliverAppBar extends StatefulWidget {
     this.floating: false,
     this.pinned: false,
     this.snap: false,
-  }) : assert(forceElevated != null),
+  }) : assert(automaticallyImplyLeading != null),
+       assert(forceElevated != null),
        assert(primary != null),
        assert(floating != null),
        assert(pinned != null),
        assert(!pinned || !floating || bottom != null, 'A pinned and floating app bar must have a bottom widget.'),
        assert(snap != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
-       assert(automaticallyImplyLeading != null),
        super(key: key);
 
   /// A widget to display before the [title].
   ///
-  /// If this is null and automaticallyImplyLeading is set to true, the [AppBar] will
+  /// If this is null and [automaticallyImplyLeading] is set to true, the [AppBar] will
   /// imply an appropriate widget. For example, if the [AppBar] is in a [Scaffold]
   /// that also has a [Drawer], the [Scaffold] will fill this widget with an
   /// [IconButton] that opens the drawer. If there's no [Drawer] and the parent
@@ -721,8 +724,8 @@ class SliverAppBar extends StatefulWidget {
 
   /// Controls whether we should try to imply the leading widget if null.
   ///
-  /// If true and leading is null, automatically try to deduce what the leading
-  /// widget should be. If false and leading is null, leading space is given to title.
+  /// If true and [leading] is null, automatically try to deduce what the leading
+  /// widget should be. If false and [leading] is null, leading space is given to [title].
   /// If leading widget is not null, this parameter has no effect.
   final bool automaticallyImplyLeading;
 
