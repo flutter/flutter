@@ -15,7 +15,7 @@ import 'object.dart';
 
 // This class should only be used in debug builds.
 class _DebugSize extends Size {
-  _DebugSize(Size source, this._owner, this._canBeUsedByParent): super.copy(source);
+  _DebugSize(Size source, this._owner, this._canBeUsedByParent) : super.copy(source);
   final RenderBox _owner;
   final bool _canBeUsedByParent;
 }
@@ -856,7 +856,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// constraints would be growing to fit the parent.
 ///
 /// Sizing purely based on the constraints allows the system to make some
-/// significant optimisations. Classes that use this approach should override
+/// significant optimizations. Classes that use this approach should override
 /// [sizedByParent] to return true, and then override [performResize] to set the
 /// [size] using nothing but the constraints, e.g.:
 ///
@@ -882,7 +882,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// child, passing it a [BoxConstraints] object describing the constraints
 /// within which the child can render. Passing tight constraints (see
 /// [BoxConstraints.isTight]) to the child will allow the rendering library to
-/// apply some optimisations, as it knows that if the constraints are tight, the
+/// apply some optimizations, as it knows that if the constraints are tight, the
 /// child's dimensions cannot change even if the layout of the child itself
 /// changes.
 ///
@@ -892,7 +892,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// then it must specify the `parentUsesSize` argument to the child's [layout]
 /// function, setting it to true.
 ///
-/// This flag turns off some optimisations; algorithms that do not rely on the
+/// This flag turns off some optimizations; algorithms that do not rely on the
 /// children's sizes will be more efficient. (In particular, relying on the
 /// child's [size] means that if the child is marked dirty for layout, the
 /// parent will probably also be marked dirty for layout, unless the
@@ -910,7 +910,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// subclass, and instead of reading the child's size, the parent would read
 /// whatever the output of [layout] is for that layout protocol. The
 /// `parentUsesSize` flag is still used to indicate whether the parent is going
-/// to read that output, and optimisations still kick in if the child has tight
+/// to read that output, and optimizations still kick in if the child has tight
 /// constraints (as defined by [Constraints.isTight]).
 ///
 /// ### Painting
@@ -1484,20 +1484,74 @@ abstract class RenderBox extends RenderObject {
       );
     });
     assert(() {
-      if (value is _DebugSize) {
-        if (value._owner != this) {
-          assert(value._owner.parent == this);
-          assert(value._canBeUsedByParent);
-        }
-      }
+      value = debugAdoptSize(value);
       return true;
     });
     _size = value;
+    assert(() { debugAssertDoesMeetConstraints(); return true; });
+  }
+
+  /// Claims ownership of the given [Size].
+  ///
+  /// In debug mode, the [RenderBox] class verifies that [Size] objects obtained
+  /// from other [RenderBox] objects are only used according to the semantics of
+  /// the [RenderBox] protocol, namely that a [Size] from a [RenderBox] can only
+  /// be used by its parent, and then only if `parentUsesSize` was set.
+  ///
+  /// Sometimes, a [Size] that can validly be used ends up no longer being valid
+  /// over time. The common example is a [Size] taken from a child that is later
+  /// removed from the parent. In such cases, this method can be called to first
+  /// check whether the size can legitimately be used, and if so, to then create
+  /// a new [Size] that can be used going forward, regardless of what happens to
+  /// the original owner.
+  Size debugAdoptSize(Size value) {
+    Size result = value;
     assert(() {
-      _size = new _DebugSize(_size, this, debugCanParentUseSize);
+      if (value is _DebugSize) {
+        if (value._owner != this) {
+          if (value._owner.parent != this) {
+            throw new FlutterError(
+              'The size property was assigned a size inappropriately.\n'
+              'The following render object:\n'
+              '  $this\n'
+              '...was assigned a size obtained from:\n'
+              '  ${value._owner}\n'
+              'However, this second render object is not, or is no longer, a '
+              'child of the first, and it is therefore a violation of the '
+              'RenderBox layout protocol to use that size in the layout of the '
+              'first render object.\n'
+              'If the size was obtained at a time where it was valid to read '
+              'the size (because the second render object above was a child '
+              'of the first at the time), then it should be adopted using '
+              'debugAdoptSize at that time.\n'
+              'If the size comes from a grandchild or a render object from an '
+              'entirely different part of the render tree, then there is no '
+              'way to be notified when the size changes and therefore attempts '
+              'to read that size are almost certainly a source of bugs. A different '
+              'approach should be used.'
+            );
+          }
+          if (!value._canBeUsedByParent) {
+            throw new FlutterError(
+              'A child\'s size was used without setting parentUsesSize.\n'
+              'The following render object:\n'
+              '  $this\n'
+              '...was assigned a size obtained from its child:\n'
+              '  ${value._owner}\n'
+              'However, when the child was laid out, the parentUsesSize argument '
+              'was not set or set to false. Subsequently this transpired to be '
+              'inaccurate: the size was nonetheless used by the parent.\n'
+              'It is important to tell the framework if the size will be used or not '
+              'as several important performance optimizations can be made if the '
+              'size will not be used by the parent.'
+            );
+          }
+        }
+      }
+      result = new _DebugSize(value, this, debugCanParentUseSize);
       return true;
     });
-    assert(() { debugAssertDoesMeetConstraints(); return true; });
+    return result;
   }
 
   @override

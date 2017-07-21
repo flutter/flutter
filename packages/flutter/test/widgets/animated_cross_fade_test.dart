@@ -21,7 +21,7 @@ void main() {
             height: 200.0
           ),
           duration: const Duration(milliseconds: 200),
-          crossFadeState: CrossFadeState.showFirst
+          crossFadeState: CrossFadeState.showFirst,
         )
       )
     );
@@ -43,7 +43,7 @@ void main() {
             height: 200.0
           ),
           duration: const Duration(milliseconds: 200),
-          crossFadeState: CrossFadeState.showSecond
+          crossFadeState: CrossFadeState.showSecond,
         )
       )
     );
@@ -69,7 +69,7 @@ void main() {
             height: 200.0
           ),
           duration: const Duration(milliseconds: 200),
-          crossFadeState: CrossFadeState.showSecond
+          crossFadeState: CrossFadeState.showSecond,
         )
       )
     );
@@ -182,6 +182,35 @@ void main() {
     await tester.pump(const Duration(milliseconds: 25));
     expect(state.ticker.muted, true);
     expect(findSemantics().excluding, true);
+  });
+
+  testWidgets('AnimatedCrossFade.layoutBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(const AnimatedCrossFade(
+      firstChild: const Text('AAA'),
+      secondChild: const Text('BBB'),
+      crossFadeState: CrossFadeState.showFirst,
+      duration: const Duration(milliseconds: 50),
+    ));
+    expect(find.text('AAA'), findsOneWidget);
+    expect(find.text('BBB'), findsOneWidget);
+    await tester.pumpWidget(new AnimatedCrossFade(
+      firstChild: const Text('AAA'),
+      secondChild: const Text('BBB'),
+      crossFadeState: CrossFadeState.showFirst,
+      duration: const Duration(milliseconds: 50),
+      layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
+    ));
+    expect(find.text('AAA'), findsOneWidget);
+    expect(find.text('BBB'), findsNothing);
+    await tester.pumpWidget(new AnimatedCrossFade(
+      firstChild: const Text('AAA'),
+      secondChild: const Text('BBB'),
+      crossFadeState: CrossFadeState.showSecond,
+      duration: const Duration(milliseconds: 50),
+      layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
+    ));
+    expect(find.text('BBB'), findsOneWidget);
+    expect(find.text('AAA'), findsNothing);
   });
 }
 

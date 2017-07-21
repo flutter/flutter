@@ -156,14 +156,18 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     _lastValue = _controller.value;
     _hasVisualOverflow = false;
 
-    if (child == null) {
+    if (child == null || constraints.isTight) {
+      _controller.stop();
       size = _sizeTween.begin = _sizeTween.end = constraints.smallest;
+      _state = RenderAnimatedSizeState.start;
+      child?.layout(constraints);
       return;
     }
 
     child.layout(constraints, parentUsesSize: true);
 
-    switch(_state) {
+    assert(_state != null);
+    switch (_state) {
       case RenderAnimatedSizeState.start:
         _layoutStart();
         break;
@@ -176,8 +180,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
       case RenderAnimatedSizeState.unstable:
         _layoutUnstable();
         break;
-      default:
-        throw new StateError('$runtimeType is in an invalid state $_state');
     }
 
     size = constraints.constrain(_animatedSize);
@@ -198,7 +200,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// We have the initial size to animate from, but we do not have the target
   /// size to animate to, so we set both ends to child's size.
   void _layoutStart() {
-    _sizeTween.begin = _sizeTween.end = child.size;
+    _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
     _state = RenderAnimatedSizeState.stable;
   }
 
@@ -209,12 +211,12 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// animation.
   void _layoutStable() {
     if (_sizeTween.end != child.size) {
-      _sizeTween.end = child.size;
+      _sizeTween.end = debugAdoptSize(child.size);
       _restartAnimation();
       _state = RenderAnimatedSizeState.changed;
     } else if (_controller.value == _controller.upperBound) {
       // Animation finished. Reset target sizes.
-      _sizeTween.begin = _sizeTween.end = child.size;
+      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
     }
   }
 
@@ -227,7 +229,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void _layoutChanged() {
     if (_sizeTween.end != child.size) {
       // Child size changed again. Match the child's size and restart animation.
-      _sizeTween.begin = _sizeTween.end = child.size;
+      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
       _restartAnimation();
       _state = RenderAnimatedSizeState.unstable;
     } else {
@@ -242,7 +244,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   void _layoutUnstable() {
     if (_sizeTween.end != child.size) {
       // Still unstable. Continue tracking the child.
-      _sizeTween.begin = _sizeTween.end = child.size;
+      _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
       _restartAnimation();
     } else {
       // Child size stabilized.
