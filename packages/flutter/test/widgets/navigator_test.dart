@@ -566,47 +566,5 @@ void main() {
     navigator.removeRoute(routes['/A']); // stack becomes /, pageValue will not complete
   });
 
-  testWidgets('push a route with arguments', (WidgetTester tester) async {
-    Future<String> pageValue;
-    final Map<String, dynamic> argumentsA = <String, dynamic>{"foo": 1, "bar" : "baz"};
-    final Map<String, dynamic> argumentsB = <String, dynamic>{"foo": 1, "bar" : "baz"};
-    final Map<String, WidgetBuilder> pageBuilders = <String, WidgetBuilder>{
-      '/': (BuildContext context) => new OnTapPage(id: '/',
-          onTap: () { pageValue = Navigator.pushNamed(context, '/A', arguments: argumentsA); }),
-      '/A': (BuildContext context) => new OnTapPage(id: 'A',
-          onTap: () { Navigator.of(context).pushNamed('/B', arguments: argumentsB); }),
-      '/B': (BuildContext context) => new OnTapPage(id: 'B', onTap: () { Navigator.pop(context, 'B'); }),
-    };
-    final Map<String, Route<String>> routes = <String, Route<String>>{};
 
-    await tester.pumpWidget(new MaterialApp(
-        onGenerateRoute: (RouteSettings settings) {
-          if (settings.name == '/A') {
-            expect(settings.arguments, equals(argumentsA));
-          } else if (settings.name == '/B') {
-            expect(settings.arguments, equals(argumentsB));
-          } else {
-            expect(settings.arguments, isNull);
-          }
-          routes[settings.name] = new PageRouteBuilder<String>(
-            settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-              return pageBuilders[settings.name](context);
-            },
-          );
-          return routes[settings.name];
-        }
-    ));
-
-    await tester.tap(find.text('/')); // pushNamed('/A'), stack becomes /, /A
-    await tester.pumpAndSettle();
-
-    // Navigator.of(context).pushNamed('/B'), stack becomes /, /A, /B
-    await tester.tap(find.text('A'));
-    await tester.pumpAndSettle();
-    pageValue.then((String value) { assert(false); });
-
-    final NavigatorState navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    navigator.removeRoute(routes['/B']); // stack becomes /, /A, pageValue will not complete
-  });
 }

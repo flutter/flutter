@@ -204,7 +204,6 @@ class RouteSettings {
   /// Creates data used to construct routes.
   const RouteSettings({
     this.name,
-    this.arguments,
     this.isInitialRoute: false,
   });
 
@@ -212,12 +211,10 @@ class RouteSettings {
   /// replaced with the new values.
   RouteSettings copyWith({
     String name,
-    Map<String, dynamic> arguments,
     bool isInitialRoute,
   }) {
     return new RouteSettings(
       name: name ?? this.name,
-      arguments: arguments ?? this.arguments,
       isInitialRoute: isInitialRoute ?? this.isInitialRoute,
     );
   }
@@ -226,11 +223,6 @@ class RouteSettings {
   ///
   /// If null, the route is anonymous.
   final String name;
-
-  /// The arguments map that this route was created with.
-  ///
-  /// If null, there were no arguments given for this route.
-  final Map<String, dynamic> arguments;
 
   /// Whether this route is the very first route being pushed onto this [Navigator].
   ///
@@ -566,9 +558,8 @@ class Navigator extends StatefulWidget {
   /// ```dart
   /// Navigator.pushNamed(context, '/nyc/1776');
   /// ```
-  static Future<dynamic> pushNamed(BuildContext context, String routeName,
-      {Map<String, dynamic> arguments}) {
-    return Navigator.of(context).pushNamed(routeName, arguments: arguments);
+  static Future<dynamic> pushNamed(BuildContext context, String routeName) {
+    return Navigator.of(context).pushNamed(routeName);
   }
 
   /// Adds the given route to the history of the navigator that most tightly
@@ -871,12 +862,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<dynamic> _routeNamed(String name, { bool allowNull: false, Map<String, dynamic> arguments}) {
+  Route<dynamic> _routeNamed(String name, { bool allowNull: false }) {
     assert(!_debugLocked);
     assert(name != null);
     final RouteSettings settings = new RouteSettings(
       name: name,
-      arguments: arguments,
       isInitialRoute: _history.isEmpty,
     );
     Route<dynamic> route = widget.onGenerateRoute(settings);
@@ -923,8 +913,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```dart
   /// Navigator.of(context).pushNamed('/nyc/1776');
   /// ```
-  Future<dynamic> pushNamed(String name, {Map<String, dynamic> arguments}) {
-    return push(_routeNamed(name, arguments: arguments));
+  Future<dynamic> pushNamed(String name) {
+    return push(_routeNamed(name));
   }
 
   /// Adds the given route to the navigator's history, and transitions to it.
@@ -1046,17 +1036,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     return newRoute.popped;
   }
 
-  /// Push the route named [name] with optional [arguments] and dispose the
-  /// old current route.
+  /// Push the route named [name] and dispose the old current route.
   ///
-  /// The new route information will be passed to [Navigator.onGenerateRoute].
-  /// The returned route will be pushed into the navigator.
+  /// The route name will be passed to [Navigator.onGenerateRoute]. The returned
+  /// route will be pushed into the navigator.
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  Future<dynamic> pushReplacementNamed(String name,
-      { dynamic result, Map<String, dynamic> arguments }) {
-    return pushReplacement(_routeNamed(name, arguments: arguments), result: result);
+  Future<dynamic> pushReplacementNamed(String name, { dynamic result }) {
+    return pushReplacement(_routeNamed(name), result: result);
   }
 
   /// Replaces a route that is not currently visible with a new route.
@@ -1147,8 +1135,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     return newRoute.popped;
   }
 
-  /// Push the route with the given `routeName`, and optional `arguments`, and
-  /// then remove all the previous routes until the `predicate` returns true.
+  /// Push the route with the given name and then remove all the previous routes
+  /// until the `predicate` returns true.
   ///
   /// The predicate may be applied to the same route more than once if
   /// [Route.willHandlePopInternally] is true.
@@ -1158,9 +1146,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// To remove all the routes before the pushed route, use a [RoutePredicate]
   /// that always returns false.
-  Future<dynamic> pushNamedAndRemoveUntil(String routeName, RoutePredicate predicate,
-      {Map<String, dynamic> arguments}) {
-    return pushAndRemoveUntil(_routeNamed(routeName, arguments: arguments), predicate);
+  Future<dynamic> pushNamedAndRemoveUntil(String routeName, RoutePredicate predicate) {
+    return pushAndRemoveUntil(_routeNamed(routeName), predicate);
   }
 
   /// Tries to pop the current route, first giving the active route the chance
