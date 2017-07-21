@@ -1201,8 +1201,6 @@ TEST_F(RenderTest, SpacingParagraph) {
   ASSERT_EQ(paragraph->records_[5].style().word_spacing, 0);
   ASSERT_EQ(paragraph->records_[6].style().word_spacing, 20);
 
-
-
 }
 
 }  // namespace txt

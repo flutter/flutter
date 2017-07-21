@@ -98,8 +98,13 @@ void GetFontAndMinikinPaint(const TextStyle& style,
                             minikin::MinikinPaint* paint) {
   *font = minikin::FontStyle(GetWeight(style), GetItalic(style));
   paint->size = style.font_size;
-  paint->letterSpacing = style.letter_spacing;
+  // Divide by font size so letter spacing is pixels, not proportional to font
+  // size.
+  paint->letterSpacing = style.letter_spacing / style.font_size;
   paint->wordSpacing = style.word_spacing;
+  paint->scaleX = 1;
+  // Prevent spacing rounding in Minikin.
+  paint->paintFlags = 0xFF;
 }
 
 void GetPaint(const TextStyle& style, SkPaint* paint) {
@@ -203,7 +208,6 @@ void Paragraph::Layout(double width, bool force) {
   SkScalar x = 0.0f;
   SkScalar y = 0.0f;
   size_t break_index = 0;
-  double letter_spacing_offset = 0.0f;
   double max_line_spacing = 0.0f;
   double max_descent = 0.0f;
   double prev_max_descent = 0.0f;
@@ -293,9 +297,6 @@ void Paragraph::Layout(double width, bool force) {
     GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
     GetPaint(run.style, &paint);
 
-    // Subtract inital offset to avoid big gap at start of run.
-    letter_spacing_offset -= run.style.letter_spacing;
-
     size_t layout_start = run.start;
     // Layout until the end of the run or too many lines.
     while (layout_start < run.end && lines_ < paragraph_style_.max_lines) {
@@ -325,7 +326,6 @@ void Paragraph::Layout(double width, bool force) {
       buffer_sizes = std::vector<size_t>();
       word_count = 0;
       double temp_line_spacing = 0;
-      double prev_letter_spacing_offset = letter_spacing_offset;
       while (blob_start < glyph_count) {
         const size_t blob_length = GetBlobLength(layout, blob_start);
         buffer_sizes.push_back(blob_length);
@@ -344,8 +344,6 @@ void Paragraph::Layout(double width, bool force) {
         buffers.push_back(
             &builder.allocRunPos(paint, blob_length - trailing_length));
 
-        letter_spacing_offset += run.style.letter_spacing;
-
         // TODO(garyq): Implement RTL.
         // Each Glyph/Letter.
         bool whitespace_ended = true;
@@ -356,8 +354,7 @@ void Paragraph::Layout(double width, bool force) {
 
           const size_t pos_index = 2 * blob_index;
 
-          buffers.back()->pos[pos_index] =
-              layout.getX(glyph_index) + letter_spacing_offset;
+          buffers.back()->pos[pos_index] = layout.getX(glyph_index);
           glyph_single_line_position_x.push_back(
               buffers.back()->pos[pos_index]);
           buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
@@ -369,11 +366,6 @@ void Paragraph::Layout(double width, bool force) {
             // whitespaces.
             if (whitespace_ended) {
               ++word_count;
-              word_widths_.push_back(buffers.back()->pos[pos_index] +
-                                     layout.getCharAdvance(glyph_index) -
-                                     prev_word_pos);
-              prev_word_pos = buffers.back()->pos[pos_index] +
-                              layout.getCharAdvance(glyph_index);
             }
             whitespace_ended = false;
           } else {
@@ -381,25 +373,8 @@ void Paragraph::Layout(double width, bool force) {
           }
 
           prev_char_advance = layout.getCharAdvance(glyph_index);
-
-          letter_spacing_offset += run.style.letter_spacing;
         }
         blob_start += blob_length;
-
-        // Add on the last word if the blob break was not on whitespace.
-        if (whitespace_ended) {
-          word_widths_.push_back(
-              layout.getX(blob_start - 1) + letter_spacing_offset -
-              run.style.letter_spacing + layout.getCharAdvance(blob_start - 1) -
-              prev_word_pos);
-        }
-
-        // Subtract letter offset to avoid big gap at end of run. This my be
-        // removed depending on the specifications for letter spacing.
-        // letter_spacing_offset -= run.style.letter_spacing;
-
-        max_intrinsic_width_ +=
-            layout.getX(blob_start - 1) + letter_spacing_offset;
       }
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
@@ -416,7 +391,6 @@ void Paragraph::Layout(double width, bool force) {
       line_width +=
           std::abs(records_[records_.size() - 1].text()->bounds().fRight +
                    records_[records_.size() - 1].text()->bounds().fLeft);
-      records_.back().SetLetterSpacingOffset(prev_letter_spacing_offset);
       // Must adjust each line to the largest text in the line, so cannot
       // directly push the offset property of PaintRecord until line is
       // finished.
@@ -452,13 +426,10 @@ void Paragraph::Layout(double width, bool force) {
         line_widths_.push_back(line_width);
         postprocess_line();
 
-        records_.back().SetLetterSpacingOffset(0);
-
         // Reset Variables for next line.
         max_line_spacing = 0.0f;
         max_descent = 0.0f;
         x = 0.0f;
-        letter_spacing_offset = 0.0f;
         prev_word_pos = 0;
         prev_char_advance = 0.0f;
         line_width = 0.0f;
@@ -643,10 +614,6 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
 
     // Filled when drawing wavy decorations.
     std::vector<WaveCoordinates> wave_coords;
-
-    x +=
-        (record_index != 0 ? records_[record_index - 1].GetLetterSpacingOffset()
-                           : 0);
 
     double width = 0;
     if (record_index == records_.size() - 1 ||

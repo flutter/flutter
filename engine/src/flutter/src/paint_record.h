@@ -54,10 +54,6 @@ class PaintRecord {
 
   double GetWidthModifier() const { return width_modifier_; }
 
-  void SetLetterSpacingOffset(double val);
-
-  double GetLetterSpacingOffset() const { return letter_spacing_offset_; }
-
   SkTextBlob* text() const { return text_.get(); }
 
   const SkPaint::FontMetrics& metrics() const { return metrics_; }
@@ -74,7 +70,6 @@ class PaintRecord {
   size_t line_;
   // Change in width when using a non-left text alignment.
   double width_modifier_ = 0.0f;
-  double letter_spacing_offset_ = 0.0f;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PaintRecord);
 };
