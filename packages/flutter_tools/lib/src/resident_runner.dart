@@ -44,12 +44,20 @@ class FlutterDevice {
     _viewsCache = null;
   }
 
-  void connect() {
+  /// If the [reloadSources] parameter is not null the 'reloadSources' service
+  /// will be registered.
+  /// The 'reloadSources' service can be used by other Service Protocol clients
+  /// connected to the VM (e.g. Observatory) to request a reload of the source
+  /// code of the running application (a.k.a. HotReload).
+  /// This ensures that the reload process follows the normal orchestration of
+  /// the Flutter Tools and not just the VM internal service.
+  void connect({ReloadSources reloadSources}) {
     if (vmServices != null)
       return;
     vmServices = new List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
-      vmServices[i] = VMService.connect(observatoryUris[i]);
+      vmServices[i] = VMService.connect(observatoryUris[i],
+          reloadSources: reloadSources);
       printTrace('Connected to service protocol: ${observatoryUris[i]}');
     }
   }
@@ -163,6 +171,11 @@ class FlutterDevice {
       await view.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
+  Future<Null> debugTogglePerformanceOverlayOverride() async {
+    for (FlutterView view in views)
+      await view.uiIsolate.flutterTogglePerformanceOverlayOverride();
+  }
+
   Future<String> togglePlatform({ String from }) async {
     String to;
     switch (from) {
@@ -210,7 +223,7 @@ class FlutterDevice {
     printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    package = getApplicationPackageForPlatform(
+    package = await getApplicationPackageForPlatform(
       targetPlatform,
       applicationBinary: hotRunner.applicationBinary
     );
@@ -239,7 +252,8 @@ class FlutterDevice {
       route: route,
       prebuiltApplication: prebuiltMode,
       kernelPath: hotRunner.kernelFilePath,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
+      usesTerminalUi: hotRunner.usesTerminalUI,
     );
 
     final LaunchResult result = await futureResult;
@@ -260,7 +274,7 @@ class FlutterDevice {
     bool shouldBuild: true,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    package = getApplicationPackageForPlatform(
+    package = await getApplicationPackageForPlatform(
       targetPlatform,
       applicationBinary: coldRunner.applicationBinary
     );
@@ -298,7 +312,8 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
+      usesTerminalUi: coldRunner.usesTerminalUI,
     );
 
     if (!result.started) {
@@ -312,7 +327,6 @@ class FlutterDevice {
   }
 
   Future<bool> updateDevFS({
-    DevFSProgressReporter progressReporter,
     AssetBundle bundle,
     bool bundleDirty: false,
     Set<String> fileFilter
@@ -324,7 +338,6 @@ class FlutterDevice {
     int bytes = 0;
     try {
       bytes = await devFS.update(
-        progressReporter: progressReporter,
         bundle: bundle,
         bundleDirty: bundleDirty,
         fileFilter: fileFilter
@@ -443,6 +456,12 @@ abstract class ResidentRunner {
       await device.toggleDebugPaintSizeEnabled();
   }
 
+  Future<Null> _debugTogglePerformanceOverlayOverride() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices)
+      await device.debugTogglePerformanceOverlayOverride();
+  }
+
   Future<Null> _screenshot(FlutterDevice device) async {
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...');
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
@@ -526,14 +545,17 @@ abstract class ResidentRunner {
       device.stopEchoingDeviceLog();
   }
 
-  Future<Null> connectToServiceProtocol({String viewFilter}) async {
+  /// If the [reloadSources] parameter is not null the 'reloadSources' service
+  /// will be registered
+  Future<Null> connectToServiceProtocol({String viewFilter,
+      ReloadSources reloadSources}) async {
     if (!debuggingOptions.debuggingEnabled)
       return new Future<Null>.error('Error the service protocol is not enabled.');
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
       device.viewFilter = viewFilter;
-      device.connect();
+      device.connect(reloadSources: reloadSources);
       await device.getVMs();
       await device.waitForViews();
       if (device.views == null)
@@ -595,9 +617,14 @@ abstract class ResidentRunner {
         await _debugDumpSemanticsTree();
         return true;
       }
-    } else if (lower == 'p') {
+    } else if (character == 'p') {
       if (supportsServiceProtocol && isRunningDebug) {
         await _debugToggleDebugPaintSizeEnabled();
+        return true;
+      }
+    } else if (character == 'P') {
+      if (supportsServiceProtocol) {
+        await _debugTogglePerformanceOverlayOverride();
         return true;
       }
     } else if (character == 's') {
@@ -715,11 +742,14 @@ abstract class ResidentRunner {
     if (supportsServiceProtocol) {
       printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
       printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
-      printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S".');
       if (isRunningDebug) {
+        printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S".');
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
+      } else {
+        printStatus('To dump the accessibility tree (debugDumpSemantics), press "S".');
       }
+      printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot))
       printStatus('To save a screenshot to flutter.png, press "s".');

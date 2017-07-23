@@ -9,6 +9,8 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/ios.dart';
 import '../framework/utils.dart';
+import 'save_catalog_screenshots.dart' show saveCatalogScreenshots;
+
 
 Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
   final Device device = await devices.workingDevice;
@@ -19,10 +21,13 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
   await inDirectory(catalogDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
-    if (deviceOperatingSystem == DeviceOperatingSystem.ios)
+    final bool isIosDevice = deviceOperatingSystem == DeviceOperatingSystem.ios;
+    if (isIosDevice)
       await prepareProvisioningCertificates(catalogDirectory.path);
 
-    await dart(<String>['bin/sample_page.dart']);
+    final String commit = await getCurrentFlutterRepoCommit();
+
+    await dart(<String>['bin/sample_page.dart', commit]);
 
     await flutter('drive', options: <String>[
       '--target',
@@ -31,11 +36,12 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
       deviceId,
     ]);
 
-    await dart(<String>[
-      'bin/save_screenshots.dart',
-      await getCurrentFlutterRepoCommit(),
-      authorizationToken,
-    ]);
+    await saveCatalogScreenshots(
+      directory: dir('${flutterDirectory.path}/examples/catalog/.generated'),
+      commit: commit,
+      token: authorizationToken,
+      prefix: isIosDevice ? 'ios_' : '',
+    );
   });
 
   return new TaskResult.success(null);

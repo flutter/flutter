@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
 
@@ -94,9 +95,6 @@ HSVColor debugCurrentRepaintColor = _kDebugCurrentRepaintColor;
 /// The amount to increment the hue of the current repaint color.
 double debugRepaintRainbowHueIncrement = _kDebugRepaintRainbowHueIncrement;
 
-/// Log the call stacks that mark render objects as needing paint.
-bool debugPrintMarkNeedsPaintStacks = false;
-
 /// Log the call stacks that mark render objects as needing layout.
 ///
 /// For sanity, this only logs the stack traces of cases where an object is
@@ -105,7 +103,33 @@ bool debugPrintMarkNeedsPaintStacks = false;
 /// up the tree.
 bool debugPrintMarkNeedsLayoutStacks = false;
 
+/// Log the call stacks that mark render objects as needing paint.
+bool debugPrintMarkNeedsPaintStacks = false;
+
+/// Log the dirty render objects that are laid out each frame.
+///
+/// Combined with [debugPrintBeginFrameBanner], this allows you to distinguish
+/// layouts triggered by the initial mounting of a render tree (e.g. in a call
+/// to [runApp]) from the regular layouts triggered by the pipeline.
+///
+/// Combined with [debugPrintMarkNeedsLayoutStacks], this lets you watch a
+/// render object's dirty/clean lifecycle.
+///
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which does something similar for
+///    painting but using the timeline view.
+///
+///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
+///    being rebuilt.
+///
+///  * The discussion at [RendererBinding.drawFrame].
+bool debugPrintLayouts = false;
+
 /// Check the intrinsic sizes of each [RenderBox] during layout.
+///
+/// By default this is turned off since these checks are expensive, but it is
+/// enabled by the test framework.
 bool debugCheckIntrinsicSizes = false;
 
 /// Adds [dart:developer.Timeline] events for every [RenderObject] painted.
@@ -117,11 +141,27 @@ bool debugCheckIntrinsicSizes = false;
 /// For details on how to use [dart:developer.Timeline] events in the Dart
 /// Observatory to optimize your app, see:
 /// <https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md>
+///
+/// See also:
+///
+///  * [debugPrintLayouts], which does something similar for layout but using
+///    console output.
+///
+///  * [debugProfileBuildsEnabled], which does something similar for widgets
+///    being rebuilt, and [debugPrintRebuildDirtyWidgets], its console
+///    equivalent.
+///
+///  * The discussion at [RendererBinding.drawFrame].
 bool debugProfilePaintsEnabled = false;
 
 
-/// Returns a list of strings representing the given transform in a format useful for [RenderObject.debugFillDescription].
+/// Returns a list of strings representing the given transform in a format
+/// useful for [RenderObject.debugFillDescription].
+///
+/// If the argument is null, returns a list with the single string "null".
 List<String> debugDescribeTransform(Matrix4 transform) {
+  if (transform == null)
+    return const <String>['null'];
   final List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;
@@ -161,9 +201,13 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See [https://docs.flutter.io/flutter/rendering/rendering-library.html] for
+/// See <https://docs.flutter.io/flutter/rendering/rendering-library.html> for
 /// a complete list.
-bool debugAssertAllRenderVarsUnset(String reason) {
+///
+/// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
+/// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
+/// test framework itself overrides this value in some cases.)
+bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride: false }) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||
@@ -171,9 +215,10 @@ bool debugAssertAllRenderVarsUnset(String reason) {
         debugPaintPointersEnabled ||
         debugRepaintRainbowEnabled ||
         debugRepaintTextRainbowEnabled ||
-        debugPrintMarkNeedsPaintStacks ||
         debugPrintMarkNeedsLayoutStacks ||
-        debugCheckIntrinsicSizes ||
+        debugPrintMarkNeedsPaintStacks ||
+        debugPrintLayouts ||
+        debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
         debugProfilePaintsEnabled ||
         debugPaintSizeColor != _kDebugPaintSizeColor ||
         debugPaintSpacingColor != _kDebugPaintSpacingColor ||

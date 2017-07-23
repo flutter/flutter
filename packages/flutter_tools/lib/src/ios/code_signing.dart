@@ -80,7 +80,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=(
 ///
 /// Will return null if none are found, if the user cancels or if the Xcode
 /// project has a development team set in the project's build settings.
-Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) async{
+Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bool usesTerminalUi: true}) async{
   if (iosApp.buildSettings == null)
     return null;
 
@@ -115,7 +115,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
       .toSet() // Unique.
       .toList();
 
-  final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities);
+  final String signingIdentity = await _chooseSigningIdentity(validCodeSigningIdentities, usesTerminalUi);
 
   // If none are chosen, return null.
   if (signingIdentity == null)
@@ -153,7 +153,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
       ?.group(1);
 }
 
-Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) async {
+Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, bool usesTerminalUi) async {
   // The user has no valid code signing identities.
   if (validCodeSigningIdentities.isEmpty) {
     printError(noCertificatesInstruction, emphasis: true);
@@ -164,9 +164,26 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
     return validCodeSigningIdentities.first;
 
   if (validCodeSigningIdentities.length > 1) {
+    final String savedCertChoice = config.getValue('ios-signing-cert');
+
+    if (savedCertChoice != null) {
+      if (validCodeSigningIdentities.contains(savedCertChoice)) {
+        printStatus('Found saved certificate choice "$savedCertChoice". To clear, use "flutter config".');
+        return savedCertChoice;
+      }
+      else {
+        printError('Saved signing certificate "$savedCertChoice" is not a valid development certificate');
+      }
+    }
+
+    // If terminal UI can't be used, just attempt with the first valid certificate
+    // since we can't ask the user.
+    if (!usesTerminalUi)
+      return validCodeSigningIdentities.first;
+
     final int count = validCodeSigningIdentities.length;
     printStatus(
-      'Multiple valid development certificates available:',
+      'Multiple valid development certificates available (your choice will be saved):',
       emphasis: true,
     );
     for (int i=0; i<count; i++) {
@@ -182,10 +199,14 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
     );
 
-    if (choice == 'a')
+    if (choice == 'a') {
       throwToolExit('Aborted. Code signing is required to build a deployable iOS app.');
-    else
-      return validCodeSigningIdentities[int.parse(choice) - 1];
+    } else {
+      final String selectedCert = validCodeSigningIdentities[int.parse(choice) - 1];
+      printStatus('Certificate choice "$savedCertChoice" saved');
+      config.setValue('ios-signing-cert', selectedCert);
+      return selectedCert;
+    }
   }
 
   return null;

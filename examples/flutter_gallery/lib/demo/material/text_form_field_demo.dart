@@ -129,6 +129,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 icon: const Icon(Icons.phone),
                 hintText: 'Where can we reach you?',
                 labelText: 'Phone Number *',
+                prefixText: '+1'
               ),
               keyboardType: TextInputType.phone,
               onSaved: (String value) { person.phoneNumber = value; },
@@ -143,9 +144,20 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
             new TextFormField(
               decoration: const InputDecoration(
                 hintText: 'Tell us about yourself',
+                helperText: 'Keep it short, this is just a demo',
                 labelText: 'Life story',
               ),
               maxLines: 3,
+            ),
+            new TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Salary',
+                prefixText: '\$',
+                suffixText: 'USD',
+                suffixStyle: const TextStyle(color: Colors.green)
+              ),
+              maxLines: 1,
             ),
             new Row(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -15,7 +15,7 @@ void main() {
       new CustomScrollView(
         slivers: <Widget>[
           new SliverFillViewport(
-            delegate: new SliverChildListDelegate(children),
+            delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
           ),
         ],
       ),
@@ -55,5 +55,62 @@ void main() {
     expect(find.text('1'), findsNothing);
     expect(find.text('2'), findsNothing);
     expect(find.text('3'), findsNothing);
+
+    final RenderObject viewport = tester.renderObject<RenderObject>(find.byType(SliverFillViewport).first);
+    // TODO(jacobr): toStringDeep has an extra trailing \n.
+    expect(viewport, isNot(hasAGoodToStringDeep));
+    expect(
+      viewport.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderSliverFillViewport#00000 relayoutBoundary=up1\n'
+        ' │ creator: SliverFillViewport ← Viewport ← _ScrollableScope ←\n'
+        ' │   IgnorePointer-[GlobalKey#00000] ← Listener ← _GestureSemantics\n'
+        ' │   ←\n'
+        ' │   RawGestureDetector-[LabeledGlobalKey<RawGestureDetectorState>#00000]\n'
+        ' │   ← RepaintBoundary ← CustomPaint ← RepaintBoundary ←\n'
+        ' │   NotificationListener<ScrollNotification> ←\n'
+        ' │   GlowingOverscrollIndicator ← ⋯\n'
+        ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
+        ' │ constraints: SliverConstraints(AxisDirection.down,\n'
+        ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
+        ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
+        ' │   viewportMainAxisExtent: 600.0)\n'
+        ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
+        ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true, )\n'
+        ' │ currently live children: 0 to 0\n'
+        ' │\n'
+        ' └─child with index 0: RenderRepaintBoundary#00000\n'
+        '   │ creator: RepaintBoundary-[<0>] ← SliverFillViewport ← Viewport ←\n'
+        '   │   _ScrollableScope ← IgnorePointer-[GlobalKey#00000] ← Listener ←\n'
+        '   │   _GestureSemantics ←\n'
+        '   │   RawGestureDetector-[LabeledGlobalKey<RawGestureDetectorState>#00000]\n'
+        '   │   ← RepaintBoundary ← CustomPaint ← RepaintBoundary ←\n'
+        '   │   NotificationListener<ScrollNotification> ← ⋯\n'
+        '   │ parentData: index=0; layoutOffset=0.0\n'
+        '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '   │ layer: OffsetLayer#00000\n'
+        '   │ size: Size(800.0, 600.0)\n'
+        '   │ metrics: 50.0% useful (1 bad vs 1 good)\n'
+        '   │ diagnosis: insufficient data to draw conclusion (less than five\n'
+        '   │   repaints)\n'
+        '   │\n'
+        '   └─child: RenderParagraph#00000\n'
+        '     │ creator: RichText ← Text ← Container ← RepaintBoundary-[<0>] ←\n'
+        '     │   SliverFillViewport ← Viewport ← _ScrollableScope ←\n'
+        '     │   IgnorePointer-[GlobalKey#00000] ← Listener ← _GestureSemantics\n'
+        '     │   ←\n'
+        '     │   RawGestureDetector-[LabeledGlobalKey<RawGestureDetectorState>#00000]\n'
+        '     │   ← RepaintBoundary ← ⋯\n'
+        '     │ parentData: <none> (can use size)\n'
+        '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '     │ size: Size(800.0, 600.0)\n'
+        '     ╘═╦══ text ═══\n'
+        '       ║ TextSpan:\n'
+        '       ║   inherit: true\n'
+        '       ║   "0"\n'
+        '       ╚═══════════\n'
+        '\n',
+      ),
+    );
   });
 }

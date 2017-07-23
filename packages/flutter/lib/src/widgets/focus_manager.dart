@@ -23,6 +23,16 @@ import 'package:flutter/foundation.dart';
 /// method to reparent your [FocusNode] if your widget moves from one
 /// location in the tree to another.
 ///
+/// ## Lifetime
+///
+/// Focus nodes are long-lived objects. For example, if a stateful widget has a
+/// focusable child widget, it should create a [FocusNode] in the
+/// [State.initState] method, and [dispose] it in the [State.dispose] method,
+/// providing the same [FocusNode] to the focusable child each time the
+/// [State.build] method is run. In particular, creating a [FocusNode] each time
+/// [State.build] is invoked will cause the focus to be lost each time the
+/// widget is built.
+///
 /// See also:
 ///
 ///  * [FocusScopeNode], which is an interior node in the focus tree.
@@ -94,7 +104,7 @@ class FocusNode extends ChangeNotifier {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode${hasFocus ? '(FOCUSED)' : ''}';
+  String toString() => '${describeIdentity(this)}${hasFocus ? '(FOCUSED)' : ''}';
 }
 
 /// An interior node in the focus tree.
@@ -446,7 +456,7 @@ class FocusManager {
   String toString() {
     final String status = _haveScheduledUpdate ? ' UPDATE SCHEDULED' : '';
     final String indent = '  ';
-    return '$runtimeType#$hashCode$status\n'
+    return '${describeIdentity(this)}$status\n'
       '${indent}currentFocus: $_currentFocus\n'
       '${rootScope.toStringDeep(indent, indent)}';
   }

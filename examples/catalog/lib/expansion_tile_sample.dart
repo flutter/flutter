@@ -97,16 +97,19 @@ Sample Catalog
 
 Title: ExpansionTile
 
-Summary: ExpansionTiles can used to produce two-level or multi-level lists.
-When displayed within a scrollable that creates its list items lazily,
-like a scrollable list created with `ListView.builder()`, they can be quite
-efficient, particularly for material design "expand/collapse" lists.
+Summary: An ExpansionTile for building nested lists, with two or more levels.
 
 Description:
 This app displays hierarchical data with ExpansionTiles. Tapping a tile
 expands or collapses the view of its children. When a tile is collapsed
 its children are disposed so that the widget footprint of the list only
 reflects what's visible.
+
+When displayed within a scrollable that creates its list items lazily,
+like a scrollable list created with `ListView.builder()`, ExpansionTiles
+can be quite efficient, particularly for material design "expand/collapse"
+lists.
+
 
 Classes: ExpansionTile, ListView
 

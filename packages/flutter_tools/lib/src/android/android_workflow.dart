@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
@@ -14,6 +15,8 @@ import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart' as android_studio;
+
+AndroidWorkflow get androidWorkflow => context.putIfAbsent(AndroidWorkflow, () => new AndroidWorkflow());
 
 class AndroidWorkflow extends DoctorValidator implements Workflow {
   AndroidWorkflow() : super('Android toolchain - develop for Android devices');
@@ -175,7 +178,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     final String javaBinary = _findJavaBinary();
     if (javaBinary != null) {
       sdkManagerEnv['PATH'] =
-          platform.environment['PATH'] + os.pathVarSeparator + fs.path.dirname(javaBinary);
+          fs.path.dirname(javaBinary) + os.pathVarSeparator + platform.environment['PATH'];
     }
 
     final String sdkManagerPath = fs.path.join(

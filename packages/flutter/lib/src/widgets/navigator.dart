@@ -207,6 +207,18 @@ class RouteSettings {
     this.isInitialRoute: false,
   });
 
+  /// Creates a copy of this route settings object with the given fields
+  /// replaced with the new values.
+  RouteSettings copyWith({
+    String name,
+    bool isInitialRoute,
+  }) {
+    return new RouteSettings(
+      name: name ?? this.name,
+      isInitialRoute: isInitialRoute ?? this.isInitialRoute,
+    );
+  }
+
   /// The name of the route (e.g., "/settings").
   ///
   /// If null, the route is anonymous.
@@ -374,7 +386,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// The app's home page route is named '/' by default.
 ///
 /// The [MaterialApp] can be created
-/// with a `Map<String, WidgetBuilder>` which maps from a route's name to
+/// with a [Map<String, WidgetBuilder>] which maps from a route's name to
 /// a builder function that will create it. The [MaterialApp] uses this
 /// map to create a value for its navigator's [onGenerateRoute] callback.
 ///
@@ -431,10 +443,10 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// ### Popup routes
 ///
-/// Routes don't have to obscure the entire screen. [PopupRoute]s cover
-/// the screen with a barrierColor that can be only partially opaque to
-/// allow the current screen to show through. Popup routes are "modal"
-/// because they block input to the widgets below.
+/// Routes don't have to obscure the entire screen. [PopupRoute]s cover the
+/// screen with a [ModalRoute.barrierColor] that can be only partially opaque to
+/// allow the current screen to show through. Popup routes are "modal" because
+/// they block input to the widgets below.
 ///
 /// There are functions which create and show popup routes. For
 /// example: [showDialog], [showMenu], and [showModalBottomSheet]. These
@@ -496,6 +508,17 @@ class Navigator extends StatefulWidget {
        super(key: key);
 
   /// The name of the first route to show.
+  ///
+  /// By default, this defers to [dart:ui.Window.defaultRouteName].
+  ///
+  /// If this string contains any `/` characters, then the string is split on
+  /// those characters and substrings from the start of the string up to each
+  /// such character are, in turn, used as routes to push.
+  ///
+  /// For example, if the route `/stocks/HOOLI` was used as the [initialRoute],
+  /// then the [Navigator] would push the following routes on startup: `/`,
+  /// `/stocks`, `/stocks/HOOLI`. This enables deep linking while allowing the
+  /// application to maintain a predictable route history.
   final String initialRoute;
 
   /// Called to generate a route for a given [RouteSettings].
@@ -514,7 +537,12 @@ class Navigator extends StatefulWidget {
   /// A list of observers for this navigator.
   final List<NavigatorObserver> observers;
 
-  /// The default name for the initial route.
+  /// The default name for the [initialRoute].
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.Window.defaultRouteName], which reflects the route that the
+  ///    application was started with.
   static const String defaultRouteName = '/';
 
   /// Push a named route onto the navigator that most tightly encloses the given context.
@@ -730,6 +758,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
   final FocusScopeNode focusScopeNode = new FocusScopeNode();
 
+  final List<OverlayEntry> _initialOverlayEntries = <OverlayEntry>[];
+
   @override
   void initState() {
     super.initState();
@@ -737,10 +767,57 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(observer.navigator == null);
       observer._navigator = this;
     }
-    push(widget.onGenerateRoute(new RouteSettings(
-      name: widget.initialRoute ?? Navigator.defaultRouteName,
-      isInitialRoute: true
-    )));
+    String initialRouteName = widget.initialRoute ?? Navigator.defaultRouteName;
+    if (initialRouteName.startsWith('/') && initialRouteName.length > 1) {
+      initialRouteName = initialRouteName.substring(1); // strip leading '/'
+      assert(Navigator.defaultRouteName == '/');
+      final List<String> plannedInitialRouteNames = <String>[
+        Navigator.defaultRouteName,
+      ];
+      final List<Route<dynamic>> plannedInitialRoutes = <Route<dynamic>>[
+        _routeNamed(Navigator.defaultRouteName, allowNull: true),
+      ];
+      final List<String> routeParts = initialRouteName.split('/');
+      if (initialRouteName.isNotEmpty) {
+        String routeName = '';
+        for (String part in routeParts) {
+          routeName += '/$part';
+          plannedInitialRouteNames.add(routeName);
+          plannedInitialRoutes.add(_routeNamed(routeName, allowNull: true));
+        }
+      }
+      if (plannedInitialRoutes.contains(null)) {
+        assert(() {
+          FlutterError.reportError(
+            new FlutterErrorDetails( // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/29952
+              exception:
+                'Could not navigate to initial route.\n'
+                'The requested route name was: "/$initialRouteName"\n'
+                'The following routes were therefore attempted:\n'
+                ' * ${plannedInitialRouteNames.join("\n * ")}\n'
+                'This resulted in the following objects:\n'
+                ' * ${plannedInitialRoutes.join("\n * ")}\n'
+                'One or more of those objects was null, and therefore the initial route specified will be '
+                'ignored and "${Navigator.defaultRouteName}" will be used instead.'
+            ),
+          );
+          return true;
+        });
+        push(_routeNamed(Navigator.defaultRouteName));
+      } else {
+        for (Route<dynamic> route in plannedInitialRoutes)
+          push(route);
+      }
+    } else {
+      Route<dynamic> route;
+      if (initialRouteName != Navigator.defaultRouteName)
+        route = _routeNamed(initialRouteName, allowNull: true);
+      if (route == null)
+        route = _routeNamed(Navigator.defaultRouteName);
+      push(route);
+    }
+    for (Route<dynamic> route in _history)
+      _initialOverlayEntries.addAll(route.overlayEntries);
   }
 
   @override
@@ -785,15 +862,40 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<dynamic> _routeNamed(String name) {
+  Route<dynamic> _routeNamed(String name, { bool allowNull: false }) {
     assert(!_debugLocked);
     assert(name != null);
-    final RouteSettings settings = new RouteSettings(name: name);
+    final RouteSettings settings = new RouteSettings(
+      name: name,
+      isInitialRoute: _history.isEmpty,
+    );
     Route<dynamic> route = widget.onGenerateRoute(settings);
-    if (route == null) {
-      assert(widget.onUnknownRoute != null);
+    if (route == null && !allowNull) {
+      assert(() {
+        if (widget.onUnknownRoute == null) {
+          throw new FlutterError(
+            'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
+            'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
+            'onUnknownRoute callback specified.\n'
+            'The Navigator was:\n'
+            '  $this'
+          );
+        }
+        return true;
+      });
       route = widget.onUnknownRoute(settings);
-      assert(route != null);
+      assert(() {
+        if (route == null) {
+          throw new FlutterError(
+            'A Navigator\'s onUnknownRoute returned null.\n'
+            'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
+            'null. The onUnknownRoute callback should never return null.\n'
+            'The Navigator was:\n'
+            '  $this'
+          );
+        }
+        return true;
+      });
     }
     return route;
   }
@@ -1245,7 +1347,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
-    final Route<dynamic> initialRoute = _history.first;
     return new Listener(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,
@@ -1257,7 +1358,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           autofocus: true,
           child: new Overlay(
             key: _overlayKey,
-            initialEntries: initialRoute.overlayEntries,
+            initialEntries: _initialOverlayEntries,
           ),
         ),
       ),

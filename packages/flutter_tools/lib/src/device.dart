@@ -81,11 +81,17 @@ class DeviceManager {
         : getAllConnectedDevices();
   }
 
+  Iterable<DeviceDiscovery> get _platformDiscoverers {
+    return _deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
+  }
+
   /// Return the list of all connected devices.
-  Stream<Device> getAllConnectedDevices() {
-    return new Stream<Device>.fromIterable(_deviceDiscoverers
-      .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform)
-      .expand((DeviceDiscovery discoverer) => discoverer.devices));
+  Stream<Device> getAllConnectedDevices() async* {
+    for (DeviceDiscovery discoverer in _platformDiscoverers) {
+      for (Device device in await discoverer.devices) {
+        yield device;
+      }
+    }
   }
 }
 
@@ -97,7 +103,7 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
-  List<Device> get devices;
+  Future<List<Device>> get devices;
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -105,19 +111,33 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingDuration = const Duration(seconds: 4);
+  static const Duration _pollingInterval = const Duration(seconds: 4);
+  static const Duration _pollingTimeout = const Duration(seconds: 30);
 
   final String name;
   ItemListNotifier<Device> _items;
   Timer _timer;
 
-  List<Device> pollingGetDevices();
+  Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
     if (_timer == null) {
       _items ??= new ItemListNotifier<Device>();
-      _timer = new Timer.periodic(_pollingDuration, (Timer timer) {
-        _items.updateWithNewList(pollingGetDevices());
+      bool _fetchingDevices = false;
+      _timer = new Timer.periodic(_pollingInterval, (Timer timer) async {
+        if (_fetchingDevices) {
+          printTrace('Skipping device poll: already in progress');
+          return;
+        }
+        _fetchingDevices = true;
+        try {
+          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+          _items.updateWithNewList(devices);
+        } on TimeoutException {
+          printTrace('Device poll timed out.');
+        } finally {
+          _fetchingDevices = false;
+        }
       });
     }
   }
@@ -128,8 +148,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   }
 
   @override
-  List<Device> get devices {
-    _items ??= new ItemListNotifier<Device>.from(pollingGetDevices());
+  Future<List<Device>> get devices async {
+    _items ??= new ItemListNotifier<Device>.from(await pollingGetDevices());
     return _items.items;
   }
 
@@ -216,6 +236,11 @@ abstract class Device {
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
+  ///
+  /// If [usesTerminalUi] is true, Flutter Tools may attempt to prompt the
+  /// user to resolve fixable issues such as selecting a signing certificate
+  /// for iOS device deployment. Set to false if stdin cannot be read from while
+  /// attempting to start the app.
   Future<LaunchResult> startApp(
     ApplicationPackage package,
     BuildMode mode, {
@@ -225,7 +250,8 @@ abstract class Device {
     Map<String, dynamic> platformArgs,
     String kernelPath,
     bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false
+    bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
   });
 
   /// Does this device implement support for hot reloading / restarting?

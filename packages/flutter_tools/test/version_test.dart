@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
+import 'package:collection/collection.dart' show ListEquality;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/time.dart';

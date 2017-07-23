@@ -31,7 +31,7 @@ const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 /// default), it will produce a blurring effect to the content behind it.
 //
 // TODO(xster): document using with a CupertinoScaffold.
-class CupertinoTabBar extends StatelessWidget {
+class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a tab bar in the iOS style.
   CupertinoTabBar({
     Key key,
@@ -81,10 +81,14 @@ class CupertinoTabBar extends StatelessWidget {
   /// should configure itself to match the icon theme's size and color.
   final double iconSize;
 
+  /// True if the tab bar's background color has no transparency.
+  bool get opaque => backgroundColor.alpha == 0xFF;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(_kTabBarHeight);
+
   @override
   Widget build(BuildContext context) {
-    final bool addBlur = backgroundColor.alpha != 0xFF;
-
     Widget result = new DecoratedBox(
       decoration: new BoxDecoration(
         border: const Border(
@@ -120,7 +124,7 @@ class CupertinoTabBar extends StatelessWidget {
       ),
     );
 
-    if (addBlur) {
+    if (!opaque) {
       // For non-opaque backgrounds, apply a blur effect.
       result = new ClipRect(
         child: new BackdropFilter(
@@ -141,6 +145,7 @@ class CupertinoTabBar extends StatelessWidget {
         _wrapActiveItem(
           new Expanded(
             child: new GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: onTap == null ? null : () { onTap(index); },
               child: new Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
@@ -173,6 +178,30 @@ class CupertinoTabBar extends StatelessWidget {
         style: new TextStyle(color: activeColor),
         child: item,
       ),
+    );
+  }
+
+  /// Create a clone of the current [CupertinoTabBar] but with provided
+  /// parameters overriden.
+  CupertinoTabBar copyWith({
+    Key key,
+    List<BottomNavigationBarItem> items,
+    Color backgroundColor,
+    Color activeColor,
+    Color inactiveColor,
+    Size iconSize,
+    int currentIndex,
+    ValueChanged<int> onTap,
+  }) {
+    return new CupertinoTabBar(
+       key: key ?? this.key,
+       items: items ?? this.items,
+       backgroundColor: backgroundColor ?? this.backgroundColor,
+       activeColor: activeColor ?? this.activeColor,
+       inactiveColor: inactiveColor ?? this.inactiveColor,
+       iconSize: iconSize ?? this.iconSize,
+       currentIndex: currentIndex ?? this.currentIndex,
+       onTap: onTap ?? this.onTap,
     );
   }
 }

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../android/android_sdk.dart';
+import '../android/android_workflow.dart';
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
@@ -17,7 +18,6 @@ import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 
@@ -35,6 +35,7 @@ const Map<String, _HardwareType> _knownHardware = const <String, _HardwareType>{
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
   'samsungexynos7420': _HardwareType.physical,
+  'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
 };
 
@@ -45,10 +46,10 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  bool get canListAnything => doctor.androidWorkflow.canListDevices;
+  bool get canListAnything => androidWorkflow.canListDevices;
 
   @override
-  List<Device> pollingGetDevices() => getAdbDevices();
+  Future<List<Device>> pollingGetDevices() async => getAdbDevices();
 }
 
 class AndroidDevice extends Device {
@@ -242,8 +243,13 @@ class AndroidDevice extends Device {
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     // This call takes 400ms - 600ms.
-    final RunResult listOut = await runCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
-    return LineSplitter.split(listOut.stdout).contains("package:${app.id}");
+    try {
+      final RunResult listOut = await runCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
+      return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
+    } catch (error) {
+      printTrace('$error');
+      return false;
+    }
   }
 
   @override
@@ -276,6 +282,7 @@ class AndroidDevice extends Device {
     }
     if (installResult.exitCode != 0) {
       printError('Error: ADB exited with exit code ${installResult.exitCode}');
+      printError('$installResult');
       return false;
     }
 
@@ -340,6 +347,7 @@ class AndroidDevice extends Device {
     String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
@@ -358,7 +366,7 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = new AndroidApk.fromCurrentDirectory();
+      package = await AndroidApk.fromCurrentDirectory();
     }
 
     printTrace("Stopping app '${package.name}' on $name.");

@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'feedback.dart';
 import 'input_decorator.dart';
 import 'text_selection.dart';
 import 'theme.dart';
@@ -62,6 +64,13 @@ class TextField extends StatefulWidget {
   /// To remove the decoration entirely (including the extra padding introduced
   /// by the decoration to save space for the labels), set the [decoration] to
   /// null.
+  ///
+  /// The [maxLines] property can be set to null to remove the restriction on
+  /// the number of lines. By default, it is 1, meaning this is a single-line
+  /// text field. If it is not null, it must be greater than zero.
+  ///
+  /// The [keyboardType], [autofocus], [obscureText], and [autocorrect] arguments
+  /// must not be null.
   const TextField({
     Key key,
     this.controller,
@@ -72,11 +81,17 @@ class TextField extends StatefulWidget {
     this.textAlign,
     this.autofocus: false,
     this.obscureText: false,
+    this.autocorrect: true,
     this.maxLines: 1,
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
-  }) : super(key: key);
+  }) : assert(keyboardType != null),
+       assert(autofocus != null),
+       assert(obscureText != null),
+       assert(autocorrect != null),
+       assert(maxLines == null || maxLines > 0),
+       super(key: key);
 
   /// Controls the text being edited.
   ///
@@ -98,6 +113,8 @@ class TextField extends StatefulWidget {
   final InputDecoration decoration;
 
   /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text]. Cannot be null.
   final TextInputType keyboardType;
 
   /// The style to use for the text being edited.
@@ -116,7 +133,7 @@ class TextField extends StatefulWidget {
   /// If true, the keyboard will open as soon as this text field obtains focus.
   /// Otherwise, the keyboard is only shown after the user taps the text field.
   ///
-  /// Defaults to false.
+  /// Defaults to false. Cannot be null.
   // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
   // keyboard behavior.
   final bool autofocus;
@@ -126,13 +143,21 @@ class TextField extends StatefulWidget {
   /// When this is set to true, all the characters in the text field are
   /// replaced by U+2022 BULLET characters (•).
   ///
-  /// Defaults to false.
+  /// Defaults to false. Cannot be null.
   final bool obscureText;
+
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true. Cannot be null.
+  final bool autocorrect;
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
+  ///
+  /// If this is null, there is no limit to the number of lines. If it is not
+  /// null, the value must be greater than zero.
   final int maxLines;
 
   /// Called when the text being edited changes.
@@ -142,8 +167,9 @@ class TextField extends StatefulWidget {
   /// field.
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides. Formatters are run 
-  /// in the provided order when the text input changes.
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
   @override
@@ -165,6 +191,8 @@ class TextField extends StatefulWidget {
       description.add('autofocus: $autofocus');
     if (obscureText)
       description.add('obscureText: $obscureText');
+    if (autocorrect)
+      description.add('autocorrect: $autocorrect');
     if (maxLines != 1)
       description.add('maxLines: $maxLines');
   }
@@ -205,6 +233,11 @@ class _TextFieldState extends State<TextField> {
     _editableTextKey.currentState?.requestKeyboard();
   }
 
+  void _onSelectionChanged(BuildContext context, bool longPress) {
+    if (longPress)
+      Feedback.forLongPress(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -222,12 +255,16 @@ class _TextFieldState extends State<TextField> {
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: materialTextSelectionControls,
+        selectionControls: themeData.platform == TargetPlatform.iOS
+            ? cupertinoTextSelectionControls
+            : materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
+        onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
         inputFormatters: widget.inputFormatters,
       ),
     );

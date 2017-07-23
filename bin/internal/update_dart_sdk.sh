@@ -17,6 +17,7 @@ set -e
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 
 DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
+DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 DART_SDK_STAMP_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk.stamp"
 DART_SDK_VERSION=`cat "$FLUTTER_ROOT/bin/internal/dart-sdk.version"`
 
@@ -41,10 +42,20 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
   if [[ $DART_SDK_VERSION == *"-dev."* ]]
   then
     DART_CHANNEL="dev"
+  elif [[ $DART_SDK_VERSION == "hash/"* ]]
+  then
+    DART_CHANNEL="be"
   fi
 
   DART_SDK_URL="https://storage.googleapis.com/dart-archive/channels/$DART_CHANNEL/raw/$DART_SDK_VERSION/sdk/$DART_ZIP_NAME"
 
+  # if the sdk path exists, copy it to a temporary location
+  if [ -d "$DART_SDK_PATH" ]; then
+    rm -rf "$DART_SDK_PATH_OLD"
+    mv "$DART_SDK_PATH" "$DART_SDK_PATH_OLD"
+  fi
+
+  # install the new sdk
   rm -rf -- "$DART_SDK_PATH"
   mkdir -p -- "$DART_SDK_PATH"
   DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/dart-sdk.zip"
@@ -61,4 +72,9 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
   }
   rm -f -- "$DART_SDK_ZIP"
   echo "$DART_SDK_VERSION" > "$DART_SDK_STAMP_PATH"
+
+  # delete any temporary sdk path
+  if [ -d "$DART_SDK_PATH_OLD" ]; then
+    rm -rf "$DART_SDK_PATH_OLD"
+  fi
 fi

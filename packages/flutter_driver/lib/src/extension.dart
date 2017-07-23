@@ -6,10 +6,12 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show RendererBinding;
+import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,18 +22,30 @@ import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
 import 'render_tree.dart';
+import 'request_data.dart';
+import 'semantics.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 
-class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so we're not extending a concrete binding
+/// Signature for the handler passed to [enableFlutterDriverExtension].
+///
+/// Messages are described in string form and should return a [Future] which
+/// eventually completes to a string response.
+typedef Future<String> DataHandler(String message);
+
+class _DriverBinding extends BindingBase with SchedulerBinding, GestureBinding, ServicesBinding, RendererBinding, WidgetsBinding {
+  _DriverBinding(this._handler);
+
+  final DataHandler _handler;
+
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    final FlutterDriverExtension extension = new FlutterDriverExtension();
+    final FlutterDriverExtension extension = new FlutterDriverExtension(_handler);
     registerServiceExtension(
       name: _extensionMethodName,
-      callback: extension.call
+      callback: extension.call,
     );
   }
 }
@@ -43,9 +57,12 @@ class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so 
 ///
 /// Call this function prior to running your application, e.g. before you call
 /// `runApp`.
-void enableFlutterDriverExtension() {
+///
+/// Optionally you can pass a [DataHandler] callback. It will be called if the
+/// test calls [FlutterDriver.requestData].
+void enableFlutterDriverExtension({ DataHandler handler }) {
   assert(WidgetsBinding.instance == null);
-  new _DriverBinding();
+  new _DriverBinding(handler);
   assert(WidgetsBinding.instance is _DriverBinding);
 }
 
@@ -59,32 +76,42 @@ typedef Command CommandDeserializerCallback(Map<String, String> params);
 /// found, if any, or null otherwise.
 typedef Finder FinderConstructor(SerializableFinder finder);
 
+/// The class that manages communication between a Flutter Driver test and the
+/// application being remote-controlled, on the application side.
+///
+/// This is not normally used directly. It is instantiated automatically when
+/// calling [enableFlutterDriverExtension].
 @visibleForTesting
 class FlutterDriverExtension {
-  static final Logger _log = new Logger('FlutterDriverExtension');
-
-  FlutterDriverExtension() {
+  /// Creates an object to manage a Flutter Driver connection.
+  FlutterDriverExtension(this._requestDataHandler) {
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
       'get_render_tree': _getRenderTree,
-      'tap': _tap,
       'get_text': _getText,
-      'set_frame_sync': _setFrameSync,
+      'request_data': _requestData,
       'scroll': _scroll,
       'scrollIntoView': _scrollIntoView,
+      'set_frame_sync': _setFrameSync,
+      'set_semantics': _setSemantics,
+      'tap': _tap,
       'waitFor': _waitFor,
+      'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
       'get_health': (Map<String, String> params) => new GetHealth.deserialize(params),
       'get_render_tree': (Map<String, String> params) => new GetRenderTree.deserialize(params),
-      'tap': (Map<String, String> params) => new Tap.deserialize(params),
       'get_text': (Map<String, String> params) => new GetText.deserialize(params),
-      'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
+      'request_data': (Map<String, String> params) => new RequestData.deserialize(params),
       'scroll': (Map<String, String> params) => new Scroll.deserialize(params),
       'scrollIntoView': (Map<String, String> params) => new ScrollIntoView.deserialize(params),
+      'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
+      'set_semantics': (Map<String, String> params) => new SetSemantics.deserialize(params),
+      'tap': (Map<String, String> params) => new Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
+      'waitForAbsent': (Map<String, String> params) => new WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => new WaitUntilNoTransientCallbacks.deserialize(params),
     });
 
@@ -92,8 +119,13 @@ class FlutterDriverExtension {
       'ByText': _createByTextFinder,
       'ByTooltipMessage': _createByTooltipMessageFinder,
       'ByValueKey': _createByValueKeyFinder,
+      'ByType': _createByTypeFinder,
     });
   }
+
+  final DataHandler _requestDataHandler;
+
+  static final Logger _log = new Logger('FlutterDriverExtension');
 
   final WidgetController _prober = new WidgetController(WidgetsBinding.instance);
   final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
@@ -114,6 +146,7 @@ class FlutterDriverExtension {
   ///
   /// The returned JSON is command specific. Generally the caller deserializes
   /// the result into a subclass of [Result], but that's not strictly required.
+  @visibleForTesting
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
     final String commandKind = params['command'];
     try {
@@ -175,6 +208,19 @@ class FlutterDriverExtension {
     return finder;
   }
 
+  /// Runs `finder` repeatedly until it finds zero [Element]s.
+  Future<Finder> _waitForAbsentElement(Finder finder) async {
+    if (_frameSync)
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+
+    await _waitUntilFrame(() => !finder.precache());
+
+    if (_frameSync)
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+
+    return finder;
+  }
+
   Finder _createByTextFinder(ByText arguments) {
     return find.text(arguments.text);
   }
@@ -197,6 +243,12 @@ class FlutterDriverExtension {
       default:
         throw 'Unsupported ByValueKey type: ${arguments.keyValueType}';
     }
+  }
+
+  Finder _createByTypeFinder(ByType arguments) {
+    return find.byElementPredicate((Element element) {
+      return element.widget.runtimeType.toString() == arguments.type;
+    }, description: 'widget with runtimeType "${arguments.type}"');
   }
 
   Finder _createFinder(SerializableFinder finder) {
@@ -222,6 +274,12 @@ class FlutterDriverExtension {
       return null;
   }
 
+  Future<WaitForAbsentResult> _waitForAbsent(Command command) async {
+    final WaitForAbsent waitForAbsentCommand = command;
+    await _waitForAbsentElement(_createFinder(waitForAbsentCommand.finder));
+    return new WaitForAbsentResult();
+  }
+
   Future<Null> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
@@ -240,8 +298,8 @@ class FlutterDriverExtension {
 
     _prober.binding.hitTest(hitTest, startLocation);
     _prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
-    await new Future<Null>.value();  // so that down and move don't happen in the same microtask
-    for (int moves = 0; moves < totalMoves; moves++) {
+    await new Future<Null>.value(); // so that down and move don't happen in the same microtask
+    for (int moves = 0; moves < totalMoves; moves += 1) {
       currentLocation = currentLocation + delta;
       _prober.binding.dispatchEvent(pointer.move(currentLocation), hitTest);
       await new Future<Null>.delayed(pause);
@@ -266,9 +324,37 @@ class FlutterDriverExtension {
     return new GetTextResult(text.data);
   }
 
+  Future<RequestDataResult> _requestData(Command command) async {
+    final RequestData requestDataCommand = command;
+    return new RequestDataResult(_requestDataHandler == null ? '' : await _requestDataHandler(requestDataCommand.message));
+  }
+
   Future<SetFrameSyncResult> _setFrameSync(Command command) async {
     final SetFrameSync setFrameSyncCommand = command;
     _frameSync = setFrameSyncCommand.enabled;
     return new SetFrameSyncResult();
+  }
+
+  SemanticsHandle _semantics;
+  bool get _semanticsIsEnabled => RendererBinding.instance.pipelineOwner.semanticsOwner != null;
+
+  Future<SetSemanticsResult> _setSemantics(Command command) async {
+    final SetSemantics setSemanticsCommand = command;
+    final bool semanticsWasEnabled = _semanticsIsEnabled;
+    if (setSemanticsCommand.enabled && _semantics == null) {
+      _semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
+      if (!semanticsWasEnabled) {
+        // wait for the first frame where semantics is enabled.
+        final Completer<Null> completer = new Completer<Null>();
+        SchedulerBinding.instance.addPostFrameCallback((Duration d) {
+          completer.complete();
+        });
+        await completer.future;
+      }
+    } else if (!setSemanticsCommand.enabled && _semantics != null) {
+      _semantics.dispose();
+      _semantics = null;
+    }
+    return new SetSemanticsResult(semanticsWasEnabled != _semanticsIsEnabled);
   }
 }

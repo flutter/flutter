@@ -4,7 +4,8 @@
 
 import 'dart:ui' show Color;
 
-/// [Color] constants that describe colors commonly used in iOS applications.
+/// A palette of [Color] constants that describe colors commonly used when
+/// matching the iOS platform aesthetics.
 class CupertinoColors {
   CupertinoColors._();
 
@@ -18,9 +19,18 @@ class CupertinoColors {
   static const Color activeGreen = const Color(0xFF4CD964);
 
   /// Opaque white color. Used for backgrounds and fonts against dark backgrounds.
+  ///
+  /// See also:
+  ///
+  ///  * [Colors.white], the same color, in the material design palette.
+  ///  * [black], opaque black in the [CupertinoColors] palette.
   static const Color white = const Color(0xFFFFFFFF);
 
   /// Opaque black color. Used for texts against light backgrounds.
+  ///
+  /// See also:
+  ///
+  ///  * [Colors.black], the same color, in the material design palette.
   static const Color black = const Color(0xFF000000);
 
   /// Used in iOS 10 for light background fills such as the chat bubble background.

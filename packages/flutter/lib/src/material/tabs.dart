@@ -389,22 +389,23 @@ class _TabBarScrollController extends ScrollController {
 
 /// A material design widget that displays a horizontal row of tabs.
 ///
-/// Typically created as part of an [AppBar] and in conjuction with a
-/// [TabBarView].
+/// Typically created as the [AppBar.bottom] part of an [AppBar] and in
+/// conjuction with a [TabBarView].
 ///
 /// If a [TabController] is not provided, then there must be a
-/// [DefaultTabController] ancestor.
+/// [DefaultTabController] ancestor. The tab controller's [TabController.length]
+/// must equal the length of the [tabs] list.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
-///  * [TabBarView], which displays the contents that the tab bar is selecting
-///    between.
+///  * [TabBarView], which displays page views that correspond to each tab.
 class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design tab bar.
   ///
-  /// The [tabs] argument must not be null and must have more than one widget.
+  /// The [tabs] argument cannot be null and its length must match the [controller]'s
+  /// [TabController.length].
   ///
   /// If a [TabController] is not provided, then there must be a
   /// [DefaultTabController] ancestor.
@@ -424,13 +425,15 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelStyle,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-  }) : assert(tabs != null && tabs.length > 1),
+  }) : assert(tabs != null),
        assert(isScrollable != null),
        assert(indicatorWeight != null && indicatorWeight > 0.0),
        assert(indicatorPadding != null),
        super(key: key);
 
-  /// Typically a list of [Tab] widgets.
+  /// Typically a list of two or more [Tab] widgets.
+  ///
+  /// The length of this list must match the [controller]'s [TabController.length].
   final List<Widget> tabs;
 
   /// This widget's selection and animation state.
@@ -667,6 +670,12 @@ class _TabBarState extends State<TabBar> {
 
   @override
   Widget build(BuildContext context) {
+    if (_controller.length == 0) {
+      return new Container(
+        height: _kTabHeight + widget.indicatorWeight,
+      );
+    }
+
     final List<Widget> wrappedTabs = new List<Widget>.from(widget.tabs, growable: false);
 
     // If the controller was provided by DefaultTabController and we're part
@@ -720,10 +729,22 @@ class _TabBarState extends State<TabBar> {
     // Add the tap handler to each tab. If the tab bar is scrollable
     // then give all of the tabs equal flexibility so that their widths
     // reflect the intrinsic width of their labels.
-    for (int index = 0; index < widget.tabs.length; index++) {
-      wrappedTabs[index] = new InkWell(
-        onTap: () { _handleTap(index); },
-        child: wrappedTabs[index],
+    final int tabCount = widget.tabs.length;
+    for (int index = 0; index < tabCount; index++) {
+      wrappedTabs[index] = new MergeSemantics(
+        child: new Stack(
+          children: <Widget>[
+            new InkWell(
+              onTap: () { _handleTap(index); },
+              child: wrappedTabs[index],
+            ),
+            new Semantics(
+              selected: index == _currentIndex,
+              // TODO(goderbauer): I10N-ify
+              label: 'Tab ${index + 1} of $tabCount',
+            ),
+          ],
+        ),
       );
       if (!widget.isScrollable)
         wrappedTabs[index] = new Expanded(child: wrappedTabs[index]);
@@ -774,8 +795,8 @@ class TabBarView extends StatefulWidget {
     Key key,
     @required this.children,
     this.controller,
-  }) : assert(children != null && children.length > 1),
-       super(key: key);
+    this.physics,
+  }) : assert(children != null), super(key: key);
 
   /// This widget's selection and animation state.
   ///
@@ -785,6 +806,17 @@ class TabBarView extends StatefulWidget {
 
   /// One widget per tab.
   final List<Widget> children;
+
+  /// How the page view should respond to user input.
+  ///
+  /// For example, determines how the page view continues to animate after the
+  /// user stops dragging the page view.
+  ///
+  /// The physics are modified to snap to page boundaries using
+  /// [PageScrollPhysics] prior to being used.
+  ///
+  /// Defaults to matching platform conventions.
+  final ScrollPhysics physics;
 
   @override
   _TabBarViewState createState() => new _TabBarViewState();
@@ -934,19 +966,26 @@ class _TabBarViewState extends State<TabBarView> {
       onNotification: _handleScrollNotification,
       child: new PageView(
         controller: _pageController,
-        physics: _kTabBarViewPhysics,
+        physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
         children: _children,
       ),
     );
   }
 }
 
-/// Displays a single 12x12 circle with the specified border and background colors.
+/// Displays a single circle with the specified border and background colors.
 ///
 /// Used by [TabPageSelector] to indicate the selected page.
 class TabPageSelectorIndicator extends StatelessWidget {
   /// Creates an indicator used by [TabPageSelector].
-  const TabPageSelectorIndicator({ Key key, this.backgroundColor, this.borderColor }) : super(key: key);
+  ///
+  /// The [backgroundColor], [borderColor], and [size] parameters cannot be null.
+  const TabPageSelectorIndicator({
+    Key key,
+    @required this.backgroundColor,
+    @required this.borderColor,
+    @required this.size,
+  }) : assert(backgroundColor != null), assert(borderColor != null), assert(size != null), super(key: key);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -954,11 +993,14 @@ class TabPageSelectorIndicator extends StatelessWidget {
   /// The indicator circle's border color.
   final Color borderColor;
 
+  /// The indicator circle's diameter.
+  final double size;
+
   @override
   Widget build(BuildContext context) {
     return new Container(
-      width: 12.0,
-      height: 12.0,
+      width: size,
+      height: size,
       margin: const EdgeInsets.all(4.0),
       decoration: new BoxDecoration(
         color: backgroundColor,
@@ -976,7 +1018,13 @@ class TabPageSelectorIndicator extends StatelessWidget {
 /// ancestor.
 class TabPageSelector extends StatelessWidget {
   /// Creates a compact widget that indicates which tab has been selected.
-  const TabPageSelector({ Key key, this.controller }) : super(key: key);
+  const TabPageSelector({
+    Key key,
+    this.controller,
+    this.indicatorSize: 12.0,
+    this.color,
+    this.selectedColor,
+  }) : assert(indicatorSize != null && indicatorSize > 0.0), super(key: key);
 
   /// This widget's selection and animation state.
   ///
@@ -984,47 +1032,64 @@ class TabPageSelector extends StatelessWidget {
   /// will be used.
   final TabController controller;
 
+  /// The indicator circle's diameter (the default value is 12.0).
+  final double indicatorSize;
+
+  /// The indicator cicle's fill color for unselected pages.
+  ///
+  /// If this parameter is null then the indicator is filled with [Colors.transparent].
+  final Color color;
+
+  /// The indicator cicle's fill color for selected pages and border color
+  /// for all indicator circles.
+  ///
+  /// If this parameter is null then the indicator is filled with the theme's
+  /// accent color, [ThemeData.accentColor].
+  final Color selectedColor;
+
   Widget _buildTabIndicator(
     int tabIndex,
     TabController tabController,
-    ColorTween selectedColor,
-    ColorTween previousColor,
+    ColorTween selectedColorTween,
+    ColorTween previousColorTween,
   ) {
     Color background;
     if (tabController.indexIsChanging) {
       // The selection's animation is animating from previousValue to value.
       final double t = 1.0 - _indexChangeProgress(tabController);
       if (tabController.index == tabIndex)
-        background = selectedColor.lerp(t);
+        background = selectedColorTween.lerp(t);
       else if (tabController.previousIndex == tabIndex)
-        background = previousColor.lerp(t);
+        background = previousColorTween.lerp(t);
       else
-        background = selectedColor.begin;
+        background = selectedColorTween.begin;
     } else {
       // The selection's offset reflects how far the TabBarView has
       /// been dragged to the left (-1.0 to 0.0) or the right (0.0 to 1.0).
       final double offset = tabController.offset;
       if (tabController.index == tabIndex) {
-        background = selectedColor.lerp(1.0 - offset.abs());
+        background = selectedColorTween.lerp(1.0 - offset.abs());
       } else if (tabController.index == tabIndex - 1 && offset > 0.0) {
-        background = selectedColor.lerp(offset);
+        background = selectedColorTween.lerp(offset);
       } else if (tabController.index == tabIndex + 1 && offset < 0.0) {
-        background = selectedColor.lerp(-offset);
+        background = selectedColorTween.lerp(-offset);
       } else {
-        background = selectedColor.begin;
+        background = selectedColorTween.begin;
       }
     }
     return new TabPageSelectorIndicator(
       backgroundColor: background,
-      borderColor: selectedColor.end,
+      borderColor: selectedColorTween.end,
+      size: indicatorSize,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color color = Theme.of(context).accentColor;
-    final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
-    final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
+    final Color fixColor = color ?? Colors.transparent;
+    final Color fixSelectedColor = selectedColor ?? Theme.of(context).accentColor;
+    final ColorTween selectedColorTween = new ColorTween(begin: fixColor, end: fixSelectedColor);
+    final ColorTween previousColorTween = new ColorTween(begin: fixSelectedColor, end: fixColor);
     final TabController tabController = controller ?? DefaultTabController.of(context);
     assert(() {
       if (tabController == null) {
@@ -1050,7 +1115,7 @@ class TabPageSelector extends StatelessWidget {
           child: new Row(
             mainAxisSize: MainAxisSize.min,
             children: new List<Widget>.generate(tabController.length, (int tabIndex) {
-              return _buildTabIndicator(tabIndex, tabController, selectedColor, previousColor);
+              return _buildTabIndicator(tabIndex, tabController, selectedColorTween, previousColorTween);
             }).toList(),
           ),
         );

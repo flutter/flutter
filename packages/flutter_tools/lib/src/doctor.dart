@@ -27,18 +27,6 @@ import 'version.dart';
 Doctor get doctor => context[Doctor];
 
 class Doctor {
-  Doctor() {
-    _androidWorkflow = new AndroidWorkflow();
-    _iosWorkflow = new IOSWorkflow();
-  }
-
-  IOSWorkflow _iosWorkflow;
-  AndroidWorkflow _androidWorkflow;
-
-  IOSWorkflow get iosWorkflow => _iosWorkflow;
-
-  AndroidWorkflow get androidWorkflow => _androidWorkflow;
-
   List<DoctorValidator> _validators;
 
   List<DoctorValidator> get validators {
@@ -46,11 +34,11 @@ class Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(new _FlutterValidator());
 
-      if (_androidWorkflow.appliesToHostPlatform)
-        _validators.add(_androidWorkflow);
+      if (androidWorkflow.appliesToHostPlatform)
+        _validators.add(androidWorkflow);
 
-      if (_iosWorkflow.appliesToHostPlatform)
-        _validators.add(_iosWorkflow);
+      if (iosWorkflow.appliesToHostPlatform)
+        _validators.add(iosWorkflow);
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -205,7 +193,7 @@ class _FlutterValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    final ValidationType valid = ValidationType.installed;
+    ValidationType valid = ValidationType.installed;
 
     final FlutterVersion version = FlutterVersion.instance;
 
@@ -227,6 +215,7 @@ class _FlutterValidator extends DoctorValidator {
     if (!_genSnapshotRuns(genSnapshotPath)) {
       messages.add(new ValidationMessage.error('Downloaded executables cannot execute '
           'on host (see https://github.com/flutter/flutter/issues/6207 for more information)'));
+      valid = ValidationType.partial;
     }
 
     return new ValidationResult(valid, messages,
@@ -263,11 +252,9 @@ abstract class IntelliJValidator extends DoctorValidator {
   static final Map<String, String> _idToTitle = <String, String>{
     'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
     'IdeaIC' : 'IntelliJ IDEA Community Edition',
-    'WebStorm': 'WebStorm',
   };
 
   static final Version kMinIdeaVersion = new Version(2017, 1, 0);
-  static final Version kMinWebStormVersion = new Version(2017, 1, 0);
   static final Version kMinFlutterPluginVersion = new Version(14, 0, 0);
 
   static Iterable<DoctorValidator> get installedValidators {
@@ -284,20 +271,16 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     _validatePackage(messages, 'flutter-intellij.jar', 'Flutter',
         minVersion: kMinFlutterPluginVersion);
-
-    // Dart is bundled with WebStorm.
-    if (!isWebStorm) {
-      _validatePackage(messages, 'Dart', 'Dart');
-    }
+    _validatePackage(messages, 'Dart', 'Dart');
 
     if (_hasIssues(messages)) {
       messages.add(new ValidationMessage(
-        'For information about managing plugins, see\n'
-        'https://www.jetbrains.com/help/idea/managing-plugins.html'
+        'For information about installing plugins, see\n'
+        'https://flutter.io/intellij-setup/#installing-the-plugins'
       ));
     }
 
-    _validateIntelliJVersion(messages, isWebStorm ? kMinWebStormVersion : kMinIdeaVersion);
+    _validateIntelliJVersion(messages, kMinIdeaVersion);
 
     return new ValidationResult(
       _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
@@ -309,8 +292,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   bool _hasIssues(List<ValidationMessage> messages) {
     return messages.any((ValidationMessage message) => message.isError);
   }
-
-  bool get isWebStorm => title == 'WebStorm';
 
   void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
     // Ignore unknown versions.
@@ -441,7 +422,6 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     'IntelliJ IDEA.app' : 'IntelliJIdea',
     'IntelliJ IDEA Ultimate.app' : 'IntelliJIdea',
     'IntelliJ IDEA CE.app' : 'IdeaIC',
-    'WebStorm.app': 'WebStorm',
   };
 
   static Iterable<DoctorValidator> get installed {

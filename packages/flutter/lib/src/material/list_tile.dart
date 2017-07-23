@@ -294,7 +294,7 @@ class ListTile extends StatelessWidget {
         position: DecorationPosition.foreground,
         decoration: new BoxDecoration(
           border: new Border(
-            bottom: new BorderSide(color: dividerColor),
+            bottom: new BorderSide(color: dividerColor, width: 0.0),
           ),
         ),
         child: tile,

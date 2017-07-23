@@ -22,8 +22,10 @@ import 'android_studio.dart';
 const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
 const String gradleAppOutDirV1 = 'android/app/build/outputs/apk';
+const String gradleVersion = '3.3';
 
 String _cachedGradleAppOutDirV2;
+String _cachedGradleExecutable;
 
 enum FlutterPluginVersion {
   none,
@@ -56,7 +58,7 @@ FlutterPluginVersion get flutterPluginVersion {
   return FlutterPluginVersion.none;
 }
 
-String getGradleAppOut() {
+Future<String> getGradleAppOut() async {
   switch (flutterPluginVersion) {
     case FlutterPluginVersion.none:
       // Fall through. Pretend we're v1, and just go with it.
@@ -65,27 +67,29 @@ String getGradleAppOut() {
     case FlutterPluginVersion.managed:
       // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
-      return '${getGradleAppOutDirV2()}/app.apk';
+      return '${await _getGradleAppOutDirV2()}/app.apk';
   }
   return null;
 }
 
-String getGradleAppOutDirV2() {
-  _cachedGradleAppOutDirV2 ??= _calculateGradleAppOutDirV2();
+Future<String> _getGradleAppOutDirV2() async {
+  _cachedGradleAppOutDirV2 ??= await _calculateGradleAppOutDirV2();
   return _cachedGradleAppOutDirV2;
 }
 
-// Note: this call takes about a second to complete.
-String _calculateGradleAppOutDirV2() {
-  final String gradle = ensureGradle();
+// Note: Dependencies are resolved and possibly downloaded as a side-effect
+// of calculating the app properties using Gradle. This may take minutes.
+Future<String> _calculateGradleAppOutDirV2() async {
+  final String gradle = await _ensureGradle();
   updateLocalProperties();
   try {
-    final String properties = runCheckedSync(
+    final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
+    final RunResult runResult = await runCheckedAsync(
       <String>[gradle, 'app:properties'],
       workingDirectory: 'android',
-      hideStdout: true,
       environment: _gradleEnv,
     );
+    final String properties = runResult.stdout.trim();
     String buildDir = properties
         .split('\n')
         .firstWhere((String s) => s.startsWith('buildDir: '))
@@ -96,6 +100,7 @@ String _calculateGradleAppOutDirV2() {
       // Relativize path, snip current directory + separating '/'.
       buildDir = buildDir.substring(currentDirectory.length + 1);
     }
+    status.stop();
     return '$buildDir/outputs/apk';
   } catch (e) {
     printError('Error running gradle: $e');
@@ -104,17 +109,7 @@ String _calculateGradleAppOutDirV2() {
   return gradleAppOutDirV1;
 }
 
-String locateSystemGradle({ bool ensureExecutable: true }) {
-  final String gradle = gradleExecutable;
-  if (ensureExecutable && gradle != null) {
-    final File file = fs.file(gradle);
-    if (file.existsSync())
-      os.makeExecutable(file);
-  }
-  return gradle;
-}
-
-String locateProjectGradlew({ bool ensureExecutable: true }) {
+String _locateProjectGradlew({ bool ensureExecutable: true }) {
   final String path = fs.path.join(
       'android', platform.isWindows ? 'gradlew.bat' : 'gradlew'
   );
@@ -129,15 +124,43 @@ String locateProjectGradlew({ bool ensureExecutable: true }) {
   }
 }
 
-String ensureGradle() {
-  String gradle = locateProjectGradlew();
+Future<String> _ensureGradle() async {
+  _cachedGradleExecutable ??= await _initializeGradle();
+  return _cachedGradleExecutable;
+}
+
+// Note: Gradle may be bootstrapped and possibly downloaded as a side-effect
+// of validating the Gradle executable. This may take several seconds.
+Future<String> _initializeGradle() async {
+  final Status status = logger.startProgress('Initializing gradle...', expectSlowOperation: true);
+  String gradle = _locateProjectGradlew();
   if (gradle == null) {
-    gradle = locateSystemGradle();
-    if (gradle == null)
-      throwToolExit('Unable to locate gradle. Please install Android Studio.');
+    _injectGradleWrapper();
+    gradle = _locateProjectGradlew();
   }
+  if (gradle == null)
+    throwToolExit('Unable to locate gradlew script');
   printTrace('Using gradle from $gradle.');
+  // Validates the Gradle executable by asking for its version.
+  // Makes Gradle Wrapper download and install Gradle distribution, if needed.
+  await runCheckedAsync(<String>[gradle, '-v'], environment: _gradleEnv);
+  status.stop();
   return gradle;
+}
+
+void _injectGradleWrapper() {
+  copyDirectorySync(cache.getArtifactDirectory('gradle_wrapper'), fs.directory('android'));
+  final String propertiesPath = fs.path.join('android', 'gradle', 'wrapper', 'gradle-wrapper.properties');
+  if (!fs.file(propertiesPath).existsSync()) {
+    fs.file(propertiesPath).writeAsStringSync('''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersion-all.zip
+''', flush: true,
+    );
+  }
 }
 
 /// Create android/local.properties if needed, and update Flutter settings.
@@ -179,24 +202,24 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target, String kerne
 
   injectPlugins();
 
-  final String gradle = ensureGradle();
+  final String gradle = await _ensureGradle();
 
   switch (flutterPluginVersion) {
     case FlutterPluginVersion.none:
       // Fall through. Pretend it's v1, and just go for it.
     case FlutterPluginVersion.v1:
-      return buildGradleProjectV1(gradle);
+      return _buildGradleProjectV1(gradle);
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return buildGradleProjectV2(gradle, buildModeName, target, kernelPath);
+      return _buildGradleProjectV2(gradle, buildModeName, target, kernelPath);
   }
 }
 
-Future<Null> buildGradleProjectV1(String gradle) async {
-  // Run 'gradle build'.
-  final Status status = logger.startProgress('Running \'gradle build\'...', expectSlowOperation: true);
-  final int exitcode = await runCommandAndStreamOutput(
+Future<Null> _buildGradleProjectV1(String gradle) async {
+  // Run 'gradlew build'.
+  final Status status = logger.startProgress('Running \'gradlew build\'...', expectSlowOperation: true);
+  final int exitCode = await runCommandAndStreamOutput(
     <String>[fs.file(gradle).absolute.path, 'build'],
     workingDirectory: 'android',
     allowReentrantFlutter: true,
@@ -204,18 +227,29 @@ Future<Null> buildGradleProjectV1(String gradle) async {
   );
   status.stop();
 
-  if (exitcode != 0)
-    throwToolExit('Gradle build failed: $exitcode', exitCode: exitcode);
+  if (exitCode != 0)
+    throwToolExit('Gradle build failed: $exitCode', exitCode: exitCode);
 
   final File apkFile = fs.file(gradleAppOutV1);
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
-Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String target, String kernelPath) async {
+File findApkFile(String buildDirectory, String buildModeName) {
+  final String apkFilename = 'app-$buildModeName.apk';
+  File apkFile = fs.file('$buildDirectory/$apkFilename');
+  if (apkFile.existsSync())
+    return apkFile;
+  apkFile = fs.file('$buildDirectory/$buildModeName/$apkFilename');
+  if (apkFile.existsSync())
+    return apkFile;
+  return null;
+}
+
+Future<Null> _buildGradleProjectV2(String gradle, String buildModeName, String target, String kernelPath) async {
   final String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
-  // Run 'gradle assemble<BuildMode>'.
-  final Status status = logger.startProgress('Running \'gradle $assembleTask\'...', expectSlowOperation: true);
+  // Run 'gradlew assemble<BuildMode>'.
+  final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
   final String gradlePath = fs.file(gradle).absolute.path;
   final List<String> command = <String>[gradlePath];
   if (!logger.isVerbose) {
@@ -243,9 +277,10 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   if (exitcode != 0)
     throwToolExit('Gradle build failed: $exitcode', exitCode: exitcode);
 
-  final String buildDirectory = getGradleAppOutDirV2();
-  final String apkFilename = 'app-$buildModeName.apk';
-  final File apkFile = fs.file('$buildDirectory/$apkFilename');
+  final String buildDirectory = await _getGradleAppOutDirV2();
+  final File apkFile = findApkFile(buildDirectory, buildModeName);
+  if (apkFile == null)
+    throwToolExit('Gradle build failed to produce an Android package.');
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
   apkFile.copySync('$buildDirectory/app.apk');
 

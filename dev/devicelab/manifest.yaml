@@ -50,18 +50,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
-  analyzer_cli__analysis_time:
-    description: >
-      Measures the speed of analyzing Flutter itself in batch mode.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
-  analyzer_server__analysis_time:
-    description: >
-      Measures the speed of analyzing Flutter itself in server mode.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
   # Android on-device tests
 
   complex_layout_scroll_perf__timeline_summary:
@@ -126,12 +114,38 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  commands_test:
+    description: >
+      Runs tests of flutter run commands.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+    flaky: true
+
   android_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and Android screenshots
     stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  complex_layout_semantics_perf:
+    description: >
+      Measures duration of building the initial semantics tree.
+    stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
+
+  routing_test:
+    description: >
+      Verifies that `flutter drive --route` still works. No performance numbers.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery_instrumentation_test:
+    description: >
+      Same as flutter_gallery__transition_perf but uses Android instrumentation
+      framework, and therefore does not require a host computer to run. This
+      test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   # iOS on-device tests
 
@@ -140,14 +154,12 @@ tasks:
       Checks that platform channels work on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   platform_channel_sample_test_ios:
     description: >
       Runs a driver test on the Platform Channel sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -155,7 +167,6 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
 #  flutter_gallery_ios__start_up:
 #    description: >
@@ -177,14 +188,12 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   basic_material_app_ios__size:
     description: >
       Measures the IPA size of a basic material app.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
 #  microbenchmarks_ios:
 #    description: >
@@ -206,14 +215,12 @@ tasks:
       Runs end-to-end Flutter tests on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   ios_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and iOS screenshots
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   # Tests running on Windows host
 
@@ -243,21 +250,18 @@ tasks:
       Measures the performance of Dart VM hot patching feature on a Linux host.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   dartdocs:
     description: >
       Tracks how many members are still lacking documentation.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   technical_debt__cost:
     description: >
       Estimates our technical debt (TODOs, analyzer ignores, etc).
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__build:
     description: >
@@ -279,6 +283,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_gallery__transition_perf_with_semantics:
+    description: >
+      Measures the delta in performance of screen transitions without and
+      with semantics enabled.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   flutter_gallery__memory_nav:
     description: >
       Measures memory usage after repeated navigation in Gallery.
@@ -288,5 +300,11 @@ tasks:
   flutter_gallery__back_button_memory:
     description: >
       Measures memory usage after Android app suspend and resume.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  analyzer_benchmark:
+    description: >
+      Measures the speed of Dart analyzer.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]

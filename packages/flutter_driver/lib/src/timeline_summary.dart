@@ -89,8 +89,11 @@ class TimelineSummary {
   }
 
   /// Writes all of the recorded timeline data to a file.
-  Future<Null> writeTimelineToFile(String traceName,
-      {String destinationDirectory, bool pretty: false}) async {
+  Future<Null> writeTimelineToFile(
+    String traceName, {
+    String destinationDirectory,
+    bool pretty: false,
+  }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
@@ -98,8 +101,11 @@ class TimelineSummary {
   }
 
   /// Writes [summaryJson] to a file.
-  Future<Null> writeSummaryToFile(String traceName,
-      {String destinationDirectory, bool pretty: false}) async {
+  Future<Null> writeSummaryToFile(
+    String traceName, {
+    String destinationDirectory,
+    bool pretty: false,
+  }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
@@ -174,6 +180,10 @@ class TimelineSummary {
 
 /// Timing information about an event that happened in the event loop.
 class TimedEvent {
+  /// Creates a timed event given begin and end timestamps in microseconds.
+  TimedEvent(this.beginTimeMicros, this.endTimeMicros)
+    : this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
+
   /// The timestamp when the event began.
   final int beginTimeMicros;
 
@@ -182,8 +192,4 @@ class TimedEvent {
 
   /// The duration of the event.
   final Duration duration;
-
-  /// Creates a timed event given begin and end timestamps in microseconds.
-  TimedEvent(this.beginTimeMicros, this.endTimeMicros)
-    : this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
 }

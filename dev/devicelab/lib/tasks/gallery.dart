@@ -12,11 +12,15 @@ import '../framework/framework.dart';
 import '../framework/ios.dart';
 import '../framework/utils.dart';
 
-TaskFunction createGalleryTransitionTest() {
-  return new GalleryTransitionTest();
+TaskFunction createGalleryTransitionTest({ bool semanticsEnabled: false }) {
+  return new GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
 class GalleryTransitionTest {
+
+  GalleryTransitionTest({ this.semanticsEnabled: false });
+
+  final bool semanticsEnabled;
 
   Future<TaskResult> call() async {
     final Device device = await devices.workingDevice;
@@ -27,17 +31,18 @@ class GalleryTransitionTest {
     await inDirectory(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(galleryDirectory.path);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
+
+      final String testDriver = semanticsEnabled
+          ? 'transitions_perf_with_semantics.dart'
+          : 'transitions_perf.dart';
 
       await flutter('drive', options: <String>[
         '--profile',
         '--trace-startup',
         '-t',
-        'test_driver/transitions_perf.dart',
+        'test_driver/$testDriver',
         '-d',
         deviceId,
       ]);

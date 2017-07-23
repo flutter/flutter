@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'update_versions.dart';
 
 const String kDocRoot = 'dev/docs/doc';
 
@@ -29,9 +30,13 @@ Future<Null> main(List<String> args) async {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
+  final RawVersion version = new RawVersion('VERSION');
+
   // Create the pubspec.yaml file.
   final StringBuffer buf = new StringBuffer('''
 name: Flutter
+homepage: https://flutter.io
+version: $version
 dependencies:
 ''');
   for (String package in findPackageNames()) {
@@ -195,6 +200,11 @@ void addHtmlBaseToIndex() {
     'href="Android/Android-library.html"',
     'href="https://docs.flutter.io/javadoc/"'
   );
+  indexContents = indexContents.replaceAll(
+      'href="iOS/iOS-library.html"',
+      'href="https://docs.flutter.io/objcdoc/"'
+  );
+
   indexFile.writeAsStringSync(indexContents);
 }
 
@@ -238,10 +248,13 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   }
 
   // Add a fake package for platform integration APIs.
-  if (diskPath)
+  if (diskPath) {
     yield 'platform_integration/lib/android.dart';
-  else
+    yield 'platform_integration/lib/ios.dart';
+  } else {
     yield 'platform_integration/android.dart';
+    yield 'platform_integration/ios.dart';
+  }
 }
 
 void printStream(Stream<List<int>> stream) {

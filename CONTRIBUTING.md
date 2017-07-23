@@ -8,7 +8,7 @@ _See also: [Flutter's code of conduct](https://flutter.io/design-principles/#cod
 Things you will need
 --------------------
 
- * Linux or Mac OS X. (Windows is not yet supported.)
+ * Linux, Mac OS X, or Windows
  * git (used for source version control).
  * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/).
  * An ssh client (used to authenticate with GitHub).
@@ -92,6 +92,8 @@ assume you want to check a single package and the flutter repository has several
 Running the tests
 -----------------
 
+_The `flutter test` command is not available on Windows (See [#8516](https://github.com/flutter/flutter/issues/8516))._
+
 To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and run them inside the flutter shell as a test, use the `flutter test` command, e.g:
 
  * `cd examples/stocks`
@@ -132,7 +134,7 @@ flutter_tools' tests run inside the Dart command line VM rather than in the
 flutter shell. To run the test:
 
 * `cd packages/flutter_tools`
-* `dart --checked test/all.dart`
+* `pub run test -j1`
 
 The pre-built flutter tool runs in release mode with the observatory off by default.
 To enable debugging mode and the observatory on the `flutter` tool, uncomment the
@@ -165,13 +167,15 @@ To send us a pull request:
 
 Please make sure all your checkins have detailed commit messages explaining the patch.
 
-Once you've gotten an LGTM from a project maintainer, submit your changes to the
-`master` branch using one of the following methods:
+Once you've gotten an LGTM from a project maintainer and once your PR has received
+the green light from all our automated testing (Travis, Appveyor, etc), and once
+the tree is green (see the [design principles](https://flutter.io/design-principles/)
+document for more details), submit your changes to the `master` branch using one of
+the following methods:
 
 * Wait for one of the project maintainers to submit it for you.
 * Click the green "Merge pull request" button on the GitHub UI of your pull
   request (requires commit access)
-* `git push upstream name_of_your_branch:master` (requires commit access)
 
 You must complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).

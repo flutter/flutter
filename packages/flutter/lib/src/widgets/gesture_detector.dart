@@ -104,6 +104,23 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 /// Material design applications typically react to touches with ink splash
 /// effects. The [InkWell] class implements this effect and can be used in place
 /// of a [GestureDetector] for handling taps.
+///
+/// ## Sample code
+///
+/// This example makes a rectangle react to being tapped by setting the
+/// `_lights` field:
+///
+/// ```dart
+/// new GestureDetector(
+///   onTap: () {
+///     setState(() { _lights = true; });
+///   },
+///   child: new Container(
+///     color: Colors.yellow,
+///     child: new Text('TURN LIGHTS ON'),
+///   ),
+/// )
+/// ```
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///
@@ -408,10 +425,10 @@ class GestureDetector extends StatelessWidget {
 ///       () => new TapGestureRecognizer(),
 ///       (TapGestureRecognizer instance) {
 ///         instance
-///           ..onTapDown = (TapDownDetails details) { setState(() { _last = 'down'; }); },
-///           ..onTapUp = (TapUpDetails details) { setState(() { _last = 'up'; }); },
-///           ..onTap = () { setState(() { _last = 'tap'; }); },
-///           ..onTapCancel = () { setState(() { _last = 'cancel'; }); },
+///           ..onTapDown = (TapDownDetails details) { setState(() { _last = 'down'; }); }
+///           ..onTapUp = (TapUpDetails details) { setState(() { _last = 'up'; }); }
+///           ..onTap = () { setState(() { _last = 'tap'; }); }
+///           ..onTapCancel = () { setState(() { _last = 'cancel'; }); };
 ///       },
 ///     ),
 ///   },
@@ -514,6 +531,35 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       context.visitChildElements((Element element) {
         final _GestureSemantics widget = element.widget;
         widget._updateHandlers(semanticsGestureHandler, _recognizers);
+      });
+    }
+  }
+
+  /// This method can be called after the build phase, during the layout of the
+  /// nearest descendant [RenderObjectWidget] of the gesture detector, to filter
+  /// the list of available semantic actions.
+  ///
+  /// This is used by [Scrollable] to configure system accessibility tools so
+  /// that they know in which direction a particular list can be scrolled.
+  ///
+  /// If this is never called, then the actions are not filtered. If the list of
+  /// actions to filter changes, it must be called again (during the layout of
+  /// the nearest descendant [RenderObjectWidget] of the gesture detector).
+  void replaceSemanticsActions(Set<SemanticsAction> actions) {
+    assert(() {
+      if (!context.findRenderObject().owner.debugDoingLayout) {
+        throw new FlutterError(
+          'Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.\n'
+          'The replaceSemanticsActions() method can only be called during the layout phase.'
+        );
+      }
+      return true;
+    });
+    if (!widget.excludeFromSemantics) {
+      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
+      context.visitChildElements((Element element) {
+        final _GestureSemantics widget = element.widget;
+        widget._updateSemanticsActions(semanticsGestureHandler, actions);
       });
     }
   }
@@ -695,6 +741,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
           recognizers.containsKey(PanGestureRecognizer) ? _handleHorizontalDragUpdate : null
       ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
           recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
+  }
+
+  void _updateSemanticsActions(RenderSemanticsGestureHandler renderObject, Set<SemanticsAction> actions) {
+    renderObject.validActions = actions;
   }
 
   @override

@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
@@ -164,7 +165,7 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   }
 }
 
-class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin {
+class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
@@ -182,6 +183,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   double _dragExtent = 0.0;
   bool _dragUnderway = false;
   Size _sizePriorToCollapse;
+
+  @override
+  bool get wantKeepAlive => _moveController?.isAnimating == true || _resizeController?.isAnimating == true;
 
   @override
   void dispose() {
@@ -323,6 +327,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   void _handleDismissStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.completed && !_dragUnderway)
       _startResizeAnimation();
+    updateKeepAlive();
   }
 
   void _startResizeAnimation() {
@@ -335,7 +340,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         widget.onDismissed(_dismissDirection);
     } else {
       _resizeController = new AnimationController(duration: widget.resizeDuration, vsync: this)
-        ..addListener(_handleResizeProgressChanged);
+        ..addListener(_handleResizeProgressChanged)
+        ..addStatusListener((AnimationStatus status) => updateKeepAlive());
       _resizeController.forward();
       setState(() {
         _sizePriorToCollapse = context.size;
@@ -362,6 +368,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // See AutomaticKeepAliveClientMixin.
     Widget background = widget.background;
     if (widget.secondaryBackground != null) {
       final DismissDirection direction = _dismissDirection;

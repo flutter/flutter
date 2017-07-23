@@ -67,7 +67,10 @@ class AndroidSdk {
 
   static AndroidSdk locateAndroidSdk() {
     String androidHomeDir;
-    if (platform.environment.containsKey(kAndroidHome)) {
+
+    if (config.containsKey('android-sdk')) {
+      androidHomeDir = config.getValue('android-sdk');
+    } else if (platform.environment.containsKey(kAndroidHome)) {
       androidHomeDir = platform.environment[kAndroidHome];
     } else if (platform.isLinux) {
       if (homeDirPath != null)

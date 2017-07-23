@@ -14,6 +14,9 @@ import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// enum Department { treasury, state }
+
 /// A material design dialog.
 ///
 /// This dialog widget does not have any opinion about the contents of the
@@ -79,6 +82,39 @@ class Dialog extends StatelessWidget {
 ///
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
+///
+/// ## Sample code
+///
+/// This snippet shows a method in a [State] which, when called, displays a dialog box
+/// and returns a [Future] that completes when the dialog is dismissed.
+///
+/// ```dart
+/// Future<Null> _neverSatisfied() async {
+///   return showDialog<Null>(
+///     context: context,
+///     barrierDismissible: false, // user must tap button!
+///     child: new AlertDialog(
+///       title: new Text('Rewind and remember'),
+///       content: new SingleChildScrollView(
+///         child: new ListBody(
+///           children: <Widget>[
+///             new Text('You will never be satisfied.'),
+///             new Text('You\’re like me. I’m never satisfied.'),
+///           ],
+///         ),
+///       ),
+///       actions: <Widget>[
+///         new FlatButton(
+///           child: new Text('Regret'),
+///           onPressed: () {
+///             Navigator.of(context).pop();
+///           },
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
 ///
 /// See also:
 ///
@@ -185,6 +221,15 @@ class AlertDialog extends StatelessWidget {
 /// selects this option, the widget will call the [onPressed] callback, which
 /// typically uses [Navigator.pop] to close the dialog.
 ///
+/// ## Sample code
+///
+/// ```dart
+/// new SimpleDialogOption(
+///   onPressed: () { Navigator.pop(context, Department.treasury); },
+///   child: const Text('Treasury department'),
+/// )
+/// ```
+///
 /// See also:
 ///
 ///  * [SimpleDialog], for a dialog in which to use this widget.
@@ -203,6 +248,9 @@ class SimpleDialogOption extends StatelessWidget {
   /// The callback that is called when this option is selected.
   ///
   /// If this is set to null, the option cannot be selected.
+  ///
+  /// When used in a [SimpleDialog], this will typically call [Navigator.pop]
+  /// with a value for [showDialog] to complete its future with.
   final VoidCallback onPressed;
 
   /// The widget below this widget in the tree.
@@ -232,6 +280,48 @@ class SimpleDialogOption extends StatelessWidget {
 ///
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
+///
+/// ## Sample code
+///
+/// In this example, the user is asked to select between two options. These
+/// options are represented as an enum. The [showDialog] method here returns
+/// a [Future] that completes to a value of that enum. If the user cancels
+/// the dialog (e.g. by hitting the back button on Android, or tapping on the
+/// mask behind the dialog) then the future completes with the null value.
+///
+/// The return value in this example is used as the index for a switch statement.
+/// One advantage of using an enum as the return value and then using that to
+/// drive a switch statement is that the analyzer will flag any switch statement
+/// that doesn't mention every value in the enum.
+///
+/// ```dart
+/// Future<Null> _askedToLead() async {
+///   switch (await showDialog<Department>(
+///     context: context,
+///     child: new SimpleDialog(
+///       title: const Text('Select assignment'),
+///       children: <Widget>[
+///         new SimpleDialogOption(
+///           onPressed: () { Navigator.pop(context, Department.treasury); },
+///           child: const Text('Treasury department'),
+///         ),
+///         new SimpleDialogOption(
+///           onPressed: () { Navigator.pop(context, Department.state); },
+///           child: const Text('State department'),
+///         ),
+///       ],
+///     ),
+///   )) {
+///     case Department.treasury:
+///       // Let's go.
+///       // ...
+///     break;
+///     case Department.state:
+///       // ...
+///     break;
+///   }
+/// }
+/// ```
 ///
 /// See also:
 ///

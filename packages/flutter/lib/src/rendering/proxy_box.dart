@@ -544,7 +544,10 @@ class RenderAspectRatio extends RenderProxyBox {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable width.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this render object can result in a layout that is O(N²) in the
+/// depth of the tree.
 class RenderIntrinsicWidth extends RenderProxyBox {
   /// Creates a render object that sizes itself to its child's intrinsic width.
   RenderIntrinsicWidth({
@@ -650,7 +653,10 @@ class RenderIntrinsicWidth extends RenderProxyBox {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable height.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this render object can result in a layout that is O(N²) in the
+/// depth of the tree.
 class RenderIntrinsicHeight extends RenderProxyBox {
   /// Creates a render object that sizes itself to its child's intrinsic height.
   RenderIntrinsicHeight({
@@ -1280,6 +1286,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     if (elevation == value)
       return;
     _elevation = value;
+    markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
@@ -1319,6 +1326,11 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   static final Paint _defaultPaint = new Paint();
   static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
 
+  // On Fuchsia, the system compositor is responsible for drawing shadows
+  // for physical model layers with non-zero elevation.
+  @override
+  bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -1351,7 +1363,11 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           );
         }
         canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
-        canvas.saveLayer(offsetBounds, _defaultPaint);
+        if (offsetClipRRect.isRect) {
+          canvas.save();
+        } else {
+          canvas.saveLayer(offsetBounds, _defaultPaint);
+        }
         canvas.clipRRect(offsetClipRRect);
         super.paint(context, offset);
         canvas.restore();
@@ -1630,7 +1646,7 @@ class RenderTransform extends RenderProxyBox {
       Matrix4 inverse;
       try {
         inverse = new Matrix4.inverted(_effectiveTransform);
-      } catch (e) {
+      } on ArgumentError {
         // We cannot invert the effective transform. That means the child
         // doesn't appear on screen and cannot be hit.
         return false;
@@ -1655,7 +1671,6 @@ class RenderTransform extends RenderProxyBox {
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.multiply(_effectiveTransform);
-    super.applyPaintTransform(child, transform);
   }
 
   @override
@@ -1779,7 +1794,7 @@ class RenderFittedBox extends RenderProxyBox {
     Matrix4 inverse;
     try {
       inverse = new Matrix4.inverted(_transform);
-    } catch (e) {
+    } on ArgumentError {
       // We cannot invert the effective transform. That means the child
       // doesn't appear on screen and cannot be hit.
       return false;
@@ -1792,7 +1807,6 @@ class RenderFittedBox extends RenderProxyBox {
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     _updatePaintData();
     transform.multiply(_transform);
-    super.applyPaintTransform(child, transform);
   }
 
   @override
@@ -1858,7 +1872,6 @@ class RenderFractionalTranslation extends RenderProxyBox {
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
     transform.translate(translation.dx * size.width, translation.dy * size.height);
-    super.applyPaintTransform(child, transform);
   }
 
   @override
@@ -2031,7 +2044,7 @@ abstract class CustomPainter extends Listenable {
   bool hitTest(Offset position) => null;
 
   @override
-  String toString() => '$runtimeType#$hashCode(${ _repaint?.toString() ?? "" })';
+  String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
 }
 
 /// Provides a canvas on which to draw during the paint phase.
@@ -2722,6 +2735,28 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+  /// If non-null, the set of actions to allow. Other actions will be omitted,
+  /// even if their callback is provided.
+  ///
+  /// For example, if [onTap] is non-null but [validActions] does not contain
+  /// [SemanticsAction.tap], then the semantic description of this node will
+  /// not claim to support taps.
+  ///
+  /// This is normally used to filter the actions made available by
+  /// [onHorizontalDragUpdate] and [onVerticalDragUpdate]. Normally, these make
+  /// both the right and left, or up and down, actions available. For example,
+  /// if [onHorizontalDragUpdate] is set but [validActions] only contains
+  /// [SemanticsAction.scrollLeft], then the [SemanticsAction.scrollRight]
+  /// action will be omitted.
+  Set<SemanticsAction> get validActions => _validActions;
+  Set<SemanticsAction> _validActions;
+  set validActions(Set<SemanticsAction> value) {
+    if (setEquals<SemanticsAction>(value, _validActions))
+      return;
+    _validActions = value;
+    markNeedsSemanticsUpdate(onlyChanges: true);
+  }
+
    /// Called when the user taps on the render object.
   GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
@@ -2793,14 +2828,25 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
+    List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
-      node.addAction(SemanticsAction.tap);
+      actions.add(SemanticsAction.tap);
     if (onLongPress != null)
-      node.addAction(SemanticsAction.longPress);
-    if (onHorizontalDragUpdate != null)
-      node.addHorizontalScrollingActions();
-    if (onVerticalDragUpdate != null)
-      node.addVerticalScrollingActions();
+      actions.add(SemanticsAction.longPress);
+    if (onHorizontalDragUpdate != null) {
+      actions.add(SemanticsAction.scrollRight);
+      actions.add(SemanticsAction.scrollLeft);
+    }
+    if (onVerticalDragUpdate != null) {
+      actions.add(SemanticsAction.scrollUp);
+      actions.add(SemanticsAction.scrollDown);
+    }
+
+    // If a set of validActions has been provided only expose those.
+    if (validActions != null)
+      actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
+
+    actions.forEach(node.addAction);
   }
 
   @override
@@ -2856,6 +2902,23 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
         break;
     }
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    final List<String> gestures = <String>[];
+    if (onTap != null)
+      gestures.add('tap');
+    if (onLongPress != null)
+      gestures.add('long press');
+    if (onHorizontalDragUpdate != null)
+      gestures.add('horizontal scroll');
+    if (onVerticalDragUpdate != null)
+      gestures.add('vertical scroll');
+    if (gestures.isEmpty)
+      gestures.add('<none>');
+    description.add('gestures: ${gestures.join(", ")}');
+  }
 }
 
 /// Add annotations to the [SemanticsNode] for this subtree.
@@ -2867,10 +2930,12 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     RenderBox child,
     bool container: false,
     bool checked,
-    String label
+    bool selected,
+    String label,
   }) : assert(container != null),
        _container = container,
        _checked = checked,
+       _selected = selected,
        _label = label,
        super(child);
 
@@ -2894,8 +2959,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the "hasCheckedState" semantic to true and the
-  /// "isChecked" semantic to the given value.
+  /// If non-null, sets the [SemanticsNode.hasCheckedState] semantic to true and
+  /// the [SemanticsNode.isChecked] semantic to the given value.
   bool get checked => _checked;
   bool _checked;
   set checked(bool value) {
@@ -2906,7 +2971,19 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
   }
 
-  /// If non-null, sets the "label" semantic to the given value.
+  /// If non-null, sets the [SemanticsNode.isSelected] semantic to the given
+  /// value.
+  bool get selected => _selected;
+  bool _selected;
+  set selected(bool value) {
+    if (selected == value)
+      return;
+    final bool hadValue = selected != null;
+    _selected = value;
+    markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
   String get label => _label;
   String _label;
   set label(String value) {
@@ -2921,7 +2998,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   bool get isSemanticBoundary => container;
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => checked != null || label != null ? _annotate : null;
+  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
     if (checked != null) {
@@ -2929,6 +3006,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
         ..hasCheckedState = true
         ..isChecked = checked;
     }
+    if (selected != null)
+      node.isSelected = selected;
     if (label != null)
       node.label = label;
   }
@@ -3005,5 +3084,202 @@ class RenderExcludeSemantics extends RenderProxyBox {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('excluding: $excluding');
+  }
+}
+
+/// Provides an anchor for a [RenderFollowerLayer].
+///
+/// See also:
+///
+///  * [CompositedTransformTarget], the corresponding widget.
+///  * [LeaderLayer], the layer that this render object creates.
+class RenderLeaderLayer extends RenderProxyBox {
+  /// Creates a render object that uses a [LeaderLayer].
+  ///
+  /// The [link] must not be null.
+  RenderLeaderLayer({
+    @required LayerLink link,
+    RenderBox child,
+  }) : assert(link != null),
+       super(child) {
+    this.link = link;
+  }
+
+  /// The link object that connects this [RenderLeaderLayer] with one or more
+  /// [RenderFollowerLayer]s.
+  ///
+  /// This property must not be null. The object must not be associated with
+  /// another [RenderLeaderLayer] that is also being painted.
+  LayerLink get link => _link;
+  LayerLink _link;
+  set link(LayerLink value) {
+    assert(value != null);
+    if (_link == value)
+      return;
+    _link = value;
+    markNeedsPaint();
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.pushLayer(new LeaderLayer(link: link, offset: offset), super.paint, Offset.zero);
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('link: $link');
+  }
+}
+
+/// Transform the child so that its origin is [offset] from the orign of the
+/// [RenderLeaderLayer] with the same [LayerLink].
+///
+/// The [RenderLeaderLayer] in question must be earlier in the paint order.
+///
+/// Hit testing on descendants of this render object will only work if the
+/// target position is within the box that this render object's parent considers
+/// to be hitable.
+///
+/// See also:
+///
+///  * [CompositedTransformFollower], the corresponding widget.
+///  * [FollowerLayer], the layer that this render object creates.
+class RenderFollowerLayer extends RenderProxyBox {
+  /// Creates a render object that uses a [FollowerLayer].
+  ///
+  /// The [link] and [offset] arguments must not be null.
+  RenderFollowerLayer({
+    @required LayerLink link,
+    bool showWhenUnlinked: true,
+    Offset offset: Offset.zero,
+    RenderBox child,
+  }) : assert(link != null),
+       assert(showWhenUnlinked != null),
+       assert(offset != null),
+       super(child) {
+    this.link = link;
+    this.showWhenUnlinked = showWhenUnlinked;
+    this.offset = offset;
+  }
+
+  /// The link object that connects this [RenderFollowerLayer] with a
+  /// [RenderLeaderLayer] earlier in the paint order.
+  LayerLink get link => _link;
+  LayerLink _link;
+  set link(LayerLink value) {
+    assert(value != null);
+    if (_link == value)
+      return;
+    _link = value;
+    markNeedsPaint();
+  }
+
+  /// Whether to show the render object's contents when there is no
+  /// corresponding [RenderLeaderLayer] with the same [link].
+  ///
+  /// When the render object is linked, the child is positioned such that it has
+  /// the same global position as the linked [RenderLeaderLayer].
+  ///
+  /// When the render object is not linked, then: if [showWhenUnlinked] is true,
+  /// the child is visible and not repositioned; if it is false, then child is
+  /// hidden.
+  bool get showWhenUnlinked => _showWhenUnlinked;
+  bool _showWhenUnlinked;
+  set showWhenUnlinked(bool value) {
+    assert(value != null);
+    if (_showWhenUnlinked == value)
+      return;
+    _showWhenUnlinked = value;
+    markNeedsPaint();
+  }
+
+  /// The offset to apply to the origin of the linked [RenderLeaderLayer] to
+  /// obtain this render object's origin.
+  Offset get offset => _offset;
+  Offset _offset;
+  set offset(Offset value) {
+    assert(value != null);
+    if (_offset == value)
+      return;
+    _offset = value;
+    markNeedsPaint();
+  }
+
+  @override
+  void detach() {
+    _layer = null;
+    super.detach();
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  /// The layer we created when we were last painted.
+  FollowerLayer _layer;
+
+  /// Return the transform that was used in the last composition phase, if any.
+  ///
+  /// If the [FollowerLayer] has not yet been created, was never composited, or
+  /// was unable to determine the transform (see
+  /// [FollowerLayer.getLastTransform]), this returns the identity matrix (see
+  /// [new Matrix4.identity].
+  Matrix4 getCurrentTransform() {
+    return _layer?.getLastTransform() ?? new Matrix4.identity();
+  }
+
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    Matrix4 inverse;
+    try {
+      inverse = new Matrix4.inverted(getCurrentTransform());
+    } on ArgumentError {
+      // We cannot invert the effective transform. That means the child
+      // doesn't appear on screen and cannot be hit.
+      return false;
+    }
+    position = MatrixUtils.transformPoint(inverse, position);
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    assert(showWhenUnlinked != null);
+    _layer = new FollowerLayer(
+      link: link,
+      showWhenUnlinked: showWhenUnlinked,
+      linkedOffset: this.offset,
+      unlinkedOffset: offset,
+    );
+    context.pushLayer(
+      _layer,
+      super.paint,
+      Offset.zero,
+      childPaintBounds: new Rect.fromLTRB(
+        // We don't know where we'll end up, so we have no idea what our cull rect should be.
+        double.NEGATIVE_INFINITY,
+        double.NEGATIVE_INFINITY,
+        double.INFINITY,
+        double.INFINITY,
+      ),
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.multiply(getCurrentTransform());
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('link: $link');
+    description.add('showWhenUnlinked: $showWhenUnlinked');
+    description.add('offset: $offset');
+    description.add('current transform matrix:');
+    description.addAll(debugDescribeTransform(getCurrentTransform()));
   }
 }

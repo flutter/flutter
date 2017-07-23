@@ -17,8 +17,12 @@ typedef bool Predicate(dynamic value);
 ///
 /// When the retry time out, the last seen error and stack trace are returned in
 /// an error [Future].
-Future<dynamic> retry(Action action, Duration timeout,
-    Duration pauseBetweenRetries, { Predicate predicate }) async {
+Future<dynamic> retry(
+  Action action,
+  Duration timeout,
+  Duration pauseBetweenRetries, {
+  Predicate predicate,
+}) async {
   assert(action != null);
   assert(timeout != null);
   assert(pauseBetweenRetries != null);
@@ -29,7 +33,7 @@ Future<dynamic> retry(Action action, Duration timeout,
   dynamic lastStackTrace;
   bool success = false;
 
-  while(!success && sw.elapsed < timeout) {
+  while (!success && sw.elapsed < timeout) {
     try {
       result = await action();
       if (predicate == null || predicate(result))

@@ -56,13 +56,29 @@ typedef void PaintingContextCallback(PaintingContext context, Offset offset);
 /// child might be recorded in separate compositing layers. For this reason, do
 /// not hold a reference to the canvas across operations that might paint
 /// child render objects.
+///
+/// New [PaintingContext] objects are created automatically when using
+/// [PaintingContext.repaintCompositedChild] and [pushLayer].
 class PaintingContext {
-  PaintingContext._(this._containerLayer, this._paintBounds)
+  PaintingContext._(this._containerLayer, this.canvasBounds)
     : assert(_containerLayer != null),
-      assert(_paintBounds != null);
+      assert(canvasBounds != null);
 
   final ContainerLayer _containerLayer;
-  final Rect _paintBounds;
+
+  /// The bounds within which the painting context's [canvas] will record
+  /// painting commands.
+  ///
+  /// A render object provided with this [PaintingContext] (e.g. in its
+  /// [RenderObject.paint] method) is permitted to paint outside the region that
+  /// the render object occupies during layout, but is not permitted to paint
+  /// outside these paints bounds. These paint bounds are used to construct
+  /// memory-efficient composited layers, which means attempting to paint
+  /// outside these bounds can attempt to write to pixels that do not exist in
+  /// the composited layer.
+  ///
+  /// The [paintBounds] rectangle is in the [canvas] coordinate system.
+  final Rect canvasBounds;
 
   /// Repaint the given render object.
   ///
@@ -70,6 +86,11 @@ class PaintingContext {
   /// composited layer, and must be in need of painting. The render object's
   /// layer, if any, is re-used, along with any layers in the subtree that don't
   /// need to be repainted.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderObject.isRepaintBoundary], which determines if a [RenderObject]
+  ///    has a composited layer.
   static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent: false }) {
     assert(child.isRepaintBoundary);
     assert(child._needsPaint);
@@ -97,7 +118,7 @@ class PaintingContext {
     childContext._stopRecordingIfNeeded();
   }
 
-  /// Paint a child render object.
+  /// Paint a child [RenderObject].
   ///
   /// If the child has its own composited layer, the child will be composited
   /// into the layer subtree associated with this painting context. Otherwise,
@@ -180,6 +201,8 @@ class PaintingContext {
   /// The current canvas can change whenever you paint a child using this
   /// context, which means it's fragile to hold a reference to the canvas
   /// returned by this getter.
+  ///
+  /// Only calls within the [canvasBounds] will be recorded.
   Canvas get canvas {
     if (_canvas == null)
       _startRecording();
@@ -188,9 +211,9 @@ class PaintingContext {
 
   void _startRecording() {
     assert(!_isRecording);
-    _currentLayer = new PictureLayer();
+    _currentLayer = new PictureLayer(canvasBounds);
     _recorder = new ui.PictureRecorder();
-    _canvas = new Canvas(_recorder, _paintBounds);
+    _canvas = new Canvas(_recorder, canvasBounds);
     _containerLayer.append(_currentLayer);
   }
 
@@ -203,14 +226,14 @@ class PaintingContext {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 6.0
           ..color = debugCurrentRepaintColor.toColor();
-        canvas.drawRect(_paintBounds.deflate(3.0), paint);
+        canvas.drawRect(canvasBounds.deflate(3.0), paint);
       }
       if (debugPaintLayerBordersEnabled) {
         final Paint paint = new Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
           ..color = debugPaintLayerBordersColor;
-        canvas.drawRect(_paintBounds, paint);
+        canvas.drawRect(canvasBounds, paint);
       }
       return true;
     });
@@ -262,7 +285,7 @@ class PaintingContext {
   }
 
   /// Appends the given layer to the recording, and calls the `painter` callback
-  /// with that layer, providing the [childPaintBounds] as the paint bounds of
+  /// with that layer, providing the `childPaintBounds` as the paint bounds of
   /// the child. Canvas recording commands are not guaranteed to be stored
   /// outside of the paint bounds.
   ///
@@ -272,9 +295,11 @@ class PaintingContext {
   ///
   /// The `offset` is the offset to pass to the `painter`.
   ///
-  /// If the `childPaintBounds` are not specified then the current layer's
+  /// If the `childPaintBounds` are not specified then the current layer's paint
   /// bounds are used. This is appropriate if the child layer does not apply any
-  /// transformation or clipping to its contents.
+  /// transformation or clipping to its contents. The `childPaintBounds`, if
+  /// specified, must be in the coordinate system of the new layer, and should
+  /// not go outside the current layer's paint bounds.
   ///
   /// See also:
   ///
@@ -285,7 +310,7 @@ class PaintingContext {
     assert(painter != null);
     _stopRecordingIfNeeded();
     _appendLayer(childLayer);
-    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? _paintBounds);
+    final PaintingContext childContext = new PaintingContext._(childLayer, childPaintBounds ?? canvasBounds);
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
@@ -379,7 +404,7 @@ class PaintingContext {
         new TransformLayer(transform: effectiveTransform),
         painter,
         offset,
-        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, _paintBounds),
+        childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, canvasBounds),
       );
     } else {
       canvas.save();
@@ -406,6 +431,9 @@ class PaintingContext {
   void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
     pushLayer(new OpacityLayer(alpha: alpha), painter, offset);
   }
+
+  @override
+  String toString() => '$runtimeType#$hashCode(layer: $_containerLayer, canvas bounds: $canvasBounds)';
 }
 
 /// An abstract set of layout constraints.
@@ -608,7 +636,7 @@ abstract class _SemanticsFragment {
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics });
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => describeIdentity(this);
 }
 
 /// A SemanticsFragment that doesn't produce any [SemanticsNode]s when compiled.
@@ -711,7 +739,8 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(parentSemantics == null);
     renderObjectOwner._semantics ??= new SemanticsNode.root(
       handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-      owner: renderObjectOwner.owner.semanticsOwner
+      owner: renderObjectOwner.owner.semanticsOwner,
+      showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
@@ -740,7 +769,8 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     renderObjectOwner._semantics ??= new SemanticsNode(
-      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
+      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+      showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
     if (geometry != null) {
@@ -784,7 +814,8 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     _haveConcreteNode = currentSemantics == null && annotator != null;
     if (haveConcreteNode) {
       renderObjectOwner._semantics ??= new SemanticsNode(
-        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
+        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+        showOnScreen: renderObjectOwner.showOnScreen,
       );
       node = renderObjectOwner._semantics;
     } else {
@@ -1528,6 +1559,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
   /// out and painted.
+  ///
+  /// It is intended to be used by tests and asserts.
   bool get debugNeedsLayout {
     bool result;
     assert(() {
@@ -1712,6 +1745,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisLayout = true;
       debugPreviousActiveLayout = _debugActiveLayout;
       _debugActiveLayout = this;
+      if (debugPrintLayouts)
+        debugPrint('Laying out (without resize) $this');
       return true;
     });
     try {
@@ -1818,6 +1853,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_doingThisLayoutWithCallback);
     assert(() {
       _debugMutationsLocked = true;
+      if (debugPrintLayouts)
+        debugPrint('Laying out (${sizedByParent ? "with separate resize" : "with resize allowed"}) $this');
       return true;
     });
     if (sizedByParent) {
@@ -1981,6 +2018,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// frequently might want to repaint themselves without requiring their parent
   /// to repaint.
   ///
+  /// If this getter returns true, the [paintBounds] are applied to this object
+  /// and all descendants.
+  ///
   /// Warning: This getter must not change value over the lifetime of this object.
   bool get isRepaintBoundary => false;
 
@@ -2082,6 +2122,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     if (!_needsCompositingBitsUpdate)
       return;
     final bool oldNeedsCompositing = _needsCompositing;
+    _needsCompositing = false;
     visitChildren((RenderObject child) {
       child._updateCompositingBits();
       if (child.needsCompositing)
@@ -2094,6 +2135,28 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _needsCompositingBitsUpdate = false;
   }
 
+  /// Whether this render object's paint information is dirty.
+  ///
+  /// This is only set in debug mode. In general, render objects should not need
+  /// to condition their runtime behavior on whether they are dirty or not,
+  /// since they should only be marked dirty immediately prior to being laid
+  /// out and painted.
+  ///
+  /// It is intended to be used by tests and asserts.
+  ///
+  /// It is possible (and indeed, quite common) for [debugNeedsPaint] to be
+  /// false and [debugNeedsLayout] to be true. The render object will still be
+  /// repainted in the next frame when this is the case, because the
+  /// [markNeedsPaint] method is implicitly called by the framework after a
+  /// render object is laid out, prior to the paint phase.
+  bool get debugNeedsPaint {
+    bool result;
+    assert(() {
+      result = _needsPaint;
+      return true;
+    });
+    return result;
+  }
   bool _needsPaint = true;
 
   /// Mark this render object as having changed its visual appearance.
@@ -2106,6 +2169,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This mechanism batches the painting work so that multiple sequential
   /// writes are coalesced, removing redundant computation.
+  ///
+  /// Once [markNeedsPaint] has been called on a render object,
+  /// [debugNeedsPaint] returns true for that render object until just after
+  /// the pipeline owner has called [paint] on the render object.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
     if (_needsPaint)
@@ -2272,12 +2339,15 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 
   /// The bounds within which this render object will paint.
   ///
-  /// A render object is permitted to paint outside the region it occupies
-  /// during layout but is not permitted to paint outside these paints bounds.
-  /// These paint bounds are used to construct memory-efficient composited
-  /// layers, which means attempting to paint outside these bounds can attempt
-  /// to write to pixels that do not exist in this render object's composited
-  /// layer.
+  /// A render object and its descendants are permitted to paint outside the
+  /// region it occupies during layout, but they are not permitted to paint
+  /// outside these paints bounds. These paint bounds are used to construct
+  /// memory-efficient composited layers, which means attempting to paint
+  /// outside these bounds can attempt to write to pixels that do not exist in
+  /// this render object's composited layer.
+  ///
+  /// The [paintBounds] are only actually enforced when the render object is a
+  /// repaint boundary; see [isRepaintBoundary].
   Rect get paintBounds;
 
   /// Override this method to paint debugging information.
@@ -2311,6 +2381,37 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void applyPaintTransform(covariant RenderObject child, Matrix4 transform) {
     assert(child.parent == this);
   }
+
+  /// Applies the paint transform up the tree to `ancestor`.
+  ///
+  /// Returns a matrix that maps the local paint coordinate system to the
+  /// coordinate system of `ancestor`.
+  ///
+  /// If `ancestor` is null, this method returns a matrix that maps from the
+  /// local paint coordinate system to the coordinate system of the
+  /// [PipelineOwner.rootNode]. For the render tree owner by the
+  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
+  /// this means that this method maps to the global coordinate system in
+  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
+  /// [RenderView] to further transform the coordinate.
+  Matrix4 getTransformTo(RenderObject ancestor) {
+    assert(attached);
+    if (ancestor == null) {
+      final AbstractNode rootNode = owner.rootNode;
+      if (rootNode is RenderObject)
+        ancestor = rootNode;
+    }
+    final List<RenderObject> renderers = <RenderObject>[];
+    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent) {
+      assert(renderer != null); // Failed to find ancestor in parent chain.
+      renderers.add(renderer);
+    }
+    final Matrix4 transform = new Matrix4.identity();
+    for (int index = renderers.length - 1; index > 0; index -= 1)
+      renderers[index].applyPaintTransform(renderers[index - 1], transform);
+    return transform;
+  }
+
 
   /// Returns a rect in this object's coordinate system that describes
   /// the approximate bounding box of the clip rect that would be
@@ -2447,8 +2548,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       }
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
-        if (owner != null)
+        if (owner != null) {
           owner._nodesNeedingSemantics.add(node);
+          owner.requestVisualUpdate();
+        }
       }
     } else {
       // The shape of the semantics tree around us may have changed.
@@ -2467,8 +2570,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       node._semantics?.reset();
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
-        if (owner != null)
+        if (owner != null) {
           owner._nodesNeedingSemantics.add(node);
+          owner.requestVisualUpdate();
+        }
       }
     }
   }
@@ -2621,7 +2726,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a human understandable name.
   @override
   String toString() {
-    String header = '$runtimeType#$hashCode';
+    String header = describeIdentity(this);
     if (_relayoutBoundary != null && _relayoutBoundary != this) {
       int count = 1;
       RenderObject target = parent;
@@ -2690,7 +2795,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void debugFillDescription(List<String> description) {
     if (debugCreator != null)
       description.add('creator: $debugCreator');
-    description.add('parentData: $parentData${ _debugCanParentUseSize ? " (can use size)" : ""}');
+    description.add('parentData: $parentData${ _debugCanParentUseSize == true ? " (can use size)" : ""}');
     description.add('constraints: $constraints');
     if (_layer != null) // don't access it via the "layer" getter since that's only valid when we don't need paint
       description.add('layer: $_layer');
@@ -2707,6 +2812,17 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   @protected
   String debugDescribeChildren(String prefix) => '';
 
+
+  /// Attempt to make this or a descendant RenderObject visible on screen.
+  ///
+  /// If [child] is provided, that [RenderObject] is made visible. If [child] is
+  /// omitted, this [RenderObject] is made visible.
+  void showOnScreen([RenderObject child]) {
+    if (parent is RenderObject) {
+      final RenderObject renderParent = parent;
+      renderParent.showOnScreen(child ?? this);
+    }
+  }
 }
 
 /// Generic mixin for render objects with one child.

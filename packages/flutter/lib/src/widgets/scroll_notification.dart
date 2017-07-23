@@ -69,6 +69,18 @@ abstract class ViewportNotificationMixin extends Notification {
 /// [Scrollable] widgets. To focus on notifications from the nearest
 /// [Scrollable] descendant, check that the [depth] property of the notification
 /// is zero.
+///
+/// When a scroll notification is received by a [NotificationListener], the
+/// listener will have already completed build and layout, and it is therefore
+/// too late for that widget to call [State.setState]. Any attempt to adjust the
+/// build or layout based on a scroll notification would result in a layout that
+/// lagged one frame behind, which is a poor user experience. Scroll
+/// notifications are therefore primarily useful for paint effects (since paint
+/// happens after layout). The [GlowingOverscrollIndicator] and [Scrollbar]
+/// widgets are examples of paint effects that use scroll notifications.
+///
+/// To drive layout based on the scroll position, consider listening to the
+/// [ScrollPosition] directly (or indirectly via a [ScrollController]).
 abstract class ScrollNotification extends LayoutChangedNotification with ViewportNotificationMixin {
   /// Initializes fields for subclasses.
   ScrollNotification({

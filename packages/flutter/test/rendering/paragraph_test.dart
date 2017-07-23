@@ -6,7 +6,7 @@ import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -79,12 +79,13 @@ void main() {
       const TextSpan(
         text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
               'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
-        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0)),
+        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      ),
       maxLines: 1,
       softWrap: true,
     );
 
-    void relayoutWith({int maxLines, bool softWrap, TextOverflow overflow}) {
+    void relayoutWith({ int maxLines, bool softWrap, TextOverflow overflow }) {
       paragraph
         ..maxLines = maxLines
         ..softWrap = softWrap
@@ -147,5 +148,85 @@ void main() {
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
   });
-}
 
+  test('maxLines', () {
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(
+        text: 'How do you write like you\'re running out of time? Write day and night like you\'re running out of time?',
+            // 0123456789 0123456789 012 345 0123456 012345 01234 012345678 012345678 0123 012 345 0123456 012345 01234
+            // 0          1          2       3       4      5     6         7         8    9       10      11     12
+        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+      ),
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+    void layoutAt(int maxLines) {
+      paragraph.maxLines = maxLines;
+      pumpFrame();
+    }
+
+    layoutAt(null);
+    expect(paragraph.size.height, 130.0);
+
+    layoutAt(1);
+    expect(paragraph.size.height, 10.0);
+
+    layoutAt(2);
+    expect(paragraph.size.height, 20.0);
+
+    layoutAt(3);
+    expect(paragraph.size.height, 30.0);
+  });
+
+  test('changing color does not do layout', () {
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(
+        text: 'Hello',
+        style: const TextStyle(color: const Color(0xFF000000)),
+      ),
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0), phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isFalse);
+    paragraph.text = const TextSpan(
+      text: 'Hello World',
+      style: const TextStyle(color: const Color(0xFF000000)),
+    );
+    expect(paragraph.debugNeedsLayout, isTrue);
+    expect(paragraph.debugNeedsPaint, isFalse);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isFalse);
+    paragraph.text = const TextSpan(
+      text: 'Hello World',
+      style: const TextStyle(color: const Color(0xFFFFFFFF)),
+    );
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isTrue);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isFalse);
+  });
+
+  test('toStringDeep', () {
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(text: _kText),
+    );
+    // TODO(jacobr): fix handling of text spans with line breaks.
+    expect(paragraph, isNot(hasAGoodToStringDeep));
+    expect(
+      paragraph.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderParagraph#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        ' │ parentData: null\n'
+        ' │ constraints: null\n'
+        ' │ size: MISSING\n'
+        ' ╘═╦══ text ═══\n'
+        '   ║ TextSpan:\n'
+        '   ║   "I polished up that handle so carefullee\n'
+        'That now I am the Ruler of the Queen\'s Navee!"\n'
+        '   ╚═══════════\n'
+        '\n',
+      ),
+    );
+  });
+}

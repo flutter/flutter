@@ -12,7 +12,16 @@ import 'theme.dart';
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
+// See the InputDecorator.build method, where this is used.
+class _InputDecoratorChildGlobalKey extends GlobalObjectKey {
+  const _InputDecoratorChildGlobalKey(BuildContext value) : super(value);
+}
+
 /// Text and styles used to label an input field.
+///
+/// The [TextField] and [InputDecorator] classes use [InputDecoration] objects
+/// to describe their decoration. (In fact, this class is merely the
+/// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
 /// See also:
 ///
@@ -20,6 +29,8 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 ///    [InputDecoration].
 ///  * [InputDecorator], which is a widget that draws an [InputDecoration]
 ///    around an arbitrary child widget.
+///  * [Decoration] and [DecoratedBox], for drawing arbitrary decorations
+///    around other widgets.
 @immutable
 class InputDecoration {
   /// Creates a bundle of text and styles used to label an input field.
@@ -31,12 +42,18 @@ class InputDecoration {
     this.icon,
     this.labelText,
     this.labelStyle,
+    this.helperText,
+    this.helperStyle,
     this.hintText,
     this.hintStyle,
     this.errorText,
     this.errorStyle,
     this.isDense: false,
     this.hideDivider: false,
+    this.prefixText,
+    this.prefixStyle,
+    this.suffixText,
+    this.suffixStyle,
   }) : isCollapsed = false;
 
   /// Creates a decoration that is the same size as the input field.
@@ -51,11 +68,17 @@ class InputDecoration {
   }) : icon = null,
        labelText = null,
        labelStyle = null,
+       helperText = null,
+       helperStyle = null,
        errorText = null,
        errorStyle = null,
        isDense = false,
        isCollapsed = true,
-       hideDivider = true;
+       hideDivider = true,
+       prefixText = null,
+       prefixStyle = null,
+       suffixText = null,
+       suffixStyle = null;
 
   /// An icon to show before the input field.
   ///
@@ -85,6 +108,17 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle labelStyle;
 
+  /// Text that provides context about the field’s value, such as how the value
+  /// will be used.
+  ///
+  /// If non-null, the text is displayed below the input field, in the same
+  /// location as [errorText]. If a non-null [errorText] value is specified then
+  /// the helper text is not shown.
+  final String helperText;
+
+  /// The style to use for the [helperText].
+  final TextStyle helperStyle;
+
   /// Text that suggests what sort of input the field accepts.
   ///
   /// Displayed on top of the input field (i.e., at the same location on the
@@ -105,10 +139,10 @@ class InputDecoration {
 
   /// Text that appears below the input field.
   ///
-  /// If non-null the divider, that appears below the input field is red.
+  /// If non-null, the divider that appears below the input field is red.
   final String errorText;
 
-  /// The style to use for the [errorText.
+  /// The style to use for the [errorText].
   ///
   /// If null, defaults of a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
@@ -133,6 +167,28 @@ class InputDecoration {
   /// Defaults to false.
   final bool hideDivider;
 
+  /// Optional text prefix to place on the line before the input.
+  ///
+  /// Uses the [prefixStyle]. Uses [hintStyle] if [prefixStyle] isn't
+  /// specified. Prefix is not returned as part of the input.
+  final String prefixText;
+
+  /// The style to use for the [prefixText].
+  ///
+  /// If null, defaults to the [hintStyle].
+  final TextStyle prefixStyle;
+
+  /// Optional text suffix to place on the line after the input.
+  ///
+  /// Uses the [suffixStyle]. Uses [hintStyle] if [suffixStyle] isn't
+  /// specified. Suffix is not returned as part of the input.
+  final String suffixText;
+
+  /// The style to use for the [suffixText].
+  ///
+  /// If null, defaults to the [hintStyle].
+  final TextStyle suffixStyle;
+
   /// Creates a copy of this input decoration but with the given fields replaced
   /// with the new values.
   ///
@@ -141,23 +197,35 @@ class InputDecoration {
     Widget icon,
     String labelText,
     TextStyle labelStyle,
+    String helperText,
+    TextStyle helperStyle,
     String hintText,
     TextStyle hintStyle,
     String errorText,
     TextStyle errorStyle,
     bool isDense,
     bool hideDivider,
+    String prefixText,
+    TextStyle prefixStyle,
+    String suffixText,
+    TextStyle suffixStyle,
   }) {
     return new InputDecoration(
       icon: icon ?? this.icon,
       labelText: labelText ?? this.labelText,
       labelStyle: labelStyle ?? this.labelStyle,
+      helperText: helperText ?? this.helperText,
+      helperStyle: helperStyle ?? this.helperStyle,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       isDense: isDense ?? this.isDense,
       hideDivider: hideDivider ?? this.hideDivider,
+      prefixText: prefixText ?? this.prefixText,
+      prefixStyle: prefixStyle ?? this.prefixStyle,
+      suffixText: suffixText ?? this.suffixText,
+      suffixStyle: suffixStyle ?? this.suffixStyle,
     );
   }
 
@@ -171,13 +239,19 @@ class InputDecoration {
     return typedOther.icon == icon
         && typedOther.labelText == labelText
         && typedOther.labelStyle == labelStyle
+        && typedOther.helperText == helperText
+        && typedOther.helperStyle == helperStyle
         && typedOther.hintText == hintText
         && typedOther.hintStyle == hintStyle
         && typedOther.errorText == errorText
         && typedOther.errorStyle == errorStyle
         && typedOther.isDense == isDense
         && typedOther.isCollapsed == isCollapsed
-        && typedOther.hideDivider == hideDivider;
+        && typedOther.hideDivider == hideDivider
+        && typedOther.prefixText == prefixText
+        && typedOther.prefixStyle == prefixStyle
+        && typedOther.suffixText == suffixText
+        && typedOther.suffixStyle == suffixStyle;
   }
 
   @override
@@ -186,6 +260,8 @@ class InputDecoration {
       icon,
       labelText,
       labelStyle,
+      helperText,
+      helperStyle,
       hintText,
       hintStyle,
       errorText,
@@ -193,6 +269,10 @@ class InputDecoration {
       isDense,
       isCollapsed,
       hideDivider,
+      prefixText,
+      prefixStyle,
+      suffixText,
+      suffixStyle,
     );
   }
 
@@ -203,6 +283,8 @@ class InputDecoration {
       description.add('icon: $icon');
     if (labelText != null)
       description.add('labelText: "$labelText"');
+    if (helperText != null)
+      description.add('helperText: "$helperText"');
     if (hintText != null)
       description.add('hintText: "$hintText"');
     if (errorText != null)
@@ -213,6 +295,14 @@ class InputDecoration {
       description.add('isCollapsed: $isCollapsed');
     if (hideDivider)
       description.add('hideDivider: $hideDivider');
+    if (prefixText != null)
+      description.add('prefixText: $prefixText');
+    if (prefixStyle != null)
+      description.add('prefixStyle: $prefixStyle');
+    if (suffixText != null)
+      description.add('suffixText: $suffixText');
+    if (suffixStyle != null)
+      description.add('suffixStyle: $suffixStyle');
     return 'InputDecoration(${description.join(', ')})';
   }
 }
@@ -223,15 +313,22 @@ class InputDecoration {
 /// Use [InputDecorator] to create widgets that look and behave like a
 /// [TextField] but can be used to input information other than text.
 ///
+/// The configuration of this widget is primarily provided in the form of an
+/// [InputDecoration] object.
+///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
-/// * [TextField], which uses an [InputDecorator] to draw labels and other
+///  * [TextField], which uses an [InputDecorator] to draw labels and other
 ///    visual elements around a text entry widget.
+///  * [Decoration] and [DecoratedBox], for drawing arbitrary decorations
+///    around other widgets.
 class InputDecorator extends StatelessWidget {
   /// Creates a widget that displayes labels and other visual elements similar
   /// to a [TextField].
+  ///
+  /// The [isFocused] and [isEmpty] arguments must not be null.
   const InputDecorator({
     Key key,
     @required this.decoration,
@@ -240,7 +337,9 @@ class InputDecorator extends StatelessWidget {
     this.isFocused: false,
     this.isEmpty: false,
     this.child,
-  }) : super(key: key);
+  }) : assert(isFocused != null),
+       assert(isEmpty != null),
+       super(key: key);
 
   /// The text and styles to use when decorating the child.
   final InputDecoration decoration;
@@ -293,7 +392,7 @@ class InputDecorator extends StatelessWidget {
     return themeData.hintColor;
   }
 
-  Widget _buildContent(Color borderColor, double topPadding, bool isDense) {
+  Widget _buildContent(Color borderColor, double topPadding, bool isDense, Widget inputChild) {
     final double bottomPadding = isDense ? 8.0 : 1.0;
     const double bottomBorder = 2.0;
     final double bottomHeight = isDense ? 14.0 : 18.0;
@@ -305,7 +404,7 @@ class InputDecorator extends StatelessWidget {
       return new Container(
         margin: margin + const EdgeInsets.only(bottom: bottomBorder),
         padding: padding,
-        child: child,
+        child: inputChild,
       );
     }
 
@@ -322,7 +421,7 @@ class InputDecorator extends StatelessWidget {
           ),
         ),
       ),
-      child: child,
+      child: inputChild,
     );
   }
 
@@ -336,6 +435,7 @@ class InputDecorator extends StatelessWidget {
     assert(!isDense || !isCollapsed);
 
     final String labelText = decoration.labelText;
+    final String helperText = decoration.helperText;
     final String hintText = decoration.hintText;
     final String errorText = decoration.errorText;
 
@@ -348,7 +448,7 @@ class InputDecorator extends StatelessWidget {
 
     final List<Widget> stackChildren = <Widget>[];
 
-    // If we're not focused, there's not value, and labelText was provided,
+    // If we're not focused, there's no value, and labelText was provided,
     // then the label appears where the hint would. And we will not show
     // the hintText.
     final bool hasInlineLabel = !isFocused && labelText != null && isEmpty;
@@ -402,23 +502,59 @@ class InputDecorator extends StatelessWidget {
       );
     }
 
-    if (isCollapsed) {
-      stackChildren.add(child);
-    } else {
-      final Color borderColor = errorText == null ? activeColor : themeData.errorColor;
-      stackChildren.add(_buildContent(borderColor, topPadding, isDense));
+    Widget inputChild = new KeyedSubtree(
+      // It's important that we maintain the state of our child subtree, as it
+      // may be stateful (e.g. containing text selections). Since our build
+      // function risks changing the depth of the tree, we preserve the subtree
+      // using global keys.
+      // GlobalObjectKey(context) will always be the same whenever we are built.
+      // Additionally, we use a subclass of GlobalObjectKey to avoid clashes
+      // with anyone else using our BuildContext as their global object key
+      // value.
+      key: new _InputDecoratorChildGlobalKey(context),
+      child: child,
+    );
+
+    if (!hasInlineLabel && (!isEmpty || hintText == null) &&
+        (decoration?.prefixText != null || decoration?.suffixText != null)) {
+      final List<Widget> rowContents = <Widget>[];
+      if (decoration.prefixText != null) {
+        rowContents.add(
+            new Text(decoration.prefixText,
+            style: decoration.prefixStyle ?? hintStyle)
+        );
+      }
+      rowContents.add(new Expanded(child: inputChild));
+      if (decoration.suffixText != null) {
+        rowContents.add(
+            new Text(decoration.suffixText,
+            style: decoration.suffixStyle ?? hintStyle)
+        );
+      }
+      inputChild = new Row(children: rowContents);
     }
 
-    if (!isDense && errorText != null) {
+    if (isCollapsed) {
+      stackChildren.add(inputChild);
+    } else {
+      final Color borderColor = errorText == null ? activeColor : themeData.errorColor;
+      stackChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild));
+    }
+
+    if (!isDense && (errorText != null || helperText != null)) {
       assert(!isCollapsed);
-      final TextStyle errorStyle = decoration.errorStyle ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor);
+      final TextStyle captionStyle = themeData.textTheme.caption;
+      final TextStyle subtextStyle = errorText != null
+        ? decoration.errorStyle ?? captionStyle.copyWith(color: themeData.errorColor)
+        : decoration.helperStyle ?? captionStyle.copyWith(color: themeData.hintColor);
+
       stackChildren.add(new Positioned(
         left: 0.0,
         right: 0.0,
         bottom: 0.0,
         child: new Text(
-          errorText,
-          style: errorStyle,
+          errorText ?? helperText,
+          style: subtextStyle,
           textAlign: textAlign,
           overflow: TextOverflow.ellipsis,
         ),

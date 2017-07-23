@@ -17,6 +17,15 @@ export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPri
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
+// Examples can assume:
+// BuildContext context;
+// void setState(VoidCallback fn) { }
+
+// Examples can assume:
+// abstract class RenderFrogJar extends RenderObject { }
+// abstract class FrogJar extends RenderObjectWidget { }
+// abstract class FrogJarParentData extends ParentData { Size size; }
+
 // KEYS
 
 /// A [Key] is an identifier for [Widget]s and [Element]s.
@@ -103,7 +112,7 @@ class UniqueKey extends LocalKey {
   UniqueKey();
 
   @override
-  String toString() => '[#$hashCode]';
+  String toString() => '[#${shortHash(this)}]';
 }
 
 /// A key that takes its identity from the object used as its value.
@@ -133,8 +142,8 @@ class ObjectKey extends LocalKey {
   @override
   String toString() {
     if (runtimeType == ObjectKey)
-      return '[${value.runtimeType}#${value.hashCode}]';
-    return '[$runtimeType ${value.runtimeType}#${value.hashCode}]';
+      return '[${describeIdentity(value)}]';
+    return '[$runtimeType ${describeIdentity(value)}]';
   }
 }
 
@@ -324,8 +333,8 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   String toString() {
     final String label = _debugLabel != null ? ' $_debugLabel' : '';
     if (runtimeType == LabeledGlobalKey)
-      return '[GlobalKey#$hashCode$label]';
-    return '[$runtimeType#$hashCode$label]';
+      return '[GlobalKey#${shortHash(this)}$label]';
+    return '[${describeIdentity(this)}$label]';
   }
 }
 
@@ -333,6 +342,22 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 ///
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
+///
+/// If the object is not private, then it is possible that collisions will occur
+/// where independent widgets will reuse the same object as their
+/// [GlobalObjectKey] value in a different part of the tree, leading to a global
+/// key conflict. To avoid this problem, create a private [GlobalObjectKey]
+/// subclass, as in:
+///
+/// ```dart
+/// class _MyKey extends GlobalObjectKey {
+///   const _MyKey(Object value) : super(value);
+/// }
+/// ```
+///
+/// Since the [runtimeType] of the key is part of its identity, this will
+/// prevent clashes with other [GlobalObjectKey]s even if they have the same
+/// value.
 ///
 /// Any [GlobalObjectKey] created for the same value will match.
 @optionalTypeArgs
@@ -355,7 +380,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   int get hashCode => identityHashCode(value);
 
   @override
-  String toString() => '[$runtimeType ${value.runtimeType}#${value.hashCode}]';
+  String toString() => '[$runtimeType ${describeIdentity(value)}]';
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
@@ -498,6 +523,46 @@ abstract class Widget {
 /// having an internal clock-driven state, or depending on some system state,
 /// consider using [StatefulWidget].
 ///
+/// ## Performance considerations
+///
+/// The [build] method of a stateless widget is typically only called in three
+/// situations: the first time the widget is inserted in the tree, when the
+/// widget's parent changes its configuration, and when an [InheritedWidget] it
+/// depends on changes.
+///
+/// If a widget's parent will regularly change the widget's configuration, or if
+/// it depends on inherited widgets that frequently change, then it is important
+/// to optimize the performance of the [build] method to maintain a fluid
+/// rendering performance.
+///
+/// There are several techniques one can use to minimize the impact of
+/// rebuilding a stateless widget:
+///
+///  * Minimize the number of nodes transitively created by the build method and
+///    any widgets it creates. For example, instead of an elaborate arrangement
+///    of [Row]s, [Column]s, [Padding]s, and [SizedBox]es to position a single
+///    child in a particularly fancy manner, consider using just an [Align] or a
+///    [CustomSingleChildLayout]. Instead of an intricate layering of multiple
+///    [Container]s and with [Decoration]s to draw just the right graphical
+///    effect, consider a single [CustomPaint] widget.
+///
+///  * Use `const` widgets where possible, and provide a `const` constructor for
+///    the widget so that users of the widget can also do so.
+///
+///  * Consider refactoring the stateless widget into a stateful widget so that
+///    it can use some of the techniques described at [StatefulWidget], such as
+///    caching common parts of subtrees and using [GlobalKey]s when changing the
+///    tree structure.
+///
+///  * If the widget is likely to get rebuilt frequently due to the use of
+///    [InheritedWidget]s, consider refactoring the stateless widget into
+///    multiple widgets, with the parts of the tree that change being pushed to
+///    the leaves. For example instead of building a tree with four widgets, the
+///    inner-most widget depending on the [Theme], consider factoring out the
+///    part of the build function that builds the inner-most widget into its own
+///    widget, so that only the inner-most widget needs to be rebuilt when the
+///    theme changes.
+///
 /// ## Sample code
 ///
 /// The following is a skeleton of a stateless widget subclass called `GreenFrog`:
@@ -589,6 +654,10 @@ abstract class StatelessWidget extends Widget {
   ///
   /// If a widget's [build] method is to depend on anything else, use a
   /// [StatefulWidget] instead.
+  ///
+  /// See also:
+  ///
+  ///  * The discussion on performance considerations at [StatelessWidget].
   @protected
   Widget build(BuildContext context);
 }
@@ -641,22 +710,82 @@ abstract class StatelessWidget extends Widget {
 /// eligible for grafting, the widget might be inserted into the new location in
 /// the same animation frame in which it was removed from the old location.
 ///
+/// ## Performance considerations
+///
+/// There are two primary categories of [StatefulWidget]s.
+///
+/// The first is one which allocates resources in [State.initState] and disposes
+/// of them in [State.dispose], but which does not depend on [InheritedWidget]s
+/// or call [State.setState]. Such widgets are commonly used at the root of an
+/// application or page, and communicate with subwidgets via [ChangeNotifier]s,
+/// [Stream]s, or other such objects. Stateful widgets following such a pattern
+/// are relatively cheap (in terms of CPU and GPU cycles), because they are
+/// built once then never update. They can, therefore, have somewhat complicated
+/// and deep build methods.
+///
+/// The second category is widgets that use [State.setState] or depend on
+/// [InheritedWidget]s. These will typically rebuild many times during the
+/// application's lifetime, and it is therefore important to minimise the impact
+/// of rebuilding such a widget. (They may also use [State.initState] or
+/// [State.didChangeDependencies] and allocate resources, but the important part
+/// is that they rebuild.)
+///
+/// There are several techniques one can use to minimize the impact of
+/// rebuilding a stateful widget:
+///
+///  * Push the state to the leaves. For example, if your page has a ticking
+///    clock, rather than putting the state at the top of the page and
+///    rebuilding the entire page each time the clock ticks, create a dedicated
+///    clock widget that only updates itself.
+///
+///  * Minimize the number of nodes transitively created by the build method and
+///    any widgets it creates. Ideally, a stateful widget would only create a
+///    single widget, and that widget would be a [RenderObjectWidget].
+///    (Obviously this isn't always practical, but the closer a widget gets to
+///    this ideal, the more efficient it will be.)
+///
+///  * If a subtree does not change, cache the widget that represents that
+///    subtree and re-use it each time it can be used. It is massively more
+///    efficient for a widget to be re-used than for a new (but
+///    identically-configured) widget to be created. Factoring out the stateful
+///    part into a widget that takes a child argument is a common way of doing
+///    this.
+///
+///  * Use `const` widgets where possible. (This is equivalent to caching a
+///    widget and re-using it.)
+///
+///  * Avoid changing the depth of any created subtrees or changing the type of
+///    any widgets in the subtree. For example, rather than returning either the
+///    child or the child wrapped in an [IgnorePointer], always wrap the child
+///    widget in an [IgnorePointer] and control the [IgnorePointer.ignoring]
+///    property. This is because changing the depth of the subtree requires
+///    rebuilding, laying out, and painting the entire subtree, whereas just
+///    changing the property will require the least possible change to the
+///    render tree (in the case of [IgnorePointer], for example, no layout or
+///    repaint is necessary at all).
+///
+///  * If the depth must be changed for some reason, consider wrapping the
+///    common parts of the subtrees in widgets that have a [GlobalKey] that
+///    remains consistent for the life of the stateful widget. (The
+///    [KeyedSubtree] widget may be useful for this purpose if no other widget
+///    can conveniently be assigned the key.)
+///
 /// ## Sample code
 ///
-/// The following is a skeleton of a stateful widget subclass called `GreenFrog`:
+/// The following is a skeleton of a stateful widget subclass called `YellowBird`:
 ///
 /// ```dart
-/// class GreenFrog extends StatefulWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
+/// class YellowBird extends StatefulWidget {
+///   const YellowBird({ Key key }) : super(key: key);
 ///
 ///   @override
-///   _GreenFrogState createState() => new _GreenFrogState();
+///   _YellowBirdState createState() => new _YellowBirdState();
 /// }
 ///
-/// class _GreenFrogState extends State<GreenFrog> {
+/// class _YellowBirdState extends State<YellowBird> {
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return new Container(color: const Color(0xFF2DBD3A));
+///     return new Container(color: const Color(0xFFFFE306));
 ///   }
 /// }
 /// ```
@@ -665,15 +794,15 @@ abstract class StatelessWidget extends Widget {
 /// represented as private member fields. Also, normally widgets have more
 /// constructor arguments, each of which corresponds to a `final` property.
 ///
-/// The next example shows the more generic widget `Frog` which can be given a
+/// The next example shows the more generic widget `Bird` which can be given a
 /// color and a child, and which has some internal state with a method that
 /// can be called to mutate it:
 ///
 /// ```dart
-/// class Frog extends StatefulWidget {
-///   const Frog({
+/// class Bird extends StatefulWidget {
+///   const Bird({
 ///     Key key,
-///     this.color: const Color(0xFF2DBD3A),
+///     this.color: const Color(0xFFFFE306),
 ///     this.child,
 ///   }) : super(key: key);
 ///
@@ -681,10 +810,10 @@ abstract class StatelessWidget extends Widget {
 ///
 ///   final Widget child;
 ///
-///   _FrogState createState() => new _FrogState();
+///   _BirdState createState() => new _BirdState();
 /// }
 ///
-/// class _FrogState extends State<Frog> {
+/// class _BirdState extends State<Bird> {
 ///   double _size = 1.0;
 ///
 ///   void grow() {
@@ -695,7 +824,7 @@ abstract class StatelessWidget extends Widget {
 ///   Widget build(BuildContext context) {
 ///     return new Container(
 ///       color: widget.color,
-///       transform: new Matrix4.diagonalValues(_size, _size, 1.0),
+///       transform: new Matrix4.diagonal3Values(_size, _size, 1.0),
 ///       child: widget.child,
 ///     );
 ///   }
@@ -1213,6 +1342,10 @@ abstract class State<T extends StatefulWidget> {
   /// rebuilds, but the framework has updated that [State] object's [widget]
   /// property to refer to the new `MyButton` instance and `${widget.color}`
   /// prints green, as expected.
+  ///
+  /// See also:
+  ///
+  ///  * The discussion on performance considerations at [StatefulWidget].
   @protected
   Widget build(BuildContext context);
 
@@ -1238,7 +1371,7 @@ abstract class State<T extends StatefulWidget> {
   String toString() {
     final List<String> data = <String>[];
     debugFillDescription(data);
-    return '$runtimeType#$hashCode(${data.join("; ")})';
+    return '${describeIdentity(this)}(${data.join("; ")})';
   }
 
   /// Add additional information to the given description for use by [toString].
@@ -1309,7 +1442,7 @@ abstract class ProxyWidget extends Widget {
 ///
 /// ```dart
 /// class FrogSize extends ParentDataWidget<FrogJar> {
-///   Pond({
+///   FrogSize({
 ///     Key key,
 ///     @required this.size,
 ///     @required Widget child,
@@ -1409,6 +1542,19 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
   /// parent, as appropriate.
   @protected
   void applyParentData(RenderObject renderObject);
+
+  /// Whether the [ParentDataElement.applyWidgetOutOfTurn] method is allowed
+  /// with this widget.
+  ///
+  /// This should only return true if this widget represents a [ParentData]
+  /// configuration that will have no impact on the layout or paint phase.
+  ///
+  /// See also:
+  ///
+  ///  * [ParentDataElement.applyWidgetOutOfTurn], which verifies this in debug
+  ///    mode.
+  @protected
+  bool debugCanApplyOutOfTurn() => false;
 }
 
 /// Base class for widgets that efficiently propagate information down the tree.
@@ -1425,7 +1571,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// ```dart
 /// class FrogColor extends InheritedWidget {
-///   const FrogColor(
+///   const FrogColor({
 ///     Key key,
 ///     @required this.color,
 ///     @required Widget child,
@@ -2461,6 +2607,11 @@ abstract class Element implements BuildContext {
   ///
   /// There is no guaranteed order in which the children will be visited, though
   /// it should be consistent over time.
+  ///
+  /// Calling this during build is dangerous: the child list might still be
+  /// being updated at that point, so the children might not be constructed yet,
+  /// or might be old children that are going to be replaced. This method should
+  /// only be called if it is provable that the children are available.
   void visitChildren(ElementVisitor visitor) { }
 
   /// Calls the argument for each child that is relevant for semantics. By
@@ -2468,11 +2619,20 @@ abstract class Element implements BuildContext {
   /// to hide their children.
   void visitChildrenForSemantics(ElementVisitor visitor) => visitChildren(visitor);
 
-  /// Wrapper around visitChildren for BuildContext.
+  /// Wrapper around [visitChildren] for [BuildContext].
   @override
   void visitChildElements(ElementVisitor visitor) {
-    // don't allow visitChildElements() during build, since children aren't necessarily built yet
-    assert(owner == null || !owner._debugStateLocked);
+    assert(() {
+      if (owner == null || !owner._debugStateLocked)
+        return true;
+      throw new FlutterError(
+        'visitChildElements() called during build.\n'
+        'The BuildContext.visitChildElements() method can\'t be called during '
+        'build because the child list is still being updated at that point, '
+        'so the children might not be constructed yet, or might be old children '
+        'that are going to be replaced.'
+      );
+    });
     visitChildren(visitor);
   }
 
@@ -3676,18 +3836,60 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
     super.mount(parent, slot);
   }
 
-  void _notifyChildren(Element child) {
-    if (child is RenderObjectElement) {
-      child._updateParentData(widget);
-    } else {
-      assert(child is! ParentDataElement<RenderObjectWidget>);
-      child.visitChildren(_notifyChildren);
+  void _applyParentData(ParentDataWidget<T> widget) {
+    void applyParentDataToChild(Element child) {
+      if (child is RenderObjectElement) {
+        child._updateParentData(widget);
+      } else {
+        assert(child is! ParentDataElement<RenderObjectWidget>);
+        child.visitChildren(applyParentDataToChild);
+      }
     }
+    visitChildren(applyParentDataToChild);
+  }
+
+  /// Calls [ParentDataWidget.applyParentData] on the given widget, passing it
+  /// the [RenderObject] whose parent data this element is ultimately
+  /// responsible for.
+  ///
+  /// This allows a render object's [RenderObject.parentData] to be modified
+  /// without triggering a build. This is generally ill-advised, but makes sense
+  /// in situations such as the following:
+  ///
+  ///  * Build and layout are currently under way, but the [ParentData] in question
+  ///    does not affect layout, and the value to be applied could not be
+  ///    determined before build and layout (e.g. it depends on the layout of a
+  ///    descendant).
+  ///
+  ///  * Paint is currently under way, but the [ParentData] in question does not
+  ///    affect layour or paint, and the value to be applied could not be
+  ///    determined before paint (e.g. it depends on the compositing phase).
+  ///
+  /// In either case, the next build is expected to cause this element to be
+  /// configured with the given new widget (or a widget with equivalent data).
+  ///
+  /// Only [ParentDataWidget]s that return true for
+  /// [ParentDataWidget.debugCanApplyOutOfTurn] can be applied this way.
+  ///
+  /// The new widget must have the same child as the current widget.
+  ///
+  /// An example of when this is used is the [AutomaticKeepAlive] widget. If it
+  /// receives a notification during the build of one of its descendants saying
+  /// that its child must be kept alive, it will apply a [KeepAlive] widget out
+  /// of turn. This is safe, because by definition the child is already alive,
+  /// and therefore this will not change the behavior of the parent this frame.
+  /// It is more efficient than requesting an additional frame just for the
+  /// purpose of updating the [KeepAlive] widget.
+  void applyWidgetOutOfTurn(ParentDataWidget<T> newWidget) {
+    assert(newWidget != null);
+    assert(newWidget.debugCanApplyOutOfTurn());
+    assert(newWidget.child == widget.child);
+    _applyParentData(newWidget);
   }
 
   @override
   void notifyClients(ParentDataWidget<T> oldWidget) {
-    visitChildren(_notifyChildren);
+    _applyParentData(widget);
   }
 }
 

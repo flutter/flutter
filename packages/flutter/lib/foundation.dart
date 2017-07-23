@@ -14,12 +14,26 @@ export 'package:meta/meta.dart' show
   mustCallSuper,
   optionalTypeArgs,
   protected,
-  required;
+  required,
+  visibleForTesting;
 
+// Examples can assume:
+// String _name;
+// bool _first;
+// bool _lights;
+// bool _visible;
+// class Cat { }
+// double _volume;
+// dynamic _calculation;
+// dynamic _last;
+// dynamic _selection;
+
+export 'src/foundation/annotations.dart';
 export 'src/foundation/assertions.dart';
 export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
 export 'src/foundation/change_notifier.dart';
+export 'src/foundation/collections.dart';
 export 'src/foundation/debug.dart';
 export 'src/foundation/licenses.dart';
 export 'src/foundation/observer_list.dart';

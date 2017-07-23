@@ -123,14 +123,17 @@ Sample Catalog
 
 Title: AppBar with a custom bottom widget.
 
-Summary: The AppBar's bottom widget is often a TabBar however any widget with a
-PreferredSize can be used.
+Summary: An AppBar that includes a bottom widget. Any widget
+with a PreferredSize can appear at the bottom of an AppBar.
+
+Summary: Any widget with a PreferredSize can appear at the bottom of an AppBar.
 
 Description:
-In this app, the app bar's bottom widget is a TabPageSelector
-that displays the relative position of the selected page in the app's
-TabBarView. The arrow buttons in the toolbar part of the app bar select
-the previous or the next choice.
+Typically an AppBar's bottom widget is a TabBar however any widget with a
+PreferredSize can be used. In this app, the app bar's bottom widget is a
+TabPageSelector that displays the relative position of the selected page
+in the app's TabBarView. The arrow buttons in the toolbar part of the app
+bar and they select the previous or the next page.
 
 Classes: AppBar, PreferredSize, TabBarView, TabController
 

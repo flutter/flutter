@@ -32,12 +32,13 @@ import 'ticker_provider.dart';
 /// content ostensibly below it.
 typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
 
-// TODO(abarth): Make this configurable with a controller.
-const double _kInitialScrollOffset = 0.0;
-
 class NestedScrollView extends StatefulWidget {
+  /// Creates a nested scroll view.
+  ///
+  /// The [reverse], [headerSliverBuilder], and [body] arguments must not be null.
   const NestedScrollView({
     Key key,
+    this.controller,
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.physics,
@@ -49,7 +50,9 @@ class NestedScrollView extends StatefulWidget {
        assert(body != null),
        super(key: key);
 
-  // TODO(ianh): we should expose a controller so you can call animateTo, etc.
+  /// An object that can be used to control the position to which the outer
+  /// scroll view is scrolled.
+  final ScrollController controller;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -73,9 +76,18 @@ class NestedScrollView extends StatefulWidget {
   /// How the scroll view should respond to user input.
   ///
   /// For example, determines how the scroll view continues to animate after the
-  /// user stops dragging the scroll view.
+  /// user stops dragging the scroll view (providing a custom implementation of
+  /// [ScrollPhysics.createBallisticSimulation] allows this particular aspect of
+  /// the physics to be overridden).
   ///
   /// Defaults to matching platform conventions.
+  ///
+  /// The [ScrollPhysics.applyBoundaryConditions] implementation of the provided
+  /// object should not allow scrolling outside the scroll extent range
+  /// described by the [ScrollMetrics.minScrollExtent] and
+  /// [ScrollMetrics.maxScrollExtent] properties passed to that method. If that
+  /// invariant is not maintained, the nested scroll view may respond to user
+  /// scrolling erratically.
   final ScrollPhysics physics;
 
   /// A builder for any widgets that are to precede the inner scroll views (as
@@ -114,7 +126,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
   @override
   void initState() {
     super.initState();
-    _coordinator = new _NestedScrollCoordinator(context, _kInitialScrollOffset);
+    _coordinator = new _NestedScrollCoordinator(context, widget.controller);
   }
 
   @override
@@ -135,7 +147,9 @@ class _NestedScrollViewState extends State<NestedScrollView> {
     return new CustomScrollView(
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
-      physics: new ClampingScrollPhysics(parent: widget.physics),
+      physics: widget.physics != null
+          ? widget.physics.applyTo(const ClampingScrollPhysics())
+          : const ClampingScrollPhysics(),
       controller: _coordinator._outerController,
       slivers: widget._buildSlivers(context, _coordinator._innerController, _coordinator.hasScrolledBody),
     );
@@ -170,12 +184,14 @@ class _NestedScrollMetrics extends FixedScrollMetrics {
 typedef ScrollActivity _NestedScrollActivityGetter(_NestedScrollPosition position);
 
 class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldController {
-  _NestedScrollCoordinator(this._context, double initialScrollOffset) {
+  _NestedScrollCoordinator(this._context, this._parent) {
+    final double initialScrollOffset = _parent?.initialScrollOffset ?? 0.0;
     _outerController = new _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'outer');
-    _innerController = new _NestedScrollController(this, initialScrollOffset: initialScrollOffset, debugLabel: 'inner');
+    _innerController = new _NestedScrollController(this, initialScrollOffset: 0.0, debugLabel: 'inner');
   }
 
   final BuildContext _context;
+  final ScrollController _parent;
   _NestedScrollController _outerController;
   _NestedScrollController _innerController;
 
@@ -407,7 +423,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   Future<Null> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
-  }) {
+  }) async {
     final DrivenScrollActivity outerActivity = _outerPosition.createDrivenScrollActivity(
       nestOffset(to, _outerPosition),
       duration,
@@ -426,7 +442,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
         return innerActivity;
       },
     );
-    return Future.wait<Null>(resultFutures);
+    await Future.wait<Null>(resultFutures);
   }
 
   void jumpTo(double to) {
@@ -513,7 +529,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   void updateParent() {
-    _outerPosition?.setParent(PrimaryScrollController.of(_context));
+    _outerPosition?.setParent(_parent ?? PrimaryScrollController.of(_context));
   }
 
   @mustCallSuper
@@ -827,7 +843,6 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
         done = true;
       }
     } else if (velocity < 0.0) {
-      assert(velocity < 0.0);
       if (value > metrics.maxRange)
         return true;
       if (value < metrics.minRange) {

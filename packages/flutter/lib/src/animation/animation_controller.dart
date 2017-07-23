@@ -15,6 +15,9 @@ import 'listener_helpers.dart';
 
 export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
 
+// Examples can assume:
+// AnimationController _controller;
+
 /// The direction in which an animation is running.
 enum _AnimationDirection {
   /// The animation is running from beginning to end.
@@ -44,17 +47,20 @@ const Tolerance _kFlingTolerance = const Tolerance(
 /// * Define the [upperBound] and [lowerBound] values of an animation.
 /// * Create a [fling] animation effect using a physics simulation.
 ///
-/// By default, an [AnimationController] linearly produces values that range from 0.0 to 1.0, during
-/// a given duration. The animation controller generates a new value whenever the device running
-/// your app is ready to display a new frame (typically, this rate is around 60 values per second).
+/// By default, an [AnimationController] linearly produces values that range
+/// from 0.0 to 1.0, during a given duration. The animation controller generates
+/// a new value whenever the device running your app is ready to display a new
+/// frame (typically, this rate is around 60 values per second).
 ///
-/// An AnimationController needs a [TickerProvider], which is configured using the `vsync` argument
-/// on the constructor. If you are creating an AnimationController from a [State], then you can use
-/// the [TickerProviderStateMixin] and [SingleTickerProviderStateMixin] classes to obtain a suitable
-/// [TickerProvider]. The widget test framework [WidgetTester] object can be used as a ticker provider
-/// in the context of tests. In other contexts, you will have to either pass a [TickerProvider] from
-/// a higher level (e.g. indirectly from a [State] that mixes in [TickerProviderStateMixin]), or
-/// create a custom [TickerProvider] subclass.
+/// An AnimationController needs a [TickerProvider], which is configured using
+/// the `vsync` argument on the constructor. If you are creating an
+/// AnimationController from a [State], then you can use the
+/// [TickerProviderStateMixin] and [SingleTickerProviderStateMixin] classes to
+/// obtain a suitable [TickerProvider]. The widget test framework [WidgetTester]
+/// object can be used as a ticker provider in the context of tests. In other
+/// contexts, you will have to either pass a [TickerProvider] from a higher
+/// level (e.g. indirectly from a [State] that mixes in
+/// [TickerProviderStateMixin]), or create a custom [TickerProvider] subclass.
 ///
 /// The methods that start animations return a [TickerFuture] object which
 /// completes when the animation completes successfully, and never throws an

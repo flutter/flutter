@@ -21,6 +21,8 @@ import 'gesture.dart';
 import 'health.dart';
 import 'message.dart';
 import 'render_tree.dart';
+import 'request_data.dart';
+import 'semantics.dart';
 import 'timeline.dart';
 
 /// Timeline stream identifier.
@@ -111,11 +113,15 @@ class FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_serviceClient], [_peer] and [_appIsolate].
   @visibleForTesting
-  FlutterDriver.connectedTo(this._serviceClient, this._peer, this._appIsolate,
-      { bool printCommunication: false, bool logCommunicationToFile: true })
-      : _printCommunication = printCommunication,
-        _logCommunicationToFile = logCommunicationToFile,
-        _driverId = _nextDriverId++;
+  FlutterDriver.connectedTo(
+    this._serviceClient,
+    this._peer,
+    this._appIsolate, {
+    bool printCommunication: false,
+    bool logCommunicationToFile: true,
+  }) : _printCommunication = printCommunication,
+       _logCommunicationToFile = logCommunicationToFile,
+       _driverId = _nextDriverId++;
 
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
@@ -346,6 +352,12 @@ class FlutterDriver {
     return null;
   }
 
+  /// Waits until [finder] can no longer locate the target.
+  Future<Null> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
+    await _sendCommand(new WaitForAbsent(finder, timeout: timeout));
+    return null;
+  }
+
   /// Waits until there are no more transient callbacks in the queue.
   ///
   /// Use this method when you need to wait for the moment when the application
@@ -381,6 +393,22 @@ class FlutterDriver {
   /// Returns the text in the `Text` widget located by [finder].
   Future<String> getText(SerializableFinder finder, { Duration timeout }) async {
     return GetTextResult.fromJson(await _sendCommand(new GetText(finder, timeout: timeout))).text;
+  }
+
+  /// Sends a string and returns a string.
+  ///
+  /// The application can respond to this by providing a handler to [enableFlutterDriverExtension].
+  Future<String> requestData(String message, { Duration timeout }) async {
+    return RequestDataResult.fromJson(await _sendCommand(new RequestData(message, timeout: timeout))).message;
+  }
+
+  /// Turns semantics on or off in the Flutter app under test.
+  ///
+  /// Returns `true` when the call actually changed the state from on to off or
+  /// vice versa.
+  Future<bool> setSemantics(bool enabled, { Duration timeout: _kShortTimeout }) async {
+    final SetSemanticsResult result = SetSemanticsResult.fromJson(await _sendCommand(new SetSemantics(enabled, timeout: timeout)));
+    return result.changedState;
   }
 
   /// Take a screenshot.  The image will be returned as a PNG.
@@ -579,9 +607,12 @@ class CommonFinders {
   /// Finds [Text] widgets containing string equal to [text].
   SerializableFinder text(String text) => new ByText(text);
 
-  /// Finds widgets by [key].
+  /// Finds widgets by [key]. Only [String] and [int] values can be used.
   SerializableFinder byValueKey(dynamic key) => new ByValueKey(key);
 
   /// Finds widgets with a tooltip with the given [message].
   SerializableFinder byTooltip(String message) => new ByTooltipMessage(message);
+
+  /// Finds widgets whose class name matches the given string.
+  SerializableFinder byType(String type) => new ByType(type);
 }

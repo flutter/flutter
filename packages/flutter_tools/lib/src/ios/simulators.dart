@@ -16,10 +16,10 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../protocol_discovery.dart';
+import 'ios_workflow.dart';
 import 'mac.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
@@ -34,10 +34,10 @@ class IOSSimulators extends PollingDeviceDiscovery {
   bool get supportsPlatform => platform.isMacOS;
 
   @override
-  bool get canListAnything => doctor.iosWorkflow.canListDevices;
+  bool get canListAnything => iosWorkflow.canListDevices;
 
   @override
-  List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
+  Future<List<Device>> pollingGetDevices() async => IOSSimulatorUtils.instance.getAttachedDevices();
 }
 
 class IOSSimulatorUtils {
@@ -45,7 +45,7 @@ class IOSSimulatorUtils {
   static IOSSimulatorUtils get instance => context[IOSSimulatorUtils];
 
   List<IOSSimulator> getAttachedDevices() {
-    if (!Xcode.instance.isInstalledAndMeetsVersionCheck)
+    if (!xcode.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
     return SimControl.instance.getConnectedDevices().map((SimDevice device) {
@@ -58,117 +58,6 @@ class IOSSimulatorUtils {
 class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
   static SimControl get instance => context[SimControl];
-
-  Future<bool> boot({ String deviceName }) async {
-    if (_isAnyConnected())
-      return true;
-
-    if (deviceName == null) {
-      final SimDevice testDevice = _createTestDevice();
-      if (testDevice == null) {
-        return false;
-      }
-      deviceName = testDevice.name;
-    }
-
-    // `xcrun instruments` requires a template (-t). @yjbanov has no idea what
-    // "template" is but the built-in 'Blank' seems to work. -l causes xcrun to
-    // quit after a time limit without killing the simulator. We quit after
-    // 1 second.
-    final List<String> args = <String>[_xcrunPath, 'instruments', '-w', deviceName, '-t', 'Blank', '-l', '1'];
-    printTrace(args.join(' '));
-    runDetached(args);
-    printStatus('Waiting for iOS Simulator to boot...');
-
-    bool connected = false;
-    int attempted = 0;
-    while (!connected && attempted < 20) {
-      connected = _isAnyConnected();
-      if (!connected) {
-        printStatus('Still waiting for iOS Simulator to boot...');
-        await new Future<Null>.delayed(const Duration(seconds: 1));
-      }
-      attempted++;
-    }
-
-    if (connected) {
-      printStatus('Connected to iOS Simulator.');
-      return true;
-    } else {
-      printStatus('Timed out waiting for iOS Simulator to boot.');
-      return false;
-    }
-  }
-
-  SimDevice _createTestDevice() {
-    final SimDeviceType deviceType = _findSuitableDeviceType();
-    if (deviceType == null)
-      return null;
-
-    final String runtime = _findSuitableRuntime();
-    if (runtime == null)
-      return null;
-
-    // Delete any old test devices
-    getDevices()
-      .where((SimDevice d) => d.name.endsWith(_kFlutterTestDeviceSuffix))
-      .forEach(_deleteDevice);
-
-    // Create new device
-    final String deviceName = '${deviceType.name} $_kFlutterTestDeviceSuffix';
-    final List<String> args = <String>[_xcrunPath, 'simctl', 'create', deviceName, deviceType.identifier, runtime];
-    printTrace(args.join(' '));
-    runCheckedSync(args);
-
-    return getDevices().firstWhere((SimDevice d) => d.name == deviceName);
-  }
-
-  SimDeviceType _findSuitableDeviceType() {
-    final List<Map<String, dynamic>> allTypes = _list(SimControlListSection.devicetypes);
-    final List<Map<String, dynamic>> usableTypes = allTypes
-      .where((Map<String, dynamic> info) => info['name'].startsWith('iPhone'))
-      .toList()
-      ..sort((Map<String, dynamic> r1, Map<String, dynamic> r2) => -compareIphoneVersions(r1['identifier'], r2['identifier']));
-
-    if (usableTypes.isEmpty) {
-      printError(
-        'No suitable device type found.\n'
-        'You may launch an iOS Simulator manually and Flutter will attempt to use it.'
-      );
-    }
-
-    return new SimDeviceType(
-      usableTypes.first['name'],
-      usableTypes.first['identifier']
-    );
-  }
-
-  String _findSuitableRuntime() {
-    final List<Map<String, dynamic>> allRuntimes = _list(SimControlListSection.runtimes);
-    final List<Map<String, dynamic>> usableRuntimes = allRuntimes
-      .where((Map<String, dynamic> info) => info['name'].startsWith('iOS'))
-      .toList()
-      ..sort((Map<String, dynamic> r1, Map<String, dynamic> r2) => -compareIosVersions(r1['version'], r2['version']));
-
-    if (usableRuntimes.isEmpty) {
-      printError(
-        'No suitable iOS runtime found.\n'
-        'You may launch an iOS Simulator manually and Flutter will attempt to use it.'
-      );
-    }
-
-    return usableRuntimes.first['identifier'];
-  }
-
-  void _deleteDevice(SimDevice device) {
-    try {
-      final List<String> args = <String>[_xcrunPath, 'simctl', 'delete', device.name];
-      printTrace(args.join(' '));
-      runCheckedSync(args);
-    } catch(e) {
-      printError(e);
-    }
-  }
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
@@ -226,14 +115,12 @@ class SimControl {
     return getDevices().where((SimDevice device) => device.isBooted).toList();
   }
 
-  bool _isAnyConnected() => getConnectedDevices().isNotEmpty;
-
-  Future<bool> isInstalled(String appId) {
+  Future<bool> isInstalled(String deviceId, String appId) {
     return exitsHappyAsync(<String>[
       _xcrunPath,
       'simctl',
       'get_app_container',
-      'booted',
+      deviceId,
       appId,
     ]);
   }
@@ -253,8 +140,8 @@ class SimControl {
     return runCheckedAsync(args);
   }
 
-  Future<Null> takeScreenshot(String outputPath) {
-    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', 'booted', 'screenshot', outputPath]);
+  Future<Null> takeScreenshot(String deviceId, String outputPath) {
+    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath]);
   }
 }
 
@@ -340,7 +227,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) {
-    return SimControl.instance.isInstalled(app.id);
+    return SimControl.instance.isInstalled(id, app.id);
   }
 
   @override
@@ -428,6 +315,7 @@ class IOSSimulator extends Device {
     String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
   }) async {
     if (!prebuiltApplication) {
       printTrace('Building ${app.name} for $id.');
@@ -474,7 +362,7 @@ class IOSSimulator extends Device {
 
     // Launch the updated application in the simulator.
     try {
-      SimControl.instance.launch(id, app.id, args);
+      await SimControl.instance.launch(id, app.id, args);
     } catch (error) {
       printError('$error');
       return new LaunchResult.failed();
@@ -529,7 +417,7 @@ class IOSSimulator extends Device {
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
 
     // Step 3: Install the updated bundle to the simulator.
-    SimControl.instance.install(id, fs.path.absolute(bundle.path));
+    await SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
   Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app) =>
@@ -587,8 +475,7 @@ class IOSSimulator extends Device {
   }
 
   bool get _xcodeVersionSupportsScreenshot {
-    return Xcode.instance.xcodeMajorVersion > 8 ||
-        (Xcode.instance.xcodeMajorVersion == 8 && Xcode.instance.xcodeMinorVersion >= 2);
+    return xcode.xcodeMajorVersion > 8 || (xcode.xcodeMajorVersion == 8 && xcode.xcodeMinorVersion >= 2);
   }
 
   @override
@@ -596,7 +483,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) {
-    return SimControl.instance.takeScreenshot(outputFile.path);
+    return SimControl.instance.takeScreenshot(id, outputFile.path);
   }
 }
 

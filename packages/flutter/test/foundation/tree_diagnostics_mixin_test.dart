@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class TestTree extends Object with TreeDiagnosticsMixin {
   TestTree({
@@ -40,20 +40,26 @@ void main() {
       ],
     );
 
-    final String dump =
-        tree.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
-    expect(dump, equals('''TestTree#000
- ├─child node A: TestTree#000
+    // The final line in the tree is a problem as it contains nothing but
+    // a vertical line character.
+    expect(tree, isNot(hasAGoodToStringDeep));
+    expect(
+      tree.toStringDeep(),
+      equalsIgnoringHashCodes(
+        '''TestTree#00000
+ ├─child node A: TestTree#00000
  │
- ├─child node B: TestTree#000
- │ ├─child node B1: TestTree#000
+ ├─child node B: TestTree#00000
+ │ ├─child node B1: TestTree#00000
  │ │
- │ ├─child node B2: TestTree#000
+ │ ├─child node B2: TestTree#00000
  │ │
- │ ├─child node B3: TestTree#000
+ │ ├─child node B3: TestTree#00000
  │ │
- ├─child node C: TestTree#000
+ ├─child node C: TestTree#00000
  │
-'''));
+''',
+      ),
+    );
   });
 }

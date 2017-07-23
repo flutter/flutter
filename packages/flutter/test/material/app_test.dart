@@ -106,7 +106,7 @@ void main() {
             return new Builder(
               builder: (BuildContext context) {
                 ++buildCounter;
-                return new Container();
+                return const Text('Y');
               },
             );
           },
@@ -129,6 +129,7 @@ void main() {
     expect(buildCounter, 1);
     await tester.pump(const Duration(seconds: 1));
     expect(buildCounter, 2);
+    expect(find.text('Y'), findsOneWidget);
   });
 
   testWidgets('Cannot pop the initial route', (WidgetTester tester) async {
@@ -152,34 +153,105 @@ void main() {
     expect(find.text('route "/"'), findsOneWidget);
   });
 
-  testWidgets('Custom initialRoute only', (WidgetTester tester) async {
+  testWidgets('One-step initial route', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         initialRoute: '/a',
         routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => const Text('route "/"'),
           '/a': (BuildContext context) => const Text('route "/a"'),
+          '/a/b': (BuildContext context) => const Text('route "/a/b"'),
+          '/b': (BuildContext context) => const Text('route "/b"'),
         },
       )
     );
 
+    expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
+    expect(find.text('route "/a/b"'), findsNothing);
+    expect(find.text('route "/b"'), findsNothing);
   });
 
-  testWidgets('Custom initialRoute along with Navigator.defaultRouteName', (WidgetTester tester) async {
+  testWidgets('Return value from pop is correct', (WidgetTester tester) async {
+    Future<String> result;
+    await tester.pumpWidget(
+        new MaterialApp(
+          home: new Builder(
+              builder: (BuildContext context) {
+                return new Material(
+                  child: new RaisedButton(
+                      child: const Text('X'),
+                      onPressed: () async {
+                        result = Navigator.of(context).pushNamed('/a');
+                      }
+                  ),
+                );
+              }
+          ),
+          routes: <String, WidgetBuilder>{
+            '/a': (BuildContext context) {
+              return new Material(
+                child: new RaisedButton(
+                  child: const Text('Y'),
+                  onPressed: () {
+                    Navigator.of(context).pop('all done');
+                  },
+                ),
+              );
+            }
+          },
+        )
+    );
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Y'), findsOneWidget);
+    await tester.tap(find.text('Y'));
+    await tester.pump();
+
+    expect(await result, equals('all done'));
+  });
+
+    testWidgets('Two-step initial route', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),
+      '/a/b': (BuildContext context) => const Text('route "/a/b"'),
       '/b': (BuildContext context) => const Text('route "/b"'),
     };
 
     await tester.pumpWidget(
       new MaterialApp(
-        initialRoute: '/a',
+        initialRoute: '/a/b',
         routes: routes,
       )
     );
-    expect(find.text('route "/"'), findsNothing);
+    expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
+    expect(find.text('route "/a/b"'), findsOneWidget);
+    expect(find.text('route "/b"'), findsNothing);
+  });
+
+  testWidgets('Initial route with missing step', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => const Text('route "/"'),
+      '/a': (BuildContext context) => const Text('route "/a"'),
+      '/a/b': (BuildContext context) => const Text('route "/a/b"'),
+      '/b': (BuildContext context) => const Text('route "/b"'),
+    };
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        initialRoute: '/a/b/c',
+        routes: routes,
+      )
+    );
+    final dynamic exception = tester.takeException();
+    expect(exception is String, isTrue);
+    expect(exception.startsWith('Could not navigate to initial route.'), isTrue);
+    expect(find.text('route "/"'), findsOneWidget);
+    expect(find.text('route "/a"'), findsNothing);
+    expect(find.text('route "/a/b"'), findsNothing);
     expect(find.text('route "/b"'), findsNothing);
   });
 
@@ -196,23 +268,41 @@ void main() {
         routes: routes,
       )
     );
-    expect(find.text('route "/"'), findsNothing);
+    expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
     expect(find.text('route "/b"'), findsNothing);
 
+    // changing initialRoute has no effect
     await tester.pumpWidget(
       new MaterialApp(
         initialRoute: '/b',
         routes: routes,
       )
     );
-    expect(find.text('route "/"'), findsNothing);
+    expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
     expect(find.text('route "/b"'), findsNothing);
 
+    // removing it has no effect
     await tester.pumpWidget(new MaterialApp(routes: routes));
-    expect(find.text('route "/"'), findsNothing);
+    expect(find.text('route "/"'), findsOneWidget);
     expect(find.text('route "/a"'), findsOneWidget);
     expect(find.text('route "/b"'), findsNothing);
+  });
+
+  testWidgets('onGenerateRoute / onUnknownRoute', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+    await tester.pumpWidget(
+      new MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          log.add('onGenerateRoute ${settings.name}');
+        },
+        onUnknownRoute: (RouteSettings settings) {
+          log.add('onUnknownRoute ${settings.name}');
+        },
+      )
+    );
+    expect(tester.takeException(), isFlutterError);
+    expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
   });
 }

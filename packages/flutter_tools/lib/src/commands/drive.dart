@@ -4,11 +4,9 @@
 
 import 'dart:async';
 
-import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -16,7 +14,6 @@ import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
 import '../resident_runner.dart';
 import 'run.dart';
 
@@ -44,20 +41,36 @@ class DriveCommand extends RunCommandBase {
   DriveCommand() {
     argParser.addFlag(
       'keep-app-running',
+      defaultsTo: null,
       negatable: true,
-      defaultsTo: false,
       help:
         'Will keep the Flutter application running when done testing.\n'
-        'By default, Flutter drive stops the application after tests are finished.\n'
-        'Ignored if --use-existing-app is specified.'
+        'By default, "flutter drive" stops the application after tests are finished,\n'
+        'and --keep-app-running overrides this. On the other hand, if --use-existing-app\n'
+        'is specified, then "flutter drive" instead defaults to leaving the application\n'
+        'running, and --no-keep-app-running overrides it.'
     );
 
     argParser.addOption(
       'use-existing-app',
       help:
         'Connect to an already running instance via the given observatory URL.\n'
-        'If this option is given, the application will not be automatically started\n'
-        'or stopped.'
+        'If this option is given, the application will not be automatically started,\n'
+        'and it will only be stopped if --no-keep-app-running is explicitly set.',
+      valueHelp:
+        'url'
+    );
+
+    argParser.addOption(
+      'driver',
+      help:
+        'The test file to run on the host (as opposed to the target file to run on\n'
+        'the device). By default, this file has the same base name as the target\n'
+        'file, but in the "test_driver/" directory instead, and with "_test" inserted\n'
+        'just before the extension, so e.g. if the target is "lib/main.dart", the\n'
+        'driver will be "test_driver/main_test.dart".',
+      valueHelp:
+        'path'
     );
   }
 
@@ -98,7 +111,7 @@ class DriveCommand extends RunCommandBase {
 
     String observatoryUri;
     if (argResults['use-existing-app'] == null) {
-      printStatus('Starting application: ${argResults["target"]}');
+      printStatus('Starting application: $targetFile');
 
       if (getBuildMode() == BuildMode.release) {
         // This is because we need VM service to be able to drive the app.
@@ -128,19 +141,24 @@ class DriveCommand extends RunCommandBase {
         rethrow;
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (!argResults['keep-app-running'] && argResults['use-existing-app'] == null) {
+      if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
+        printStatus('Leaving the application running.');
+      } else {
         printStatus('Stopping application instance.');
         await appStopper(this);
-      } else {
-        printStatus('Leaving the application running.');
       }
     }
   }
 
   String _getTestFile() {
+    if (argResults['driver'] != null)
+      return argResults['driver'];
+
+    // If the --driver argument wasn't provided, then derive the value from
+    // the target file.
     String appFile = fs.path.normalize(targetFile);
 
-    // This command extends `flutter start` and therefore CWD == package dir
+    // This command extends `flutter run` and therefore CWD == package dir
     final String packageDir = fs.currentDirectory.path;
 
     // Make appFile path relative to package directory because we are looking
@@ -198,62 +216,21 @@ Future<Device> findTargetDevice() async {
     return devices.first;
   }
 
-
-  if (platform.isMacOS) {
-    // On Mac we look for the iOS Simulator. If available, we use that. Then
-    // we look for an Android device. If there's one, we use that. Otherwise,
-    // we launch a new iOS Simulator.
-    Device reusableDevice;
-    for (Device device in devices) {
-      if (await device.isLocalEmulator) {
-        reusableDevice = device;
-        break;
-      }
-    }
-    if (reusableDevice == null) {
-      for (Device device in devices) {
-        if (device is AndroidDevice) {
-          reusableDevice = device;
-          break;
-        }
-      }
-    }
-
-    if (reusableDevice != null) {
-      printStatus('Found connected ${await reusableDevice.isLocalEmulator ? "emulator" : "device"} "${reusableDevice.name}"; will reuse it.');
-      return reusableDevice;
-    }
-
-    // No running emulator found. Attempt to start one.
-    printStatus('Starting iOS Simulator, because did not find existing connected devices.');
-    final bool started = await SimControl.instance.boot();
-    if (started) {
-      return IOSSimulatorUtils.instance.getAttachedDevices().first;
-    } else {
-      printError('Failed to start iOS Simulator.');
-      return null;
-    }
-  } else if (platform.isLinux || platform.isWindows) {
-    // On Linux and Windows, for now, we just grab the first connected device we can find.
-    if (devices.isEmpty) {
-      printError('No devices found.');
-      return null;
-    } else if (devices.length > 1) {
-      printStatus('Found multiple connected devices:');
-      printStatus(devices.map((Device d) => '  - ${d.name}\n').join(''));
-    }
-    printStatus('Using device ${devices.first.name}.');
-    return devices.first;
-  } else {
-    printError('The operating system on this computer is not supported.');
+  if (devices.isEmpty) {
+    printError('No devices found.');
     return null;
+  } else if (devices.length > 1) {
+    printStatus('Found multiple connected devices:');
+    printStatus(devices.map((Device d) => '  - ${d.name}\n').join(''));
   }
+  printStatus('Using device ${devices.first.name}.');
+  return devices.first;
 }
 
 /// Starts the application on the device given command configuration.
 typedef Future<LaunchResult> AppStarter(DriveCommand command);
 
-AppStarter appStarter = _startApp;
+AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
   appStarter = _startApp;
 }
@@ -269,11 +246,11 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   await appStopper(command);
 
   printTrace('Installing application package.');
-  final ApplicationPackage package = command.applicationPackages
+  final ApplicationPackage package = await command.applicationPackages
       .getPackageForPlatform(await command.device.targetPlatform);
   if (await command.device.isAppInstalled(package))
-    command.device.uninstallApp(package);
-  command.device.installApp(package);
+    await command.device.uninstallApp(package);
+  await command.device.installApp(package);
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
   if (command.traceStartup)
@@ -299,7 +276,8 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       observatoryPort: command.observatoryPort,
       diagnosticPort: command.diagnosticPort,
     ),
-    platformArgs: platformArgs
+    platformArgs: platformArgs,
+    usesTerminalUi: false,
   );
 
   if (!result.started) {
@@ -343,7 +321,7 @@ void restoreAppStopper() {
 
 Future<bool> _stopApp(DriveCommand command) async {
   printTrace('Stopping application.');
-  final ApplicationPackage package = command.applicationPackages.getPackageForPlatform(await command.device.targetPlatform);
+  final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(await command.device.targetPlatform);
   final bool stopped = await command.device.stopApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;

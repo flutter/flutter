@@ -3,18 +3,29 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
+import '../android/android_sdk.dart';
+import '../android/android_studio.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../usage.dart';
 
 class ConfigCommand extends FlutterCommand {
-  ConfigCommand() {
+  ConfigCommand({ bool verboseHelp: false }) {
     argParser.addFlag('analytics',
       negatable: true,
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+    argParser.addFlag('clear-ios-signing-cert',
+      negatable: false,
+      help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('gradle-dir', help: 'The gradle install directory.');
+    argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
+    argParser.addFlag('machine',
+      negatable: false,
+      hide: !verboseHelp,
+      help: 'Pring config values as json.');
   }
 
   @override
@@ -28,6 +39,9 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   final List<String> aliases = <String>['configure'];
+
+  @override
+  bool get shouldUpdateCache => false;
 
   @override
   String get usageFooter {
@@ -48,6 +62,9 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
+    if (argResults['machine'])
+      return handleMachine();
+
     if (argResults.wasParsed('analytics')) {
       final bool value = argResults['analytics'];
       flutterUsage.enabled = value;
@@ -57,11 +74,35 @@ class ConfigCommand extends FlutterCommand {
     if (argResults.wasParsed('gradle-dir'))
       _updateConfig('gradle-dir', argResults['gradle-dir']);
 
+    if (argResults.wasParsed('android-sdk'))
+      _updateConfig('android-sdk', argResults['android-sdk']);
+
     if (argResults.wasParsed('android-studio-dir'))
       _updateConfig('android-studio-dir', argResults['android-studio-dir']);
 
+    if (argResults.wasParsed('clear-ios-signing-cert'))
+      _updateConfig('ios-signing-cert', '');
+
     if (argResults.arguments.isEmpty)
       printStatus(usage);
+  }
+
+  Future<Null> handleMachine() async {
+    // Get all the current values.
+    final Map<String, dynamic> results = <String, dynamic>{};
+    for (String key in config.keys) {
+      results[key] = config.getValue(key);
+    }
+
+    // Ensure we send any calculated ones, if overrides don't exist.
+    if (results['android-studio-dir'] == null && androidStudio != null) {
+      results['android-studio-dir'] = androidStudio.directory;
+    }
+    if (results['android-sdk'] == null && androidSdk != null) {
+      results['android-sdk'] = androidSdk.directory;
+    }
+
+    printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
   void _updateConfig(String keyName, String keyValue) {

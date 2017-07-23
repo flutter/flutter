@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -92,7 +93,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dismissible ModalBarrier includes button in semantic tree', (WidgetTester tester) async {
+  testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(const ModalBarrier(dismissible: true));
 
@@ -111,6 +114,17 @@ void main() {
         ),
       ]
     );
+    expect(semantics, hasSemantics(expectedSemantics));
+
+    semantics.dispose();
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(const ModalBarrier(dismissible: true));
+
+    final TestSemantics expectedSemantics = new TestSemantics.root();
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();

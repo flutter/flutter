@@ -95,10 +95,25 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [debugPrintOverride], which can be overridden by subclasses.
   TestWidgetsFlutterBinding() {
     debugPrint = debugPrintOverride;
+    debugCheckIntrinsicSizes = checkIntrinsicSizes;
   }
 
+  /// The value to set [debugPrint] to while tests are running.
+  ///
+  /// This can be used to redirect console output from the framework, or to
+  /// change the behavior of [debugPrint]. For example,
+  /// [AutomatedTestWidgetsFlutterBinding] uses it to make [debugPrint]
+  /// synchronous, disabling its normal throttling behaviour.
   @protected
   DebugPrintCallback get debugPrintOverride => debugPrint;
+
+  /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
+  ///
+  /// This can be used to enable additional checks. For example,
+  /// [AutomatedTestWidgetsFlutterBinding] sets this to true, so that all tests
+  /// always run with aggressive intrinsic sizing tests enabled.
+  @protected
+  bool get checkIntrinsicSizes => false;
 
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
@@ -460,13 +475,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       debugPrintOverride: debugPrintOverride,
     ));
     assert(debugAssertAllRenderVarsUnset(
-      'The value of a rendering debug variable was changed by the test.'
+      'The value of a rendering debug variable was changed by the test.',
+      debugCheckIntrinsicSizesOverride: checkIntrinsicSizes,
     ));
     assert(debugAssertAllWidgetVarsUnset(
-      'The value of a widget debug variable was changed by the test.'
+      'The value of a widget debug variable was changed by the test.',
     ));
     assert(debugAssertAllSchedulerVarsUnset(
-      'The value of a scheduler debug variable was changed by the test.'
+      'The value of a scheduler debug variable was changed by the test.',
     ));
   }
 
@@ -504,6 +520,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   DebugPrintCallback get debugPrintOverride => debugPrintSynchronously;
+
+  @override
+  bool get checkIntrinsicSizes => true;
 
   @override
   test_package.Timeout get defaultTestTimeout => const test_package.Timeout(const Duration(seconds: 5));

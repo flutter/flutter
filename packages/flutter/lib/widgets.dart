@@ -19,6 +19,7 @@ export 'src/widgets/animated_list.dart';
 export 'src/widgets/animated_size.dart';
 export 'src/widgets/app.dart';
 export 'src/widgets/async.dart';
+export 'src/widgets/automatic_keep_alive.dart';
 export 'src/widgets/banner.dart';
 export 'src/widgets/basic.dart';
 export 'src/widgets/binding.dart';

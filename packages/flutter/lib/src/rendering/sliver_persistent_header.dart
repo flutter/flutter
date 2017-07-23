@@ -16,7 +16,27 @@ import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
+/// A base class for slivers that have a [RenderBox] child which scrolls
+/// normally, except that when it hits the leading edge (typically the top) of
+/// the viewport, it shrinks to a minimum size ([minExtent]).
+///
+/// This class primarily provides helpers for managing the child, in particular:
+///
+///  * [layoutChild], which applies min and max extents and a scroll offset to
+///    lay out the child. This is normally called from [performLayout].
+///
+///  * [childExtent], to convert the child's box layout dimensions to the sliver
+///    geometry model.
+///
+///  * hit testing, painting, and other details of the sliver protocol.
+///
+/// Subclasses must implement [performLayout], [minExtent], and [maxExtent], and
+/// typically also will implement [updateChild].
 abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
+  /// Creates a sliver that changes its size when scrolled to the start of the
+  /// viewport.
+  ///
+  /// This is an abstract class; this constructor only initializes the [child].
   RenderSliverPersistentHeader({ RenderBox child }) {
     this.child = child;
   }
@@ -86,6 +106,15 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     super.markNeedsLayout();
   }
 
+  /// Lays out the [child].
+  ///
+  /// This is called by [performLayout]. It applies the given `scrollOffset`
+  /// (which need not match the offset given by the [constraints]) and the
+  /// `maxExtent` (which need not match the value returned by the [maxExtent]
+  /// getter).
+  ///
+  /// The `overlapsContent` argument is passed to [updateChild].
+  @protected
   void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent: false }) {
     assert(maxExtent != null);
     final double shrinkOffset = math.min(scrollOffset, maxExtent);
@@ -196,6 +225,8 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
 ///
 /// This sliver makes no effort to avoid overlapping other content.
 abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersistentHeader {
+  /// Creates a sliver that shrinks when it hits the start of the viewport, then
+  /// scrolls off.
   RenderSliverScrollingPersistentHeader({
     RenderBox child,
   }) : super(child: child);
@@ -232,6 +263,8 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
 ///
 /// This sliver avoids overlapping other earlier slivers where possible.
 abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistentHeader {
+  /// Creates a sliver that shrinks when it hits the start of the viewport, then
+  /// stays pinned there.
   RenderSliverPinnedPersistentHeader({
     RenderBox child,
   }) : super(child: child);
@@ -286,7 +319,18 @@ class FloatingHeaderSnapConfiguration {
   final Duration duration;
 }
 
+/// A sliver with a [RenderBox] child which shrinks and scrolls like a
+/// [RenderSliverScrollingPersistentHeader], but immediately comes back when the
+/// user scrolls in the reverse direction.
+///
+/// See also:
+///
+///  * [RenderSliverFloatingPinnedPersistentHeader], which is similar but sticks
+///    to the start of the viewport rather than scrolling off.
 abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersistentHeader {
+  /// Creates a sliver that shrinks when it hits the start of the viewport, then
+  /// scrolls off, and comes back immediately when the user reverses the scroll
+  /// direction.
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
@@ -334,7 +378,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     _snapConfiguration = value;
   }
 
-  // Update [geometry] and return the new value for [childMainAxisPosition].
+  /// Updates [geometry], and returns the new value for [childMainAxisPosition].
+  ///
+  /// This is used by [performLayout].
   @protected
   double updateGeometry() {
     final double maxExtent = this.maxExtent;
@@ -425,7 +471,18 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   }
 }
 
+/// A sliver with a [RenderBox] child which shrinks and then remains pinned to
+/// the start of the viewport like a [RenderSliverPinnedPersistentHeader], but
+/// immediately grows when the user scrolls in the reverse direction.
+///
+/// See also:
+///
+///  * [RenderSliverFloatingPersistentHeader], which is similar but scrolls off
+///    the top rather than sticking to it.
 abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFloatingPersistentHeader {
+  /// Creates a sliver that shrinks when it hits the start of the viewport, then
+  /// stays pinned there, and grows immediately when the user reverses the
+  /// scroll direction.
   RenderSliverFloatingPinnedPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,

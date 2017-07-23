@@ -143,8 +143,10 @@ class SemanticsNode extends AbstractNode {
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
   SemanticsNode({
-    SemanticsActionHandler handler
+    SemanticsActionHandler handler,
+    VoidCallback showOnScreen,
   }) : id = _generateNewId(),
+       _showOnScreen = showOnScreen,
        _actionHandler = handler;
 
   /// Creates a semantic node to represent the root of the semantics tree.
@@ -152,8 +154,10 @@ class SemanticsNode extends AbstractNode {
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
     SemanticsActionHandler handler,
-    SemanticsOwner owner
+    VoidCallback showOnScreen,
+    SemanticsOwner owner,
   }) : id = 0,
+        _showOnScreen = showOnScreen,
        _actionHandler = handler {
     attach(owner);
   }
@@ -171,6 +175,7 @@ class SemanticsNode extends AbstractNode {
   final int id;
 
   final SemanticsActionHandler _actionHandler;
+  final VoidCallback _showOnScreen;
 
   // GEOMETRY
   // These are automatically handled by RenderObject's own logic
@@ -291,6 +296,10 @@ class SemanticsNode extends AbstractNode {
   /// that state is on or off, corresponding to true and false, respectively.
   bool get isChecked => (_flags & SemanticsFlags.isChecked.index) != 0;
   set isChecked(bool value) => _setFlag(SemanticsFlags.isChecked, value);
+
+  /// Whether the current node is selected (true) or not (false).
+  bool get isSelected => (_flags & SemanticsFlags.isSelected.index) != 0;
+  set isSelected(bool value) => _setFlag(SemanticsFlags.isSelected, value);
 
   /// A textual description of this node.
   String get label => _label;
@@ -595,6 +604,8 @@ class SemanticsNode extends AbstractNode {
       else
         buffer.write('; unchecked');
     }
+    if (isSelected)
+      buffer.write('; selected');
     if (label.isNotEmpty)
       buffer.write('; "$label"');
     buffer.write(')');
@@ -728,7 +739,14 @@ class SemanticsOwner extends ChangeNotifier {
   void performAction(int id, SemanticsAction action) {
     assert(action != null);
     final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
-    handler?.performAction(action);
+    if (handler != null) {
+      handler.performAction(action);
+      return;
+    }
+
+    // Default actions if no [handler] was provided.
+    if (action == SemanticsAction.showOnScreen && _nodes[id]._showOnScreen != null)
+      _nodes[id]._showOnScreen();
   }
 
   SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
@@ -775,5 +793,5 @@ class SemanticsOwner extends ChangeNotifier {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => describeIdentity(this);
 }

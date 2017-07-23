@@ -7,6 +7,7 @@ import 'dart:collection' show SplayTreeMap, HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'framework.dart';
 
@@ -43,7 +44,7 @@ abstract class SliverChildDelegate {
   /// exists.
   ///
   /// Subclasses typically override this function and wrap their children in
-  /// [RepaintBoundary] widgets.
+  /// [AutomaticKeepAlive] and [RepaintBoundary] widgets.
   Widget build(BuildContext context, int index);
 
   /// Returns an estimate of the number of children this delegate will build.
@@ -94,7 +95,7 @@ abstract class SliverChildDelegate {
   String toString() {
     final List<String> description = <String>[];
     debugFillDescription(description);
-    return '$runtimeType#$hashCode(${description.join(", ")})';
+    return '${describeIdentity(this)}(${description.join(", ")})';
   }
 
   /// Add additional information to the given description for use by [toString].
@@ -115,8 +116,13 @@ abstract class SliverChildDelegate {
 ///
 /// Many slivers lazily construct their box children to avoid creating more
 /// children than are visible through the [Viewport]. This delegate provides
-/// children using an [IndexedWidgetBuilder] callback. The widgets returned from
-/// the builder callback are wrapped in [RepaintBoundary] widgets.
+/// children using an [IndexedWidgetBuilder] callback, so that the children do
+/// not even have to be built until they are displayed.
+///
+/// The widgets returned from the builder callback are automatically wrapped in
+/// [AutomaticKeepAlive] widgets if [addAutomaticKeepAlives] is true (the
+/// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
+/// (also the default).
 ///
 /// See also:
 ///
@@ -124,8 +130,18 @@ abstract class SliverChildDelegate {
 ///    of children.
 class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
-  /// builder callback
-  const SliverChildBuilderDelegate(this.builder, { this.childCount });
+  /// builder callback.
+  ///
+  /// The [builder], [addAutomaticKeepAlives], and [addRepaintBoundaries]
+  /// arguments must not be null.
+  const SliverChildBuilderDelegate(
+    this.builder, {
+    this.childCount,
+    this.addAutomaticKeepAlives: true,
+    this.addRepaintBoundaries: true,
+  }) : assert(builder != null),
+       assert(addAutomaticKeepAlives != null),
+       assert(addRepaintBoundaries != null);
 
   /// Called to build children for the sliver.
   ///
@@ -145,15 +161,44 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   /// [builder] returns null.
   final int childCount;
 
+  /// Whether to wrap each child in an [AutomaticKeepAlive].
+  ///
+  /// Typically, children in lazy list are wrapped in [AutomaticKeepAlive]
+  /// widgets so that children can use [KeepAliveNotification]s to preserve
+  /// their state when they would otherwise be garbage collected off-screen.
+  ///
+  /// This feature (and [addRepaintBoundaries]) must be disabled if the children
+  /// are going to manually maintain their [KeepAlive] state. It may also be
+  /// more efficient to disable this feature if it is known ahead of time that
+  /// none of the children will ever try to keep themselves alive.
+  ///
+  /// Defaults to true.
+  final bool addAutomaticKeepAlives;
+
+  /// Whether to wrap each child in a [RepaintBoundary].
+  ///
+  /// Typically, children in a scrolling container are wrapped in repaint
+  /// boundaries so that they do not need to be repainted as the list scrolls.
+  /// If the children are easy to repaint (e.g., solid color blocks or a short
+  /// snippet of text), it might be more efficient to not add a repaint boundary
+  /// and simply repaint the children during scrolling.
+  ///
+  /// Defaults to true.
+  final bool addRepaintBoundaries;
+
   @override
   Widget build(BuildContext context, int index) {
     assert(builder != null);
     if (index < 0 || (childCount != null && index >= childCount))
       return null;
-    final Widget child = builder(context, index);
+    Widget child = builder(context, index);
     if (child == null)
       return null;
-    return new RepaintBoundary.wrap(child, index);
+    if (addRepaintBoundaries)
+      child = new RepaintBoundary.wrap(child, index);
+    if (addAutomaticKeepAlives)
+      child = new AutomaticKeepAlive(child: child);
+    return child;
   }
 
   @override
@@ -183,6 +228,11 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 /// demand). For example, the body of a dialog box might fit both of these
 /// conditions.
 ///
+/// The widgets in the given [children] list are automatically wrapped in
+/// [AutomaticKeepAlive] widgets if [addAutomaticKeepAlives] is true (the
+/// default) and in [RepaintBoundary] widgets if [addRepaintBoundaries] is true
+/// (also the default).
+///
 /// See also:
 ///
 ///  * [SliverChildBuilderDelegate], which is a delegate that uses a builder
@@ -190,7 +240,30 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 class SliverChildListDelegate extends SliverChildDelegate {
   /// Creates a delegate that supplies children for slivers using the given
   /// list.
-  const SliverChildListDelegate(this.children, { this.addRepaintBoundaries: true });
+  ///
+  /// The [children], [addAutomaticKeepAlives], and [addRepaintBoundaries]
+  /// arguments must not be null.
+  const SliverChildListDelegate(
+    this.children, {
+    this.addAutomaticKeepAlives: true,
+    this.addRepaintBoundaries: true,
+  }) : assert(children != null),
+       assert(addAutomaticKeepAlives != null),
+       assert(addRepaintBoundaries != null);
+
+  /// Whether to wrap each child in an [AutomaticKeepAlive].
+  ///
+  /// Typically, children in lazy list are wrapped in [AutomaticKeepAlive]
+  /// widgets so that children can use [KeepAliveNotification]s to preserve
+  /// their state when they would otherwise be garbage collected off-screen.
+  ///
+  /// This feature (and [addRepaintBoundaries]) must be disabled if the children
+  /// are going to manually maintain their [KeepAlive] state. It may also be
+  /// more efficient to disable this feature if it is known ahead of time that
+  /// none of the children will ever try to keep themselves alive.
+  ///
+  /// Defaults to true.
+  final bool addAutomaticKeepAlives;
 
   /// Whether to wrap each child in a [RepaintBoundary].
   ///
@@ -211,9 +284,13 @@ class SliverChildListDelegate extends SliverChildDelegate {
     assert(children != null);
     if (index < 0 || index >= children.length)
       return null;
-    final Widget child = children[index];
+    Widget child = children[index];
     assert(child != null);
-    return addRepaintBoundaries ? new RepaintBoundary.wrap(child, index) : child;
+    if (addRepaintBoundaries)
+      child = new RepaintBoundary.wrap(child, index);
+    if (addAutomaticKeepAlives)
+      child = new AutomaticKeepAlive(child: child);
+    return child;
   }
 
   @override
@@ -393,6 +470,9 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 /// [gridDelegate]. Each child is forced to have the size specified by the
 /// [gridDelegate].
 ///
+/// The main axis direction of a grid is the direction in which it scrolls; the
+/// cross axis direction is the orthogonal direction.
+///
 /// ## Sample code
 ///
 /// This example, which would be inserted into a [CustomScrollView.slivers]
@@ -435,6 +515,54 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
     @required SliverChildDelegate delegate,
     @required this.gridDelegate,
   }) : super(key: key, delegate: delegate);
+
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement with a fixed number of tiles in the cross axis.
+  ///
+  /// Uses a [SliverGridDelegateWithFixedCrossAxisCount] as the [gridDelegate],
+  /// and a [SliverChildListDelegate] as the [delegate].
+  ///
+  /// See also:
+  ///
+  ///  * [new GridView.count], the equivalent constructor for [GridView] widgets.
+  SliverGrid.count({
+    Key key,
+    @required int crossAxisCount,
+    double mainAxisSpacing: 0.0,
+    double crossAxisSpacing: 0.0,
+    double childAspectRatio: 1.0,
+    List<Widget> children: const <Widget>[],
+  }) : gridDelegate = new SliverGridDelegateWithFixedCrossAxisCount(
+         crossAxisCount: crossAxisCount,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       super(key: key, delegate: new SliverChildListDelegate(children));
+
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement with tiles that each have a maximum cross-axis extent.
+  ///
+  /// Uses a [SliverGridDelegateWithMaxCrossAxisExtent] as the [gridDelegate],
+  /// and a [SliverChildListDelegate] as the [delegate].
+  ///
+  /// See also:
+  ///
+  ///  * [new GridView.extent], the equivalent constructor for [GridView] widgets.
+  SliverGrid.extent({
+    Key key,
+    @required double maxCrossAxisExtent,
+    double mainAxisSpacing: 0.0,
+    double crossAxisSpacing: 0.0,
+    double childAspectRatio: 1.0,
+    List<Widget> children: const <Widget>[],
+  }) : gridDelegate = new SliverGridDelegateWithMaxCrossAxisExtent(
+         maxCrossAxisExtent: maxCrossAxisExtent,
+         mainAxisSpacing: mainAxisSpacing,
+         crossAxisSpacing: crossAxisSpacing,
+         childAspectRatio: childAspectRatio,
+       ),
+       super(key: key, delegate: new SliverChildListDelegate(children));
 
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
@@ -537,13 +665,20 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       performRebuild();
   }
 
-  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
+  // We inflate widgets at two different times:
+  //  1. When we ourselves are told to rebuild (see performRebuild).
+  //  2. When our render object needs a new child (see createChild).
+  // In both cases, we cache the results of calling into our delegate to get the widget,
+  // so that if we do case 2 later, we don't call the builder again.
+  // Any time we do case 1, though, we reset the cache.
+
   final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
+  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
   RenderBox _currentBeforeChild;
 
   @override
   void performRebuild() {
-    _childWidgets.clear();
+    _childWidgets.clear(); // Reset the cache, as described above.
     super.performRebuild();
     _currentBeforeChild = null;
     assert(_currentlyUpdatingChildIndex == null);
@@ -556,9 +691,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       } else if (_didUnderflow) {
         lastIndex += 1;
       }
-      // We won't call the delegate's build function multiple times, because we
-      // cache the delegate's results until the next time we need to rebuild the
-      // whole widget.
       for (int index = firstIndex; index <= lastIndex; ++index) {
         _currentlyUpdatingChildIndex = index;
         final Element newChild = updateChild(_childElements[index], _build(index), index);
@@ -759,4 +891,52 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 
   @override
   RenderSliverFillRemaining createRenderObject(BuildContext context) => new RenderSliverFillRemaining();
+}
+
+/// Mark a child as needing to stay alive even when it's in a lazy list that
+/// would otherwise remove it.
+///
+/// This widget is for use in [SliverMultiBoxAdaptorWidget]s, such as
+/// [SliverGrid] or [SliverList].
+class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
+  /// Marks a child as needing to remain alive.
+  ///
+  /// The [child] and [keepAlive] arguments must not be null.
+  KeepAlive({
+    Key key,
+    @required this.keepAlive,
+    @required Widget child,
+  }) : assert(child != null),
+       assert(keepAlive != null),
+       super(key: key, child: child);
+
+  /// Whether to keep the child alive.
+  ///
+  /// If this is false, it is as if this widget was omitted.
+  final bool keepAlive;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is SliverMultiBoxAdaptorParentData);
+    final SliverMultiBoxAdaptorParentData parentData = renderObject.parentData;
+    if (parentData.keepAlive != keepAlive) {
+      parentData.keepAlive = keepAlive;
+      final AbstractNode targetParent = renderObject.parent;
+      if (targetParent is RenderObject && !keepAlive)
+        targetParent.markNeedsLayout(); // No need to redo layout if it became true.
+    }
+  }
+
+  // We only return true if [keepAlive] is true, because turning _off_ keep
+  // alive requires a layout to do the garbage collection (but turning it on
+  // requires nothing, since by definition the widget is already alive and won't
+  // go away _unless_ we do a layout).
+  @override
+  bool debugCanApplyOutOfTurn() => keepAlive;
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('keepAlive: $keepAlive');
+  }
 }

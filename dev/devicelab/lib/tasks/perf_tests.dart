@@ -73,9 +73,6 @@ TaskFunction createFlutterViewStartupTest() {
   return new StartupTest(
       '${flutterDirectory.path}/examples/flutter_view',
       reportMetrics: false,
-      // This project has a non-standard CocoaPods Podfile. Run pod install
-      // before building the project.
-      runPodInstall: true,
   );
 }
 
@@ -83,27 +80,18 @@ TaskFunction createFlutterViewStartupTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  const StartupTest(this.testDirectory, { this.reportMetrics: true, this.runPodInstall: false });
+  const StartupTest(this.testDirectory, { this.reportMetrics: true });
 
   final String testDirectory;
   final bool reportMetrics;
-  /// Used to trigger a `pod install` when the project has a custom Podfile and
-  /// flutter build ios won't automatically run `pod install` via the managed
-  /// plugin system.
-  final bool runPodInstall;
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-        if (runPodInstall)
-          await runPodInstallForCustomPodfile(testDirectory);
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
 
       await flutter('run', options: <String>[
         '--verbose',
@@ -141,11 +129,8 @@ class PerfTest {
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
 
       await flutter('drive', options: <String>[
         '-v',
@@ -280,11 +265,8 @@ class MemoryTest {
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
 
       final int observatoryPort = await findAvailablePort();
 

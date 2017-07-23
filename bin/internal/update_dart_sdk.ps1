@@ -29,7 +29,7 @@ if ((Test-Path $dartSdkStampPath) -and ($dartSdkVersion -eq (Get-Content $dartSd
 
 Write-Host "Downloading Dart SDK $dartSdkVersion..."
 $dartZipName = "dartsdk-windows-x64-release.zip"
-$dartChannel = if ($dartSdkVersion.Contains("-dev.")) {"dev"} else {"stable"}
+$dartChannel = if ($dartSdkVersion.Contains("-dev.")) {"dev"} else {if ($dartSdkVersion.Contains("hash/")) {"be"} else {"stable"}}
 $dartSdkUrl = "https://storage.googleapis.com/dart-archive/channels/$dartChannel/raw/$dartSdkVersion/sdk/$dartZipName"
 
 if (Test-Path $dartSdkPath) {
@@ -40,8 +40,13 @@ if (Test-Path $dartSdkPath) {
 }
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\dart-sdk.zip"
-Import-Module BitsTransfer
-Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+# TODO(goderbauer): remove (slow and backwards-incompatible) appveyor work around
+if (Test-Path Env:\APPVEYOR) {
+    curl $dartSdkUrl -OutFile $dartSdkZip
+} else {
+    Import-Module BitsTransfer
+    Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+}
 
 Write-Host "Unzipping Dart SDK..."
 If (Get-Command 7z -errorAction SilentlyContinue) {

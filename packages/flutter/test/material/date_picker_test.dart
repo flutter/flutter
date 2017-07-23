@@ -3,9 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+
+import 'feedback_tester.dart';
 
 void main() {
   DateTime firstDate;
@@ -185,9 +186,9 @@ void main() {
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.text('2016'));
       await tester.pump();
-      await tester.tap(find.text('2006'));
+      await tester.tap(find.text('2018'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2006, DateTime.JANUARY, 15)));
+      expect(await date, equals(new DateTime(2018, DateTime.JANUARY, 15)));
     });
   });
 
@@ -195,14 +196,25 @@ void main() {
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.text('2016'));
       await tester.pump();
-      await tester.tap(find.text('2005'));
+      await tester.tap(find.text('2017'));
       await tester.pump();
-      final String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2005, DateTime.JANUARY, 15));
+      final String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2017, DateTime.JANUARY, 15));
       await tester.tap(find.text(dayLabel));
       await tester.pump();
       await tester.tap(find.text('19'));
       await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2005, DateTime.JANUARY, 19)));
+      expect(await date, equals(new DateTime(2017, DateTime.JANUARY, 19)));
+    });
+  });
+
+  testWidgets('Current year is initially visible in year picker', (WidgetTester tester) async {
+    initialDate = new DateTime(2000);
+    firstDate = new DateTime(1900);
+    lastDate = new DateTime(2100);
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.tap(find.text('2000'));
+      await tester.pump();
+      expect(find.text('2000'), findsNWidgets(2));
     });
   });
 
@@ -214,7 +226,7 @@ void main() {
       await tester.tap(find.text('10')); // Earlier than firstDate. Should be ignored.
       await tester.tap(find.text('20')); // Later than lastDate. Should be ignored.
       await tester.tap(find.text('OK'));
-      // We should still be on the inital date.
+      // We should still be on the initial date.
       expect(await date, equals(initialDate));
     });
   });
@@ -273,34 +285,31 @@ void main() {
 
   group('haptic feedback', () {
     const Duration kHapticFeedbackInterval = const Duration(milliseconds: 10);
-    int hapticFeedbackCount;
-
-    setUpAll(() {
-      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-        if (methodCall.method == "HapticFeedback.vibrate")
-          hapticFeedbackCount++;
-      });
-    });
+    FeedbackTester feedback;
 
     setUp(() {
-      hapticFeedbackCount = 0;
+      feedback = new FeedbackTester();
       initialDate = new DateTime(2017, DateTime.JANUARY, 16);
       firstDate = new DateTime(2017, DateTime.JANUARY, 10);
       lastDate = new DateTime(2018, DateTime.JANUARY, 20);
       selectableDayPredicate = (DateTime date) => date.day.isEven;
     });
 
+    tearDown(() {
+      feedback?.dispose();
+    });
+
     testWidgets('tap-select date vibrates', (WidgetTester tester) async {
       await preparePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('10'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 1);
+        expect(feedback.hapticCount, 1);
         await tester.tap(find.text('12'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 2);
+        expect(feedback.hapticCount, 2);
         await tester.tap(find.text('14'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 3);
+        expect(feedback.hapticCount, 3);
       });
     });
 
@@ -308,13 +317,13 @@ void main() {
       await preparePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('11'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 0);
+        expect(feedback.hapticCount, 0);
         await tester.tap(find.text('13'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 0);
+        expect(feedback.hapticCount, 0);
         await tester.tap(find.text('15'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 0);
+        expect(feedback.hapticCount, 0);
       });
     });
 
@@ -322,11 +331,34 @@ void main() {
       await preparePicker(tester, (Future<DateTime> date) async {
         await tester.tap(find.text('2017'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 1);
+        expect(feedback.hapticCount, 1);
         await tester.tap(find.text('2018'));
         await tester.pump(kHapticFeedbackInterval);
-        expect(hapticFeedbackCount, 2);
+        expect(feedback.hapticCount, 2);
       });
+    });
+
+  });
+
+  test('days in month', () {
+    expect(DayPicker.getDaysInMonth(2017, 10), 31);
+    expect(DayPicker.getDaysInMonth(2017, 6), 30);
+    expect(DayPicker.getDaysInMonth(2017, 2), 28);
+    expect(DayPicker.getDaysInMonth(2016, 2), 29);
+    expect(DayPicker.getDaysInMonth(2000, 2), 29);
+    expect(DayPicker.getDaysInMonth(1900, 2), 28);
+  });
+
+  testWidgets('month header tap', (WidgetTester tester) async {
+    selectableDayPredicate = null;
+    await preparePicker(tester, (Future<DateTime> date) async {
+      // Switch into the year selector.
+      await tester.tap(find.text('January 2016'));
+      await tester.pump();
+      expect(find.text('2020'), isNotNull);
+
+      await tester.tap(find.text('CANCEL'));
+      expect(await date, isNull);
     });
   });
 }

@@ -5,8 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'feedback_tester.dart';
+
 void main() {
   testWidgets('Chip control test', (WidgetTester tester) async {
+    final FeedbackTester feedback = new FeedbackTester();
     bool didDeleteChip = false;
     await tester.pumpWidget(
       new MaterialApp(
@@ -26,8 +29,15 @@ void main() {
       )
     );
 
+    expect(feedback.clickSoundCount, 0);
+
     expect(didDeleteChip, isFalse);
     await tester.tap(find.byType(Tooltip));
     expect(didDeleteChip, isTrue);
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 1);
+
+    feedback.dispose();
   });
 }

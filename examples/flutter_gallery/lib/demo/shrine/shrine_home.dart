@@ -252,39 +252,41 @@ class _Heading extends StatelessWidget {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final ShrineTheme theme = ShrineTheme.of(context);
-    return new SizedBox(
-      height: screenSize.width > screenSize.height
-        ? (screenSize.height - kToolbarHeight) * 0.85
-        : (screenSize.height - kToolbarHeight) * 0.70,
-      child: new Container(
-        decoration: new BoxDecoration(
-          color: theme.cardBackgroundColor,
-          border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
-        ),
-        child: new CustomMultiChildLayout(
-          delegate: new _HeadingLayout(),
-          children: <Widget>[
-            new LayoutId(
-              id: _HeadingLayout.price,
-              child: new _FeaturePriceItem(product: product),
-            ),
-            new LayoutId(
-              id: _HeadingLayout.image,
-              child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
-            ),
-            new LayoutId(
-              id: _HeadingLayout.title,
-              child: new Text(product.featureTitle, style: theme.featureTitleStyle),
-            ),
-            new LayoutId(
-              id: _HeadingLayout.description,
-              child: new Text(product.featureDescription, style: theme.featureStyle),
-            ),
-            new LayoutId(
-              id: _HeadingLayout.vendor,
-              child: new _VendorItem(vendor: product.vendor),
-            ),
-          ],
+    return new MergeSemantics(
+      child: new SizedBox(
+        height: screenSize.width > screenSize.height
+          ? (screenSize.height - kToolbarHeight) * 0.85
+          : (screenSize.height - kToolbarHeight) * 0.70,
+        child: new Container(
+          decoration: new BoxDecoration(
+            color: theme.cardBackgroundColor,
+            border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
+          ),
+          child: new CustomMultiChildLayout(
+            delegate: new _HeadingLayout(),
+            children: <Widget>[
+              new LayoutId(
+                id: _HeadingLayout.price,
+                child: new _FeaturePriceItem(product: product),
+              ),
+              new LayoutId(
+                id: _HeadingLayout.image,
+                child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
+              ),
+              new LayoutId(
+                id: _HeadingLayout.title,
+                child: new Text(product.featureTitle, style: theme.featureTitleStyle),
+              ),
+              new LayoutId(
+                id: _HeadingLayout.description,
+                child: new Text(product.featureDescription, style: theme.featureStyle),
+              ),
+              new LayoutId(
+                id: _HeadingLayout.vendor,
+                child: new _VendorItem(vendor: product.vendor),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -303,35 +305,37 @@ class _ProductItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Card(
-      child: new Stack(
-        children: <Widget>[
-          new Column(
-            children: <Widget>[
-              new Align(
-                alignment: FractionalOffset.centerRight,
-                child: new _ProductPriceItem(product: product),
-              ),
-              new Container(
-                width: 144.0,
-                height: 144.0,
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: new Hero(
-                    tag: product.tag,
-                    child: new Image.asset(product.imageAsset, fit: BoxFit.contain),
-                  ),
+    return new MergeSemantics(
+      child: new Card(
+        child: new Stack(
+          children: <Widget>[
+            new Column(
+              children: <Widget>[
+                new Align(
+                  alignment: FractionalOffset.centerRight,
+                  child: new _ProductPriceItem(product: product),
                 ),
-              new Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: new _VendorItem(vendor: product.vendor),
-              ),
-            ],
-          ),
-          new Material(
-            type: MaterialType.transparency,
-            child: new InkWell(onTap: onPressed),
-          ),
-        ],
+                new Container(
+                  width: 144.0,
+                  height: 144.0,
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: new Hero(
+                      tag: product.tag,
+                      child: new Image.asset(product.imageAsset, fit: BoxFit.contain),
+                    ),
+                  ),
+                new Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: new _VendorItem(vendor: product.vendor),
+                ),
+              ],
+            ),
+            new Material(
+              type: MaterialType.transparency,
+              child: new InkWell(onTap: onPressed),
+            ),
+          ],
+        ),
       ),
     );
   }

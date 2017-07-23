@@ -26,7 +26,7 @@ bool _isTaskRegistered = false;
 
 /// Registers a [task] to run, returns the result when it is complete.
 ///
-/// Note, the task does not run immediately but waits for the request via the
+/// The task does not run immediately but waits for the request via the
 /// VM service protocol to run it.
 ///
 /// It is ok for a [task] to perform many things. However, only one task can be
@@ -134,7 +134,8 @@ class _TaskRunner {
       // are catching errors coming from arbitrary (and untrustworthy) task
       // code. Our goal is to convert the failure into a readable message.
       // Propagating it further is not useful.
-      completer.complete(new TaskResult.failure(message));
+      if (!completer.isCompleted)
+        completer.complete(new TaskResult.failure(message));
     });
     return completer.future;
   }

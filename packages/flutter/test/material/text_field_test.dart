@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'feedback_tester.dart';
+
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -27,7 +29,7 @@ class MockClipboard {
 
 Widget overlay(Widget child) {
   return new MediaQuery(
-    data: const MediaQueryData(),
+    data: const MediaQueryData(size: const Size(800.0, 600.0)),
     child: new Overlay(
       initialEntries: <OverlayEntry>[
         new OverlayEntry(
@@ -38,6 +40,11 @@ Widget overlay(Widget child) {
   );
 }
 
+Future<Null> skipPastScrollingAnimation(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 200));
+}
+
 void main() {
   final MockClipboard mockClipboard = new MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
@@ -46,7 +53,7 @@ void main() {
     'First line of text is '
     'Second line goes until '
     'Third line of stuff ';
-  const String kFourLines =
+  const String kMoreThanFourLines =
     kThreeLines +
     'Fourth line won\'t display and ends at';
 
@@ -68,10 +75,22 @@ void main() {
     return renderEditable;
   }
 
+  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
+    return points.map((TextSelectionPoint point) {
+      return new TextSelectionPoint(
+        box.localToGlobal(point.point),
+        point.direction,
+      );
+    }).toList();
+  }
+
   Offset textOffsetToPosition(WidgetTester tester, int offset) {
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-      new TextSelection.collapsed(offset: offset),
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(
+        new TextSelection.collapsed(offset: offset),
+      ),
+      renderEditable,
     );
     expect(endpoints.length, 1);
     return endpoints[0].point + const Offset(0.0, -2.0);
@@ -112,8 +131,7 @@ void main() {
         expect(textFieldValue, equals(testValue));
 
         await tester.pumpWidget(builder());
-        // skip past scrolling animation
-        await tester.pump(const Duration(milliseconds: 200));
+        await skipPastScrollingAnimation(tester);
       });
     }
 
@@ -219,8 +237,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap to reposition the caret.
     final int tapIndex = testValue.indexOf('e');
@@ -263,8 +280,7 @@ void main() {
     expect(controller.value.text, testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     expect(controller.selection.isCollapsed, true);
 
@@ -299,8 +315,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
@@ -308,15 +323,19 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     final TextSelection selection = controller.selection;
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the right handle 2 letters to the right.
-    // Note: use a small offset because the endpoint is on the very corner
+    // We use a small offset because the endpoint is on the very corner
     // of the handle.
     Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
     Offset newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
@@ -362,16 +381,20 @@ void main() {
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     RenderEditable renderEditable = findRenderEditable(tester);
-    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     // SELECT ALL should select all the text.
     await tester.tap(find.text('SELECT ALL'));
@@ -382,17 +405,21 @@ void main() {
     // COPY should reset the selection.
     await tester.tap(find.text('COPY'));
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
     expect(controller.selection.isCollapsed, true);
 
     // Tap again to bring back the menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     renderEditable = findRenderEditable(tester);
-    endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     // PASTE right before the 'e'.
     await tester.tap(find.text('PASTE'));
@@ -418,14 +445,17 @@ void main() {
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(TextField), testValue);
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
@@ -462,7 +492,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(builder(3));
+    await tester.pumpWidget(builder(null));
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
 
@@ -470,28 +500,44 @@ void main() {
     final Size emptyInputSize = inputBox.size;
 
     await tester.enterText(find.byType(TextField), 'No wrapping here.');
-    await tester.pumpWidget(builder(3));
+    await tester.pumpWidget(builder(null));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    await tester.enterText(find.byType(TextField), kThreeLines);
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
 
     final Size threeLineInputSize = inputBox.size;
 
+    await tester.enterText(find.byType(TextField), kThreeLines);
+    await tester.pumpWidget(builder(null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, greaterThan(emptyInputSize));
+
+    await tester.enterText(find.byType(TextField), kThreeLines);
+    await tester.pumpWidget(builder(null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, threeLineInputSize);
+
     // An extra line won't increase the size because we max at 3.
-    await tester.enterText(find.byType(TextField), kFourLines);
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
-    // But now it will.
-    await tester.enterText(find.byType(TextField), kFourLines);
+    // But now it will... but it will max at four
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
     await tester.pumpWidget(builder(4));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(threeLineInputSize));
+
+    final Size fourLineInputSize = inputBox.size;
+
+    // Now it won't max out until the end
+    await tester.pumpWidget(builder(null));
+    expect(findInputBox(), equals(inputBox));
+    expect(inputBox.size, greaterThan(fourLineInputSize));
   });
 
   testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
@@ -516,8 +562,7 @@ void main() {
     await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
-    // skip past scrolling animation
-    await tester.pump(const Duration(milliseconds: 200));
+    await skipPastScrollingAnimation(tester);
 
     // Check that the text spans multiple lines.
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
@@ -534,12 +579,16 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
     expect(controller.selection.baseOffset, 39);
     expect(controller.selection.extentOffset, 44);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the right handle to the third line, just after 'Third'.
@@ -594,7 +643,7 @@ void main() {
     await tester.pumpWidget(builder());
     await tester.pump(const Duration(seconds: 1));
 
-    await tester.enterText(find.byType(TextField), kFourLines);
+    await tester.enterText(find.byType(TextField), kMoreThanFourLines);
 
     await tester.pumpWidget(builder());
     await tester.pump(const Duration(seconds: 1));
@@ -603,8 +652,8 @@ void main() {
     final RenderBox inputBox = findInputBox();
 
     // Check that the last line of text is not displayed.
-    final Offset firstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
-    final Offset fourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    final Offset firstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    final Offset fourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
     expect(firstPos.dx, fourthPos.dx);
     expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
@@ -622,8 +671,8 @@ void main() {
     await tester.pump();
 
     // Now the first line is scrolled up, and the fourth line is visible.
-    Offset newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
-    Offset newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    Offset newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    Offset newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
 
     expect(newFirstPos.dy, lessThan(firstPos.dy));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
@@ -633,19 +682,22 @@ void main() {
 
     // Long press the 'i' in 'Fourth line' to select the word.
     await tester.pump(const Duration(seconds: 1));
-    final Offset untilPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth line')+8);
+    final Offset untilPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth line')+8);
     gesture = await tester.startGesture(untilPos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
     final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
-    final Offset newHandlePos = textOffsetToPosition(tester, kFourLines.indexOf('First') + 5);
+    final Offset newHandlePos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
     await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
@@ -655,8 +707,8 @@ void main() {
 
     // The text should have scrolled up with the handle to keep the active
     // cursor visible, back to its original position.
-    newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
-    newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
+    newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
     expect(newFirstPos.dy, firstPos.dy);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
@@ -728,6 +780,75 @@ void main() {
     await checkText('Hello World');
   });
 
+  testWidgets('TextField errorText trumps helperText', (WidgetTester tester) async {
+    Widget builder() {
+      return const Center(
+        child: const Material(
+          child: const TextField(
+            decoration: const InputDecoration(
+              errorText: 'error text',
+              helperText: 'helper text',
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    expect(find.text('helper text'), findsNothing);
+    expect(find.text('error text'), findsOneWidget);
+  });
+
+  testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
+    final ThemeData themeData = new ThemeData(
+      hintColor: Colors.blue[500],
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Theme(
+          data: themeData,
+          child: const Material(
+            child: const TextField(
+              decoration: const InputDecoration(
+                helperText: 'helper text',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final Text helperText = tester.widget(find.text('helper text'));
+    expect(helperText.style.color, themeData.hintColor);
+    expect(helperText.style.fontSize, themeData.textTheme.caption.fontSize);
+  });
+
+  testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
+    final TextStyle style = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new TextField(
+            decoration: new InputDecoration(
+              helperText: 'helper text',
+              helperStyle: style,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    final Text helperText = tester.widget(find.text('helper text'));
+    expect(helperText.style, style);
+  });
+
   testWidgets('TextField with default hintStyle', (WidgetTester tester) async {
     final TextStyle style = new TextStyle(
       color: Colors.pink[500],
@@ -783,6 +904,248 @@ void main() {
 
     final Text hintText = tester.widget(find.text('Placeholder'));
     expect(hintText.style, hintStyle);
+  });
+
+  testWidgets('TextField with specified prefixStyle', (WidgetTester tester) async {
+    final TextStyle prefixStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new TextField(
+            decoration: new InputDecoration(
+              prefixText: 'Prefix:',
+              prefixStyle: prefixStyle,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    final Text prefixText = tester.widget(find.text('Prefix:'));
+    expect(prefixText.style, prefixStyle);
+  });
+
+  testWidgets('TextField with specified suffixStyle', (WidgetTester tester) async {
+    final TextStyle suffixStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+
+    Widget builder() {
+      return new Center(
+        child: new Material(
+          child: new TextField(
+            decoration: new InputDecoration(
+              suffixText: '.com',
+              suffixStyle: suffixStyle,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    final Text suffixText = tester.widget(find.text('.com'));
+    expect(suffixText.style, suffixStyle);
+  });
+
+  testWidgets('TextField prefix and suffix appear correctly with no hint or label',
+          (WidgetTester tester) async {
+    final Key secondKey = new UniqueKey();
+
+    Widget innerBuilder() {
+      return new Center(
+        child: new Material(
+          child: new Column(
+            children: <Widget>[
+              const TextField(
+                decoration: const InputDecoration(
+                  labelText: 'First',
+                ),
+              ),
+              new TextField(
+                key: secondKey,
+                decoration: const InputDecoration(
+                  prefixText: 'Prefix',
+                  suffixText: 'Suffix',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    Widget builder() => overlay(innerBuilder());
+
+    await tester.pumpWidget(builder());
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+
+    // Focus the Input. The prefix should still display.
+    await tester.tap(find.byKey(secondKey));
+    await tester.pump();
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+
+    // Enter some text, and the prefix should still display.
+    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+  });
+
+  testWidgets('TextField prefix and suffix appear correctly with hint text',
+          (WidgetTester tester) async {
+    final TextStyle hintStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+    final Key secondKey = new UniqueKey();
+
+    Widget innerBuilder() {
+      return new Center(
+        child: new Material(
+          child: new Column(
+            children: <Widget>[
+              const TextField(
+                decoration: const InputDecoration(
+                  labelText: 'First',
+                ),
+              ),
+              new TextField(
+                key: secondKey,
+                decoration: new InputDecoration(
+                  hintText: 'Hint',
+                  hintStyle: hintStyle,
+                  prefixText: 'Prefix',
+                  suffixText: 'Suffix',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    Widget builder() => overlay(innerBuilder());
+
+    await tester.pumpWidget(builder());
+
+    // Neither the prefix or the suffix should initially be visible, only the hint.
+    expect(find.text('Prefix'), findsNothing);
+    expect(find.text('Suffix'), findsNothing);
+    expect(find.text('Hint'), findsOneWidget);
+
+    await tester.tap(find.byKey(secondKey));
+    await tester.pump();
+
+    // Focus the Input. The hint should display, but not the prefix and suffix.
+    expect(find.text('Prefix'), findsNothing);
+    expect(find.text('Suffix'), findsNothing);
+    expect(find.text('Hint'), findsOneWidget);
+
+    // Enter some text, and the hint should disappear and the prefix and suffix
+    // should appear.
+    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+
+    // It's onstage, but animated to zero opacity.
+    expect(find.text('Hint'), findsOneWidget);
+    final Element target = tester.element(find.text('Hint'));
+    final Opacity opacity = target.ancestorWidgetOfExactType(Opacity);
+    expect(opacity, isNotNull);
+    expect(opacity.opacity, equals(0.0));
+
+    // Check and make sure that the right styles were applied.
+    final Text prefixText = tester.widget(find.text('Prefix'));
+    expect(prefixText.style, hintStyle);
+    final Text suffixText = tester.widget(find.text('Suffix'));
+    expect(suffixText.style, hintStyle);
+  });
+
+  testWidgets('TextField prefix and suffix appear correctly with label text',
+          (WidgetTester tester) async {
+    final TextStyle prefixStyle = new TextStyle(
+      color: Colors.pink[500],
+      fontSize: 10.0,
+    );
+    final TextStyle suffixStyle = new TextStyle(
+      color: Colors.green[500],
+      fontSize: 12.0,
+    );
+    final Key secondKey = new UniqueKey();
+
+    Widget innerBuilder() {
+      return new Center(
+        child: new Material(
+          child: new Column(
+            children: <Widget>[
+              const TextField(
+                decoration: const InputDecoration(
+                  labelText: 'First',
+                ),
+              ),
+              new TextField(
+                key: secondKey,
+                decoration: new InputDecoration(
+                  labelText: 'Label',
+                  prefixText: 'Prefix',
+                  prefixStyle: prefixStyle,
+                  suffixText: 'Suffix',
+                  suffixStyle: suffixStyle,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    Widget builder() => overlay(innerBuilder());
+
+    await tester.pumpWidget(builder());
+
+    // Not focused.  The prefix should not display, but the label should.
+    expect(find.text('Prefix'), findsNothing);
+    expect(find.text('Suffix'), findsNothing);
+    expect(find.text('Label'), findsOneWidget);
+
+    await tester.tap(find.byKey(secondKey));
+    await tester.pump();
+
+    // Focus the input. The label should display, and also the prefix.
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+    expect(find.text('Label'), findsOneWidget);
+
+    // Enter some text, and the label should stay and the prefix should
+    // remain.
+    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Prefix'), findsOneWidget);
+    expect(find.text('Suffix'), findsOneWidget);
+    expect(find.text('Label'), findsOneWidget);
+
+    // Check and make sure that the right styles were applied.
+    final Text prefixText = tester.widget(find.text('Prefix'));
+    expect(prefixText.style, prefixStyle);
+    final Text suffixText = tester.widget(find.text('Suffix'));
+    expect(suffixText.style, suffixStyle);
   });
 
   testWidgets('TextField label text animates', (WidgetTester tester) async {
@@ -990,7 +1353,7 @@ void main() {
   });
 
   testWidgets(
-    'Cannot enter new lines onto single line TextField', 
+    'Cannot enter new lines onto single line TextField',
     (WidgetTester tester) async {
       final TextEditingController textController = new TextEditingController();
 
@@ -1005,13 +1368,13 @@ void main() {
   );
 
   testWidgets(
-    'Injected formatters are chained', 
+    'Injected formatters are chained',
     (WidgetTester tester) async {
       final TextEditingController textController = new TextEditingController();
 
       await tester.pumpWidget(new Material(
         child: new TextField(
-          controller: textController, 
+          controller: textController,
           decoration: null,
           inputFormatters: <TextInputFormatter> [
             new BlacklistingTextInputFormatter(
@@ -1029,13 +1392,13 @@ void main() {
   );
 
   testWidgets(
-    'Chained formatters are in sequence', 
+    'Chained formatters are in sequence',
     (WidgetTester tester) async {
       final TextEditingController textController = new TextEditingController();
 
       await tester.pumpWidget(new Material(
         child: new TextField(
-          controller: textController, 
+          controller: textController,
           decoration: null,
           maxLines: 2,
           inputFormatters: <TextInputFormatter> [
@@ -1051,15 +1414,15 @@ void main() {
       await tester.enterText(find.byType(TextField), 'a1b2c3');
       // The first formatter turns it into
       // 12\n112\n212\n3
-      // The second formatter turns it into 
+      // The second formatter turns it into
       // \n1\n2\n3
-      // Multiline is allowed since maxLine != 1. 
+      // Multiline is allowed since maxLine != 1.
       expect(textController.text, '\n1\n2\n3');
     }
   );
 
   testWidgets(
-    'Pasted values are formatted', 
+    'Pasted values are formatted',
     (WidgetTester tester) async {
       final TextEditingController textController = new TextEditingController();
 
@@ -1067,7 +1430,7 @@ void main() {
         return overlay(new Center(
           child: new Material(
             child: new TextField(
-              controller: textController, 
+              controller: textController,
               decoration: null,
               inputFormatters: <TextInputFormatter> [
                 WhitelistingTextInputFormatter.digitsOnly,
@@ -1082,16 +1445,19 @@ void main() {
       await tester.enterText(find.byType(TextField), 'a1b\n2c3');
       expect(textController.text, '123');
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       await tester.tapAt(textOffsetToPosition(tester, '123'.indexOf('2')));
       await tester.pumpWidget(builder());
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
       final RenderEditable renderEditable = findRenderEditable(tester);
-      final List<TextSelectionPoint> endpoints = 
-          renderEditable.getEndpointsForSelection(textController.selection);
+      final List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(textController.selection),
+        renderEditable,
+      );
       await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
       await tester.pumpWidget(builder());
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
       Clipboard.setData(const ClipboardData(text: '一4二\n5三6'));
       await tester.tap(find.text('PASTE'));
@@ -1124,8 +1490,7 @@ void main() {
       final String longText = 'a' * 20;
       await tester.enterText(find.byType(TextField), longText);
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
       expect(scrollableState.position.pixels, equals(0.0));
@@ -1134,11 +1499,97 @@ void main() {
       // scrolls to make the caret visible.
       controller.selection = new TextSelection.collapsed(offset: longText.length);
       await tester.pumpWidget(builder());
-      // skip past scrolling animation
-      await tester.pump(const Duration(milliseconds: 200));
+      await skipPastScrollingAnimation(tester);
 
       scrollableState = tester.firstState(find.byType(Scrollable));
       expect(scrollableState.position.pixels, isNot(equals(0.0)));
+    }
+  );
+
+  testWidgets('haptic feedback', (WidgetTester tester) async {
+    final FeedbackTester feedback = new FeedbackTester();
+    final TextEditingController controller = new TextEditingController();
+
+    Widget builder() {
+      return overlay(new Center(
+        child: new Material(
+          child: new Container(
+            width: 100.0,
+            child: new TextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      ));
+    }
+
+    await tester.pumpWidget(builder());
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 0);
+    expect(feedback.hapticCount, 0);
+
+    await tester.longPress(find.byType(TextField));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 0);
+    expect(feedback.hapticCount, 1);
+
+    feedback.dispose();
+  });
+
+  testWidgets(
+    'Text field drops selection when losing focus',
+    (WidgetTester tester) async {
+      final Key key1 = new UniqueKey();
+      final TextEditingController controller1 = new TextEditingController();
+      final Key key2 = new UniqueKey();
+
+      Widget builder() {
+        return overlay(new Center(
+          child: new Material(
+            child: new Column(
+              children: <Widget>[
+                new TextField(
+                  key: key1,
+                  controller: controller1
+                ),
+                new TextField(key: key2),
+              ],
+            ),
+          ),
+        ));
+      }
+
+      await tester.pumpWidget(builder());
+      await tester.tap(find.byKey(key1));
+      await tester.enterText(find.byKey(key1), 'abcd');
+      await tester.pump();
+      controller1.selection = const TextSelection(baseOffset: 0, extentOffset: 3);
+      await tester.pump();
+      expect(controller1.selection, isNot(equals(TextRange.empty)));
+
+      await tester.tap(find.byKey(key2));
+      await tester.pump();
+      expect(controller1.selection, equals(TextRange.empty));
+    }
+  );
+
+  testWidgets(
+    'Selection is consistent with text length',
+    (WidgetTester tester) async {
+      final TextEditingController controller = new TextEditingController();
+
+      controller.text = 'abcde';
+      controller.selection = const TextSelection.collapsed(offset: 5);
+
+      controller.text = '';
+      expect(controller.selection.start, lessThanOrEqualTo(0));
+      expect(controller.selection.end, lessThanOrEqualTo(0));
+
+      expect(() {
+        controller.selection = const TextSelection.collapsed(offset: 10);
+      }, throwsFlutterError);
     }
   );
 }

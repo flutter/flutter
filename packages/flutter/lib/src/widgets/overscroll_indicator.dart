@@ -5,11 +5,17 @@
 import 'dart:async' show Timer;
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart';
+
+import 'basic.dart';
+import 'framework.dart';
+import 'notification_listener.dart';
+import 'scroll_notification.dart';
+import 'ticker_provider.dart';
 
 /// A visual indication that a scroll view has overscrolled.
 ///
@@ -111,12 +117,14 @@ class GlowingOverscrollIndicator extends StatefulWidget {
 class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator> with TickerProviderStateMixin {
   _GlowController _leadingController;
   _GlowController _trailingController;
+  Listenable _leadingAndTrailingListener;
 
   @override
   void initState() {
     super.initState();
     _leadingController = new _GlowController(vsync: this, color: widget.color, axis: widget.axis);
     _trailingController = new _GlowController(vsync: this, color: widget.color, axis: widget.axis);
+    _leadingAndTrailingListener = new Listenable.merge(<Listenable>[_leadingController, _trailingController]);
   }
 
   @override
@@ -204,6 +212,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             leadingController: widget.showLeading ? _leadingController : null,
             trailingController: widget.showTrailing ? _trailingController : null,
             axisDirection: widget.axisDirection,
+            repaint: _leadingAndTrailingListener,
           ),
           child: new RepaintBoundary(
             child: widget.child,
@@ -438,8 +447,9 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
     this.leadingController,
     this.trailingController,
     this.axisDirection,
+    Listenable repaint,
   }) : super(
-    repaint: new Listenable.merge(<Listenable>[leadingController, trailingController])
+    repaint: repaint,
   );
 
   /// The controller for the overscroll glow on the side with negative scroll offsets.

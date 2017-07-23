@@ -32,7 +32,7 @@ class StopCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
-    final ApplicationPackage app = applicationPackages.getPackageForPlatform(targetPlatform);
+    final ApplicationPackage app = await applicationPackages.getPackageForPlatform(targetPlatform);
     if (app == null) {
       final String platformName = getNameForTargetPlatform(targetPlatform);
       throwToolExit('No Flutter application for $platformName found in the current directory.');

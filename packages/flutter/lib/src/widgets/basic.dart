@@ -12,7 +12,11 @@ import 'debug.dart';
 import 'framework.dart';
 
 export 'package:flutter/animation.dart';
-export 'package:flutter/foundation.dart' show TargetPlatform;
+export 'package:flutter/foundation.dart' show
+  ChangeNotifier,
+  Listenable,
+  TargetPlatform,
+  ValueNotifier;
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
   Axis,
@@ -26,6 +30,7 @@ export 'package:flutter/rendering.dart' show
   FlowPaintingContext,
   FractionalOffsetTween,
   HitTestBehavior,
+  LayerLink,
   MainAxisAlignment,
   MainAxisSize,
   MultiChildLayoutDelegate,
@@ -301,11 +306,13 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   final Size size;
 
   @override
-  RenderCustomPaint createRenderObject(BuildContext context) => new RenderCustomPaint(
-    painter: painter,
-    foregroundPainter: foregroundPainter,
-    preferredSize: size,
-  );
+  RenderCustomPaint createRenderObject(BuildContext context) {
+    return new RenderCustomPaint(
+      painter: painter,
+      foregroundPainter: foregroundPainter,
+      preferredSize: size,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderCustomPaint renderObject) {
@@ -330,7 +337,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 /// custom [clipper].
 ///
 /// [ClipRect] is commonly used with these widgets, which commonly paint outside
-/// their bounds.
+/// their bounds:
 ///
 ///  * [CustomPaint]
 ///  * [CustomSingleChildLayout]
@@ -342,15 +349,15 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///
 /// ## Sample code
 ///
-/// For example, use a clip to show the top half of an [Image], you can use a
-/// [ClipRect] combined with an [Align]:
+/// For example, by combining a [ClipRect] with an [Align], one can show just
+/// the top half of an [Image]:
 ///
 /// ```dart
 /// new ClipRect(
 ///   child: new Align(
 ///     alignment: FractionalOffset.topCenter,
 ///     heightFactor: 0.5,
-///     child: new Image(...),
+///     child: new Image.network(userAvatarUrl),
 ///   ),
 /// )
 /// ```
@@ -711,12 +718,14 @@ class Transform extends SingleChildRenderObjectWidget {
   final bool transformHitTests;
 
   @override
-  RenderTransform createRenderObject(BuildContext context) => new RenderTransform(
-    transform: transform,
-    origin: origin,
-    alignment: alignment,
-    transformHitTests: transformHitTests
-  );
+  RenderTransform createRenderObject(BuildContext context) {
+    return new RenderTransform(
+      transform: transform,
+      origin: origin,
+      alignment: alignment,
+      transformHitTests: transformHitTests
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderTransform renderObject) {
@@ -725,6 +734,140 @@ class Transform extends SingleChildRenderObjectWidget {
       ..origin = origin
       ..alignment = alignment
       ..transformHitTests = transformHitTests;
+  }
+}
+
+/// A widget that can be targetted by a [CompositedTransformFollower].
+///
+/// When this widget is composited during the compositing phase (which comes
+/// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
+/// updates the [link] object so that any [CompositedTransformFollower] widgets
+/// that are subsequently composited in the same frame and were given the same
+/// [LayerLink] can position themselves at the same screen location.
+///
+/// A single [CompositedTransformTarget] can be followed by multiple
+/// [CompositedTransformFollower] widgets.
+///
+/// The [CompositedTransformTarget] must come earlier in the paint order than
+/// any linked [CompositedTransformFollower]s.
+///
+/// See also:
+///
+///  * [CompositedTransformFollower], the widget that can target this one.
+///  * [LeaderLayer], the layer that implements this widget's logic.
+class CompositedTransformTarget extends SingleChildRenderObjectWidget {
+  /// Creates a composited transform target widget.
+  ///
+  /// The [link] property must not be null, and must not be currently being used
+  /// by any other [CompositedTransformTarget] object that is in the tree.
+  const CompositedTransformTarget({
+    Key key,
+    @required this.link,
+    Widget child,
+  }) : assert(link != null),
+       super(key: key, child: child);
+
+  /// The link object that connects this [CompositedTransformTarget] with one or
+  /// more [CompositedTransformFollower]s.
+  ///
+  /// This property must not be null. The object must not be associated with
+  /// another [CompositedTransformTarget] that is also being painted.
+  final LayerLink link;
+
+  @override
+  RenderLeaderLayer createRenderObject(BuildContext context) {
+    return new RenderLeaderLayer(
+      link: link,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderLeaderLayer renderObject) {
+    renderObject
+      ..link = link;
+  }
+}
+
+/// A widget that follows a [CompositedTransformTarget].
+///
+/// When this widget is composited during the compositing phase (which comes
+/// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
+/// applies a transformation that causes it to provide its child with a
+/// coordinate space that matches that of the linked [CompositedTransformTarget]
+/// widget, offset by [offset].
+///
+/// The [LayerLink] object used as the [link] must be the same object as that
+/// provided to the matching [CompositedTransformTarget].
+///
+/// The [CompositedTransformTarget] must come earlier in the paint order than
+/// this [CompositedTransformFollower].
+///
+/// Hit testing on descendants of this widget will only work if the target
+/// position is within the box that this widget's parent considers to be
+/// hitable. If the parent covers the screen, this is trivially achievable, so
+/// this widget is usually used as the root of an [OverlayEntry] in an app-wide
+/// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
+///
+/// See also:
+///
+///  * [CompositedTransformTarget], the widget that this widget can target.
+///  * [FollowerLayer], the layer that implements this widget's logic.
+///  * [Transform], which applies an arbitrary transform to a child.
+class CompositedTransformFollower extends SingleChildRenderObjectWidget {
+  /// Creates a composited transform target widget.
+  ///
+  /// The [link] property must not be null. If it was also provided to a
+  /// [CompositedTransformTarget], that widget must come earlier in the paint
+  /// order.
+  ///
+  /// The [showWhenUnlinked] and [offset] properties must also not be null.
+  const CompositedTransformFollower({
+    Key key,
+    @required this.link,
+    this.showWhenUnlinked: true,
+    this.offset: Offset.zero,
+    Widget child,
+  }) : assert(link != null),
+       assert(showWhenUnlinked != null),
+       assert(offset != null),
+       super(key: key, child: child);
+
+  /// The link object that connects this [CompositedTransformFollower] with a
+  /// [CompositedTransformTarget].
+  ///
+  /// This property must not be null.
+  final LayerLink link;
+
+  /// Whether to show the widget's contents when there is no corresponding
+  /// [CompositedTransformTarget] with the same [link].
+  ///
+  /// When the widget is linked, the child is positioned such that it has the
+  /// same global position as the linked [CompositedTransformTarget].
+  ///
+  /// When the widget is not linked, then: if [showWhenUnlinked] is true, the
+  /// child is visible and not repositioned; if it is false, then child is
+  /// hidden.
+  final bool showWhenUnlinked;
+
+  /// The offset to apply to the origin of the linked
+  /// [CompositedTransformTarget] to obtain this widget's origin.
+  final Offset offset;
+
+  @override
+  RenderFollowerLayer createRenderObject(BuildContext context) {
+    return new RenderFollowerLayer(
+      link: link,
+      showWhenUnlinked: showWhenUnlinked,
+      offset: offset,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderFollowerLayer renderObject) {
+    renderObject
+      ..link = link
+      ..showWhenUnlinked = showWhenUnlinked
+      ..offset = offset;
   }
 }
 
@@ -1058,8 +1201,9 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
 
 /// Meta data for identifying children in a [CustomMultiChildLayout].
 ///
-/// The [MultiChildLayoutDelegate] hasChild, layoutChild, and positionChild
-/// methods use these identifiers.
+/// The [MultiChildLayoutDelegate.hasChild],
+/// [MultiChildLayoutDelegate.layoutChild], and
+/// [MultiChildLayoutDelegate.positionChild] methods use these identifiers.
 class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   /// Marks a child with a layout identifier.
   ///
@@ -1207,9 +1351,11 @@ class SizedBox extends SingleChildRenderObjectWidget {
   final double height;
 
   @override
-  RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(
-    additionalConstraints: _additionalConstraints,
-  );
+  RenderConstrainedBox createRenderObject(BuildContext context) {
+    return new RenderConstrainedBox(
+      additionalConstraints: _additionalConstraints,
+    );
+  }
 
   BoxConstraints get _additionalConstraints {
     return new BoxConstraints.tightFor(width: width, height: height);
@@ -1353,11 +1499,13 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   final FractionalOffset alignment;
 
   @override
-  RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) => new RenderFractionallySizedOverflowBox(
-    alignment: alignment,
-    widthFactor: widthFactor,
-    heightFactor: heightFactor
-  );
+  RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) {
+    return new RenderFractionallySizedOverflowBox(
+      alignment: alignment,
+      widthFactor: widthFactor,
+      heightFactor: heightFactor
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFractionallySizedOverflowBox renderObject) {
@@ -1423,10 +1571,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   final double maxHeight;
 
   @override
-  RenderLimitedBox createRenderObject(BuildContext context) => new RenderLimitedBox(
-    maxWidth: maxWidth,
-    maxHeight: maxHeight
-  );
+  RenderLimitedBox createRenderObject(BuildContext context) {
+    return new RenderLimitedBox(
+      maxWidth: maxWidth,
+      maxHeight: maxHeight
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderLimitedBox renderObject) {
@@ -1489,13 +1639,15 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   final double maxHeight;
 
   @override
-  RenderConstrainedOverflowBox createRenderObject(BuildContext context) => new RenderConstrainedOverflowBox(
-    alignment: alignment,
-    minWidth: minWidth,
-    maxWidth: maxWidth,
-    minHeight: minHeight,
-    maxHeight: maxHeight
-  );
+  RenderConstrainedOverflowBox createRenderObject(BuildContext context) {
+    return new RenderConstrainedOverflowBox(
+      alignment: alignment,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderConstrainedOverflowBox renderObject) {
@@ -1693,7 +1845,10 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable width.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this widget can result in a layout that is O(N²) in the depth of
+/// the tree.
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
   ///
@@ -1724,7 +1879,10 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable height.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this widget can result in a layout that is O(N²) in the depth of
+/// the tree.
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
   ///
@@ -1914,12 +2072,13 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// placed relative to the stack according to their top, right, bottom, and left
 /// properties.
 ///
-/// The stack paints its children in order. If you want to change the order in
-/// which the children paint, you can rebuild the stack with the children in
-/// the new order. If you reorder the children in this way, consider giving the
-/// children non-null keys. These keys will cause the framework to move the
-/// underlying objects for the children to their new locations rather than
-/// recreate them at their new location.
+/// The stack paints its children in order with the first child being at the
+/// bottom. If you want to change the order in which the children paint, you
+/// can rebuild the stack with the children in the new order. If you reorder
+/// the children in this way, consider giving the children non-null keys.
+/// These keys will cause the framework to move the underlying objects for
+/// the children to their new locations rather than recreate them at their
+/// new location.
 ///
 /// For more details about the stack layout algorithm, see [RenderStack].
 ///
@@ -2235,6 +2394,7 @@ class Positioned extends ParentDataWidget<Stack> {
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Flex] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Flex] proceeds in six steps:
 ///
@@ -2458,6 +2618,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Row] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Row] proceeds in six steps:
 ///
@@ -2582,6 +2743,7 @@ class Row extends Flex {
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Column] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Column] proceeds in six steps:
 ///
@@ -2999,13 +3161,14 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Text displayed in a [RichText] widget must be explicitly styled. When
 /// picking which style to use, consider using [DefaultTextStyle.of] the current
-/// [BuildContext] to provide defaults.
+/// [BuildContext] to provide defaults. For more details on how to style text in
+/// a [RichText] widget, see the documentation for [TextStyle].
 ///
 /// When all the text uses the same style, consider using the [Text] widget,
 /// which is less verbose and integrates with [DefaultTextStyle] for default
 /// styling.
 ///
-/// Example:
+/// ## Sample code
 ///
 /// ```dart
 /// new RichText(
@@ -3022,13 +3185,18 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Text]
-///  * [TextSpan]
-///  * [DefaultTextStyle]
+///  * [TextStyle], which discusses how to style text.
+///  * [TextSpan], which is used to describe the text in a paragraph.
+///  * [Text], which automatically applies the ambient styles described by a
+///    [DefaultTextStyle] to a single string.
 class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [softWrap], and [overflow] arguments must not be null.
+  /// The [text], [softWrap], [overflow], nad [textScaleFactor] arguments must
+  /// not be null.
+  ///
+  /// The [maxLines] property may be null (and indeed defaults to null), but if
+  /// it is not null, it must be greater than zero.
   const RichText({
     Key key,
     @required this.text,
@@ -3041,6 +3209,7 @@ class RichText extends LeafRenderObjectWidget {
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
+       assert(maxLines == null || maxLines > 0),
        super(key: key);
 
   /// The text to display in this widget.
@@ -3066,6 +3235,9 @@ class RichText extends LeafRenderObjectWidget {
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
+  ///
+  /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
+  /// edge of the box.
   final int maxLines;
 
   @override
@@ -3176,18 +3348,20 @@ class RawImage extends LeafRenderObjectWidget {
   final Rect centerSlice;
 
   @override
-  RenderImage createRenderObject(BuildContext context) => new RenderImage(
-    image: image,
-    width: width,
-    height: height,
-    scale: scale,
-    color: color,
-    colorBlendMode: colorBlendMode,
-    fit: fit,
-    alignment: alignment,
-    repeat: repeat,
-    centerSlice: centerSlice
-  );
+  RenderImage createRenderObject(BuildContext context) {
+    return new RenderImage(
+      image: image,
+      width: width,
+      height: height,
+      scale: scale,
+      color: color,
+      colorBlendMode: colorBlendMode,
+      fit: fit,
+      alignment: alignment,
+      repeat: repeat,
+      centerSlice: centerSlice
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
@@ -3314,6 +3488,10 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// Rather than listening for raw pointer events, consider listening for
 /// higher-level gestures using [GestureDetector].
 ///
+/// ## Layout behavior
+///
+/// _See [BoxConstraints] for an introduction to box layout models._
+///
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 class Listener extends SingleChildRenderObjectWidget {
@@ -3347,13 +3525,15 @@ class Listener extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
-  RenderPointerListener createRenderObject(BuildContext context) => new RenderPointerListener(
-    onPointerDown: onPointerDown,
-    onPointerMove: onPointerMove,
-    onPointerUp: onPointerUp,
-    onPointerCancel: onPointerCancel,
-    behavior: behavior
-  );
+  RenderPointerListener createRenderObject(BuildContext context) {
+    return new RenderPointerListener(
+      onPointerDown: onPointerDown,
+      onPointerMove: onPointerMove,
+      onPointerUp: onPointerUp,
+      onPointerCancel: onPointerCancel,
+      behavior: behavior
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPointerListener renderObject) {
@@ -3475,10 +3655,12 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   final bool ignoringSemantics;
 
   @override
-  RenderIgnorePointer createRenderObject(BuildContext context) => new RenderIgnorePointer(
-    ignoring: ignoring,
-    ignoringSemantics: ignoringSemantics
-  );
+  RenderIgnorePointer createRenderObject(BuildContext context) {
+    return new RenderIgnorePointer(
+      ignoring: ignoring,
+      ignoringSemantics: ignoringSemantics
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
@@ -3559,10 +3741,12 @@ class MetaData extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
-  RenderMetaData createRenderObject(BuildContext context) => new RenderMetaData(
-    metaData: metaData,
-    behavior: behavior
-  );
+  RenderMetaData createRenderObject(BuildContext context) {
+    return new RenderMetaData(
+      metaData: metaData,
+      behavior: behavior
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderMetaData renderObject) {
@@ -3611,7 +3795,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     this.container: false,
     this.checked,
-    this.label
+    this.selected,
+    this.label,
   }) : assert(container != null),
        super(key: key, child: child);
 
@@ -3632,21 +3817,32 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// state is.
   final bool checked;
 
+  /// If non-null indicates that this subtree represents something that can be
+  /// in a selected or unselected state, and what its current state is.
+  ///
+  /// The active tab in a tab bar for example is considered "selected", whereas
+  /// all other tabs are unselected.
+  final bool selected;
+
   /// Provides a textual description of the widget.
   final String label;
 
   @override
-  RenderSemanticsAnnotations createRenderObject(BuildContext context) => new RenderSemanticsAnnotations(
-    container: container,
-    checked: checked,
-    label: label
-  );
+  RenderSemanticsAnnotations createRenderObject(BuildContext context) {
+    return new RenderSemanticsAnnotations(
+      container: container,
+      checked: checked,
+      selected: selected,
+      label: label,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
       ..checked = checked
+      ..selected = selected
       ..label = label;
   }
 
@@ -3656,6 +3852,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     description.add('container: $container');
     if (checked != null)
       description.add('checked: $checked');
+    if (selected != null)
+      description.add('selected: $selected');
     if (label != null)
       description.add('label: "$label"');
   }

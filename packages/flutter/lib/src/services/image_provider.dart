@@ -73,11 +73,11 @@ class ImageConfiguration {
   /// The size at which the image will be rendered.
   final Size size;
 
-  /// A string (same as [Platform.operatingSystem]) that represents the platform
-  /// for which assets should be used. This allows images to be specified in a
-  /// platform-neutral fashion yet use different assets on different platforms,
-  /// to match local conventions e.g. for color matching or shadows.
-  final String platform;
+  /// The [TargetPlatform] for which assets should be used. This allows images
+  /// to be specified in a platform-neutral fashion yet use different assets on
+  /// different platforms, to match local conventions e.g. for color matching or
+  /// shadows.
+  final TargetPlatform platform;
 
   /// An image configuration that provides no additional information.
   ///
@@ -131,7 +131,7 @@ class ImageConfiguration {
     if (platform != null) {
       if (hasArguments)
         result.write(', ');
-      result.write('platform: $platform');
+      result.write('platform: ${describeEnum(platform)}');
       hasArguments = true;
     }
     result.write(')');
@@ -161,7 +161,7 @@ class ImageConfiguration {
 ///
 /// The following shows the code required to write a widget that fully conforms
 /// to the [ImageProvider] and [Widget] protocols. (It is essentially a
-/// bare-bones version of the [Image] widget.)
+/// bare-bones version of the [widgets.Image] widget.)
 ///
 /// ```dart
 /// class MyImage extends StatefulWidget {
@@ -388,7 +388,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
-/// Cache headers from the server are ignored.
+/// The image will be cached regardless of cache headers from the server.
 // TODO(ianh): Find some way to honour cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.
@@ -528,6 +528,12 @@ class FileImage extends ImageProvider<FileImage> {
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the
 /// given scale.
+///
+/// The provided [bytes] buffer should not be changed after it is provided
+/// to a [MemoryImage]. To provide an [ImageStream] that represents an image
+/// that changes over time, consider creating a new subclass of [ImageProvider]
+/// whose [load] method returns a subclass of [ImageStreamCompleter] that can
+/// handle providing multiple images.
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
@@ -578,8 +584,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   int get hashCode => hashValues(bytes.hashCode, scale);
 
   @override
-  String toString() => '$runtimeType(${bytes.runtimeType}#${bytes.hashCode}, scale: $scale)';
+  String toString() => '$runtimeType(${describeIdentity(bytes)}, scale: $scale)';
 }
+
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
 ///
 /// This implementation requires an explicit final [name] and [scale] on

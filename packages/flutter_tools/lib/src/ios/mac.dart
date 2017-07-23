@@ -17,21 +17,25 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../plugins.dart';
 import '../services.dart';
+import 'cocoapods.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
-const int kXcodeRequiredVersionMajor = 7;
+const int kXcodeRequiredVersionMajor = 8;
 const int kXcodeRequiredVersionMinor = 0;
 
 // The Python `six` module is a dependency for Xcode builds, and installed by
 // default, but may not be present in custom Python installs; e.g., via
 // Homebrew.
 const PythonModule kPythonSix = const PythonModule('six');
+
+IMobileDevice get iMobileDevice => context.putIfAbsent(IMobileDevice, () => const IMobileDevice());
+
+Xcode get xcode => context.putIfAbsent(Xcode, () => new Xcode());
 
 class PythonModule {
   const PythonModule(this.name);
@@ -45,79 +49,162 @@ class PythonModule {
     'Install via \'pip install $name\' or \'sudo easy_install $name\'.';
 }
 
-class Xcode {
-  Xcode() {
-    _eulaSigned = false;
+class IMobileDevice {
+  const IMobileDevice();
 
-    try {
-      _xcodeSelectPath = runSync(<String>['xcode-select', '--print-path'])?.trim();
-      if (_xcodeSelectPath == null || _xcodeSelectPath.isEmpty) {
-        _isInstalled = false;
-        return;
-      }
-      _isInstalled = true;
+  bool get isInstalled => exitsHappy(<String>['idevice_id', '-h']);
 
-      _xcodeVersionText = runSync(<String>['xcodebuild', '-version']).replaceAll('\n', ', ');
+  /// Returns true if libimobiledevice is installed and working as expected.
+  ///
+  /// Older releases of libimobiledevice fail to work with iOS 10.3 and above.
+  Future<bool> get isWorking async {
+    if (!isInstalled)
+      return false;
 
-      if (!xcodeVersionRegex.hasMatch(_xcodeVersionText)) {
-        _isInstalled = false;
-      } else {
-        try {
-          printTrace('xcrun clang');
-          final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
+    // If no device is attached, we're unable to detect any problems. Assume all is well.
+    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+    if (result.exitCode != 0 || result.stdout.isEmpty)
+      return true;
 
-          if (result.stdout != null && result.stdout.contains('license'))
-            _eulaSigned = false;
-          else if (result.stderr != null && result.stderr.contains('license'))
-            _eulaSigned = false;
-          else
-            _eulaSigned = true;
-        } catch (error) {
-          _eulaSigned = false;
-        }
-      }
-    } catch (error) {
-      _isInstalled = false;
-    }
+    // Check that we can look up the names of any attached devices.
+    return await exitsHappyAsync(<String>['idevicename']);
   }
 
-  /// Returns [Xcode] active in the current app context.
-  static Xcode get instance => context.putIfAbsent(Xcode, () => new Xcode());
+  /// Starts `idevicesyslog` and returns the running process.
+  Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
 
+  /// Captures a screenshot to the specified outputfile.
+  Future<Null> takeScreenshot(File outputFile) {
+    return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
+  }
+}
+
+class Xcode {
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
   String _xcodeSelectPath;
-  String get xcodeSelectPath => _xcodeSelectPath;
+  String get xcodeSelectPath {
+    if (_xcodeSelectPath == null) {
+      try {
+        _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
+      } on ProcessException {
+        // Ignore: return null below.
+      }
+    }
+    return _xcodeSelectPath;
+  }
 
-  bool _isInstalled;
-  bool get isInstalled => _isInstalled;
+  bool get isInstalled {
+    if (xcodeSelectPath == null || xcodeSelectPath.isEmpty)
+      return false;
+    if (xcodeVersionText == null || !xcodeVersionRegex.hasMatch(xcodeVersionText))
+      return false;
+    return true;
+  }
 
   bool _eulaSigned;
   /// Has the EULA been signed?
-  bool get eulaSigned => _eulaSigned;
-
-  String _xcodeVersionText;
-  String get xcodeVersionText => _xcodeVersionText;
-
-  int _xcodeMajorVersion;
-  int get xcodeMajorVersion => _xcodeMajorVersion;
-
-  int _xcodeMinorVersion;
-  int get xcodeMinorVersion => _xcodeMinorVersion;
+  bool get eulaSigned {
+    if (_eulaSigned == null) {
+      try {
+        final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
+        if (result.stdout != null && result.stdout.contains('license'))
+          _eulaSigned = false;
+        else if (result.stderr != null && result.stderr.contains('license'))
+          _eulaSigned = false;
+        else
+          _eulaSigned = true;
+      } on ProcessException {
+        _eulaSigned = false;
+      }
+    }
+    return _eulaSigned;
+  }
 
   final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
+  void _updateXcodeVersion() {
+    try {
+      _xcodeVersionText = processManager.runSync(<String>['/usr/bin/xcodebuild', '-version']).stdout.trim().replaceAll('\n', ', ');
+      final Match match = xcodeVersionRegex.firstMatch(xcodeVersionText);
+      if (match == null)
+        return;
+
+      final String version = match.group(1);
+      final List<String> components = version.split('.');
+      _xcodeMajorVersion = int.parse(components[0]);
+      _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
+    } on ProcessException {
+      // Ignore: leave values null.
+    }
+  }
+
+  String _xcodeVersionText;
+  String get xcodeVersionText {
+    if (_xcodeVersionText == null)
+      _updateXcodeVersion();
+    return _xcodeVersionText;
+  }
+
+  int _xcodeMajorVersion;
+  int get xcodeMajorVersion {
+    if (_xcodeMajorVersion == null)
+      _updateXcodeVersion();
+    return _xcodeMajorVersion;
+  }
+
+  int _xcodeMinorVersion;
+  int get xcodeMinorVersion {
+    if (_xcodeMinorVersion == null)
+      _updateXcodeVersion();
+    return _xcodeMinorVersion;
+  }
 
   bool get xcodeVersionSatisfactory {
-    if (!xcodeVersionRegex.hasMatch(xcodeVersionText))
+    if (xcodeVersionText == null || !xcodeVersionRegex.hasMatch(xcodeVersionText))
       return false;
+    return _xcodeVersionCheckValid(xcodeMajorVersion, xcodeMinorVersion);
+  }
 
-    final String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
-    final List<String> components = version.split('.');
+  final RegExp _processRegExp = new RegExp(r'^(\S+)\s+1\s+(\d+)\s+(.+)$');
 
-    _xcodeMajorVersion = int.parse(components[0]);
-    _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
+  /// Kills any orphaned Instruments processes belonging to the user.
+  ///
+  /// In some cases, we've seen interactions between Instruments and the iOS
+  /// simulator that cause hung instruments and DTServiceHub processes. If
+  /// enough instances pile up, the host machine eventually becomes
+  /// unresponsive. Until the underlying issue is resolved, manually kill any
+  /// orphaned instances (where the parent process has died and PPID is 1)
+  /// before launching another instruments run.
+  Future<Null> _killOrphanedInstrumentsProcesses() async {
+    final ProcessResult result = await processManager.run(<String>['ps', '-e', '-o', 'user,ppid,pid,comm']);
+    if (result.exitCode != 0)
+      return;
+    for (String line in result.stdout.split('\n')) {
+      final Match match = _processRegExp.firstMatch(line.trim());
+      if (match == null || match[1] != platform.environment['USER'])
+        continue;
+      if (<String>['/instruments', '/DTServiceHub'].any(match[3].endsWith)) {
+        try {
+          printTrace('Killing orphaned Instruments process: ${match[2]}');
+          processManager.killPid(int.parse(match[2]));
+        } catch (_) {
+          printTrace('Failed to kill orphaned Instruments process:\n$line');
+        }
+      }
+    }
+  }
 
-    return _xcodeVersionCheckValid(_xcodeMajorVersion, _xcodeMinorVersion);
+  Future<String> getAvailableDevices() async {
+    await _killOrphanedInstrumentsProcesses();
+    try {
+      final ProcessResult result = await processManager.run(
+          <String>['/usr/bin/instruments', '-s', 'devices']);
+      if (result.exitCode != 0)
+        throw new ToolExit('/usr/bin/instruments returned an error:\n${result.stderr}');
+      return result.stdout;
+    } on ProcessException {
+      throw new ToolExit('Failed to invoke /usr/bin/instruments. Is Xcode installed?');
+    }
   }
 }
 
@@ -136,7 +223,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   BuildMode mode,
   String target: flx.defaultMainPath,
   bool buildForDevice,
-  bool codesign: true
+  bool codesign: true,
+  bool usesTerminalUi: true,
 }) async {
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
@@ -148,7 +236,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   String developmentTeam;
   if (codesign && buildForDevice)
-    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
+    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -157,7 +245,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   final bool hasFlutterPlugins = injectPlugins();
 
   if (hasFlutterPlugins)
-    await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
+    await cocoaPods.processPods(
+      appIosDir: appDirectory,
+      iosEngineDir: flutterFrameworkDir(mode),
+      isSwift: app.isSwift,
+    );
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -257,8 +349,9 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp 
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      // Make sure the user has specified at least the DEVELOPMENT_TEAM (for automatic Xcode 8)
-      // signing or the PROVISIONING_PROFILE (for manual signing or Xcode 7).
+      // Make sure the user has specified one of:
+      // DEVELOPMENT_TEAM (automatic signing)
+      // PROVISIONING_PROFILE (manual signing)
       !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
@@ -318,7 +411,7 @@ class XcodeBuildExecution {
 }
 
 final RegExp _xcodeVersionRegExp = new RegExp(r'Xcode (\d+)\..*');
-final String _xcodeRequirement = 'Xcode 7.0 or greater is required to develop for iOS.';
+final String _xcodeRequirement = 'Xcode $kXcodeRequiredVersionMajor.$kXcodeRequiredVersionMinor or greater is required to develop for iOS.';
 
 bool _checkXcodeVersion() {
   if (!platform.isMacOS)
@@ -326,7 +419,7 @@ bool _checkXcodeVersion() {
   try {
     final String version = runCheckedSync(<String>['xcodebuild', '-version']);
     final Match match = _xcodeVersionRegExp.firstMatch(version);
-    if (int.parse(match[1]) < 7) {
+    if (int.parse(match[1]) < kXcodeRequiredVersionMajor) {
       printError('Found "${match[0]}". $_xcodeRequirement');
       return false;
     }
@@ -335,59 +428,6 @@ bool _checkXcodeVersion() {
     return false;
   }
   return true;
-}
-
-final String noCocoaPodsConsequence = '''
-  CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
-  Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
-  For more info, see https://flutter.io/platform-plugins''';
-
-final String cocoaPodsInstallInstructions = '''
-  brew update
-  brew install cocoapods
-  pod setup''';
-
-final String cocoaPodsUpgradeInstructions = '''
-  brew update
-  brew upgrade cocoapods
-  pod setup''';
-
-Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
-  if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!await doctor.iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
-      final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
-      printError(
-        'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
-        '$noCocoaPodsConsequence\n'
-        'To install:\n'
-        '$cocoaPodsInstallInstructions\n',
-        emphasis: true,
-      );
-      return;
-    }
-    if (!await doctor.iosWorkflow.isCocoaPodsInitialized) {
-      printError(
-        'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
-        '$noCocoaPodsConsequence\n'
-        'To initialize CocoaPods, run:\n'
-        '  pod setup\n'
-        'once to finalize CocoaPods\' installation.',
-        emphasis: true,
-      );
-      return;
-    }
-    try {
-      final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
-      await runCheckedAsync(
-          <String>['pod', 'install'],
-          workingDirectory: bundle.path,
-          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-      );
-      status.stop();
-    } catch (e) {
-      throwToolExit('Error running pod install: $e');
-    }
-  }
 }
 
 Future<Null> _addServicesToBundle(Directory bundle) async {

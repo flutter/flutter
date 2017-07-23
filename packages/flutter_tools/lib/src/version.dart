@@ -149,6 +149,16 @@ class FlutterVersion {
     String commit = _shortGitRevision(_runSync(<String>['git', 'rev-parse', 'HEAD']));
     commit = commit.isEmpty ? 'unknown' : commit;
 
+    final String branch = getBranchName(whitelistBranchName: whitelistBranchName);
+
+    return '$branch/$commit';
+  }
+
+  /// Return the branch name.
+  ///
+  /// If whitelistBranchName is true and the branch is unknown,
+  /// the branch name will be returned as 'dev'.
+  static String getBranchName({ bool whitelistBranchName: false }) {
     String branch = _runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD']);
     branch = branch == 'HEAD' ? 'master' : branch;
 
@@ -158,7 +168,7 @@ class FlutterVersion {
         branch = 'dev';
     }
 
-    return '$branch/$commit';
+    return branch;
   }
 
   /// The amount of time we wait before pinging the server to check for the
@@ -209,10 +219,12 @@ class FlutterVersion {
 
     if (beenAWhileSinceWarningWasPrinted && installationSeemsOutdated && await newerFrameworkVersionAvailable()) {
       printStatus(versionOutOfDateMessage(frameworkAge), emphasis: true);
-      stamp.store(
-        newTimeWarningWasPrinted: _clock.now(),
-      );
-      await new Future<Null>.delayed(kPauseToLetUserReadTheMessage);
+      await Future.wait<Null>(<Future<Null>>[
+        stamp.store(
+          newTimeWarningWasPrinted: _clock.now(),
+        ),
+        new Future<Null>.delayed(kPauseToLetUserReadTheMessage),
+      ]);
     }
   }
 
@@ -254,7 +266,7 @@ class FlutterVersion {
     try {
       final String branch = _channel == 'alpha' ? 'alpha' : 'master';
       final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(branch));
-      versionCheckStamp.store(
+      await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
         newKnownRemoteVersion: remoteFrameworkCommitDate,
       );

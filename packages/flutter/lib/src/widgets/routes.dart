@@ -722,6 +722,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
+  ///
+  /// The color is ignored, and the barrier made invisible, when [offstage] is
+  /// true.
   Color get barrierColor;
 
   /// Whether the route should remain in memory when it is inactive. If this is
@@ -741,6 +744,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// non-interactive, but each widget has its final size and position. This
   /// mechanism lets the [HeroController] determine the final local of any hero
   /// widgets being animated as part of the transition.
+  ///
+  /// The modal barrier, if any, is not rendered if [offstage] is true (see
+  /// [barrierColor]).
   bool get offstage => _offstage;
   bool _offstage = false;
   set offstage(bool value) {
@@ -910,7 +916,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // one of the builders
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
-    if (barrierColor != null) {
+    if (barrierColor != null && !offstage) {
       assert(barrierColor != _kTransparent);
       final Animation<Color> color = new ColorTween(
         begin: _kTransparent,
@@ -966,4 +972,124 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
     assert(nextRoute is! PageRoute<dynamic>);
     super.didChangeNext(nextRoute);
   }
+}
+
+/// A [Navigator] observer that notifies [RouteAware]s of changes to the
+/// state of their [Route].
+///
+/// [RouteObserver] informs subscribers whenever a route of type `T` is pushed
+/// on top of their own route of type `T` or popped from it. This is for example
+/// useful to keep track of page transitions, e.i. a `RouteObserver<PageRoute>`
+/// will inform subscribed [RouteAware]s whenever the user navigates away from
+/// the current page route to another page route.
+///
+/// If you want to be informed about route changes of any type, you should
+/// instantiate a `RouteObserver<Route>`.
+///
+/// ## Sample code
+///
+/// To make a [StatefulWidget] aware of its current [Route] state, implement
+/// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
+///
+/// ```dart
+/// // Register the RouteObserver as a navigation observer.
+/// final RouteObserver<PageRoute> routeObserver = new RouteObserver<PageRoute>();
+/// void main() {
+///   runApp(new MaterialApp(
+///     home: new Container(),
+///     navigatorObservers: [routeObserver],
+///   ));
+/// }
+///
+/// class RouteAwareWidget extends StatefulWidget {
+///   State<RouteAwareWidget> createState() => new RouteAwareWidgetState();
+/// }
+///
+/// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
+/// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+///
+///   @override
+///   void didChangeDependencies() {
+///     super.didChangeDependencies();
+///     routeObserver.subscribe(this, ModalRoute.of(context));
+///   }
+///
+///   @override
+///   void dispose() {
+///     routeObserver.unsubscribe(this);
+///     super.dispose();
+///   }
+///
+///   @override
+///   void didPush() {
+///     // Route was pushed onto navigator and is now topmost route.
+///   }
+///
+///   @override
+///   void didPopNext() {
+///     // Covering route was popped off the navigator.
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) => new Container();
+///
+/// }
+///
+/// ```
+class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
+  final Map<T, RouteAware> _listeners = <T, RouteAware>{};
+
+  /// Subscribe [routeAware] to be informed about changes to [route].
+  ///
+  /// Going forward, [routeAware] will be informed about qualifying changes
+  /// to [route], e.g. when [route] is covered by another route or when [route]
+  /// is popped off the [Navigator] stack.
+  void subscribe(RouteAware routeAware, T route) {
+    assert(routeAware != null);
+    assert(route != null);
+    if (!_listeners.containsKey(route)) {
+      routeAware.didPush();
+      _listeners[route] = routeAware;
+    }
+  }
+
+  /// Unsubscribe [routeAware].
+  ///
+  /// [routeAware] is no longer informed about changes to its route.
+  void unsubscribe(RouteAware routeAware) {
+    assert(routeAware != null);
+    _listeners.remove(routeAware);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route is T && previousRoute is T) {
+      _listeners[previousRoute]?.didPopNext();
+      _listeners[route]?.didPop();
+    }
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route is T && previousRoute is T) {
+      _listeners[previousRoute]?.didPushNext();
+    }
+  }
+}
+
+/// A interface that is aware of its current Route.
+abstract class RouteAware {
+  /// Called when the top route has been popped off, and the current route
+  /// shows up.
+  void didPopNext() { }
+
+  /// Called when the current route has been pushed.
+  void didPush() { }
+
+  /// Called when the current route has been popped off.
+  void didPop() { }
+
+  /// Called when a new route has been pushed, and the current route is no
+  /// longer visible.
+  void didPushNext() { }
 }

@@ -174,10 +174,20 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
+  Future<Map<String, String>> get usageValues async {
+    final bool isEmulator = await devices[0].isLocalEmulator;
+    final String deviceType = devices.length == 1 
+            ? getNameForTargetPlatform(await devices[0].targetPlatform)
+            : 'multiple';
+
+    return <String, String>{ 'cd3': '$isEmulator', 'cd4': deviceType };
+  }
+
+  @override
   void printNoConnectedDevices() {
     super.printNoConnectedDevices();
     if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
-        Xcode.instance.isInstalledAndMeetsVersionCheck) {
+        xcode.isInstalledAndMeetsVersionCheck) {
       printStatus('');
       printStatus('To run on a simulator, launch it first: open -a Simulator.app');
       printStatus('');
@@ -264,7 +274,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit(null, exitCode: result);
       return new FlutterCommandResult(
         ExitStatus.success,
-        analyticsParameters: <String>['daemon'],
+        timingLabelParts: <String>['daemon'],
         endTimeOverride: appStartedTime,
       );
     }
@@ -317,8 +327,8 @@ class RunCommand extends RunCommandBase {
     }
 
     DateTime appStartedTime;
-    // Sync completer so the completing agent attaching to the resident doesn't 
-    // need to know about analytics. 
+    // Sync completer so the completing agent attaching to the resident doesn't
+    // need to know about analytics.
     //
     // Do not add more operations to the future.
     final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync();
@@ -335,10 +345,10 @@ class RunCommand extends RunCommandBase {
       throwToolExit(null, exitCode: result);
     return new FlutterCommandResult(
       ExitStatus.success,
-      analyticsParameters: <String>[
+      timingLabelParts: <String>[
         hotMode ? 'hot' : 'cold',
         getModeName(getBuildMode()),
-        devices.length == 1 
+        devices.length == 1
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple',
         devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null

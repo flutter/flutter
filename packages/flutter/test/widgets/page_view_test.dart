@@ -93,16 +93,18 @@ void main() {
     expect(leftOf(0), equals(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
+    // Going into overscroll.
     await tester.drag(find.byType(PageView), const Offset(100.0, 0.0));
     await tester.pump();
 
-    expect(leftOf(0), equals(100.0));
+    expect(leftOf(0), greaterThan(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
+    // Easing overscroll past overscroll limit.
     await tester.drag(find.byType(PageView), const Offset(-200.0, 0.0));
     await tester.pump();
 
-    expect(leftOf(0), equals(-100.0));
+    expect(leftOf(0), lessThan(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
   });
 
@@ -407,6 +409,7 @@ void main() {
       new PageStorage(
         bucket: bucket,
         child: new PageView(
+          key: const PageStorageKey<String>('PageView'),
           controller: controller,
           children: <Widget>[
             const Placeholder(),
@@ -431,6 +434,7 @@ void main() {
       new PageStorage(
         bucket: bucket,
         child: new PageView(
+          key: const PageStorageKey<String>('PageView'),
           controller: controller,
           children: <Widget>[
             const Placeholder(),
@@ -447,7 +451,7 @@ void main() {
       new PageStorage(
         bucket: bucket,
         child: new PageView(
-          key: const Key('Check it again against your list and see consistency!'),
+          key: const PageStorageKey<String>('Check it again against your list and see consistency!'),
           controller: controller2,
           children: <Widget>[
             const Placeholder(),

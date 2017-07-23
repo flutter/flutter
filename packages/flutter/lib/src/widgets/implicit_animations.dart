@@ -111,12 +111,21 @@ class Matrix4Tween extends Tween<Matrix4> {
   Matrix4 lerp(double t) {
     assert(begin != null);
     assert(end != null);
-    // TODO(abarth): We should use [Matrix4.decompose] and animate the
-    // decomposed parameters instead of just animating the translation.
-    final Vector3 beginT = begin.getTranslation();
-    final Vector3 endT = end.getTranslation();
-    final Vector3 lerpT = beginT*(1.0-t) + endT*t;
-    return new Matrix4.identity()..translate(lerpT);
+    final Vector3 beginTranslation = new Vector3.zero();
+    final Vector3 endTranslation = new Vector3.zero();
+    final Quaternion beginRotation = new Quaternion.identity();
+    final Quaternion endRotation = new Quaternion.identity();
+    final Vector3 beginScale = new Vector3.zero();
+    final Vector3 endScale = new Vector3.zero();
+    begin.decompose(beginTranslation, beginRotation, beginScale);
+    end.decompose(endTranslation, endRotation, endScale);
+    final Vector3 lerpTranslation =
+        beginTranslation * (1.0 - t) + endTranslation * t;
+    // TODO(alangardner): Implement slerp for constant rotation
+    final Quaternion lerpRotation =
+        (beginRotation.scaled(1.0 - t) + endRotation.scaled(t)).normalized();
+    final Vector3 lerpScale = beginScale * (1.0 - t) + endScale * t;
+    return new Matrix4.compose(lerpTranslation, lerpRotation, lerpScale);
   }
 }
 
@@ -601,7 +610,8 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 /// Animated version of [Opacity] which automatically transitions the child's
 /// opacity over a given duration whenever the given opacity changes.
 ///
-/// Animating an opacity is relatively expensive.
+/// Animating an opacity is relatively expensive because it requires painting
+/// the child into an intermediate buffer.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.
   ///
@@ -654,10 +664,10 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
   }
 }
 
-/// Animated version of [DefaultTextStyle] which automatically
-/// transitions the default text style (the text style to apply to
-/// descendant [Text] widgets without explicit style) over a given
-/// duration whenever the given style changes.
+/// Animated version of [DefaultTextStyle] which automatically transitions the
+/// default text style (the text style to apply to descendant [Text] widgets
+/// without explicit style) over a given duration whenever the given style
+/// changes.
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///
@@ -708,6 +718,15 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 }
 
 /// Animated version of [PhysicalModel].
+///
+/// The [borderRadius] and [elevation] are animated.
+///
+/// The [color] is animated if the [animateColor] property is set; otherwise,
+/// the color changes immediately at the start of the animation for the other
+/// two properties. This allows the color to be animated independently (e.g.
+/// because it is being driven by an [AnimatedTheme]).
+///
+/// The [shape] is not animated.
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///

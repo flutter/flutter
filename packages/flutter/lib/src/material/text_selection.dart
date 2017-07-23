@@ -2,42 +2,57 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'flat_button.dart';
 import 'material.dart';
 import 'theme.dart';
 
-const double _kHandleSize = 22.0; // pixels
-const double _kToolbarScreenPadding = 8.0; // pixels
+const double _kHandleSize = 22.0;
+// Minimal padding from all edges of the selection toolbar to all edges of the
+// viewport.
+const double _kToolbarScreenPadding = 8.0;
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
-  const _TextSelectionToolbar(this.delegate, {Key key}) : super(key: key);
+  const _TextSelectionToolbar({
+    Key key,
+    this.delegate,
+    this.handleCut,
+    this.handleCopy,
+    this.handlePaste,
+    this.handleSelectAll,
+  }) : super(key: key);
 
   final TextSelectionDelegate delegate;
   TextEditingValue get value => delegate.textEditingValue;
+
+  final VoidCallback handleCut;
+  final VoidCallback handleCopy;
+  final VoidCallback handlePaste;
+  final VoidCallback handleSelectAll;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
 
     if (!value.selection.isCollapsed) {
-      items.add(new FlatButton(child: const Text('CUT'), onPressed: _handleCut));
-      items.add(new FlatButton(child: const Text('COPY'), onPressed: _handleCopy));
+      items.add(new FlatButton(child: const Text('CUT'), onPressed: handleCut));
+      items.add(new FlatButton(child: const Text('COPY'), onPressed: handleCopy));
     }
     items.add(new FlatButton(
       child: const Text('PASTE'),
-      // TODO(mpcomplete): This should probably be grayed-out if there is nothing to paste.
-      onPressed: _handlePaste
+      // TODO(https://github.com/flutter/flutter/issues/11254):
+      // This should probably be grayed-out if there is nothing to paste.
+      onPressed: handlePaste,
     ));
     if (value.text.isNotEmpty) {
       if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: _handleSelectAll));
+        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: handleSelectAll));
     }
 
     return new Material(
@@ -48,50 +63,22 @@ class _TextSelectionToolbar extends StatelessWidget {
       )
     );
   }
-
-  void _handleCut() {
-    Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
-    delegate.textEditingValue = new TextEditingValue(
-      text: value.selection.textBefore(value.text) + value.selection.textAfter(value.text),
-      selection: new TextSelection.collapsed(offset: value.selection.start)
-    );
-    delegate.hideToolbar();
-  }
-
-  void _handleCopy() {
-    Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
-    delegate.textEditingValue = new TextEditingValue(
-      text: value.text,
-      selection: new TextSelection.collapsed(offset: value.selection.end)
-    );
-    delegate.hideToolbar();
-  }
-
-  Future<Null> _handlePaste() async {
-    final TextEditingValue value = this.value;  // Snapshot the input before using `await`.
-    final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null) {
-      delegate.textEditingValue = new TextEditingValue(
-        text: value.selection.textBefore(value.text) + data.text + value.selection.textAfter(value.text),
-        selection: new TextSelection.collapsed(offset: value.selection.start + data.text.length)
-      );
-    }
-    delegate.hideToolbar();
-  }
-
-  void _handleSelectAll() {
-    delegate.textEditingValue = new TextEditingValue(
-      text: value.text,
-      selection: new TextSelection(baseOffset: 0, extentOffset: value.text.length)
-    );
-  }
 }
 
 /// Centers the toolbar around the given position, ensuring that it remains on
 /// screen.
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
-  _TextSelectionToolbarLayout(this.position);
+  _TextSelectionToolbarLayout(this.screenSize, this.globalEditableRegion, this.position);
 
+  /// The size of the screen at the time that the toolbar was last laid out.
+  final Size screenSize;
+
+  /// Size and position of the editing region at the time the toolbar was last
+  /// laid out, in global coordinates.
+  final Rect globalEditableRegion;
+
+  /// Anchor position of the toolbar, relative to the top left of the
+  /// [globalEditableRegion].
   final Offset position;
 
   @override
@@ -101,17 +88,20 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double x = position.dx - childSize.width / 2.0;
-    double y = position.dy - childSize.height;
+    final Offset globalPosition = globalEditableRegion.topLeft + position;
+
+    double x = globalPosition.dx - childSize.width / 2.0;
+    double y = globalPosition.dy - childSize.height;
 
     if (x < _kToolbarScreenPadding)
       x = _kToolbarScreenPadding;
-    else if (x + childSize.width > size.width - 2 * _kToolbarScreenPadding)
-      x = size.width - childSize.width - _kToolbarScreenPadding;
+    else if (x + childSize.width > screenSize.width - _kToolbarScreenPadding)
+      x = screenSize.width - childSize.width - _kToolbarScreenPadding;
+
     if (y < _kToolbarScreenPadding)
       y = _kToolbarScreenPadding;
-    else if (y + childSize.height > size.height - 2 * _kToolbarScreenPadding)
-      y = size.height - childSize.height - _kToolbarScreenPadding;
+    else if (y + childSize.height > screenSize.height - _kToolbarScreenPadding)
+      y = screenSize.height - childSize.height - _kToolbarScreenPadding;
 
     return new Offset(x, y);
   }
@@ -149,22 +139,30 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
-  Widget buildToolbar(
-      BuildContext context, Offset position, TextSelectionDelegate delegate) {
+  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
     assert(debugCheckHasMediaQuery(context));
-    final Size screenSize = MediaQuery.of(context).size;
     return new ConstrainedBox(
-      constraints: new BoxConstraints.loose(screenSize),
+      constraints: new BoxConstraints.tight(globalEditableRegion.size),
       child: new CustomSingleChildLayout(
-        delegate: new _TextSelectionToolbarLayout(position),
-        child: new _TextSelectionToolbar(delegate)
+        delegate: new _TextSelectionToolbarLayout(
+          MediaQuery.of(context).size,
+          globalEditableRegion,
+          position,
+        ),
+        child: new _TextSelectionToolbar(
+          delegate: delegate,
+          handleCut: () => handleCut(delegate),
+          handleCopy: () => handleCopy(delegate),
+          handlePaste: () => handlePaste(delegate),
+          handleSelectAll: () => handleSelectAll(delegate),
+        ),
       )
     );
   }
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
     final Widget handle = new SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
