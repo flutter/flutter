@@ -9,7 +9,7 @@
 
 namespace flow {
 
-PhysicalModelLayer::PhysicalModelLayer() : rrect_(SkRRect::MakeEmpty()) {}
+PhysicalModelLayer::PhysicalModelLayer() = default;
 
 PhysicalModelLayer::~PhysicalModelLayer() = default;
 
@@ -70,7 +70,7 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
 
   if (elevation_ != 0) {
     DrawShadow(&context.canvas, path, SK_ColorBLACK, elevation_,
-               SkColorGetA(color_) != 0xff);
+               SkColorGetA(color_) != 0xff, device_pixel_ratio_);
   }
 
   SkPaint paint;
@@ -93,16 +93,17 @@ void PhysicalModelLayer::DrawShadow(SkCanvas* canvas,
                                     const SkPath& path,
                                     SkColor color,
                                     float elevation,
-                                    bool transparentOccluder) {
+                                    bool transparentOccluder,
+                                    SkScalar dpr) {
   SkShadowFlags flags = transparentOccluder
                             ? SkShadowFlags::kTransparentOccluder_ShadowFlag
                             : SkShadowFlags::kNone_ShadowFlag;
   const SkRect& bounds = path.getBounds();
   SkScalar shadow_x = (bounds.left() + bounds.right()) / 2;
   SkScalar shadow_y = bounds.top() - 600.0f;
-  SkShadowUtils::DrawShadow(canvas, path, elevation,
-                            SkPoint3::Make(shadow_x, shadow_y, 600.0f), 800.0f,
-                            0.039f, 0.25f, color, flags);
+  SkShadowUtils::DrawShadow(canvas, path, dpr * elevation,
+                            SkPoint3::Make(shadow_x, shadow_y, dpr * 600.0f),
+                            dpr * 800.0f, 0.039f, 0.25f, color, flags);
 }
 
 }  // namespace flow

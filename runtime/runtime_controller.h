@@ -62,7 +62,6 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
   RuntimeDelegate* client_;
-  ViewportMetrics viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
   bool semantics_enabled_ = false;

@@ -129,6 +129,8 @@ void Window::DidCreateIsolate() {
 }
 
 void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
+  viewport_metrics_ = metrics;
+
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;

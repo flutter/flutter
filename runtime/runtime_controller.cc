@@ -45,7 +45,6 @@ void RuntimeController::CreateDartController(
 
   Window* window = GetWindow();
 
-  window->UpdateWindowMetrics(viewport_metrics_);
   window->UpdateLocale(language_code_, country_code_);
 
   if (semantics_enabled_)
@@ -53,8 +52,7 @@ void RuntimeController::CreateDartController(
 }
 
 void RuntimeController::SetViewportMetrics(const ViewportMetrics& metrics) {
-  viewport_metrics_ = metrics;
-  GetWindow()->UpdateWindowMetrics(viewport_metrics_);
+  GetWindow()->UpdateWindowMetrics(metrics);
 }
 
 void RuntimeController::SetLocale(const std::string& language_code,

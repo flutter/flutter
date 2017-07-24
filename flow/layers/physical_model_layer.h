@@ -17,12 +17,14 @@ class PhysicalModelLayer : public ContainerLayer {
   void set_rrect(const SkRRect& rrect) { rrect_ = rrect; }
   void set_elevation(float elevation) { elevation_ = elevation; }
   void set_color(SkColor color) { color_ = color; }
+  void set_device_pixel_ratio(SkScalar dpr) { device_pixel_ratio_ = dpr; }
 
   static void DrawShadow(SkCanvas* canvas,
                          const SkPath& path,
                          SkColor color,
                          float elevation,
-                         bool transparentOccluder);
+                         bool transparentOccluder,
+                         SkScalar dpr);
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) override;
@@ -35,6 +37,7 @@ class PhysicalModelLayer : public ContainerLayer {
   SkRRect rrect_;
   float elevation_;
   SkColor color_;
+  SkScalar device_pixel_ratio_;
 
 #if defined(OS_FUCHSIA)
   SkScalar scale_x_;
