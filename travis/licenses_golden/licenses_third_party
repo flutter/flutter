@@ -1,4 +1,4 @@
-Signature: a473c29dabda7f9b405168e352668491
+Signature: d07ddbe451cf7cb7a46904d92963fecc
 
 UNUSED LICENSES:
 
@@ -23369,8 +23369,6 @@ FILE: ../../../third_party/skia/bench/MeasureBench.cpp
 FILE: ../../../third_party/skia/bench/PDFBench.cpp
 FILE: ../../../third_party/skia/bench/QuickRejectBench.cpp
 FILE: ../../../third_party/skia/bench/ShapesBench.cpp
-FILE: ../../../third_party/skia/bench/SkBlend_optsBench.cpp
-FILE: ../../../third_party/skia/bench/SkLinearBitmapPipelineBench.cpp
 FILE: ../../../third_party/skia/bench/SkRasterPipelineBench.cpp
 FILE: ../../../third_party/skia/bench/StreamBench.cpp
 FILE: ../../../third_party/skia/bench/SwizzleBench.cpp
@@ -23562,12 +23560,6 @@ FILE: ../../../third_party/skia/src/core/SkImageFilterCache.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterCache.h
 FILE: ../../../third_party/skia/src/core/SkLRUCache.h
 FILE: ../../../third_party/skia/src/core/SkLights.cpp
-FILE: ../../../third_party/skia/src/core/SkLinearBitmapPipeline.cpp
-FILE: ../../../third_party/skia/src/core/SkLinearBitmapPipeline.h
-FILE: ../../../third_party/skia/src/core/SkLinearBitmapPipeline_core.h
-FILE: ../../../third_party/skia/src/core/SkLinearBitmapPipeline_matrix.h
-FILE: ../../../third_party/skia/src/core/SkLinearBitmapPipeline_sample.h
-FILE: ../../../third_party/skia/src/core/SkLinearBitmapPipeline_tile.h
 FILE: ../../../third_party/skia/src/core/SkLiteDL.cpp
 FILE: ../../../third_party/skia/src/core/SkLiteDL.h
 FILE: ../../../third_party/skia/src/core/SkLiteRecorder.cpp
@@ -23681,8 +23673,6 @@ FILE: ../../../third_party/skia/src/gpu/instanced/InstanceProcessor.h
 FILE: ../../../third_party/skia/src/gpu/instanced/InstancedRendering.cpp
 FILE: ../../../third_party/skia/src/gpu/instanced/InstancedRendering.h
 FILE: ../../../third_party/skia/src/gpu/instanced/InstancedRenderingTypes.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrAnalyticRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrAnalyticRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrMSAAPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrPathStencilSettings.h
@@ -23727,12 +23717,9 @@ FILE: ../../../third_party/skia/src/gpu/vk/GrVkUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkVaryingHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkVaryingHandler.h
 FILE: ../../../third_party/skia/src/images/SkImageEncoderPriv.h
-FILE: ../../../third_party/skia/src/opts/SkBitmapFilter_opts.h
-FILE: ../../../third_party/skia/src/opts/SkBlend_opts.h
 FILE: ../../../third_party/skia/src/opts/SkChecksum_opts.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_avx.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_crc32.cpp
-FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
 FILE: ../../../third_party/skia/src/opts/SkOpts_sse42.cpp
 FILE: ../../../third_party/skia/src/opts/SkSwizzler_opts.h
 FILE: ../../../third_party/skia/src/pdf/SkBitmapKey.h
@@ -24555,86 +24542,6 @@ Exhibit B - “Incompatible With Secondary Licenses” Notice
 
 ====================================================================================================
 LIBRARY: skia
-LIBRARY: zlib
-ORIGIN: ../../../third_party/skia/src/core/SkConvolver.cpp + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/src/core/SkConvolver.cpp
-FILE: ../../../third_party/zlib/google/zip.h
-FILE: ../../../third_party/zlib/google/zip_internal.cc
-FILE: ../../../third_party/zlib/google/zip_internal.h
-FILE: ../../../third_party/zlib/google/zip_reader.h
-FILE: ../../../third_party/zlib/google/zip_reader_unittest.cc
-FILE: ../../../third_party/zlib/google/zip_unittest.cc
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2011 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
-LIBRARY: zlib
-ORIGIN: ../../../third_party/skia/src/core/SkConvolver.h + ../../../LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/src/core/SkConvolver.h
-FILE: ../../../third_party/zlib/google/zip.cc
-FILE: ../../../third_party/zlib/google/zip_reader.cc
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2012 The Chromium Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
 ORIGIN: ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/CQ_COMMITTERS
@@ -24747,6 +24654,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_intel_driver_debug/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_intel_driver_release/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_sdk/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/protoc/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skimage/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skp/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/svg/VERSION
@@ -24785,6 +24693,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/core/examples/full.exp
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/ct/examples/full.expected/failed_gsutil.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/ct/examples/full.expected/test.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/env/examples/full.expected/test.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-Clang-arm-Release-Android_API26.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Mac-Clang-arm64-Debug-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Mac-Clang-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Ubuntu-Clang-x86_64-Release-Mini.json
@@ -24945,6 +24854,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-GalaxyS6-GPU-MaliT760-arm64-Debug-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-GalaxyS7_G930A-GPU-Adreno530-arm64-Debug-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NVIDIA_Shield-GPU-TegraX1-arm64-Debug-Android.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NVIDIA_Shield-GPU-TegraX1-arm64-Debug-Android_CCPR.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus10-GPU-MaliT604-arm-Release-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5-GPU-Adreno330-arm-Release-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus6p-GPU-Adreno430-arm64-Debug-Android_Vulkan.json
@@ -24952,6 +24862,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NexusPlayer-CPU-SSE4-x86-Release-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NexusPlayer-GPU-PowerVR-x86-Release-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-PixelC-CPU-TegraX1-arm64-Debug-Android.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-PixelXL-GPU-Adreno530-arm64-Debug-Android_CCPR.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-PixelXL-GPU-Adreno530-arm64-Debug-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-ChromeOS-Clang-Chromebook_C100p-GPU-MaliT764-arm-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini6.2-CPU-AVX-x86_64-Debug.json
@@ -25024,6 +24935,8 @@ FILE: ../../../third_party/skia/site/dev/design/PdfLogicalDocumentStructure.png
 FILE: ../../../third_party/skia/site/dev/tools/debugger.png
 FILE: ../../../third_party/skia/site/dev/tools/image.png
 FILE: ../../../third_party/skia/site/dev/tools/onlinedebugger.png
+FILE: ../../../third_party/skia/site/dev/tools/tracing.png
+FILE: ../../../third_party/skia/site/dev/tools/tracing_load.png
 FILE: ../../../third_party/skia/site/favicon.ico
 FILE: ../../../third_party/skia/site/user/METADATA
 FILE: ../../../third_party/skia/site/user/api/METADATA
@@ -25566,7 +25479,6 @@ FILE: ../../../third_party/skia/include/core/SkPictureRecorder.h
 FILE: ../../../third_party/skia/include/core/SkPixelSerializer.h
 FILE: ../../../third_party/skia/include/core/SkSurfaceProps.h
 FILE: ../../../third_party/skia/include/core/SkTextBlob.h
-FILE: ../../../third_party/skia/include/effects/SkArcToPathEffect.h
 FILE: ../../../third_party/skia/include/gpu/GrGpuResource.h
 FILE: ../../../third_party/skia/include/gpu/GrResourceKey.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleInterface.h
@@ -25616,7 +25528,6 @@ FILE: ../../../third_party/skia/src/core/SkTextBlob.cpp
 FILE: ../../../third_party/skia/src/core/SkTextMapStateProc.h
 FILE: ../../../third_party/skia/src/core/SkVertState.cpp
 FILE: ../../../third_party/skia/src/core/SkVertState.h
-FILE: ../../../third_party/skia/src/effects/SkArcToPathEffect.cpp
 FILE: ../../../third_party/skia/src/fonts/SkFontMgr_indirect.cpp
 FILE: ../../../third_party/skia/src/fonts/SkRemotableFontMgr.cpp
 FILE: ../../../third_party/skia/src/fonts/SkTestScalerContext.cpp
@@ -25822,7 +25733,6 @@ FILE: ../../../third_party/skia/gm/strokerect.cpp
 FILE: ../../../third_party/skia/gm/typeface.cpp
 FILE: ../../../third_party/skia/gm/verylargebitmap.cpp
 FILE: ../../../third_party/skia/include/core/SkAnnotation.h
-FILE: ../../../third_party/skia/include/core/SkColorTable.h
 FILE: ../../../third_party/skia/include/core/SkImage.h
 FILE: ../../../third_party/skia/include/core/SkRRect.h
 FILE: ../../../third_party/skia/include/core/SkStrokeRec.h
@@ -25841,6 +25751,7 @@ FILE: ../../../third_party/skia/samplecode/SampleFatBits.cpp
 FILE: ../../../third_party/skia/samplecode/SampleQuadStroker.cpp
 FILE: ../../../third_party/skia/src/core/SkAnnotation.cpp
 FILE: ../../../third_party/skia/src/core/SkBBoxHierarchy.h
+FILE: ../../../third_party/skia/src/core/SkColorTable.h
 FILE: ../../../third_party/skia/src/core/SkDeviceProfile.cpp
 FILE: ../../../third_party/skia/src/core/SkDeviceProfile.h
 FILE: ../../../third_party/skia/src/core/SkFontDescriptor.cpp
@@ -26219,7 +26130,6 @@ FILE: ../../../third_party/skia/src/core/SkBitmapController.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapController.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProvider.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapProvider.h
-FILE: ../../../third_party/skia/src/core/SkBitmapScaler.cpp
 FILE: ../../../third_party/skia/src/core/SkFindAndPlaceGlyph.h
 FILE: ../../../third_party/skia/src/core/SkFontMgr.cpp
 FILE: ../../../third_party/skia/src/core/SkFontStyle.cpp
@@ -26280,7 +26190,6 @@ FILE: ../../../third_party/skia/src/gpu/GrOpFlushState.cpp
 FILE: ../../../third_party/skia/src/gpu/GrOpFlushState.h
 FILE: ../../../third_party/skia/src/gpu/GrPipeline.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPipeline.h
-FILE: ../../../third_party/skia/src/gpu/GrPipelineBuilder.h
 FILE: ../../../third_party/skia/src/gpu/GrProcessorUnitTest.cpp
 FILE: ../../../third_party/skia/src/gpu/GrQuad.h
 FILE: ../../../third_party/skia/src/gpu/GrRenderTargetContext.cpp
@@ -26335,7 +26244,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrDashLinePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDiscardOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawAtlasOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawPathOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawPathOp.h
@@ -26485,9 +26393,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/bench/BitmapScaleBench.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/bench/BlendmodeBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/bench/BitmapScaleBench.cpp
 FILE: ../../../third_party/skia/bench/BlendmodeBench.cpp
 FILE: ../../../third_party/skia/bench/BlurImageFilterBench.cpp
 FILE: ../../../third_party/skia/bench/BlurRectBench.cpp
@@ -26600,10 +26507,10 @@ FILE: ../../../third_party/skia/include/effects/SkPerlinNoiseShader.h
 FILE: ../../../third_party/skia/include/effects/SkTileImageFilter.h
 FILE: ../../../third_party/skia/include/gpu/GrBlend.h
 FILE: ../../../third_party/skia/include/gpu/GrCaps.h
-FILE: ../../../third_party/skia/include/gpu/GrTypesPriv.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLExtensions.h
 FILE: ../../../third_party/skia/include/ports/SkFontConfigInterface.h
 FILE: ../../../third_party/skia/include/ports/SkFontMgr.h
+FILE: ../../../third_party/skia/include/private/GrTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkMessageBus.h
 FILE: ../../../third_party/skia/include/private/SkOnce.h
 FILE: ../../../third_party/skia/include/private/SkTFitsIn.h
@@ -26622,9 +26529,7 @@ FILE: ../../../third_party/skia/samplecode/SampleStringArt.cpp
 FILE: ../../../third_party/skia/samplecode/SampleUnpremul.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.h
-FILE: ../../../third_party/skia/src/core/SkBitmapFilter.h
 FILE: ../../../third_party/skia/src/core/SkBitmapProcState_matrix_template.h
-FILE: ../../../third_party/skia/src/core/SkBitmapScaler.h
 FILE: ../../../third_party/skia/src/core/SkDataTable.cpp
 FILE: ../../../third_party/skia/src/core/SkDeviceLooper.cpp
 FILE: ../../../third_party/skia/src/core/SkDeviceLooper.h
@@ -26751,6 +26656,7 @@ FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
 FILE: ../../../third_party/skia/bench/PathTextBench.cpp
 FILE: ../../../third_party/skia/bench/ShadowBench.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzCanvas.cpp
+FILE: ../../../third_party/skia/gm/alpha_image.cpp
 FILE: ../../../third_party/skia/gm/bitmaptiled.cpp
 FILE: ../../../third_party/skia/gm/blurignorexform.cpp
 FILE: ../../../third_party/skia/gm/blurimagevmask.cpp
@@ -26839,6 +26745,8 @@ FILE: ../../../third_party/skia/src/gpu/GrOnFlushResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrOnFlushResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrProcessorSet.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorSet.h
+FILE: ../../../third_party/skia/src/gpu/GrResourceAllocator.cpp
+FILE: ../../../third_party/skia/src/gpu/GrResourceAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrSemaphore.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxyPriv.h
 FILE: ../../../third_party/skia/src/gpu/SkGr.h
@@ -28611,6 +28519,82 @@ freely, subject to the following restrictions:
 2. Altered source versions must be plainly marked as such, and must not be
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: zlib
+ORIGIN: ../../../third_party/zlib/google/zip.cc + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/zlib/google/zip.cc
+FILE: ../../../third_party/zlib/google/zip_reader.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2012 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: zlib
+ORIGIN: ../../../third_party/zlib/google/zip.h + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/zlib/google/zip.h
+FILE: ../../../third_party/zlib/google/zip_internal.cc
+FILE: ../../../third_party/zlib/google/zip_internal.h
+FILE: ../../../third_party/zlib/google/zip_reader.h
+FILE: ../../../third_party/zlib/google/zip_reader_unittest.cc
+FILE: ../../../third_party/zlib/google/zip_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2011 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
