@@ -28,12 +28,12 @@ import 'package:flutter/widgets.dart';
 ///
 /// Example:
 ///
-/// '''dart
+/// ```dart
 /// return new FadeInImage(
 ///   placeholder: new Image.memory(bytes),
 ///   image: new Image.network('https://yourbackend.com/image.png'),
 /// );
-/// '''
+/// ```
 ///
 /// Prefer [placeholder] that's already cached so that it can be displayed in
 /// the frame in which the [FadeInImage] is built.
