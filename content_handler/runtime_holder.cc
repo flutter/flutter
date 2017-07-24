@@ -233,15 +233,17 @@ void RuntimeHolder::CreateView(
     isolate_snapshot_instr = reinterpret_cast<const uint8_t*>(
         dlsym(dylib_handle_, "_kDartIsolateSnapshotInstructions"));
   }
+  std::vector<uint8_t> empty_platform_kernel;
   runtime_->CreateDartController(script_uri, isolate_snapshot_data,
-                                 isolate_snapshot_instr);
+                                 isolate_snapshot_instr,
+                                 std::move(empty_platform_kernel));
 
   runtime_->SetViewportMetrics(viewport_metrics_);
 
   if (Dart_IsPrecompiledRuntime()) {
     runtime_->dart_controller()->RunFromPrecompiledSnapshot();
   } else if (!kernel.empty()) {
-    runtime_->dart_controller()->RunFromKernel(kernel.data(), kernel.size());
+    runtime_->dart_controller()->RunFromKernel(std::move(kernel));
   } else {
     runtime_->dart_controller()->RunFromScriptSnapshot(snapshot.data(),
                                                        snapshot.size());
