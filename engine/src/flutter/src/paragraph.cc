@@ -758,8 +758,8 @@ std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
     word_bounds.fX = fmax(start, word_bounds.fX);
     word_bounds.fY = fmin(end, word_bounds.fY);
     start = fmax(word_bounds.fY, start + 1);
-    SkRect left_limits = GetCoordinatesForGlyphPosition(word_bounds.fX + 1);
-    SkRect right_limits = GetCoordinatesForGlyphPosition(word_bounds.fY);
+    SkRect left_limits = GetCoordinatesForGlyphPosition(word_bounds.fX);
+    SkRect right_limits = GetCoordinatesForGlyphPosition(word_bounds.fY - 1);
     if (left_limits.top() < right_limits.top()) {
       rects.push_back(SkRect::MakeLTRB(
           0, right_limits.top(), right_limits.right(), right_limits.bottom()));
@@ -774,6 +774,7 @@ std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
 
 SkRect Paragraph::GetCoordinatesForGlyphPosition(size_t pos) const {
   size_t remainder = fmin(pos, text_.size());
+  remainder++;
   size_t line = 1;
   for (line = 1; line < line_heights_.size() - 1; ++line) {
     if (remainder > glyph_position_x_[line].size() - 3) {

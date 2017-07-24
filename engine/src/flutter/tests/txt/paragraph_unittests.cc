@@ -1093,26 +1093,72 @@ TEST_F(RenderTest, GetWordBoundaryParagraph) {
 
   paragraph->Paint(GetCanvas(), 0, 0);
 
-  ASSERT_TRUE(Snapshot());
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+  paint.setColor(SK_ColorRED);
+
+  SkRect rect = paragraph->GetCoordinatesForGlyphPosition(0);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(0), SkIPoint::Make(0, 5));
   EXPECT_EQ(paragraph->GetWordBoundary(1), SkIPoint::Make(0, 5));
   EXPECT_EQ(paragraph->GetWordBoundary(2), SkIPoint::Make(0, 5));
   EXPECT_EQ(paragraph->GetWordBoundary(3), SkIPoint::Make(0, 5));
   EXPECT_EQ(paragraph->GetWordBoundary(4), SkIPoint::Make(0, 5));
+  rect = paragraph->GetCoordinatesForGlyphPosition(5);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(5), SkIPoint::Make(5, 6));
+  rect = paragraph->GetCoordinatesForGlyphPosition(6);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
   EXPECT_EQ(paragraph->GetWordBoundary(6), SkIPoint::Make(6, 7));
+  rect = paragraph->GetCoordinatesForGlyphPosition(7);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(7), SkIPoint::Make(7, 12));
   EXPECT_EQ(paragraph->GetWordBoundary(8), SkIPoint::Make(7, 12));
   EXPECT_EQ(paragraph->GetWordBoundary(9), SkIPoint::Make(7, 12));
   EXPECT_EQ(paragraph->GetWordBoundary(10), SkIPoint::Make(7, 12));
   EXPECT_EQ(paragraph->GetWordBoundary(11), SkIPoint::Make(7, 12));
+  rect = paragraph->GetCoordinatesForGlyphPosition(12);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(12), SkIPoint::Make(12, 13));
+  rect = paragraph->GetCoordinatesForGlyphPosition(13);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(13), SkIPoint::Make(13, 18));
+  rect = paragraph->GetCoordinatesForGlyphPosition(18);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
+  rect = paragraph->GetCoordinatesForGlyphPosition(19);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
+  rect = paragraph->GetCoordinatesForGlyphPosition(24);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
+  rect = paragraph->GetCoordinatesForGlyphPosition(25);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
+  rect = paragraph->GetCoordinatesForGlyphPosition(30);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
+  EXPECT_EQ(paragraph->GetWordBoundary(30), SkIPoint::Make(30, 31));
+  rect = paragraph->GetCoordinatesForGlyphPosition(31);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
+  rect = paragraph->GetCoordinatesForGlyphPosition(icu_text.length() - 5);
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
+  EXPECT_EQ(paragraph->GetWordBoundary(icu_text.length() - 1), SkIPoint::Make(icu_text.length() - 5, icu_text.length()));
+  rect = paragraph->GetCoordinatesForGlyphPosition(icu_text.length());
+  GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
+
+  ASSERT_TRUE(Snapshot());
 }
 
 TEST_F(RenderTest, SpacingParagraph) {
