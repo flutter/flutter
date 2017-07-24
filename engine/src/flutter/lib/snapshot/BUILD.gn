@@ -365,6 +365,11 @@ generate_vm_patched_sdk("flutter_patched_sdk") {
       "//dart/runtime/lib",
     ],
     [
+      "mirrors",
+      processed_gypis.mirrors_runtime_sources,
+      "//dart/runtime/lib",
+    ],
+    [
       "typed_data",
       processed_gypis.typed_data_runtime_sources,
       "//dart/runtime/lib",

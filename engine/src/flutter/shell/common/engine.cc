@@ -181,13 +181,16 @@ void Engine::Init() {
 void Engine::RunBundle(const std::string& bundle_path) {
   TRACE_EVENT0("flutter", "Engine::RunBundle");
   ConfigureAssetBundle(bundle_path);
-  ConfigureRuntime(GetScriptUriFromPath(bundle_path));
+  std::vector<uint8_t> platform_kernel;
+  GetAssetAsBuffer(blink::kPlatformKernelAssetKey, &platform_kernel);
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel);
+
   if (blink::IsRunningPrecompiledCode()) {
     runtime_->dart_controller()->RunFromPrecompiledSnapshot();
   } else {
     std::vector<uint8_t> kernel;
     if (GetAssetAsBuffer(blink::kKernelAssetKey, &kernel)) {
-      runtime_->dart_controller()->RunFromKernel(kernel.data(), kernel.size());
+      runtime_->dart_controller()->RunFromKernel(kernel);
       return;
     }
     std::vector<uint8_t> snapshot;
@@ -425,11 +428,13 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
   }
 }
 
-void Engine::ConfigureRuntime(const std::string& script_uri) {
+void Engine::ConfigureRuntime(const std::string& script_uri,
+    const std::vector<uint8_t>& platform_kernel) {
   runtime_ = blink::RuntimeController::Create(this);
   runtime_->CreateDartController(std::move(script_uri),
                                  default_isolate_snapshot_data,
-                                 default_isolate_snapshot_instr);
+                                 default_isolate_snapshot_instr,
+                                 platform_kernel);
   runtime_->SetViewportMetrics(viewport_metrics_);
   runtime_->SetLocale(language_code_, country_code_);
   runtime_->SetSemanticsEnabled(semantics_enabled_);

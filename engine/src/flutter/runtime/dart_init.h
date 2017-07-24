@@ -20,6 +20,9 @@ extern const char kKernelAssetKey[];
 // Name of the snapshot blob asset within the FLX bundle.
 extern const char kSnapshotAssetKey[];
 
+// Name of the platform kernel blob asset within the FLX bundle.
+extern const char kPlatformKernelAssetKey[];
+
 bool IsRunningPrecompiledCode();
 
 using EmbedderTracingCallback = ftl::Closure;
