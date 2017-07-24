@@ -122,6 +122,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   StringConverter mapFunction,
   Map<String, String> environment
 }) async {
+  print(cmd);
   final Process process = await runCommand(
     cmd,
     workingDirectory: workingDirectory,
@@ -131,8 +132,9 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   final StreamSubscription<String> stdoutSubscription = process.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
-    .where((String line) => filter == null ? true : filter.hasMatch(line))
+//    .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
+      print(line);
       if (mapFunction != null)
         line = mapFunction(line);
       if (line != null) {
@@ -146,8 +148,9 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   final StreamSubscription<String> stderrSubscription = process.stderr
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
-    .where((String line) => filter == null ? true : filter.hasMatch(line))
+//    .where((String line) => filter == null ? true : filter.hasMatch(line))
     .listen((String line) {
+      print(line);
       if (mapFunction != null)
         line = mapFunction(line);
       if (line != null)

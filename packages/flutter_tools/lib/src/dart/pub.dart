@@ -51,7 +51,7 @@ Future<Null> pubGet({
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
       expectSlowOperation: true,
     );
-    final List<String> args = <String>['--verbosity=warning', command, '--no-precompile'];
+    final List<String> args = <String>['--verbose', command, '--no-precompile'];
     if (offline)
       args.add('--offline');
     try {
@@ -79,7 +79,7 @@ Future<Null> pub(List<String> arguments, {
   final int code = await runCommandAndStreamOutput(
     command,
     workingDirectory: directory,
-    mapFunction: filter,
+//    mapFunction: filter,
     environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
   );
   if (code != 0)
