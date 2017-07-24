@@ -167,6 +167,20 @@ List<String> debugDescribeTransform(Matrix4 transform) {
   return matrix;
 }
 
+/// Property which handles [Matrix4] that represent transforms.
+class TransformProperty extends DiagnosticsProperty<Matrix4> {
+  TransformProperty(String name, Matrix4 value, {
+    Object defaultValue: kNoDefaultValue,
+  }) : super(
+    name,
+    value,
+    defaultValue: defaultValue,
+  );
+
+  @override
+  String valueToString() => debugDescribeTransform(value).join('\n');
+}
+
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
   final Path path = new Path()
     ..fillType = PathFillType.evenOdd

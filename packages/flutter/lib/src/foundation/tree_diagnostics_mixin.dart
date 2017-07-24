@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
 import 'print.dart';
@@ -1075,20 +1074,6 @@ class PercentProperty extends DoubleProperty {
 
     return '${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%';
   }
-}
-
-/// Property which handles [Matrix4] that represent transforms.
-class TransformProperty extends DiagnosticsProperty<Matrix4> {
-  TransformProperty(String name, Matrix4 value, {
-    Object defaultValue: kNoDefaultValue,
-  }) : super(
-    name,
-    value,
-    defaultValue: defaultValue,
-  );
-
-  @override
-  String valueToString() => debugDescribeTransform(value).join('\n');
 }
 
 /// Property where the description is either [ifTrue] or [ifFalse] depending on

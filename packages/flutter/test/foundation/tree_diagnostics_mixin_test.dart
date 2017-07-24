@@ -5,7 +5,6 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 class TestTree extends Object with TreeDiagnosticsMixin {
   TestTree({
@@ -1225,45 +1224,6 @@ void main() {
     expect(hide.object, isFalse);
     expect(hide.hidden, isTrue);
     expect(hide.toString(), equals(''));
-  });
-
-  test('transform property test', () {
-    final Matrix4 transform = new Matrix4.diagonal3(new Vector3.all(2.0));
-    final TransformProperty simple = new TransformProperty(
-      'transform',
-      transform,
-    );
-    expect(simple.name, equals('transform'));
-    expect(simple.object, equals(transform));
-    expect(simple.hidden, isFalse);
-    expect(
-      simple.toString(),
-      equals(
-        'transform:\n'
-        '  [0] 2.0,0.0,0.0,0.0\n'
-        '  [1] 0.0,2.0,0.0,0.0\n'
-        '  [2] 0.0,0.0,2.0,0.0\n'
-        '  [3] 0.0,0.0,0.0,1.0',
-      ),
-    );
-
-    final TransformProperty nullProperty = new TransformProperty(
-      'transform',
-      null,
-    );
-    expect(nullProperty.name, equals('transform'));
-    expect(nullProperty.object, isNull);
-    expect(nullProperty.hidden, isFalse);
-    expect(nullProperty.toString(), equals('transform: null'));
-
-    final TransformProperty hideNull = new TransformProperty(
-      'transform',
-      null,
-      defaultValue: null,
-    );
-    expect(hideNull.object, isNull);
-    expect(hideNull.hidden, isTrue);
-    expect(hideNull.toString(), equals('transform: null'));
   });
 
   test('has property test', () {
