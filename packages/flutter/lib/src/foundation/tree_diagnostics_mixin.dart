@@ -1094,7 +1094,7 @@ class PercentProperty extends DoubleProperty {
 ///   'visible',
 ///   value: true,
 ///   ifFalse: 'hidden',
-/// ).toString();
+/// )
 /// ```
 ///
 /// [FlagProperty] should also be used instead of `DiagnosticsProperty<bool>`
@@ -1109,7 +1109,7 @@ class PercentProperty extends DoubleProperty {
 ///   value: inherit,
 ///   ifTrue: '<all styles inherited>',
 ///   ifFalse: '<no style specified>',
-/// );
+/// )
 /// ```
 ///
 /// See also:
