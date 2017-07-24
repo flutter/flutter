@@ -177,9 +177,9 @@ class RenderPadding extends RenderShiftedBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('padding: $padding');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding));
   }
 }
 
@@ -236,9 +236,9 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
   }
 }
 
@@ -366,10 +366,22 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('widthFactor: ${_widthFactor ?? "expand"}');
-    description.add('heightFactor: ${_heightFactor ?? "expand"}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(
+      new DoubleProperty(
+        'widthFactor',
+        _widthFactor,
+        ifNull: 'expand',
+      ),
+    );
+    description.add(
+      new DoubleProperty(
+        'heightFactor',
+        _heightFactor,
+        ifNull: 'expand',
+      ),
+    );
   }
 }
 
@@ -479,12 +491,12 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('minWidth: ${minWidth ?? "use parent minWidth constraint"}');
-    description.add('maxWidth: ${maxWidth ?? "use parent maxWidth constraint"}');
-    description.add('minHeight: ${minHeight ?? "use parent minHeight constraint"}');
-    description.add('maxHeight: ${maxHeight ?? "use parent maxHeight constraint"}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('minWidth', minWidth, ifNull: 'use parent minWidth constraint'));
+    description.add(new DoubleProperty('maxWidth', maxWidth, ifNull: 'use parent maxWidth constraint'));
+    description.add(new DoubleProperty('minHeight', minHeight, ifNull: 'use parent minHeight constraint'));
+    description.add(new DoubleProperty('maxHeight', maxHeight, ifNull: 'use parent maxHeight constraint'));
   }
 }
 
@@ -689,10 +701,22 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('widthFactor: ${_widthFactor ?? "pass-through"}');
-    description.add('heightFactor: ${_heightFactor ?? "pass-through"}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(
+      new DoubleProperty(
+        'widthFactor',
+        _widthFactor,
+        ifNull: 'pass-through',
+      ),
+    );
+    description.add(
+      new DoubleProperty(
+        'heightFactor',
+        _heightFactor,
+        ifNull: 'pass-through',
+      ),
+    );
   }
 }
 
@@ -945,9 +969,9 @@ class RenderBaseline extends RenderShiftedBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('baseline: $baseline');
-    description.add('baselineType: $baselineType');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('baseline', baseline));
+    description.add(new EnumProperty<TextBaseline>('baselineType', baselineType));
   }
 }

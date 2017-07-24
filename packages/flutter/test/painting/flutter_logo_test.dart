@@ -68,13 +68,13 @@ void main() {
     expect(
       start.toString(),
       equals(
-        'FlutterLogoDecoration(Color(0xff000000)/Color(0xffffffff) on Color(0xffd4f144), FlutterLogoStyle.stacked)'
+        'FlutterLogoDecoration(Color(0xff000000)/Color(0xffffffff) on Color(0xffd4f144), style: stacked)'
       ),
     );
     expect(
       FlutterLogoDecoration.lerp(null, end, 0.5).toString(),
       equals(
-        'FlutterLogoDecoration(Color(0xffffffff)/Color(0xff000000) on Color(0xff81d4fa), FlutterLogoStyle.stacked, transition -1.0:0.5)',
+        'FlutterLogoDecoration(Color(0xffffffff)/Color(0xff000000) on Color(0xff81d4fa), style: stacked, transition -1.0:0.5)',
       ),
     );
   });

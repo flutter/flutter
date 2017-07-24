@@ -141,9 +141,9 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    '$style'.split('\n').forEach(description.add);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    style?.debugFillProperties(description);
   }
 }
 
@@ -270,10 +270,9 @@ class Text extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('"$data"');
-    if (style != null)
-      '$style'.split('\n').forEach(description.add);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('data', data, showName: false));
+    style?.debugFillProperties(description);
   }
 }

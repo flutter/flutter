@@ -92,7 +92,7 @@ void main() {
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   viewportMainAxisExtent: 600.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 200.0, paintExtent: 200.0,\n'
-        ' │   maxPaintExtent: 200.0, hasVisualOverflow: true, )\n'
+        ' │   maxPaintExtent: 200.0, hasVisualOverflow: true)\n'
         ' │ maxExtent: EXCEPTION (FlutterError)\n'
         ' │ child position: 0.0\n'
         ' │\n'

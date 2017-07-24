@@ -98,19 +98,21 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   _GlowingOverscrollIndicatorState createState() => new _GlowingOverscrollIndicatorState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$axisDirection');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    String showDescription;
     if (showLeading && showTrailing) {
-      description.add('show: both sides');
+      showDescription = 'both sides';
     } else if (showLeading) {
-      description.add('show: leading side only');
+      showDescription = 'leading side only';
     } else if (showTrailing) {
-      description.add('show: trailing side only');
+      showDescription = 'trailing side only';
     } else {
-      description.add('show: neither side (!)');
+      showDescription = 'neither side (!)';
     }
-    description.add('$color');
+    description.add(new MessageProperty('show', showDescription));
+    description.add(new DiagnosticsProperty<Color>('color', color, showName: false));
   }
 }
 

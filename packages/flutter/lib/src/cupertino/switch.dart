@@ -88,11 +88,16 @@ class CupertinoSwitch extends StatefulWidget {
   _CupertinoSwitchState createState() => new _CupertinoSwitchState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: ${value ? "on" : "off"}');
-    if (onChanged == null)
-      description.add('disabled');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty(
+      'value',
+      value: value,
+      ifTrue: 'on',
+      ifFalse: 'off',
+      showName: true,
+    ));
+    description.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
   }
 }
 
@@ -420,10 +425,22 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: ${value ? "checked" : "unchecked"}');
-    if (!isInteractive)
-      description.add('disabled');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty(
+      'value',
+      value: value,
+      ifTrue: "checked",
+      ifFalse: "unchecked",
+      showName: true,
+    ));
+    description.add(new FlagProperty(
+      'isInteractive',
+      value: isInteractive,
+      ifTrue: 'enabled',
+      ifFalse: 'disabled',
+      showName: true,
+      defaultValue: true,
+    ));
   }
 }

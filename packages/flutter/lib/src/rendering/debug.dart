@@ -156,7 +156,7 @@ bool debugProfilePaintsEnabled = false;
 
 
 /// Returns a list of strings representing the given transform in a format
-/// useful for [RenderObject.debugFillDescription].
+/// useful for [TransformProperty].
 ///
 /// If the argument is null, returns a list with the single string "null".
 List<String> debugDescribeTransform(Matrix4 transform) {
@@ -165,6 +165,20 @@ List<String> debugDescribeTransform(Matrix4 transform) {
   final List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
   matrix.removeLast();
   return matrix;
+}
+
+/// Property which handles [Matrix4] that represent transforms.
+class TransformProperty extends DiagnosticsProperty<Matrix4> {
+  TransformProperty(String name, Matrix4 value, {
+    Object defaultValue: kNoDefaultValue,
+  }) : super(
+    name,
+    value,
+    defaultValue: defaultValue,
+  );
+
+  @override
+  String valueToString() => debugDescribeTransform(value).join('\n');
 }
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {

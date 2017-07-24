@@ -57,9 +57,15 @@ class TickerMode extends InheritedWidget {
   bool updateShouldNotify(TickerMode old) => enabled != old.enabled;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('mode: ${ enabled ? "enabled" : "disabled" }');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty(
+      'mode',
+      value: enabled,
+      ifTrue: 'enabled',
+      ifFalse: 'disabled',
+      showName: true,
+    ));
   }
 }
 
@@ -127,18 +133,26 @@ abstract class SingleTickerProviderStateMixin extends State<dynamic> implements 
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    String tickerDescription;
     if (_ticker != null) {
       if (_ticker.isActive && _ticker.muted)
-        description.add('ticker active but muted');
+        tickerDescription = 'active but muted';
       else if (_ticker.isActive)
-        description.add('ticker active');
+        tickerDescription = 'active';
       else if (_ticker.muted)
-        description.add('ticker inactive and muted');
+        tickerDescription = 'inactive and muted';
       else
-        description.add('ticker inactive');
+        tickerDescription = 'inactive';
     }
+    description.add(new DiagnosticsProperty<Ticker>(
+      'ticker',
+      _ticker,
+      description: tickerDescription,
+      showSeparator: false,
+      defaultValue: null,
+    ));
   }
 
 }
@@ -208,10 +222,16 @@ abstract class TickerProviderStateMixin extends State<dynamic> implements Ticker
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (_tickers != null)
-      description.add('tracking ${_tickers.length} ticker${_tickers.length == 1 ? "" : "s"}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Set<Ticker>>(
+      'tickers',
+      _tickers,
+      description: _tickers != null ?
+        'tracking ${_tickers.length} ticker${_tickers.length == 1 ? "" : "s"}' :
+        null,
+      defaultValue: null,
+    ));
   }
 
 }
