@@ -55,12 +55,15 @@ class _TextSelectionToolbar extends StatelessWidget {
         items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: handleSelectAll));
     }
 
-    return new Material(
-      elevation: 1.0,
-      child: new Container(
-        height: 44.0,
-        child: new Row(mainAxisSize: MainAxisSize.min, children: items)
-      )
+    return new Padding(
+      padding: const EdgeInsets.only(bottom: 4.0),
+      child: new Material(
+        elevation: 1.0,
+        child: new Container(
+          height: 44.0,
+          child: new Row(mainAxisSize: MainAxisSize.min, children: items)
+        )
+      ),
     );
   }
 }
