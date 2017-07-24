@@ -123,7 +123,19 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   void startPolling() {
     if (_timer == null) {
       _items ??= new ItemListNotifier<Device>();
-      bool _fetchingDevices = false;
+
+      bool _fetchingDevices = true;
+
+      // Scan once for devices initially.
+      pollingGetDevices().timeout(_pollingTimeout).then((List<Device> devices) {
+        _items.updateWithNewList(devices);
+      }).catchError((dynamic error) {
+        printTrace('Error polling for devices: $error');
+      }).whenComplete(() {
+        _fetchingDevices = false;
+      });
+
+      // Poll periodically for device changes (but no quicker then _pollingInterval between polls).
       _timer = new Timer.periodic(_pollingInterval, (Timer timer) async {
         if (_fetchingDevices) {
           printTrace('Skipping device poll: already in progress');
