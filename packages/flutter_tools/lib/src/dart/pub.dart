@@ -75,7 +75,7 @@ Future<Null> pub(List<String> arguments, {
   MessageFilter filter,
   String failureMessage: 'pub failed'
 }) async {
-  final List<String> command = <String>[ sdkBinaryName('pub') ]..addAll(arguments);
+  final List<String> command = <String>[ sdkBinaryName('pub'), '--verbose' ]..addAll(arguments);
   final int code = await runCommandAndStreamOutput(
     command,
     workingDirectory: directory,
