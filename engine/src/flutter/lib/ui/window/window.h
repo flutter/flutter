@@ -39,6 +39,7 @@ class Window {
   ~Window();
 
   WindowClient* client() const { return client_; }
+  const ViewportMetrics& viewport_metrics() { return viewport_metrics_; }
 
   void DidCreateIsolate();
   void UpdateWindowMetrics(const ViewportMetrics& metrics);
@@ -59,6 +60,7 @@ class Window {
  private:
   WindowClient* client_;
   tonic::DartPersistentValue library_;
+  ViewportMetrics viewport_metrics_;
 
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;

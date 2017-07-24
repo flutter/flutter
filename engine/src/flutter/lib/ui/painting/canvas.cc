@@ -7,8 +7,10 @@
 #include <math.h>
 
 #include "flutter/flow/layers/physical_model_layer.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/matrix.h"
+#include "flutter/lib/ui/window/window.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
@@ -399,11 +401,13 @@ void Canvas::drawShadow(const CanvasPath* path,
                         bool transparentOccluder) {
   if (!path)
     Dart_ThrowException(ToDart("Canvas.drawShader called with non-genuine Path."));
+  SkScalar dpr = UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio;
   flow::PhysicalModelLayer::DrawShadow(canvas_,
                                        path->path(),
                                        color,
                                        elevation,
-                                       transparentOccluder);
+                                       transparentOccluder,
+                                       dpr);
 }
 
 void Canvas::Clear() {
