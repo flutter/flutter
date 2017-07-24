@@ -139,6 +139,7 @@ class Stepper extends StatefulWidget {
     this.currentStep: 0,
     this.onStepTapped,
     this.onStepContinue,
+    this.onStepBack,
     this.onStepCancel,
   }) : assert(steps != null),
        assert(type != null),
@@ -164,10 +165,15 @@ class Stepper extends StatefulWidget {
   /// an argument.
   final ValueChanged<int> onStepTapped;
 
-  /// The callback called when the 'continue' button is tapped.
+  /// The callback called when the 'continue' or 'next' button is tapped.
   ///
-  /// If null, the 'continue' button will be disabled.
+  /// If null, the 'continue' or 'next' button will be disabled.
   final VoidCallback onStepContinue;
+
+  /// The callback called when the 'back' button is tapped.
+  ///
+  /// If null, the 'back' button will be disabled.
+  final VoidCallback onStepBack;
 
   /// The callback called when the 'cancel' button is tapped.
   ///
@@ -362,6 +368,47 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 child: const Text('CANCEL'),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHorizontalControls() {
+    Color backColor;
+
+    switch (Theme.of(context).brightness) {
+      case Brightness.light:
+        backColor = Colors.black54;
+        break;
+      case Brightness.dark:
+        backColor = Colors.white70;
+        break;
+    }
+
+    assert(backColor != null);
+
+    final ThemeData themeData = Theme.of(context);
+
+    return new Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints.tightFor(height: 48.0),
+        child: new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            new FlatButton(
+              onPressed: widget.onStepBack,
+              textColor: backColor,
+              textTheme: ButtonTextTheme.normal,
+              child: new Row(children: <Widget>[const Icon(Icons.chevron_left), const Text('BACK')]),
+            ),
+            new FlatButton(
+              onPressed: widget.onStepContinue,
+              textColor: _isDark() ? Colors.white : themeData.primaryColor,
+              textTheme: ButtonTextTheme.normal,
+              child: new Row(children: const <Widget>[const Text('NEXT'), const Icon(Icons.chevron_right)]),
+            )
           ],
         ),
       ),
@@ -607,9 +654,12 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 vsync: this,
                 child: widget.steps[widget.currentStep].content,
               ),
-              _buildVerticalControls(),
             ],
           ),
+        ),
+        new Material(
+          elevation: 8.0,
+          child: _buildHorizontalControls()
         ),
       ],
     );
