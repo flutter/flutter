@@ -535,6 +535,35 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
+  /// This method can be called after the build phase, during the layout of the
+  /// nearest descendant [RenderObjectWidget] of the gesture detector, to filter
+  /// the list of available semantic actions.
+  ///
+  /// This is used by [Scrollable] to configure system accessibility tools so
+  /// that they know in which direction a particular list can be scrolled.
+  ///
+  /// If this is never called, then the actions are not filtered. If the list of
+  /// actions to filter changes, it must be called again (during the layout of
+  /// the nearest descendant [RenderObjectWidget] of the gesture detector).
+  void replaceSemanticsActions(Set<SemanticsAction> actions) {
+    assert(() {
+      if (!context.findRenderObject().owner.debugDoingLayout) {
+        throw new FlutterError(
+          'Unexpected call to replaceSemanticsActions() method of RawGestureDetectorState.\n'
+          'The replaceSemanticsActions() method can only be called during the layout phase.'
+        );
+      }
+      return true;
+    });
+    if (!widget.excludeFromSemantics) {
+      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
+      context.visitChildElements((Element element) {
+        final _GestureSemantics widget = element.widget;
+        widget._updateSemanticsActions(semanticsGestureHandler, actions);
+      });
+    }
+  }
+
   @override
   void dispose() {
     for (GestureRecognizer recognizer in _recognizers.values)
@@ -712,6 +741,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
           recognizers.containsKey(PanGestureRecognizer) ? _handleHorizontalDragUpdate : null
       ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
           recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
+  }
+
+  void _updateSemanticsActions(RenderSemanticsGestureHandler renderObject, Set<SemanticsAction> actions) {
+    renderObject.validActions = actions;
   }
 
   @override

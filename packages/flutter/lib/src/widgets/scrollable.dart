@@ -67,6 +67,8 @@ typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 ///    effects using slivers.
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
 ///    child.
+///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 class Scrollable extends StatefulWidget {
   /// Creates a widget that scrolls.
   ///
@@ -95,6 +97,14 @@ class Scrollable extends StatefulWidget {
 
   /// An object that can be used to control the position to which this widget is
   /// scrolled.
+  ///
+  /// A [ScrollController] serves several purposes. It can be used to control
+  /// the initial scroll position (see [ScrollController.initialScrollOffset]).
+  /// It can be used to control whether the scroll view should automatically
+  /// save and restore its scroll position in the [PageStorage] (see
+  /// [ScrollController.keepScrollOffset]). It can be used to read the current
+  /// scroll position (see [ScrollController.offset]), or change it (see
+  /// [ScrollController.animateTo]).
   ///
   /// See also:
   ///
@@ -301,6 +311,16 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     widget.controller?.detach(position);
     position.dispose();
     super.dispose();
+  }
+
+
+  // SEMANTICS ACTIONS
+
+  @override
+  @protected
+  void setSemanticsActions(Set<SemanticsAction> actions) {
+    if (_gestureDetectorKey.currentState != null)
+      _gestureDetectorKey.currentState.replaceSemanticsActions(actions);
   }
 
 

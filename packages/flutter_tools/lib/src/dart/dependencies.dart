@@ -45,13 +45,12 @@ class DartDependencySetBuilder {
       final Uri currentUri = toProcess.removeLast();
       final analyzer.CompilationUnit unit = _parse(currentUri.toFilePath());
       for (analyzer.Directive directive in unit.directives) {
-        if (!(directive is analyzer.UriBasedDirective)) {
+        if (!(directive is analyzer.UriBasedDirective))
           continue;
-        }
 
         String uriAsString;
         if (directive is analyzer.NamespaceDirective) {
-         final analyzer.NamespaceDirective namespaceDirective = directive;
+          final analyzer.NamespaceDirective namespaceDirective = directive;
           // If the directive is a conditional import directive, we should
           // select the imported uri based on the condition.
           for (analyzer.Configuration configuration in namespaceDirective.configurations) {

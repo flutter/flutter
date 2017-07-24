@@ -106,7 +106,7 @@ void main() {
             return new Builder(
               builder: (BuildContext context) {
                 ++buildCounter;
-                return new Container();
+                return const Text('Y');
               },
             );
           },
@@ -129,6 +129,7 @@ void main() {
     expect(buildCounter, 1);
     await tester.pump(const Duration(seconds: 1));
     expect(buildCounter, 2);
+    expect(find.text('Y'), findsOneWidget);
   });
 
   testWidgets('Cannot pop the initial route', (WidgetTester tester) async {
@@ -171,7 +172,47 @@ void main() {
     expect(find.text('route "/b"'), findsNothing);
   });
 
-  testWidgets('Two-step initial route', (WidgetTester tester) async {
+  testWidgets('Return value from pop is correct', (WidgetTester tester) async {
+    Future<String> result;
+    await tester.pumpWidget(
+        new MaterialApp(
+          home: new Builder(
+              builder: (BuildContext context) {
+                return new Material(
+                  child: new RaisedButton(
+                      child: const Text('X'),
+                      onPressed: () async {
+                        result = Navigator.of(context).pushNamed('/a');
+                      }
+                  ),
+                );
+              }
+          ),
+          routes: <String, WidgetBuilder>{
+            '/a': (BuildContext context) {
+              return new Material(
+                child: new RaisedButton(
+                  child: const Text('Y'),
+                  onPressed: () {
+                    Navigator.of(context).pop('all done');
+                  },
+                ),
+              );
+            }
+          },
+        )
+    );
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('Y'), findsOneWidget);
+    await tester.tap(find.text('Y'));
+    await tester.pump();
+
+    expect(await result, equals('all done'));
+  });
+
+    testWidgets('Two-step initial route', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),

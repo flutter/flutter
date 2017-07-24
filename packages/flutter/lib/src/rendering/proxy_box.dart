@@ -1286,6 +1286,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     if (elevation == value)
       return;
     _elevation = value;
+    markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
@@ -1325,6 +1326,11 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   static final Paint _defaultPaint = new Paint();
   static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
 
+  // On Fuchsia, the system compositor is responsible for drawing shadows
+  // for physical model layers with non-zero elevation.
+  @override
+  bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -1357,7 +1363,11 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           );
         }
         canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
-        canvas.saveLayer(offsetBounds, _defaultPaint);
+        if (offsetClipRRect.isRect) {
+          canvas.save();
+        } else {
+          canvas.saveLayer(offsetBounds, _defaultPaint);
+        }
         canvas.clipRRect(offsetClipRRect);
         super.paint(context, offset);
         canvas.restore();
@@ -2725,6 +2735,28 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+  /// If non-null, the set of actions to allow. Other actions will be omitted,
+  /// even if their callback is provided.
+  ///
+  /// For example, if [onTap] is non-null but [validActions] does not contain
+  /// [SemanticsAction.tap], then the semantic description of this node will
+  /// not claim to support taps.
+  ///
+  /// This is normally used to filter the actions made available by
+  /// [onHorizontalDragUpdate] and [onVerticalDragUpdate]. Normally, these make
+  /// both the right and left, or up and down, actions available. For example,
+  /// if [onHorizontalDragUpdate] is set but [validActions] only contains
+  /// [SemanticsAction.scrollLeft], then the [SemanticsAction.scrollRight]
+  /// action will be omitted.
+  Set<SemanticsAction> get validActions => _validActions;
+  Set<SemanticsAction> _validActions;
+  set validActions(Set<SemanticsAction> value) {
+    if (setEquals<SemanticsAction>(value, _validActions))
+      return;
+    _validActions = value;
+    markNeedsSemanticsUpdate(onlyChanges: true);
+  }
+
    /// Called when the user taps on the render object.
   GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
@@ -2796,14 +2828,25 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
+    List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
-      node.addAction(SemanticsAction.tap);
+      actions.add(SemanticsAction.tap);
     if (onLongPress != null)
-      node.addAction(SemanticsAction.longPress);
-    if (onHorizontalDragUpdate != null)
-      node.addHorizontalScrollingActions();
-    if (onVerticalDragUpdate != null)
-      node.addVerticalScrollingActions();
+      actions.add(SemanticsAction.longPress);
+    if (onHorizontalDragUpdate != null) {
+      actions.add(SemanticsAction.scrollRight);
+      actions.add(SemanticsAction.scrollLeft);
+    }
+    if (onVerticalDragUpdate != null) {
+      actions.add(SemanticsAction.scrollUp);
+      actions.add(SemanticsAction.scrollDown);
+    }
+
+    // If a set of validActions has been provided only expose those.
+    if (validActions != null)
+      actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
+
+    actions.forEach(node.addAction);
   }
 
   @override

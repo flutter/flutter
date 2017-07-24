@@ -118,6 +118,7 @@ abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
 ///
 /// Picture layers are always leaves in the layer tree.
 class PictureLayer extends Layer {
+  /// Creates a leaf layer for the layer tree.
   PictureLayer(this.canvasBounds);
 
   /// The bounds that were used for the canvas that drew this layer's [picture].
@@ -754,6 +755,8 @@ class PhysicalModelLayer extends ContainerLayer {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('clipRRect: $clipRRect');
+    description.add('elevation: $elevation');
+    description.add('color: $color');
   }
 }
 

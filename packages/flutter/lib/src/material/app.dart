@@ -307,7 +307,7 @@ class _MaterialAppState extends State<MaterialApp> {
     else
       builder = widget.routes[name];
     if (builder != null) {
-      return new MaterialPageRoute<Null>(
+      return new MaterialPageRoute<dynamic>(
         builder: builder,
         settings: settings,
       );

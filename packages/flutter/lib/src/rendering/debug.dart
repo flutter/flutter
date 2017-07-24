@@ -95,9 +95,6 @@ HSVColor debugCurrentRepaintColor = _kDebugCurrentRepaintColor;
 /// The amount to increment the hue of the current repaint color.
 double debugRepaintRainbowHueIncrement = _kDebugRepaintRainbowHueIncrement;
 
-/// Log the call stacks that mark render objects as needing paint.
-bool debugPrintMarkNeedsPaintStacks = false;
-
 /// Log the call stacks that mark render objects as needing layout.
 ///
 /// For sanity, this only logs the stack traces of cases where an object is
@@ -105,6 +102,29 @@ bool debugPrintMarkNeedsPaintStacks = false;
 /// redundant stack traces as a single [RenderObject.markNeedsLayout] call walks
 /// up the tree.
 bool debugPrintMarkNeedsLayoutStacks = false;
+
+/// Log the call stacks that mark render objects as needing paint.
+bool debugPrintMarkNeedsPaintStacks = false;
+
+/// Log the dirty render objects that are laid out each frame.
+///
+/// Combined with [debugPrintBeginFrameBanner], this allows you to distinguish
+/// layouts triggered by the initial mounting of a render tree (e.g. in a call
+/// to [runApp]) from the regular layouts triggered by the pipeline.
+///
+/// Combined with [debugPrintMarkNeedsLayoutStacks], this lets you watch a
+/// render object's dirty/clean lifecycle.
+///
+/// See also:
+///
+///  * [debugProfilePaintsEnabled], which does something similar for
+///    painting but using the timeline view.
+///
+///  * [debugPrintRebuildDirtyWidgets], which does something similar for widgets
+///    being rebuilt.
+///
+///  * The discussion at [RendererBinding.drawFrame].
+bool debugPrintLayouts = false;
 
 /// Check the intrinsic sizes of each [RenderBox] during layout.
 ///
@@ -121,6 +141,17 @@ bool debugCheckIntrinsicSizes = false;
 /// For details on how to use [dart:developer.Timeline] events in the Dart
 /// Observatory to optimize your app, see:
 /// <https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md>
+///
+/// See also:
+///
+///  * [debugPrintLayouts], which does something similar for layout but using
+///    console output.
+///
+///  * [debugProfileBuildsEnabled], which does something similar for widgets
+///    being rebuilt, and [debugPrintRebuildDirtyWidgets], its console
+///    equivalent.
+///
+///  * The discussion at [RendererBinding.drawFrame].
 bool debugProfilePaintsEnabled = false;
 
 
@@ -184,8 +215,9 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
         debugPaintPointersEnabled ||
         debugRepaintRainbowEnabled ||
         debugRepaintTextRainbowEnabled ||
-        debugPrintMarkNeedsPaintStacks ||
         debugPrintMarkNeedsLayoutStacks ||
+        debugPrintMarkNeedsPaintStacks ||
+        debugPrintLayouts ||
         debugCheckIntrinsicSizes != debugCheckIntrinsicSizesOverride ||
         debugProfilePaintsEnabled ||
         debugPaintSizeColor != _kDebugPaintSizeColor ||

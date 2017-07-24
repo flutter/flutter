@@ -113,11 +113,15 @@ class FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_serviceClient], [_peer] and [_appIsolate].
   @visibleForTesting
-  FlutterDriver.connectedTo(this._serviceClient, this._peer, this._appIsolate,
-      { bool printCommunication: false, bool logCommunicationToFile: true })
-      : _printCommunication = printCommunication,
-        _logCommunicationToFile = logCommunicationToFile,
-        _driverId = _nextDriverId++;
+  FlutterDriver.connectedTo(
+    this._serviceClient,
+    this._peer,
+    this._appIsolate, {
+    bool printCommunication: false,
+    bool logCommunicationToFile: true,
+  }) : _printCommunication = printCommunication,
+       _logCommunicationToFile = logCommunicationToFile,
+       _driverId = _nextDriverId++;
 
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
@@ -345,6 +349,12 @@ class FlutterDriver {
   /// Waits until [finder] locates the target.
   Future<Null> waitFor(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(new WaitFor(finder, timeout: timeout));
+    return null;
+  }
+
+  /// Waits until [finder] can no longer locate the target.
+  Future<Null> waitForAbsent(SerializableFinder finder, {Duration timeout}) async {
+    await _sendCommand(new WaitForAbsent(finder, timeout: timeout));
     return null;
   }
 
@@ -597,9 +607,12 @@ class CommonFinders {
   /// Finds [Text] widgets containing string equal to [text].
   SerializableFinder text(String text) => new ByText(text);
 
-  /// Finds widgets by [key].
+  /// Finds widgets by [key]. Only [String] and [int] values can be used.
   SerializableFinder byValueKey(dynamic key) => new ByValueKey(key);
 
   /// Finds widgets with a tooltip with the given [message].
   SerializableFinder byTooltip(String message) => new ByTooltipMessage(message);
+
+  /// Finds widgets whose class name matches the given string.
+  SerializableFinder byType(String type) => new ByType(type);
 }

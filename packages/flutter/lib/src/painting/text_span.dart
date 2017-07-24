@@ -11,19 +11,6 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'text_style.dart';
 
-// TODO(ianh): This should be on List itself.
-bool _deepEquals(List<Object> a, List<Object> b) {
-  if (a == null)
-    return b == null;
-  if (b == null || a.length != b.length)
-    return false;
-  for (int i = 0; i < a.length; i += 1) {
-    if (a[i] != b[i])
-      return false;
-  }
-  return true;
-}
-
 /// An immutable span of text.
 ///
 /// A [TextSpan] object can be styled using its [style] property.
@@ -317,6 +304,39 @@ class TextSpan {
     return true;
   }
 
+  /// Describe the difference between this text span and another, in terms of
+  /// how much damage it will make to the rendering. The comparison is deep.
+  ///
+  /// See also:
+  ///
+  ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
+  RenderComparison compareTo(TextSpan other) {
+    if (identical(this, other))
+      return RenderComparison.identical;
+    if (other.text != text ||
+        children?.length != other.children?.length ||
+        (style == null) != (other.style == null))
+      return RenderComparison.layout;
+    RenderComparison result = recognizer == other.recognizer ? RenderComparison.identical : RenderComparison.metadata;
+    if (style != null) {
+      final RenderComparison candidate = style.compareTo(other.style);
+      if (candidate.index > result.index)
+        result = candidate;
+      if (result == RenderComparison.layout)
+        return result;
+    }
+    if (children != null) {
+      for (int index = 0; index < children.length; index += 1) {
+        final RenderComparison candidate = children[index].compareTo(other.children[index]);
+        if (candidate.index > result.index)
+          result = candidate;
+        if (result == RenderComparison.layout)
+          return result;
+      }
+    }
+    return result;
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -327,7 +347,7 @@ class TextSpan {
     return typedOther.text == text
         && typedOther.style == style
         && typedOther.recognizer == recognizer
-        && _deepEquals(typedOther.children, children);
+        && listEquals<TextSpan>(typedOther.children, children);
   }
 
   @override

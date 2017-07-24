@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -68,7 +69,8 @@ class TextField extends StatefulWidget {
   /// the number of lines. By default, it is 1, meaning this is a single-line
   /// text field. If it is not null, it must be greater than zero.
   ///
-  /// The [keyboardType], [autofocus], and [obscureText] arguments must not be null.
+  /// The [keyboardType], [autofocus], [obscureText], and [autocorrect] arguments
+  /// must not be null.
   const TextField({
     Key key,
     this.controller,
@@ -79,6 +81,7 @@ class TextField extends StatefulWidget {
     this.textAlign,
     this.autofocus: false,
     this.obscureText: false,
+    this.autocorrect: true,
     this.maxLines: 1,
     this.onChanged,
     this.onSubmitted,
@@ -86,6 +89,7 @@ class TextField extends StatefulWidget {
   }) : assert(keyboardType != null),
        assert(autofocus != null),
        assert(obscureText != null),
+       assert(autocorrect != null),
        assert(maxLines == null || maxLines > 0),
        super(key: key);
 
@@ -142,6 +146,11 @@ class TextField extends StatefulWidget {
   /// Defaults to false. Cannot be null.
   final bool obscureText;
 
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true. Cannot be null.
+  final bool autocorrect;
+
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will scroll
@@ -158,8 +167,9 @@ class TextField extends StatefulWidget {
   /// field.
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides. Formatters are run 
-  /// in the provided order when the text input changes.
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
   @override
@@ -181,6 +191,8 @@ class TextField extends StatefulWidget {
       description.add('autofocus: $autofocus');
     if (obscureText)
       description.add('obscureText: $obscureText');
+    if (autocorrect)
+      description.add('autocorrect: $autocorrect');
     if (maxLines != 1)
       description.add('maxLines: $maxLines');
   }
@@ -243,10 +255,13 @@ class _TextFieldState extends State<TextField> {
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: materialTextSelectionControls,
+        selectionControls: themeData.platform == TargetPlatform.iOS
+            ? cupertinoTextSelectionControls
+            : materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),

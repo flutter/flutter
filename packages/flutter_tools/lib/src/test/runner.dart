@@ -26,7 +26,7 @@ Future<int> runTests(
     bool enableObservatory: false,
     bool startPaused: false,
     bool ipv6: false,
-    bool json: false,
+    bool machine: false,
     TestWatcher watcher,
     }) async {
   // Compute the command-line arguments for package:test.
@@ -39,7 +39,7 @@ Future<int> runTests(
     testArgs.add('--concurrency=1');
   }
 
-  if (json) {
+  if (machine) {
     testArgs.addAll(<String>['-r', 'json']);
   }
 
@@ -66,6 +66,7 @@ Future<int> runTests(
     shellPath: shellPath,
     watcher: watcher,
     enableObservatory: enableObservatory,
+    machine: machine,
     startPaused: startPaused,
     serverType: serverType,
   );

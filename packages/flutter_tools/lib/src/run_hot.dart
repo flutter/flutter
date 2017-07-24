@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -12,7 +14,6 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
-import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
@@ -84,13 +85,26 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
+  Future<Null> _reloadSourcesService(String isolateId,
+      { bool force: false, bool pause: false }) async {
+    // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
+    final OperationResult result = await restart(pauseAfterRestart: pause);
+    if (!result.isOk) {
+      throw new rpc.RpcException(
+        rpc_error_code.INTERNAL_ERROR,
+        'Unable to reload sources',
+      );
+    }
+  }
+
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String viewFilter,
   }) async {
     try {
-      await connectToServiceProtocol(viewFilter: viewFilter);
+      await connectToServiceProtocol(viewFilter: viewFilter,
+          reloadSources: _reloadSourcesService);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -139,7 +153,6 @@ class HotRunner extends ResidentRunner {
       // Measure time to perform a hot restart.
       printStatus('Benchmarking hot restart');
       await restart(fullRestart: true);
-      await refreshViews();
       // TODO(johnmccutchan): Modify script entry point.
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
@@ -223,7 +236,7 @@ class HotRunner extends ResidentRunner {
     return devFSUris;
   }
 
-  Future<bool> _updateDevFS({ DevFSProgressReporter progressReporter }) async {
+  Future<bool> _updateDevFS() async {
     if (!_refreshDartDependencies()) {
       // Did not update DevFS because of a Dart source error.
       return false;
@@ -238,7 +251,6 @@ class HotRunner extends ResidentRunner {
 
     for (FlutterDevice device in flutterDevices) {
       final bool result = await device.updateDevFS(
-        progressReporter: progressReporter,
         bundle: assetBundle,
         bundleDirty: rebuildBundle,
         fileFilter: _dartDependencies,
@@ -300,6 +312,11 @@ class HotRunner extends ResidentRunner {
                           deviceEntryUri,
                           devicePackagesUri,
                           deviceAssetsDirectoryUri);
+      if (benchmarkMode) {
+        for (FlutterDevice device in flutterDevices)
+          for (FlutterView view in device.views)
+            await view.flushUIThreadTasks();
+      }
     }
   }
 
@@ -507,9 +524,10 @@ class HotRunner extends ResidentRunner {
     final List<FlutterView> reassembleViews = <FlutterView>[];
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
+        // Check if the isolate is paused, and if so, don't reassemble. Ignore the
+        // PostPauseEvent event - the client requesting the pause will resume the app.
         final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
-        if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
-          // Isolate is paused. Don't reassemble.
+        if (pauseEvent != null && pauseEvent.isPauseEvent && pauseEvent.kind != ServiceEvent.kPausePostRequest) {
           continue;
         }
         reassembleViews.add(view);

@@ -114,6 +114,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  commands_test:
+    description: >
+      Runs tests of flutter run commands.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+    flaky: true
+
   android_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and Android screenshots
@@ -131,7 +138,6 @@ tasks:
       Verifies that `flutter drive --route` still works. No performance numbers.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery_instrumentation_test:
     description: >
@@ -140,7 +146,6 @@ tasks:
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   # iOS on-device tests
 
@@ -149,14 +154,12 @@ tasks:
       Checks that platform channels work on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   platform_channel_sample_test_ios:
     description: >
       Runs a driver test on the Platform Channel sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -164,7 +167,6 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
 #  flutter_gallery_ios__start_up:
 #    description: >
@@ -186,14 +188,12 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   basic_material_app_ios__size:
     description: >
       Measures the IPA size of a basic material app.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
 #  microbenchmarks_ios:
 #    description: >
@@ -215,14 +215,12 @@ tasks:
       Runs end-to-end Flutter tests on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   ios_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and iOS screenshots
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   # Tests running on Windows host
 
@@ -291,6 +289,7 @@ tasks:
       with semantics enabled.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery__memory_nav:
     description: >
