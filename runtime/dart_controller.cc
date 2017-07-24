@@ -44,7 +44,8 @@ std::string ResolvePath(std::string path) {
 
 }  // namespace
 
-DartController::DartController() : ui_dart_state_(nullptr) {}
+DartController::DartController() : ui_dart_state_(nullptr),
+    kernel_bytes(nullptr), platform_kernel_bytes(nullptr) {}
 
 DartController::~DartController() {
   if (ui_dart_state_) {
@@ -54,6 +55,12 @@ DartController::~DartController() {
     Dart_SetMessageNotifyCallback(nullptr);
     Dart_ShutdownIsolate();  // deletes ui_dart_state_
     ui_dart_state_ = nullptr;
+  }
+  if (kernel_bytes) {
+    free(kernel_bytes);
+  }
+  if (platform_kernel_bytes) {
+    free(platform_kernel_bytes);
   }
 }
 
@@ -94,10 +101,25 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
   return LogIfError(result);
 }
 
+static void CopyVectorBytes(const std::vector<uint8_t>& vector,
+    uint8_t*& bytes) {
+  if (bytes) {
+    free(bytes);
+  }
+  bytes = (uint8_t*) malloc(vector.size());
+  memcpy(bytes, vector.data(), vector.size());
+}
+
 tonic::DartErrorHandleType DartController::RunFromKernel(
-    const uint8_t* buffer, size_t size) {
+    const std::vector<uint8_t>& kernel) {
   tonic::DartState::Scope scope(dart_state());
-  Dart_Handle result = Dart_LoadKernel(Dart_ReadKernelBinary(buffer, size));
+  // Copy kernel bytes so they won't go away after we exit this method.
+  // This is needed because original kernel data has to be available
+  // during code execution.
+  CopyVectorBytes(kernel, kernel_bytes);
+
+  Dart_Handle result = Dart_LoadKernel(
+      Dart_ReadKernelBinary(kernel_bytes, kernel.size()));
   LogIfError(result);
   tonic::DartErrorHandleType error = tonic::GetErrorHandleType(result);
   if (SendStartMessage(Dart_RootLibrary())) {
@@ -146,11 +168,28 @@ tonic::DartErrorHandleType DartController::RunFromSource(
 void DartController::CreateIsolateFor(const std::string& script_uri,
                                       const uint8_t* isolate_snapshot_data,
                                       const uint8_t* isolate_snapshot_instr,
+                                      const std::vector<uint8_t>& platform_kernel,
                                       std::unique_ptr<UIDartState> state) {
   char* error = nullptr;
-  Dart_Isolate isolate = Dart_CreateIsolate(
-      script_uri.c_str(), "main", isolate_snapshot_data, isolate_snapshot_instr,
-      nullptr, static_cast<tonic::DartState*>(state.get()), &error);
+
+  Dart_Isolate isolate;
+  if (!platform_kernel.empty()) {
+    // Copy kernel bytes so they won't go away after we exit this method.
+    // This is needed because original kernel data has to be available
+    // during code execution.
+    CopyVectorBytes(platform_kernel, platform_kernel_bytes);
+
+    isolate = Dart_CreateIsolateFromKernel(
+        script_uri.c_str(), "main",
+        Dart_ReadKernelBinary(platform_kernel_bytes, platform_kernel.size()),
+        nullptr /* flags */,
+        static_cast<tonic::DartState*>(state.get()), &error);
+  } else {
+    isolate = Dart_CreateIsolate(
+        script_uri.c_str(), "main", isolate_snapshot_data,
+        isolate_snapshot_instr, nullptr,
+        static_cast<tonic::DartState*>(state.get()), &error);
+  }
   FTL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();
   dart_state()->message_handler().Initialize(blink::Threads::UI());

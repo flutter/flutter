@@ -67,6 +67,7 @@ namespace blink {
 
 const char kKernelAssetKey[] = "kernel_blob.bin";
 const char kSnapshotAssetKey[] = "snapshot_blob.bin";
+const char kPlatformKernelAssetKey[] = "platform.dill";
 
 namespace {
 
@@ -243,6 +244,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   // Are we running from a Dart source file?
   const bool running_from_source = StringEndsWith(entry_uri, ".dart");
 
+  void* kernel_platform = nullptr;
   std::vector<uint8_t> kernel_data;
   std::vector<uint8_t> snapshot_data;
   std::string entry_path;
@@ -262,15 +264,25 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
               GetUnzipperProviderForPath(std::move(bundle_path)));
       zip_asset_store->GetAsBuffer(kKernelAssetKey, &kernel_data);
       zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data);
+
+      std::vector<uint8_t> platform_data;
+      zip_asset_store->GetAsBuffer(kPlatformKernelAssetKey, &platform_data);
+      if (!platform_data.empty()) {
+        kernel_platform =
+            Dart_ReadKernelBinary(platform_data.data(), platform_data.size());
+        FTL_DCHECK(kernel_platform != NULL);
+      }
     }
   }
 
   UIDartState* parent_dart_state = static_cast<UIDartState*>(callback_data);
   UIDartState* dart_state = parent_dart_state->CreateForChildIsolate();
 
-  Dart_Isolate isolate = Dart_CreateIsolate(
-      script_uri, main, g_default_isolate_snapshot_data,
-      g_default_isolate_snapshot_instructions, nullptr, dart_state, error);
+  Dart_Isolate isolate = kernel_platform != nullptr
+      ? Dart_CreateIsolateFromKernel(script_uri, main, kernel_platform,
+            nullptr /* flags */, dart_state, error)
+      : Dart_CreateIsolate(script_uri, main, g_default_isolate_snapshot_data,
+            g_default_isolate_snapshot_instructions, nullptr, dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
   FTL_CHECK(!LogIfError(
