@@ -548,17 +548,8 @@ class TextStyle extends TreeDiagnostics {
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.hidden);
     properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, hidden: !styleSpecified && inherit));
-
     properties.addAll(styles);
-
-    if (!styleSpecified) {
-      properties.add(new FlagProperty(
-        'inherit',
-        value: inherit,
-        ifTrue: '$prefix<all styles inherited>',
-        ifFalse: '$prefix<no style specified>',
-      ));
-    }
+    if (!styleSpecified)
+      properties.add(new FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
   }
-
 }

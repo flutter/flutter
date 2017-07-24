@@ -40,7 +40,9 @@ enum DiagnosticsTreeStyle {
   ///
   /// See also:
   ///
-  ///  * [RenderParagraph], which uses this style for
+  ///  * [RenderParagraph], which uses this style to display a [TextSpan] child
+  ///    in a way that is compatible with the [DiagnosticsTreeStyle.sparse]
+  ///    style of the [RenderObject] tree.
   transition,
 
   /// Render the tree just using whitespace without connecting parents to
@@ -184,8 +186,8 @@ class TextTreeConfiguration {
 
   /// Footer to add as its own line at the end of a non-root node.
   ///
-  /// See [leafTextConfiguration] for an example of using footer to draw a box around
-  /// the node.  [footer] is indented the same amount as [prefixOtherLines].
+  /// See [leafTextConfiguration] for an example of using footer to draw a box
+  /// around the node. [footer] is indented the same amount as [prefixOtherLines].
   final String footer;
 
   /// Add a blank line between properties and children if both are present.

@@ -368,20 +368,8 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   @override
   void debugFillProperties(List<DiagnosticsNode> description) {
     super.debugFillProperties(description);
-    description.add(
-      new DoubleProperty(
-        'widthFactor',
-        _widthFactor,
-        ifNull: 'expand',
-      ),
-    );
-    description.add(
-      new DoubleProperty(
-        'heightFactor',
-        _heightFactor,
-        ifNull: 'expand',
-      ),
-    );
+    description.add(new DoubleProperty('widthFactor', _widthFactor, ifNull: 'expand'));
+    description.add(new DoubleProperty('heightFactor', _heightFactor, ifNull: 'expand'));
   }
 }
 
@@ -703,20 +691,8 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   @override
   void debugFillProperties(List<DiagnosticsNode> description) {
     super.debugFillProperties(description);
-    description.add(
-      new DoubleProperty(
-        'widthFactor',
-        _widthFactor,
-        ifNull: 'pass-through',
-      ),
-    );
-    description.add(
-      new DoubleProperty(
-        'heightFactor',
-        _heightFactor,
-        ifNull: 'pass-through',
-      ),
-    );
+    description.add(new DoubleProperty('widthFactor', _widthFactor, ifNull: 'pass-through'));
+    description.add(new DoubleProperty('heightFactor', _heightFactor, ifNull: 'pass-through'));
   }
 }
 

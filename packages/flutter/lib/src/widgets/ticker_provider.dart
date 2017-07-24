@@ -59,13 +59,7 @@ class TickerMode extends InheritedWidget {
   @override
   void debugFillProperties(List<DiagnosticsNode> description) {
     super.debugFillProperties(description);
-    description.add(new FlagProperty(
-      'mode',
-      value: enabled,
-      ifTrue: 'enabled',
-      ifFalse: 'disabled',
-      showName: true,
-    ));
+    description.add(new FlagProperty('mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
   }
 }
 
@@ -146,13 +140,7 @@ abstract class SingleTickerProviderStateMixin extends State<dynamic> implements 
       else
         tickerDescription = 'inactive';
     }
-    description.add(new DiagnosticsProperty<Ticker>(
-      'ticker',
-      _ticker,
-      description: tickerDescription,
-      showSeparator: false,
-      defaultValue: null,
-    ));
+    description.add(new DiagnosticsProperty<Ticker>('ticker', _ticker, description: tickerDescription, showSeparator: false, defaultValue: null));
   }
 
 }

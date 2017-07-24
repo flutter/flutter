@@ -352,20 +352,8 @@ class RenderLimitedBox extends RenderProxyBox {
   @override
   void debugFillProperties(List<DiagnosticsNode> description) {
     super.debugFillProperties(description);
-    description.add(
-      new DoubleProperty(
-        'maxWidth',
-        maxWidth,
-        defaultValue: double.INFINITY,
-      ),
-    );
-    description.add(
-      new DoubleProperty(
-        'maxHeight',
-        maxHeight,
-        defaultValue: double.INFINITY,
-      ),
-    );
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
   }
 }
 

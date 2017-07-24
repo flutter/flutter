@@ -90,13 +90,7 @@ class Tooltip extends StatefulWidget {
     super.debugFillProperties(description);
     description.add(new StringProperty('message', message, showName: false));
     description.add(new DoubleProperty('vertical offset', verticalOffset));
-    description.add(new FlagProperty(
-      'position',
-      value: preferBelow,
-      ifTrue: 'below',
-      ifFalse: 'above',
-      showName: true,
-    ));
+    description.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
   }
 }
 

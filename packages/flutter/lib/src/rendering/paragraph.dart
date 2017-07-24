@@ -371,11 +371,6 @@ class RenderParagraph extends RenderBox {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return <DiagnosticsNode>[
-      text.toDiagnosticsNode(
-        name: 'text',
-       style: DiagnosticsTreeStyle.transition,
-      ),
-    ];
+    return <DiagnosticsNode>[text.toDiagnosticsNode(name: 'text', style: DiagnosticsTreeStyle.transition)];
   }
 }

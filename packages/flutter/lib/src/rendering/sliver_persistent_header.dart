@@ -206,18 +206,8 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   @override
   void debugFillProperties(List<DiagnosticsNode> description) {
     super.debugFillProperties(description);
-    description.add(
-      new DoubleProperty.lazy(
-        'maxExtent',
-        () => maxExtent,
-      ),
-    );
-    description.add(
-      new DoubleProperty.lazy(
-        'child position',
-        () => childMainAxisPosition(child),
-      ),
-    );
+    description.add(new DoubleProperty.lazy('maxExtent', () => maxExtent));
+    description.add(new DoubleProperty.lazy('child position', () => childMainAxisPosition(child)));
   }
 }
 
