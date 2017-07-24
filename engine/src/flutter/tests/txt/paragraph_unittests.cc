@@ -1217,7 +1217,8 @@ TEST_F(RenderTest, LongWordParagraph) {
   txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
-  text_style.font_size = 30;
+  text_style.font_family = "Roboto";
+  text_style.font_size = 31;
   text_style.letter_spacing = 0;
   text_style.word_spacing = 0;
   text_style.color = SK_ColorBLACK;
@@ -1242,6 +1243,46 @@ TEST_F(RenderTest, LongWordParagraph) {
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->GetLineCount(), 4);
+  ASSERT_TRUE(Snapshot());
+}
+
+TEST_F(RenderTest, KernParagraph) {
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
+  text_style.font_size = 100;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 0;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1;
+  builder.PushStyle(text_style);
+  builder.AddText("AVAVAWAH A0 V0 VA To The Lo");
+  builder.PushStyle(text_style);
+  builder.AddText("A");
+  builder.PushStyle(text_style);
+  builder.AddText("V");
+  builder.PushStyle(text_style);
+  builder.AddText(" Dialog");
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth());
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+  
+  ASSERT_TRUE(Snapshot());
+
+  EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 441.16796875f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 506.16796875);
+  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 570.16796875);
+
   ASSERT_TRUE(Snapshot());
 }
 
