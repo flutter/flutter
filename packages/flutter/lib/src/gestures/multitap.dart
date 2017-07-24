@@ -68,6 +68,9 @@ class _TapTracker {
 /// Recognizes when the user has tapped the screen at the same location twice in
 /// quick succession.
 class DoubleTapGestureRecognizer extends GestureRecognizer {
+  /// Create a gesture recognizer for double taps.
+  DoubleTapGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
   // Implementation notes:
   // The double tap recognizer can be in one of four states. There's no
   // explicit enum for the states, because they are already captured by
@@ -315,8 +318,9 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// The [longTapDelay] defaults to [Duration.ZERO], which means
   /// [onLongTapDown] is called immediately after [onTapDown].
   MultiTapGestureRecognizer({
-    this.longTapDelay: Duration.ZERO
-  });
+    this.longTapDelay: Duration.ZERO,
+    Object debugOwner,
+  }) : super(debugOwner: debugOwner);
 
   /// A pointer that might cause a tap has contacted the screen at a particular
   /// location.

@@ -344,7 +344,7 @@ class TextSpan implements TreeDiagnostics {
   }) {
     return new DiagnosticsNode.lazy(
       name: name,
-      object: this,
+      value: this,
       description: '$runtimeType',
       style: style,
       fillProperties: (List<DiagnosticsNode> properties) {

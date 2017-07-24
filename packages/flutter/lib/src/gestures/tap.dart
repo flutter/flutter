@@ -64,7 +64,7 @@ typedef void GestureTapCancelCallback();
 ///  * [MultiTapGestureRecognizer]
 class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a tap gesture recognizer.
-  TapGestureRecognizer() : super(deadline: kPressTimeout);
+  TapGestureRecognizer({ Object debugOwner }) : super(deadline: kPressTimeout, debugOwner: debugOwner);
 
   /// A pointer that might cause a tap has contacted the screen at a particular
   /// location.

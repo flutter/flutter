@@ -215,7 +215,7 @@ class FlutterLogoDecoration extends Decoration {
     return new DiagnosticsNode.lazy(
       name: name,
       description: '$runtimeType',
-      object: this,
+      value: this,
       style: style,
       fillProperties: (List<DiagnosticsNode> properties) {
         properties.add(new DiagnosticsNode.message('$lightColor/$darkColor on $textColor'));

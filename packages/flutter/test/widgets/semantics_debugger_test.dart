@@ -232,7 +232,12 @@ void main() {
       ),
     );
 
-    await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 100.0);
+    // The fling below must be such that the velocity estimation examines an
+    // offset greater than the kTouchSlop. Too slow or too short a distance, and
+    // it won't trigger. The actual distance moved doesn't matter since this is
+    // interpreted as a gesture by the semantics debugger and sent to the widget
+    // as a semantic action that always moves by 10% of the complete track.
+    await tester.fling(find.byType(Slider), const Offset(-100.0, 0.0), 2000.0);
     expect(value, equals(0.65));
   });
 

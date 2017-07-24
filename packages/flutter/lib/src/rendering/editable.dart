@@ -118,11 +118,11 @@ class RenderEditable extends RenderBox {
        _offset = offset {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
-    _tap = new TapGestureRecognizer()
+    _tap = new TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapCancel = _handleTapCancel;
-    _longPress = new LongPressGestureRecognizer()
+    _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
 

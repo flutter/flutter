@@ -169,6 +169,7 @@ List<String> debugDescribeTransform(Matrix4 transform) {
 
 /// Property which handles [Matrix4] that represent transforms.
 class TransformProperty extends DiagnosticsProperty<Matrix4> {
+  /// Create a diagnostics property for [Matrix4] objects.
   TransformProperty(String name, Matrix4 value, {
     Object defaultValue: kNoDefaultValue,
   }) : super(

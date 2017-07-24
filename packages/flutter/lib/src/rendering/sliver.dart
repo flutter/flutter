@@ -636,7 +636,7 @@ class SliverGeometry implements TreeDiagnostics {
   }) {
     return new DiagnosticsNode.lazy(
       name: name,
-      object: this,
+      value: this,
       description: 'SliverGeometry',
       style: style,
       emptyBodyDescription: '<no decorations specified>',

@@ -462,7 +462,7 @@ class TextStyle extends TreeDiagnostics {
   }) {
     return new DiagnosticsNode.lazy(
       name: name,
-      object: this,
+      value: this,
       style: style,
       description: '$runtimeType',
       fillProperties: debugFillProperties,

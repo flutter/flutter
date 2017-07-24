@@ -41,7 +41,7 @@ void main() {
     position: const Offset(31.0, 29.0)
   );
 
-  // Down/move/up sequence 3: intervening motion
+  // Down/move/up sequence 3: intervening motion, more than kTouchSlop. (~21px)
   const PointerDownEvent down3 = const PointerDownEvent(
     pointer: 3,
     position: const Offset(10.0, 10.0)
@@ -55,6 +55,22 @@ void main() {
   const PointerUpEvent up3 = const PointerUpEvent(
     pointer: 3,
     position: const Offset(25.0, 25.0)
+  );
+
+  // Down/move/up sequence 4: intervening motion, less than kTouchSlop. (~17px)
+  const PointerDownEvent down4 = const PointerDownEvent(
+    pointer: 4,
+    position: const Offset(10.0, 10.0)
+  );
+
+  const PointerMoveEvent move4 = const PointerMoveEvent(
+    pointer: 4,
+    position: const Offset(22.0, 22.0)
+  );
+
+  const PointerUpEvent up4 = const PointerUpEvent(
+    pointer: 4,
+    position: const Offset(22.0, 22.0)
   );
 
   testGesture('Should recognize tap', (GestureTester tester) {
@@ -175,6 +191,39 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(3);
     expect(tapRecognized, isFalse);
     expect(tapCanceled, isTrue);
+
+    tap.dispose();
+  });
+
+  testGesture('Short distance does not cancel tap', (GestureTester tester) {
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
+
+    bool tapRecognized = false;
+    tap.onTap = () {
+      tapRecognized = true;
+    };
+    bool tapCanceled = false;
+    tap.onTapCancel = () {
+      tapCanceled = true;
+    };
+
+    tap.addPointer(down4);
+    tester.closeArena(4);
+    expect(tapRecognized, isFalse);
+    expect(tapCanceled, isFalse);
+    tester.route(down4);
+    expect(tapRecognized, isFalse);
+    expect(tapCanceled, isFalse);
+
+    tester.route(move4);
+    expect(tapRecognized, isFalse);
+    expect(tapCanceled, isFalse);
+    tester.route(up4);
+    expect(tapRecognized, isTrue);
+    expect(tapCanceled, isFalse);
+    GestureBinding.instance.gestureArena.sweep(4);
+    expect(tapRecognized, isTrue);
+    expect(tapCanceled, isFalse);
 
     tap.dispose();
   });

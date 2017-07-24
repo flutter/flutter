@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -78,7 +79,7 @@ void main() {
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
-    await gesture.moveBy(const Offset(-10.0, -10.0));
+    await gesture.moveBy(const Offset(-10.0, -40.0));
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
