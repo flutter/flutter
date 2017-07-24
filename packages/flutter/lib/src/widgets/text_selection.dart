@@ -314,7 +314,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
       (endpoints.length == 1) ?
         endpoints[0].point.dx :
         (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0,
-      endpoints[0].point.dy - renderObject.size.height,
+      endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
     final Rect editingRegion = new Rect.fromPoints(
@@ -479,7 +479,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
-                widget.renderObject.size.height / widget.renderObject.maxLines,
+                widget.renderObject.preferredLineHeight,
               ),
             ),
           ],
