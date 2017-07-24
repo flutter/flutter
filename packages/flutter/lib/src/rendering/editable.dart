@@ -375,7 +375,7 @@ class RenderEditable extends RenderBox {
     return _textPainter.maxIntrinsicWidth;
   }
 
-  // This does not required the layout to be updated.
+  // This does not require the layout to be updated.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
