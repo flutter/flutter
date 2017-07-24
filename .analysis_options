@@ -110,7 +110,7 @@ linter:
     - prefer_adjacent_string_concatenation
     - prefer_collection_literals
     # - prefer_conditional_assignment # not yet tested
-    # - prefer_const_constructors # https://github.com/dart-lang/linter/issues/752
+    - prefer_const_constructors
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
