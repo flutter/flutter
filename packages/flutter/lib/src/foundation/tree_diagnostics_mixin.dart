@@ -1092,8 +1092,8 @@ class PercentProperty extends DoubleProperty {
 ///   'visible',
 ///   value: visible,
 ///   ifFalse: 'hidden',
-/// )).toString()
-/// `
+/// )).toString();
+/// ```
 ///
 /// [FlagProperty] should also be used instead of `DiagnosticsProperty<bool>`
 /// if showing the bool value would not clearly indicate the meaning of the
