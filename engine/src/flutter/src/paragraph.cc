@@ -202,7 +202,6 @@ void Paragraph::Layout(double width, bool force) {
 
   // Reset member variables so Layout still works when called more than once
   lines_ = 0;
-  width_ = 0.0f;
   line_widths_ = std::vector<double>();
   line_heights_ = std::vector<double>();
   line_heights_.push_back(0);
@@ -798,7 +797,10 @@ SkRect Paragraph::GetCoordinatesForGlyphPosition(size_t pos) const {
                           line_heights_[line]);
 }
 
-size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
+size_t Paragraph::GetGlyphPositionAtCoordinate(
+    double dx,
+    double dy,
+    bool using_glyph_center_as_boundary) const {
   size_t offset = 0;
   size_t y_index = 1;
   size_t prev_count = 0;
@@ -814,7 +816,14 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
   prev_count = 0;
   for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size() - 1;
        ++x_index) {
-    if (dx < glyph_position_x_[y_index][x_index]) {
+    // TODO(garyq): Resolve edge case where second to last glyph position is
+    // skipped/unreachable.
+    if (dx < glyph_position_x_[y_index][x_index] -
+                 (using_glyph_center_as_boundary
+                      ? (glyph_position_x_[y_index][x_index + 1] -
+                         glyph_position_x_[y_index][x_index]) /
+                            2.0f
+                      : 0)) {
       break;
     } else {
       offset += prev_count;
