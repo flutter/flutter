@@ -2064,6 +2064,8 @@ class RenderCustomPaint extends RenderProxyBox {
     CustomPainter painter,
     CustomPainter foregroundPainter,
     Size preferredSize: Size.zero,
+    this.isComplex: false,
+    this.willChange: false,
     RenderBox child,
   }) : assert(preferredSize != null),
        _painter = painter,
@@ -2153,6 +2155,19 @@ class RenderCustomPaint extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  /// Whether to hint that this layer's painting should be cached.
+  ///
+  /// The compositor contains a raster cache that holds bitmaps of layers in
+  /// order to avoid the cost of repeatedly rendering those layers on each
+  /// frame.  If this flag is not set, then the compositor will apply its own
+  /// heuristics to decide whether the this layer is complex enough to benefit
+  /// from caching.
+  bool isComplex;
+
+  /// Whether the raster cache should be told that this painting is likely
+  /// to change in the next frame.
+  bool willChange;
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -2226,11 +2241,22 @@ class RenderCustomPaint extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_painter != null)
+    if (_painter != null) {
       _paintWithPainter(context.canvas, offset, _painter);
+      _setRasterCacheHints(context);
+    }
     super.paint(context, offset);
-    if (_foregroundPainter != null)
+    if (_foregroundPainter != null) {
       _paintWithPainter(context.canvas, offset, _foregroundPainter);
+      _setRasterCacheHints(context);
+    }
+  }
+
+  void _setRasterCacheHints(PaintingContext context) {
+    if (isComplex)
+      context.setIsComplexHint();
+    if (willChange)
+      context.setWillChangeHint();
   }
 }
 
