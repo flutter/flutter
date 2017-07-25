@@ -139,6 +139,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  gradle_plugin_test:
+    description: >
+      Verifies that the Flutter Gradle plugin supports standard and custom Android build types.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery_instrumentation_test:
     description: >
       Same as flutter_gallery__transition_perf but uses Android instrumentation
