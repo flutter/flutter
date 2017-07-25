@@ -18,32 +18,25 @@ void main() {
     });
 
     test('can assemble debug', () async {
-      final ProcessResult result = await project.runGradleTask('assembleDebug');
-      expect(result.exitCode, isZero);
+      await project.runGradleTask('assembleDebug');
     });
 
     test('can assemble profile', () async {
-      final ProcessResult result =
-          await project.runGradleTask('assembleProfile');
-      expect(result.exitCode, isZero);
+      await project.runGradleTask('assembleProfile');
     });
 
     test('can assemble release', () async {
-      final ProcessResult result =
-          await project.runGradleTask('assembleRelease');
-      expect(result.exitCode, isZero);
+      await project.runGradleTask('assembleRelease');
     });
 
     test('can assemble custom debug', () async {
       await project.addCustomBuildType('local', initWith: 'debug');
-      final ProcessResult result = await project.runGradleTask('assembleLocal');
-      expect(result.exitCode, isZero);
+      await project.runGradleTask('assembleLocal');
     });
 
     test('can assemble custom release', () async {
       await project.addCustomBuildType('beta', initWith: 'release');
-      final ProcessResult result = await project.runGradleTask('assembleBeta');
-      expect(result.exitCode, isZero);
+      await project.runGradleTask('assembleBeta');
     });
   });
 }
@@ -83,11 +76,12 @@ android {
     ''');
   }
 
-  Future<ProcessResult> runGradleTask(String task) async {
-    return Process.run(
+  Future<Null> runGradleTask(String task) async {
+    final ProcessResult result = await Process.run(
       './gradlew',
       <String>['-q', 'app:$task'],
       workingDirectory: androidPath,
     );
+    expect(result.exitCode, isZero);
   }
 }
