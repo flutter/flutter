@@ -17,13 +17,7 @@ class ChildSceneLayer : public Layer {
 
   void set_offset(const SkPoint& offset) { offset_ = offset; }
 
-  void set_device_pixel_ratio(float device_pixel_ratio) {
-    device_pixel_ratio_ = device_pixel_ratio;
-  }
-
-  void set_physical_size(const SkISize& physical_size) {
-    physical_size_ = physical_size;
-  }
+  void set_size(const SkSize& size) { size_ = size; }
 
   void set_export_node(ftl::RefPtr<ExportNode> export_node) {
     export_node_ = std::move(export_node);
@@ -39,8 +33,7 @@ class ChildSceneLayer : public Layer {
 
  private:
   SkPoint offset_;
-  float device_pixel_ratio_ = 1.0;
-  SkISize physical_size_;
+  SkSize size_;
   ftl::RefPtr<ExportNode> export_node_;
   bool hit_testable_ = true;
 

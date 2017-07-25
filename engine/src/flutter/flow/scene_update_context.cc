@@ -21,19 +21,15 @@ SceneUpdateContext::~SceneUpdateContext() = default;
 
 void SceneUpdateContext::AddChildScene(ExportNode* export_node,
                                        SkPoint offset,
-                                       float device_pixel_ratio,
                                        bool hit_testable) {
   FTL_DCHECK(top_entity_);
 
-  export_node->Bind(*this, top_entity_->entity_node(), offset,
-                    1.f / device_pixel_ratio, hit_testable);
+  export_node->Bind(*this, top_entity_->entity_node(), offset, hit_testable);
 }
 
 void SceneUpdateContext::CreateFrame(mozart::client::EntityNode& entity_node,
                                      const SkRRect& rrect,
                                      SkColor color,
-                                     SkScalar scale_x,
-                                     SkScalar scale_y,
                                      const SkRect& paint_bounds,
                                      std::vector<Layer*> paint_layers) {
   // Frames always clip their children.
@@ -72,6 +68,10 @@ void SceneUpdateContext::CreateFrame(mozart::client::EntityNode& entity_node,
     SetShapeColor(shape_node, color);
     return;
   }
+
+  // Apply current metrics and transformation scale factors.
+  const float scale_x = metrics_->scale_x * top_scale_x_;
+  const float scale_y = metrics_->scale_y * top_scale_y_;
 
   // If the painted area only covers a portion of the frame then we can
   // reduce the texture size by drawing just that smaller area.
@@ -223,47 +223,69 @@ SceneUpdateContext::Clip::~Clip() = default;
 
 SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
                                          const SkMatrix& transform)
-    : Entity(context) {
-  // TODO(MZ-192): The perspective and shear components in the matrix
-  // are not handled correctly.
-  MatrixDecomposition decomposition(transform);
-  if (decomposition.IsValid()) {
-    entity_node().SetTranslation(decomposition.translation().x(),  //
-                                 decomposition.translation().y(),  //
-                                 decomposition.translation().z()   //
-                                 );
-    entity_node().SetScale(decomposition.scale().x(),  //
-                           decomposition.scale().y(),  //
-                           decomposition.scale().z()   //
-                           );
-    entity_node().SetRotation(decomposition.rotation().fData[0],  //
-                              decomposition.rotation().fData[1],  //
-                              decomposition.rotation().fData[2],  //
-                              decomposition.rotation().fData[3]   //
-                              );
+    : Entity(context),
+      previous_scale_x_(context.top_scale_x_),
+      previous_scale_y_(context.top_scale_y_) {
+  if (!transform.isIdentity()) {
+    // TODO(MZ-192): The perspective and shear components in the matrix
+    // are not handled correctly.
+    MatrixDecomposition decomposition(transform);
+    if (decomposition.IsValid()) {
+      entity_node().SetTranslation(decomposition.translation().x(),  //
+                                   decomposition.translation().y(),  //
+                                   decomposition.translation().z()   //
+                                   );
+
+      entity_node().SetScale(decomposition.scale().x(),  //
+                             decomposition.scale().y(),  //
+                             decomposition.scale().z()   //
+                             );
+      context.top_scale_x_ *= decomposition.scale().x();
+      context.top_scale_y_ *= decomposition.scale().y();
+
+      entity_node().SetRotation(decomposition.rotation().fData[0],  //
+                                decomposition.rotation().fData[1],  //
+                                decomposition.rotation().fData[2],  //
+                                decomposition.rotation().fData[3]   //
+                                );
+    }
   }
 }
 
-SceneUpdateContext::Transform::~Transform() = default;
+SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
+                                         float scale_x,
+                                         float scale_y,
+                                         float scale_z)
+    : Entity(context),
+      previous_scale_x_(context.top_scale_x_),
+      previous_scale_y_(context.top_scale_y_) {
+  if (scale_x != 1.f || scale_y != 1.f || scale_z != 1.f) {
+    entity_node().SetScale(scale_x, scale_y, scale_z);
+    context.top_scale_x_ *= scale_x;
+    context.top_scale_y_ *= scale_y;
+  }
+}
+
+SceneUpdateContext::Transform::~Transform() {
+  context().top_scale_x_ = previous_scale_x_;
+  context().top_scale_y_ = previous_scale_y_;
+}
 
 SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
                                  const SkRRect& rrect,
                                  SkColor color,
-                                 float elevation,
-                                 SkScalar scale_x,
-                                 SkScalar scale_y)
+                                 float elevation)
     : Entity(context),
       rrect_(rrect),
       color_(color),
-      scale_x_(scale_x),
-      scale_y_(scale_y),
       paint_bounds_(SkRect::MakeEmpty()) {
-  entity_node().SetTranslation(0.f, 0.f, elevation);
+  if (elevation != 0.0)
+    entity_node().SetTranslation(0.f, 0.f, elevation);
 }
 
 SceneUpdateContext::Frame::~Frame() {
-  context().CreateFrame(entity_node(), rrect_, color_, scale_x_, scale_y_,
-                        paint_bounds_, std::move(paint_layers_));
+  context().CreateFrame(entity_node(), rrect_, color_, paint_bounds_,
+                        std::move(paint_layers_));
 }
 
 void SceneUpdateContext::Frame::AddPaintedLayer(Layer* layer) {

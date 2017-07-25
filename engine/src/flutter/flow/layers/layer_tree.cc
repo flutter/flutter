@@ -34,6 +34,7 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
       frame.gr_context(), color_space, SkRect::MakeEmpty(),
   };
+
   root_layer_->Preroll(&context, SkMatrix::I());
 }
 
@@ -42,18 +43,20 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
                             mozart::client::ContainerNode& container) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
 
+  SceneUpdateContext::Transform transform(context, 1.f / device_pixel_ratio_,
+                                          1.f / device_pixel_ratio_, 1.f);
   SceneUpdateContext::Frame frame(
       context,
       SkRRect::MakeRect(
-          SkRect::MakeIWH(frame_size_.width(), frame_size_.height())),
-      SK_ColorTRANSPARENT, 0.f, 1.f, 1.f);
+          SkRect::MakeWH(frame_size_.width(), frame_size_.height())),
+      SK_ColorTRANSPARENT, 0.f);
   if (root_layer_->needs_system_composite()) {
     root_layer_->UpdateScene(context);
   }
   if (root_layer_->needs_painting()) {
     frame.AddPaintedLayer(root_layer_.get());
   }
-  container.AddChild(frame.entity_node());
+  container.AddChild(transform.entity_node());
 }
 #endif
 

@@ -31,6 +31,10 @@ class LayerTree {
                bool ignore_raster_cache = false);
 
 #if defined(OS_FUCHSIA)
+  void set_device_pixel_ratio(float device_pixel_ratio) {
+    device_pixel_ratio_ = device_pixel_ratio;
+  }
+
   void UpdateScene(SceneUpdateContext& context,
                    mozart::client::ContainerNode& container);
 #endif
@@ -79,6 +83,10 @@ class LayerTree {
   uint32_t rasterizer_tracing_threshold_;
   bool checkerboard_raster_cache_images_;
   bool checkerboard_offscreen_layers_;
+
+#if defined(OS_FUCHSIA)
+  float device_pixel_ratio_ = 1.f;
+#endif
 
   FTL_DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };

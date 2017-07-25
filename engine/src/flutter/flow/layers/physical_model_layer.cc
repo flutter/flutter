@@ -34,13 +34,6 @@ void PhysicalModelLayer::Preroll(PrerollContext* context,
     set_paint_bounds(bounds);
 #endif  // defined(OS_FUCHSIA)
   }
-
-#if defined(OS_FUCHSIA)
-  if (needs_system_composite()) {
-    scale_x_ = matrix.getScaleX();
-    scale_y_ = matrix.getScaleY();
-  }
-#endif  // defined(OS_FUCHSIA)
 }
 
 #if defined(OS_FUCHSIA)
@@ -48,8 +41,7 @@ void PhysicalModelLayer::Preroll(PrerollContext* context,
 void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context) {
   FTL_DCHECK(needs_system_composite());
 
-  SceneUpdateContext::Frame frame(context, rrect_, color_, elevation_, scale_x_,
-                                  scale_y_);
+  SceneUpdateContext::Frame frame(context, rrect_, color_, elevation_);
   for (auto& layer : layers()) {
     if (layer->needs_painting()) {
       frame.AddPaintedLayer(layer.get());
