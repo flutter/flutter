@@ -34,8 +34,10 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   ImageStreamCompleter load(TestImageProvider key) =>
       new OneFrameImageStreamCompleter(_completer.future);
 
-  void complete() {
-    _completer.complete(new ImageInfo(image: testImage));
+  ImageInfo complete() {
+    final ImageInfo imageInfo = new ImageInfo(image: testImage);
+    _completer.complete(imageInfo);
+    return imageInfo;
   }
 
   @override
