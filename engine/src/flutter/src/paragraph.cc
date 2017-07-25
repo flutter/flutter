@@ -819,6 +819,8 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(double dx, double dy) const {
 
 SkIPoint Paragraph::GetWordBoundary(size_t offset) const {
   // TODO(garyq): Consider punctuation as separate words.
+  if (text_.size() == 0)
+    return SkIPoint::Make(0, 0);
   return SkIPoint::Make(
       minikin::getPrevWordBreakForCache(text_.data(), offset + 1, text_.size()),
       minikin::getNextWordBreakForCache(text_.data(), offset, text_.size()));
