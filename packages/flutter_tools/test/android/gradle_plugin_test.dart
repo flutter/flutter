@@ -48,8 +48,11 @@ class FlutterProject {
   String name;
 
   static Future<FlutterProject> create(Directory directory, String name) async {
+    final String flutterExecutable = path.absolute(
+      path.join('..', '..', 'bin', 'flutter'),
+    );
     final ProcessResult result = await Process.run(
-      'flutter',
+      flutterExecutable,
       <String>['create', name],
       workingDirectory: directory.path,
     );
