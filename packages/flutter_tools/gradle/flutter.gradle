@@ -99,6 +99,7 @@ class FlutterPlugin implements Plugin<Project> {
 
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
+
             project.dependencies {
                 compile project.files(flutterJar)
             }
@@ -155,25 +156,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    /**
-     * Adds suitable flutter.jar dependencies to the specified configuration, provided it is the
-     * compile configuration for a one of the project's buildTypes (debugCompile, releaseCompile, etc)
-     */
-    private void addFlutterJarCompileDependency(Project project, Configuration cf) {
-        project.android.buildTypes.find({ cf.name == "${it.name}Compile" }).each {
-            FileCollection files
-            String buildMode = buildModeFor(it)
-            if (buildMode == "debug") {
-                files = project.files(flutterX86Jar, debugFlutterJar)
-            } else if (buildMode == "profile") {
-                files = project.files(profileFlutterJar)
-            } else {
-                files = project.files(releaseFlutterJar)
-            }
-            project.dependencies.add(cf.name, files)
-        }
-    }
-
     private void addFlutterJarProvidedDependency(Project project) {
         project.dependencies {
             if (flutterJar != null) {
@@ -181,6 +163,27 @@ class FlutterPlugin implements Plugin<Project> {
             } else {
                 debugProvided project.files(debugFlutterJar)
                 releaseProvided project.files(releaseFlutterJar)
+            }
+        }
+    }
+
+    /**
+     * Adds suitable flutter.jar dependencies to the specified configuration, provided it is the
+     * compile configuration for a one of the project's buildTypes (debugCompile, releaseCompile, etc)
+     */
+    private void addFlutterJarCompileDependency(Project project, Configuration cf) {
+        project.android.buildTypes.find({ cf.name == "${it.name}Compile" }).each { buildType ->
+            project.dependencies {
+                add(cf.name, project.files {
+                    String buildMode = buildModeFor(buildType)
+                    if (buildMode == "debug") {
+                        [flutterX86Jar, debugFlutterJar]
+                    } else if (buildMode == "profile") {
+                        profileFlutterJar
+                    } else {
+                        releaseFlutterJar
+                    }
+                })
             }
         }
     }
