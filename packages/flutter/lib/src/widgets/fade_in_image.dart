@@ -15,16 +15,13 @@ import 'ticker_provider.dart';
 /// An image that shows a [placeholder] image while the target [image] is
 /// loading, then fades in the new image when it loads.
 ///
-/// Use this class to display long-loading images, such as [new Image.network],
+/// Use this class to display long-loading images, such as [new NetworkImage],
 /// so that the image appears on screen with a graceful animation rather than a
 /// sudden jerk.
 ///
-/// This image ignores the [placeholder]'s and [image]'s `color` and `blendMode`
-/// properties in order to efficiently perform the cross-fade animation.
-///
-/// If the [image]'s [ImageProvider] returns [ImageInfo] synchronously, such as
-/// when the image has been loaded and cached, the [image] is displayed
-/// immediately and the [placeholder] is never displayed.
+/// If the [image] emits an [ImageInfo] synchronously, such as when the image
+/// has been loaded and cached, the [image] is displayed immediately and the
+/// [placeholder] is never displayed.
 ///
 /// [fadeOutDuration] and [fadeOutCurve] control the fade-out animation of the
 /// placeholder.
@@ -32,15 +29,16 @@ import 'ticker_provider.dart';
 /// [fadeInDuration] and [fadeInCurve] control the fade-in animation of the
 /// target [image].
 ///
-/// Prefer [placeholder] that's already cached so that it is displayed in one
+/// Prefer a [placeholder] that's already cached so that it is displayed in one
 /// frame. This prevents it from appearing suddenly on the screen.
 ///
 /// ## Sample code:
 ///
 /// ```dart
 /// return new FadeInImage(
-///   placeholder: new Image.memory(bytes),
-///   image: new Image.network('https://yourbackend.com/image.png'),
+///   // here `bytes` is a Uint8List containing the bytes for the in-memory image
+///   placeholder: new MemoryImage(bytes),
+///   image: new NetworkImage('https://backend.example.com/image.png'),
 /// );
 /// ```
 class FadeInImage extends StatefulWidget {
@@ -62,7 +60,6 @@ class FadeInImage extends StatefulWidget {
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
-    this.centerSlice,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(fadeOutDuration != null),
@@ -71,12 +68,15 @@ class FadeInImage extends StatefulWidget {
        assert(fadeInCurve != null),
        super(key: key);
 
-  /// Creates a widget that uses a placeholder image stored in-memory while
+  /// Creates a widget that uses a placeholder image stored in memory while
   /// loading the final image from the network.
   ///
   /// [placeholder] contains the bytes of the in-memory image.
   ///
   /// [image] is the URL of the final image.
+  ///
+  /// [placeholderScale] and [imageScale] are passed to their respective
+  /// [ImageProvider]s (see also [ImageInfo.scale]).
   ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration] and [fadeInCurve] arguments must not be null.
@@ -91,7 +91,8 @@ class FadeInImage extends StatefulWidget {
     Key key,
     @required Uint8List placeholder,
     @required String image,
-    double scale: 1.0,
+    double placeholderScale: 1.0,
+    double imageScale: 1.0,
     this.fadeOutDuration: const Duration(milliseconds: 300),
     this.fadeOutCurve: Curves.easeOut,
     this.fadeInDuration: const Duration(milliseconds: 700),
@@ -101,16 +102,15 @@ class FadeInImage extends StatefulWidget {
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
-    this.centerSlice,
   }) : assert(placeholder != null),
-      assert(image != null),
-      placeholder = new MemoryImage(placeholder, scale: scale),
-      image = new NetworkImage(image, scale: scale),
-      assert(fadeOutDuration != null),
-      assert(fadeOutCurve != null),
-      assert(fadeInDuration != null),
-      assert(fadeInCurve != null),
-      super(key: key);
+       assert(image != null),
+       placeholder = new MemoryImage(placeholder, scale: placeholderScale),
+       image = new NetworkImage(image, scale: imageScale),
+       assert(fadeOutDuration != null),
+       assert(fadeOutCurve != null),
+       assert(fadeInDuration != null),
+       assert(fadeInCurve != null),
+       super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
   /// while loading the final image from the network.
@@ -118,6 +118,9 @@ class FadeInImage extends StatefulWidget {
   /// [placeholder] is the key of the image in the asset bundle.
   ///
   /// [image] is the URL of the final image.
+  ///
+  /// [placeholderScale] and [imageScale] are passed to their respective
+  /// [ImageProvider]s (see also [ImageInfo.scale]).
   ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration] and [fadeInCurve] arguments must not be null.
@@ -133,7 +136,8 @@ class FadeInImage extends StatefulWidget {
     @required String placeholder,
     @required String image,
     AssetBundle bundle,
-    double scale: 1.0,
+    double placeholderScale,
+    double imageScale: 1.0,
     this.fadeOutDuration: const Duration(milliseconds: 300),
     this.fadeOutCurve: Curves.easeOut,
     this.fadeInDuration: const Duration(milliseconds: 700),
@@ -143,13 +147,12 @@ class FadeInImage extends StatefulWidget {
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
-    this.centerSlice,
   }) : assert(placeholder != null),
        assert(image != null),
-       placeholder = scale != null
-         ? new ExactAssetImage(placeholder, bundle: bundle, scale: scale)
+       placeholder = placeholderScale != null
+         ? new ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale)
          : new AssetImage(placeholder, bundle: bundle),
-       image = new NetworkImage(image, scale: scale),
+       image = new NetworkImage(image, scale: imageScale),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
@@ -177,13 +180,17 @@ class FadeInImage extends StatefulWidget {
   /// If non-null, require the image to have this width.
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
-  /// aspect ratio.
+  /// aspect ratio. This may result in a sudden change if the size of the
+  /// placeholder image does not match that of the target image. The size is
+  /// also affected by the scale factor.
   final double width;
 
   /// If non-null, require the image to have this height.
   ///
   /// If null, the image will pick a size that best preserves its intrinsic
-  /// aspect ratio.
+  /// aspect ratio. This may result in a sudden change if the size of the
+  /// placeholder image does not match that of the target image. The size is
+  /// also affected by the scale factor.
   final double height;
 
   /// How to inscribe the image into the space allocated during layout.
@@ -201,15 +208,6 @@ class FadeInImage extends StatefulWidget {
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
-
-  /// The center slice for a nine-patch image.
-  ///
-  /// The region of the image inside the center slice will be stretched both
-  /// horizontally and vertically to fit the image into its destination. The
-  /// region of the image above and below the center slice will be stretched
-  /// only horizontally and the region of the image to the left and right of
-  /// the center slice will be stretched only vertically.
-  final Rect centerSlice;
 
   @override
   State<StatefulWidget> createState() => new _FadeInImageState();
@@ -239,7 +237,7 @@ enum FadeInImagePhase {
   completed,
 }
 
-typedef _ImageProviderResolverListener = void Function();
+typedef void _ImageProviderResolverListener();
 
 class _ImageProviderResolver {
   _ImageProviderResolver({
@@ -380,7 +378,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
           }
           break;
         case FadeInImagePhase.completed:
-        // Nothing to do.
+          // Nothing to do.
           break;
       }
     });
@@ -421,7 +419,6 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
       fit: widget.fit,
       alignment: widget.alignment,
       repeat: widget.repeat,
-      centerSlice: widget.centerSlice,
     );
   }
 
