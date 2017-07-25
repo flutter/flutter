@@ -1625,7 +1625,7 @@ String describeEnum(Object enumEntry) {
 /// ## Sample code
 ///
 /// ```dart
-/// example() {
+/// checkNames() {
 ///   assert(camelCaseToHyphenatedName('deferToChild') == 'defer-to-child');
 ///   assert(camelCaseToHyphenatedName('Monday') == 'monday');
 ///   assert(camelCaseToHyphenatedName('monday') == 'monday');
