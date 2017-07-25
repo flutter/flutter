@@ -92,6 +92,12 @@ android {
       <String>['-q', 'app:$task'],
       workingDirectory: androidPath,
     );
+    if (result.exitCode != 0) {
+      print('stdout:');
+      print(result.stdout);
+      print('stderr:');
+      print(result.stderr);
+    }
     expect(result.exitCode, isZero);
   }
 }
