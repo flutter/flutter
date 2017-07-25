@@ -495,12 +495,11 @@ class _PageViewState extends State<PageView> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('${widget.scrollDirection}');
-    if (widget.reverse)
-      description.add('reversed');
-    description.add('${widget.controller}');
-    description.add('${widget.physics}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
+    description.add(new FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
+    description.add(new DiagnosticsProperty<PageController>('controller', widget.controller, showName: false));
+    description.add(new DiagnosticsProperty<ScrollPhysics>('physics', widget.physics, showName: false));
   }
 }

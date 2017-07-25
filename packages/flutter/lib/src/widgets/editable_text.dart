@@ -254,25 +254,18 @@ class EditableText extends StatefulWidget {
   EditableTextState createState() => new EditableTextState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('controller: $controller');
-    description.add('focusNode: $focusNode');
-    if (obscureText != false)
-      description.add('obscureText: $obscureText');
-    if (autocorrect != true)
-      description.add('autocorrect: $autocorrect');
-    description.add('${style.toString().split("\n").join(", ")}');
-    if (textAlign != null)
-      description.add('$textAlign');
-    if (textScaleFactor != null)
-      description.add('textScaleFactor: $textScaleFactor');
-    if (maxLines != 1)
-      description.add('maxLines: $maxLines');
-    if (autofocus != false)
-      description.add('autofocus: $autofocus');
-    if (keyboardType != null)
-      description.add('keyboardType: $keyboardType');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<TextEditingController>('controller', controller));
+    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));
+    description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    style?.debugFillProperties(description);
+    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+    description.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    description.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
   }
 }
 

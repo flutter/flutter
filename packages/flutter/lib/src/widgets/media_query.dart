@@ -193,8 +193,8 @@ class MediaQuery extends InheritedWidget {
   bool updateShouldNotify(MediaQuery old) => data != old.data;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$data');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
 }
