@@ -83,7 +83,13 @@ class Paragraph {
 
   // Returns the index of the glyph that corresponds to the provided coordinate,
   // with the top left corner as the origin, and +y direction as down.
-  size_t GetGlyphPositionAtCoordinate(double dx, double dy) const;
+  //
+  // When using_glyph_center_as_boundary == true, coords to the + direction of
+  // the center x-position of the glyph will be considered as the next glyph.
+  size_t GetGlyphPositionAtCoordinate(
+      double dx,
+      double dy,
+      bool using_glyph_center_as_boundary = false) const;
 
   // Returns a bounding box that encloses the glyph at the index pos.
   SkRect GetCoordinatesForGlyphPosition(size_t pos) const;
