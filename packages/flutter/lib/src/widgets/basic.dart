@@ -256,7 +256,10 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// Custom painters normally size themselves to their child. If they do not have
 /// a child, they attempt to size themselves to the [size], which defaults to
-/// [Size.zero].
+/// [Size.zero].  [size] must not be null.
+///
+/// [isComplex] and [willChange] are hints to the compositor's raster cache
+/// and must not be null.
 ///
 /// ## Sample code
 ///
@@ -286,9 +289,18 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///  * [Canvas], the class that a custom painter uses to paint.
 class CustomPaint extends SingleChildRenderObjectWidget {
   /// Creates a widget that delegates its painting.
-  const CustomPaint({ Key key, this.painter, this.foregroundPainter, this.size: Size.zero, Widget child })
-    : assert(size != null),
-      super(key: key, child: child);
+  const CustomPaint({
+    Key key,
+    this.painter,
+    this.foregroundPainter,
+    this.size: Size.zero,
+    this.isComplex: false,
+    this.willChange: false,
+    Widget child
+  }) : assert(size != null),
+       assert(isComplex != null),
+       assert(willChange != null),
+       super(key: key, child: child);
 
   /// The painter that paints before the children.
   final CustomPainter painter;
@@ -305,12 +317,27 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// instead.
   final Size size;
 
+  /// Whether the painting is complex enough to benefit from caching.
+  ///
+  /// The compositor contains a raster cache that holds bitmaps of layers in
+  /// order to avoid the cost of repeatedly rendering those layers on each
+  /// frame.  If this flag is not set, then the compositor will apply its own
+  /// heuristics to decide whether the this layer is complex enough to benefit
+  /// from caching.
+  final bool isComplex;
+
+  /// Whether the raster cache should be told that this painting is likely
+  /// to change in the next frame.
+  final bool willChange;
+
   @override
   RenderCustomPaint createRenderObject(BuildContext context) {
     return new RenderCustomPaint(
       painter: painter,
       foregroundPainter: foregroundPainter,
       preferredSize: size,
+      isComplex: isComplex,
+      willChange: willChange,
     );
   }
 
@@ -319,7 +346,9 @@ class CustomPaint extends SingleChildRenderObjectWidget {
     renderObject
       ..painter = painter
       ..foregroundPainter = foregroundPainter
-      ..preferredSize = size;
+      ..preferredSize = size
+      ..isComplex = isComplex
+      ..willChange = willChange;
   }
 
   @override
