@@ -38,7 +38,7 @@ void main() {
       await project.addCustomBuildType('beta', initWith: 'release');
       await project.runGradleTask('assembleBeta');
     });
-  });
+  }, timeout: new Timeout.factor(4));
 }
 
 String get flutterExecutable {
