@@ -41,6 +41,11 @@ void main() {
   });
 }
 
+String get flutterExecutable {
+  final String fileName = Platform.isWindows ? 'flutter.bat' : 'flutter';
+  return path.absolute(path.join('..', '..', 'bin', fileName));
+}
+
 class FlutterProject {
   FlutterProject(this.parent, this.name);
 
@@ -48,9 +53,6 @@ class FlutterProject {
   String name;
 
   static Future<FlutterProject> create(Directory directory, String name) async {
-    final String flutterExecutable = path.absolute(
-      path.join('..', '..', 'bin', 'flutter'),
-    );
     final ProcessResult result = await Process.run(
       flutterExecutable,
       <String>['create', name],
