@@ -47,7 +47,8 @@ String get flutterExecutable {
 }
 
 String get gradleExecutable {
-  return Platform.isWindows ? './gradlew.bat' : './gradlew';
+  final String fileName = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
+  return path.join('.', fileName);
 }
 
 class FlutterProject {
