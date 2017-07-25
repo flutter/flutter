@@ -133,8 +133,8 @@ class FlutterPlugin implements Plugin<Project> {
             }
             // Add flutter.jar dependencies to all <buildType>Compile configurations, including custom ones
             // added after applying the Flutter plugin.
-            project.configurations.each { addFlutterJarCompileDependency(project, it) }
-            project.configurations.whenObjectAdded { addFlutterJarCompileDependency(project, it) }
+            project.android.buildTypes.each { addFlutterJarCompileDependency(project, it) }
+            project.android.buildTypes.whenObjectAdded { addFlutterJarCompileDependency(project, it) }
         }
 
         project.extensions.create("flutter", FlutterExtension)
@@ -168,24 +168,39 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
-     * Adds suitable flutter.jar dependencies to the specified configuration, provided it is the
-     * compile configuration for a one of the project's buildTypes (debugCompile, releaseCompile, etc)
+     * Adds suitable flutter.jar compile dependencies to the specified buildType.
+     *
+     * Note: The BuildType DSL type is not public, and is therefore just Object here.
      */
-    private void addFlutterJarCompileDependency(Project project, Configuration cf) {
-        project.android.buildTypes.find({ cf.name == "${it.name}Compile" }).each { buildType ->
-            project.dependencies {
-                add(cf.name, project.files {
-                    String buildMode = buildModeFor(buildType)
-                    if (buildMode == "debug") {
-                        [flutterX86Jar, debugFlutterJar]
-                    } else if (buildMode == "profile") {
-                        profileFlutterJar
-                    } else {
-                        releaseFlutterJar
-                    }
-                })
-            }
+    private void addFlutterJarCompileDependency(Project project, Object buildType) {
+        project.dependencies {
+            add(buildType.name + "Compile", project.files {
+                String buildMode = buildModeFor(buildType)
+                if (buildMode == "debug") {
+                    [flutterX86Jar, debugFlutterJar]
+                } else if (buildMode == "profile") {
+                    profileFlutterJar
+                } else {
+                    releaseFlutterJar
+                }
+            })
         }
+    }
+
+    /**
+     * Returns a Flutter build mode suitable for the specified Android buildType.
+     *
+     * Note: The BuildType DSL type is not public, and is therefore just Object here.
+     *
+     * @return "debug", "profile", or "release" (fall-back).
+     */
+    private String buildModeFor(Object buildType) {
+        if (buildType.name == "profile") {
+            return "profile"
+        } else if (buildType.debuggable) {
+            return "debug"
+        }
+        return "release"
     }
 
     private void addFlutterTask(Project project) {
@@ -202,7 +217,12 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         if (project.tasks.findByName('flutterBuildX86Jar')) {
-            project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
+            project.android.buildTypes.each { buildType ->
+                Task task = project.tasks.findByName("compile${buildType.name.capitalize()}JavaWithJavac")
+                if (task) {
+                    task.dependsOn project.flutterBuildX86Jar
+                }
+            }
         }
 
         File kernel
@@ -245,24 +265,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
             variant.outputs[0].processResources.dependsOn(copyFlxTask)
         }
-    }
-
-    /**
-     * Returns a Flutter build mode suitable for the specified Android buildType.
-     *
-     * @return "debug", "profile", or "release" (fall-back).
-     */
-    private String buildModeFor(Object buildType) {
-        // The implementation is dynamically accessing properties of the Android Gradle plugin's
-        // DSL type BuildType_Decorated which is not public.
-        if (buildType.hasProperty("name") && buildType.hasProperty("debuggable")) {
-            if (buildType.name == "profile") {
-                return "profile"
-            } else if (buildType.debuggable) {
-                return "debug"
-            }
-        }
-        return "release"
     }
 }
 
