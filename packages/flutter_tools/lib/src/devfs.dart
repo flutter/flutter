@@ -440,7 +440,7 @@ class DevFS {
         });
         final DeltaProgram delta = await generator.computeDelta();
         final Program program = delta.newProgram;
-        writeProgramToBinary(program, mainPath + ".dill");
+        await writeProgramToBinary(program, mainPath + ".dill");
         dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
                 () => new DevFSFileContent(fs.file(mainPath + ".dill")));
       }

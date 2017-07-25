@@ -29,8 +29,8 @@ Future<String> compile({String packagesPath, String mainPath}) async {
       Artifact.platformKernelDill);
   // TODO(aam): Move FlutterFastaTarget to flutter tools.
   final CompilerOptions options = new CompilerOptions()
-    ..dartLibraries = loadDartLibraries()
     ..packagesFileUri = Uri.parse(packagesPath)
+    // TODO(aam): Use outline.dill instead of full platform.dill here.
     ..sdkSummary = Uri.parse(platformKernelDill)
     ..linkedDependencies = <Uri>[Uri.parse(platformKernelDill)]
     ..target = new FlutterFastaTarget(new TargetFlags());
@@ -43,6 +43,15 @@ Future<String> compile({String packagesPath, String mainPath}) async {
   // than next to the source main dart file? It goes into .flx and
   // is interpreted by Dart VM as if it is a source code.
   final String kernelBinaryFilename = mainPath + ".dill";
+  // TODO(aam): Consider using serializeProgram from
+  // pkg/front_end/lib/src/fasta/kernel/utils.dart (helper function should be
+  // moved to the kernel package too).
+  // This is only relevant when we can use a summary input file
+  // (and no linked-dependencies). At that point instead of serializing
+  // a .dill file with an outline of the SDK, we can serialize just the
+  // program portion and exclude the sdk code. This logic is what is used in
+  // kernel-service.dart and in the incremental kernel generator to serialize
+  // an incremental build.
   await writeProgramToBinary(program, kernelBinaryFilename);
   return kernelBinaryFilename;
 }
