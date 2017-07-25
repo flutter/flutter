@@ -1608,7 +1608,7 @@ String describeIdentity(Object object) =>
 ///   monday, tuesday, wednesday, thursday, friday, saturday, sunday
 /// }
 ///
-/// main() {
+/// validateDescribeEnum() {
 ///   assert(Day.monday.toString() == 'Day.monday');
 ///   assert(describeEnum(Day.monday) == 'monday');
 /// }
@@ -1625,7 +1625,7 @@ String describeEnum(Object enumEntry) {
 /// ## Sample code
 ///
 /// ```dart
-/// checkNames() {
+/// validateCamelCaseToHyphenatedName() {
 ///   assert(camelCaseToHyphenatedName('deferToChild') == 'defer-to-child');
 ///   assert(camelCaseToHyphenatedName('Monday') == 'monday');
 ///   assert(camelCaseToHyphenatedName('monday') == 'monday');

@@ -993,7 +993,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// ```dart
 /// // Register the RouteObserver as a navigation observer.
 /// final RouteObserver<PageRoute> routeObserver = new RouteObserver<PageRoute>();
-/// void _main() {
+/// void main() {
 ///   runApp(new MaterialApp(
 ///     home: new Container(),
 ///     navigatorObservers: [routeObserver],
