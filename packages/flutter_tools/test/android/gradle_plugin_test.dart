@@ -46,6 +46,10 @@ String get flutterExecutable {
   return path.absolute(path.join('..', '..', 'bin', fileName));
 }
 
+String get gradleExecutable {
+  return Platform.isWindows ? './gradlew.bat' : './gradlew';
+}
+
 class FlutterProject {
   FlutterProject(this.parent, this.name);
 
@@ -83,7 +87,7 @@ android {
 
   Future<Null> runGradleTask(String task) async {
     final ProcessResult result = await Process.run(
-      './gradlew',
+      gradleExecutable,
       <String>['-q', 'app:$task'],
       workingDirectory: androidPath,
     );
