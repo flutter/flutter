@@ -181,8 +181,8 @@ void Paragraph::Layout(double width, bool force) {
   // a pattern binary dataset. Should be something along these lines:
   //
   //   minikin::Hyphenator* hyph =
-  //   minikin::Hyphenator::loadBinary(<paramsgohere>);
-  //      breaker_.setLocale(icu::Locale::getRoot(), &hyph);
+  //     minikin::Hyphenator::loadBinary(<paramsgohere>);
+  //   breaker_.setLocale(icu::Locale::getRoot(), &hyph);
   //
   AddRunsToLineBreaker(collection_map);
   breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
@@ -201,17 +201,20 @@ void Paragraph::Layout(double width, bool force) {
   SkTextBlobBuilder builder;
 
   // Reset member variables so Layout still works when called more than once
-  max_intrinsic_width_ = 0.0f;
   lines_ = 0;
+  width_ = 0.0f;
   line_widths_ = std::vector<double>();
   line_heights_ = std::vector<double>();
+  line_heights_.push_back(0);
+  records_ = std::vector<PaintRecord>();
+  height_ = 0.0f;
 
   // Set padding elements to have a minimum point.
-  line_heights_.push_back(0);
   glyph_position_x_ = std::vector<std::vector<double>>();
   glyph_position_x_.push_back(std::vector<double>());
   std::vector<double> glyph_single_line_position_x;
   glyph_single_line_position_x.push_back(0);
+  double previous_run_x_position = 0.0f;
 
   SkScalar x = 0.0f;
   SkScalar y = 0.0f;
@@ -334,6 +337,7 @@ void Paragraph::Layout(double width, bool force) {
       buffer_sizes = std::vector<size_t>();
       word_count = 0;
       double temp_line_spacing = 0;
+      double current_x_position = previous_run_x_position;
       while (blob_start < glyph_count) {
         const size_t blob_length = GetBlobLength(layout, blob_start);
         buffer_sizes.push_back(blob_length);
@@ -362,9 +366,10 @@ void Paragraph::Layout(double width, bool force) {
 
           const size_t pos_index = 2 * blob_index;
 
-          buffers.back()->pos[pos_index] = layout.getX(glyph_index);
-          glyph_single_line_position_x.push_back(
-              buffers.back()->pos[pos_index]);
+          current_x_position = layout.getX(glyph_index);
+          buffers.back()->pos[pos_index] = current_x_position;
+          glyph_single_line_position_x.push_back(current_x_position +
+                                                 previous_run_x_position);
           buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
 
           // Check if the current Glyph is a whitespace and handle multiple
@@ -383,6 +388,7 @@ void Paragraph::Layout(double width, bool force) {
           prev_char_advance = layout.getCharAdvance(glyph_index);
         }
         blob_start += blob_length;
+        previous_run_x_position += current_x_position + prev_char_advance;
       }
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
@@ -440,6 +446,7 @@ void Paragraph::Layout(double width, bool force) {
         x = 0.0f;
         prev_word_pos = 0;
         prev_char_advance = 0.0f;
+        previous_run_x_position = 0.0f;
         line_width = 0.0f;
         break_index += 1;
         lines_++;
