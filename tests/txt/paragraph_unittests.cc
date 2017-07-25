@@ -906,6 +906,10 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(3, 3), 0ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 1), 1ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(300, 2), 10ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(301, 2.2), 10ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(302, 2.6), 10ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(301, 2.1), 10ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20), 18ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(450, 20), 16ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 90), 36ull);
@@ -1093,7 +1097,6 @@ TEST_F(RenderTest, GetWordBoundaryParagraph) {
 
   paragraph->Paint(GetCanvas(), 0, 0);
 
-
   SkPaint paint;
   paint.setStyle(SkPaint::kStroke_Style);
   paint.setAntiAlias(true);
@@ -1154,7 +1157,8 @@ TEST_F(RenderTest, GetWordBoundaryParagraph) {
   rect = paragraph->GetCoordinatesForGlyphPosition(icu_text.length() - 5);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  EXPECT_EQ(paragraph->GetWordBoundary(icu_text.length() - 1), SkIPoint::Make(icu_text.length() - 5, icu_text.length()));
+  EXPECT_EQ(paragraph->GetWordBoundary(icu_text.length() - 1),
+            SkIPoint::Make(icu_text.length() - 5, icu_text.length()));
   rect = paragraph->GetCoordinatesForGlyphPosition(icu_text.length());
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
@@ -1320,7 +1324,7 @@ TEST_F(RenderTest, KernParagraph) {
   paragraph->Layout(GetTestCanvasWidth());
 
   paragraph->Paint(GetCanvas(), 0, 0);
-  
+
   ASSERT_TRUE(Snapshot());
 
   EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
