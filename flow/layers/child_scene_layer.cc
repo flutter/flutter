@@ -26,15 +26,8 @@ void ChildSceneLayer::UpdateScene(SceneUpdateContext& context) {
   // or whether we should leave this up to the Flutter application to decide.
   // In some situations, it might be useful to allow children to draw
   // outside of their layout bounds.
-  //
-  // float inverse_device_pixel_ratio = 1.f / device_pixel_ratio_;
-  // SkRect bounds =
-  //     SkRect::MakeXYWH(offset_.x(), offset_.y(),
-  //                      physical_size_.width() * inverse_device_pixel_ratio,
-  //                      physical_size_.height() * inverse_device_pixel_ratio);
   if (export_node_) {
-    context.AddChildScene(export_node_.get(), offset_, device_pixel_ratio_,
-                          hit_testable_);
+    context.AddChildScene(export_node_.get(), offset_, hit_testable_);
   }
 }
 

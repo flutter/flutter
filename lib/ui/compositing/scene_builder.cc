@@ -224,24 +224,21 @@ void SceneBuilder::addPicture(double dx,
 
 void SceneBuilder::addChildScene(double dx,
                                  double dy,
-                                 double devicePixelRatio,
-                                 int physicalWidth,
-                                 int physicalHeight,
+                                 double width,
+                                 double height,
                                  SceneHost* sceneHost,
                                  bool hitTestable) {
 #if defined(OS_FUCHSIA)
   if (!m_currentLayer)
     return;
 
-  SkRect sceneRect = SkRect::MakeXYWH(dx, dy, physicalWidth / devicePixelRatio,
-                                      physicalHeight / devicePixelRatio);
+  SkRect sceneRect = SkRect::MakeXYWH(dx, dy, width, height);
   if (!SkRect::Intersects(sceneRect, m_cullRects.top()))
     return;
 
   std::unique_ptr<flow::ChildSceneLayer> layer(new flow::ChildSceneLayer());
   layer->set_offset(SkPoint::Make(dx, dy));
-  layer->set_device_pixel_ratio(devicePixelRatio);
-  layer->set_physical_size(SkISize::Make(physicalWidth, physicalHeight));
+  layer->set_size(SkSize::Make(width, height));
   layer->set_export_node(sceneHost->exportNode());
   layer->set_hit_testable(hitTestable);
   m_currentLayer->Add(std::move(layer));

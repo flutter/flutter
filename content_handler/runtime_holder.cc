@@ -206,20 +206,36 @@ void RuntimeHolder::CreateView(
   input_connection_->SetEventListener(std::move(input_listener));
 
   // Setup the session.
-  mozart2::SessionPtr session;
-  mozart2::SceneManagerPtr scene_manager;
+  fidl::InterfaceHandle<mozart2::SceneManager> scene_manager;
   view_manager_->GetSceneManager(scene_manager.NewRequest());
-  scene_manager->CreateSession(session.NewRequest(),
-                               nullptr /* session listener */);
+
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([
-    rasterizer = rasterizer_.get(),           //
-    session = session.PassInterfaceHandle(),  //
-    import_token = std::move(import_token)    //
+    rasterizer = rasterizer_.get(),            //
+    scene_manager = std::move(scene_manager),  //
+    import_token = std::move(import_token),    //
+    weak_runtime_holder = GetWeakPtr()
   ]() mutable {
     ASSERT_IS_GPU_THREAD;
-    rasterizer->SetSession(std::move(session), std::move(import_token));
+    rasterizer->SetScene(
+        std::move(scene_manager), std::move(import_token),
+        // TODO(MZ-222): Ideally we would immediately redraw the previous layer
+        // tree when the metrics change since there's no need to rerecord it.
+        // However, we want to make sure there's only one outstanding frame.
+        // We should improve the frame scheduling so that the rasterizer thread
+        // can self-schedule re-rasterization.
+        [weak_runtime_holder] {
+          // This is on the GPU thread thread. Post to the Platform/UI
+          // thread for the completion callback.
+          ASSERT_IS_GPU_THREAD;
+          blink::Threads::Platform()->PostTask([weak_runtime_holder]() {
+            // On the Platform/UI thread.
+            ASSERT_IS_UI_THREAD;
+            if (weak_runtime_holder) {
+              weak_runtime_holder->OnRedrawFrame();
+            }
+          });
+        });
   }));
-
   runtime_ = blink::RuntimeController::Create(this);
 
   const uint8_t* isolate_snapshot_data;
@@ -290,6 +306,7 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
                                     last_begin_frame_time_);
   layer_tree->set_frame_size(SkISize::Make(viewport_metrics_.physical_width,
                                            viewport_metrics_.physical_height));
+  layer_tree->set_device_pixel_ratio(viewport_metrics_.device_pixel_ratio);
 
   // We are on the Platform/UI thread. Post to the GPU thread to render.
   ASSERT_IS_PLATFORM_THREAD;
@@ -301,8 +318,8 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
     // On the GPU Thread.
     ASSERT_IS_GPU_THREAD;
     rasterizer->Draw(std::move(layer_tree), [weak_runtime_holder]() {
-      // This is on the GPU thread thread. Post to the Platform/UI thread for
-      // the completion callback.
+      // This is on the GPU thread thread. Post to the Platform/UI thread
+      // for the completion callback.
       ASSERT_IS_GPU_THREAD;
       blink::Threads::Platform()->PostTask([weak_runtime_holder]() {
         // On the Platform/UI thread.
@@ -516,8 +533,8 @@ void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
     pointer_data.change = GetChangeFromPointerEventPhase(pointer->phase);
     pointer_data.kind = GetKindFromPointerType(pointer->type);
     pointer_data.device = pointer->pointer_id;
-    pointer_data.physical_x = pointer->x;
-    pointer_data.physical_y = pointer->y;
+    pointer_data.physical_x = pointer->x * viewport_metrics_.device_pixel_ratio;
+    pointer_data.physical_y = pointer->y * viewport_metrics_.device_pixel_ratio;
 
     switch (pointer_data.change) {
       case blink::PointerData::Change::kDown:
@@ -585,15 +602,21 @@ void RuntimeHolder::OnPropertiesChanged(
   FTL_DCHECK(properties);
 
   // Attempt to read the device pixel ratio.
-  float pixel_ratio = 1.0;
+  float pixel_ratio = 1.f;
   if (auto& metrics = properties->display_metrics) {
     pixel_ratio = metrics->device_pixel_ratio;
   }
 
   // Apply view property changes.
   if (auto& layout = properties->view_layout) {
-    viewport_metrics_.physical_width = layout->size->width;
-    viewport_metrics_.physical_height = layout->size->height;
+    viewport_metrics_.physical_width = layout->size->width * pixel_ratio;
+    viewport_metrics_.physical_height = layout->size->height * pixel_ratio;
+    viewport_metrics_.physical_padding_top = layout->inset->top * pixel_ratio;
+    viewport_metrics_.physical_padding_right =
+        layout->inset->right * pixel_ratio;
+    viewport_metrics_.physical_padding_bottom =
+        layout->inset->bottom * pixel_ratio;
+    viewport_metrics_.physical_padding_left = layout->inset->left * pixel_ratio;
     viewport_metrics_.device_pixel_ratio = pixel_ratio;
     runtime_->SetViewportMetrics(viewport_metrics_);
   }
@@ -704,6 +727,11 @@ void RuntimeHolder::OnFrameComplete() {
   frame_outstanding_ = false;
   if (frame_scheduled_)
     PostBeginFrame();
+}
+
+void RuntimeHolder::OnRedrawFrame() {
+  if (!frame_outstanding_)
+    ScheduleFrame();
 }
 
 }  // namespace flutter_runner

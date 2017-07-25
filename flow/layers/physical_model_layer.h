@@ -38,11 +38,6 @@ class PhysicalModelLayer : public ContainerLayer {
   float elevation_;
   SkColor color_;
   SkScalar device_pixel_ratio_;
-
-#if defined(OS_FUCHSIA)
-  SkScalar scale_x_;
-  SkScalar scale_y_;
-#endif  // defined(OS_FUCHSIA)
 };
 
 }  // namespace flow

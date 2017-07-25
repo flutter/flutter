@@ -12,6 +12,7 @@
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/scene_update_context.h"
 #include "lib/fidl/cpp/bindings/interface_handle.h"
+#include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "magenta/system/ulib/mx/include/mx/eventpair.h"
 
@@ -19,10 +20,16 @@ namespace flutter_runner {
 
 class SessionConnection {
  public:
-  SessionConnection(fidl::InterfaceHandle<mozart2::Session> session_handle,
+  SessionConnection(mozart2::SceneManagerPtr scene_manager,
                     mx::eventpair import_token);
 
   ~SessionConnection();
+
+  bool has_metrics() const { return scene_update_context_.has_metrics(); }
+
+  void set_metrics_changed_callback(ftl::Closure callback) {
+    metrics_changed_callback_ = std::move(callback);
+  }
 
   flow::SceneUpdateContext& scene_update_context() {
     return scene_update_context_;
@@ -43,8 +50,11 @@ class SessionConnection {
   ftl::Closure pending_on_present_callback_;
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
   flow::SceneUpdateContext scene_update_context_;
+  ftl::Closure metrics_changed_callback_;
 
   void OnSessionError();
+  void OnSessionEvents(uint64_t presentation_time,
+                       fidl::Array<mozart2::EventPtr> events);
 
   void EnqueueClearOps();
 

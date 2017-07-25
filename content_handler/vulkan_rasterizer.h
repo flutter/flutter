@@ -22,8 +22,9 @@ class VulkanRasterizer : public Rasterizer {
 
   bool IsValid() const;
 
-  void SetSession(fidl::InterfaceHandle<mozart2::Session> session,
-                  mx::eventpair import_token) override;
+  void SetScene(fidl::InterfaceHandle<mozart2::SceneManager> scene_manager,
+                mx::eventpair import_token,
+                ftl::Closure metrics_changed_callback) override;
 
   void Draw(std::unique_ptr<flow::LayerTree> layer_tree,
             ftl::Closure callback) override;

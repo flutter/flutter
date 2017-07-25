@@ -7,17 +7,24 @@
 
 namespace flutter_runner {
 
-SessionConnection::SessionConnection(
-    fidl::InterfaceHandle<mozart2::Session> session_handle,
-    mx::eventpair import_token)
-    : session_(mozart2::SessionPtr::Create(std::move(session_handle))),
+SessionConnection::SessionConnection(mozart2::SceneManagerPtr scene_manager,
+                                     mx::eventpair import_token)
+    : session_(scene_manager.get()),
       root_node_(&session_),
       surface_producer_(std::make_unique<VulkanSurfaceProducer>(&session_)),
       scene_update_context_(&session_, surface_producer_.get()) {
   ASSERT_IS_GPU_THREAD;
-  root_node_.Bind(std::move(import_token));
+
   session_.set_connection_error_handler(
       std::bind(&SessionConnection::OnSessionError, this));
+  session_.set_event_handler(std::bind(&SessionConnection::OnSessionEvents,
+                                       this, std::placeholders::_1,
+                                       std::placeholders::_2));
+
+  root_node_.Bind(std::move(import_token));
+  root_node_.SetEventMask(mozart2::kMetricsEventMask);
+  session_.Present(0, [](mozart2::PresentationInfoPtr info) {});
+
   present_callback_ =
       std::bind(&SessionConnection::OnPresent, this, std::placeholders::_1);
 }
@@ -30,6 +37,24 @@ void SessionConnection::OnSessionError() {
   ASSERT_IS_GPU_THREAD;
   // TODO: Not this.
   FTL_CHECK(false) << "Session connection was terminated.";
+}
+
+void SessionConnection::OnSessionEvents(uint64_t presentation_time,
+                                        fidl::Array<mozart2::EventPtr> events) {
+  mozart2::MetricsPtr new_metrics;
+  for (const auto& event : events) {
+    if (event->is_metrics() &&
+        event->get_metrics()->node_id == root_node_.id()) {
+      new_metrics = std::move(event->get_metrics()->metrics);
+    }
+  }
+  if (!new_metrics)
+    return;
+
+  scene_update_context_.set_metrics(std::move(new_metrics));
+
+  if (metrics_changed_callback_)
+    metrics_changed_callback_();
 }
 
 void SessionConnection::Present(flow::CompositorContext::ScopedFrame& frame,

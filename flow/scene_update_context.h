@@ -52,13 +52,6 @@ class SceneUpdateContext {
         std::unique_ptr<SurfaceProducerSurface> surface) = 0;
   };
 
-  SceneUpdateContext(mozart::client::Session* session,
-                     SurfaceProducer* surface_producer);
-
-  ~SceneUpdateContext();
-
-  mozart::client::Session* session() { return session_; }
-
   class Entity {
    public:
     Entity(SceneUpdateContext& context);
@@ -85,7 +78,15 @@ class SceneUpdateContext {
   class Transform : public Entity {
    public:
     Transform(SceneUpdateContext& context, const SkMatrix& transform);
+    Transform(SceneUpdateContext& context,
+              float scale_x,
+              float scale_y,
+              float scale_z);
     ~Transform();
+
+   private:
+    float const previous_scale_x_;
+    float const previous_scale_y_;
   };
 
   class Frame : public Entity {
@@ -93,9 +94,7 @@ class SceneUpdateContext {
     Frame(SceneUpdateContext& context,
           const SkRRect& rrect,
           SkColor color,
-          float elevation,
-          SkScalar scale_x,
-          SkScalar scale_y);
+          float elevation);
     ~Frame();
 
     void AddPaintedLayer(Layer* layer);
@@ -103,16 +102,25 @@ class SceneUpdateContext {
    private:
     const SkRRect& rrect_;
     SkColor const color_;
-    SkScalar const scale_x_;
-    SkScalar const scale_y_;
 
     std::vector<Layer*> paint_layers_;
     SkRect paint_bounds_;
   };
 
+  SceneUpdateContext(mozart::client::Session* session,
+                     SurfaceProducer* surface_producer);
+
+  ~SceneUpdateContext();
+
+  mozart::client::Session* session() { return session_; }
+
+  bool has_metrics() const { return !!metrics_; }
+  void set_metrics(mozart2::MetricsPtr metrics) {
+    metrics_ = std::move(metrics);
+  }
+
   void AddChildScene(ExportNode* export_node,
                      SkPoint offset,
-                     float device_pixel_ratio,
                      bool hit_testable);
 
   // TODO(chinmaygarde): This method must submit the surfaces as soon as paint
@@ -139,8 +147,6 @@ class SceneUpdateContext {
   void CreateFrame(mozart::client::EntityNode& entity_node,
                    const SkRRect& rrect,
                    SkColor color,
-                   SkScalar scale_x,
-                   SkScalar scale_y,
                    const SkRect& paint_bounds,
                    std::vector<Layer*> paint_layers);
   void SetShapeTextureOrColor(mozart::client::ShapeNode& shape_node,
@@ -158,9 +164,13 @@ class SceneUpdateContext {
       std::vector<Layer*> paint_layers);
 
   Entity* top_entity_ = nullptr;
+  float top_scale_x_ = 1.f;
+  float top_scale_y_ = 1.f;
 
   mozart::client::Session* const session_;
   SurfaceProducer* const surface_producer_;
+
+  mozart2::MetricsPtr metrics_;
 
   std::vector<PaintTask> paint_tasks_;
 

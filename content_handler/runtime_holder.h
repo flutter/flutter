@@ -89,6 +89,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void PostBeginFrame();
   void BeginFrame();
   void OnFrameComplete();
+  void OnRedrawFrame();
   void Invalidate();
 
   std::unique_ptr<app::ApplicationContext> context_;

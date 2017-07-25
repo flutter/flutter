@@ -53,13 +53,17 @@ bool VulkanRasterizer::IsValid() const {
   return valid_;
 }
 
-void VulkanRasterizer::SetSession(
-    fidl::InterfaceHandle<mozart2::Session> session,
-    mx::eventpair import_token) {
+void VulkanRasterizer::SetScene(
+    fidl::InterfaceHandle<mozart2::SceneManager> scene_manager,
+    mx::eventpair import_token,
+    ftl::Closure metrics_changed_callback) {
   ASSERT_IS_GPU_THREAD;
   FTL_DCHECK(valid_ && !session_connection_);
   session_connection_ = std::make_unique<SessionConnection>(
-      std::move(session), std::move(import_token));
+      mozart2::SceneManagerPtr::Create(std::move(scene_manager)),
+      std::move(import_token));
+  session_connection_->set_metrics_changed_callback(
+      std::move(metrics_changed_callback));
 }
 
 void VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
@@ -75,6 +79,12 @@ void VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
 
   if (!session_connection_) {
     FTL_LOG(ERROR) << "Session was not valid.";
+    callback();
+    return;
+  }
+
+  if (!session_connection_->has_metrics()) {
+    // Still awaiting metrics.  Will redraw when we get them.
     callback();
     return;
   }

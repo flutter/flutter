@@ -34,7 +34,6 @@ class ExportNode : public ftl::RefCountedThreadSafe<ExportNode> {
   void Bind(SceneUpdateContext& context,
             mozart::client::ContainerNode& container,
             const SkPoint& offset,
-            float scale,
             bool hit_testable);
 
  private:

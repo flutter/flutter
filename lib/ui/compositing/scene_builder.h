@@ -59,9 +59,8 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
   void addPicture(double dx, double dy, Picture* picture, int hints);
   void addChildScene(double dx,
                      double dy,
-                     double devicePixelRatio,
-                     int physicalWidth,
-                     int physicalHeight,
+                     double width,
+                     double height,
                      SceneHost* sceneHost,
                      bool hitTestable);
 

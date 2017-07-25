@@ -201,25 +201,22 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// for this application.
   void addChildScene({
     Offset offset: Offset.zero,
-    double devicePixelRatio: 1.0,
-    int physicalWidth: 0,
-    int physicalHeight: 0,
+    double width: 0.0,
+    double height: 0.0,
     SceneHost sceneHost,
     bool hitTestable: true
   }) {
     _addChildScene(offset.dx,
                    offset.dy,
-                   devicePixelRatio,
-                   physicalWidth,
-                   physicalHeight,
+                   width,
+                   height,
                    sceneHost,
                    hitTestable);
   }
   void _addChildScene(double dx,
                       double dy,
-                      double devicePixelRatio,
-                      int physicalWidth,
-                      int physicalHeight,
+                      double width,
+                      double height,
                       SceneHost sceneHost,
                       bool hitTestable) native "SceneBuilder_addChildScene";
 

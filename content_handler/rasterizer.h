@@ -21,8 +21,10 @@ class Rasterizer {
 
   static std::unique_ptr<Rasterizer> Create();
 
-  virtual void SetSession(fidl::InterfaceHandle<mozart2::Session> session,
-                          mx::eventpair import_token) = 0;
+  virtual void SetScene(
+      fidl::InterfaceHandle<mozart2::SceneManager> scene_manager,
+      mx::eventpair import_token,
+      ftl::Closure metrics_changed_callback) = 0;
 
   virtual void Draw(std::unique_ptr<flow::LayerTree> layer_tree,
                     ftl::Closure callback) = 0;
