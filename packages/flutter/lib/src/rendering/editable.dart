@@ -379,7 +379,9 @@ class RenderEditable extends RenderBox {
   ///
   /// This height is based on properties of the text's style such as
   /// font size etc and could change when those properties change.
-  /// This does not require the layout to be updated.
+  ///
+  /// The [RenderEditable] does not need to be laid out for this property
+  /// to be available.
   ///
   /// Use for defining UI based on the text's height.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
