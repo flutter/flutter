@@ -84,7 +84,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     String label;
     if (position != null) {
@@ -360,7 +360,7 @@ class Container extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));

@@ -254,7 +254,7 @@ class EditableText extends StatefulWidget {
   EditableTextState createState() => new EditableTextState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<TextEditingController>('controller', controller));
     description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode));

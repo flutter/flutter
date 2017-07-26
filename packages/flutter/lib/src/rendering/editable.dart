@@ -546,7 +546,7 @@ class RenderEditable extends RenderBox {
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Color>('cursorColor', cursorColor));
     description.add(new DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));

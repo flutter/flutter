@@ -17,7 +17,7 @@ import 'layer.dart';
 import 'node.dart';
 import 'semantics.dart';
 
-export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, IntProperty;
+export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, IntProperty, DiagnosticPropertiesBuilder;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 
@@ -1330,7 +1330,7 @@ class PipelineOwner {
 /// [RenderObject.markNeedsLayout] so that if a parent has queried the intrinsic
 /// or baseline information, it gets marked dirty whenever the child's geometry
 /// changes.
-abstract class RenderObject extends AbstractNode with TreeDiagnosticsMixin implements HitTestTarget {
+abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
@@ -2737,7 +2737,7 @@ abstract class RenderObject extends AbstractNode with TreeDiagnosticsMixin imple
 
   /// Returns a human understandable name.
   @override
-  String toString() {
+  String toStringShort() {
     String header = describeIdentity(this);
     if (_relayoutBoundary != null && _relayoutBoundary != this) {
       int count = 1;
@@ -2756,6 +2756,9 @@ abstract class RenderObject extends AbstractNode with TreeDiagnosticsMixin imple
       header += ' DETACHED';
     return header;
   }
+
+  @override
+  String toString() => toStringShort();
 
   /// Returns a description of the tree rooted at this node.
   /// If the prefix argument is provided, then every line in the output
@@ -2787,7 +2790,7 @@ abstract class RenderObject extends AbstractNode with TreeDiagnosticsMixin imple
 
   @protected
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null));
     description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? "can use size" : null));
     description.add(new DiagnosticsProperty<Constraints>('constraints', constraints));

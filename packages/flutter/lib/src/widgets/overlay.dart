@@ -370,7 +370,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     // TODO(jacobr): use IterableProperty instead as that would
     // provide a slightly more consistent string summary of the List.

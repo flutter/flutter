@@ -116,7 +116,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   _ViewportElement createElement() => new _ViewportElement(this);
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
     description.add(new DoubleProperty('anchor', anchor));
@@ -239,7 +239,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
     description.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));

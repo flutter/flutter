@@ -333,7 +333,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
   }
 
   @override
-  String toStringShort() => 'multidrag';
+  String get debugDescription => 'multidrag';
 }
 
 
@@ -379,7 +379,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
   }
 
   @override
-  String toStringShort() => 'horizontal multidrag';
+  String get debugDescription => 'horizontal multidrag';
 }
 
 
@@ -425,7 +425,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
   }
 
   @override
-  String toStringShort() => 'vertical multidrag';
+  String get debugDescription => 'vertical multidrag';
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
@@ -532,5 +532,5 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
   }
 
   @override
-  String toStringShort() => 'long multidrag';
+  String get debugDescription => 'long multidrag';
 }

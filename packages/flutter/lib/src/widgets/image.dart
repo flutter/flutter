@@ -314,7 +314,7 @@ class Image extends StatefulWidget {
   _ImageState createState() => new _ImageState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ImageProvider>('image', image));
     description.add(new DoubleProperty('width', width, defaultValue: null));
@@ -396,7 +396,7 @@ class _ImageState extends State<Image> {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ImageStream>('stream', _imageStream));
     description.add(new DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));

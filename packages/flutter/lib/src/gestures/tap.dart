@@ -158,5 +158,5 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  String toStringShort() => 'tap';
+  String get debugDescription => 'tap';
 }

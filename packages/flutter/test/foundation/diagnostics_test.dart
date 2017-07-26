@@ -6,7 +6,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestTree extends Object with TreeDiagnosticsMixin {
+class TestTree extends Object with DiagnosticableTreeMixin {
   TestTree({
     this.name,
     this.style,
@@ -32,8 +32,9 @@ class TestTree extends Object with TreeDiagnosticsMixin {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> properties) {
-    properties.addAll(this.properties);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    for (DiagnosticsNode property in this.properties)
+      properties.add(property);
   }
 }
 
@@ -274,29 +275,16 @@ void main() {
       'dense',
       style: DiagnosticsTreeStyle.dense,
       golden:
-      'TestTree#00000\n'
-      '│stringProperty1: value1\n'
-      '│doubleProperty1: 42.5\n'
-      '│roundedProperty: 0.3\n'
-      '│nullProperty: null\n'
-      '│<root node>\n'
-      '│\n'
-      '├child node A: TestTree#00000\n'
-      '├child node B: TestTree#00000\n'
-      '││p1: v1\n'
-      '││p2: v2\n'
-      '││\n'
-      '│├child node B1: TestTree#00000\n'
-      '│├child node B2: TestTree#00000\n'
-      '││ property1: value1\n'
-      '│└child node B3: TestTree#00000\n'
-      '│  <leaf node>\n'
-      '│  foo: 42\n'
-      '└child node C: TestTree#00000\n'
-      '  foo:\n'
-      '  multi\n'
-      '  line\n'
-      '  value!\n',
+        'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n'
+        '├child node A: TestTree#00000\n'
+        '├child node B: TestTree#00000(p1: v1, p2: v2)\n'
+        '│├child node B1: TestTree#00000\n'
+        '│├child node B2: TestTree#00000(property1: value1)\n'
+        '│└child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
+        '└child node C: TestTree#00000(foo:\n'
+        '  multi\n'
+        '  line\n'
+        '  value!)\n',
     );
 
     goldenStyleTest(
@@ -365,12 +353,10 @@ void main() {
       '   ╚═══════════\n',
     );
 
-    // You would never really want to make everything a leaf child like this
-    // but you can and still get a readable tree.
-    // The joint between single and double lines here is a bit clunky
-    // but we could correct that if there is any real use for this style.
+    // You would never really want to make everything a transition child like
+    // this but you can and still get a readable tree.
     goldenStyleTest(
-      'leaf',
+      'transition',
       style: DiagnosticsTreeStyle.transition,
       golden:
       'TestTree#00000:\n'
@@ -534,11 +520,8 @@ void main() {
         ' │ ║   tree property: TestTree#00000:\n'
         ' │ ║     survived: true\n'
         ' │ ║   ├child dense child: TestTree#00000\n'
-        ' │ ║   ├child dense: TestTree#00000\n'
-        ' │ ║   │ property1: "value1"\n'
-        ' │ ║   └child node B3: TestTree#00000\n'
-        ' │ ║     <leaf node>\n'
-        ' │ ║     foo: 42\n'
+        ' │ ║   ├child dense: TestTree#00000(property1: "value1")\n'
+        ' │ ║   └child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
         ' │ ╚═══════════\n'
         ' └─child node C: TestTree#00000\n'
         '     foo:\n'

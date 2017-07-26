@@ -252,7 +252,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   double _getPrimaryValueFromOffset(Offset value) => value.dy;
 
   @override
-  String toStringShort() => 'vertical drag';
+  String get debugDescription => 'vertical drag';
 }
 
 /// Recognizes movement in the horizontal direction.
@@ -286,7 +286,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   double _getPrimaryValueFromOffset(Offset value) => value.dx;
 
   @override
-  String toStringShort() => 'horizontal drag';
+  String get debugDescription => 'horizontal drag';
 }
 
 /// Recognizes movement both horizontally and vertically.
@@ -322,5 +322,5 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   double _getPrimaryValueFromOffset(Offset value) => null;
 
   @override
-  String toStringShort() => 'pan';
+  String get debugDescription => 'pan';
 }

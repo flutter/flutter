@@ -71,7 +71,7 @@ class IconTheme extends InheritedWidget {
   bool updateShouldNotify(IconTheme old) => data != old.data;
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<IconThemeData>('data', data, showName: false));
   }

@@ -1278,7 +1278,7 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
     description.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, hidden: _columnWidths.isEmpty));

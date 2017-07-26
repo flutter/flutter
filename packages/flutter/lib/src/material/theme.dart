@@ -138,7 +138,7 @@ class Theme extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ThemeData>('data', data, showName: false));
   }
@@ -235,7 +235,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ThemeDataTween>('data', _data, showName: false, defaultValue: null));
   }

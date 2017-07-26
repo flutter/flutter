@@ -175,7 +175,7 @@ class Material extends StatefulWidget {
   _MaterialState createState() => new _MaterialState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<MaterialType>('type', type));
     description.add(new DoubleProperty('elevation', elevation));

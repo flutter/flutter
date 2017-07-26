@@ -9,7 +9,7 @@ class TestGestureRecognizer extends GestureRecognizer {
   TestGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
-  String toStringShort() => 'toStringShort content';
+  String get debugDescription => 'debugDescription content';
 
   @override
   void addPointer(PointerDownEvent event) { }

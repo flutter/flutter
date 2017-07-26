@@ -47,7 +47,7 @@ import 'text_style.dart';
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class TextSpan implements TreeDiagnostics {
+class TextSpan extends DiagnosticableTree {
   /// Creates a [TextSpan] with the given values.
   ///
   /// For the object to be useful, at least one of [text] or
@@ -248,11 +248,6 @@ class TextSpan implements TreeDiagnostics {
     return result;
   }
 
-  @override
-  String toString([String prefix = '']) {
-    return toStringDeep(prefix, prefix);
-  }
-
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
   ///
@@ -276,7 +271,7 @@ class TextSpan implements TreeDiagnostics {
           'TextSpan contains a null child.\n'
           'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
           'The full text in question was:\n'
-          '${toString("  ")}'
+          '${toStringDeep('  ')}'
         );
       }
       return true;
@@ -318,11 +313,6 @@ class TextSpan implements TreeDiagnostics {
   }
 
   @override
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
-  }
-
-  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -337,37 +327,34 @@ class TextSpan implements TreeDiagnostics {
 
   @override
   int get hashCode => hashValues(style, text, recognizer, hashList(children));
+
   @override
-  DiagnosticsNode toDiagnosticsNode({
-    String name,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.whitespace,
-  }) {
-    return new DiagnosticsNode.lazy(
-      name: name,
-      value: this,
-      description: '$runtimeType',
-      style: style,
-      fillProperties: (List<DiagnosticsNode> properties) {
-        // Properties on style are added as if they were properties directly on
-        // this TextSpan.
-        if (this.style != null)
-          this.style.debugFillProperties(properties);
+  String toStringShort() => '$runtimeType';
 
-        properties.add(new DiagnosticsProperty<GestureRecognizer>(
-          'recognizer', recognizer,
-          description: recognizer?.runtimeType?.toString(),
-          defaultValue: null,
-        ));
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
+    // Properties on style are added as if they were properties directly on
+    // this TextSpan.
+    if (style != null)
+      style.debugFillProperties(properties);
 
-        properties.add(new StringProperty('text', text, showName: false, defaultValue: null));
-        if (this.style == null && text == null && children == null)
-          properties.add(new DiagnosticsNode.message('(empty)'));
-      },
-      getChildren: () {
-        return children == null ?
-            <DiagnosticsNode>[] :
-            children.map((TextSpan child) => child?.toDiagnosticsNode()).toList();
-      },
-    );
+    properties.add(new DiagnosticsProperty<GestureRecognizer>(
+      'recognizer', recognizer,
+      description: recognizer?.runtimeType?.toString(),
+      defaultValue: null,
+    ));
+
+    properties.add(new StringProperty('text', text, showName: false, defaultValue: null));
+    if (style == null && text == null && children == null)
+      properties.add(new DiagnosticsNode.message('(empty)'));
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return children == null ?
+        const <DiagnosticsNode>[] :
+        children.map((TextSpan child) => child?.toDiagnosticsNode()).toList();
   }
 }

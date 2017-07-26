@@ -101,7 +101,7 @@ class CupertinoButton extends StatefulWidget {
   _CupertinoButtonState createState() => new _CupertinoButtonState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }

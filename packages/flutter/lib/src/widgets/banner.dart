@@ -207,7 +207,7 @@ class Banner extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new StringProperty('message', message, showName: false));
     description.add(new EnumProperty<BannerLocation>('location', location));
@@ -243,7 +243,7 @@ class CheckedModeBanner extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     String message = 'disabled';
     assert(() {

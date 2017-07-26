@@ -131,7 +131,7 @@ import 'basic_types.dart';
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
 @immutable
-class TextStyle extends TreeDiagnostics {
+class TextStyle extends Diagnosticable {
   /// Creates a text style.
   const TextStyle({
     this.inherit: true,
@@ -456,24 +456,12 @@ class TextStyle extends TreeDiagnostics {
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode({
-    String name,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.singleLine,
-  }) {
-    return new DiagnosticsNode.lazy(
-      name: name,
-      value: this,
-      style: style,
-      description: '$runtimeType',
-      fillProperties: debugFillProperties,
-    );
-  }
-
-  @override
-  String toString() => toDiagnosticsNode().toString();
+  String toStringShort() => '$runtimeType';
 
   /// Adds all properties prefixing property names with the optional `prefix`.
-  void debugFillProperties(List<DiagnosticsNode> properties, { String prefix: '' }) {
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix: '' }) {
+    super.debugFillProperties(properties);
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(new DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(new StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
@@ -548,7 +536,9 @@ class TextStyle extends TreeDiagnostics {
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.hidden);
     properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, hidden: !styleSpecified && inherit));
-    properties.addAll(styles);
+    for (DiagnosticsNode style in styles)
+      properties.add(style);
+
     if (!styleSpecified)
       properties.add(new FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
   }

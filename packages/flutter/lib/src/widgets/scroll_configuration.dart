@@ -112,7 +112,7 @@ class ScrollConfiguration extends InheritedWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ScrollBehavior>('behavior', behavior));
   }

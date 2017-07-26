@@ -86,7 +86,7 @@ class Tooltip extends StatefulWidget {
   _TooltipState createState() => new _TooltipState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new StringProperty('message', message, showName: false));
     description.add(new DoubleProperty('vertical offset', verticalOffset));

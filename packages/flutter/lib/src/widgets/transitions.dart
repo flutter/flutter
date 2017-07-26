@@ -58,7 +58,7 @@ abstract class AnimatedWidget extends StatefulWidget {
   _AnimatedState createState() => new _AnimatedState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Listenable>('animation', listenable));
   }

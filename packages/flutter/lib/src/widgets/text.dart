@@ -141,7 +141,7 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     style?.debugFillProperties(description);
   }
@@ -270,7 +270,7 @@ class Text extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new StringProperty('data', data, showName: false));
     style?.debugFillProperties(description);

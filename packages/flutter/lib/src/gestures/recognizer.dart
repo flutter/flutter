@@ -35,7 +35,7 @@ typedef T RecognizerCallback<T>();
 ///  * [GestureDetector], the widget that is used to detect gestures.
 ///  * [debugPrintRecognizerCallbacksTrace], a flag that can be set to help
 ///    debug issues with gesture recognizers.
-abstract class GestureRecognizer extends GestureArenaMember with TreeDiagnosticsMixin {
+abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableTreeMixin {
   /// Initializes the gesture recognizer.
   ///
   /// The argument is optional and is only used for debug purposes (e.g. in the
@@ -73,7 +73,7 @@ abstract class GestureRecognizer extends GestureArenaMember with TreeDiagnostics
 
   /// Returns a very short pretty description of the gesture that the
   /// recognizer looks for, like 'tap' or 'horizontal drag'.
-  String toStringShort();
+  String get debugDescription;
 
   /// Invoke a callback provided by the application, catching and logging any
   /// exceptions.
@@ -117,20 +117,9 @@ abstract class GestureRecognizer extends GestureArenaMember with TreeDiagnostics
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Object>('debugOwner', debugOwner, defaultValue: null));
-  }
-
-  @override
-  String toString() {
-    final String name = describeIdentity(this);
-    List<DiagnosticsNode> data = <DiagnosticsNode>[];
-    debugFillProperties(data);
-    data = data.where((DiagnosticsNode n) => !n.hidden).toList();
-    if (data.isEmpty)
-      return '$name';
-    return '$name(${data.join("; ")})';
   }
 }
 
@@ -375,7 +364,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<GestureRecognizerState>('state', state));
   }

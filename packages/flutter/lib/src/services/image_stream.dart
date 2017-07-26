@@ -70,7 +70,7 @@ typedef void ImageListener(ImageInfo image, bool synchronousCall);
 ///
 ///  * [ImageProvider], which has an example that includes the use of an
 ///    [ImageStream] in a [Widget].
-class ImageStream {
+class ImageStream extends Diagnosticable {
   /// Create an initially unbound image stream.
   ///
   /// Once an [ImageStreamCompleter] is available, call [setCompleter].
@@ -142,24 +142,25 @@ class ImageStream {
   Object get key => _completer != null ? _completer : this;
 
   @override
-  String toString() {
-    final StringBuffer result = new StringBuffer();
-    result.write('$runtimeType(');
-    if (_completer == null) {
-      result.write('unresolved; ');
-      if (_listeners != null) {
-        result.write('${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }');
-      } else {
-        result.write('no listeners');
-      }
-    } else {
-      result.write('${_completer.runtimeType}; ');
-      final List<String> description = <String>[];
-      _completer.debugFillDescription(description);
-      result.write(description.join('; '));
-    }
-    result.write(')');
-    return result.toString();
+  String toStringShort() => '$runtimeType';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new ObjectFlagProperty<ImageStreamCompleter>(
+      'completer',
+      _completer,
+      ifPresent: _completer?.toStringShort(),
+      ifNull: 'unresolved',
+    ));
+    properties.add(new ObjectFlagProperty<List<ImageListener>>(
+      'listeners',
+      _listeners,
+      ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
+      ifNull: 'no listeners',
+      hidden: _completer != null,
+    ));
+    _completer?.debugFillProperties(properties);
   }
 }
 
@@ -169,7 +170,7 @@ class ImageStream {
 /// This class is rarely used directly. Generally, an [ImageProvider] subclass
 /// will return an [ImageStream] and automatically configure it with the right
 /// [ImageStreamCompleter] when possible.
-class ImageStreamCompleter {
+class ImageStreamCompleter extends Diagnosticable {
   final List<ImageListener> _listeners = <ImageListener>[];
   ImageInfo _current;
 
@@ -226,22 +227,19 @@ class ImageStreamCompleter {
   }
 
   @override
-  String toString() {
-    final List<String> description = <String>[];
-    debugFillDescription(description);
-    return '$runtimeType(${description.join("; ")})';
-  }
+  String toStringShort() => '$runtimeType';
 
   /// Accumulates a list of strings describing the object's state. Subclasses
   /// should override this to have their information included in [toString].
-  @protected
-  @mustCallSuper
-  void debugFillDescription(List<String> description) {
-    if (_current == null)
-      description.add('unresolved');
-    else
-      description.add('$_current');
-    description.add('${_listeners.length} listener${_listeners.length == 1 ? "" : "s" }');
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ImageInfo>('current', _current, ifNull: 'unresolved', showName: false));
+    description.add(new ObjectFlagProperty<List<ImageListener>>(
+      'listeners',
+      _listeners,
+      ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
+    ));
   }
 }
 

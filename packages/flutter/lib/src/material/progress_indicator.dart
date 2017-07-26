@@ -61,7 +61,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new PercentProperty('value', value, showName: false, ifNull: '<indeterminate>'));
   }

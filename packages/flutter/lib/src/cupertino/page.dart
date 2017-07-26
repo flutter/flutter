@@ -424,19 +424,9 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode({
-    String name,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.singleLine,
-  }) {
-    return new DiagnosticsNode.lazy(
-      name: name,
-      value: this,
-      style: style,
-      description: '$runtimeType',
-      fillProperties: (List<DiagnosticsNode> properties) {
-        properties.add(new DiagnosticsProperty<LinearGradient>('edgeGradient', edgeGradient));
-      },
-    );
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<LinearGradient>('edgeGradient', edgeGradient));
   }
 }
 

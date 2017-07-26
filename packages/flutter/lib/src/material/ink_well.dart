@@ -222,7 +222,7 @@ class InkResponse extends StatefulWidget {
   _InkResponseState<InkResponse> createState() => new _InkResponseState<InkResponse>();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     final List<String> gestures = <String>[];
     if (onTap != null)

@@ -31,14 +31,14 @@ void main() {
   });
 
   testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
-    final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
+    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
       maxWidth: 2.0,
       minHeight: 3.0,
       maxHeight: 4.0
-    ).debugFillProperties(properties);
-    final List<String> description = properties
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
         .where((DiagnosticsNode n) => !n.hidden)
         .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[

@@ -140,7 +140,7 @@ class SliverPersistentHeader extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<SliverPersistentHeaderDelegate>('delegate', delegate));
     final List<String> flags = <String>[];
@@ -244,7 +244,7 @@ abstract class _SliverPersistentHeaderRenderObjectWidget extends RenderObjectWid
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context);
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<SliverPersistentHeaderDelegate>('delegate', delegate));
   }

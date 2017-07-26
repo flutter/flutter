@@ -36,5 +36,5 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  String toStringShort() => 'long press';
+  String get debugDescription => 'long press';
 }

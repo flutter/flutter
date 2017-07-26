@@ -489,11 +489,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             }
             if (node != null) {
               information.writeln('The nearest ancestor providing an unbounded width constraint is:');
-              information.writeln('  $node');
-              final List<DiagnosticsNode> description = <DiagnosticsNode>[];
-              node.debugFillProperties(description);
-              for (DiagnosticsNode line in description)
-                information.writeln('  $line');
+              information.write('  ');
+              information.write(node.toStringShallow('\n  '));
             }
             information.writeln('See also: https://flutter.io/layout/');
             addendum = information.toString();
@@ -776,15 +773,15 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   Rect describeApproximatePaintClip(RenderObject child) => _overflow > 0.0 ? Offset.zero & size : null;
 
   @override
-  String toString() {
-    String header = super.toString();
+  String toStringShort() {
+    String header = super.toStringShort();
     if (_overflow is double && _overflow > 0.0)
       header += ' OVERFLOWING';
     return header;
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<Axis>('direction', _direction));
     description.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', _mainAxisAlignment));

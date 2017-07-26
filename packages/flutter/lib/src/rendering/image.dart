@@ -259,7 +259,7 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ui.Image>('image', image));
     description.add(new DoubleProperty('width', width, defaultValue: null));

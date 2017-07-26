@@ -129,7 +129,7 @@ class FocusNode extends ChangeNotifier {
 ///    [BuildContext].
 ///  * [FocusScope], which is a widget that associates a [FocusScopeNode] with
 ///    its location in the tree.
-class FocusScopeNode extends Object with TreeDiagnosticsMixin {
+class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   FocusManager _manager;
   FocusScopeNode _parent;
 
@@ -354,7 +354,7 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     if (_focus != null)
       description.add(new DiagnosticsProperty<FocusNode>('focus', _focus));
