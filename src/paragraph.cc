@@ -622,7 +622,11 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     const SkPaint::FontMetrics& metrics = record.metrics();
     SkPaint paint;
     paint.setStyle(SkPaint::kStroke_Style);
-    paint.setColor(record.style().decoration_color);
+    if (record.style().decoration_color == SK_ColorTRANSPARENT) {
+      paint.setColor(record.style().color);
+    } else {
+      paint.setColor(record.style().decoration_color);
+    }
     paint.setAntiAlias(true);
 
     // This is set to 2 for the double line style
