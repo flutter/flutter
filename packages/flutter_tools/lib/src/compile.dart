@@ -30,8 +30,7 @@ Future<String> compile({String packagesPath, String mainPath}) async {
   // TODO(aam): Move FlutterFastaTarget to flutter tools.
   final CompilerOptions options = new CompilerOptions()
     ..packagesFileUri = Uri.parse(packagesPath)
-    // TODO(aam): Use outline.dill instead of full platform.dill here.
-    ..sdkSummary = Uri.parse(platformKernelDill)
+    ..compileSdk = true
     ..linkedDependencies = <Uri>[Uri.parse(platformKernelDill)]
     ..target = new FlutterFastaTarget(new TargetFlags());
   final Program program =
