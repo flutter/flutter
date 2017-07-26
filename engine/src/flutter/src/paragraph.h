@@ -37,8 +37,17 @@ namespace txt {
 
 using GlyphID = uint32_t;
 
+// Paragraph provides Layout, metrics, and painting capabilites for text. Once a
+// Paragraph is constructed with ParagraphBuilder::Build(), an example basic
+// workflow can be this:
+//
+//   std::unique_ptr<Paragraph> paragraph = paragraph_builder.Build();
+//   paragraph->Layout(<somewidthgoeshere>);
+//   paragraph->Paint(<someSkCanvas>, <xpos>, <ypos>);
 class Paragraph {
  public:
+  // Constructor. I is highly recommended to construct a paragrph with a
+  // ParagraphBuilder.
   Paragraph();
 
   ~Paragraph();
@@ -57,24 +66,38 @@ class Paragraph {
   // the origin. Only valid after Layout() is called.
   void Paint(SkCanvas* canvas, double x, double y);
 
+  // Getter for paragraph_style_.
   const ParagraphStyle& GetParagraphStyle() const;
 
+  // Returns the number of characters/unicode characters. AKA text_.size()
   size_t TextSize() const;
 
+  // Returns the height of the laid out paragraph. NOTE this is not a tight
+  // bounding height of the glyphs, as some glyphs do not reach as low as they
+  // can.
   double GetHeight() const;
 
   // Returns the actual max width of the longest line after Layout().
   double GetLayoutWidth() const;
 
-  // Returns the width provided in the Layout() method.
+  // Returns the width provided in the Layout() method. This is the maximum
+  // width any line in the laid out paragraph can occupy. We expect that
+  // GetMaxWidth() >= GetLayoutWidth().
   double GetMaxWidth() const;
 
+  // Distance from top of paragraph to the Alphabetic baseline of the first
+  // line.
   double GetAlphabeticBaseline() const;
 
+  // Distance from top of paragraph to the Ideographic baseline of the first
+  // line.
   double GetIdeographicBaseline() const;
 
+  // Returns the total width covered by the paragraph without linebreaking.
   double GetMaxIntrinsicWidth() const;
 
+  // Currently, calculated similarly to as GetLayoutWidth(), however this is not
+  // nessecarily 100% correct in all cases.
   double GetMinIntrinsicWidth() const;
 
   // Returns a vector of bounding boxes that enclose all text between start and
@@ -98,8 +121,13 @@ class Paragraph {
   // index offset.
   SkIPoint GetWordBoundary(size_t offset) const;
 
+  // Returns the number of lines the paragraph takes up. If the text exceeds the
+  // amount width and maxlines provides, Layout() truncates the extra text from
+  // the layout and this will return the max lines allowed.
   int GetLineCount() const;
 
+  // Checks if the layout extends past the maximum lines and had to be
+  // truncated.
   bool DidExceedMaxLines() const;
 
   // Sets the needs_layout_ to dirty. When Layout() is called, a new Layout will
@@ -126,28 +154,37 @@ class Paragraph {
   FRIEND_TEST(RenderTest, LongWordParagraph);
   FRIEND_TEST(RenderTest, KernParagraph);
 
+  // Starting data to layout.
   std::vector<uint16_t> text_;
   StyledRuns runs_;
+  ParagraphStyle paragraph_style_;
+  FontCollection* font_collection_;
+
   minikin::LineBreaker breaker_;
+
+  // Stores the result of Layout().
   std::vector<PaintRecord> records_;
-  std::vector<double> line_widths_;
 
   // TODO(garyq): Can we access this info without redundantly storing it here?
+  std::vector<double> line_widths_;
   std::vector<double> line_heights_;
+  // Holds the laid out x positions of each glyph, as well as padding to make
+  // math on it simpler.
   std::vector<std::vector<double>> glyph_position_x_;
 
   // Set of glyph IDs that correspond to whitespace.
   std::set<GlyphID> whitespace_set_;
 
-  ParagraphStyle paragraph_style_;
-  FontCollection* font_collection_;
-  SkScalar height_ = 0.0f;
+  // The max width of the paragraph as provided in the most recent Layout()
+  // call.
   double width_ = 0.0f;
+  SkScalar height_ = 0.0f;
   size_t lines_ = 0;
   double max_intrinsic_width_ = 0;
   double min_intrinsic_width_ = 0;
   double alphabetic_baseline_ = FLT_MAX;
   double ideographic_baseline_ = FLT_MAX;
+
   bool needs_layout_ = true;
 
   struct WaveCoordinates {
@@ -166,6 +203,9 @@ class Paragraph {
 
   void SetFontCollection(FontCollection* font_collection);
 
+  // Pass the runs to breaker_.
+  // NOTE: This is O(N^2) due to minikin breaking being O(N^2) where N = sum of
+  // all text added using this method. This is insignificant with normal usage.
   void AddRunsToLineBreaker(
       std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
           collection_map);
@@ -175,17 +215,20 @@ class Paragraph {
   // justifying.
   void FillWhitespaceSet(size_t start, size_t end, hb_font_t* hb_font);
 
+  // Calculates and amends the layout for one line to be justified.
   void JustifyLine(std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
                    std::vector<size_t>& buffer_sizes,
                    int word_count,
                    double& justify_spacing,
                    double multiplier = 1);
 
+  // Creates and draws the decorations onto the canvas.
   void PaintDecorations(SkCanvas* canvas,
                         double x,
                         double y,
                         size_t record_index);
 
+  // Calculates wavy decorations and Draws them onto the canvas.
   void PaintWavyDecoration(SkCanvas* canvas,
                            std::vector<WaveCoordinates> wave_coords,
                            SkPaint paint,

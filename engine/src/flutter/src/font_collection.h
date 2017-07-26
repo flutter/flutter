@@ -37,7 +37,8 @@
 namespace txt {
 
 // FontCollection holds a vector of Skia Font Managers and handles font
-// fallback.
+// fallback. If no additional font directories are provided, then only the
+// default font directory will be available.
 class FontCollection {
  public:
   enum CacheMethod {
@@ -45,19 +46,22 @@ class FontCollection {
     kLRU,  // Least Recently Used.
     kUnlimited,
   };
-  // Will be deprecated when full compatibility with Flutter Engine is complete.
+  // TODO(garyq): Will be deprecated when full compatibility with Flutter Engine
+  // is complete.
   static FontCollection& GetDefaultFontCollection();
 
-  // Will be deprecated when full compatibility with Flutter Engine is complete.
+  // TODO(garyq): Will be deprecated when full compatibility with Flutter Engine
+  // is complete..
   static FontCollection& GetFontCollection(std::string dir = "");
 
-  // Will be deprecated when full compatibility with Flutter Engine is complete.
+  // TODO(garyq): Will be deprecated when full compatibility with Flutter Engine
+  // is complete.
   static FontCollection& GetFontCollection(std::vector<std::string> dirs);
 
   // Provides a pointer to the minikin FontCollection for the given font family.
   // If the famly is not in any font manager, this will return a nullptr. Once a
-  // font is loaded, it is cached and future calls will be very efficient (until
-  // the font is flushed).
+  // font is loaded, it is cached and future calls will be very efficient
+  // (until/if the font is flushed).
   std::shared_ptr<minikin::FontCollection> GetMinikinFontCollectionForFamily(
       const std::string& family);
 
