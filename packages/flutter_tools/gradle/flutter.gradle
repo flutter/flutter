@@ -216,21 +216,19 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
-        if (project.tasks.findByName('flutterBuildX86Jar')) {
-            project.android.buildTypes.each { buildType ->
-                Task task = project.tasks.findByName("compile${buildType.name.capitalize()}JavaWithJavac")
-                if (task) {
-                    task.dependsOn project.flutterBuildX86Jar
-                }
-            }
-        }
-
         File kernel
         if (project.hasProperty('kernel')) {
             kernel = project.file(project.property('kernel'))
         }
 
         project.android.applicationVariants.all { variant ->
+            if (project.tasks.findByName('flutterBuildX86Jar')) {
+                Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
+                if (task) {
+                    task.dependsOn project.flutterBuildX86Jar
+                }
+            }
+
             String flutterBuildMode = buildModeFor(variant.buildType)
             GenerateDependencies dependenciesTask = project.tasks.create(name: "flutterDependencies${variant.name.capitalize()}", type: GenerateDependencies) {
                 flutterRoot this.flutterRoot

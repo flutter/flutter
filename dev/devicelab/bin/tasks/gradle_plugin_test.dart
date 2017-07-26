@@ -32,6 +32,10 @@ void main() {
     await project.addCustomBuildType('beta', initWith: 'release');
     await project.runGradleTask('assembleBeta');
 
+    section('gradlew assembleFreeDebug (product flavor)');
+    await project.addProductFlavor('free');
+    await project.runGradleTask('assembleFreeDebug');
+
     await project.parent.delete(recursive: true);
     return new TaskResult.success(null);
   });
@@ -63,6 +67,23 @@ android {
     buildTypes {
         $name {
             initWith $initWith
+        }
+    }
+}
+    ''');
+  }
+
+  Future<Null> addProductFlavor(String name) async {
+    final File buildScript = new File(
+      path.join(androidPath, 'app', 'build.gradle'),
+    );
+    buildScript.openWrite(mode: FileMode.APPEND).write('''
+
+android {
+    productFlavors {
+        $name {
+            applicationIdSuffix ".$name"
+            versionNameSuffix "-$name"
         }
     }
 }
