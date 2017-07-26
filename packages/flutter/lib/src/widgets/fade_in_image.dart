@@ -441,11 +441,11 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('phase: $_phase');
-    description.add('pixels: $_imageInfo');
-    description.add('image stream: ${_imageResolver._imageStream}');
-    description.add('placeholder stream: ${_placeholderResolver._imageStream}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<FadeInImagePhase>('phase', _phase));
+    description.add(new DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
+    description.add(new DiagnosticsProperty<ImageStream>('image stream', _imageResolver._imageStream));
+    description.add(new DiagnosticsProperty<ImageStream>('placeholder stream', _placeholderResolver._imageStream));
   }
 }
