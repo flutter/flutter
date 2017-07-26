@@ -1601,24 +1601,29 @@ class BoxDecoration extends Decoration {
     );
   }
 
+  @protected
   @override
-  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style: DiagnosticsTreeStyle.whitespace }) {
-    return new DiagnosticsNode.lazy(
-      name: name,
-      value: this,
-      description: '',
-      style: style,
-      emptyBodyDescription: '<no decorations specified>',
-      fillProperties: (List<DiagnosticsNode> properties) {
-        properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
-        properties.add(new DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
-        properties.add(new DiagnosticsProperty<Border>('border', border, defaultValue: null));
-        properties.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
-        properties.add(new IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: style));
-        properties.add(new DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
-        properties.add(new EnumProperty<BoxShape>('shape', shape, defaultValue: BoxShape.rectangle));
-      },
-    );
+  String get debugEmptyBodyDescription => '<no decorations specified>';
+
+  @protected
+  @override
+  DiagnosticsTreeStyle get debugDefaultDiagnosticsTreeStyle {
+    return DiagnosticsTreeStyle.whitespace;
+  }
+
+  @override
+  String toShortDescription() => '$runtimeType';
+
+  @override
+  void debugFillProperties(List<DiagnosticsNode> properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(new DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
+    properties.add(new DiagnosticsProperty<Border>('border', border, defaultValue: null));
+    properties.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
+    properties.add(new IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
+    properties.add(new DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
+    properties.add(new EnumProperty<BoxShape>('shape', shape, defaultValue: BoxShape.rectangle));
   }
 
   @override

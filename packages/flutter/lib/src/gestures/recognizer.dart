@@ -35,7 +35,7 @@ typedef T RecognizerCallback<T>();
 ///  * [GestureDetector], the widget that is used to detect gestures.
 ///  * [debugPrintRecognizerCallbacksTrace], a flag that can be set to help
 ///    debug issues with gesture recognizers.
-abstract class GestureRecognizer extends GestureArenaMember with TreeDiagnosticsMixin {
+abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableTreeMixin {
   /// Initializes the gesture recognizer.
   ///
   /// The argument is optional and is only used for debug purposes (e.g. in the
@@ -120,17 +120,6 @@ abstract class GestureRecognizer extends GestureArenaMember with TreeDiagnostics
   void debugFillProperties(List<DiagnosticsNode> description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Object>('debugOwner', debugOwner, defaultValue: null));
-  }
-
-  @override
-  String toString() {
-    final String name = describeIdentity(this);
-    List<DiagnosticsNode> data = <DiagnosticsNode>[];
-    debugFillProperties(data);
-    data = data.where((DiagnosticsNode n) => !n.hidden).toList();
-    if (data.isEmpty)
-      return '$name';
-    return '$name(${data.join("; ")})';
   }
 }
 

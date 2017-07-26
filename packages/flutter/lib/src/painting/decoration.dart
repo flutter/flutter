@@ -25,7 +25,7 @@ export 'edge_insets.dart' show EdgeInsets;
 /// shared between boxes; [BoxPainter] objects can cache resources to
 /// make painting on a particular surface faster.
 @immutable
-abstract class Decoration extends TreeDiagnostics {
+abstract class Decoration extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Decoration();
@@ -80,11 +80,6 @@ abstract class Decoration extends TreeDiagnostics {
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
   BoxPainter createBoxPainter([VoidCallback onChanged]);
-
-  @override
-  String toString() {
-    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toStringDeep();
-  }
 }
 
 /// A stateful class that can paint a particular [Decoration].

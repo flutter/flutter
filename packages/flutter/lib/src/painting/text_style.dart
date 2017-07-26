@@ -131,7 +131,7 @@ import 'basic_types.dart';
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
 @immutable
-class TextStyle extends TreeDiagnostics {
+class TextStyle extends Diagnosticable {
   /// Creates a text style.
   const TextStyle({
     this.inherit: true,
@@ -456,24 +456,12 @@ class TextStyle extends TreeDiagnostics {
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode({
-    String name,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.singleLine,
-  }) {
-    return new DiagnosticsNode.lazy(
-      name: name,
-      value: this,
-      style: style,
-      description: '$runtimeType',
-      fillProperties: debugFillProperties,
-    );
-  }
-
-  @override
-  String toString() => toDiagnosticsNode().toString();
+  String toShortDescription() => '$runtimeType';
 
   /// Adds all properties prefixing property names with the optional `prefix`.
+  @override
   void debugFillProperties(List<DiagnosticsNode> properties, { String prefix: '' }) {
+    super.debugFillProperties(properties);
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(new DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(new StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));

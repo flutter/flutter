@@ -63,7 +63,7 @@ enum DiagnosticsTreeStyle {
 /// See also:
 ///
 ///  * [sparseTextConfiguration], which is a typical style.
-///  * [leafTextConfiguration], which is an example of a complex tree style.
+///  * [transitionTextConfiguration], which is an example of a complex tree style.
 ///  * [DiagnosticsNode.toStringDeep], for code using [TextTreeConfiguration]
 ///    to render text art for arbitrary trees of [DiagnosticsNode] objects.
 class TextTreeConfiguration {
@@ -79,6 +79,7 @@ class TextTreeConfiguration {
     @required this.propertyPrefixIfChildren,
     @required this.propertyPrefixNoChildren,
     this.lineBreak: '\n',
+    this.lineBreakProperties: '\n',
     this.afterName: ':',
     this.afterDescriptionIfBody: '',
     this.beforeProperties: '',
@@ -98,6 +99,7 @@ class TextTreeConfiguration {
        assert(propertyPrefixIfChildren != null),
        assert(propertyPrefixNoChildren != null),
        assert(lineBreak != null),
+       assert(lineBreakProperties != null),
        assert(afterName != null),
        assert(afterDescriptionIfBody != null),
        assert(beforeProperties != null),
@@ -158,9 +160,16 @@ class TextTreeConfiguration {
   /// [singleLineTextConfiguration].
   final String lineBreak;
 
+  /// Character(s) to use to separate lines within the block of properties.
+  ///
+  /// Typically leave set at the default value of '\n' unless this style needs
+  /// to treat line breaks within the property block differently as is the case
+  /// for [denseTextConfiguration].
+  final String lineBreakProperties;
+
   /// Text added immediately after the name of the node.
   ///
-  /// See [leafTextConfiguration] for an example of using a value other than ':'
+  /// See [transitionTextConfiguration] for an example of using a value other than ':'
   /// to achieve a custom line art style.
   final String afterName;
 
@@ -208,7 +217,7 @@ class TextTreeConfiguration {
 
   /// Footer to add as its own line at the end of a non-root node.
   ///
-  /// See [leafTextConfiguration] for an example of using footer to draw a box
+  /// See [transitionTextConfiguration] for an example of using footer to draw a box
   /// around the node. [footer] is indented the same amount as [prefixOtherLines].
   final String footer;
 
@@ -320,29 +329,19 @@ final TextTreeConfiguration dashedTextConfiguration = new TextTreeConfiguration(
 ///
 /// Example:
 /// ```
-/// <root_name>: <root_description>
-/// │ <property1>
-/// │ <property2>
-/// │ ...
-/// │ <propertyN>
-/// │
-/// ├<child_name>: <child_description>
-/// │ <property1>
-/// │ <property2>
-/// │ ...
-/// │ <propertyN>
-/// │
-/// └<child_name>: <child_description>'
-///   <property1>
-///   <property2>
-///   ...
-///   <propertyN>
+/// <root_name>: <root_description>(<property1>; <property2> <propertyN>)
+/// ├<child_name>: <child_description>(<property1>, <property2>, <propertyN>)
+/// └<child_name>: <child_description>(<property1>, <property2>, <propertyN>)
 /// ```
 ///
 /// See also:
 ///
 ///  * [DiagnosticsTreeStyle.dense]
 final TextTreeConfiguration denseTextConfiguration = new TextTreeConfiguration(
+  propertySeparator: '; ',
+  beforeProperties: '(',
+  afterProperties: ')',
+  lineBreakProperties: '',
   prefixLineOne:            '├',
   prefixOtherLines:         '',
   prefixLastChildLineOne:   '└',
@@ -351,6 +350,7 @@ final TextTreeConfiguration denseTextConfiguration = new TextTreeConfiguration(
   propertyPrefixNoChildren: ' ',
   prefixOtherLinesRootNode: '',
   addBlankLineIfNoChildren: false,
+  isBlankLineBetweenPropertiesAndChildren: false,
 );
 
 /// Configuration that draws a box around a leaf node.
@@ -376,7 +376,7 @@ final TextTreeConfiguration denseTextConfiguration = new TextTreeConfiguration(
 /// /// See also:
 ///
 ///  * [DiagnosticsTreeStyle.transition]
-final TextTreeConfiguration leafTextConfiguration = new TextTreeConfiguration(
+final TextTreeConfiguration transitionTextConfiguration = new TextTreeConfiguration(
   prefixLineOne:           '╞═╦══ ',
   prefixLastChildLineOne:  '╘═╦══ ',
   prefixOtherLines:         ' ║ ',
@@ -406,7 +406,7 @@ final TextTreeConfiguration leafTextConfiguration = new TextTreeConfiguration(
 /// two spaces.
 ///
 /// Use this style for displaying properties with structured values or for
-/// displaying children within a [leafTextConfiguration] as using a style that
+/// displaying children within a [transitionTextConfiguration] as using a style that
 /// draws line art would be visually distracting for those cases.
 ///
 /// Example:
@@ -455,6 +455,7 @@ final TextTreeConfiguration singleLineTextConfiguration = new TextTreeConfigurat
   prefixOtherLines: '',
   prefixLastChildLineOne: '',
   lineBreak: '',
+  lineBreakProperties: '',
   addBlankLineIfNoChildren: false,
   showChildren: false,
   propertyPrefixIfChildren: '',
@@ -601,6 +602,7 @@ abstract class DiagnosticsNode {
   /// are computed lazily.
   ///
   /// The [style] argument must not be null.
+  /* XXX
   factory DiagnosticsNode.lazy({
     String name,
     Object value,
@@ -621,6 +623,7 @@ abstract class DiagnosticsNode {
       emptyBodyDescription: emptyBodyDescription,
     );
   }
+  */
 
   /// Diagnostics containing just a string `message` and not a concrete name or
   /// value.
@@ -709,6 +712,9 @@ abstract class DiagnosticsNode {
                                       : '$name$_separator $description';
   }
 
+  /// Returns a configuration specifying how this object should be rendered
+  /// as text art.
+  @protected
   TextTreeConfiguration get textTreeConfiguration {
     assert(style != null);
     switch (style) {
@@ -721,7 +727,7 @@ abstract class DiagnosticsNode {
       case DiagnosticsTreeStyle.whitespace:
         return whitespaceTextConfiguration;
       case DiagnosticsTreeStyle.transition:
-        return leafTextConfiguration;
+        return transitionTextConfiguration;
       case DiagnosticsTreeStyle.singleLine:
         return singleLineTextConfiguration;
     }
@@ -785,9 +791,10 @@ abstract class DiagnosticsNode {
     if (properties.isNotEmpty || children.isNotEmpty || emptyBodyDescription != null)
       builder.write(config.afterDescriptionIfBody);
 
+    builder.write(config.lineBreakProperties);
+
     if (properties.isNotEmpty)
       builder.write(config.beforeProperties);
-    builder.write(config.lineBreak);
 
     builder.prefixOtherLines += config.bodyIndent;
 
@@ -795,7 +802,7 @@ abstract class DiagnosticsNode {
         properties.isEmpty &&
         children.isEmpty &&
         prefixLineOne.isNotEmpty) {
-      builder..write(emptyBodyDescription)..write(config.lineBreak);
+      builder..write(emptyBodyDescription)..write(config.lineBreakProperties);
     }
 
     for (int i = 0; i < properties.length; ++i) {
@@ -814,7 +821,7 @@ abstract class DiagnosticsNode {
       }
       assert(property.style == DiagnosticsTreeStyle.singleLine);
       final String message = property == null ? '<null>' : property.toString();
-      if (config.isSingleLine || message.length < kWrapWidth) {
+      if (config.lineBreakProperties.isEmpty || message.length < kWrapWidth) {
         builder.write(message);
       } else {
         // debugWordWrap doesn't handle line breaks within the text being
@@ -827,10 +834,13 @@ abstract class DiagnosticsNode {
           builder.write(debugWordWrap(line, kWrapWidth, wrapIndent: '  ').join('\n'));
         }
       }
-      builder.write(config.lineBreak);
+      builder.write(config.lineBreakProperties);
     }
     if (properties.isNotEmpty)
       builder.write(config.afterProperties);
+
+    if (config.lineBreakProperties.isEmpty)
+      builder.write(config.lineBreak);
 
     final String prefixChildren = '$prefixOtherLines${config.bodyIndent}';
 
@@ -1478,7 +1488,9 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
          showName: showName,
          showSeparator: showSeparator,
          style: style,
-       );
+       ) {
+    assert(defaultValue == kNoDefaultValue || defaultValue is T);
+  }
 
   final String _description;
 
@@ -1491,7 +1503,10 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// values are decorated to generate a nice description are consistent across
   /// all implementations. Debugging tools may also choose to use
   /// [valueToString] directly instead of [description].
-  String valueToString() => value.toString();
+  String valueToString() {
+    final T v = value;
+    return v is DiagnosticableTree ? v.toShortDescription() : v.toString();
+  }
 
   @override
   String get description {
@@ -1591,6 +1606,10 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     }
   }
 
+  /// If the [value] of the property equals [defaultValue] the property is
+  /// [hidden] as the [value] is uninteresting.
+  ///
+  /// [defaultValue] has type [T] or is [kNoDefaultValue].
   final Object defaultValue;
 
   final bool _hidden;
@@ -1625,7 +1644,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 ///
 /// See also:
 ///
-///  * [TreeDiagnosticsMixin.debugFillProperties], which lists best practices
+///  * [DiagnosticableTree.debugFillProperties], which lists best practices
 ///    for specifying properties.
 typedef void FillPropertiesCallback(List<DiagnosticsNode> properties);
 
@@ -1633,71 +1652,27 @@ typedef void FillPropertiesCallback(List<DiagnosticsNode> properties);
 ///
 /// See also:
 ///
-///  * [TreeDiagnosticsMixin.debugDescribeChildren], which lists best practices
+///  * [DiagnosticableTree.debugDescribeChildren], which lists best practices
 ///    for describing children.
 typedef List<DiagnosticsNode> GetChildrenCallback();
 
-class _LazyMembersDiagnosticsNode extends DiagnosticsNode {
-  _LazyMembersDiagnosticsNode({
-    @required String name,
-    @required String description,
-    @required this.value,
-    GetChildrenCallback getChildren,
-    FillPropertiesCallback fillProperties,
-    String emptyBodyDescription,
-    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.sparse,
-  }) : assert(style != null),
-       _description = description,
-       _getChildren = getChildren,
-       _fillProperties = fillProperties,
-       super(
-         name: name,
-         style: style,
-         emptyBodyDescription: emptyBodyDescription,
-       );
-
-  @override
-  final Object value;
-
-  final GetChildrenCallback _getChildren;
-  final FillPropertiesCallback _fillProperties;
-
-  final String _description;
-
-  @override
-  bool get hidden => false;
-
-  @override
-  String get description => _description ?? value.toString();
-
-  @override
-  List<DiagnosticsNode> getProperties() {
-    final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
-    if (_fillProperties != null)
-      _fillProperties(properties);
-    return properties;
-  }
-
-  @override
-  List<DiagnosticsNode> getChildren() {
-    return _getChildren != null ? _getChildren() :  <DiagnosticsNode>[];
-  }
-}
-
-/// [DiagnosticsNode] for an instance of [TreeDiagnosticsMixin].
-class _TreeDiagnosticsMixinNode extends DiagnosticsNode {
-  _TreeDiagnosticsMixinNode({
+/// [DiagnosticsNode] for an instance of [Diagnosticable].
+class _DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
+  _DiagnosticableNode({
     String name,
-    this.value,
+    @required this.value,
     @required DiagnosticsTreeStyle style,
   }) : assert(style != null),
-       super(
-    name: name,
-    style: style,
-  );
+        super(
+        name: name,
+        style: style,
+      );
 
   @override
-  final TreeDiagnosticsMixin value;
+  final T value;
+
+  @override
+  String get emptyBodyDescription => value.debugEmptyBodyDescription;
 
   @override
   List<DiagnosticsNode> getProperties() {
@@ -1709,15 +1684,34 @@ class _TreeDiagnosticsMixinNode extends DiagnosticsNode {
 
   @override
   List<DiagnosticsNode> getChildren() {
-    if (value != null)
-      return value.debugDescribeChildren();
-    return <DiagnosticsNode>[];
+    return const<DiagnosticsNode>[];
   }
 
   @override
-  String get description => value.toString();
+  String get description => value.toShortDescription();
 
   @override bool get hidden => false;
+}
+
+/// [DiagnosticsNode] for an instance of [DiagnosticableTree].
+class _DiagnosticableTreeNode extends _DiagnosticableNode<DiagnosticableTree> {
+  _DiagnosticableTreeNode({
+    String name,
+    @required DiagnosticableTree value,
+    @required DiagnosticsTreeStyle style,
+  }) : assert(style != null),
+        super(
+        name: name,
+        value: value,
+        style: style,
+      );
+
+  @override
+  List<DiagnosticsNode> getChildren() {
+    if (value != null)
+      return value.debugDescribeChildren();
+    return const <DiagnosticsNode>[];
+  }
 }
 
 /// Returns a 5 character long hexadecimal string generated from
@@ -1796,114 +1790,68 @@ String camelCaseToHyphenatedName(String word) {
 ///
 /// See also:
 ///
-///  * [TreeDiagnosticsMixin], which provides convenience members for implementing
-///    this interface in a consistent way.
-///  * The documentation for [TreeDiagnosticsMixin.debugFillProperties], which
-///    lists best practices for specifying the properties of a
-///    [DiagnosticsNode]. The most common use case is to override
-///    [TreeDiagnosticsMixin.debugFillProperties] to define custom properties
-///    for a subclass of [TreeDiagnosticsMixin] using the existing
+///  * [DiagnosticableTree], which should be used to implement this interface
+///    in all contexts where a mixin can be used.
+///  * [PropertyDiagnosticsMixin], which should be used for cases where only
+///    properties of a node are of interest.
+///  * [DiagnosticableTree.debugFillProperties], which lists best practices
+///    for specifying the properties of a [DiagnosticNode]. The most common use
+///    case is to override [debugFillProperties] defining custom properties for
+///    a subclass of [TreeDiagnosticsMixin] using the existing
 ///    [DiagnosticsProperty] subclasses.
-///  * The documentation for [TreeDiagnosticsMixin.debugDescribeChildren], which
-///    lists best practices for describing the children of a [DiagnosticsNode].
-///    Typically the base class already describes the children of a node
-///    properly or a node has no children.
-///  * [DiagnosticsProperty], which describes leaf diagnostic nodes without
-///    properties or children. There are many [DiagnosticsProperty] subclasses
-///    to handle common use cases such as strings and doubles.
-abstract class TreeDiagnostics {
+///  * [DiagnosticableTree.debugDescribeChildren], which lists best practices
+///    for describing the children of a [DiagnosticNode]. Typically the base
+///    class already describes the children of a node properly or a node has
+///    no children.
+///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
+///    nodes without properties or children. There are many [DiagnosticProperty]
+///    subclasses to handle common use cases.
+///  * [DiagnosticsNode.lazy], which should be used to create a DiagnosticNode
+///    with children and properties where [TreeDiagnosticsMixin] cannot be used.
+abstract class Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const TreeDiagnostics();
-
-  /// The [toStringDeep] method takes arguments, but those are intended for
-  /// internal use when recursing to the descendants, and so can be ignored.
-  ///
-  /// See also:
-  ///
-  ///  * [toString], for a brief description of the object but not its children.
-  ///  * [TreeDiagnosticsMixin.toStringShallow], for a detailed description of
-  ///    the object but not its children.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
-  }
-
-  // `name` may be null, but `style` must not be.
-  // TODO(jacobr): document the semantics of the arguments, including what it means when name is null.
-  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style: DiagnosticsTreeStyle.sparse });
-}
-
-// Examples can assume:
-// class ExampleSuperclass { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
-
-/// A mixin that helps dump string and [DiagnosticsNode] representations of
-/// trees.
-///
-/// Use this class to implement [TreeDiagnostics] any time it is possible to use
-/// mixins.
-abstract class TreeDiagnosticsMixin implements TreeDiagnostics {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory TreeDiagnosticsMixin._() => null;
+  const Diagnosticable();
 
   /// A brief description of this object, usually just the [runtimeType] and the
   /// [hashCode].
   ///
   /// See also:
   ///
-  ///  * [toStringShallow], for a detailed description of the object.
-  ///  * [toStringDeep], for a description of the subtree rooted at this object.
-  @override
-  String toString() => describeIdentity(this);
+  ///  * [toString], for a detailed description of the object.
+  String toShortDescription() => describeIdentity(this);
 
-  /// Returns a one-line detailed description of the object.
-  ///
-  /// This description is often somewhat long. This includes the same
-  /// information given by [toStringDeep], but does not recurse to any children.
-  ///
-  /// The [toStringShallow] method can take an argument, which is the string to
-  /// place between each part obtained from [debugFillProperties]. Passing a
-  /// string such as `'\n '` will result in a multiline string that indents the
-  /// properties of the object below its name (as per [toString]).
-  ///
-  /// See also:
-  ///
-  ///  * [toString], for a brief description of the object.
-  ///  * [toStringDeep], for a description of the subtree rooted at this object.
-  String toStringShallow([String joiner = '; ']) {
-    final StringBuffer result = new StringBuffer();
-    result.write(toString());
-    result.write(joiner);
-    final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
-    debugFillProperties(properties);
-    result.write(
-      properties.where((DiagnosticsNode n) => !n.hidden).join(joiner),
-    );
-    return result.toString();
+  @override String toString() {
+    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString();
   }
 
-  /// Returns a string representation of this node and its descendants.
-  ///
-  /// The [toStringDeep] method takes arguments, but those are intended for
-  /// internal use when recursing to the descendants, and so can be ignored.
-  ///
-  /// See also:
-  ///
-  ///  * [toString], for a brief description of the object but not its children.
-  ///  * [toStringShallow], for a detailed description of the object but not its
-  ///    children.
-  @override
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  /// Default diagnostics tree style to use.
+  @protected
+  DiagnosticsTreeStyle get debugDefaultDiagnosticsTreeStyle {
+    return DiagnosticsTreeStyle.singleLine;
   }
 
-  @override
-  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style: DiagnosticsTreeStyle.sparse }) {
-    assert(style != null);
-    return new _TreeDiagnosticsMixinNode(
+  /// Description to show if the diagnostic data displayed would otherwise be
+  /// empty.
+  @protected
+  String get debugEmptyBodyDescription => null;
+
+
+  /// Returns a debug representation of the object that is used by debugging
+  /// tools and by [toStringDeep].
+  ///
+  /// Leave [name] as `null` if there is not a meaningful description of the
+  /// relationship between the this node and its parent.
+  ///
+  /// The [style] argument must not be null. Typically the style argument is
+  /// only specified to indicate an atypical relationship between the parent and
+  /// the node. For example, pass [DiagnosticsTreeStyle.offstage] to indicate
+  /// that a node is offstage.
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style}) {
+    return new _DiagnosticableNode<Diagnosticable>(
       name: name,
       value: this,
-      style: style,
+      style: style ?? debugDefaultDiagnosticsTreeStyle,
     );
   }
 
@@ -2108,10 +2056,72 @@ abstract class TreeDiagnosticsMixin implements TreeDiagnostics {
   /// }
   /// ```
   ///
-  /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
+  /// Used by [toDiagnosticsNode] and [toString].
   @protected
   @mustCallSuper
   void debugFillProperties(List<DiagnosticsNode> properties) { }
+}
+
+/// A class that can be used as a mixin that helps dump string and
+/// [DiagnosticsNode] representations of trees.
+///
+/// Use this class as a mixin in any context where it is possible to use mixins.
+abstract class DiagnosticableTree extends Diagnosticable {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const DiagnosticableTree();
+
+  /// Returns a one-line detailed description of the object.
+  ///
+  /// This description is often somewhat long. This includes the same
+  /// information given by [toStringDeep], but does not recurse to any children.
+  ///
+  /// The [toStringShallow] method can take an argument, which is the string to
+  /// place between each part obtained from [debugFillProperties]. Passing a
+  /// string such as `'\n '` will result in a multiline string that indents the
+  /// properties of the object below its name (as per [toString]).
+  ///
+  /// See also:
+  ///
+  ///  * [toString], for a brief description of the object.
+  ///  * [toStringDeep], for a description of the subtree rooted at this object.
+  String toStringShallow([String joiner = '; ']) {
+    final StringBuffer result = new StringBuffer();
+    result.write(toString());
+    result.write(joiner);
+    final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
+    debugFillProperties(properties);
+    result.write(
+      properties.where((DiagnosticsNode n) => !n.hidden).join(joiner),
+    );
+    return result.toString();
+  }
+
+  /// Returns a string representation of this node and its descendants.
+  ///
+  /// The [toStringDeep] method takes arguments, but those are intended for
+  /// internal use when recursing to the descendants, and so can be ignored.
+  ///
+  /// See also:
+  ///
+  ///  * [toString], for a brief description of the object but not its children.
+  ///  * [toStringShallow], for a detailed description of the object but not its
+  ///    children.
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  }
+
+  @override
+  String toShortDescription() => describeIdentity(this);
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return new _DiagnosticableTreeNode(
+      name: name,
+      value: this,
+      style: style ?? debugDefaultDiagnosticsTreeStyle,
+    );
+  }
 
   /// Returns a list of [DiagnosticsNode] objects describing this node's
   /// children.
@@ -2126,7 +2136,66 @@ abstract class TreeDiagnosticsMixin implements TreeDiagnostics {
   ///
   /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
   @protected
-  List<DiagnosticsNode> debugDescribeChildren() {
-    return const <DiagnosticsNode>[];
+  List<DiagnosticsNode> debugDescribeChildren() => const <DiagnosticsNode>[];
+}
+
+/// A class that can be used as a mixin that helps dump string and
+/// [DiagnosticsNode] representations of trees.
+///
+/// This class is identical to DiagnosticableTree except that it can be used as
+/// a mixin.
+abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory DiagnosticableTreeMixin._() => null;
+
+  @override
+  String toString() {
+    return toDiagnosticsNode(style: DiagnosticsTreeStyle.singleLine).toString();
   }
+
+  @override
+  String toStringShallow([String joiner = '; ']) {
+    final StringBuffer result = new StringBuffer();
+    result.write(toShortDescription());
+    result.write(joiner);
+    final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
+    debugFillProperties(properties);
+    result.write(
+      properties.where((DiagnosticsNode n) => !n.hidden).join(joiner),
+    );
+    return result.toString();
+  }
+
+  @override
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  }
+
+  @override
+  String toShortDescription() => describeIdentity(this);
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return new _DiagnosticableTreeNode(
+      name: name,
+      value: this,
+      style: style ?? debugDefaultDiagnosticsTreeStyle,
+    );
+  }
+
+  @override DiagnosticsTreeStyle get debugDefaultDiagnosticsTreeStyle {
+    return DiagnosticsTreeStyle.sparse;
+  }
+
+  @override String get debugEmptyBodyDescription => null;
+
+  @override
+  @protected
+  List<DiagnosticsNode> debugDescribeChildren() => const <DiagnosticsNode>[];
+
+  @override
+  @protected
+  @mustCallSuper
+  void debugFillProperties(List<DiagnosticsNode> properties) { }
 }
