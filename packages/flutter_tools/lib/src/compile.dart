@@ -4,10 +4,10 @@
 
 import 'dart:async';
 import 'dart:convert' show JSON;
-import 'dart:io' as io show File;
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:front_end/compiler_options.dart';
 import 'package:front_end/kernel_generator.dart';
@@ -16,9 +16,10 @@ import 'package:kernel/kernel.dart';
 import 'package:kernel/target/flutter_fasta.dart';
 import 'package:kernel/target/targets.dart';
 
-Map<String, Uri> loadDartLibraries() {
+Map<String, Uri> loadDartLibraries(FileSystem fs) {
   final Uri libraries = new Uri.file(artifacts.getArtifactPath(Artifact.platformLibrariesJson));
-  final dynamic map = JSON.decode(new io.File.fromUri(libraries).readAsStringSync())['libraries'];
+  final dynamic map =
+      JSON.decode(fs.file(libraries).readAsStringSync())['libraries'];
   final Map<String, Uri> dartLibraries = <String, Uri>{};
   map.forEach((String k, String v) => dartLibraries[k] = libraries.resolve(v));
   return dartLibraries;

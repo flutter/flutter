@@ -119,14 +119,12 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices)
       device.initLogReader();
 
-    if (previewDart2) {
-      if (generator == null) {
-        final CompilerOptions options = new CompilerOptions()
-          ..packagesFileUri = Uri.parse(packagesFilePath)
-          ..dartLibraries = loadDartLibraries();
-        generator = await IncrementalKernelGenerator.newInstance(
-            options, new Uri.file(mainPath));
-      }
+    if (previewDart2 && (generator == null)) {
+      final CompilerOptions options = new CompilerOptions()
+        ..packagesFileUri = Uri.parse(packagesFilePath)
+        ..dartLibraries = loadDartLibraries(fs);
+      generator = await IncrementalKernelGenerator.newInstance(
+          options, new Uri.file(mainPath));
     }
 
     try {
