@@ -247,9 +247,6 @@ void Paragraph::Layout(double width, bool force) {
               records_[record_index].offset().x() + width_ -
                   breaker_.getWidths()[records_[record_index].line()],
               records_[record_index].offset().y()));
-          records_[record_index].SetWidthModifier(
-              records_[record_index].GetWidthModifier() + width_ -
-              breaker_.getWidths()[records_[record_index].line()]);
           break;
         }
         case TextAlign::center: {
@@ -259,18 +256,9 @@ void Paragraph::Layout(double width, bool force) {
                    breaker_.getWidths()[records_[record_index].line()]) /
                       2,
               records_[record_index].offset().y()));
-
-          records_[record_index].SetWidthModifier(
-              records_[record_index].GetWidthModifier() +
-              (width_ - breaker_.getWidths()[records_[record_index].line()]) /
-                  2);
           break;
         }
         case TextAlign::justify: {
-          records_[record_index].SetWidthModifier(
-              records_[record_index].GetWidthModifier() +
-              records_[record_index].GetWidthModifier() + width_ -
-              breaker_.getWidths()[records_[record_index].line()]);
           break;
         }
       }
@@ -339,6 +327,7 @@ void Paragraph::Layout(double width, bool force) {
       word_count = 0;
       double temp_line_spacing = 0;
       double current_x_position = previous_run_x_position;
+      double run_width = 0.0f;
       while (blob_start < glyph_count) {
         const size_t blob_length = GetBlobLength(layout, blob_start);
         buffer_sizes.push_back(blob_length);
@@ -347,9 +336,10 @@ void Paragraph::Layout(double width, bool force) {
 
         // Check if we should remove trailing whitespace of blobs.
         size_t trailing_length = 0;
-        while (paragraph_style_.text_align == TextAlign::justify &&
-               minikin::isWordSpace(
-                   text_[blob_start + blob_length - trailing_length - 1]) &&
+        while ((paragraph_style_.text_align == TextAlign::center ||
+                paragraph_style_.text_align == TextAlign::right) &&
+               whitespace_set_.count(layout.getGlyphId(
+                   blob_start + blob_length - trailing_length - 1)) > 0 &&
                layout_end == next_break) {
           ++trailing_length;
         }
@@ -387,6 +377,7 @@ void Paragraph::Layout(double width, bool force) {
           }
 
           prev_char_advance = layout.getCharAdvance(glyph_index);
+          run_width += layout.getCharAdvance(glyph_index);
         }
         blob_start += blob_length;
         previous_run_x_position += current_x_position + prev_char_advance;
@@ -402,7 +393,7 @@ void Paragraph::Layout(double width, bool force) {
         JustifyLine(buffers, buffer_sizes, word_count, justify_spacing);
       }
       records_.push_back(
-          PaintRecord{run.style, builder.make(), metrics, lines_});
+          PaintRecord{run.style, builder.make(), metrics, lines_, run_width});
       line_width +=
           std::abs(records_[records_.size() - 1].text()->bounds().fRight +
                    records_[records_.size() - 1].text()->bounds().fLeft);
@@ -480,7 +471,6 @@ void Paragraph::Layout(double width, bool force) {
     // Remove decoration extra width if the last line.
     size_t i = records_.size() - 1;
     while (records_[i].line() == lines_ - 1) {
-      records_[i].SetWidthModifier(0);
       --i;
     }
   }
@@ -636,14 +626,12 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     std::vector<WaveCoordinates> wave_coords;
 
     double width = 0;
-    if (record_index == records_.size() - 1 ||
-        record.line() < records_[record_index + 1].line()) {
-      width = line_widths_[record.line()] - x;
+    if (paragraph_style_.text_align == TextAlign::justify &&
+        record.line() != lines_ - 1) {
+      width = width_;
     } else {
-      width = record.text()->bounds().fRight + record.text()->bounds().fLeft;
+      width = record.GetRunWidth();
     }
-
-    width += record.GetWidthModifier();
 
     paint.setStrokeWidth(
         (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
