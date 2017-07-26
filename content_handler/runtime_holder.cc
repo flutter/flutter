@@ -25,13 +25,14 @@
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
 #include "lib/mtl/vmo/vector.h"
-#include "lib/tonic/mx/mx_converter.h"
+#include "lib/tonic/handle_table.h"
 #include "lib/zip/create_unzipper.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/rapidjson/writer.h"
 
 using tonic::DartConverter;
+using tonic::HandleTable;
 using tonic::ToDart;
 
 namespace flutter_runner {
@@ -364,13 +365,15 @@ void RuntimeHolder::InitFidlInternal() {
   DART_CHECK_VALID(Dart_SetNativeResolver(
       fidl_internal, fidl::dart::NativeLookup, fidl::dart::NativeSymbol));
 
-  DART_CHECK_VALID(Dart_SetField(
-      fidl_internal, ToDart("_environment"),
-      DartConverter<mx::channel>::ToDart(environment.PassHandle())));
+  HandleTable& handle_table = HandleTable::Current();
 
-  DART_CHECK_VALID(Dart_SetField(
-      fidl_internal, ToDart("_outgoingServices"),
-      DartConverter<mx::channel>::ToDart(outgoing_services_.PassChannel())));
+  DART_CHECK_VALID(
+      Dart_SetField(fidl_internal, ToDart("_environment"),
+                    handle_table.AddAndWrap(environment.PassHandle())));
+
+  DART_CHECK_VALID(
+      Dart_SetField(fidl_internal, ToDart("_outgoingServices"),
+                    handle_table.AddAndWrap(outgoing_services_.PassChannel())));
 }
 
 void RuntimeHolder::InitMozartInternal() {
@@ -388,9 +391,10 @@ void RuntimeHolder::InitMozartInternal() {
                     DartConverter<uint64_t>::ToDart(reinterpret_cast<intptr_t>(
                         static_cast<mozart::NativesDelegate*>(this)))));
 
-  DART_CHECK_VALID(Dart_SetField(
-      mozart_internal, ToDart("_viewContainer"),
-      DartConverter<mx::channel>::ToDart(view_container.PassHandle())));
+  HandleTable& handle_table = HandleTable::Current();
+  DART_CHECK_VALID(
+      Dart_SetField(mozart_internal, ToDart("_viewContainer"),
+                    handle_table.AddAndWrap(view_container.PassHandle())));
 }
 
 void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {

@@ -8,6 +8,10 @@
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/dart_library_natives.h"
 
+#if defined(OS_FUCHSIA)
+#include "lib/tonic/handle_table.h"
+#endif
+
 namespace blink {
 
 static void SceneHost_constructor(Dart_NativeArguments args) {
@@ -31,7 +35,8 @@ ftl::RefPtr<SceneHost> SceneHost::create(int export_token_handle) {
 
 SceneHost::SceneHost(int export_token_handle) {
 #if defined(OS_FUCHSIA)
-  export_node_ = ftl::MakeRefCounted<flow::ExportNode>(export_token_handle);
+  export_node_ = ftl::MakeRefCounted<flow::ExportNode>(
+      tonic::HandleTable::Current().Unwrap(export_token_handle));
 #endif
 }
 

@@ -63,7 +63,7 @@ template("flutter_content_handler") {
              "//lib/fidl/dart/sdk_ext",
              "//lib/ftl",
              "//lib/mtl",
-             "//lib/tonic/mx",
+             "//lib/tonic",
              "//lib/zip",
              "//magma:vulkan",
              "//third_party/rapidjson",
