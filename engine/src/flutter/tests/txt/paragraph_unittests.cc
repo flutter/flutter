@@ -700,6 +700,7 @@ TEST_F(RenderTest, DecorationsParagraph) {
 
   paragraph->Paint(GetCanvas(), 0, 0);
 
+  ASSERT_TRUE(Snapshot());
   ASSERT_EQ(paragraph->runs_.size(), 5ull);
   ASSERT_EQ(paragraph->records_.size(), 6ull);
 
@@ -727,8 +728,6 @@ TEST_F(RenderTest, DecorationsParagraph) {
   ASSERT_EQ(paragraph->records_[3].style().decoration_color, SK_ColorBLACK);
   ASSERT_EQ(paragraph->records_[4].style().decoration_color, SK_ColorBLACK);
   ASSERT_EQ(paragraph->records_[5].style().decoration_color, SK_ColorRED);
-
-  ASSERT_TRUE(Snapshot());
 }
 
 TEST_F(RenderTest, ItalicsParagraph) {
