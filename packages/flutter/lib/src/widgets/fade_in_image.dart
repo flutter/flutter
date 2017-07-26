@@ -32,6 +32,15 @@ import 'ticker_provider.dart';
 /// Prefer a [placeholder] that's already cached so that it is displayed in one
 /// frame. This prevents it from appearing suddenly on the screen.
 ///
+/// When [image] changes it is resolved to a new [ImageStream]. If the new
+/// [ImageStream.key] is different this widget subscribes to the new stream and
+/// replaces the displayed image to images emitted by the new stream.
+///
+/// When [placeholder] changes and the [image] has not yet emitted an
+/// [ImageInfo], then [placeholder] is resolved to a new [ImageStream]. If the
+/// new [ImageStream.key] is different this widget subscribes to the new stream
+/// and replaces the displayed image to images emitted by the new stream.
+///
 /// ## Sample code:
 ///
 /// ```dart
@@ -272,9 +281,8 @@ class _ImageProviderResolver {
     listener();
   }
 
-  void dispose() {
-    assert(_imageStream != null);
-    _imageStream.removeListener(_handleImageChanged);
+  void stopListening() {
+    _imageStream?.removeListener(_handleImageChanged);
   }
 }
 
@@ -332,7 +340,10 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
 
   void _resolveImage() {
     _imageResolver.resolve(widget.image);
-    _placeholderResolver.resolve(widget.placeholder);
+
+    // No need to resolve the placeholder if we are past the placeholder stage.
+    if (_isShowingPlaceholder)
+      _placeholderResolver.resolve(widget.placeholder);
 
     if (_phase == FadeInImagePhase.start)
       _updatePhase();
@@ -368,6 +379,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
               curve: widget.fadeInCurve,
             );
             _phase = FadeInImagePhase.fadeIn;
+            _placeholderResolver.stopListening();
             _controller.forward(from: 0.0);
           }
           break;
@@ -386,24 +398,30 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
 
   @override
   void dispose() {
-    _imageResolver.dispose();
-    _placeholderResolver.dispose();
+    _imageResolver.stopListening();
+    _placeholderResolver.stopListening();
     _controller.dispose();
     super.dispose();
   }
 
-  ImageInfo get _imageInfo {
+  bool get _isShowingPlaceholder {
     switch(_phase) {
       case FadeInImagePhase.start:
       case FadeInImagePhase.waiting:
       case FadeInImagePhase.fadeOut:
-        return _placeholderResolver._imageInfo;
+        return true;
       case FadeInImagePhase.fadeIn:
       case FadeInImagePhase.completed:
-        return _imageResolver._imageInfo;
+        return false;
     }
 
     throw new StateError('Unrecognized FadeInImage phase: $_phase');
+  }
+
+  ImageInfo get _imageInfo {
+    return _isShowingPlaceholder
+      ? _placeholderResolver._imageInfo
+      : _imageResolver._imageInfo;
   }
 
   @override
