@@ -106,6 +106,47 @@ abstract class DeviceDiscovery {
   Future<List<Device>> get devices;
 }
 
+// TODO: test the polling class
+
+typedef Future<Null> AsyncCallback();
+
+/// A [Timer] inspired class that:
+///   - has a different initial value for the first callback delay
+///   - waits for a callback to be complete before it starts the next timer
+class Poller {
+  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.ZERO }) {
+    new Future<Null>.delayed(initialDelay, _handleCallback);
+  }
+
+  final AsyncCallback callback;
+  final Duration initialDelay;
+  final Duration pollingInterval;
+
+  bool _cancelled = false;
+  Timer _timer;
+
+  Future<Null> _handleCallback() async {
+    if (_cancelled)
+      return;
+
+    try {
+      await callback();
+    } catch (error) {
+      printTrace('Error from poller: $error');
+    }
+
+    if (!_cancelled)
+      _timer = new Timer(pollingInterval, _handleCallback);
+  }
+
+  /// Cancels the poller.
+  void cancel() {
+    _cancelled = true;
+    _timer?.cancel();
+    _timer = null;
+  }
+}
+
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
 /// and removals.
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
@@ -116,47 +157,28 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   final String name;
   ItemListNotifier<Device> _items;
-  Timer _timer;
+  Poller _poller;
 
   Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
-    if (_timer == null) {
+    if (_poller == null) {
       _items ??= new ItemListNotifier<Device>();
 
-      bool _fetchingDevices = true;
-
-      // Scan once for devices initially.
-      pollingGetDevices().timeout(_pollingTimeout).then((List<Device> devices) {
-        _items.updateWithNewList(devices);
-      }).catchError((dynamic error) {
-        printTrace('Error polling for devices: $error');
-      }).whenComplete(() {
-        _fetchingDevices = false;
-      });
-
-      // Poll periodically for device changes (but no quicker then _pollingInterval between polls).
-      _timer = new Timer.periodic(_pollingInterval, (Timer timer) async {
-        if (_fetchingDevices) {
-          printTrace('Skipping device poll: already in progress');
-          return;
-        }
-        _fetchingDevices = true;
+      _poller = new Poller(() async {
         try {
           final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
           _items.updateWithNewList(devices);
         } on TimeoutException {
           printTrace('Device poll timed out.');
-        } finally {
-          _fetchingDevices = false;
         }
-      });
+      }, _pollingInterval);
     }
   }
 
   void stopPolling() {
-    _timer?.cancel();
-    _timer = null;
+    _poller?.cancel();
+    _poller = null;
   }
 
   @override
