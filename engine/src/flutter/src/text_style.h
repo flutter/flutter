@@ -31,7 +31,9 @@ class TextStyle {
  public:
   SkColor color = SK_ColorBLACK;
   TextDecoration decoration = TextDecoration::kNone;
-  SkColor decoration_color = SK_ColorBLACK;
+  // Does not make sense to draw a transparent object, so we use it as a default
+  // value to indicate no decoration color was set.
+  SkColor decoration_color = SK_ColorTRANSPARENT;
   TextDecorationStyle decoration_style = TextDecorationStyle::kSolid;
   double decoration_thickness = 1.0;
   FontWeight font_weight = FontWeight::w400;
