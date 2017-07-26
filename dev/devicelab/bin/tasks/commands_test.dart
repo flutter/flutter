@@ -59,6 +59,12 @@ void main() {
       print('test: pressing "P" again...');
       run.stdin.write('P');
       await drive('none');
+      print('test: pressing "r" to perform a hot reload...');
+      run.stdin.write('r');
+      await drive('none');
+      print('test: pressing "R" to perform a full reload...');
+      run.stdin.write('R');
+      await drive('none');
       run.stdin.write('q');
       final int result = await run.exitCode;
       if (result != 0)
