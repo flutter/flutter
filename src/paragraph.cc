@@ -213,6 +213,8 @@ void Paragraph::Layout(double width, bool force) {
   glyph_position_x_.push_back(std::vector<double>());
   std::vector<double> glyph_single_line_position_x;
   glyph_single_line_position_x.push_back(0);
+  // Track the x of the previous run to maintain accurate xposition when
+  // multiple SkTextBlobs make up a single line.
   double previous_run_x_position = 0.0f;
 
   SkScalar x = 0.0f;

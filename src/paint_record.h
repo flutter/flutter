@@ -25,6 +25,9 @@
 
 namespace txt {
 
+// PaintRecord holds the layout data after Paragraph::Layout() is called. This
+// stores all nessecary offsets, blobs, metrics, and more for Skia to draw the
+// text.
 class PaintRecord {
  public:
   PaintRecord() = delete;
@@ -50,10 +53,6 @@ class PaintRecord {
 
   void SetOffset(SkPoint pt);
 
-  void SetWidthModifier(double val);
-
-  double GetWidthModifier() const { return width_modifier_; }
-
   SkTextBlob* text() const { return text_.get(); }
 
   const SkPaint::FontMetrics& metrics() const { return metrics_; }
@@ -62,10 +61,15 @@ class PaintRecord {
 
   size_t line() const { return line_; }
 
+  size_t GetRunWidth() const { return run_width_; }
+
  private:
   TextStyle style_;
+  // offset_ is the overall offset of the origin of the SkTextBlob.
   SkPoint offset_;
+  // SkTextBlob stores the glyphs and coordinates to draw them.
   sk_sp<SkTextBlob> text_;
+  // FontMetrics stores the measurements of the font used.
   SkPaint::FontMetrics metrics_;
   size_t line_;
   // Change in width when using a non-left text alignment.

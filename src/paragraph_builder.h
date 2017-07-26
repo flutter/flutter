@@ -56,10 +56,14 @@ class ParagraphBuilder {
   //   builder.AddText(" Back to normal again.");
   void Pop();
 
+  // Adds text to the builder. Forms the proper runs to use the upper-most style
+  // on the style_stack_;
   void AddText(const std::u16string& text);
 
+  // Converts to u16string before adding.
   void AddText(const std::string& text);
 
+  // Converts to u16string before adding.
   void AddText(const char* text);
 
   void SetParagraphStyle(const ParagraphStyle& style);
