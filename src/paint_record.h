@@ -38,12 +38,14 @@ class PaintRecord {
               SkPoint offset,
               sk_sp<SkTextBlob> text,
               SkPaint::FontMetrics metrics,
-              int line);
+              int line,
+              double run_width);
 
   PaintRecord(TextStyle style,
               sk_sp<SkTextBlob> text,
               SkPaint::FontMetrics metrics,
-              int line);
+              int line,
+              double run_width);
 
   PaintRecord(PaintRecord&& other);
 
@@ -72,8 +74,7 @@ class PaintRecord {
   // FontMetrics stores the measurements of the font used.
   SkPaint::FontMetrics metrics_;
   size_t line_;
-  // Change in width when using a non-left text alignment.
-  double width_modifier_ = 0.0f;
+  double run_width_ = 0.0f;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PaintRecord);
 };

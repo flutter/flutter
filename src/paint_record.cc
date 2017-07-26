@@ -25,18 +25,25 @@ PaintRecord::PaintRecord(TextStyle style,
                          SkPoint offset,
                          sk_sp<SkTextBlob> text,
                          SkPaint::FontMetrics metrics,
-                         int line)
+                         int line,
+                         double run_width)
     : style_(style),
       offset_(offset),
       text_(std::move(text)),
       metrics_(metrics),
-      line_(line) {}
+      line_(line),
+      run_width_(run_width) {}
 
 PaintRecord::PaintRecord(TextStyle style,
                          sk_sp<SkTextBlob> text,
                          SkPaint::FontMetrics metrics,
-                         int line)
-    : style_(style), text_(std::move(text)), metrics_(metrics), line_(line) {}
+                         int line,
+                         double run_width)
+    : style_(style),
+      text_(std::move(text)),
+      metrics_(metrics),
+      line_(line),
+      run_width_(run_width) {}
 
 PaintRecord::PaintRecord(PaintRecord&& other) {
   style_ = other.style_;
@@ -44,7 +51,7 @@ PaintRecord::PaintRecord(PaintRecord&& other) {
   text_ = std::move(other.text_);
   metrics_ = other.metrics_;
   line_ = other.line_;
-  width_modifier_ = other.width_modifier_;
+  run_width_ = other.run_width_;
 }
 
 PaintRecord& PaintRecord::operator=(PaintRecord&& other) {
@@ -53,16 +60,12 @@ PaintRecord& PaintRecord::operator=(PaintRecord&& other) {
   text_ = std::move(other.text_);
   metrics_ = other.metrics_;
   line_ = other.line_;
-  width_modifier_ = other.width_modifier_;
+  run_width_ = other.run_width_;
   return *this;
 }
 
 void PaintRecord::SetOffset(SkPoint pt) {
   offset_ = pt;
-}
-
-void PaintRecord::SetWidthModifier(double val) {
-  width_modifier_ = val;
 }
 
 }  // namespace txt
