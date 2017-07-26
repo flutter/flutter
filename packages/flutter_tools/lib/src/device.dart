@@ -106,47 +106,6 @@ abstract class DeviceDiscovery {
   Future<List<Device>> get devices;
 }
 
-// TODO: test the polling class
-
-typedef Future<Null> AsyncCallback();
-
-/// A [Timer] inspired class that:
-///   - has a different initial value for the first callback delay
-///   - waits for a callback to be complete before it starts the next timer
-class Poller {
-  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.ZERO }) {
-    new Future<Null>.delayed(initialDelay, _handleCallback);
-  }
-
-  final AsyncCallback callback;
-  final Duration initialDelay;
-  final Duration pollingInterval;
-
-  bool _cancelled = false;
-  Timer _timer;
-
-  Future<Null> _handleCallback() async {
-    if (_cancelled)
-      return;
-
-    try {
-      await callback();
-    } catch (error) {
-      printTrace('Error from poller: $error');
-    }
-
-    if (!_cancelled)
-      _timer = new Timer(pollingInterval, _handleCallback);
-  }
-
-  /// Cancels the poller.
-  void cancel() {
-    _cancelled = true;
-    _timer?.cancel();
-    _timer = null;
-  }
-}
-
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
 /// and removals.
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {

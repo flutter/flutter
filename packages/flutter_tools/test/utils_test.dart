@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:test/test.dart';
@@ -113,6 +115,54 @@ baz=qux
       expect(v5, equals(v2));
 
       expect(new Version.parse('Preview2.2'), isNull);
+    });
+  });
+
+  group('Poller', () {
+    const Duration kShortDelay = const Duration(milliseconds: 100);
+
+    Poller poller;
+
+    tearDown(() {
+      poller?.cancel();
+    });
+
+    test('fires at start', () async {
+      bool called = false;
+      poller = new Poller(() {
+        called = true;
+      }, const Duration(seconds: 1));
+      expect(called, false);
+      await new Future<Null>.delayed(kShortDelay);
+      expect(called, true);
+    });
+
+    test('runs periodically', () async {
+      // Ensure we get the first (no-delay) callback, and one of the periodic callbacks.
+      int callCount = 0;
+      poller = new Poller(() {
+        callCount++;
+      }, new Duration(milliseconds: kShortDelay.inMilliseconds ~/ 2));
+      expect(callCount, 0);
+      await new Future<Null>.delayed(kShortDelay);
+      expect(callCount, greaterThanOrEqualTo(2));
+    });
+
+    test('no quicker then the periodic delay', () async {
+      // Make sure that the poller polls at delay + the time it took to run the callback.
+      final Completer<Duration> completer = new Completer<Duration>();
+      DateTime firstTime;
+      poller = new Poller(() async {
+        if (firstTime == null)
+          firstTime = new DateTime.now();
+        else
+          completer.complete(new DateTime.now().difference(firstTime));
+
+        // introduce a delay
+        await new Future<Null>.delayed(kShortDelay);
+      }, kShortDelay);
+      final Duration duration = await completer.future;
+      expect(duration, greaterThanOrEqualTo(new Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
     });
   });
 }
