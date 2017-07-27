@@ -1,4 +1,4 @@
-Signature: c931e7e92b0f1f1872a60b8f1a18b0aa
+Signature: 13858c16cf7bc526f01e6d1ac4287bf6
 
 UNUSED LICENSES:
 
@@ -539,8 +539,6 @@ FILE: ../../../dart/runtime/bin/embedded_dart_io.cc
 FILE: ../../../dart/runtime/bin/embedded_dart_io.h
 FILE: ../../../dart/runtime/bin/observatory_assets_empty.cc
 FILE: ../../../dart/runtime/bin/vmservice/loader.dart
-FILE: ../../../dart/runtime/bin/vmservice_dartium.cc
-FILE: ../../../dart/runtime/bin/vmservice_dartium.h
 FILE: ../../../dart/runtime/lib/async_patch.dart
 FILE: ../../../dart/runtime/lib/compact_hash.dart
 FILE: ../../../dart/runtime/lib/developer.cc
@@ -1203,7 +1201,6 @@ FILE: ../../../dart/client/idea/.idea/.name
 FILE: ../../../dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
 FILE: ../../../dart/client/idea/.idea/vcs.xml
 FILE: ../../../dart/runtime/CPPLINT.cfg
-FILE: ../../../dart/runtime/bin/vmserviceio_dartium.dart
 FILE: ../../../dart/runtime/observatory/.analysis_options
 FILE: ../../../dart/runtime/observatory/.packages
 FILE: ../../../dart/runtime/observatory/lib/elements.dart
@@ -1621,6 +1618,11 @@ FILE: ../../../dart/runtime/vm/optimizer.cc
 FILE: ../../../dart/runtime/vm/optimizer.h
 FILE: ../../../dart/runtime/vm/stack_trace.cc
 FILE: ../../../dart/runtime/vm/stack_trace.h
+FILE: ../../../dart/runtime/vm/timeline_android.cc
+FILE: ../../../dart/runtime/vm/timeline_fuchsia.cc
+FILE: ../../../dart/runtime/vm/timeline_linux.cc
+FILE: ../../../dart/runtime/vm/timeline_macos.cc
+FILE: ../../../dart/runtime/vm/timeline_win.cc
 FILE: ../../../dart/runtime/vm/zone_text_buffer.cc
 FILE: ../../../dart/runtime/vm/zone_text_buffer.h
 FILE: ../../../dart/sdk/lib/io/sync_socket.dart
