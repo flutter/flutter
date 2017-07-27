@@ -30,7 +30,37 @@ void main() {
 
     await flingDown(tester);
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown]));
+  });
 
+  testWidgets('showOnScreen works in scrollable', (WidgetTester tester) async {
+    new SemanticsTester(tester); // enables semantics tree generation
+
+    const double kItemHeight = 40.0;
+
+    final List<Widget> containers = <Widget>[];
+    for (int i = 0; i < 80; i++)
+      containers.add(new MergeSemantics(child: new Container(
+        height: kItemHeight,
+        child: new Text('container $i'),
+      )));
+
+    final ScrollController scrollController = new ScrollController(
+      initialScrollOffset: kItemHeight / 2,
+    );
+
+    await tester.pumpWidget(new ListView(
+      controller: scrollController,
+      children: containers
+    ));
+
+    expect(scrollController.offset, kItemHeight / 2);
+
+    final int firstContainerId = tester.renderObject(find.byWidget(containers.first)).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+
+    expect(scrollController.offset, 0.0);
   });
 }
 

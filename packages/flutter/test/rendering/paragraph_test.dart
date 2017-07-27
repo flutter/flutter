@@ -177,12 +177,41 @@ void main() {
     expect(paragraph.size.height, 30.0);
   });
 
+  test('changing color does not do layout', () {
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(
+        text: 'Hello',
+        style: const TextStyle(color: const Color(0xFF000000)),
+      ),
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0), phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isFalse);
+    paragraph.text = const TextSpan(
+      text: 'Hello World',
+      style: const TextStyle(color: const Color(0xFF000000)),
+    );
+    expect(paragraph.debugNeedsLayout, isTrue);
+    expect(paragraph.debugNeedsPaint, isFalse);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isFalse);
+    paragraph.text = const TextSpan(
+      text: 'Hello World',
+      style: const TextStyle(color: const Color(0xFFFFFFFF)),
+    );
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isTrue);
+    pumpFrame(phase: EnginePhase.paint);
+    expect(paragraph.debugNeedsLayout, isFalse);
+    expect(paragraph.debugNeedsPaint, isFalse);
+  });
+
   test('toStringDeep', () {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(text: _kText),
     );
-    // TODO(jacobr): fix handling of text spans with line breaks.
-    expect(paragraph, isNot(hasAGoodToStringDeep));
+    expect(paragraph, hasAGoodToStringDeep);
     expect(
       paragraph.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -193,9 +222,8 @@ void main() {
         ' ╘═╦══ text ═══\n'
         '   ║ TextSpan:\n'
         '   ║   "I polished up that handle so carefullee\n'
-        'That now I am the Ruler of the Queen\'s Navee!"\n'
+        '   ║   That now I am the Ruler of the Queen\'s Navee!"\n'
         '   ╚═══════════\n'
-        '\n',
       ),
     );
   });

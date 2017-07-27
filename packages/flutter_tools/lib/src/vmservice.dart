@@ -1230,6 +1230,10 @@ class FlutterView extends ServiceObject {
 
   bool get hasIsolate => _uiIsolate != null;
 
+  Future<Null> flushUIThreadTasks() async {
+    await owner.vm.invokeRpcRaw('_flutter.flushUIThreadTasks');
+  }
+
   @override
   String toString() => id;
 }

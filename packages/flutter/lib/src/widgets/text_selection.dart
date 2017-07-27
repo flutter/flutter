@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -66,9 +68,14 @@ abstract class TextSelectionDelegate {
 
 /// An interface for building the selection UI, to be provided by the
 /// implementor of the toolbar widget.
+///
+/// Override text operations such as [handleCut] if needed.
 abstract class TextSelectionControls {
   /// Builds a selection handle of the given type.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type);
+  ///
+  /// The top left corner of this widget is positioned at the bottom of the
+  /// selection position.
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -77,6 +84,59 @@ abstract class TextSelectionControls {
 
   /// Returns the size of the selection handle.
   Size get handleSize;
+
+  void handleCut(TextSelectionDelegate delegate) {
+    final TextEditingValue value = delegate.textEditingValue;
+    Clipboard.setData(new ClipboardData(
+      text: value.selection.textInside(value.text),
+    ));
+    delegate.textEditingValue = new TextEditingValue(
+      text: value.selection.textBefore(value.text)
+          + value.selection.textAfter(value.text),
+      selection: new TextSelection.collapsed(
+        offset: value.selection.start
+      ),
+    );
+    delegate.hideToolbar();
+  }
+
+  void handleCopy(TextSelectionDelegate delegate) {
+    final TextEditingValue value = delegate.textEditingValue;
+    Clipboard.setData(new ClipboardData(
+      text: value.selection.textInside(value.text),
+    ));
+    delegate.textEditingValue = new TextEditingValue(
+      text: value.text,
+      selection: new TextSelection.collapsed(offset: value.selection.end),
+    );
+    delegate.hideToolbar();
+  }
+
+  Future<Null> handlePaste(TextSelectionDelegate delegate) async {
+    final TextEditingValue value = delegate.textEditingValue;  // Snapshot the input before using `await`.
+    final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (data != null) {
+      delegate.textEditingValue = new TextEditingValue(
+        text: value.selection.textBefore(value.text)
+            + data.text
+            + value.selection.textAfter(value.text),
+        selection: new TextSelection.collapsed(
+          offset: value.selection.start + data.text.length
+        ),
+      );
+    }
+    delegate.hideToolbar();
+  }
+
+  void handleSelectAll(TextSelectionDelegate delegate) {
+    delegate.textEditingValue = new TextEditingValue(
+      text: delegate.textEditingValue.text,
+      selection: new TextSelection(
+        baseOffset: 0,
+        extentOffset: delegate.textEditingValue.text.length
+      ),
+    );
+  }
 }
 
 /// An object that manages a pair of text selection handles.
@@ -416,7 +476,11 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
             new Positioned(
               left: point.dx,
               top: point.dy,
-              child: widget.selectionControls.buildHandle(context, type),
+              child: widget.selectionControls.buildHandle(
+                context,
+                type,
+                widget.renderObject.size.height / widget.renderObject.maxLines,
+              ),
             ),
           ],
         ),

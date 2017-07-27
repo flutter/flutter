@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -166,33 +167,26 @@ class TextField extends StatefulWidget {
   /// field.
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides. Formatters are run 
-  /// in the provided order when the text input changes.
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (controller != null)
-      description.add('controller: $controller');
-    if (focusNode != null)
-      description.add('focusNode: $focusNode');
-    description.add('decoration: $decoration');
-    if (keyboardType != TextInputType.text)
-      description.add('keyboardType: $keyboardType');
-    if (style != null)
-      description.add('style: $style');
-    if (autofocus)
-      description.add('autofocus: $autofocus');
-    if (obscureText)
-      description.add('obscureText: $obscureText');
-    if (autocorrect)
-      description.add('autocorrect: $autocorrect');
-    if (maxLines != 1)
-      description.add('maxLines: $maxLines');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    description.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    description.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    description.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
   }
 }
 
@@ -257,7 +251,9 @@ class _TextFieldState extends State<TextField> {
         maxLines: widget.maxLines,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: materialTextSelectionControls,
+        selectionControls: themeData.platform == TargetPlatform.iOS
+            ? cupertinoTextSelectionControls
+            : materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),

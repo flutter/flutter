@@ -34,6 +34,7 @@
 ///  * [Summary], which is used to provide a one-line description of a
 ///    class that overrides the inline documentations' own description.
 class Category {
+  /// Create an annotation to provide a categorization of a class.
   const Category(this.sections) : assert(sections != null);
 
   /// The strings the correspond to the section and subsection of the
@@ -67,6 +68,7 @@ class Category {
 ///  * [Summary], which is used to provide a one-line description of a
 ///    class that overrides the inline documentations' own description.
 class DocumentationIcon {
+  /// Create an annotation to provide a URL to an image describing a class.
   const DocumentationIcon(this.url) : assert(url != null);
 
   /// The URL to an image that represents the annotated class.
@@ -102,6 +104,7 @@ class DocumentationIcon {
 ///  * [DocumentationIcon], which is used to give the URL to an image that
 ///    represents the class.
 class Summary {
+  /// Create an annotation to provide a short description of a class.
   const Summary(this.text) : assert(text != null);
 
   /// The text of the summary of the annotated class.

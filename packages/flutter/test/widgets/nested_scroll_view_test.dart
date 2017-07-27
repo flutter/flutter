@@ -6,7 +6,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildTest({ ScrollController controller, String title: 'TTTTTTTT' }) {
+class _CustomPhysics extends ClampingScrollPhysics {
+  const _CustomPhysics({ ScrollPhysics parent }) : super(parent: parent);
+
+  @override
+  _CustomPhysics applyTo(ScrollPhysics ancestor) {
+    return new _CustomPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
+    return new ScrollSpringSimulation(spring, 1000.0, 1000.0, 1000.0);
+  }
+}
+
+Widget buildTest({ ScrollController controller, String title:'TTTTTTTT' }) {
   return new MediaQuery(
     data: const MediaQueryData(),
     child: new Scaffold(
@@ -286,6 +300,30 @@ void main() {
     expect(find.text('Page1'), findsNothing);
     expect(find.text('Page2'), findsOneWidget);
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
+  });
+
+  testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
+    await tester.pumpWidget(new MediaQuery(
+      data: const MediaQueryData(),
+      child: new NestedScrollView(
+        physics: const _CustomPhysics(),
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            const SliverAppBar(
+              floating: true,
+              title: const Text('AA'),
+            ),
+          ];
+        },
+        body: new Container(),
+    )));
+    expect(find.text('AA'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 500));
+    final Offset point1 = tester.getCenter(find.text('AA'));
+    await tester.dragFrom(point1, const Offset(0.0, 200.0));
+    await tester.pump(const Duration(milliseconds: 20));
+    final Offset point2 = tester.getCenter(find.text('AA'));
+    expect(point1.dy, greaterThan(point2.dy));
   });
 
 }

@@ -8,7 +8,7 @@ import 'dart:developer' as developer;
 import 'dart:ui' as ui show window;
 import 'dart:ui' show VoidCallback;
 
-import 'package:collection/collection.dart';
+import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
 
 import 'debug.dart';

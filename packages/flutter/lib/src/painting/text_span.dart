@@ -11,19 +11,6 @@ import 'package:flutter/services.dart';
 import 'basic_types.dart';
 import 'text_style.dart';
 
-// TODO(ianh): This should be on List itself.
-bool _deepEquals(List<Object> a, List<Object> b) {
-  if (a == null)
-    return b == null;
-  if (b == null || a.length != b.length)
-    return false;
-  for (int i = 0; i < a.length; i += 1) {
-    if (a[i] != b[i])
-      return false;
-  }
-  return true;
-}
-
 /// An immutable span of text.
 ///
 /// A [TextSpan] object can be styled using its [style] property.
@@ -60,7 +47,7 @@ bool _deepEquals(List<Object> a, List<Object> b) {
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [TextSpan] objects on a [Canvas].
 @immutable
-class TextSpan {
+class TextSpan implements TreeDiagnostics {
   /// Creates a [TextSpan] with the given values.
   ///
   /// For the object to be useful, at least one of [text] or
@@ -263,27 +250,7 @@ class TextSpan {
 
   @override
   String toString([String prefix = '']) {
-    final StringBuffer buffer = new StringBuffer();
-    buffer.writeln('$prefix$runtimeType:');
-    final String indent = '$prefix  ';
-    if (style != null)
-      buffer.writeln(style.toString(indent));
-    if (recognizer != null)
-      buffer.writeln('${indent}recognizer: ${recognizer.runtimeType}');
-    if (text != null)
-      buffer.writeln('$indent"$text"');
-    if (children != null) {
-      for (TextSpan child in children) {
-        if (child != null) {
-          buffer.write(child.toString(indent));
-        } else {
-          buffer.writeln('$indent<null>');
-        }
-      }
-    }
-    if (style == null && text == null && children == null)
-      buffer.writeln('$indent(empty)');
-    return buffer.toString();
+    return toStringDeep(prefix, prefix);
   }
 
   /// In checked mode, throws an exception if the object is not in a
@@ -317,6 +284,44 @@ class TextSpan {
     return true;
   }
 
+  /// Describe the difference between this text span and another, in terms of
+  /// how much damage it will make to the rendering. The comparison is deep.
+  ///
+  /// See also:
+  ///
+  ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
+  RenderComparison compareTo(TextSpan other) {
+    if (identical(this, other))
+      return RenderComparison.identical;
+    if (other.text != text ||
+        children?.length != other.children?.length ||
+        (style == null) != (other.style == null))
+      return RenderComparison.layout;
+    RenderComparison result = recognizer == other.recognizer ? RenderComparison.identical : RenderComparison.metadata;
+    if (style != null) {
+      final RenderComparison candidate = style.compareTo(other.style);
+      if (candidate.index > result.index)
+        result = candidate;
+      if (result == RenderComparison.layout)
+        return result;
+    }
+    if (children != null) {
+      for (int index = 0; index < children.length; index += 1) {
+        final RenderComparison candidate = children[index].compareTo(other.children[index]);
+        if (candidate.index > result.index)
+          result = candidate;
+        if (result == RenderComparison.layout)
+          return result;
+      }
+    }
+    return result;
+  }
+
+  @override
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -327,9 +332,42 @@ class TextSpan {
     return typedOther.text == text
         && typedOther.style == style
         && typedOther.recognizer == recognizer
-        && _deepEquals(typedOther.children, children);
+        && listEquals<TextSpan>(typedOther.children, children);
   }
 
   @override
   int get hashCode => hashValues(style, text, recognizer, hashList(children));
+  @override
+  DiagnosticsNode toDiagnosticsNode({
+    String name,
+    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.whitespace,
+  }) {
+    return new DiagnosticsNode.lazy(
+      name: name,
+      object: this,
+      description: '$runtimeType',
+      style: style,
+      fillProperties: (List<DiagnosticsNode> properties) {
+        // Properties on style are added as if they were properties directly on
+        // this TextSpan.
+        if (this.style != null)
+          this.style.debugFillProperties(properties);
+
+        properties.add(new DiagnosticsProperty<GestureRecognizer>(
+          'recognizer', recognizer,
+          description: recognizer?.runtimeType?.toString(),
+          defaultValue: null,
+        ));
+
+        properties.add(new StringProperty('text', text, showName: false, defaultValue: null));
+        if (this.style == null && text == null && children == null)
+          properties.add(new DiagnosticsNode.message('(empty)'));
+      },
+      getChildren: () {
+        return children == null ?
+            <DiagnosticsNode>[] :
+            children.map((TextSpan child) => child?.toDiagnosticsNode()).toList();
+      },
+    );
+  }
 }

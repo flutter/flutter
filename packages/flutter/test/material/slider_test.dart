@@ -118,6 +118,72 @@ void main() {
     log.clear();
   });
 
+  testWidgets('Slider has a customizable active color',
+      (WidgetTester tester) async {
+    final Color customColor = const Color(0xFF4CD964);
+    final ThemeData theme = new ThemeData(platform: TargetPlatform.android);
+    Widget buildApp(Color activeColor) {
+      return new Material(
+        child: new Center(
+          child: new Theme(
+            data: theme,
+            child: new Slider(
+              value: 0.5,
+              activeColor: activeColor,
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(null));
+
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(sliderBox, paints..rect(color: theme.accentColor)..rect(color: theme.unselectedWidgetColor));
+    expect(sliderBox, paints..circle(color: theme.accentColor));
+    expect(sliderBox, isNot(paints..circle(color: customColor)));
+    expect(sliderBox, isNot(paints..circle(color: theme.unselectedWidgetColor)));
+    await tester.pumpWidget(buildApp(customColor));
+    expect(sliderBox, paints..rect(color: customColor)..rect(color: theme.unselectedWidgetColor));
+    expect(sliderBox, paints..circle(color: customColor));
+    expect(sliderBox, isNot(paints..circle(color: theme.accentColor)));
+    expect(sliderBox, isNot(paints..circle(color: theme.unselectedWidgetColor)));
+  });
+
+  testWidgets('Slider has a customizable inactive color',
+      (WidgetTester tester) async {
+    final Color customColor = const Color(0xFF4CD964);
+    final ThemeData theme = new ThemeData(platform: TargetPlatform.android);
+    Widget buildApp(Color inactiveColor) {
+      return new Material(
+        child: new Center(
+          child: new Theme(
+            data: theme,
+            child: new Slider(
+              value: 0.5,
+              inactiveColor: inactiveColor,
+              onChanged: (double newValue) {},
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(null));
+
+    final RenderBox sliderBox =
+        tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(sliderBox, paints..rect(color: theme.accentColor)..rect(color: theme.unselectedWidgetColor));
+    expect(sliderBox, paints..circle(color: theme.accentColor));
+    await tester.pumpWidget(buildApp(customColor));
+    expect(sliderBox, paints..rect(color: theme.accentColor)..rect(color: customColor));
+    expect(sliderBox, paints..circle(color: theme.accentColor));
+  });
+
   testWidgets('Slider can draw an open thumb at min',
       (WidgetTester tester) async {
     Widget buildApp(bool thumbOpenAtMin) {

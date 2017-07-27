@@ -156,9 +156,9 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('mainAxis: $mainAxis');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('mainAxis', mainAxis));
   }
 
   double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {

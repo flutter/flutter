@@ -535,6 +535,16 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
+  /// This method can be called after the build phase, during the layout of the
+  /// nearest descendant [RenderObjectWidget] of the gesture detector, to filter
+  /// the list of available semantic actions.
+  ///
+  /// This is used by [Scrollable] to configure system accessibility tools so
+  /// that they know in which direction a particular list can be scrolled.
+  ///
+  /// If this is never called, then the actions are not filtered. If the list of
+  /// actions to filter changes, it must be called again (during the layout of
+  /// the nearest descendant [RenderObjectWidget] of the gesture detector).
   void replaceSemanticsActions(Set<SemanticsAction> actions) {
     assert(() {
       if (!context.findRenderObject().owner.debugDoingLayout) {
@@ -603,27 +613,17 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     if (_recognizers == null) {
-      description.add('DISPOSED');
+      description.add(new DiagnosticsNode.message('DISPOSED'));
     } else {
       final List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.toStringShort()).toList();
       if (gestures.isEmpty)
         gestures.add('<none>');
-      description.add('gestures: ${gestures.join(", ")}');
+      description.add(new IterableProperty<String>('gestures', gestures));
     }
-    switch (widget.behavior) {
-      case HitTestBehavior.translucent:
-        description.add('behavior: translucent');
-        break;
-      case HitTestBehavior.opaque:
-        description.add('behavior: opaque');
-        break;
-      case HitTestBehavior.deferToChild:
-        description.add('behavior: defer-to-child');
-        break;
-    }
+    description.add(new EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
 }
 

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
+
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -64,11 +65,20 @@ class RenderParagraph extends RenderBox {
   TextSpan get text => _textPainter.text;
   set text(TextSpan value) {
     assert(value != null);
-    if (_textPainter.text == value)
-      return;
-    _textPainter.text = value;
-    _overflowShader = null;
-    markNeedsLayout();
+    switch (_textPainter.text.compareTo(value)) {
+      case RenderComparison.identical:
+      case RenderComparison.metadata:
+        return;
+      case RenderComparison.paint:
+        _textPainter.text = value;
+        markNeedsPaint();
+        break;
+      case RenderComparison.layout:
+        _textPainter.text = value;
+        _overflowShader = null;
+        markNeedsLayout();
+        break;
+    }
   }
 
   /// How the text should be aligned horizontally.
@@ -360,10 +370,7 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    return '$prefix \u2558\u2550\u2566\u2550\u2550 text \u2550\u2550\u2550\n'
-           '${text.toString("$prefix   \u2551 ")}' // TextSpan includes a newline
-           '$prefix   \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n'
-           '${prefix.trimRight()}\n';
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return <DiagnosticsNode>[text.toDiagnosticsNode(name: 'text', style: DiagnosticsTreeStyle.transition)];
   }
 }

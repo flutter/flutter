@@ -71,7 +71,7 @@ enum LogLevel {
   critical,
 }
 
-/// A log entry.
+/// A log entry, as emitted on [flutterDriverLog].
 class LogRecord {
   const LogRecord._(this.level, this.loggerName, this.message);
 

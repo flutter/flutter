@@ -64,6 +64,7 @@ class Slider extends StatefulWidget {
     this.divisions,
     this.label,
     this.activeColor,
+    this.inactiveColor,
     this.thumbOpenAtMin: false,
   }) : assert(value != null),
        assert(min != null),
@@ -138,6 +139,11 @@ class Slider extends StatefulWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
+  /// The color for the unselected portion of the slider.
+  ///
+  /// Defaults to the unselected widget color of the current [Theme].
+  final Color inactiveColor;
+
   /// Whether the thumb should be an open circle when the slider is at its minimum position.
   ///
   /// When this property is false, the thumb does not change when it the slider
@@ -155,11 +161,11 @@ class Slider extends StatefulWidget {
   _SliderState createState() => new _SliderState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: ${value.toStringAsFixed(1)}');
-    description.add('min: $min');
-    description.add('max: $max');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('value', value));
+    description.add(new DoubleProperty('min', min));
+    description.add(new DoubleProperty('max', max));
   }
 }
 
@@ -178,6 +184,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       divisions: widget.divisions,
       label: widget.label,
       activeColor: widget.activeColor ?? theme.accentColor,
+      inactiveColor: widget.inactiveColor ?? theme.unselectedWidgetColor,
       thumbOpenAtMin: widget.thumbOpenAtMin,
       textTheme: theme.accentTextTheme,
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
@@ -193,6 +200,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.divisions,
     this.label,
     this.activeColor,
+    this.inactiveColor,
     this.thumbOpenAtMin,
     this.textTheme,
     this.onChanged,
@@ -203,6 +211,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int divisions;
   final String label;
   final Color activeColor;
+  final Color inactiveColor;
   final bool thumbOpenAtMin;
   final TextTheme textTheme;
   final ValueChanged<double> onChanged;
@@ -215,6 +224,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       divisions: divisions,
       label: label,
       activeColor: activeColor,
+      inactiveColor: inactiveColor,
       thumbOpenAtMin: thumbOpenAtMin,
       textTheme: textTheme,
       onChanged: onChanged,
@@ -229,6 +239,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..divisions = divisions
       ..label = label
       ..activeColor = activeColor
+      ..inactiveColor = inactiveColor
       ..thumbOpenAtMin = thumbOpenAtMin
       ..textTheme = textTheme
       ..onChanged = onChanged;
@@ -246,11 +257,9 @@ const double _kMinimumTrackWidth = _kActiveThumbRadius; // biggest of the thumb 
 const double _kPreferredTotalWidth = _kPreferredTrackWidth + 2 * _kReactionRadius;
 const double _kMinimumTotalWidth = _kMinimumTrackWidth + 2 * _kReactionRadius;
 
-final Color _kInactiveTrackColor = Colors.grey.shade400;
 final Color _kActiveTrackColor = Colors.grey;
 final Tween<double> _kReactionRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kReactionRadius);
 final Tween<double> _kThumbRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kActiveThumbRadius);
-final ColorTween _kTrackColorTween = new ColorTween(begin: _kInactiveTrackColor, end: _kActiveTrackColor);
 final ColorTween _kTickColorTween = new ColorTween(begin: Colors.transparent, end: Colors.black54);
 final Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
 
@@ -276,6 +285,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     int divisions,
     String label,
     Color activeColor,
+    Color inactiveColor,
     bool thumbOpenAtMin,
     TextTheme textTheme,
     this.onChanged,
@@ -284,6 +294,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
+       _inactiveColor = inactiveColor,
        _thumbOpenAtMin = thumbOpenAtMin,
        _textTheme = textTheme {
     this.label = label;
@@ -360,6 +371,15 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     if (value == _activeColor)
       return;
     _activeColor = value;
+    markNeedsPaint();
+  }
+
+  Color get inactiveColor => _inactiveColor;
+  Color _inactiveColor;
+  set inactiveColor(Color value) {
+    if (value == _inactiveColor)
+      return;
+    _inactiveColor = value;
     markNeedsPaint();
   }
 
@@ -451,7 +471,6 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     }
   }
 
-
   @override
   double computeMinIntrinsicWidth(double height) {
     return _kMinimumTotalWidth;
@@ -501,8 +520,8 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     final double trackRight = trackLeft + trackLength;
     final double trackActive = trackLeft + trackLength * value;
 
-    final Paint primaryPaint = new Paint()..color = enabled ? _activeColor : _kInactiveTrackColor;
-    final Paint trackPaint = new Paint()..color = _kTrackColorTween.evaluate(_reaction);
+    final Paint primaryPaint = new Paint()..color = enabled ? _activeColor : _inactiveColor;
+    final Paint trackPaint = new Paint()..color = _inactiveColor;
 
     final Offset thumbCenter = new Offset(trackActive, trackCenter);
     final double thumbRadius = enabled ? _kThumbRadiusTween.evaluate(_reaction) : _kDisabledThumbRadius;

@@ -593,13 +593,13 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('direction: $direction');
-    description.add('alignment: $alignment');
-    description.add('spacing: $spacing');
-    description.add('runAlignment: $runAlignment');
-    description.add('runSpacing: $runSpacing');
-    description.add('crossAxisAlignment: $runSpacing');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('direction', direction));
+    description.add(new EnumProperty<WrapAlignment>('alignment', alignment));
+    description.add(new DoubleProperty('spacing', spacing));
+    description.add(new EnumProperty<WrapAlignment>('runAlignment', runAlignment));
+    description.add(new DoubleProperty('runSpacing', runSpacing));
+    description.add(new DoubleProperty('crossAxisAlignment', runSpacing));
   }
 }

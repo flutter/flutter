@@ -17,7 +17,7 @@ import 'layer.dart';
 import 'node.dart';
 import 'semantics.dart';
 
-export 'package:flutter/foundation.dart' show FlutterError, InformationCollector;
+export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, IntProperty;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 
@@ -739,7 +739,8 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(parentSemantics == null);
     renderObjectOwner._semantics ??= new SemanticsNode.root(
       handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-      owner: renderObjectOwner.owner.semanticsOwner
+      owner: renderObjectOwner.owner.semanticsOwner,
+      showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
@@ -768,7 +769,8 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     renderObjectOwner._semantics ??= new SemanticsNode(
-      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
+      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+      showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
     if (geometry != null) {
@@ -812,7 +814,8 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     _haveConcreteNode = currentSemantics == null && annotator != null;
     if (haveConcreteNode) {
       renderObjectOwner._semantics ??= new SemanticsNode(
-        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
+        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+        showOnScreen: renderObjectOwner.showOnScreen,
       );
       node = renderObjectOwner._semantics;
     } else {
@@ -1315,7 +1318,7 @@ class PipelineOwner {
 /// [RenderObject.markNeedsLayout] so that if a parent has queried the intrinsic
 /// or baseline information, it gets marked dirty whenever the child's geometry
 /// changes.
-abstract class RenderObject extends AbstractNode implements HitTestTarget {
+abstract class RenderObject extends AbstractNode with TreeDiagnosticsMixin implements HitTestTarget {
   /// Initializes internal fields for subclasses.
   RenderObject() {
     _needsCompositing = isRepaintBoundary || alwaysNeedsCompositing;
@@ -1556,6 +1559,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
   /// out and painted.
+  ///
+  /// It is intended to be used by tests and asserts.
   bool get debugNeedsLayout {
     bool result;
     assert(() {
@@ -1740,6 +1745,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       _debugDoingThisLayout = true;
       debugPreviousActiveLayout = _debugActiveLayout;
       _debugActiveLayout = this;
+      if (debugPrintLayouts)
+        debugPrint('Laying out (without resize) $this');
       return true;
     });
     try {
@@ -1846,6 +1853,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(!_doingThisLayoutWithCallback);
     assert(() {
       _debugMutationsLocked = true;
+      if (debugPrintLayouts)
+        debugPrint('Laying out (${sizedByParent ? "with separate resize" : "with resize allowed"}) $this');
       return true;
     });
     if (sizedByParent) {
@@ -2126,6 +2135,28 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     _needsCompositingBitsUpdate = false;
   }
 
+  /// Whether this render object's paint information is dirty.
+  ///
+  /// This is only set in debug mode. In general, render objects should not need
+  /// to condition their runtime behavior on whether they are dirty or not,
+  /// since they should only be marked dirty immediately prior to being laid
+  /// out and painted.
+  ///
+  /// It is intended to be used by tests and asserts.
+  ///
+  /// It is possible (and indeed, quite common) for [debugNeedsPaint] to be
+  /// false and [debugNeedsLayout] to be true. The render object will still be
+  /// repainted in the next frame when this is the case, because the
+  /// [markNeedsPaint] method is implicitly called by the framework after a
+  /// render object is laid out, prior to the paint phase.
+  bool get debugNeedsPaint {
+    bool result;
+    assert(() {
+      result = _needsPaint;
+      return true;
+    });
+    return result;
+  }
   bool _needsPaint = true;
 
   /// Mark this render object as having changed its visual appearance.
@@ -2138,6 +2169,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This mechanism batches the painting work so that multiple sequential
   /// writes are coalesced, removing redundant computation.
+  ///
+  /// Once [markNeedsPaint] has been called on a render object,
+  /// [debugNeedsPaint] returns true for that render object until just after
+  /// the pipeline owner has called [paint] on the render object.
   void markNeedsPaint() {
     assert(owner == null || !owner.debugDoingPaint);
     if (_needsPaint)
@@ -2713,25 +2748,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a description of the tree rooted at this node.
   /// If the prefix argument is provided, then every line in the output
   /// will be prefixed by that string.
+  @override
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
-    String result = '$prefixLineOne$this\n';
-    final String childrenDescription = debugDescribeChildren(prefixOtherLines);
-    final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
-    final List<String> description = <String>[];
-    debugFillDescription(description);
-    result += description
-      .expand((String description) => debugWordWrap(description, 65, wrapIndent: '  '))
-      .map<String>((String line) => "$descriptionPrefix$line\n")
-      .join();
-    if (childrenDescription == '') {
-      final String prefix = prefixOtherLines.trimRight();
-      if (prefix != '')
-        result += '$prefix\n';
-    } else {
-      result += childrenDescription;
-    }
+
+    final String result = super.toStringDeep(prefixLineOne, prefixOtherLines);
+
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
   }
@@ -2741,42 +2764,46 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This includes the same information for this RenderObject as given by
   /// [toStringDeep], but does not recurse to any children.
+  @override
   String toStringShallow([String joiner = '; ']) {
     final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
-    final StringBuffer result = new StringBuffer();
-    result.write('${this}$joiner'); // TODO(ianh): https://github.com/dart-lang/sdk/issues/28206
-    final List<String> description = <String>[];
-    debugFillDescription(description);
-    result.write(description.join(joiner));
+    final String result = super.toStringShallow(joiner);
     _debugActiveLayout = debugPreviousActiveLayout;
-    return result.toString();
+    return result;
   }
 
-  /// Accumulates a list of strings describing the current node's fields, one
-  /// field per string. Subclasses should override this to have their
-  /// information included in [toStringDeep].
   @protected
-  void debugFillDescription(List<String> description) {
-    if (debugCreator != null)
-      description.add('creator: $debugCreator');
-    description.add('parentData: $parentData${ _debugCanParentUseSize == true ? " (can use size)" : ""}');
-    description.add('constraints: $constraints');
-    if (_layer != null) // don't access it via the "layer" getter since that's only valid when we don't need paint
-      description.add('layer: $_layer');
-    if (_semantics != null)
-      description.add('semantics: $_semantics');
-    if (isBlockingSemanticsOfPreviouslyPaintedNodes)
-      description.add('blocks semantics of earlier render objects below the common boundary');
-    if (isSemanticBoundary)
-      description.add('semantic boundary');
+  @override
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null));
+    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? "can use size" : null));
+    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints));
+    // don't access it via the "layer" getter since that's only valid when we don't need paint
+    description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
+    description.add(new DiagnosticsProperty<SemanticsNode>('_semantics', _semantics, defaultValue: null));
+    description.add(new FlagProperty(
+      'isBlockingSemanticsOfPreviouslyPaintedNodes',
+      value: isBlockingSemanticsOfPreviouslyPaintedNodes,
+      ifTrue: 'blocks semantics of earlier render objects below the common boundary',
+    ));
+    description.add(new FlagProperty('isSemanticBoundary', value: isSemanticBoundary, ifTrue: 'semantic boundary'));
   }
 
-  /// Returns a string describing the current node's descendants. Each line of
-  /// the subtree in the output should be indented by the prefix argument.
   @protected
-  String debugDescribeChildren(String prefix) => '';
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[];
 
+  /// Attempt to make this or a descendant RenderObject visible on screen.
+  ///
+  /// If [child] is provided, that [RenderObject] is made visible. If [child] is
+  /// omitted, this [RenderObject] is made visible.
+  void showOnScreen([RenderObject child]) {
+    if (parent is RenderObject) {
+      final RenderObject renderParent = parent;
+      renderParent.showOnScreen(child ?? this);
+    }
+  }
 }
 
 /// Generic mixin for render objects with one child.
@@ -2855,10 +2882,8 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extend
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    if (child != null)
-      return '$prefix \u2502\n${child.toStringDeep('$prefix \u2514\u2500child: ', '$prefix  ')}';
-    return '';
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return child != null ? <DiagnosticsNode>[child.toDiagnosticsNode(name: 'child')] : <DiagnosticsNode>[];
   }
 }
 
@@ -3158,26 +3183,21 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
     if (firstChild != null) {
-      final StringBuffer result = new StringBuffer()
-        ..write(prefix)
-        ..write(' \u2502\n');
       ChildType child = firstChild;
       int count = 1;
-      while (child != lastChild) {
-        result.write(child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502"));
+      while (true) {
+        children.add(child.toDiagnosticsNode(name: 'child $count'));
+        if (child == lastChild)
+          break;
         count += 1;
         final ParentDataType childParentData = child.parentData;
         child = childParentData.nextSibling;
       }
-      if (child != null) {
-        assert(child == lastChild);
-        result.write(child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  "));
-      }
-      return result.toString();
     }
-    return '';
+    return children;
   }
 }
 

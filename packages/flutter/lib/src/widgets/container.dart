@@ -84,8 +84,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     String label;
     if (position != null) {
       switch (position) {
@@ -97,10 +97,15 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
           break;
       }
     } else {
-      description.add('position: NULL');
       label = 'decoration';
     }
-    description.add(decoration != null ? '$label: $decoration' : 'no decoration');
+    description.add(new EnumProperty<DecorationPosition>('position', position, hidden: position != null));
+    description.add(new DiagnosticsProperty<Decoration>(
+      label,
+      decoration,
+      ifNull: 'no decoration',
+      showName: decoration != null,
+    ));
   }
 }
 
@@ -355,21 +360,14 @@ class Container extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (alignment != null)
-      description.add('$alignment');
-    if (padding != null)
-      description.add('padding: $padding');
-    if (decoration != null)
-      description.add('bg: $decoration');
-    if (foregroundDecoration != null)
-      description.add('fg: $foregroundDecoration');
-    if (constraints != null)
-      description.add('$constraints');
-    if (margin != null)
-      description.add('margin: $margin');
-    if (transform != null)
-      description.add('has transform');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
+    description.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsets>('margin', margin, defaultValue: null));
+    description.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 }

@@ -472,8 +472,9 @@ abstract class Widget {
   @override
   String toString() {
     final String name = toStringShort();
-    final List<String> data = <String>[];
-    debugFillDescription(data);
+    List<DiagnosticsNode> data = <DiagnosticsNode>[];
+    debugFillProperties(data);
+    data = data.where((DiagnosticsNode n) => !n.hidden).toList();
     if (data.isEmpty)
       return '$name';
     return '$name(${data.join("; ")})';
@@ -483,14 +484,14 @@ abstract class Widget {
   ///
   /// This method makes it easier for subclasses to coordinate to provide a
   /// high-quality [toString] implementation. The [toString] implementation on
-  /// the [State] base class calls [debugFillDescription] to collect useful
+  /// the [State] base class calls [debugFillProperties] to collect useful
   /// information from subclasses to incorporate into its return value.
   ///
   /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// `super.debugFillProperties(description)`.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) { }
+  void debugFillProperties(List<DiagnosticsNode> description) { }
 
   /// Whether the `newWidget` can be used to update an [Element] that currently
   /// has the `oldWidget` as its configuration.
@@ -522,6 +523,46 @@ abstract class Widget {
 /// is inflated. For compositions that can change dynamically, e.g. due to
 /// having an internal clock-driven state, or depending on some system state,
 /// consider using [StatefulWidget].
+///
+/// ## Performance considerations
+///
+/// The [build] method of a stateless widget is typically only called in three
+/// situations: the first time the widget is inserted in the tree, when the
+/// widget's parent changes its configuration, and when an [InheritedWidget] it
+/// depends on changes.
+///
+/// If a widget's parent will regularly change the widget's configuration, or if
+/// it depends on inherited widgets that frequently change, then it is important
+/// to optimize the performance of the [build] method to maintain a fluid
+/// rendering performance.
+///
+/// There are several techniques one can use to minimize the impact of
+/// rebuilding a stateless widget:
+///
+///  * Minimize the number of nodes transitively created by the build method and
+///    any widgets it creates. For example, instead of an elaborate arrangement
+///    of [Row]s, [Column]s, [Padding]s, and [SizedBox]es to position a single
+///    child in a particularly fancy manner, consider using just an [Align] or a
+///    [CustomSingleChildLayout]. Instead of an intricate layering of multiple
+///    [Container]s and with [Decoration]s to draw just the right graphical
+///    effect, consider a single [CustomPaint] widget.
+///
+///  * Use `const` widgets where possible, and provide a `const` constructor for
+///    the widget so that users of the widget can also do so.
+///
+///  * Consider refactoring the stateless widget into a stateful widget so that
+///    it can use some of the techniques described at [StatefulWidget], such as
+///    caching common parts of subtrees and using [GlobalKey]s when changing the
+///    tree structure.
+///
+///  * If the widget is likely to get rebuilt frequently due to the use of
+///    [InheritedWidget]s, consider refactoring the stateless widget into
+///    multiple widgets, with the parts of the tree that change being pushed to
+///    the leaves. For example instead of building a tree with four widgets, the
+///    inner-most widget depending on the [Theme], consider factoring out the
+///    part of the build function that builds the inner-most widget into its own
+///    widget, so that only the inner-most widget needs to be rebuilt when the
+///    theme changes.
 ///
 /// ## Sample code
 ///
@@ -614,6 +655,10 @@ abstract class StatelessWidget extends Widget {
   ///
   /// If a widget's [build] method is to depend on anything else, use a
   /// [StatefulWidget] instead.
+  ///
+  /// See also:
+  ///
+  ///  * The discussion on performance considerations at [StatelessWidget].
   @protected
   Widget build(BuildContext context);
 }
@@ -665,6 +710,66 @@ abstract class StatelessWidget extends Widget {
 /// (instead of being recreated) in the new location. However, in order to be
 /// eligible for grafting, the widget might be inserted into the new location in
 /// the same animation frame in which it was removed from the old location.
+///
+/// ## Performance considerations
+///
+/// There are two primary categories of [StatefulWidget]s.
+///
+/// The first is one which allocates resources in [State.initState] and disposes
+/// of them in [State.dispose], but which does not depend on [InheritedWidget]s
+/// or call [State.setState]. Such widgets are commonly used at the root of an
+/// application or page, and communicate with subwidgets via [ChangeNotifier]s,
+/// [Stream]s, or other such objects. Stateful widgets following such a pattern
+/// are relatively cheap (in terms of CPU and GPU cycles), because they are
+/// built once then never update. They can, therefore, have somewhat complicated
+/// and deep build methods.
+///
+/// The second category is widgets that use [State.setState] or depend on
+/// [InheritedWidget]s. These will typically rebuild many times during the
+/// application's lifetime, and it is therefore important to minimise the impact
+/// of rebuilding such a widget. (They may also use [State.initState] or
+/// [State.didChangeDependencies] and allocate resources, but the important part
+/// is that they rebuild.)
+///
+/// There are several techniques one can use to minimize the impact of
+/// rebuilding a stateful widget:
+///
+///  * Push the state to the leaves. For example, if your page has a ticking
+///    clock, rather than putting the state at the top of the page and
+///    rebuilding the entire page each time the clock ticks, create a dedicated
+///    clock widget that only updates itself.
+///
+///  * Minimize the number of nodes transitively created by the build method and
+///    any widgets it creates. Ideally, a stateful widget would only create a
+///    single widget, and that widget would be a [RenderObjectWidget].
+///    (Obviously this isn't always practical, but the closer a widget gets to
+///    this ideal, the more efficient it will be.)
+///
+///  * If a subtree does not change, cache the widget that represents that
+///    subtree and re-use it each time it can be used. It is massively more
+///    efficient for a widget to be re-used than for a new (but
+///    identically-configured) widget to be created. Factoring out the stateful
+///    part into a widget that takes a child argument is a common way of doing
+///    this.
+///
+///  * Use `const` widgets where possible. (This is equivalent to caching a
+///    widget and re-using it.)
+///
+///  * Avoid changing the depth of any created subtrees or changing the type of
+///    any widgets in the subtree. For example, rather than returning either the
+///    child or the child wrapped in an [IgnorePointer], always wrap the child
+///    widget in an [IgnorePointer] and control the [IgnorePointer.ignoring]
+///    property. This is because changing the depth of the subtree requires
+///    rebuilding, laying out, and painting the entire subtree, whereas just
+///    changing the property will require the least possible change to the
+///    render tree (in the case of [IgnorePointer], for example, no layout or
+///    repaint is necessary at all).
+///
+///  * If the depth must be changed for some reason, consider wrapping the
+///    common parts of the subtrees in widgets that have a [GlobalKey] that
+///    remains consistent for the life of the stateful widget. (The
+///    [KeyedSubtree] widget may be useful for this purpose if no other widget
+///    can conveniently be assigned the key.)
 ///
 /// ## Sample code
 ///
@@ -1238,6 +1343,10 @@ abstract class State<T extends StatefulWidget> {
   /// rebuilds, but the framework has updated that [State] object's [widget]
   /// property to refer to the new `MyButton` instance and `${widget.color}`
   /// prints green, as expected.
+  ///
+  /// See also:
+  ///
+  ///  * The discussion on performance considerations at [StatefulWidget].
   @protected
   Widget build(BuildContext context);
 
@@ -1261,32 +1370,37 @@ abstract class State<T extends StatefulWidget> {
 
   @override
   String toString() {
-    final List<String> data = <String>[];
-    debugFillDescription(data);
-    return '${describeIdentity(this)}(${data.join("; ")})';
+    final List<DiagnosticsNode> allProperties = <DiagnosticsNode>[];
+    debugFillProperties(allProperties);
+    final Iterable<DiagnosticsNode> properties =
+        allProperties.where((DiagnosticsNode n) => !n.hidden);
+    return '${describeIdentity(this)}(${properties.join("; ")})';
   }
 
-  /// Add additional information to the given description for use by [toString].
+  /// Add additional properties to the given description used by
+  /// [toDiagnosticNode], [toString] and [toStringDeep].
   ///
-  /// This method makes it easier for subclasses to coordinate to provide a
-  /// high-quality [toString] implementation. The [toString] implementation on
-  /// the [State] base class calls [debugFillDescription] to collect useful
+  /// This method makes it easier for subclasses to coordinate to provide
+  /// high-quality diagnostic data. The [toString] implementation on
+  /// the [State] base class calls [debugFillProperties] to collect useful
   /// information from subclasses to incorporate into its return value.
   ///
   /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// `super.debugFillProperties(description)`.
+  ///
+  /// See also:
+  ///
+  ///  * [TreeDiagnosticsMixin.debugFillProperties], which provides detailed
+  ///    best practices for defining diagnostic properties.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) {
+  void debugFillProperties(List<DiagnosticsNode> description) {
     assert(() {
-      if (_debugLifecycleState != _StateLifecycle.ready)
-        description.add('$_debugLifecycleState');
+      description.add(new EnumProperty<_StateLifecycle>('lifecycle state', _debugLifecycleState, defaultValue: _StateLifecycle.ready));
       return true;
     });
-    if (_widget == null)
-      description.add('no widget');
-    if (_element == null)
-      description.add('not mounted');
+    description.add(new ObjectFlagProperty<T>('_widget', _widget, ifNull: 'no widget'));
+    description.add(new ObjectFlagProperty<StatefulElement>('_element', _element, ifNull: 'not mounted'));
   }
 }
 
@@ -2408,7 +2522,7 @@ class BuildOwner {
 ///    element.
 ///  * At this point, the element is considered "defunct" and will not be
 ///    incorporated into the tree in the future.
-abstract class Element implements BuildContext {
+abstract class Element implements BuildContext, TreeDiagnostics {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
@@ -3183,52 +3297,60 @@ abstract class Element implements BuildContext {
 
   @override
   String toString() {
-    final List<String> data = <String>[];
-    debugFillDescription(data);
+    List<DiagnosticsNode> data = <DiagnosticsNode>[];
+    debugFillProperties(data);
+    data = data.where((DiagnosticsNode n) => !n.hidden).toList();
     final String name = widget != null ? '${widget.runtimeType}' : '[$runtimeType]';
     return '$name(${data.join("; ")})';
   }
 
-  /// Add additional information to the given description for use by [toString].
+  /// Add additional properties to the given description used by
+  /// [toDiagnosticNode], [toString] and [toStringDeep].
   ///
-  /// This method makes it easier for subclasses to coordinate to provide a
-  /// high-quality [toString] implementation. The [toString] implementation on
-  /// the [State] base class calls [debugFillDescription] to collect useful
+  /// This method makes it easier for subclasses to coordinate to provide
+  /// high-quality diagnostic data. The [toString] implementation on
+  /// the [State] base class calls [debugFillProperties] to collect useful
   /// information from subclasses to incorporate into its return value.
   ///
   /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillDescription(description)`.
+  /// `super.debugFillProperties(description)`.
+  ///
+  /// See also:
+  ///
+  ///  * [TreeDiagnosticsMixin.debugFillProperties], which provides detailed
+  ///    best practices for defining diagnostic properties.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) {
-    if (depth == null)
-      description.add('no depth');
-    if (widget == null) {
-      description.add('no widget');
-    } else {
-      if (widget.key != null)
-        description.add('${widget.key}');
-      widget.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    description.add(new ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
+    description.add(new ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
+    if (widget != null) {
+      description.add(new DiagnosticsProperty<Key>('key', widget?.key, showName: false, defaultValue: null));
+      widget.debugFillProperties(description);
     }
-    if (dirty)
-      description.add('dirty');
+    description.add(new FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
   }
 
   /// A detailed, textual description of this element, includings its children.
+  @override
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    final StringBuffer result = new StringBuffer()
-      ..write(prefixLineOne)
-      ..write(this)
-      ..write('\n');
-    final List<Element> children = <Element>[];
-    visitChildren(children.add);
-    if (children.isNotEmpty) {
-      final Element last = children.removeLast();
-      for (Element child in children)
-        result.write(child.toStringDeep("$prefixOtherLines\u251C", "$prefixOtherLines\u2502"));
-      result.write(last.toStringDeep("$prefixOtherLines\u2514", "$prefixOtherLines "));
-    }
-    return result.toString();
+    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return new DiagnosticsNode.lazy(
+      name: name,
+      object: this,
+      getChildren: () {
+        final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+        visitChildren((Element child) {
+          children.add(child.toDiagnosticsNode());
+        });
+        return children;
+      },
+      style: style ?? DiagnosticsTreeStyle.dense,
+    );
   }
 
   /// Returns true if the element has been marked as needing rebuilding.
@@ -3371,9 +3493,9 @@ class ErrorWidget extends LeafRenderObjectWidget {
   RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('message: ' + _stringify(message));
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('message', message, quoted: false));
   }
 }
 
@@ -3652,10 +3774,9 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (state != null)
-      description.add('state: $state');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<State<StatefulWidget>>('state', state, defaultValue: null));
   }
 }
 
@@ -4320,10 +4441,9 @@ abstract class RenderObjectElement extends Element {
   void removeChildRenderObject(covariant RenderObject child);
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (renderObject != null)
-      description.add('renderObject: $renderObject');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<RenderObject>('renderObject', renderObject, defaultValue: null));
   }
 }
 

@@ -89,7 +89,7 @@ class HotRunner extends ResidentRunner {
       { bool force: false, bool pause: false }) async {
     // TODO(cbernaschina): check that isolateId is the id of the UI isolate.
     final OperationResult result = await restart(pauseAfterRestart: pause);
-    if (result != OperationResult.ok) {
+    if (!result.isOk) {
       throw new rpc.RpcException(
         rpc_error_code.INTERNAL_ERROR,
         'Unable to reload sources',
@@ -153,7 +153,6 @@ class HotRunner extends ResidentRunner {
       // Measure time to perform a hot restart.
       printStatus('Benchmarking hot restart');
       await restart(fullRestart: true);
-      await refreshViews();
       // TODO(johnmccutchan): Modify script entry point.
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
@@ -313,6 +312,11 @@ class HotRunner extends ResidentRunner {
                           deviceEntryUri,
                           devicePackagesUri,
                           deviceAssetsDirectoryUri);
+      if (benchmarkMode) {
+        for (FlutterDevice device in flutterDevices)
+          for (FlutterView view in device.views)
+            await view.flushUIThreadTasks();
+      }
     }
   }
 
@@ -520,9 +524,10 @@ class HotRunner extends ResidentRunner {
     final List<FlutterView> reassembleViews = <FlutterView>[];
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
+        // Check if the isolate is paused, and if so, don't reassemble. Ignore the
+        // PostPauseEvent event - the client requesting the pause will resume the app.
         final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
-        if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
-          // Isolate is paused. Don't reassemble.
+        if (pauseEvent != null && pauseEvent.isPauseEvent && pauseEvent.kind != ServiceEvent.kPausePostRequest) {
           continue;
         }
         reassembleViews.add(view);

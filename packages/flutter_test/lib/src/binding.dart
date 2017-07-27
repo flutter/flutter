@@ -98,9 +98,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     debugCheckIntrinsicSizes = checkIntrinsicSizes;
   }
 
+  /// The value to set [debugPrint] to while tests are running.
+  ///
+  /// This can be used to redirect console output from the framework, or to
+  /// change the behavior of [debugPrint]. For example,
+  /// [AutomatedTestWidgetsFlutterBinding] uses it to make [debugPrint]
+  /// synchronous, disabling its normal throttling behaviour.
   @protected
   DebugPrintCallback get debugPrintOverride => debugPrint;
 
+  /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
+  ///
+  /// This can be used to enable additional checks. For example,
+  /// [AutomatedTestWidgetsFlutterBinding] sets this to true, so that all tests
+  /// always run with aggressive intrinsic sizing tests enabled.
   @protected
   bool get checkIntrinsicSizes => false;
 
@@ -462,6 +473,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(debugAssertAllFoundationVarsUnset(
       'The value of a foundation debug variable was changed by the test.',
       debugPrintOverride: debugPrintOverride,
+    ));
+    assert(debugAssertAllGesturesVarsUnset(
+      'The value of a gestures debug variable was changed by the test.',
     ));
     assert(debugAssertAllRenderVarsUnset(
       'The value of a rendering debug variable was changed by the test.',

@@ -98,31 +98,35 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   _GlowingOverscrollIndicatorState createState() => new _GlowingOverscrollIndicatorState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$axisDirection');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    String showDescription;
     if (showLeading && showTrailing) {
-      description.add('show: both sides');
+      showDescription = 'both sides';
     } else if (showLeading) {
-      description.add('show: leading side only');
+      showDescription = 'leading side only';
     } else if (showTrailing) {
-      description.add('show: trailing side only');
+      showDescription = 'trailing side only';
     } else {
-      description.add('show: neither side (!)');
+      showDescription = 'neither side (!)';
     }
-    description.add('$color');
+    description.add(new MessageProperty('show', showDescription));
+    description.add(new DiagnosticsProperty<Color>('color', color, showName: false));
   }
 }
 
 class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator> with TickerProviderStateMixin {
   _GlowController _leadingController;
   _GlowController _trailingController;
+  Listenable _leadingAndTrailingListener;
 
   @override
   void initState() {
     super.initState();
     _leadingController = new _GlowController(vsync: this, color: widget.color, axis: widget.axis);
     _trailingController = new _GlowController(vsync: this, color: widget.color, axis: widget.axis);
+    _leadingAndTrailingListener = new Listenable.merge(<Listenable>[_leadingController, _trailingController]);
   }
 
   @override
@@ -210,6 +214,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             leadingController: widget.showLeading ? _leadingController : null,
             trailingController: widget.showTrailing ? _trailingController : null,
             axisDirection: widget.axisDirection,
+            repaint: _leadingAndTrailingListener,
           ),
           child: new RepaintBoundary(
             child: widget.child,
@@ -444,8 +449,9 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
     this.leadingController,
     this.trailingController,
     this.axisDirection,
+    Listenable repaint,
   }) : super(
-    repaint: new Listenable.merge(<Listenable>[leadingController, trailingController])
+    repaint: repaint,
   );
 
   /// The controller for the overscroll glow on the side with negative scroll offsets.

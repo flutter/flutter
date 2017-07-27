@@ -114,16 +114,10 @@ class Icon extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (icon != null) {
-      description.add('$icon');
-    } else {
-      description.add('<empty>');
-    }
-    if (size != null)
-      description.add('size: $size');
-    if (color != null)
-      description.add('color: $color');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false));
+    description.add(new DoubleProperty('size', size, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }

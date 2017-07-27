@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 
-import 'package:collection/collection.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -170,19 +169,9 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   bool hitTestSelf(Offset position) => behavior == HitTestBehavior.opaque;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    switch (behavior) {
-      case HitTestBehavior.translucent:
-        description.add('behavior: translucent');
-        break;
-      case HitTestBehavior.opaque:
-        description.add('behavior: opaque');
-        break;
-      case HitTestBehavior.deferToChild:
-        description.add('behavior: defer-to-child');
-        break;
-    }
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<HitTestBehavior>('behavior', behavior, defaultValue: null));
   }
 }
 
@@ -285,9 +274,9 @@ class RenderConstrainedBox extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('additionalConstraints: $additionalConstraints');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<BoxConstraints>('additionalConstraints', additionalConstraints));
   }
 }
 
@@ -361,12 +350,10 @@ class RenderLimitedBox extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (maxWidth != double.INFINITY)
-      description.add('maxWidth: $maxWidth');
-    if (maxHeight != double.INFINITY)
-      description.add('maxHeight: $maxHeight');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
   }
 }
 
@@ -528,9 +515,9 @@ class RenderAspectRatio extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('aspectRatio: $aspectRatio');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('aspectRatio', aspectRatio));
   }
 }
 
@@ -641,10 +628,10 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('stepWidth: $stepWidth');
-    description.add('stepHeight: $stepHeight');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('stepWidth', stepWidth));
+    description.add(new DoubleProperty('stepHeight', stepHeight));
   }
 }
 
@@ -779,9 +766,9 @@ class RenderOpacity extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('opacity: ${opacity.toStringAsFixed(1)}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('opacity', opacity));
   }
 }
 
@@ -1364,7 +1351,11 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           );
         }
         canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
-        canvas.saveLayer(offsetBounds, _defaultPaint);
+        if (offsetClipRRect.isRect) {
+          canvas.save();
+        } else {
+          canvas.saveLayer(offsetBounds, _defaultPaint);
+        }
         canvas.clipRRect(offsetClipRRect);
         super.paint(context, offset);
         canvas.restore();
@@ -1374,12 +1365,12 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('shape: $shape');
-    description.add('borderRadius: $borderRadius');
-    description.add('elevation: ${elevation.toStringAsFixed(1)}');
-    description.add('color: $color');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<BoxShape>('shape', shape));
+    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
   }
 }
 
@@ -1488,7 +1479,7 @@ class RenderDecoratedBox extends RenderProxyBox {
             'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
             'Every call to save() or saveLayer() must be matched by a call to restore().\n'
             'The decoration was:\n'
-            '${decoration.toString("  ")}\n'
+            '${decoration.toStringDeep()}\n'
             'The painter was:\n'
             '  $_painter'
           );
@@ -1507,11 +1498,10 @@ class RenderDecoratedBox extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('decoration:');
-    description.addAll(_decoration.toString('  ', '    ').split('\n'));
-    description.add('configuration: $configuration');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(_decoration.toDiagnosticsNode(name: 'decoration'));
+    description.add(new DiagnosticsProperty<ImageConfiguration>('configuration', configuration));
   }
 }
 
@@ -1671,13 +1661,12 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('transform matrix:');
-    description.addAll(debugDescribeTransform(_transform));
-    description.add('origin: $origin');
-    description.add('alignment: $alignment');
-    description.add('transformHitTests: $transformHitTests');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new TransformProperty('transform matrix', _transform));
+    description.add(new DiagnosticsProperty<Offset>('origin', origin));
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
 
@@ -1807,10 +1796,10 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('fit: $fit');
-    description.add('alignment: $alignment');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<BoxFit>('fit', fit));
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
   }
 }
 
@@ -1872,10 +1861,10 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('translation: $translation');
-    description.add('transformHitTests: $transformHitTests');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('translation', translation));
+    description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
 
@@ -2075,6 +2064,8 @@ class RenderCustomPaint extends RenderProxyBox {
     CustomPainter painter,
     CustomPainter foregroundPainter,
     Size preferredSize: Size.zero,
+    this.isComplex: false,
+    this.willChange: false,
     RenderBox child,
   }) : assert(preferredSize != null),
        _painter = painter,
@@ -2164,6 +2155,19 @@ class RenderCustomPaint extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  /// Whether to hint that this layer's painting should be cached.
+  ///
+  /// The compositor contains a raster cache that holds bitmaps of layers in
+  /// order to avoid the cost of repeatedly rendering those layers on each
+  /// frame.  If this flag is not set, then the compositor will apply its own
+  /// heuristics to decide whether the this layer is complex enough to benefit
+  /// from caching.
+  bool isComplex;
+
+  /// Whether the raster cache should be told that this painting is likely
+  /// to change in the next frame.
+  bool willChange;
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
@@ -2237,11 +2241,22 @@ class RenderCustomPaint extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_painter != null)
+    if (_painter != null) {
       _paintWithPainter(context.canvas, offset, _painter);
+      _setRasterCacheHints(context);
+    }
     super.paint(context, offset);
-    if (_foregroundPainter != null)
+    if (_foregroundPainter != null) {
       _paintWithPainter(context.canvas, offset, _foregroundPainter);
+      _setRasterCacheHints(context);
+    }
+  }
+
+  void _setRasterCacheHints(PaintingContext context) {
+    if (isComplex)
+      context.setIsComplexHint();
+    if (willChange)
+      context.setWillChangeHint();
   }
 }
 
@@ -2316,8 +2331,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     final List<String> listeners = <String>[];
     if (onPointerDown != null)
       listeners.add('down');
@@ -2329,7 +2344,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       listeners.add('cancel');
     if (listeners.isEmpty)
       listeners.add('<none>');
-    description.add('listeners: ${listeners.join(", ")}');
+    description.add(new IterableProperty<String>('listeners', listeners));
+    // TODO(jacobr): add raw listeners to the diagnostics data.
   }
 }
 
@@ -2419,38 +2435,38 @@ class RenderRepaintBoundary extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     bool inReleaseMode = true;
     assert(() {
       inReleaseMode = false;
       if (debugSymmetricPaintCount + debugAsymmetricPaintCount == 0) {
-        description.add('usefulness ratio: no metrics collected yet (never painted)');
+        description.add(new MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)'));
       } else {
-        final double percentage = 100.0 * debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
+        final double fraction = debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
         String diagnosis;
         if (debugSymmetricPaintCount + debugAsymmetricPaintCount < 5) {
           diagnosis = 'insufficient data to draw conclusion (less than five repaints)';
-        } else if (percentage > 90.0) {
+        } else if (fraction > 0.9) {
           diagnosis = 'this is an outstandingly useful repaint boundary and should definitely be kept';
-        } else if (percentage > 50.0) {
+        } else if (fraction > 0.5) {
           diagnosis = 'this is a useful repaint boundary and should be kept';
-        } else if (percentage > 30.0) {
+        } else if (fraction > 0.30) {
           diagnosis = 'this repaint boundary is probably useful, but maybe it would be more useful in tandem with adding more repaint boundaries elsewhere';
-        } else if (percentage > 10.0) {
+        } else if (fraction > 0.1) {
           diagnosis = 'this repaint boundary does sometimes show value, though currently not that often';
         } else if (debugAsymmetricPaintCount == 0) {
           diagnosis = 'this repaint boundary is astoundingly ineffectual and should be removed';
         } else {
           diagnosis = 'this repaint boundary is not very effective and should probably be removed';
         }
-        description.add('metrics: ${percentage.toStringAsFixed(1)}% useful ($debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good)');
-        description.add('diagnosis: $diagnosis');
+        description.add(new PercentProperty('metrics', fraction, unit: 'useful', tooltip: '$debugSymmetricPaintCount bad vs $debugAsymmetricPaintCount good'));
+        description.add(new MessageProperty('diagnosis', diagnosis));
       }
       return true;
     });
     if (inReleaseMode)
-      description.add('(run in checked mode to collect repaint boundary statistics)');
+      description.add(new DiagnosticsNode.message('(run in checked mode to collect repaint boundary statistics)'));
   }
 }
 
@@ -2530,10 +2546,16 @@ class RenderIgnorePointer extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('ignoring: $ignoring');
-    description.add('ignoringSemantics: ${ ignoringSemantics == null ? "implicitly " : "" }$_effectiveIgnoringSemantics');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('ignoring', ignoring));
+    description.add(
+      new DiagnosticsProperty<bool>(
+        'ignoringSemantics',
+        _effectiveIgnoringSemantics,
+        description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,
+      )
+    );
   }
 }
 
@@ -2639,9 +2661,21 @@ class RenderOffstage extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('offstage: $offstage');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('offstage', offstage));
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    if (child == null)
+      return <DiagnosticsNode>[];
+    return <DiagnosticsNode>[
+      child.toDiagnosticsNode(
+        name: 'child',
+        style: offstage ? DiagnosticsTreeStyle.offstage : DiagnosticsTreeStyle.sparse,
+      ),
+    ];
   }
 }
 
@@ -2680,9 +2714,9 @@ class RenderAbsorbPointer extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('absorbing: $absorbing');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('absorbing', absorbing));
   }
 }
 
@@ -2706,9 +2740,9 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
   dynamic metaData;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('metaData: $metaData');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<dynamic>('metaData', metaData));
   }
 }
 
@@ -2732,10 +2766,23 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+  /// If non-null, the set of actions to allow. Other actions will be omitted,
+  /// even if their callback is provided.
+  ///
+  /// For example, if [onTap] is non-null but [validActions] does not contain
+  /// [SemanticsAction.tap], then the semantic description of this node will
+  /// not claim to support taps.
+  ///
+  /// This is normally used to filter the actions made available by
+  /// [onHorizontalDragUpdate] and [onVerticalDragUpdate]. Normally, these make
+  /// both the right and left, or up and down, actions available. For example,
+  /// if [onHorizontalDragUpdate] is set but [validActions] only contains
+  /// [SemanticsAction.scrollLeft], then the [SemanticsAction.scrollRight]
+  /// action will be omitted.
   Set<SemanticsAction> get validActions => _validActions;
   Set<SemanticsAction> _validActions;
   set validActions(Set<SemanticsAction> value) {
-    if (const SetEquality<SemanticsAction>().equals(value, _validActions))
+    if (setEquals<SemanticsAction>(value, _validActions))
       return;
     _validActions = value;
     markNeedsSemanticsUpdate(onlyChanges: true);
@@ -2888,8 +2935,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     final List<String> gestures = <String>[];
     if (onTap != null)
       gestures.add('tap');
@@ -2901,7 +2948,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
       gestures.add('vertical scroll');
     if (gestures.isEmpty)
       gestures.add('<none>');
-    description.add('gestures: ${gestures.join(", ")}');
+    description.add(new IterableProperty<String>('gestures', gestures));
   }
 }
 
@@ -3065,9 +3112,9 @@ class RenderExcludeSemantics extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('excluding: $excluding');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('excluding', excluding));
   }
 }
 
@@ -3113,9 +3160,9 @@ class RenderLeaderLayer extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('link: $link');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<LayerLink>('link', link));
   }
 }
 
@@ -3258,12 +3305,11 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('link: $link');
-    description.add('showWhenUnlinked: $showWhenUnlinked');
-    description.add('offset: $offset');
-    description.add('current transform matrix:');
-    description.addAll(debugDescribeTransform(getCurrentTransform()));
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<LayerLink>('link', link));
+    description.add(new DiagnosticsProperty<bool>('showWhenUnlinked', showWhenUnlinked));
+    description.add(new DiagnosticsProperty<Offset>('offset', offset));
+    description.add(new TransformProperty('current transform matrix', getCurrentTransform()));
   }
 }

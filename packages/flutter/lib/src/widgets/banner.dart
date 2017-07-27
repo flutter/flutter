@@ -207,12 +207,12 @@ class Banner extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('"$message"');
-    description.add('$location');
-    description.add('$color');
-    '$textStyle'.split('\n').map((String value) => 'text $value').forEach(description.add);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('message', message, showName: false));
+    description.add(new EnumProperty<BannerLocation>('location', location));
+    description.add(new DiagnosticsProperty<Color>('color', color, showName: false));
+    textStyle?.debugFillProperties(description, prefix: 'text ');
   }
 }
 
@@ -243,13 +243,13 @@ class CheckedModeBanner extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     String message = 'disabled';
     assert(() {
       message = '"SLOW MODE"';
       return true;
     });
-    description.add(message);
+    description.add(new DiagnosticsNode.message(message));
   }
 }

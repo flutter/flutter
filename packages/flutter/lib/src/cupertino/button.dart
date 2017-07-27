@@ -47,8 +47,9 @@ class CupertinoButton extends StatefulWidget {
     this.color,
     this.minSize: 44.0,
     this.pressedOpacity: 0.1,
+    this.borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
     @required this.onPressed,
-  }) : assert(pressedOpacity >= 0.0 && pressedOpacity <= 1.0);
+  }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0));
 
   /// The widget below this widget in the tree.
   ///
@@ -83,8 +84,14 @@ class CupertinoButton extends StatefulWidget {
   /// The opacity that the button will fade to when it is pressed.
   /// The button will have an opacity of 1.0 when it is not pressed.
   ///
-  /// This defaults to 0.1.
+  /// This defaults to 0.1. If null, opacity will not change on pressed if using
+  /// your own custom effects is desired.
   final double pressedOpacity;
+
+  /// The radius of the button's corners when it has a background color.
+  ///
+  /// Defaults to round corners of 8 logical pixels.
+  final BorderRadius borderRadius;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
@@ -94,10 +101,9 @@ class CupertinoButton extends StatefulWidget {
   _CupertinoButtonState createState() => new _CupertinoButtonState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (!enabled)
-      description.add('disabled');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
 }
 
@@ -112,7 +118,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   void _setTween() {
     _opacityTween = new Tween<double>(
       begin: 1.0,
-      end: widget.pressedOpacity,
+      end: widget.pressedOpacity ?? 1.0,
     );
   }
 
@@ -164,10 +170,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       child: new GestureDetector(
         onTap: widget.onPressed,
         child: new ConstrainedBox(
-          constraints: new BoxConstraints(
-            minWidth: widget.minSize,
-            minHeight: widget.minSize,
-          ),
+          constraints: widget.minSize == null
+              ? const BoxConstraints()
+              : new BoxConstraints(
+                minWidth: widget.minSize,
+                minHeight: widget.minSize,
+              ),
           child: new FadeTransition(
             opacity: _opacityTween.animate(new CurvedAnimation(
               parent: _animationController,
@@ -175,17 +183,15 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             )),
             child: new DecoratedBox(
               decoration: new BoxDecoration(
-                borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
+                borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
                     ? _kDisabledBackground
                     : backgroundColor,
               ),
               child: new Padding(
-                padding: widget.padding != null
-                    ? widget.padding
-                    : backgroundColor != null
-                        ? _kBackgroundButtonPadding
-                        : _kButtonPadding,
+                padding: widget.padding ?? (backgroundColor != null
+                  ? _kBackgroundButtonPadding
+                  : _kButtonPadding),
                 child: new Center(
                   widthFactor: 1.0,
                   heightFactor: 1.0,

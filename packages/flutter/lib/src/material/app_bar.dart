@@ -84,7 +84,9 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// If the [leading] widget is omitted, but the [AppBar] is in a [Scaffold] with
 /// a [Drawer], then a button will be inserted to open the drawer. Otherwise, if
 /// the nearest [Navigator] has any previous routes, a [BackButton] is inserted
-/// instead.
+/// instead. This behavior can be turned off by setting the [automaticallyImplyLeading]
+/// to false. In that case a null leading widget will result in the middle/title widget
+/// stretching to start.
 ///
 /// ## Sample code
 ///
@@ -126,10 +128,14 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
+  /// The arguments [elevation], [primary], [toolbarOpacity], [bottomOpacity]
+  /// and [automaticallyImplyLeading] must not be null.
+  ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
     Key key,
     this.leading,
+    this.automaticallyImplyLeading: true,
     this.title,
     this.actions,
     this.flexibleSpace,
@@ -143,7 +149,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.centerTitle,
     this.toolbarOpacity: 1.0,
     this.bottomOpacity: 1.0,
-  }) : assert(elevation != null),
+  }) : assert(automaticallyImplyLeading != null),
+       assert(elevation != null),
        assert(primary != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
@@ -152,12 +159,20 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// A widget to display before the [title].
   ///
-  /// If this is null, the [AppBar] will imply an appropriate widget. For
-  /// example, if the [AppBar] is in a [Scaffold] that also has a [Drawer], the
-  /// [Scaffold] will fill this widget with an [IconButton] that opens the
-  /// drawer. If there's no [Drawer] and the parent [Navigator] can go back, the
-  /// [AppBar] will use a [BackButton] that calls [Navigator.maybePop].
+  /// If this is null and [automaticallyImplyLeading] is set to true, the [AppBar] will
+  /// imply an appropriate widget. For example, if the [AppBar] is in a [Scaffold]
+  /// that also has a [Drawer], the [Scaffold] will fill this widget with an
+  /// [IconButton] that opens the drawer. If there's no [Drawer] and the parent
+  /// [Navigator] can go back, the [AppBar] will use a [BackButton] that calls
+  /// [Navigator.maybePop].
   final Widget leading;
+
+  /// Controls whether we should try to imply the leading widget if null.
+  ///
+  /// If true and [leading] is null, automatically try to deduce what the leading
+  /// widget should be. If false and [leading] is null, leading space is given to [title].
+  /// If leading widget is not null, this parameter has no effect.
+  final bool automaticallyImplyLeading;
 
   /// The primary widget displayed in the appbar.
   ///
@@ -332,7 +347,7 @@ class _AppBarState extends State<AppBar> {
     }
 
     Widget leading = widget.leading;
-    if (leading == null) {
+    if (leading == null && widget.automaticallyImplyLeading) {
       if (hasDrawer) {
         leading = new IconButton(
           icon: const Icon(Icons.menu),
@@ -499,6 +514,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate({
     @required this.leading,
+    @required this.automaticallyImplyLeading,
     @required this.title,
     @required this.actions,
     @required this.flexibleSpace,
@@ -521,6 +537,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
   final Widget leading;
+  final bool automaticallyImplyLeading;
   final Widget title;
   final List<Widget> actions;
   final Widget flexibleSpace;
@@ -562,6 +579,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
       toolbarOpacity: toolbarOpacity,
       child: new AppBar(
         leading: leading,
+        automaticallyImplyLeading: automaticallyImplyLeading,
         title: title,
         actions: actions,
         flexibleSpace: flexibleSpace,
@@ -583,6 +601,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _SliverAppBarDelegate oldDelegate) {
     return leading != oldDelegate.leading
+        || automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading
         || title != oldDelegate.title
         || actions != oldDelegate.actions
         || flexibleSpace != oldDelegate.flexibleSpace
@@ -660,9 +679,13 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///  * <https://material.google.com/layout/structure.html#structure-toolbars>
 class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
+  ///
+  /// The arguments [forceElevated], [primary], [floating], [pinned], [snap]
+  /// and [automaticallyImplyLeading] must not be null.
   const SliverAppBar({
     Key key,
     this.leading,
+    this.automaticallyImplyLeading: true,
     this.title,
     this.actions,
     this.flexibleSpace,
@@ -679,7 +702,8 @@ class SliverAppBar extends StatefulWidget {
     this.floating: false,
     this.pinned: false,
     this.snap: false,
-  }) : assert(forceElevated != null),
+  }) : assert(automaticallyImplyLeading != null),
+       assert(forceElevated != null),
        assert(primary != null),
        assert(floating != null),
        assert(pinned != null),
@@ -690,12 +714,20 @@ class SliverAppBar extends StatefulWidget {
 
   /// A widget to display before the [title].
   ///
-  /// If this is null, the [AppBar] will imply an appropriate widget. For
-  /// example, if the [AppBar] is in a [Scaffold] that also has a [Drawer], the
-  /// [Scaffold] will fill this widget with an [IconButton] that opens the
-  /// drawer. If there's no [Drawer] and the parent [Navigator] can go back, the
-  /// [AppBar] will use an [IconButton] that calls [Navigator.pop].
+  /// If this is null and [automaticallyImplyLeading] is set to true, the [AppBar] will
+  /// imply an appropriate widget. For example, if the [AppBar] is in a [Scaffold]
+  /// that also has a [Drawer], the [Scaffold] will fill this widget with an
+  /// [IconButton] that opens the drawer. If there's no [Drawer] and the parent
+  /// [Navigator] can go back, the [AppBar] will use a [BackButton] that calls
+  /// [Navigator.maybePop].
   final Widget leading;
+
+  /// Controls whether we should try to imply the leading widget if null.
+  ///
+  /// If true and [leading] is null, automatically try to deduce what the leading
+  /// widget should be. If false and [leading] is null, leading space is given to [title].
+  /// If leading widget is not null, this parameter has no effect.
+  final bool automaticallyImplyLeading;
 
   /// The primary widget displayed in the appbar.
   ///
@@ -893,6 +925,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
       pinned: widget.pinned,
       delegate: new _SliverAppBarDelegate(
         leading: widget.leading,
+        automaticallyImplyLeading: widget.automaticallyImplyLeading,
         title: widget.title,
         actions: widget.actions,
         flexibleSpace: widget.flexibleSpace,

@@ -89,12 +89,10 @@ class Tab extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (text != null)
-      description.add('text: $text');
-    if (icon != null)
-      description.add('icon: $icon');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('text', text, defaultValue: null));
+    description.add(new DiagnosticsProperty<Widget>('icon', icon, defaultValue: null));
   }
 }
 
