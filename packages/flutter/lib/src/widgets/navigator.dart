@@ -14,8 +14,40 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
-import 'routes.dart';
 import 'ticker_provider.dart';
+
+/// Indicates whether the current route should be popped.
+///
+/// Used as the return value for [Route.willPop].
+///
+/// See also:
+///
+///  * [WillPopScope], a widget that hooks into the route's [Route.willPop]
+///    mechanism.
+enum RoutePopDisposition {
+  /// Pop the route.
+  ///
+  /// If [Route.willPop] returns [pop] then the back button will actually pop
+  /// the current route.
+  pop,
+
+  /// Do not pop the route.
+  ///
+  /// If [Route.willPop] returns [doNotPop] then the back button will be ignored.
+  doNotPop,
+
+  /// Delegate this to the next level of navigation.
+  ///
+  /// If [Route.willPop] return [bubble] then the back button will be handled
+  /// by the [SystemNavigator], which will usually close the application.
+  bubble,
+}
+
+/// Signature for a callback that verifies that it's OK to call [Navigator.pop].
+///
+/// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
+/// [ModalRoute.removeScopedWillPopCallback], and [WillPopScope].
+typedef Future<bool> WillPopCallback();
 
 /// An abstraction for an entry managed by a [Navigator].
 ///
@@ -79,7 +111,10 @@ abstract class Route<T> {
   ///
   /// See also:
   ///
-  /// * [Form], which provides a [Form.onWillPop] callback that uses this mechanism.
+  ///  * [Form], which provides a [Form.onWillPop] callback that uses this
+  ///    mechanism.
+  ///  * [WillPopScope], another widget that provides a way to intercept the
+  ///    back button.
   Future<RoutePopDisposition> willPop() async {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
@@ -1157,10 +1192,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// See also:
   ///
-  /// * [Form], which provides a [Form.onWillPop] callback that enables the form
-  ///   to veto a [maybePop] initiated by the app's back button.
-  /// * [ModalRoute], which has as a [ModalRoute.willPop] method that can be
-  ///   defined by a list of [WillPopCallback]s.
+  ///  * [Form], which provides a [Form.onWillPop] callback that enables the form
+  ///    to veto a [maybePop] initiated by the app's back button.
+  ///  * [WillPopScope], a widget that hooks into the route's [Route.willPop]
+  ///    mechanism.
+  ///  * [ModalRoute], which has as a [ModalRoute.willPop] method that can be
+  ///    defined by a list of [WillPopCallback]s.
   Future<bool> maybePop([dynamic result]) async {
     final Route<dynamic> route = _history.last;
     assert(route._navigator == this);

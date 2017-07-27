@@ -386,34 +386,6 @@ class _ModalScopeStatus extends InheritedWidget {
   }
 }
 
-/// Indicates whether the current route should be popped.
-///
-/// Used as the return value for [Route.willPop].
-enum RoutePopDisposition {
-  /// Pop the route.
-  ///
-  /// If [Route.willPop] returns [pop] then the back button will actually pop
-  /// the current route.
-  pop,
-
-  /// Do not pop the route.
-  ///
-  /// If [Route.willPop] returns [doNotPop] then the back button will be ignored.
-  doNotPop,
-
-  /// Delegate this to the next level of navigation.
-  ///
-  /// If [Route.willPop] return [bubble] then the back button will be handled
-  /// by the [SystemNavigator], which will usually close the application.
-  bubble,
-}
-
-/// Signature for a callback that verifies that it's OK to call [Navigator.pop].
-///
-/// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback], and
-/// [ModalRoute.removeScopedWillPopCallback].
-typedef Future<bool> WillPopCallback();
-
 class _ModalScope extends StatefulWidget {
   const _ModalScope({
     Key key,
