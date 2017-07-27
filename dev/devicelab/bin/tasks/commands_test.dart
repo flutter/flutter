@@ -28,11 +28,13 @@ void main() {
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         <String>['run', '--verbose', '--observatory-port=$kObservatoryPort', '-d', device.deviceId, 'lib/commands.dart'],
       );
+      final StreamController<String> stdout = new StreamController<String>.broadcast();
       run.stdout
         .transform(UTF8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
+          stdout.add(line);
           if (line.contains(new RegExp(r'^\[\s+\] For a more detailed help message, press "h"\. To quit, press "q"\.'))) {
             print('run: ready!');
             ready.complete();
@@ -65,11 +67,17 @@ void main() {
       print('test: pressing "P" again...');
       run.stdin.write('P');
       await drive('none');
+      final Future<String> reloadStartingText =
+        stdout.stream.firstWhere((String line) => line.endsWith('hot reload...'));
       print('test: pressing "r" to perform a hot reload...');
       run.stdin.write('r');
+      await reloadStartingText;
       await drive('none');
+      final Future<String> restartStartingText =
+        stdout.stream.firstWhere((String line) => line.endsWith('full restart...'));
       print('test: pressing "R" to perform a full reload...');
       run.stdin.write('R');
+      await restartStartingText;
       await drive('none');
       run.stdin.write('q');
       final int result = await run.exitCode;

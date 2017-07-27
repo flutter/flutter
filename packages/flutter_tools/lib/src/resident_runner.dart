@@ -58,13 +58,16 @@ class FlutterDevice {
   }
 
   Future<Null> refreshViews() async {
-    if ((vmServices == null) || vmServices.isEmpty)
+    if (vmServices == null || vmServices.isEmpty)
       return;
     for (VMService service in vmServices)
       await service.vm.refreshViews();
   }
 
   List<FlutterView> get views {
+    if (vmServices == null)
+      return <FlutterView>[];
+
     return vmServices
       .where((VMService service) => !service.isClosed)
       .expand((VMService service) => viewFilter != null
