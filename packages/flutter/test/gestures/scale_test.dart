@@ -39,7 +39,7 @@ void main() {
 
     final TestPointer pointer1 = new TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Offset(10.0, 10.0));
+    final PointerDownEvent down = pointer1.down(const Offset(0.0, 0.0));
     scale.addPointer(down);
     tap.addPointer(down);
 
@@ -211,7 +211,9 @@ void main() {
     tester.route(down);
     expect(log, isEmpty);
 
-    tester.route(pointer1.move(const Offset(10.0, 30.0)));
+    // scale will win if focal point delta exceeds 18.0*2
+
+    tester.route(pointer1.move(const Offset(10.0, 50.0))); // delta of 40.0 exceeds 18.0*2
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
@@ -240,7 +242,10 @@ void main() {
     expect(log, isEmpty);
     log.clear();
 
-    // Horizontal moves are drags.
+    // Horizontal moves are either drags or scales, depending on which wins first.
+    // TODO(ianh): https://github.com/flutter/flutter/issues/11384
+    // In this case, we move fast, so that the scale wins. If we moved slowly,
+    // the horizontal drag would win, since it was added first.
     final TestPointer pointer3 = new TestPointer(3);
     final PointerDownEvent down3 = pointer3.down(const Offset(30.0, 30.0));
     scale.addPointer(down3);
@@ -250,7 +255,7 @@ void main() {
 
     expect(log, isEmpty);
 
-    tester.route(pointer3.move(const Offset(50.0, 30.0)));
+    tester.route(pointer3.move(const Offset(100.0, 30.0)));
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 

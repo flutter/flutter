@@ -641,9 +641,9 @@ void main() {
     final DiagnosticsProperty<bool> falseProperty = new DiagnosticsProperty<bool>('name', false);
     expect(trueProperty.toString(), equals('name: true'));
     expect(trueProperty.hidden, isFalse);
-    expect(trueProperty.object, isTrue);
+    expect(trueProperty.value, isTrue);
     expect(falseProperty.toString(), equals('name: false'));
-    expect(falseProperty.object, isFalse);
+    expect(falseProperty.value, isFalse);
     expect(falseProperty.hidden, isFalse);
     expect(
       new DiagnosticsProperty<bool>(
@@ -680,8 +680,8 @@ void main() {
     );
     expect(trueFlag.toString(), equals('myFlag'));
 
-    expect(trueFlag.object, isTrue);
-    expect(falseFlag.object, isFalse);
+    expect(trueFlag.value, isTrue);
+    expect(falseFlag.value, isFalse);
 
     expect(trueFlag.hidden, isFalse);
     expect(falseFlag.hidden, isTrue);
@@ -697,7 +697,7 @@ void main() {
      withTooltip.toString(),
       equals('name: value (tooltip)'),
     );
-    expect(withTooltip.object, equals('value'));
+    expect(withTooltip.value, equals('value'));
     expect(withTooltip.hidden, isFalse);
   });
 
@@ -708,7 +708,7 @@ void main() {
     );
     expect(doubleProperty.toString(), equals('name: 42.0'));
     expect(doubleProperty.hidden, isFalse);
-    expect(doubleProperty.object, equals(42.0));
+    expect(doubleProperty.value, equals(42.0));
 
     expect(new DoubleProperty('name', 1.3333).toString(), equals('name: 1.3'));
 
@@ -735,7 +735,7 @@ void main() {
     );
     expect(safe.toString(), equals('name: 42.0'));
     expect(safe.hidden, isFalse);
-    expect(safe.object, equals(42.0));
+    expect(safe.value, equals(42.0));
 
     expect(
       new DoubleProperty.lazy('name', () => 1.3333).toString(),
@@ -757,7 +757,7 @@ void main() {
     );
     // TODO(jacobr): it would be better if throwingProperty.object threw an
     // exception.
-    expect(throwingProperty.object, isNull);
+    expect(throwingProperty.value, isNull);
     expect(throwingProperty.hidden, isFalse);
     expect(
       throwingProperty.toString(),
@@ -782,7 +782,7 @@ void main() {
     );
 
     expect(
-      new PercentProperty('name', 0.4).object,
+      new PercentProperty('name', 0.4).value,
       0.4,
     );
     expect(
@@ -847,7 +847,7 @@ void main() {
 
     expect(present.toString(), equals('clickable'));
     expect(present.hidden, isFalse);
-    expect(present.object, equals(onClick));
+    expect(present.value, equals(onClick));
     expect(missing.toString(), equals(''));
     expect(missing.hidden, isTrue);
   });
@@ -867,7 +867,7 @@ void main() {
 
     expect(present.toString(), equals(''));
     expect(present.hidden, isTrue);
-    expect(present.object, equals(onClick));
+    expect(present.value, equals(onClick));
     expect(missing.toString(), equals('disabled'));
     expect(missing.hidden, isFalse);
   });
@@ -889,10 +889,10 @@ void main() {
     );
     expect(yes.toString(), equals('name: YES'));
     expect(yes.hidden, isFalse);
-    expect(yes.object, isTrue);
+    expect(yes.value, isTrue);
     expect(no.toString(), equals('name: NO'));
     expect(no.hidden, isFalse);
-    expect(no.object, isFalse);
+    expect(no.value, isFalse);
 
     expect(
       new FlagProperty(
@@ -945,19 +945,19 @@ void main() {
       null,
     );
     expect(hello.hidden, isFalse);
-    expect(hello.object, equals(ExampleEnum.hello));
+    expect(hello.value, equals(ExampleEnum.hello));
     expect(hello.toString(), equals('name: hello'));
 
     expect(world.hidden, isFalse);
-    expect(world.object, equals(ExampleEnum.world));
+    expect(world.value, equals(ExampleEnum.world));
     expect(world.toString(), equals('name: world'));
 
     expect(deferToChild.hidden, isFalse);
-    expect(deferToChild.object, equals(ExampleEnum.deferToChild));
+    expect(deferToChild.value, equals(ExampleEnum.deferToChild));
     expect(deferToChild.toString(), equals('name: defer-to-child'));
 
     expect(nullEnum.hidden, isFalse);
-    expect(nullEnum.object, isNull);
+    expect(nullEnum.value, isNull);
     expect(nullEnum.toString(), equals('name: null'));
 
     final EnumProperty<ExampleEnum> matchesDefault = new EnumProperty<ExampleEnum>(
@@ -966,7 +966,7 @@ void main() {
       defaultValue: ExampleEnum.hello,
     );
     expect(matchesDefault.toString(), equals('name: hello'));
-    expect(matchesDefault.object, equals(ExampleEnum.hello));
+    expect(matchesDefault.value, equals(ExampleEnum.hello));
     expect(matchesDefault.hidden, isTrue);
 
 
@@ -986,7 +986,7 @@ void main() {
       42,
     );
     expect(regular.toString(), equals('name: 42'));
-    expect(regular.object, equals(42));
+    expect(regular.value, equals(42));
     expect(regular.hidden, isFalse);
 
     final IntProperty nullValue = new IntProperty(
@@ -994,7 +994,7 @@ void main() {
       null,
     );
     expect(nullValue.toString(), equals('name: null'));
-    expect(nullValue.object, isNull);
+    expect(nullValue.value, isNull);
     expect(nullValue.hidden, isFalse);
 
     final IntProperty hideNull = new IntProperty(
@@ -1003,7 +1003,7 @@ void main() {
       defaultValue: null
     );
     expect(hideNull.toString(), equals('name: null'));
-    expect(hideNull.object, isNull);
+    expect(hideNull.value, isNull);
     expect(hideNull.hidden, isTrue);
 
     final IntProperty nullDescription = new IntProperty(
@@ -1012,7 +1012,7 @@ void main() {
       ifNull: 'missing',
     );
     expect(nullDescription.toString(), equals('name: missing'));
-    expect(nullDescription.object, isNull);
+    expect(nullDescription.value, isNull);
     expect(nullDescription.hidden, isFalse);
 
     final IntProperty hideName = new IntProperty(
@@ -1021,7 +1021,7 @@ void main() {
       showName: false,
     );
     expect(hideName.toString(), equals('42'));
-    expect(hideName.object, equals(42));
+    expect(hideName.value, equals(42));
     expect(hideName.hidden, isFalse);
 
     final IntProperty withUnit = new IntProperty(
@@ -1030,7 +1030,7 @@ void main() {
       unit: 'pt',
     );
     expect(withUnit.toString(), equals('name: 42pt'));
-    expect(withUnit.object, equals(42));
+    expect(withUnit.value, equals(42));
     expect(withUnit.hidden, isFalse);
 
     final IntProperty defaultValue = new IntProperty(
@@ -1039,7 +1039,7 @@ void main() {
       defaultValue: 42,
     );
     expect(defaultValue.toString(), equals('name: 42'));
-    expect(defaultValue.object, equals(42));
+    expect(defaultValue.value, equals(42));
     expect(defaultValue.hidden, isTrue);
 
     final IntProperty notDefaultValue = new IntProperty(
@@ -1048,7 +1048,7 @@ void main() {
       defaultValue: 42,
     );
     expect(notDefaultValue.toString(), equals('name: 43'));
-    expect(notDefaultValue.object, equals(43));
+    expect(notDefaultValue.value, equals(43));
     expect(notDefaultValue.hidden, isFalse);
 
     final IntProperty hidden = new IntProperty(
@@ -1057,7 +1057,7 @@ void main() {
       hidden: true,
     );
     expect(hidden.toString(), equals('name: 42'));
-    expect(hidden.object, equals(42));
+    expect(hidden.value, equals(42));
     expect(hidden.hidden, isTrue);
   });
 
@@ -1067,7 +1067,7 @@ void main() {
       'name',
       rect,
     );
-    expect(simple.object, equals(rect));
+    expect(simple.value, equals(rect));
     expect(simple.hidden, isFalse);
     expect(simple.toString(), equals('name: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
 
@@ -1076,7 +1076,7 @@ void main() {
       rect,
       description: 'small rect',
     );
-    expect(withDescription.object, equals(rect));
+    expect(withDescription.value, equals(rect));
     expect(withDescription.hidden, isFalse);
     expect(withDescription.toString(), equals('name: small rect'));
 
@@ -1084,7 +1084,7 @@ void main() {
       'name',
       null,
     );
-    expect(nullProperty.object, isNull);
+    expect(nullProperty.value, isNull);
     expect(nullProperty.hidden, isFalse);
     expect(nullProperty.toString(), equals('name: null'));
 
@@ -1093,7 +1093,7 @@ void main() {
       null,
       defaultValue: null,
     );
-    expect(hideNullProperty.object, isNull);
+    expect(hideNullProperty.value, isNull);
     expect(hideNullProperty.hidden, isTrue);
     expect(hideNullProperty.toString(), equals('name: null'));
 
@@ -1102,7 +1102,7 @@ void main() {
       null,
       ifNull: 'missing',
     );
-    expect(nullDescription.object, isNull);
+    expect(nullDescription.value, isNull);
     expect(nullDescription.hidden, isFalse);
     expect(nullDescription.toString(), equals('name: missing'));
 
@@ -1111,7 +1111,7 @@ void main() {
       rect,
       showName: false,
     );
-    expect(hideName.object, equals(rect));
+    expect(hideName.value, equals(rect));
     expect(hideName.hidden, isFalse);
     expect(hideName.toString(), equals('Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
 
@@ -1120,7 +1120,7 @@ void main() {
       rect,
       showSeparator: false,
     );
-    expect(hideSeparator.object, equals(rect));
+    expect(hideSeparator.value, equals(rect));
     expect(hideSeparator.hidden, isFalse);
     expect(
       hideSeparator.toString(),
@@ -1135,7 +1135,7 @@ void main() {
       () => rect,
       description: 'small rect',
     );
-    expect(simple.object, equals(rect));
+    expect(simple.value, equals(rect));
     expect(simple.hidden, isFalse);
     expect(simple.toString(), equals('name: small rect'));
 
@@ -1144,7 +1144,7 @@ void main() {
       () => null,
       description: 'missing',
     );
-    expect(nullProperty.object, isNull);
+    expect(nullProperty.value, isNull);
     expect(nullProperty.hidden, isFalse);
     expect(nullProperty.toString(), equals('name: missing'));
 
@@ -1154,7 +1154,7 @@ void main() {
       description: 'missing',
       defaultValue: null,
     );
-    expect(hideNullProperty.object, isNull);
+    expect(hideNullProperty.value, isNull);
     expect(hideNullProperty.hidden, isTrue);
     expect(hideNullProperty.toString(), equals('name: missing'));
 
@@ -1164,7 +1164,7 @@ void main() {
       description: 'small rect',
       showName: false,
     );
-    expect(hideName.object, equals(rect));
+    expect(hideName.value, equals(rect));
     expect(hideName.hidden, isFalse);
     expect(hideName.toString(), equals('small rect'));
 
@@ -1174,7 +1174,7 @@ void main() {
       description: 'missing',
       defaultValue: null,
     );
-    expect(throwingWithDescription.object, isNull);
+    expect(throwingWithDescription.value, isNull);
     expect(throwingWithDescription.exception, isFlutterError);
     expect(throwingWithDescription.hidden, false);
     expect(throwingWithDescription.toString(), equals('name: missing'));
@@ -1184,7 +1184,7 @@ void main() {
       () => throw new FlutterError('Property not available'),
       defaultValue: null,
     );
-    expect(throwingProperty.object, isNull);
+    expect(throwingProperty.value, isNull);
     expect(throwingProperty.exception, isFlutterError);
     expect(throwingProperty.hidden, false);
     expect(throwingProperty.toString(), equals('name: EXCEPTION (FlutterError)'));
@@ -1200,7 +1200,7 @@ void main() {
       color,
     );
     expect(simple.hidden, isFalse);
-    expect(simple.object, equals(color));
+    expect(simple.value, equals(color));
     expect(simple.toString(), equals('name: Color(0xffffffff)'));
   });
 
@@ -1211,7 +1211,7 @@ void main() {
       ifTrue: 'layout computed',
     );
     expect(show.name, equals('wasLayout'));
-    expect(show.object, isTrue);
+    expect(show.value, isTrue);
     expect(show.hidden, isFalse);
     expect(show.toString(), equals('layout computed'));
 
@@ -1221,7 +1221,7 @@ void main() {
       ifTrue: 'layout computed',
     );
     expect(hide.name, equals('wasLayout'));
-    expect(hide.object, isFalse);
+    expect(hide.value, isFalse);
     expect(hide.hidden, isTrue);
     expect(hide.toString(), equals(''));
   });
@@ -1233,7 +1233,7 @@ void main() {
       onClick,
     );
     expect(has.name, equals('onClick'));
-    expect(has.object, equals(onClick));
+    expect(has.value, equals(onClick));
     expect(has.hidden, isFalse);
     expect(has.toString(), equals('has onClick'));
 
@@ -1242,7 +1242,7 @@ void main() {
       null,
     );
     expect(missing.name, equals('onClick'));
-    expect(missing.object, isNull);
+    expect(missing.value, isNull);
     expect(missing.hidden, isTrue);
     expect(missing.toString(), equals(''));
   });
@@ -1253,7 +1253,7 @@ void main() {
       'ints',
       ints,
     );
-    expect(intsProperty.object, equals(ints));
+    expect(intsProperty.value, equals(ints));
     expect(intsProperty.hidden, isFalse);
     expect(intsProperty.toString(), equals('ints: 1, 2, 3'));
 
@@ -1261,7 +1261,7 @@ void main() {
       'name',
       <Object>[],
     );
-    expect(emptyProperty.object, isEmpty);
+    expect(emptyProperty.value, isEmpty);
     expect(emptyProperty.hidden, isFalse);
     expect(emptyProperty.toString(), equals('name: []'));
 
@@ -1269,7 +1269,7 @@ void main() {
       'list',
       null,
     );
-    expect(nullProperty.object, isNull);
+    expect(nullProperty.value, isNull);
     expect(nullProperty.hidden, isFalse);
     expect(nullProperty.toString(), equals('list: null'));
 
@@ -1278,7 +1278,7 @@ void main() {
       null,
       defaultValue: null,
     );
-    expect(hideNullProperty.object, isNull);
+    expect(hideNullProperty.value, isNull);
     expect(hideNullProperty.hidden, isTrue);
     expect(hideNullProperty.toString(), equals('list: null'));
 
@@ -1290,7 +1290,7 @@ void main() {
       'objects',
       objects,
     );
-    expect(objectsProperty.object, equals(objects));
+    expect(objectsProperty.value, equals(objects));
     expect(objectsProperty.hidden, isFalse);
     expect(
       objectsProperty.toString(),
@@ -1306,7 +1306,7 @@ void main() {
       objects,
       style: DiagnosticsTreeStyle.whitespace,
     );
-    expect(multiLineProperty.object, equals(objects));
+    expect(multiLineProperty.value, equals(objects));
     expect(multiLineProperty.hidden, isFalse);
     expect(
       multiLineProperty.toString(),
@@ -1347,7 +1347,7 @@ void main() {
       singleElementList,
       style: DiagnosticsTreeStyle.whitespace,
     );
-    expect(objectProperty.object, equals(singleElementList));
+    expect(objectProperty.value, equals(singleElementList));
     expect(objectProperty.hidden, isFalse);
     expect(
       objectProperty.toString(),
@@ -1373,13 +1373,13 @@ void main() {
     final DiagnosticsNode message = new DiagnosticsNode.message('hello world');
     expect(message.toString(), equals('hello world'));
     expect(message.name, isEmpty);
-    expect(message.object, isNull);
+    expect(message.value, isNull);
     expect(message.showName, isFalse);
 
     final DiagnosticsNode messageProperty = new MessageProperty('diagnostics', 'hello world');
     expect(messageProperty.toString(), equals('diagnostics: hello world'));
     expect(messageProperty.name, equals('diagnostics'));
-    expect(messageProperty.object, isNull);
+    expect(messageProperty.value, isNull);
     expect(messageProperty.showName, isTrue);
 
   });

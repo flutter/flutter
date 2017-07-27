@@ -324,6 +324,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(Zone.current == _parentZone);
     assert(_currentTestCompleter != null);
     if (_pendingExceptionDetails != null) {
+      debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
       FlutterError.dumpErrorToConsole(_pendingExceptionDetails, forceReport: true);
       // test_package.registerException actually just calls the current zone's error handler (that
       // is to say, _parentZone's handleUncaughtError function). FakeAsync doesn't add one of those,
@@ -344,6 +345,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     int _exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (_exceptionCount == 0) {
           _exceptionCount = 2;
           FlutterError.dumpErrorToConsole(_pendingExceptionDetails, forceReport: true);
@@ -369,6 +371,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           // If we silently dropped these errors on the ground, nobody would ever know. So instead
           // we report them to the console. They don't cause test failures, but hopefully someone
           // will see them in the logs at some point.
+          debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
           FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
             exception: exception,
             stack: _unmangle(stack),

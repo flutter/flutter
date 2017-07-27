@@ -15,6 +15,31 @@ import 'package:flutter/foundation.dart';
 /// This has no effect in release builds.
 bool debugPrintHitTestResults = false;
 
+/// Prints information about gesture recognizers and gesture arenas.
+///
+/// This flag only has an effect in debug mode.
+///
+/// See also:
+///
+///  * [GestureArenaManager], the class that manages gesture arenas.
+///  * [debugPrintRecognizerCallbacksTrace], for debugging issues with
+///    gesture recognizers.
+bool debugPrintGestureArenaDiagnostics = false;
+
+/// Logs a message every time a gesture recognizer callback is invoked.
+///
+/// This flag only has an effect in debug mode.
+///
+/// This is specifically used by [GestureRecognizer.invokeCallback]. Gesture
+/// recognizers that do not use this method to invoke callbacks may not honor
+/// the [debugPrintRecognizerCallbacksTrace] flag.
+///
+/// See also:
+///
+///  * [debugPrintGestureArenaDiagnostics], for debugging issues with gesture
+///    arenas.
+bool debugPrintRecognizerCallbacksTrace = false;
+
 /// Returns true if none of the gestures library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
@@ -24,7 +49,9 @@ bool debugPrintHitTestResults = false;
 /// a complete list.
 bool debugAssertAllGesturesVarsUnset(String reason) {
   assert(() {
-    if (debugPrintHitTestResults)
+    if (debugPrintHitTestResults ||
+        debugPrintGestureArenaDiagnostics ||
+        debugPrintRecognizerCallbacksTrace)
       throw new FlutterError(reason);
     return true;
   });

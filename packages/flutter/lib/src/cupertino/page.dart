@@ -430,7 +430,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   }) {
     return new DiagnosticsNode.lazy(
       name: name,
-      object: this,
+      value: this,
       style: style,
       description: '$runtimeType',
       fillProperties: (List<DiagnosticsNode> properties) {

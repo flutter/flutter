@@ -28,8 +28,7 @@ void main() {
       transform,
     );
     expect(simple.name, equals('transform'));
-    expect(simple.object, equals(transform));
-    expect(simple.hidden, isFalse);
+    expect(simple.value, same(transform));
     expect(
       simple.toString(),
       equals(
@@ -46,8 +45,7 @@ void main() {
       null,
     );
     expect(nullProperty.name, equals('transform'));
-    expect(nullProperty.object, isNull);
-    expect(nullProperty.hidden, isFalse);
+    expect(nullProperty.value, isNull);
     expect(nullProperty.toString(), equals('transform: null'));
 
     final TransformProperty hideNull = new TransformProperty(
@@ -55,8 +53,7 @@ void main() {
       null,
       defaultValue: null,
     );
-    expect(hideNull.object, isNull);
-    expect(hideNull.hidden, isTrue);
+    expect(hideNull.value, isNull);
     expect(hideNull.toString(), equals('transform: null'));
   });
 

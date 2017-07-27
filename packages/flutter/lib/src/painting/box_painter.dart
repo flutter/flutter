@@ -1605,7 +1605,7 @@ class BoxDecoration extends Decoration {
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style: DiagnosticsTreeStyle.whitespace }) {
     return new DiagnosticsNode.lazy(
       name: name,
-      object: this,
+      value: this,
       description: '',
       style: style,
       emptyBodyDescription: '<no decorations specified>',

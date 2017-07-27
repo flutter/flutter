@@ -3341,7 +3341,7 @@ abstract class Element implements BuildContext, TreeDiagnostics {
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
     return new DiagnosticsNode.lazy(
       name: name,
-      object: this,
+      value: this,
       getChildren: () {
         final List<DiagnosticsNode> children = <DiagnosticsNode>[];
         visitChildren((Element child) {
