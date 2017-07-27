@@ -207,6 +207,10 @@ class VMService {
     final String streamId = data['streamId'];
     final Map<String, dynamic> eventData = data['event'];
     final Map<String, dynamic> eventIsolate = eventData['isolate'];
+
+    // Log event information.
+    printTrace(data.toString());
+
     ServiceEvent event;
     if (eventIsolate != null) {
       // getFromMap creates the Isolate if necessary.
@@ -336,8 +340,7 @@ abstract class ServiceObject {
     // If we don't have a model object for this service object type, as a
     // fallback return a ServiceMap object.
     serviceObject ??= new ServiceMap._empty(owner);
-    // We have now constructed an emtpy service object, call update to
-    // populate it.
+    // We have now constructed an empty service object, call update to populate it.
     serviceObject.update(map);
     return serviceObject;
   }
@@ -717,6 +720,8 @@ class VM extends ServiceObjectOwner {
     Duration timeout,
     bool timeoutFatal: true,
   }) async {
+    printTrace('$method: $params');
+
     assert(params != null);
     timeout ??= _vmService._requestTimeout;
     try {
@@ -1029,7 +1034,6 @@ class Isolate extends ServiceObjectOwner {
     return invokeRpcRaw('resume');
   }
 
-
   // Flutter extension methods.
 
   // Invoke a flutter extension method, if the flutter extension is not
@@ -1140,6 +1144,9 @@ class Isolate extends ServiceObjectOwner {
       return result['value'];
     return 'unknown';
   }
+
+  @override
+  String toString() => 'Isolate $id';
 }
 
 class ServiceMap extends ServiceObject implements Map<String, dynamic> {
