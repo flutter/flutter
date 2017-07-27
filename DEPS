@@ -30,7 +30,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_fluter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': 'a83a69ff3eff845980308779cadbdb80cc03a603',
+  'dart_revision': '1d384ca3ff4aa03bb83471c1c9591a77f1ccd530',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': 'daf66909019d2aaec1721fc39d94ea648a9fdc1d',
@@ -200,7 +200,7 @@ deps = {
    Var('skia_git') + '/third_party/libjpeg-turbo.git' + '@' + 'debddedc75850bcdeb8a57258572f48b802a4bb3',
 
   'src/third_party/gyp':
-   Var('chromium_git') + '/external/gyp.git' + '@' + '6ee91ad8659871916f9aa840d42e1513befdf638',
+   Var('chromium_git') + '/external/gyp.git' + '@' + '4801a5331ae62da9769a327f11c4213d32fb0dad',
 
    # Headers for Vulkan 1.0
    'src/third_party/vulkan':
