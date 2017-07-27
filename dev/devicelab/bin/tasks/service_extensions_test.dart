@@ -33,7 +33,6 @@ void main() {
         .transform(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
-          // TODO: shorten this regex
           if (line.contains(new RegExp(r'^\[\s+\] For a more detailed help message, press "h"\. To quit, press "q"\.'))) {
             print('run: ready!');
             ready.complete();
