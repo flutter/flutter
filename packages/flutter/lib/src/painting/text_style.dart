@@ -40,11 +40,11 @@ import 'basic_types.dart';
 /// ### Opacity
 ///
 /// Each line here is progressively more opaque. The base color is
-/// [Colors.black], and [Color.withOpacity] is used to create a derivative color
-/// with the desired opacity. The root [TextSpan] for this [RichText] widget is
-/// explicitly given the ambient [DefaultTextStyle], since [RichText] does not
-/// do that automatically. The inner [TextStyle] objects are implicitly mixed
-/// with the parent [TextSpan]'s [TextSpan.style].
+/// [material.Colors.black], and [Color.withOpacity] is used to create a
+/// derivative color with the desired opacity. The root [TextSpan] for this
+/// [RichText] widget is explicitly given the ambient [DefaultTextStyle], since
+/// [RichText] does not do that automatically. The inner [TextStyle] objects are
+/// implicitly mixed with the parent [TextSpan]'s [TextSpan.style].
 ///
 /// ```dart
 /// new RichText(

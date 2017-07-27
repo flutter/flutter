@@ -1378,7 +1378,7 @@ abstract class State<T extends StatefulWidget> {
   }
 
   /// Add additional properties to the given description used by
-  /// [toDiagnosticNode], [toString] and [toStringDeep].
+  /// [toDiagnosticsNode], [toString] and [toStringDeep].
   ///
   /// This method makes it easier for subclasses to coordinate to provide
   /// high-quality diagnostic data. The [toString] implementation on
@@ -3305,7 +3305,7 @@ abstract class Element implements BuildContext, TreeDiagnostics {
   }
 
   /// Add additional properties to the given description used by
-  /// [toDiagnosticNode], [toString] and [toStringDeep].
+  /// [toDiagnosticsNode], [toString] and [toStringDeep].
   ///
   /// This method makes it easier for subclasses to coordinate to provide
   /// high-quality diagnostic data. The [toString] implementation on

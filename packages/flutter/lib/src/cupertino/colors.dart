@@ -22,7 +22,7 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [Colors.white], the same color, in the material design palette.
+  ///  * [material.Colors.white], the same color, in the material design palette.
   ///  * [black], opaque black in the [CupertinoColors] palette.
   static const Color white = const Color(0xFFFFFFFF);
 
@@ -30,7 +30,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  ///  * [Colors.black], the same color, in the material design palette.
+  ///  * [material.Colors.black], the same color, in the material design palette.
+  ///  * [white], opaque white in the [CupertinoColors] palette.
   static const Color black = const Color(0xFF000000);
 
   /// Used in iOS 10 for light background fills such as the chat bubble background.

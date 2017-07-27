@@ -836,7 +836,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// * Implement the [visitChildren] method such that it calls its argument for
 ///   each child, typically in paint order (back-most to front-most).
 ///
-/// * Implement [debugDescribeChildren] such that it outputs a [DiagnosticNode]
+/// * Implement [debugDescribeChildren] such that it outputs a [DiagnosticsNode]
 ///   for each child.
 ///
 /// Implementing these seven bullet points is essentially all that the two

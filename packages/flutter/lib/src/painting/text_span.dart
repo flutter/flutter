@@ -96,7 +96,7 @@ class TextSpan implements TreeDiagnostics {
   /// ## Sample code
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to a [TextSpan] object. It defines a [BuzzingText] widget which
+  /// provided to a [TextSpan] object. It defines a `BuzzingText` widget which
   /// uses the [HapticFeedback] class to vibrate the device when the user
   /// long-presses the "find the" span, which is underlined in wavy green. The
   /// hit-testing is handled by the [RichText] widget.

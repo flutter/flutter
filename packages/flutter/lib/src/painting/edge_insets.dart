@@ -97,7 +97,7 @@ class EdgeInsets {
   ///
   /// If you need the current system padding in the context of a widget,
   /// consider using [MediaQuery.of] to obtain the current padding rather than
-  /// using the value from [ui.window], so that you get notified when it
+  /// using the value from [dart:ui.window], so that you get notified when it
   /// changes.
   EdgeInsets.fromWindowPadding(ui.WindowPadding padding, double devicePixelRatio)
     : left = padding.left / devicePixelRatio,

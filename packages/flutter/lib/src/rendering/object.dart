@@ -72,12 +72,12 @@ class PaintingContext {
   /// A render object provided with this [PaintingContext] (e.g. in its
   /// [RenderObject.paint] method) is permitted to paint outside the region that
   /// the render object occupies during layout, but is not permitted to paint
-  /// outside these paints bounds. These paint bounds are used to construct
-  /// memory-efficient composited layers, which means attempting to paint
-  /// outside these bounds can attempt to write to pixels that do not exist in
-  /// the composited layer.
+  /// outside these canvas paints bounds. These paint bounds are used to
+  /// construct memory-efficient composited layers, which means attempting to
+  /// paint outside these bounds can attempt to write to pixels that do not
+  /// exist in the composited layer.
   ///
-  /// The [paintBounds] rectangle is in the [canvas] coordinate system.
+  /// The [canvasBounds] rectangle is in the [canvas] coordinate system.
   final Rect canvasBounds;
 
   /// Repaint the given render object.
@@ -1180,7 +1180,7 @@ class PipelineOwner {
   /// update.
   ///
   /// Initially, only the root node, as scheduled by
-  /// [RenderObjectscheduleInitialSemantics], needs a semantics update.
+  /// [RenderObject.scheduleInitialSemantics], needs a semantics update.
   ///
   /// This function is one of the core stages of the rendering pipeline. The
   /// semantics are compiled after painting and only after

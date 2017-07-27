@@ -439,7 +439,7 @@ class GestureDetector extends StatelessWidget {
 /// See also:
 ///
 ///  * [GestureDetector], a less flexible but much simpler widget that does the same thing.
-///  * [PointerListener], a widget that reports raw pointer events.
+///  * [Listener], a widget that reports raw pointer events.
 ///  * [GestureRecognizer], the class that you extend to create a custom gesture recognizer.
 class RawGestureDetector extends StatefulWidget {
   /// Creates a widget that detects gestures.

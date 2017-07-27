@@ -25,8 +25,7 @@ export 'src/error.dart' show
   LogRecord,
   flutterDriverLog;
 export 'src/find.dart' show
-  SerializableFinder,
-  GetTextResult;
+  SerializableFinder;
 export 'src/health.dart' show
   Health,
   HealthStatus;

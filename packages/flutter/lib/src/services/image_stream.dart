@@ -177,7 +177,7 @@ class ImageStreamCompleter {
   /// object is available. If a concrete image is already available, this object
   /// will call the listener synchronously.
   ///
-  /// If the assigned [completer] completes multiple images over its lifetime,
+  /// If the [ImageStreamCompleter] completes multiple images over its lifetime,
   /// this listener will fire multiple times.
   ///
   /// The listener will be passed a flag indicating whether a synchronous call

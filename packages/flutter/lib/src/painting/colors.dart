@@ -181,7 +181,7 @@ class HSVColor {
 ///
 ///  * [MaterialColor] and [MaterialAccentColor], which define material design
 ///    primary and accent color swatches.
-///  * [Colors], which defines all of the standard material design colors.
+///  * [material.Colors], which defines all of the standard material design colors.
 class ColorSwatch<T> extends Color {
   /// Creates a color that has a small table of related colors called a "swatch".
   const ColorSwatch(int primary, this._swatch) : super(primary);

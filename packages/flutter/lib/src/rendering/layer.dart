@@ -122,7 +122,7 @@ class PictureLayer extends Layer {
   /// The bounds that were used for the canvas that drew this layer's [picture].
   ///
   /// This is purely advisory. It is included in the information dumped with
-  /// [dumpLayerTree] (which can be triggered by pressing "L" when using
+  /// [debugDumpLayerTree] (which can be triggered by pressing "L" when using
   /// "flutter run" at the console), which can help debug why certain drawing
   /// commands are being culled.
   final Rect canvasBounds;
@@ -866,7 +866,7 @@ class LeaderLayer extends ContainerLayer {
 ///
 /// If any of the ancestors of this layer have a degenerate matrix (e.g. scaling
 /// by zero), then the [FollowerLayer] will not be able to transform its child
-/// to the coordinate space of the [Leader].
+/// to the coordinate space of the [LeaderLayer].
 ///
 /// A [linkedOffset] property can be provided to further offset the child layer
 /// from the leader layer, for example if the child is to follow the linked
