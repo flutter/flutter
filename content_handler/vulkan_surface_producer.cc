@@ -16,8 +16,13 @@ VulkanSurfaceProducer::VulkanSurfaceProducer(
     mozart::client::Session* mozart_session) {
   valid_ = Initialize(mozart_session);
 
-  FTL_LOG(ERROR) << "Vulkan surface producer initialization: "
-                 << (valid_ ? "Successful" : "Failed");
+  if (valid_) {
+    FTL_LOG(INFO)
+        << "Flutter engine: Vulkan surface producer initialization: Successful";
+  } else {
+    FTL_LOG(ERROR)
+        << "Flutter engine: Vulkan surface producer initialization: Failed";
+  }
 }
 
 VulkanSurfaceProducer::~VulkanSurfaceProducer() = default;
@@ -50,7 +55,7 @@ bool VulkanSurfaceProducer::Initialize(
   }
 
   if (!vk_->HasAcquiredMandatoryProcAddresses()) {
-    FTL_LOG(ERROR) << "Failed to acquire mandatory proc addresses";
+    FTL_LOG(ERROR) << "Failed to acquire mandatory proc addresses.";
     return false;
   }
 
@@ -62,13 +67,13 @@ bool VulkanSurfaceProducer::Initialize(
   auto interface = vk_->CreateSkiaInterface();
 
   if (interface == nullptr || !interface->validate(0)) {
-    FTL_LOG(ERROR) << "interface invalid";
+    FTL_LOG(ERROR) << "Skia interface invalid.";
     return false;
   }
 
   uint32_t skia_features = 0;
   if (!logical_device_->GetPhysicalDeviceFeaturesSkia(&skia_features)) {
-    FTL_LOG(ERROR) << "Failed to get physical device features";
+    FTL_LOG(ERROR) << "Failed to get physical device features.";
 
     return false;
   }
