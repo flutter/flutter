@@ -190,6 +190,10 @@ void Paragraph::Layout(double width, bool force) {
   size_t breaks_count = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
 
+  // Create a copy of text_ to use locally so that any changes made to the
+  // vector (such as removing newline characters) is not permanent.
+  std::vector<uint16_t> text(text_);
+
   SkPaint paint;
   paint.setAntiAlias(true);
   paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
@@ -293,6 +297,11 @@ void Paragraph::Layout(double width, bool force) {
   };
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
+    bool is_newline = text_[run.start] == '\n' && run.end - run.start == 1;
+    // Replace '\n' with a null character so that a 'missing glyph' box is not
+    // drawn.
+    if (is_newline)
+      text[run.start] = '\0';
 
     GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
     GetPaint(run.style, &paint);
@@ -311,7 +320,7 @@ void Paragraph::Layout(double width, bool force) {
       // However, this is not significant for reasonably sized paragraphs. It is
       // currently recommended to break up very long paragraphs (10k+
       // characters) to ensure speedy layout.
-      layout.doLayout(text_.data() + layout_start, 0, layout_end - layout_start,
+      layout.doLayout(text.data() + layout_start, 0, layout_end - layout_start,
                       layout_end - layout_start, bidiFlags, font, minikin_paint,
                       font_collection_->GetMinikinFontCollectionForFamily(
                           run.style.font_family));
@@ -419,7 +428,7 @@ void Paragraph::Layout(double width, bool force) {
       if (max_descent < temp_line_spacing)
         max_descent = temp_line_spacing;
 
-      if (layout_end == next_break) {
+      if (layout_end == next_break || is_newline) {
         y += max_line_spacing + prev_max_descent;
         line_heights_.push_back(
             (line_heights_.empty() ? 0 : line_heights_.back()) +
@@ -769,10 +778,10 @@ void Paragraph::PaintWavyDecoration(SkCanvas* canvas,
 
 std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
                                                 size_t end) const {
-  FTL_DCHECK(end >= start && end >= 0 && start >= 0);
   std::vector<SkRect> rects;
   end = fmax(start, end);
   start = fmin(start, end);
+  FTL_DCHECK(end >= start && end >= 0 && start >= 0);
   if (end == start)
     end = start + 1;
   end = fmin(end, text_.size());

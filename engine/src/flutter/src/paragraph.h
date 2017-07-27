@@ -153,6 +153,7 @@ class Paragraph {
   FRIEND_TEST(RenderTest, SpacingParagraph);
   FRIEND_TEST(RenderTest, LongWordParagraph);
   FRIEND_TEST(RenderTest, KernParagraph);
+  FRIEND_TEST(RenderTest, NewlineParagraph);
 
   // Starting data to layout.
   std::vector<uint16_t> text_;

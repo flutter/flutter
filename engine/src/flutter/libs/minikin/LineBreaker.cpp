@@ -156,6 +156,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
         } else {
             if (isWordSpace(c)) mSpaceCount += 1;
             mWidth += mCharWidths[i];
+            if (c == '\n') mWidth += INT_MAX;
             if (!isLineEndSpace(c)) {
                 postBreak = mWidth;
                 postSpaceCount = mSpaceCount;
