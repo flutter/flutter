@@ -551,7 +551,7 @@ abstract class SchedulerBinding extends BindingBase {
   Duration _currentFrameTimeStamp;
 
   int _profileFrameNumber = 0;
-  Stopwatch _profileFrameStopwatch = new Stopwatch();
+  final Stopwatch _profileFrameStopwatch = new Stopwatch();
   String _debugBanner;
 
   /// Called by the engine to prepare the framework to produce a new frame.
