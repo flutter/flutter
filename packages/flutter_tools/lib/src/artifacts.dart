@@ -192,7 +192,7 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.genSnapshot:
-        return _genSnapshotPath(platform, mode);
+        return _genSnapshotPath();
       case Artifact.flutterTester:
         return _flutterTesterPath(platform);
       case Artifact.isolateSnapshotData:
@@ -210,14 +210,15 @@ class LocalEngineArtifacts extends Artifacts {
     return fs.path.basename(engineOutPath);
   }
 
-  String _genSnapshotPath(TargetPlatform platform, BuildMode mode) {
-    String clang;
-    if (platform == TargetPlatform.ios) {
-      clang = 'clang_x64';
-    } else {
-      clang = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
+  String _genSnapshotPath() {
+    const List<String> clangDirs = const <String>['clang_x86', 'clang_x64', 'clang_i386'];
+    final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
+    for (String clangDir in clangDirs) {
+      final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);
+      if (fs.file(genSnapshotPath).existsSync())
+        return genSnapshotPath;
     }
-    return fs.path.join(engineOutPath, clang, _artifactToFileName(Artifact.genSnapshot));
+    throw new Exception('Unable to find $genSnapshotName');
   }
 
   String _flutterTesterPath(TargetPlatform platform) {
