@@ -1858,7 +1858,7 @@ final List<ForwardReferencePattern> csForwardReferenceLicenses = <ForwardReferen
       )
       +
       r'|'
-      r'(?:(?:\1\2? *)? *\n)*'
+      r'(?:\1? *\n)+'
       r')*'
       r'\1\2 *'
       +
