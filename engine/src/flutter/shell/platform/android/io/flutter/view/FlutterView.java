@@ -816,6 +816,11 @@ public class FlutterView extends SurfaceView
 
     @Override
     public void send(String channel, ByteBuffer message, BinaryReply callback) {
+        if (!isAttached()) {
+            Log.d("flutter", "FlutterView.send called on a detached view, channel=" + channel);
+            return;
+        }
+
         int replyId = 0;
         if (callback != null) {
             replyId = mNextReplyId++;
