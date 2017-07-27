@@ -17,6 +17,7 @@
 #ifndef LIB_TXT_SRC_STYLED_RUNS_H_
 #define LIB_TXT_SRC_STYLED_RUNS_H_
 
+#include <list>
 #include <vector>
 
 #include "lib/txt/src/text_style.h"
@@ -55,6 +56,9 @@ class StyledRuns {
   size_t size() const { return runs_.size(); }
 
   Run GetRun(size_t index) const;
+
+  // Break any newline '\n' characters into their own runs.
+  void SplitNewlineRuns(std::list<size_t> newline_positions);
 
  private:
   FRIEND_TEST(RenderTest, SimpleParagraph);

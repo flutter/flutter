@@ -1335,4 +1335,60 @@ TEST_F(RenderTest, KernParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(RenderTest, NewlineParagraph) {
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.font_family = "Roboto";
+  text_style.font_size = 60;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 0;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 1;
+  builder.PushStyle(text_style);
+  builder.AddText(
+      "line1\nline2 test1 test2 test3 test4 test5 test6 test7\nline3\n\nline4 "
+      "test1 test2 test3 test4");
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 300);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
+
+  ASSERT_EQ(paragraph->runs_.size(), 9ull);
+  ASSERT_EQ(paragraph->runs_.GetRun(1).end - paragraph->runs_.GetRun(1).start,
+            1ull);
+  ASSERT_EQ(paragraph->runs_.GetRun(3).end - paragraph->runs_.GetRun(3).start,
+            1ull);
+  ASSERT_EQ(paragraph->runs_.GetRun(5).end - paragraph->runs_.GetRun(5).start,
+            1ull);
+  ASSERT_EQ(paragraph->runs_.GetRun(7).end - paragraph->runs_.GetRun(7).start,
+            1ull);
+
+  ASSERT_EQ(paragraph->records_.size(), 10ull);
+  EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 129);
+  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().y(),
+                   paragraph->records_[0].offset().y());
+  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 593);
+  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().y(),
+                   paragraph->records_[4].offset().y());
+  EXPECT_DOUBLE_EQ(paragraph->records_[5].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 129);
+  EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().y(), 336.9140625);
+  EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().y(), 407.2265625);
+
+}
+
 }  // namespace txt

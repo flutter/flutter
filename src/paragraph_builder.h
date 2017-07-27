@@ -83,6 +83,10 @@ class ParagraphBuilder {
   ParagraphStyle paragraph_style_;
   FontCollection* font_collection_ = nullptr;
 
+  // Break any newline '\n' characters into their own runs. This allows
+  // Paragraph::Layout to cleanly discover and handle newlines.
+  void SplitNewlineRuns();
+
   FTL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
 };
 
