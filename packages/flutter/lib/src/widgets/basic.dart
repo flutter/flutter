@@ -55,6 +55,50 @@ export 'package:flutter/rendering.dart' show
   WrapAlignment,
   WrapCrossAlignment;
 
+// BIDIRECTIONAL TEXT SUPPORT
+
+/// A widget that determines the ambient directionality of text and
+/// text-direction-sensitive render objects.
+///
+/// For example, [Padding] depends on the [Directionality] to resolve
+/// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
+class Directionality extends InheritedWidget {
+  /// Creates a widget that determines the directionality of text and
+  /// text-direction-sensitive render objects.
+  ///
+  /// The [textDirection] and [child] arguments must not be null.
+  const Directionality({
+    Key key,
+    @required this.textDirection,
+    @required Widget child
+  }) : assert(textDirection != null),
+       assert(child != null),
+       super(key: key, child: child);
+
+  /// The text direction for this subtree.
+  final TextDirection textDirection;
+
+  /// The text direction from the closest instance of this class that encloses
+  /// the given context.
+  ///
+  /// If there is no [Directionality] ancestor widget in the tree at the given
+  /// context, then this will return null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TextDirection textDirection = Directionality.of(context);
+  /// ```
+  static TextDirection of(BuildContext context) {
+    final Directionality widget = context.inheritFromWidgetOfExactType(Directionality);
+    return widget?.textDirection;
+  }
+
+  @override
+  bool updateShouldNotify(Directionality old) => textDirection != old.textDirection;
+}
+
+
 // PAINTING NODES
 
 /// A widget that makes its child partially transparent.
@@ -1066,14 +1110,21 @@ class Padding extends SingleChildRenderObjectWidget {
        super(key: key, child: child);
 
   /// The amount of space by which to inset the child.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
-  RenderPadding createRenderObject(BuildContext context) => new RenderPadding(padding: padding);
+  RenderPadding createRenderObject(BuildContext context) {
+    return new RenderPadding(
+      padding: padding,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPadding renderObject) {
-    renderObject.padding = padding;
+    renderObject
+      ..padding = padding
+      ..textDirection = Directionality.of(context);
   }
 
   @override
@@ -2007,6 +2058,8 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 
   /// The amount of space by which to inset the child sliver.
   final EdgeInsets padding;
+
+  // TODO(ianh): RTL
 
   @override
   RenderSliverPadding createRenderObject(BuildContext context) => new RenderSliverPadding(padding: padding);

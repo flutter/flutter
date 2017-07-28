@@ -50,4 +50,25 @@ void main() {
     expect(EdgeInsets.lerp(null, b, 0.25), equals(b * 0.25));
     expect(EdgeInsets.lerp(a, null, 0.25), equals(a * 0.75));
   });
+
+  test('EdgeInsets.resolve()', () {
+    expect(new EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(10.0, 20.0, 30.0, 40.0));
+    expect(new EdgeInsetsDirectional.fromSTEB(99.0, 98.0, 97.0, 96.0).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(97.0, 98.0, 99.0, 96.0));
+    expect(new EdgeInsetsDirectional.only(start: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(963.25, 0.0, 0.0, 0.0));
+    expect(new EdgeInsetsDirectional.only(top: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 963.25, 0.0, 0.0));
+    expect(new EdgeInsetsDirectional.only(end: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 0.0, 963.25, 0.0));
+    expect(new EdgeInsetsDirectional.only(bottom: 963.25).resolve(TextDirection.ltr), const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 963.25));
+    expect(new EdgeInsetsDirectional.only(start: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(0.0, 0.0, 963.25, 0.0));
+    expect(new EdgeInsetsDirectional.only(top: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(0.0, 963.25, 0.0, 0.0));
+    expect(new EdgeInsetsDirectional.only(end: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(963.25, 0.0, 0.0, 0.0));
+    expect(new EdgeInsetsDirectional.only(bottom: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 963.25));
+    expect(new EdgeInsetsDirectional.only(), new EdgeInsetsDirectional.only());
+    expect(new EdgeInsetsDirectional.only(top: 1.0).hashCode, isNot(new EdgeInsetsDirectional.only(bottom: 1.0)));
+    expect(new EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+           new EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.rtl));
+    expect(new EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+     isNot(new EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.ltr)));
+    expect(new EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
+     isNot(new EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.rtl)));
+  });
 }
