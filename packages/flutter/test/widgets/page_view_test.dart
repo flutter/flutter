@@ -35,7 +35,7 @@ void main() {
 
     expect(find.text('Alaska'), findsNothing);
 
-    await tester.drag(find.byType(PageView), const Offset(-10.0, 0.0));
+    await tester.drag(find.byType(PageView), const Offset(-20.0, 0.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsOneWidget);

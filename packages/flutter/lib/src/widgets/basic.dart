@@ -120,9 +120,9 @@ class Opacity extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('opacity: $opacity');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('opacity', opacity));
   }
 }
 
@@ -256,7 +256,10 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// Custom painters normally size themselves to their child. If they do not have
 /// a child, they attempt to size themselves to the [size], which defaults to
-/// [Size.zero].
+/// [Size.zero].  [size] must not be null.
+///
+/// [isComplex] and [willChange] are hints to the compositor's raster cache
+/// and must not be null.
 ///
 /// ## Sample code
 ///
@@ -286,9 +289,18 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///  * [Canvas], the class that a custom painter uses to paint.
 class CustomPaint extends SingleChildRenderObjectWidget {
   /// Creates a widget that delegates its painting.
-  const CustomPaint({ Key key, this.painter, this.foregroundPainter, this.size: Size.zero, Widget child })
-    : assert(size != null),
-      super(key: key, child: child);
+  const CustomPaint({
+    Key key,
+    this.painter,
+    this.foregroundPainter,
+    this.size: Size.zero,
+    this.isComplex: false,
+    this.willChange: false,
+    Widget child
+  }) : assert(size != null),
+       assert(isComplex != null),
+       assert(willChange != null),
+       super(key: key, child: child);
 
   /// The painter that paints before the children.
   final CustomPainter painter;
@@ -305,12 +317,27 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// instead.
   final Size size;
 
+  /// Whether the painting is complex enough to benefit from caching.
+  ///
+  /// The compositor contains a raster cache that holds bitmaps of layers in
+  /// order to avoid the cost of repeatedly rendering those layers on each
+  /// frame.  If this flag is not set, then the compositor will apply its own
+  /// heuristics to decide whether the this layer is complex enough to benefit
+  /// from caching.
+  final bool isComplex;
+
+  /// Whether the raster cache should be told that this painting is likely
+  /// to change in the next frame.
+  final bool willChange;
+
   @override
   RenderCustomPaint createRenderObject(BuildContext context) {
     return new RenderCustomPaint(
       painter: painter,
       foregroundPainter: foregroundPainter,
       preferredSize: size,
+      isComplex: isComplex,
+      willChange: willChange,
     );
   }
 
@@ -319,7 +346,9 @@ class CustomPaint extends SingleChildRenderObjectWidget {
     renderObject
       ..painter = painter
       ..foregroundPainter = foregroundPainter
-      ..preferredSize = size;
+      ..preferredSize = size
+      ..isComplex = isComplex
+      ..willChange = willChange;
   }
 
   @override
@@ -392,10 +421,9 @@ class ClipRect extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (clipper != null)
-      description.add('clipper: $clipper');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<CustomClipper<Rect>>('clipper', clipper, defaultValue: null));
   }
 }
 
@@ -448,12 +476,10 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (borderRadius != null)
-      description.add('$borderRadius');
-    if (clipper != null)
-      description.add('clipper: $clipper');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<CustomClipper<RRect>>('clipper', clipper, defaultValue: null));
   }
 }
 
@@ -502,10 +528,9 @@ class ClipOval extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (clipper != null)
-      description.add('clipper: $clipper');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<CustomClipper<Rect>>('clipper', clipper, defaultValue: null));
   }
 }
 
@@ -551,10 +576,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (clipper != null)
-      description.add('clipper: $clipper');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper, defaultValue: null));
   }
 }
 
@@ -615,12 +639,12 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('shape: $shape');
-    description.add('borderRadius: $borderRadius');
-    description.add('elevation: ${elevation.toStringAsFixed(1)}');
-    description.add('color: $color');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<BoxShape>('shape', shape));
+    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
   }
 }
 
@@ -1053,9 +1077,9 @@ class Padding extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('padding: $padding');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding));
   }
 }
 
@@ -1130,13 +1154,11 @@ class Align extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    if (widthFactor != null)
-      description.add('widthFactor: $widthFactor');
-    if (heightFactor != null)
-      description.add('heightFactor: $heightFactor');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
+    description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
 }
 
@@ -1232,9 +1254,9 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('id: $id');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Object>('id', id));
   }
 }
 
@@ -1374,14 +1396,11 @@ class SizedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (width != double.INFINITY || height != double.INFINITY) {
-      if (width != null)
-        description.add('width: $width');
-      if (height != null)
-        description.add('height: $height');
-    }
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    final bool hidden = width == double.INFINITY && height == double.INFINITY;
+    description.add(new DoubleProperty('width', width, defaultValue: null, hidden: hidden));
+    description.add(new DoubleProperty('height', height, defaultValue: null, hidden: hidden));
   }
 }
 
@@ -1438,9 +1457,9 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$constraints');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, showName: false));
   }
 }
 
@@ -1516,13 +1535,11 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    if (widthFactor != null)
-      description.add('widthFactor: $widthFactor');
-    if (heightFactor != null)
-      description.add('heightFactor: $heightFactor');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
+    description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
 }
 
@@ -1586,12 +1603,10 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (maxWidth != double.INFINITY)
-      description.add('maxWidth: $maxWidth');
-    if (maxHeight != double.INFINITY)
-      description.add('maxHeight: $maxHeight');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
   }
 }
 
@@ -1660,17 +1675,13 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    if (minWidth != null)
-      description.add('minWidth: $minWidth');
-    if (maxWidth != null)
-      description.add('maxWidth: $maxWidth');
-    if (minHeight != null)
-      description.add('minHeight: $minHeight');
-    if (maxHeight != null)
-      description.add('maxHeight: $maxHeight');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DoubleProperty('minWidth', minWidth, defaultValue: null));
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: null));
+    description.add(new DoubleProperty('minHeight', minHeight, defaultValue: null));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: null));
   }
 }
 
@@ -1719,11 +1730,10 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    if (size != null)
-      description.add('size: $size');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }
 
@@ -1754,9 +1764,9 @@ class Offstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('offstage: $offstage');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('offstage', offstage));
   }
 
   @override
@@ -1828,9 +1838,9 @@ class AspectRatio extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('aspectRatio: $aspectRatio');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('aspectRatio', aspectRatio));
   }
 }
 
@@ -2007,9 +2017,9 @@ class SliverPadding extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('padding: $padding');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding));
   }
 }
 
@@ -2149,11 +2159,11 @@ class Stack extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    description.add('fit: $fit');
-    description.add('overflow: $overflow');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new EnumProperty<StackFit>('fit', fit));
+    description.add(new EnumProperty<Overflow>('overflow', overflow));
   }
 }
 
@@ -2355,20 +2365,14 @@ class Positioned extends ParentDataWidget<Stack> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (left != null)
-      description.add('left: $left');
-    if (top != null)
-      description.add('top: $top');
-    if (right != null)
-      description.add('right: $right');
-    if (bottom != null)
-      description.add('bottom: $bottom');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('left', left, defaultValue: null));
+    description.add(new DoubleProperty('top', top, defaultValue: null));
+    description.add(new DoubleProperty('right', right, defaultValue: null));
+    description.add(new DoubleProperty('bottom', bottom, defaultValue: null));
+    description.add(new DoubleProperty('width', width, defaultValue: null));
+    description.add(new DoubleProperty('height', height, defaultValue: null));
   }
 }
 
@@ -2877,9 +2881,9 @@ class Flexible extends ParentDataWidget<Flex> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('flex: $flex');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new IntProperty('flex', flex));
   }
 }
 
@@ -3379,27 +3383,18 @@ class RawImage extends LeafRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('image: $image');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
-    if (scale != 1.0)
-      description.add('scale: $scale');
-    if (color != null)
-      description.add('color: $color');
-    if (colorBlendMode != null)
-      description.add('colorBlendMode: $colorBlendMode');
-    if (fit != null)
-      description.add('fit: $fit');
-    if (alignment != null)
-      description.add('alignment: $alignment');
-    if (repeat != ImageRepeat.noRepeat)
-      description.add('repeat: $repeat');
-    if (centerSlice != null)
-      description.add('centerSlice: $centerSlice');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ui.Image>('image', image));
+    description.add(new DoubleProperty('width', width, defaultValue: null));
+    description.add(new DoubleProperty('height', height, defaultValue: null));
+    description.add(new DoubleProperty('scale', scale, defaultValue: 1.0));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, defaultValue: null));
+    description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+    description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
   }
 }
 
@@ -3546,8 +3541,8 @@ class Listener extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     final List<String> listeners = <String>[];
     if (onPointerDown != null)
       listeners.add('down');
@@ -3559,18 +3554,8 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('cancel');
     if (listeners.isEmpty)
       listeners.add('<none>');
-    description.add('listeners: ${listeners.join(", ")}');
-    switch (behavior) {
-      case HitTestBehavior.translucent:
-        description.add('behavior: translucent');
-        break;
-      case HitTestBehavior.opaque:
-        description.add('behavior: opaque');
-        break;
-      case HitTestBehavior.deferToChild:
-        description.add('behavior: defer-to-child');
-        break;
-    }
+    description.add(new IterableProperty<String>('listeners', listeners));
+    description.add(new EnumProperty<HitTestBehavior>('behavior', behavior));
   }
 }
 
@@ -3670,11 +3655,10 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('ignoring: $ignoring');
-    if (ignoringSemantics != null)
-      description.add('ignoringSemantics: $ignoringSemantics');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('ignoring', ignoring));
+    description.add(new DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null));
   }
 }
 
@@ -3756,10 +3740,10 @@ class MetaData extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('behavior: $behavior');
-    description.add('metaData: $metaData');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<HitTestBehavior>('behavior', behavior));
+    description.add(new DiagnosticsProperty<dynamic>('metaData', metaData));
   }
 }
 
@@ -3847,15 +3831,12 @@ class Semantics extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('container: $container');
-    if (checked != null)
-      description.add('checked: $checked');
-    if (selected != null)
-      description.add('selected: $selected');
-    if (label != null)
-      description.add('label: "$label"');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('container', container));
+    description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    description.add(new StringProperty('label', label));
   }
 }
 
@@ -3941,9 +3922,9 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('excluding: $excluding');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('excluding', excluding));
   }
 }
 

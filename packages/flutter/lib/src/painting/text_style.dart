@@ -131,7 +131,7 @@ import 'basic_types.dart';
 ///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
 ///    passing it to a [RichText].
 @immutable
-class TextStyle {
+class TextStyle extends TreeDiagnostics {
   /// Creates a text style.
   const TextStyle({
     this.inherit: true,
@@ -456,112 +456,100 @@ class TextStyle {
   }
 
   @override
-  String toString([String prefix = '']) {
-    final List<String> result = <String>[];
-    result.add('${prefix}inherit: $inherit');
-    if (color != null)
-      result.add('${prefix}color: $color');
-    if (fontFamily != null)
-      result.add('${prefix}family: "$fontFamily"');
-    if (fontSize != null)
-      result.add('${prefix}size: $fontSize');
+  DiagnosticsNode toDiagnosticsNode({
+    String name,
+    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.singleLine,
+  }) {
+    return new DiagnosticsNode.lazy(
+      name: name,
+      value: this,
+      style: style,
+      description: '$runtimeType',
+      fillProperties: debugFillProperties,
+    );
+  }
+
+  @override
+  String toString() => toDiagnosticsNode().toString();
+
+  /// Adds all properties prefixing property names with the optional `prefix`.
+  void debugFillProperties(List<DiagnosticsNode> properties, { String prefix: '' }) {
+    final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
+    styles.add(new DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
+    styles.add(new StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
+    styles.add(new DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    String weightDescription;
     if (fontWeight != null) {
       switch (fontWeight) {
         case FontWeight.w100:
-          result.add('${prefix}weight: 100');
+          weightDescription = '100';
           break;
         case FontWeight.w200:
-          result.add('${prefix}weight: 200');
+          weightDescription = '200';
           break;
         case FontWeight.w300:
-          result.add('${prefix}weight: 300');
+          weightDescription = '300';
           break;
         case FontWeight.w400:
-          result.add('${prefix}weight: 400');
+          weightDescription = '400';
           break;
         case FontWeight.w500:
-          result.add('${prefix}weight: 500');
+          weightDescription = '500';
           break;
         case FontWeight.w600:
-          result.add('${prefix}weight: 600');
+          weightDescription = '600';
           break;
         case FontWeight.w700:
-          result.add('${prefix}weight: 700');
+          weightDescription = '700';
           break;
         case FontWeight.w800:
-          result.add('${prefix}weight: 800');
+          weightDescription = '800';
           break;
         case FontWeight.w900:
-          result.add('${prefix}weight: 900');
+          weightDescription = '900';
           break;
       }
     }
-    if (fontStyle != null) {
-      switch (fontStyle) {
-        case FontStyle.normal:
-          result.add('${prefix}style: normal');
-          break;
-        case FontStyle.italic:
-          result.add('${prefix}style: italic');
-          break;
-      }
-    }
-    if (letterSpacing != null)
-      result.add('${prefix}letterSpacing: ${letterSpacing}x');
-    if (wordSpacing != null)
-      result.add('${prefix}wordSpacing: ${wordSpacing}x');
-    if (textBaseline != null) {
-      switch (textBaseline) {
-        case TextBaseline.alphabetic:
-          result.add('${prefix}baseline: alphabetic');
-          break;
-        case TextBaseline.ideographic:
-          result.add('${prefix}baseline: ideographic');
-          break;
-      }
-    }
-    if (height != null)
-      result.add('${prefix}height: ${height}x');
+    // TODO(jacobr): switch this to use enumProperty which will either cause the
+    // weight description to change to w600 from 600 or require existing
+    // enumProperty to handle this special case.
+    styles.add(new DiagnosticsProperty<FontWeight>(
+      '${prefix}weight',
+      fontWeight,
+      description: weightDescription,
+      defaultValue: null,
+    ));
+    styles.add(new EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
+    styles.add(new DoubleProperty('${prefix}letterSpacing', letterSpacing, unit: 'x', defaultValue: null));
+    styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, unit: 'x', defaultValue: null));
+    styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
+    styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
-      String decorationDescription = '${prefix}decoration: ';
-      bool haveDecorationDescription = false;
-      if (decorationStyle != null) {
-        switch (decorationStyle) {
-          case TextDecorationStyle.solid:
-            decorationDescription += 'solid';
-            break;
-          case TextDecorationStyle.double:
-            decorationDescription += 'double';
-            break;
-          case TextDecorationStyle.dotted:
-            decorationDescription += 'dotted';
-            break;
-          case TextDecorationStyle.dashed:
-            decorationDescription += 'dashed';
-            break;
-          case TextDecorationStyle.wavy:
-            decorationDescription += 'wavy';
-            break;
-        }
-        haveDecorationDescription = true;
-      }
-      if (decorationColor != null) {
-        if (haveDecorationDescription)
-          decorationDescription += ' ';
-        decorationDescription += '$decorationColor';
-        haveDecorationDescription = true;
-      }
-      if (decoration != null) {
-        if (haveDecorationDescription)
-          decorationDescription += ' ';
-        decorationDescription += '$decoration';
-        haveDecorationDescription = true;
-      }
-      assert(haveDecorationDescription);
-      result.add(decorationDescription);
+      final List<String> decorationDescription = <String>[];
+      if (decorationStyle != null)
+        decorationDescription.add(describeEnum((decorationStyle)));
+
+      // Hide decorationColor from the default text view as it is shown in the
+      // terse decoration summary as well.
+      styles.add(new DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, hidden: true));
+
+      if (decorationColor != null)
+        decorationDescription.add('$decorationColor');
+
+      // Intentionally collide with the property 'decoration' added below.
+      // Tools that show hidden properties could choose the first property
+      // matching the name to disambiguate.
+      styles.add(new DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, hidden: true));
+      if (decoration != null)
+        decorationDescription.add('$decoration');
+      assert(decorationDescription.isNotEmpty);
+      styles.add(new MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
     }
-    if (result.isEmpty)
-      return '$prefix<no style specified>';
-    return result.join('\n');
+
+    final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.hidden);
+    properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, hidden: !styleSpecified && inherit));
+    properties.addAll(styles);
+    if (!styleSpecified)
+      properties.add(new FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
   }
 }

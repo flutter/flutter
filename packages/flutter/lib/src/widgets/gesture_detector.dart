@@ -296,7 +296,7 @@ class GestureDetector extends StatelessWidget {
 
     if (onTapDown != null || onTapUp != null || onTap != null || onTapCancel != null) {
       gestures[TapGestureRecognizer] = new GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-        () => new TapGestureRecognizer(),
+        () => new TapGestureRecognizer(debugOwner: this),
         (TapGestureRecognizer instance) {
           instance
             ..onTapDown = onTapDown
@@ -309,7 +309,7 @@ class GestureDetector extends StatelessWidget {
 
     if (onDoubleTap != null) {
       gestures[DoubleTapGestureRecognizer] = new GestureRecognizerFactoryWithHandlers<DoubleTapGestureRecognizer>(
-        () => new DoubleTapGestureRecognizer(),
+        () => new DoubleTapGestureRecognizer(debugOwner: this),
         (DoubleTapGestureRecognizer instance) {
           instance
             ..onDoubleTap = onDoubleTap;
@@ -319,7 +319,7 @@ class GestureDetector extends StatelessWidget {
 
     if (onLongPress != null) {
       gestures[LongPressGestureRecognizer] = new GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-        () => new LongPressGestureRecognizer(),
+        () => new LongPressGestureRecognizer(debugOwner: this),
         (LongPressGestureRecognizer instance) {
           instance
             ..onLongPress = onLongPress;
@@ -333,7 +333,7 @@ class GestureDetector extends StatelessWidget {
         onVerticalDragEnd != null ||
         onVerticalDragCancel != null) {
       gestures[VerticalDragGestureRecognizer] = new GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
-        () => new VerticalDragGestureRecognizer(),
+        () => new VerticalDragGestureRecognizer(debugOwner: this),
         (VerticalDragGestureRecognizer instance) {
           instance
             ..onDown = onVerticalDragDown
@@ -351,7 +351,7 @@ class GestureDetector extends StatelessWidget {
         onHorizontalDragEnd != null ||
         onHorizontalDragCancel != null) {
       gestures[HorizontalDragGestureRecognizer] = new GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
-        () => new HorizontalDragGestureRecognizer(),
+        () => new HorizontalDragGestureRecognizer(debugOwner: this),
         (HorizontalDragGestureRecognizer instance) {
           instance
             ..onDown = onHorizontalDragDown
@@ -369,7 +369,7 @@ class GestureDetector extends StatelessWidget {
         onPanEnd != null ||
         onPanCancel != null) {
       gestures[PanGestureRecognizer] = new GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-        () => new PanGestureRecognizer(),
+        () => new PanGestureRecognizer(debugOwner: this),
         (PanGestureRecognizer instance) {
           instance
             ..onDown = onPanDown
@@ -383,7 +383,7 @@ class GestureDetector extends StatelessWidget {
 
     if (onScaleStart != null || onScaleUpdate != null || onScaleEnd != null) {
       gestures[ScaleGestureRecognizer] = new GestureRecognizerFactoryWithHandlers<ScaleGestureRecognizer>(
-        () => new ScaleGestureRecognizer(),
+        () => new ScaleGestureRecognizer(debugOwner: this),
         (ScaleGestureRecognizer instance) {
           instance
             ..onStart = onScaleStart
@@ -397,7 +397,7 @@ class GestureDetector extends StatelessWidget {
       gestures: gestures,
       behavior: behavior,
       excludeFromSemantics: excludeFromSemantics,
-      child: child
+      child: child,
     );
   }
 }
@@ -613,27 +613,18 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     if (_recognizers == null) {
-      description.add('DISPOSED');
+      description.add(new DiagnosticsNode.message('DISPOSED'));
     } else {
       final List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.toStringShort()).toList();
       if (gestures.isEmpty)
         gestures.add('<none>');
-      description.add('gestures: ${gestures.join(", ")}');
+      description.add(new IterableProperty<String>('gestures', gestures));
+      description.add(new IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, hidden: true));
     }
-    switch (widget.behavior) {
-      case HitTestBehavior.translucent:
-        description.add('behavior: translucent');
-        break;
-      case HitTestBehavior.opaque:
-        description.add('behavior: opaque');
-        break;
-      case HitTestBehavior.deferToChild:
-        description.add('behavior: defer-to-child');
-        break;
-    }
+    description.add(new EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
 }
 

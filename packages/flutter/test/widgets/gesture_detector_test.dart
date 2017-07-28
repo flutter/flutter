@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart';
 
 void main() {
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
@@ -59,13 +60,13 @@ void main() {
     double dragDistance = 0.0;
 
     final Offset downLocation = const Offset(10.0, 10.0);
-    final Offset upLocation = const Offset(10.0, 20.0);
+    final Offset upLocation = const Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
     final Widget widget = new GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
       onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
-      onHorizontalDragUpdate: (DragUpdateDetails details) { fail("gesture should not match"); },
-      onHorizontalDragEnd: (DragEndDetails details) { fail("gesture should not match"); },
+      onHorizontalDragUpdate: (DragUpdateDetails details) { fail('gesture should not match'); },
+      onHorizontalDragEnd: (DragEndDetails details) { fail('gesture should not match'); },
       child: new Container(
         color: const Color(0xFF00FF00),
       )
@@ -81,7 +82,7 @@ void main() {
     await gesture.up();
 
     expect(gestureCount, 2);
-    expect(dragDistance, 20.0);
+    expect(dragDistance, 40.0 * 2.0); // delta between down and up, twice
 
     await tester.pumpWidget(new Container());
   });

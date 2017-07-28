@@ -30,14 +30,17 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
-  testWidgets('OverflowBox implements debugFillDescription', (WidgetTester tester) async {
-    final List<String> description = <String>[];
+  testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
+    final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
     const OverflowBox(
       minWidth: 1.0,
       maxWidth: 2.0,
       minHeight: 3.0,
       maxHeight: 4.0
-    ).debugFillDescription(description);
+    ).debugFillProperties(properties);
+    final List<String> description = properties
+        .where((DiagnosticsNode n) => !n.hidden)
+        .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
       'alignment: FractionalOffset(0.5, 0.5)',
       'minWidth: 1.0',

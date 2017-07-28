@@ -284,25 +284,17 @@ class Image extends StatefulWidget {
   _ImageState createState() => new _ImageState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('image: $image');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
-    if (color != null)
-      description.add('color: $color');
-    if (colorBlendMode != null)
-      description.add('colorBlendMode: $colorBlendMode');
-    if (fit != null)
-      description.add('fit: $fit');
-    if (alignment != null)
-      description.add('alignment: $alignment');
-    if (repeat != ImageRepeat.noRepeat)
-      description.add('repeat: $repeat');
-    if (centerSlice != null)
-      description.add('centerSlice: $centerSlice');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ImageProvider>('image', image));
+    description.add(new DoubleProperty('width', width, defaultValue: null));
+    description.add(new DoubleProperty('height', height, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, defaultValue: null));
+    description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+    description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
   }
 }
 
@@ -374,9 +366,9 @@ class _ImageState extends State<Image> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('stream: $_imageStream');
-    description.add('pixels: $_imageInfo');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ImageStream>('stream', _imageStream));
+    description.add(new DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
   }
 }

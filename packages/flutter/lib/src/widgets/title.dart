@@ -40,11 +40,9 @@ class Title extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (title != null)
-      description.add('"$title"');
-    if (color != null)
-      description.add('color: $color');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('title', title, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }

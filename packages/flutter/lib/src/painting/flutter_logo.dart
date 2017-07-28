@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'box_fit.dart';
@@ -210,9 +211,19 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
-  String toString([String prefix = '', String prefixIndent ]) {
-    final String extra = _inTransition ? ', transition $_position:$_opacity' : '';
-    return '$prefix$runtimeType($lightColor/$darkColor on $textColor, $style$extra)';
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return new DiagnosticsNode.lazy(
+      name: name,
+      description: '$runtimeType',
+      value: this,
+      style: style,
+      fillProperties: (List<DiagnosticsNode> properties) {
+        properties.add(new DiagnosticsNode.message('$lightColor/$darkColor on $textColor'));
+        properties.add(new EnumProperty<FlutterLogoStyle>('style', this.style));
+        if (_inTransition)
+          properties.add(new DiagnosticsNode.message('transition $_position:$_opacity'));
+      }
+    );
   }
 }
 

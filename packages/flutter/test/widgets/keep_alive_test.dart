@@ -258,7 +258,7 @@ void main() {
       '               │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '               │ layer: OffsetLayer#00000\n'
       '               │ size: Size(800.0, 600.0)\n'
-      '               │ AxisDirection.down\n'
+      '               │ axisDirection: down\n'
       '               │ offset: ScrollPositionWithSingleContext#00000(offset: 0.0, range:\n'
       '               │   0.0..39400.0, viewport: 600.0, ScrollableState,\n'
       '               │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics,\n'
@@ -279,7 +279,7 @@ void main() {
       '                 │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
       '                 │   viewportMainAxisExtent: 600.0)\n'
       '                 │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
-      '                 │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true, )\n'
+      '                 │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true)\n'
       '                 │ currently live children: 0 to 1\n'
       '                 │\n'
       '                 ├─child with index 0: RenderLimitedBox#00000\n'
@@ -333,7 +333,6 @@ void main() {
       '                       parentData: <none> (can use size)\n'
       '                       constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                       size: Size(800.0, 400.0)\n'
-      '' // TODO(ianh): remove blank line
     ));
     const GlobalObjectKey<_LeafState>(0).currentState.setKeepAlive(true);
     await tester.drag(find.byType(ListView), const Offset(0.0, -1000.0));
@@ -429,7 +428,7 @@ void main() {
       '               │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
       '               │ layer: OffsetLayer#00000\n'
       '               │ size: Size(800.0, 600.0)\n'
-      '               │ AxisDirection.down\n'
+      '               │ axisDirection: down\n'
       '               │ offset: ScrollPositionWithSingleContext#00000(offset: 2000.0,\n'
       '               │   range: 0.0..39400.0, viewport: 600.0, ScrollableState,\n'
       '               │   AlwaysScrollableScrollPhysics -> ClampingScrollPhysics,\n'
@@ -450,7 +449,7 @@ void main() {
       '                 │   2000.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
       '                 │   viewportMainAxisExtent: 600.0)\n'
       '                 │ geometry: SliverGeometry(scrollExtent: 40000.0, paintExtent:\n'
-      '                 │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true, )\n'
+      '                 │   600.0, maxPaintExtent: 40000.0, hasVisualOverflow: true)\n'
       '                 │ currently live children: 5 to 6\n'
       '                 │\n'
       '                 ├─child with index 5: RenderLimitedBox#00000\n'                                       // <----- this is index 5, not 0
@@ -505,7 +504,7 @@ void main() {
       '                 ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                 ╎     size: Size(800.0, 400.0)\n'
       '                 ╎\n'
-      '                 ├─child with index 0 (kept alive offstage): RenderLimitedBox#00000\n'                 // <----- this one is index 0 and is marked as being offstage
+      '                 ╎╌child with index 0 (kept alive offstage): RenderLimitedBox#00000\n'                 // <----- this one is index 0 and is marked as being offstage
       '                 ╎ │ creator: LimitedBox ← Placeholder ← KeepAlive ←\n'
       '                 ╎ │   Leaf-[GlobalObjectKey<_LeafState> int#00000] ←\n'
       '                 ╎ │   SliverFixedExtentList ← Viewport ← _ScrollableScope ←\n'
@@ -531,7 +530,7 @@ void main() {
       '                 ╎     constraints: BoxConstraints(w=800.0, h=400.0)\n'
       '                 ╎     size: Size(800.0, 400.0)\n'
       '                 ╎\n'                                                                                  // <----- dashed line ends here
-      '                 └─child with index 3 (kept alive offstage): RenderLimitedBox#00000\n'
+      '                 └╌child with index 3 (kept alive offstage): RenderLimitedBox#00000\n'
       '                   │ creator: LimitedBox ← Placeholder ← KeepAlive ←\n'
       '                   │   Leaf-[GlobalObjectKey<_LeafState> int#00000] ←\n'
       '                   │   SliverFixedExtentList ← Viewport ← _ScrollableScope ←\n'

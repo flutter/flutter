@@ -156,11 +156,10 @@ class Scrollable extends StatefulWidget {
   ScrollableState createState() => new ScrollableState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$axisDirection');
-    if (physics != null)
-      description.add('physics: $physics');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    description.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -485,8 +484,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('position: $position');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ScrollPosition>('position', position));
   }
 }

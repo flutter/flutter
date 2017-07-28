@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
@@ -82,6 +82,21 @@ void main() {
     final RenderFlex flex = new RenderFlex();
     expect(flex.crossAxisAlignment, equals(CrossAxisAlignment.center));
     expect(flex.direction, equals(Axis.horizontal));
+    expect(flex, hasAGoodToStringDeep);
+    expect(
+      flex.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'RenderFlex#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        '   parentData: null\n'
+        '   constraints: null\n'
+        '   size: MISSING\n'
+        '   direction: horizontal\n'
+        '   mainAxisAlignment: start\n'
+        '   mainAxisSize: max\n'
+        '   crossAxisAlignment: center\n'
+        '   textBaseline: null\n'
+      ),
+    );
   });
 
   test('Parent data', () {

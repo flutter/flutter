@@ -222,19 +222,14 @@ abstract class ScrollView extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$scrollDirection');
-    if (reverse)
-      description.add('reversed');
-    if (controller != null)
-      description.add('$controller');
-    if (primary)
-      description.add('using primary controller');
-    if (physics != null)
-      description.add('$physics');
-    if (shrinkWrap)
-      description.add('shrink-wrapping');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('scrollDirection', scrollDirection));
+    description.add(new FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
+    description.add(new DiagnosticsProperty<ScrollController>('controller', controller, showName: false, defaultValue: null));
+    description.add(new FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true));
+    description.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics, showName: false, defaultValue: null));
+    description.add(new FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true));
   }
 }
 
@@ -387,10 +382,9 @@ abstract class BoxScrollView extends ScrollView {
   Widget buildChildLayout(BuildContext context);
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (padding != null)
-      description.add('padding: $padding');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
   }
 }
 
@@ -681,10 +675,9 @@ class ListView extends BoxScrollView {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (itemExtent != null)
-      description.add('itemExtent: $itemExtent');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('itemExtent', itemExtent, defaultValue: null));
   }
 }
 

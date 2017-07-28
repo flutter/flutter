@@ -140,9 +140,9 @@ class SliverPersistentHeader extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('delegate: $delegate');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<SliverPersistentHeaderDelegate>('delegate', delegate));
     final List<String> flags = <String>[];
     if (pinned)
       flags.add('pinned');
@@ -150,7 +150,7 @@ class SliverPersistentHeader extends StatelessWidget {
       flags.add('floating');
     if (flags.isEmpty)
       flags.add('normal');
-    description.add('mode: ${flags.join(", ")}');
+    description.add(new IterableProperty<String>('mode', flags));
   }
 }
 
@@ -244,9 +244,9 @@ abstract class _SliverPersistentHeaderRenderObjectWidget extends RenderObjectWid
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context);
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('delegate: $delegate');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<SliverPersistentHeaderDelegate>('delegate', delegate));
   }
 }
 

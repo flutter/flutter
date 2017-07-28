@@ -21,6 +21,42 @@ void main() {
     ]));
   });
 
+  test('transform property test', () {
+    final Matrix4 transform = new Matrix4.diagonal3(new Vector3.all(2.0));
+    final TransformProperty simple = new TransformProperty(
+      'transform',
+      transform,
+    );
+    expect(simple.name, equals('transform'));
+    expect(simple.value, same(transform));
+    expect(
+      simple.toString(),
+      equals(
+        'transform:\n'
+            '  [0] 2.0,0.0,0.0,0.0\n'
+            '  [1] 0.0,2.0,0.0,0.0\n'
+            '  [2] 0.0,0.0,2.0,0.0\n'
+            '  [3] 0.0,0.0,0.0,1.0',
+      ),
+    );
+
+    final TransformProperty nullProperty = new TransformProperty(
+      'transform',
+      null,
+    );
+    expect(nullProperty.name, equals('transform'));
+    expect(nullProperty.value, isNull);
+    expect(nullProperty.toString(), equals('transform: null'));
+
+    final TransformProperty hideNull = new TransformProperty(
+      'transform',
+      null,
+      defaultValue: null,
+    );
+    expect(hideNull.value, isNull);
+    expect(hideNull.toString(), equals('transform: null'));
+  });
+
   test('debugPaintPadding', () {
     expect((Canvas canvas) {
       debugPaintPadding(canvas, new Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), null);
