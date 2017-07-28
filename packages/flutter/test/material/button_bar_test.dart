@@ -6,7 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ButtonBar default control', (WidgetTester tester) async {
-    await tester.pumpWidget(const Center(child: const ButtonBar()));
+  testWidgets('ButtonBar default control smoketest', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: const ButtonBar(),
+      ),
+    );
   });
 }

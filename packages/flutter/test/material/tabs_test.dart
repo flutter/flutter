@@ -14,6 +14,15 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
+Widget boilerplate({ Widget child }) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Material(
+      child: child,
+    ),
+  );
+}
+
 class StateMarker extends StatefulWidget {
   const StateMarker({ Key key, this.child }) : super(key: key);
 
@@ -41,7 +50,7 @@ Widget buildFrame({
     bool isScrollable: false,
     Color indicatorColor,
   }) {
-  return new Material(
+  return boilerplate(
     child: new DefaultTabController(
       initialIndex: tabs.indexOf(value),
       length: tabs.length,
@@ -253,7 +262,7 @@ void main() {
     String value = tabs[0];
 
     Widget builder() {
-      return new Material(
+      return boilerplate(
         child: new DefaultTabController(
           initialIndex: tabs.indexOf(value),
           length: tabs.length,
@@ -633,7 +642,7 @@ void main() {
     Color secondColor;
 
     await tester.pumpWidget(
-      new Material(
+      boilerplate(
         child: new TabBar(
           controller: controller,
           labelColor: Colors.green[500],
@@ -667,7 +676,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
+      boilerplate(
         child: new TabBarView(
           controller: controller,
           children: <Widget>[ const Text('First'), const Text('Second') ],
@@ -765,7 +774,7 @@ void main() {
     );
 
     Widget buildFrame() {
-      return new Material(
+      return boilerplate(
         child: new TabBar(
           key: new UniqueKey(),
           controller: controller,
@@ -893,7 +902,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
+      boilerplate(
         child: new TabBar(
           isScrollable: true,
           controller: controller,
@@ -927,7 +936,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
+      boilerplate(
         child: new Column(
           children: <Widget>[
             new TabBar(
@@ -985,7 +994,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
+      boilerplate(
         child: new Semantics(
           container: true,
           child: new TabBar(
@@ -1034,7 +1043,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
+      boilerplate(
         child: new Column(
           children: <Widget>[
             new TabBar(
@@ -1074,7 +1083,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
+      boilerplate(
         child: new Column(
           children: <Widget>[
             new TabBar(
@@ -1129,7 +1138,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Material(
+      boilerplate(
         child: new Column(
           children: <Widget>[
             new TabBar(

@@ -107,29 +107,31 @@ void main() {
     feedback.dispose();
   });
 
-  testWidgets(
-      'Chip does not constrain size of label widget if it does not exceed '
-      'the available space', (WidgetTester tester) async {
+  testWidgets('Chip does not constrain size of label widget if it does not exceed '
+              'the available space', (WidgetTester tester) async {
     const double labelWidth = 50.0;
     const double labelHeight = 30.0;
     final Key labelKey = new UniqueKey();
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new Container(
-            width: 500.0,
-            height: 500.0,
-            child: new Column(
-              children: <Widget>[
-                new Chip(
-                  label: new Container(
-                    key: labelKey,
-                    width: labelWidth,
-                    height: labelHeight,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new Container(
+              width: 500.0,
+              height: 500.0,
+              child: new Column(
+                children: <Widget>[
+                  new Chip(
+                    label: new Container(
+                      key: labelKey,
+                      width: labelWidth,
+                      height: labelHeight,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -141,15 +143,13 @@ void main() {
     expect(labelSize.height, labelHeight);
   });
 
-  testWidgets(
-      'Chip constrains the size of the label widget when it exceeds the '
-      'available space', (WidgetTester tester) async {
+  testWidgets('Chip constrains the size of the label widget when it exceeds the '
+              'available space', (WidgetTester tester) async {
     await _testConstrainedLabel(tester);
   });
 
-  testWidgets(
-      'Chip constrains the size of the label widget when it exceeds the '
-      'available space and the avatar is present', (WidgetTester tester) async {
+  testWidgets('Chip constrains the size of the label widget when it exceeds the '
+              'available space and the avatar is present', (WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
       avatar: const CircleAvatar(
@@ -158,20 +158,16 @@ void main() {
     );
   });
 
-  testWidgets(
-      'Chip constrains the size of the label widget when it exceeds the '
-      'available space and the delete icon is present',
-      (WidgetTester tester) async {
+  testWidgets('Chip constrains the size of the label widget when it exceeds the '
+              'available space and the delete icon is present', (WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
       onDeleted: () {},
     );
   });
 
-  testWidgets(
-      'Chip constrains the size of the label widget when it exceeds the '
-      'available space and both avatar and delete icons are present',
-      (WidgetTester tester) async {
+  testWidgets('Chip constrains the size of the label widget when it exceeds the '
+              'available space and both avatar and delete icons are present', (WidgetTester tester) async {
     await _testConstrainedLabel(
       tester,
       avatar: const CircleAvatar(
@@ -222,5 +218,105 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 32.0));
+  });
+  testWidgets('Chip supports RTL', (WidgetTester tester) async {
+    final Widget test = new Overlay(
+      initialEntries: <OverlayEntry>[
+        new OverlayEntry(
+          builder: (BuildContext context) {
+            return new Material(
+              child: new Center(
+                child: new Chip(
+                  onDeleted: () { },
+                  label: new Text('ABC'),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: test,
+      ),
+    );
+    expect(tester.getCenter(find.text('ABC')).dx, greaterThan(tester.getCenter(find.byType(Icon)).dx));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: test,
+      ),
+    );
+    expect(tester.getCenter(find.text('ABC')).dx, lessThan(tester.getCenter(find.byType(Icon)).dx));
+  });
+
+  testWidgets('Chip padding - LTR', (WidgetTester tester) async {
+    final GlobalKey keyA = new GlobalKey();
+    final GlobalKey keyB = new GlobalKey();
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) {
+                return new Material(
+                  child: new Center(
+                    child: new Chip(
+                      avatar: new Placeholder(key: keyA),
+                      label: new Placeholder(key: keyB),
+                      onDeleted: () { },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byKey(keyA)), const Offset(0.0, 284.0));
+    expect(tester.getBottomRight(find.byKey(keyA)), const Offset(32.0, 316.0));
+    expect(tester.getTopLeft(find.byKey(keyB)), const Offset(40.0, 284.0));
+    expect(tester.getBottomRight(find.byKey(keyB)), const Offset(774.0, 316.0));
+    expect(tester.getTopLeft(find.byType(Icon)), const Offset(778.0, 291.0));
+    expect(tester.getBottomRight(find.byType(Icon)), const Offset(796.0, 309.0));
+  });
+
+  testWidgets('Chip padding - RTL', (WidgetTester tester) async {
+    final GlobalKey keyA = new GlobalKey();
+    final GlobalKey keyB = new GlobalKey();
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) {
+                return new Material(
+                  child: new Center(
+                    child: new Chip(
+                      avatar: new Placeholder(key: keyA),
+                      label: new Placeholder(key: keyB),
+                      onDeleted: () { },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getTopRight(find.byKey(keyA)), const Offset(800.0 - 0.0, 284.0));
+    expect(tester.getBottomLeft(find.byKey(keyA)), const Offset(800.0 - 32.0, 316.0));
+    expect(tester.getTopRight(find.byKey(keyB)), const Offset(800.0 - 40.0, 284.0));
+    expect(tester.getBottomLeft(find.byKey(keyB)), const Offset(800.0 - 774.0, 316.0));
+    expect(tester.getTopRight(find.byType(Icon)), const Offset(800.0 - 778.0, 291.0));
+    expect(tester.getBottomLeft(find.byType(Icon)), const Offset(800.0 - 796.0, 309.0));
   });
 }

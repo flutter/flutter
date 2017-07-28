@@ -433,7 +433,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           }
         ));
         assert(_parentZone != null);
-        assert(_pendingExceptionDetails != null);
+        assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
         _parentZone.run<Null>(_testCompletionHandler);
       }
     );

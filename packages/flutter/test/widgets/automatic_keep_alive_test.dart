@@ -196,32 +196,35 @@ void main() {
   group('Implied automatic keep-alive', () { tests(impliedMode: true); });
 
   testWidgets('AutomaticKeepAlive double', (WidgetTester tester) async {
-    await tester.pumpWidget(new ListView(
-      addAutomaticKeepAlives: false,
-      addRepaintBoundaries: false,
-      children: <Widget>[
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
-            ]),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView(
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
+        children: <Widget>[
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-        new AutomaticKeepAlive(
-          child: new Container(
-            key: const GlobalObjectKey<_LeafState>(2),
-            height: 400.0,
+          new AutomaticKeepAlive(
+            child: new Container(
+              key: const GlobalObjectKey<_LeafState>(2),
+              height: 400.0,
+            ),
           ),
-        ),
-        new AutomaticKeepAlive(
-          child: new Container(
-            key: const GlobalObjectKey<_LeafState>(3),
-            height: 400.0,
+          new AutomaticKeepAlive(
+            child: new Container(
+              key: const GlobalObjectKey<_LeafState>(3),
+              height: 400.0,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ));
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
@@ -267,38 +270,41 @@ void main() {
   });
 
   testWidgets('AutomaticKeepAlive double', (WidgetTester tester) async {
-    await tester.pumpWidget(new ListView(
-      addAutomaticKeepAlives: false,
-      addRepaintBoundaries: false,
-      children: <Widget>[
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
-            ]),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView(
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
+        children: <Widget>[
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
-            ]),
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
-            ]),
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ));
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);
@@ -315,38 +321,41 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4)), findsOneWidget);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsOneWidget);
-    await tester.pumpWidget(new ListView(
-      addAutomaticKeepAlives: false,
-      addRepaintBoundaries: false,
-      children: <Widget>[
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
-            ]),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView(
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
+        children: <Widget>[
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
-            ]),
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
-            ]),
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ));
     await tester.pump(); // Sometimes AutomaticKeepAlive needs an extra pump to clean things up.
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsNothing);
@@ -371,38 +380,41 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(4)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(5)), findsNothing);
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0)), findsNothing);
-    await tester.pumpWidget(new ListView(
-      addAutomaticKeepAlives: false,
-      addRepaintBoundaries: false,
-      children: <Widget>[
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
-            ]),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView(
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
+        children: <Widget>[
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-            ]),
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+              ]),
+            ),
           ),
-        ),
-        new AutomaticKeepAlive(
-          child: new Container(
-            height: 400.0,
-            child: new Row(children: <Widget>[
-              new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
-              new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
-            ]),
+          new AutomaticKeepAlive(
+            child: new Container(
+              height: 400.0,
+              child: new Row(children: <Widget>[
+                new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
+                new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+              ]),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ));
     await tester.pump(); // Sometimes AutomaticKeepAlive needs an extra pump to clean things up.
     expect(find.byKey(const GlobalObjectKey<_LeafState>(1)), findsOneWidget);

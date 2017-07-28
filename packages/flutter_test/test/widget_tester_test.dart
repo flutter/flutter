@@ -140,33 +140,42 @@ void main() {
 
   group('find.descendant', () {
     testWidgets('finds one descendant', (WidgetTester tester) async {
-      await tester.pumpWidget(new Row(children: <Widget>[
-        new Column(children: <Text>[const Text('foo'), const Text('bar')])
-      ]));
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+        ],
+      ));
 
       expect(find.descendant(
         of: find.widgetWithText(Row, 'foo'),
-        matching: find.text('bar')
+        matching: find.text('bar'),
       ), findsOneWidget);
     });
 
     testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
-      await tester.pumpWidget(new Row(children: <Widget>[
-        new Column(children: <Text>[const Text('foo'), const Text('bar')]),
-        new Column(children: <Text>[const Text('foo'), const Text('bar')]),
-      ]));
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+        ],
+      ));
 
       expect(find.descendant(
         of: find.widgetWithText(Column, 'foo'),
-        matching: find.text('bar')
+        matching: find.text('bar'),
       ), findsNWidgets(2));
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(new Row(children: <Widget>[
-        new Column(children: <Text>[const Text('foo')]),
-        const Text('bar')
-      ]));
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: <Text>[const Text('foo')]),
+          const Text('bar'),
+        ],
+      ));
 
       TestFailure failure;
       try {
@@ -186,9 +195,12 @@ void main() {
     });
 
     testWidgets('Root not matched by default', (WidgetTester tester) async {
-      await tester.pumpWidget(new Row(children: <Widget>[
-        new Column(children: <Text>[const Text('foo'), const Text('bar')])
-      ]));
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+        ],
+      ));
 
       expect(find.descendant(
         of: find.widgetWithText(Row, 'foo'),
@@ -197,9 +209,12 @@ void main() {
     });
 
     testWidgets('Match the root', (WidgetTester tester) async {
-      await tester.pumpWidget(new Row(children: <Widget>[
-        new Column(children: <Text>[const Text('foo'), const Text('bar')])
-      ]));
+      await tester.pumpWidget(new Row(
+        textDirection: TextDirection.ltr,
+        children: <Widget>[
+          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+        ],
+      ));
 
       expect(find.descendant(
         of: find.widgetWithText(Row, 'foo'),

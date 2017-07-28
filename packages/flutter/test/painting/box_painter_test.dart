@@ -167,7 +167,7 @@ void main() {
         ],
       ).toString(),
       equals(
-        'LinearGradient(FractionalOffset(0.0, 0.0), FractionalOffset(0.0, 1.0), [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
+        'LinearGradient(FractionalOffset.topLeft, FractionalOffset.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
       ),
     );
   });

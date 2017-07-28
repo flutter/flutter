@@ -10,10 +10,17 @@ import 'package:flutter/rendering.dart';
 
 import '../widgets/semantics_tester.dart';
 
+Widget wrap({ Widget child }) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Material(child: child),
+  );
+}
+
 void main() {
   testWidgets('CheckboxListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
-    await tester.pumpWidget(new Material(
+    await tester.pumpWidget(wrap(
       child: new CheckboxListTile(
         value: true,
         onChanged: (bool value) { log.add(value); },
@@ -28,7 +35,7 @@ void main() {
 
   testWidgets('RadioListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
-    await tester.pumpWidget(new Material(
+    await tester.pumpWidget(wrap(
       child: new RadioListTile<bool>(
         value: true,
         groupValue: false,
@@ -44,7 +51,7 @@ void main() {
 
   testWidgets('SwitchListTile control test', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
-    await tester.pumpWidget(new Material(
+    await tester.pumpWidget(wrap(
       child: new SwitchListTile(
         value: true,
         onChanged: (bool value) { log.add(value); },
@@ -59,7 +66,7 @@ void main() {
 
   testWidgets('SwitchListTile control test', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-    await tester.pumpWidget(new Material(
+    await tester.pumpWidget(wrap(
       child: new Column(
         children: <Widget>[
           new SwitchListTile(

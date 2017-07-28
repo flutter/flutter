@@ -9,32 +9,35 @@ const Color kSelectedColor = const Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
 Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize: 12.0 }) {
-  return new Theme(
-    data: new ThemeData(accentColor: kSelectedColor),
-    child: new SizedBox.expand(
-      child: new Center(
-        child: new SizedBox(
-          width: 400.0,
-          height: 400.0,
-          child: new Column(
-            children: <Widget>[
-              new TabPageSelector(
-                controller: tabController,
-                color: color,
-                selectedColor: selectedColor,
-                indicatorSize: indicatorSize,
-              ),
-              new Flexible(
-                child: new TabBarView(
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Theme(
+      data: new ThemeData(accentColor: kSelectedColor),
+      child: new SizedBox.expand(
+        child: new Center(
+          child: new SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: new Column(
+              children: <Widget>[
+                new TabPageSelector(
                   controller: tabController,
-                  children: <Widget>[
-                    const Center(child: const Text('0')),
-                    const Center(child: const Text('1')),
-                    const Center(child: const Text('2')),
-                  ],
+                  color: color,
+                  selectedColor: selectedColor,
+                  indicatorSize: indicatorSize,
                 ),
-              ),
-            ],
+                new Flexible(
+                  child: new TabBarView(
+                    controller: tabController,
+                    children: <Widget>[
+                      const Center(child: const Text('0')),
+                      const Center(child: const Text('1')),
+                      const Center(child: const Text('2')),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

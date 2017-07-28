@@ -2,44 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-/// Default localized resource values for the material widgets.
+/// Interface for localized resource values for the material widgets.
 ///
-/// This class is just a placeholder, it only provides English values.
+/// This class provides a default placeholder implementation that returns
+/// hard-coded American English values.
 class MaterialLocalizations {
-  const MaterialLocalizations._(this.locale) : assert(locale != null);
+  /// Create a placeholder object for the localized resources of material widgets
+  /// which only provides American English strings.
+  const MaterialLocalizations();
 
   /// The locale for which the values of this class's localized resources
   /// have been translated.
-  final Locale locale;
-
-  /// Creates an object that provides default localized resource values for the
-  /// for the widgets of the material library.
-  ///
-  /// This method is typically used to create a [DefaultLocalizationsDelegate].
-  /// The [MaterialApp] does so by default.
-  static Future<MaterialLocalizations> load(Locale locale) {
-    return new SynchronousFuture<MaterialLocalizations>(new MaterialLocalizations._(locale));
-  }
-
-  /// The `MaterialLocalizations` from the closest [Localizations] instance
-  /// that encloses the given context.
-  ///
-  /// This method is just a convenient shorthand for:
-  /// `Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)`.
-  ///
-  /// References to the localized resources defined by this class are typically
-  /// written in terms of this method. For example:
-  /// ```dart
-  /// tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-  /// ```
-  static MaterialLocalizations of(BuildContext context) {
-    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
-  }
+  Locale get locale => const Locale('en', 'US');
 
   /// The tooltip for the leading [AppBar] menu (aka 'hamburger') button
   String get openAppDrawerTooltip => 'Open navigation menu';
@@ -55,4 +31,20 @@ class MaterialLocalizations {
 
   /// The tooltip for the [MonthPicker]'s "previous month" button.
   String get previousMonthTooltip => 'Previous month';
+
+  /// The `MaterialLocalizations` from the closest [Localizations] instance
+  /// that encloses the given context.
+  ///
+  /// This method is just a convenient shorthand for:
+  /// `Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)`.
+  ///
+  /// References to the localized resources defined by this class are typically
+  /// written in terms of this method. For example:
+  ///
+  /// ```dart
+  /// tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+  /// ```
+  static MaterialLocalizations of(BuildContext context) {
+    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
+  }
 }

@@ -42,6 +42,9 @@ class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizati
     shouldReloadValues.add(prefix != old.prefix);
     return prefix != old.prefix;
   }
+
+  @override
+  String toString() => '$runtimeType($prefix)';
 }
 
 class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
@@ -58,6 +61,9 @@ class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizat
     shouldReloadValues.add(prefix != old.prefix);
     return prefix != old.prefix;
   }
+
+  @override
+  String toString() => '$runtimeType($prefix)';
 }
 
 class MoreLocalizations {
@@ -289,6 +295,7 @@ void main() {
                 locale: const Locale('en', 'GB'),
                 delegates: <LocalizationsDelegate<dynamic>>[
                   new SyncTestLocalizationsDelegate(),
+                  new DefaultWidgetsLocalizationsDelegate(),
                 ],
                 // Create a new context within the en_GB Localization
                 child: new Builder(
@@ -359,6 +366,7 @@ void main() {
     expect(find.text('A: ---en_US'), findsOneWidget);
     expect(find.text('B: en_US'), findsOneWidget);
     expect(modifiedDelegate.shouldReloadValues, <bool>[true]);
+    expect(originalDelegate.shouldReloadValues, <bool>[]);
   });
 
   testWidgets('Localizations async delegate shouldReload returns true', (WidgetTester tester) async {
@@ -409,4 +417,17 @@ void main() {
     expect(modifiedDelegate.shouldReloadValues, <bool>[true]);
   });
 
+}
+
+// Same as _WidgetsLocalizationsDelegate in widgets/app.dart
+class DefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const DefaultWidgetsLocalizationsDelegate();
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) {
+    return new SynchronousFuture<WidgetsLocalizations>(const WidgetsLocalizations());
+  }
+
+  @override
+  bool shouldReload(DefaultWidgetsLocalizationsDelegate old) => false;
 }

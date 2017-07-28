@@ -94,6 +94,10 @@ Axis axisDirectionToAxis(AxisDirection axisDirection) {
 /// Specifically, returns [AxisDirection.up] for [AxisDirection.down] (and
 /// vice versa), as well as [AxisDirection.left] for [AxisDirection.right] (and
 /// vice versa).
+///
+/// See also:
+///
+///  * [flipAxis], which does the same thing for [Axis] values.
 AxisDirection flipAxisDirection(AxisDirection axisDirection) {
   assert(axisDirection != null);
   switch (axisDirection) {

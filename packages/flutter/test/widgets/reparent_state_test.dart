@@ -335,6 +335,7 @@ void main() {
 
     await tester.pumpWidget(
       new Row(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new StateMarker(
             key: key1,
@@ -352,6 +353,7 @@ void main() {
 
     await tester.pumpWidget(
       new Row(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new StateMarker(
             key: key2,

@@ -26,11 +26,14 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationStyle: TextDecorationStyle.double
 );
 
+// Delegate that fetches the default (English) strings.
 class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const _MaterialLocalizationsDelegate();
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) => MaterialLocalizations.load(locale);
+  Future<MaterialLocalizations> load(Locale locale) {
+    return new SynchronousFuture<MaterialLocalizations>(const MaterialLocalizations());
+  }
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
@@ -317,8 +320,8 @@ class _MaterialAppState extends State<MaterialApp> {
 
   // Combine the Localizations for Material with the ones contributed
   // by the localizationsDelegates parameter, if any.
-  Iterable<LocalizationsDelegate<dynamic>> _createLocalizationsDelegates() sync* {
-    yield const _MaterialLocalizationsDelegate();
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
+    yield const _MaterialLocalizationsDelegate(); // TODO(ianh): make this configurable
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
   }
@@ -397,7 +400,7 @@ class _MaterialAppState extends State<MaterialApp> {
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
-        localizationsDelegates: _createLocalizationsDelegates(),
+        localizationsDelegates: _localizationsDelegates,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,

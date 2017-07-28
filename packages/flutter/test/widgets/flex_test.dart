@@ -47,6 +47,7 @@ void main() {
   testWidgets('Flexible defaults to loose', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Row(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           const Flexible(child: const SizedBox(width: 100.0, height: 200.0)),
         ],
@@ -60,6 +61,7 @@ void main() {
   testWidgets('Can pass null for flex', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Row(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           const Expanded(flex: null, child: const Text('one')),
           const Flexible(flex: null, child: const Text('two')),

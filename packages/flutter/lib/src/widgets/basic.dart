@@ -1116,20 +1116,27 @@ class Padding extends SingleChildRenderObjectWidget {
        super(key: key, child: child);
 
   /// The amount of space by which to inset the child.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
-  RenderPadding createRenderObject(BuildContext context) => new RenderPadding(padding: padding);
+  RenderPadding createRenderObject(BuildContext context) {
+    return new RenderPadding(
+      padding: padding,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPadding renderObject) {
-    renderObject.padding = padding;
+    renderObject
+      ..padding = padding
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
   }
 }
 
@@ -2058,6 +2065,8 @@ class SliverPadding extends SingleChildRenderObjectWidget {
   /// The amount of space by which to inset the child sliver.
   final EdgeInsets padding;
 
+  // TODO(ianh): RTL
+
   @override
   RenderSliverPadding createRenderObject(BuildContext context) => new RenderSliverPadding(padding: padding);
 
@@ -2495,22 +2504,31 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// The [direction] is required.
   ///
-  /// The [direction], [mainAxisAlignment], and [crossAxisAlignment] arguments
-  /// must not be null. If [crossAxisAlignment] is
+  /// The [direction], [mainAxisAlignment], [crossAxisAlignment], and
+  /// [verticalDirection] arguments must not be null. If [crossAxisAlignment] is
   /// [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
+  ///
+  /// The [textDirection] argument defaults to the ambient [Directionality], if
+  /// any. If there is no ambient directionality, and a text direction is going
+  /// to be necessary to decide which direction to lay the children in or to
+  /// disambiguate `start` or `end` values for the main or cross axis
+  /// directions, the [textDirection] must not be null.
   Flex({
     Key key,
     @required this.direction,
     this.mainAxisAlignment: MainAxisAlignment.start,
     this.mainAxisSize: MainAxisSize.max,
     this.crossAxisAlignment: CrossAxisAlignment.center,
+    this.textDirection,
+    this.verticalDirection: VerticalDirection.down,
     this.textBaseline,
     List<Widget> children: const <Widget>[],
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
        assert(mainAxisSize != null),
        assert(crossAxisAlignment != null),
-       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),// https://github.com/dart-lang/sdk/issues/29278
+       assert(verticalDirection != null),
+       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),
        super(key: key, children: children);
 
   /// The direction to use as the main axis.
@@ -2546,8 +2564,87 @@ class Flex extends MultiChildRenderObjectWidget {
   /// children in the cross axis (e.g., horizontally for a [Column]).
   final CrossAxisAlignment crossAxisAlignment;
 
+  /// Determines the order to lay children out horizontally and how to interpret
+  /// `start` and `end` in the horizontal direction.
+  ///
+  /// Defaults to the ambient [Directionality].
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls which order
+  /// children are painted in (left-to-right or right-to-left), and the meaning
+  /// of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
+  /// [MainAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and either the
+  /// [mainAxisAlignment] is either [MainAxisAlignment.start] or
+  /// [MainAxisAlignment.end], or there's more than one child, then the
+  /// [textDirection] (or the ambient [Directionality]) must not be null.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls the meaning of the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and the [crossAxisAlignment] is
+  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
+  /// [textDirection] (or the ambient [Directionality]) must not be null.
+  final TextDirection textDirection;
+
+  /// Determines the order to lay children out vertically and how to interpret
+  /// `start` and `end` in the vertical direction.
+  ///
+  /// Defaults to [VerticalDirection.down].
+  ///
+  /// If the [direction] is [Axis.vertical], this controls which order children
+  /// are painted in (down or up), the meaning of the [mainAxisAlignment]
+  /// property's [MainAxisAlignment.start] and [MainAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and either the [mainAxisAlignment]
+  /// is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or there's
+  /// more than one child, then the [verticalDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls the meaning of the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and the [crossAxisAlignment] is
+  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
+  /// [verticalDirection] must not be null.
+  final VerticalDirection verticalDirection;
+
   /// If aligning items according to their baseline, which baseline to use.
   final TextBaseline textBaseline;
+
+  bool get _needTextDirection {
+    assert(direction != null);
+    switch (direction) {
+      case Axis.horizontal:
+        return true; // because it affects the layout order.
+      case Axis.vertical:
+        assert(crossAxisAlignment != null);
+        return crossAxisAlignment == CrossAxisAlignment.start
+            || crossAxisAlignment == CrossAxisAlignment.end;
+    }
+    return null;
+  }
+
+  /// The value to pass to [RenderFlex.textDirection].
+  ///
+  /// This value is derived from the [textDirection] property and the ambient
+  /// [Directionality]. The value is null if there is no need to specify the
+  /// text direction. In practice there's always a need to specify the direction
+  /// except for vertical flexes (e.g. [Column]s) whose [crossAxisAlignment] is
+  /// not dependent on the text direction (not `start` or `end`). In particular,
+  /// a [Row] always needs a text direction because the text direction controls
+  /// its layout order. (For [Column]s, the layout order is controlled by
+  /// [verticalDirection], which is always specified as it does not depend on an
+  /// inherited widget and defaults to [VerticalDirection.down].)
+  ///
+  /// This method exists so that subclasses of [Flex] that create their own
+  /// render objects that are derived from [RenderFlex] can do so and still use
+  /// the logic for providing a text direction only when it is necessary.
+  @protected
+  TextDirection getEffectiveTextDirection(BuildContext context) {
+    return textDirection ?? (_needTextDirection ? Directionality.of(context) : null);
+  }
 
   @override
   RenderFlex createRenderObject(BuildContext context) {
@@ -2556,7 +2653,9 @@ class Flex extends MultiChildRenderObjectWidget {
       mainAxisAlignment: mainAxisAlignment,
       mainAxisSize: mainAxisSize,
       crossAxisAlignment: crossAxisAlignment,
-      textBaseline: textBaseline
+      textDirection: getEffectiveTextDirection(context),
+      verticalDirection: verticalDirection,
+      textBaseline: textBaseline,
     );
   }
 
@@ -2567,7 +2666,21 @@ class Flex extends MultiChildRenderObjectWidget {
       ..mainAxisAlignment = mainAxisAlignment
       ..mainAxisSize = mainAxisSize
       ..crossAxisAlignment = crossAxisAlignment
+      ..textDirection = getEffectiveTextDirection(context)
+      ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('direction', direction));
+    description.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
+    description.add(new EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize, defaultValue: MainAxisSize.max));
+    description.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
+    description.add(new EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
   }
 }
 
@@ -2716,14 +2829,24 @@ class Flex extends MultiChildRenderObjectWidget {
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSize], and
-  /// [crossAxisAlignment] arguments must not be null. If [crossAxisAlignment]
-  /// is [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
+  /// The [direction], [mainAxisAlignment], [mainAxisSize],
+  /// [crossAxisAlignment], and [verticalDirection] arguments must not be null.
+  /// If [crossAxisAlignment] is [CrossAxisAlignment.baseline], then
+  /// [textBaseline] must not be null.
+  ///
+  /// The [textDirection] argument defaults to the ambient [Directionality], if
+  /// any. If there is no ambient directionality, and a text direction is going
+  /// to be necessary to determine the layout order (which is always the case
+  /// unless the row has no children or only one child) or to disambiguate
+  /// `start` or `end` values for the [mainAxisDirection], the [textDirection]
+  /// must not be null.
   Row({
     Key key,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection: VerticalDirection.down,
     TextBaseline textBaseline,
     List<Widget> children: const <Widget>[],
   }) : super(
@@ -2733,7 +2856,9 @@ class Row extends Flex {
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
-    textBaseline: textBaseline
+    textDirection: textDirection,
+    verticalDirection: verticalDirection,
+    textBaseline: textBaseline,
   );
 }
 
@@ -2843,14 +2968,22 @@ class Row extends Flex {
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSize], and
-  /// [crossAxisAlignment] arguments must not be null. If [crossAxisAlignment]
-  /// is [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
+  /// The [direction], [mainAxisAlignment], [mainAxisSize],
+  /// [crossAxisAlignment], and [verticalDirection] arguments must not be null.
+  /// If [crossAxisAlignment] is [CrossAxisAlignment.baseline], then
+  /// [textBaseline] must not be null.
+  ///
+  /// The [textDirection] argument defaults to the ambient [Directionality], if
+  /// any. If there is no ambient directionality, and a text direction is going
+  /// to be necessary to disambiguate `start` or `end` values for the
+  /// [crossAxisDirection], the [textDirection] must not be null.
   Column({
     Key key,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection: VerticalDirection.down,
     TextBaseline textBaseline,
     List<Widget> children: const <Widget>[],
   }) : super(
@@ -2860,7 +2993,9 @@ class Column extends Flex {
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
-    textBaseline: textBaseline
+    textDirection: textDirection,
+    verticalDirection: verticalDirection,
+    textBaseline: textBaseline,
   );
 }
 
