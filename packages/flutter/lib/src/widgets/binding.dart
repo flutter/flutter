@@ -315,7 +315,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   /// cause the back button to close dialog boxes, return from modal
   /// pages, and so forth.
   Future<Null> handlePopRoute() async {
-    for (WidgetsBindingObserver observer in  new List<WidgetsBindingObserver>.from(_observers)) {
+    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
