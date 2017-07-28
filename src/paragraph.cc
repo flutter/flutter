@@ -167,7 +167,7 @@ void Paragraph::FillWhitespaceSet(size_t start,
 
 void Paragraph::Layout(double width, bool force) {
   // Do not allow calling layout multiple times without changing anything.
-  if (!needs_layout_ && !force)
+  if (!needs_layout_ && !force && width == width_)
     return;
   needs_layout_ = false;
 
