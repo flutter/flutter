@@ -23,8 +23,7 @@ class GPUSurfaceGLDelegate {
 
   virtual intptr_t GLContextFBO() const = 0;
 
-  // TODO: Update Mac desktop and make this pure virtual.
-  virtual sk_sp<SkColorSpace> ColorSpace() const { return nullptr; }
+  virtual bool SurfaceSupportsSRGB() const = 0;
 };
 
 class GPUSurfaceGL : public Surface {
@@ -32,8 +31,6 @@ class GPUSurfaceGL : public Surface {
   GPUSurfaceGL(GPUSurfaceGLDelegate* delegate);
 
   ~GPUSurfaceGL() override;
-
-  bool Setup() override;
 
   bool IsValid() override;
 
@@ -43,13 +40,16 @@ class GPUSurfaceGL : public Surface {
 
  private:
   GPUSurfaceGLDelegate* delegate_;
+  bool onscreen_surface_supports_sgrb_;
   sk_sp<GrContext> context_;
-  sk_sp<SkSurface> cached_surface_;
+  sk_sp<SkSurface> onscreen_surface_;
+  sk_sp<SkSurface> offscreen_surface_;
+  bool valid_ = false;
   ftl::WeakPtrFactory<GPUSurfaceGL> weak_factory_;
 
-  sk_sp<SkSurface> CreateSurface(const SkISize& size);
+  bool CreateOrUpdateSurfaces(const SkISize& size);
 
-  sk_sp<SkSurface> AcquireSurface(const SkISize& size);
+  sk_sp<SkSurface> AcquireRenderSurface(const SkISize& size);
 
   bool PresentSurface(SkCanvas* canvas);
 

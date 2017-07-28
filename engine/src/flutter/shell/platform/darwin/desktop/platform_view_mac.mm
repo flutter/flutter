@@ -23,8 +23,7 @@ PlatformViewMac::PlatformViewMac(NSOpenGLView* gl_view)
     : PlatformView(std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
       opengl_view_([gl_view retain]),
       resource_loading_context_([[NSOpenGLContext alloc] initWithFormat:gl_view.pixelFormat
-                                                           shareContext:gl_view.openGLContext]) {
-}
+                                                           shareContext:gl_view.openGLContext]) {}
 
 PlatformViewMac::~PlatformViewMac() = default;
 
@@ -77,6 +76,10 @@ void PlatformViewMac::SetupAndLoadFromSource(const std::string& assets_directory
 intptr_t PlatformViewMac::GLContextFBO() const {
   // Default window bound framebuffer FBO 0.
   return 0;
+}
+
+bool PlatformViewMac::SurfaceSupportsSRGB() const {
+  return false;
 }
 
 bool PlatformViewMac::GLContextMakeCurrent() {

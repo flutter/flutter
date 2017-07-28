@@ -24,8 +24,6 @@ class GPUSurfaceSoftware : public Surface {
 
   ~GPUSurfaceSoftware() override;
 
-  bool Setup() override;
-
   bool IsValid() override;
 
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;

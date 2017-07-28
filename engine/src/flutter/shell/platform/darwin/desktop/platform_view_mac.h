@@ -33,6 +33,8 @@ class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
 
   intptr_t GLContextFBO() const override;
 
+  bool SurfaceSupportsSRGB() const override;
+
   VsyncWaiter* GetVsyncWaiter() override;
 
   bool ResourceContextMakeCurrent() override;

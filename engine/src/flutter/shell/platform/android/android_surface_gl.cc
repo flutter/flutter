@@ -55,6 +55,10 @@ AndroidSurfaceGL::AndroidSurfaceGL(
 
 AndroidSurfaceGL::~AndroidSurfaceGL() = default;
 
+bool AndroidSurfaceGL::SurfaceSupportsSRGB() const {
+  return offscreen_context_->SupportsSRGB();
+}
+
 bool AndroidSurfaceGL::IsOffscreenContextValid() const {
   return offscreen_context_ && offscreen_context_->IsValid();
 }
@@ -81,12 +85,7 @@ bool AndroidSurfaceGL::IsValid() const {
 
 std::unique_ptr<Surface> AndroidSurfaceGL::CreateGPUSurface() {
   auto surface = std::make_unique<GPUSurfaceGL>(this);
-
-  if (!surface->Setup()) {
-    return nullptr;
-  }
-
-  return surface;
+  return surface->IsValid() ? std::move(surface) : nullptr;
 }
 
 SkISize AndroidSurfaceGL::OnScreenSurfaceSize() const {
