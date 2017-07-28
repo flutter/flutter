@@ -43,7 +43,7 @@ class AbstractNode {
   int get depth => _depth;
   int _depth = 0;
 
-  /// Adjust the [depth] of the given [child] to be greated than this node's own
+  /// Adjust the [depth] of the given [child] to be greater than this node's own
   /// [depth].
   ///
   /// Only call this method from overrides of [redepthChildren].
