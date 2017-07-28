@@ -58,7 +58,7 @@ export 'scroll_activity.dart' show ScrollHoldController;
 ///    other scrollable widgets to control a [ScrollPosition].
 ///  * [ScrollPositionWithSingleContext], which is the most commonly used
 ///    concrete subclass of [ScrollPosition].
-///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Creates an object that determines which portion of the content is visible
@@ -92,7 +92,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Typically implemented by [ScrollableState].
   final ScrollContext context;
 
-  /// Save the current scroll [offset] with [PageStorage] and restore it if
+  /// Save the current scroll offset with [PageStorage] and restore it if
   /// this scroll position's scrollable is recreated.
   ///
   /// See also:

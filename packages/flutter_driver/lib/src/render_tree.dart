@@ -16,7 +16,8 @@ class GetRenderTree extends Command {
   final String kind = 'get_render_tree';
 }
 
-/// A string representation of the render tree, the result of a [GetRenderTree] command.
+/// A string representation of the render tree, the result of a
+/// [FlutterDriver.getRenderTree] method.
 class RenderTree extends Result {
   /// Creates a [RenderTree] object with the given string representation.
   RenderTree(this.tree);

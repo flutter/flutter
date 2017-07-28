@@ -42,7 +42,7 @@ import 'viewport.dart';
 ///    of child widgets.
 ///  * [CustomScrollView], which is a [ScrollView] that creates custom scroll
 ///    effects using slivers.
-///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 abstract class ScrollView extends StatelessWidget {
   /// Creates a widget that scrolls.
@@ -303,7 +303,7 @@ abstract class ScrollView extends StatelessWidget {
 ///    sliver.
 ///  * [SliverAppBar], which is a sliver that displays a header that can expand
 ///    and float as the scroll view scrolls.
-///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 class CustomScrollView extends ScrollView {
   /// Creates a [ScrollView] that creates custom scroll effects using slivers.
@@ -438,7 +438,7 @@ abstract class BoxScrollView extends ScrollView {
 /// ## Transitioning to [CustomScrollView]
 ///
 /// A [ListView] is basically a [CustomScrollView] with a single [SliverList] in
-/// its [slivers] property.
+/// its [CustomScrollView.slivers] property.
 ///
 /// If [ListView] is no longer sufficient, for example because the scroll view
 /// is to have both a list and a grid, or because the list is to be combined
@@ -519,7 +519,7 @@ abstract class BoxScrollView extends ScrollView {
 ///    scroll effects using slivers.
 ///  * [ListBody], which arranges its children in a similar manner, but without
 ///    scrolling.
-///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 class ListView extends BoxScrollView {
   /// Creates a scrollable, linear array of widgets from an explicit [List].
@@ -708,7 +708,7 @@ class ListView extends BoxScrollView {
 /// ## Transitioning to [CustomScrollView]
 ///
 /// A [GridView] is basically a [CustomScrollView] with a single [SliverGrid] in
-/// its [slivers] property.
+/// its [CustomScrollView.slivers] property.
 ///
 /// If [GridView] is no longer sufficient, for example because the scroll view
 /// is to have both a grid and a list, or because the grid is to be combined
@@ -804,7 +804,7 @@ class ListView extends BoxScrollView {
 ///    a fixed number of tiles in the cross axis.
 ///  * [SliverGridDelegateWithMaxCrossAxisExtent], which creates a layout with
 ///    tiles that have a maximum cross-axis extent.
-///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 class GridView extends BoxScrollView {
   /// Creates a scrollable, 2D array of widgets with a custom

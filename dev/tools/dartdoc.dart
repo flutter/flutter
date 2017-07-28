@@ -10,6 +10,12 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'update_versions.dart';
 
+/// Whether to report all error messages (true) or attempt to filter out some
+/// known false positives (false).
+///
+/// Set this to false locally if you want to address Flutter-specific issues.
+const bool kVerbose = true; // please leave this as true on Travis
+
 const String kDocRoot = 'dev/docs/doc';
 
 /// This script expects to run with the cwd as the root of the flutter repo. It
@@ -68,8 +74,8 @@ dependencies:
       'FLUTTER_ROOT': Directory.current.path,
     },
   );
-  printStream(process.stdout);
-  printStream(process.stderr);
+  printStream(process.stdout, prefix: 'pub:stdout: ');
+  printStream(process.stderr, prefix: 'pub:stderr: ');
   final int code = await process.exitCode;
   if (code != 0)
     exit(code);
@@ -94,8 +100,12 @@ dependencies:
     '--favicon=favicon.ico',
     '--use-categories',
     '--category-order', 'flutter,Dart Core,flutter_test,flutter_driver',
+    '--show-warnings',
+    '--auto-include-dependencies',
   ];
 
+  // Explicitly list all the packages in //flutter/packages/* that are
+  // not listed 'nodoc' in their pubspec.yaml.
   for (String libraryRef in libraryRefs(diskPath: true)) {
     args.add('--include-external');
     args.add(libraryRef);
@@ -106,8 +116,18 @@ dependencies:
     args,
     workingDirectory: 'dev/docs',
   );
-  printStream(process.stdout);
-  printStream(process.stderr);
+  printStream(process.stdout, prefix: 'dartdoc:stdout: ',
+    filter: kVerbose ? const <Pattern>[] : <Pattern>[
+      new RegExp(r'^generating docs for library '), // unnecessary verbosity
+      new RegExp(r'^pars'), // unnecessary verbosity
+    ],
+  );
+  printStream(process.stderr, prefix: 'dartdoc:stderr: ',
+    filter: kVerbose ? const <Pattern>[] : <Pattern>[
+      new RegExp(r'^ warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
+      new RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
+    ],
+  );
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0)
@@ -194,15 +214,17 @@ void copyIndexToRootOfDocs() {
 void addHtmlBaseToIndex() {
   final File indexFile = new File('$kDocRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
-  indexContents = indexContents.replaceFirst('</title>\n',
-    '</title>\n  <base href="./flutter/">\n');
+  indexContents = indexContents.replaceFirst(
+    '</title>\n',
+    '</title>\n  <base href="./flutter/">\n',
+  );
   indexContents = indexContents.replaceAll(
     'href="Android/Android-library.html"',
-    'href="https://docs.flutter.io/javadoc/"'
+    'href="/javadoc/"',
   );
   indexContents = indexContents.replaceAll(
       'href="iOS/iOS-library.html"',
-      'href="https://docs.flutter.io/objcdoc/"'
+      'href="/objcdoc/"',
   );
 
   indexFile.writeAsStringSync(indexContents);
@@ -257,9 +279,14 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   }
 }
 
-void printStream(Stream<List<int>> stream) {
+void printStream(Stream<List<int>> stream, { String prefix: '', List<Pattern> filter: const <Pattern>[] }) {
+  assert(prefix != null);
+  assert(filter != null);
   stream
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
-    .listen(print);
+    .listen((String line) {
+      if (!filter.any((Pattern pattern) => line.contains(pattern)))
+        print('$prefix$line'.trim());
+    });
 }

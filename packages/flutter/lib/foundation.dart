@@ -23,6 +23,8 @@ export 'package:meta/meta.dart' show
 // bool _lights;
 // bool _visible;
 // bool inherit;
+// int columns;
+// int rows;
 // class Cat { }
 // double _volume;
 // dynamic _calculation;

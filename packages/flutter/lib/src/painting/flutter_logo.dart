@@ -56,15 +56,16 @@ class FlutterLogoDecoration extends Decoration {
   /// The lighter of the two colors used to paint the logo.
   ///
   /// If possible, the default should be used. It corresponds to the 400 and 900
-  /// values of [Colors.blue] from the Material library.
+  /// values of [material.Colors.blue] from the Material library.
   ///
   /// If for some reason that color scheme is impractical, the same entries from
-  /// [Colors.amber], [Colors.red], or [Colors.indigo] colors can be used. These
-  /// are Flutter's secondary colors.
+  /// [material.Colors.amber], [material.Colors.red], or
+  /// [material.Colors.indigo] colors can be used. These are Flutter's secondary
+  /// colors.
   ///
   /// In extreme cases where none of those four color schemes will work,
-  /// [Colors.pink], [Colors.purple], or [Colors.cyan] can be used.
-  /// These are Flutter's tertiary colors.
+  /// [material.Colors.pink], [material.Colors.purple], or
+  /// [material.Colors.cyan] can be used. These are Flutter's tertiary colors.
   final Color lightColor;
 
   /// The darker of the two colors used to paint the logo.
