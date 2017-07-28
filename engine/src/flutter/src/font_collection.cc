@@ -28,6 +28,7 @@
 #include "lib/txt/src/font_skia.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
+#include "third_party/skia/include/ports/SkFontMgr_android.h"
 #include "third_party/skia/include/ports/SkFontMgr_directory.h"
 
 namespace txt {
@@ -69,16 +70,50 @@ FontCollection::FontCollection(std::string dir, CacheMethod cache_method) {
 
 FontCollection::FontCollection(const std::vector<std::string>& dirs,
                                CacheMethod cache_method) {
-#ifdef DIRECTORY_FONT_MANAGER_AVAILABLE
   for (std::string dir : dirs) {
     if (dir.length() != 0) {
-      skia_font_managers_.push_back(
-          SkFontMgr_New_Custom_Directory(dir.c_str()));
+      AddFontMgr(dir, false);
     }
   }
-#endif
   skia_font_managers_.push_back(SkFontMgr::RefDefault());
 
+  DiscoverFamilyNames();
+
+  cache_method_ = cache_method;
+}
+
+FontCollection::~FontCollection() = default;
+
+void FontCollection::AddFontMgr(std::string dir, bool rediscover_family_names) {
+#ifdef DIRECTORY_FONT_MANAGER_AVAILABLE
+  // On Linux systems:
+  skia_font_managers_.push_back(SkFontMgr_New_Custom_Directory(dir.c_str()));
+#endif
+#ifdef ANDROID_FONT_MANAGER_AVAILABLE
+  // On Android:
+  SkFontMgr_Android_CustomFonts android_custom_font_data;
+  // Ensure the dir string is '/' terminated.
+  if (dir.back() != '/')
+    dir += '/';
+  android_custom_font_data.fBasePath = dir.data();
+  android_custom_font_data.fSystemFontUse =
+      SkFontMgr_Android_CustomFonts::SystemFontUse::kOnlyCustom;
+  skia_font_managers_.push_back(
+      SkFontMgr_New_Android(&android_custom_font_data));
+#endif
+
+  if (rediscover_family_names)
+    DiscoverFamilyNames();
+}
+
+void FontCollection::AddFontMgr(sk_sp<SkFontMgr> font_mgr,
+                                bool rediscover_family_names) {
+  skia_font_managers_.push_back(font_mgr);
+  if (rediscover_family_names)
+    DiscoverFamilyNames();
+}
+
+void FontCollection::DiscoverFamilyNames() {
   SkString str;
   for (sk_sp<SkFontMgr> mgr : skia_font_managers_) {
     for (int i = 0; i < mgr->countFamilies(); i++) {
@@ -86,11 +121,7 @@ FontCollection::FontCollection(const std::vector<std::string>& dirs,
       family_names_.insert(std::string{str.writable_str()});
     }
   }
-
-  cache_method_ = cache_method;
 }
-
-FontCollection::~FontCollection() = default;
 
 std::set<std::string> FontCollection::GetFamilyNames() {
   return family_names_;

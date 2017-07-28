@@ -84,6 +84,13 @@ class FontCollection {
   // managers.
   bool HasFamily(const std::string family) const;
 
+  // Adds a new SkFontMgr to the front of the stack of font managers.
+  void AddFontMgr(std::string dir, bool rediscover_family_names = true);
+
+  // Adds the provided SkFontMgr to the front of the stack of font managers.
+  void AddFontMgr(sk_sp<SkFontMgr> font_mgr,
+                  bool rediscover_family_names = true);
+
   // Removes all fonts that do not fit in the cache capacity from memory.
   void FlushCache();
 
@@ -112,7 +119,12 @@ class FontCollection {
   FRIEND_TEST(FontCollection, GetMinikinFontCollections);
   FRIEND_TEST(FontCollection, GetFamilyNames);
 
+  // Postprocess the family name to handle the following properties: fallback
+  // when not found and reverting to the default name when no fallback is found.
   const std::string ProcessFamilyName(const std::string& family);
+
+  // Polls the SkFontMgrs to obtain a set of all available font family names.
+  void DiscoverFamilyNames();
 
   void TrimCache();
 
