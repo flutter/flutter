@@ -1,4 +1,4 @@
-Signature: d07ddbe451cf7cb7a46904d92963fecc
+Signature: a0ac508508961cd3261f0a1d8d0e5c84
 
 UNUSED LICENSES:
 
@@ -25557,8 +25557,6 @@ FILE: ../../../third_party/skia/src/gpu/GrSKSLPrettyPrint.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfacePriv.h
 FILE: ../../../third_party/skia/src/gpu/GrTRecorder.h
 FILE: ../../../third_party/skia/src/gpu/GrTexturePriv.h
-FILE: ../../../third_party/skia/src/gpu/GrTraceMarker.cpp
-FILE: ../../../third_party/skia/src/gpu/GrTraceMarker.h
 FILE: ../../../third_party/skia/src/gpu/GrTracing.h
 FILE: ../../../third_party/skia/src/gpu/GrXferProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrBicubicEffect.cpp
@@ -25788,13 +25786,10 @@ FILE: ../../../third_party/skia/src/gpu/GrSoftwarePathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSoftwarePathRenderer.h
 FILE: ../../../third_party/skia/src/gpu/GrSurface.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureStripAtlas.h
-FILE: ../../../third_party/skia/src/gpu/effects/Gr1DKernelEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrGaussianConvolutionFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrGaussianConvolutionFragmentProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrSingleTextureEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrSingleTextureEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrTextureDomain.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrTextureDomain.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrTextureStripAtlas.cpp
@@ -26681,12 +26676,14 @@ FILE: ../../../third_party/skia/gm/simple_magnification.cpp
 FILE: ../../../third_party/skia/gm/srgb.cpp
 FILE: ../../../third_party/skia/gm/testgradient.cpp
 FILE: ../../../third_party/skia/gm/thinconcavepaths.cpp
+FILE: ../../../third_party/skia/gm/tosrgb_colorfilter.cpp
 FILE: ../../../third_party/skia/gm/xform_image_gen.cpp
 FILE: ../../../third_party/skia/include/core/SkColorSpaceXformCanvas.h
 FILE: ../../../third_party/skia/include/core/SkExecutor.h
 FILE: ../../../third_party/skia/include/core/SkFontArguments.h
 FILE: ../../../third_party/skia/include/core/SkVertices.h
 FILE: ../../../third_party/skia/include/effects/SkHighContrastFilter.h
+FILE: ../../../third_party/skia/include/effects/SkToSRGBColorFilter.h
 FILE: ../../../third_party/skia/include/encode/SkEncoder.h
 FILE: ../../../third_party/skia/include/encode/SkJpegEncoder.h
 FILE: ../../../third_party/skia/include/encode/SkPngEncoder.h
@@ -26718,6 +26715,8 @@ FILE: ../../../third_party/skia/src/core/SkColorSpaceXformImageGenerator.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformImageGenerator.h
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformer.cpp
 FILE: ../../../third_party/skia/src/core/SkColorSpaceXformer.h
+FILE: ../../../third_party/skia/src/core/SkCoverageDelta.cpp
+FILE: ../../../third_party/skia/src/core/SkCoverageDelta.h
 FILE: ../../../third_party/skia/src/core/SkDrawShadowRec.h
 FILE: ../../../third_party/skia/src/core/SkDraw_vertices.cpp
 FILE: ../../../third_party/skia/src/core/SkExecutor.cpp
@@ -26736,6 +26735,7 @@ FILE: ../../../third_party/skia/src/effects/GrCircleBlurFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/effects/GrCircleBlurFragmentProcessor.h
 FILE: ../../../third_party/skia/src/effects/SkDashImpl.h
 FILE: ../../../third_party/skia/src/effects/SkHighContrastFilter.cpp
+FILE: ../../../third_party/skia/src/effects/SkToSRGBColorFilter.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferImageGenerator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferImageGenerator.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurface.cpp
@@ -27137,7 +27137,6 @@ FILE: ../../../third_party/skia/src/core/SkScan_AntiPath.cpp
 FILE: ../../../third_party/skia/src/core/SkScan_Hairline.cpp
 FILE: ../../../third_party/skia/src/core/SkScan_Path.cpp
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter.h
-FILE: ../../../third_party/skia/src/core/SkSpriteBlitterTemplate.h
 FILE: ../../../third_party/skia/src/core/SkSpriteBlitter_ARGB32.cpp
 FILE: ../../../third_party/skia/src/core/SkStream.cpp
 FILE: ../../../third_party/skia/src/core/SkString.cpp
@@ -27909,6 +27908,7 @@ LIBRARY: skia
 ORIGIN: ../../../third_party/skia/src/core/SkScan_AAAPath.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/core/SkScan_AAAPath.cpp
+FILE: ../../../third_party/skia/src/core/SkScan_DAAPath.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The Android Open Source Project
 

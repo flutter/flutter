@@ -36,6 +36,10 @@ intptr_t IOSSurfaceGL::GLContextFBO() const {
   return IsValid() ? context_.framebuffer() : GL_NONE;
 }
 
+bool IOSSurfaceGL::SurfaceSupportsSRGB() const {
+  return true;
+}
+
 bool IOSSurfaceGL::GLContextMakeCurrent() {
   return IsValid() ? context_.MakeCurrent() : false;
 }

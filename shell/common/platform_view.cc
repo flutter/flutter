@@ -17,8 +17,7 @@
 namespace shell {
 
 PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
-    : rasterizer_(std::move(rasterizer)),
-      size_(SkISize::Make(0, 0)){}
+    : rasterizer_(std::move(rasterizer)), size_(SkISize::Make(0, 0)) {}
 
 PlatformView::~PlatformView() {
   blink::Threads::UI()->PostTask([] { Shell::Shared().PurgePlatformViews(); });
@@ -90,7 +89,6 @@ void PlatformView::NotifyCreated(std::unique_ptr<Surface> surface,
       &latch
     ]() mutable {
       // Runs on the GPU Thread. So does the Caller Continuation.
-      surface->Setup();
       rasterizer_->Setup(std::move(surface), caller_continuation, &latch);
     });
     // Runs on the UI Thread.
