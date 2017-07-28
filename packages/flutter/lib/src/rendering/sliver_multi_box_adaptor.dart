@@ -517,13 +517,9 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (firstChild != null) {
-      description.add('currently live children: ${indexOf(firstChild)} to ${indexOf(lastChild)}');
-    } else {
-      description.add('no children current live');
-    }
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsNode.message(firstChild != null ? 'currently live children: ${indexOf(firstChild)} to ${indexOf(lastChild)}' : 'no children current live'));
   }
 
   /// Asserts that the reified child list is not empty and has a contiguous
@@ -546,40 +542,27 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    StringBuffer result;
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
     if (firstChild != null) {
-      result = new StringBuffer()
-        ..write(prefix)
-        ..write(' \u2502\n');
       RenderBox child = firstChild;
-      while (child != lastChild) {
+      while (true) {
         final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
-        result.write(child.toStringDeep("$prefix \u251C\u2500child with index ${childParentData.index}: ", "$prefix \u2502"));
+        children.add(child.toDiagnosticsNode(name: "child with index ${childParentData.index}"));
+        if (child == lastChild)
+          break;
         child = childParentData.nextSibling;
-      }
-      if (child != null) {
-        assert(child == lastChild);
-        final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
-        if (_keepAliveBucket.isEmpty) {
-          result.write(child.toStringDeep("$prefix \u2514\u2500child with index ${childParentData.index}: ", "$prefix  "));
-        } else {
-          result.write(child.toStringDeep("$prefix \u251C\u2500child with index ${childParentData.index}: ", "$prefix \u254E"));
-        }
       }
     }
     if (_keepAliveBucket.isNotEmpty) {
-      result ??= new StringBuffer()
-        ..write(prefix)
-        ..write(' \u254E\n');
       final List<int> indices = _keepAliveBucket.keys.toList()..sort();
-      final int lastIndex = indices.removeLast();
-      if (indices.isNotEmpty) {
-        for (int index in indices)
-          result.write(_keepAliveBucket[index].toStringDeep("$prefix \u251C\u2500child with index $index (kept alive offstage): ", "$prefix \u254E"));
+      for (int index in indices) {
+        children.add(_keepAliveBucket[index].toDiagnosticsNode(
+          name: "child with index $index (kept alive offstage)",
+          style: DiagnosticsTreeStyle.offstage,
+        ));
       }
-      result.write(_keepAliveBucket[lastIndex].toStringDeep("$prefix \u2514\u2500child with index $lastIndex (kept alive offstage): ", "$prefix  "));
     }
-    return result?.toString() ?? '';
+    return children;
   }
 }

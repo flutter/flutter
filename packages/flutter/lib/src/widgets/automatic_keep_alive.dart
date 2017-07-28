@@ -198,15 +198,17 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (_keepingAlive)
-      description.add('keeping subtree alive');
-    if (_handles == null) {
-      description.add('no notifications ever received');
-    } else {
-      description.add('${_handles.length} active client${ _handles.length == 1 ? "" : "s" }');
-    }
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('_keepingAlive', value: _keepingAlive, ifTrue: 'keeping subtree alive'));
+    description.add(new DiagnosticsProperty<Map<Listenable, VoidCallback>>(
+      'handles',
+      _handles,
+      description: _handles != null ?
+        '${_handles.length} active client${ _handles.length == 1 ? "" : "s" }' :
+        null,
+      ifNull: 'no notifications ever received',
+    ));
   }
 }
 

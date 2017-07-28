@@ -118,11 +118,11 @@ class RenderEditable extends RenderBox {
        _offset = offset {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
-    _tap = new TapGestureRecognizer()
+    _tap = new TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
       ..onTapCancel = _handleTapCancel;
-    _longPress = new LongPressGestureRecognizer()
+    _longPress = new LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
   }
 
@@ -546,22 +546,24 @@ class RenderEditable extends RenderBox {
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('cursorColor: $cursorColor');
-    description.add('showCursor: $showCursor');
-    description.add('maxLines: $maxLines');
-    description.add('selectionColor: $selectionColor');
-    description.add('textScaleFactor: $textScaleFactor');
-    description.add('selection: $selection');
-    description.add('offset: $offset');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Color>('cursorColor', cursorColor));
+    description.add(new DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
+    description.add(new IntProperty('maxLines', maxLines));
+    description.add(new DiagnosticsProperty<Color>('selectionColor', selectionColor));
+    description.add(new DoubleProperty('textScaleFactor', textScaleFactor));
+    description.add(new DiagnosticsProperty<TextSelection>('selection', selection));
+    description.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    return '$prefix \u2558\u2550\u2566\u2550\u2550 text \u2550\u2550\u2550\n'
-           '${text.toString("$prefix   \u2551 ")}' // TextSpan includes a newline
-           '$prefix   \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n'
-           '${prefix.trimRight()}\n';
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return <DiagnosticsNode>[
+      text.toDiagnosticsNode(
+        name: 'text',
+        style: DiagnosticsTreeStyle.transition,
+      ),
+    ];
   }
 }

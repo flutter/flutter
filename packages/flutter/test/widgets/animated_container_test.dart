@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('AnimatedContainer.debugFillDescription', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
     final AnimatedContainer container = new AnimatedContainer(
       constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),
       decoration: const BoxDecoration(color: const Color(0xFF00FF00)),

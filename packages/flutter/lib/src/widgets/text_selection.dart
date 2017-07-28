@@ -85,6 +85,12 @@ abstract class TextSelectionControls {
   /// Returns the size of the selection handle.
   Size get handleSize;
 
+  /// Copy the current selection of the text field managed by the given
+  /// `delegate` to the [Clipboard]. Then, remove the selected text from the
+  /// text field and hide the toolbar.
+  ///
+  /// This is called by subclasses when their cut affordance is activated by
+  /// the user.
   void handleCut(TextSelectionDelegate delegate) {
     final TextEditingValue value = delegate.textEditingValue;
     Clipboard.setData(new ClipboardData(
@@ -100,6 +106,12 @@ abstract class TextSelectionControls {
     delegate.hideToolbar();
   }
 
+  /// Copy the current selection of the text field managed by the given
+  /// `delegate` to the [Clipboard]. Then, move the cursor to the end of the
+  /// text (collapsing the selection in the process), and hide the toolbar.
+  ///
+  /// This is called by subclasses when their copy affordance is activated by
+  /// the user.
   void handleCopy(TextSelectionDelegate delegate) {
     final TextEditingValue value = delegate.textEditingValue;
     Clipboard.setData(new ClipboardData(
@@ -112,6 +124,17 @@ abstract class TextSelectionControls {
     delegate.hideToolbar();
   }
 
+  /// Paste the current clipboard selection (obtained from [Clipboard]) into
+  /// the text field managed by the given `delegate`, replacing its current
+  /// selection, if any. Then, hide the toolbar.
+  ///
+  /// This is called by subclasses when their paste affordance is activated by
+  /// the user.
+  ///
+  /// This function is asynchronous since interacting with the clipboard is
+  /// asynchronous. Race conditions may exist with this API as currently
+  /// implemented.
+  // TODO(ianh): https://github.com/flutter/flutter/issues/11427
   Future<Null> handlePaste(TextSelectionDelegate delegate) async {
     final TextEditingValue value = delegate.textEditingValue;  // Snapshot the input before using `await`.
     final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
@@ -128,6 +151,13 @@ abstract class TextSelectionControls {
     delegate.hideToolbar();
   }
 
+  /// Adjust the selection of the text field managed by the given `delegate` so
+  /// that everything is selected.
+  ///
+  /// Does not hide the toolbar.
+  ///
+  /// This is called by subclasses when their select-all affordance is activated
+  /// by the user.
   void handleSelectAll(TextSelectionDelegate delegate) {
     delegate.textEditingValue = new TextEditingValue(
       text: delegate.textEditingValue.text,

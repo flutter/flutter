@@ -215,11 +215,10 @@ class AnimatedCrossFade extends StatefulWidget {
   _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$crossFadeState');
-    if (alignment != FractionalOffset.topCenter)
-      description.add('alignment: $alignment');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, defaultValue: FractionalOffset.topCenter));
   }
 }
 
@@ -353,11 +352,10 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('${widget.crossFadeState}');
-    description.add('$_controller');
-    if (widget.alignment != FractionalOffset.topCenter)
-      description.add('alignment: ${widget.alignment}');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<CrossFadeState>('crossFadeState', widget.crossFadeState));
+    description.add(new DiagnosticsProperty<AnimationController>('controller', _controller, showName: false));
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', widget.alignment, defaultValue: FractionalOffset.topCenter));
   }
 }

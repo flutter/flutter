@@ -211,8 +211,7 @@ void main() {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(text: _kText),
     );
-    // TODO(jacobr): fix handling of text spans with line breaks.
-    expect(paragraph, isNot(hasAGoodToStringDeep));
+    expect(paragraph, hasAGoodToStringDeep);
     expect(
       paragraph.toStringDeep(),
       equalsIgnoringHashCodes(
@@ -223,9 +222,8 @@ void main() {
         ' ╘═╦══ text ═══\n'
         '   ║ TextSpan:\n'
         '   ║   "I polished up that handle so carefullee\n'
-        'That now I am the Ruler of the Queen\'s Navee!"\n'
+        '   ║   That now I am the Ruler of the Queen\'s Navee!"\n'
         '   ╚═══════════\n'
-        '\n',
       ),
     );
   });

@@ -179,9 +179,9 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   AnimatedWidgetBaseState<ImplicitlyAnimatedWidget> createState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('duration: ${duration.inMilliseconds}ms');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
   }
 }
 
@@ -392,22 +392,15 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   _AnimatedContainerState createState() => new _AnimatedContainerState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (alignment != null)
-      description.add('$alignment');
-    if (padding != null)
-      description.add('padding: $padding');
-    if (decoration != null)
-      description.add('bg: $decoration');
-    if (foregroundDecoration != null)
-      description.add('fg: $foregroundDecoration');
-    if (constraints != null)
-      description.add('$constraints');
-    if (margin != null)
-      description.add('margin: $margin');
-    if (transform != null)
-      description.add('has transform');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
+    description.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null, showName: false));
+    description.add(new DiagnosticsProperty<EdgeInsets>('margin', margin, defaultValue: null));
+    description.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 }
 
@@ -446,22 +439,15 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (_alignment != null)
-      description.add('$_alignment');
-    if (_padding != null)
-      description.add('padding: $_padding');
-    if (_decoration != null)
-      description.add('bg: $_decoration');
-    if (_foregroundDecoration != null)
-      description.add('fg: $_foregroundDecoration');
-    if (_constraints != null)
-      description.add('$_constraints');
-    if (_margin != null)
-      description.add('margin: $_margin');
-    if (_transform != null)
-      description.add('has transform');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<FractionalOffsetTween>('alignment', _alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsTween>('padding', _padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<DecorationTween>('bg', _decoration, defaultValue: null));
+    description.add(new DiagnosticsProperty<DecorationTween>('fg', _foregroundDecoration, defaultValue: null));
+    description.add(new DiagnosticsProperty<BoxConstraintsTween>('constraints', _constraints, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsTween>('margin', _margin, defaultValue: null));
+    description.add(new ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
   }
 }
 
@@ -541,20 +527,14 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   _AnimatedPositionedState createState() => new _AnimatedPositionedState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (left != null)
-      description.add('left: $left');
-    if (top != null)
-      description.add('top: $top');
-    if (right != null)
-      description.add('right: $right');
-    if (bottom != null)
-      description.add('bottom: $bottom');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('left', left, defaultValue: null));
+    description.add(new DoubleProperty('top', top, defaultValue: null));
+    description.add(new DoubleProperty('right', right, defaultValue: null));
+    description.add(new DoubleProperty('bottom', bottom, defaultValue: null));
+    description.add(new DoubleProperty('width', width, defaultValue: null));
+    description.add(new DoubleProperty('height', height, defaultValue: null));
   }
 }
 
@@ -590,20 +570,14 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (_left != null)
-      description.add('has left');
-    if (_top != null)
-      description.add('has top');
-    if (_right != null)
-      description.add('has right');
-    if (_bottom != null)
-      description.add('has bottom');
-    if (_width != null)
-      description.add('has width');
-    if (_height != null)
-      description.add('has height');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new ObjectFlagProperty<Tween<double>>.has('left', _left));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('top', _top));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('right', _right));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('bottom', _bottom));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('width', _width));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('height', _height));
   }
 }
 
@@ -641,9 +615,9 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   _AnimatedOpacityState createState() => new _AnimatedOpacityState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('opacity: $opacity');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('opacity', opacity));
   }
 }
 
@@ -694,9 +668,9 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   _AnimatedDefaultTextStyleState createState() => new _AnimatedDefaultTextStyleState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    '$style'.split('\n').forEach(description.add);
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    style?.debugFillProperties(description);
   }
 }
 
@@ -775,13 +749,13 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   _AnimatedPhysicalModelState createState() => new _AnimatedPhysicalModelState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('shape: $shape');
-    description.add('borderRadius: $borderRadius');
-    description.add('elevation: ${elevation.toStringAsFixed(1)}');
-    description.add('color: $color');
-    description.add('animateColor: $animateColor');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<BoxShape>('shape', shape));
+    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
   }
 }
 

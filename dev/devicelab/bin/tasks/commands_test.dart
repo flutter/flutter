@@ -7,10 +7,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
+import 'package:vm_service_client/vm_service_client.dart';
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+
+const int kObservatoryPort = 8888;
 
 void main() {
   task(() async {
@@ -23,13 +26,15 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '--observatory-port=8888', '-d', device.deviceId, 'lib/commands.dart'],
+        <String>['run', '--verbose', '--observatory-port=$kObservatoryPort', '-d', device.deviceId, 'lib/commands.dart'],
       );
+      final StreamController<String> stdout = new StreamController<String>.broadcast();
       run.stdout
         .transform(UTF8.decoder)
         .transform(const LineSplitter())
         .listen((String line) {
           print('run:stdout: $line');
+          stdout.add(line);
           if (line.contains(new RegExp(r'^\[\s+\] For a more detailed help message, press "h"\. To quit, press "q"\.'))) {
             print('run: ready!');
             ready.complete();
@@ -46,6 +51,9 @@ void main() {
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok)
         throw 'Failed to run test app.';
+
+      final VMServiceClient client = new VMServiceClient.connect('ws://localhost:$kObservatoryPort/ws');
+
       await drive('none');
       print('test: pressing "p" to enable debugPaintSize...');
       run.stdin.write('p');
@@ -59,10 +67,24 @@ void main() {
       print('test: pressing "P" again...');
       run.stdin.write('P');
       await drive('none');
+      final Future<String> reloadStartingText =
+        stdout.stream.firstWhere((String line) => line.endsWith('hot reload...'));
+      print('test: pressing "r" to perform a hot reload...');
+      run.stdin.write('r');
+      await reloadStartingText;
+      await drive('none');
+      final Future<String> restartStartingText =
+        stdout.stream.firstWhere((String line) => line.endsWith('full restart...'));
+      print('test: pressing "R" to perform a full reload...');
+      run.stdin.write('R');
+      await restartStartingText;
+      await drive('none');
       run.stdin.write('q');
       final int result = await run.exitCode;
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
+      print('test: validating that the app has in fact closed...');
+      await client.done.timeout(new Duration(seconds: 5));
     });
     return new TaskResult.success(null);
   });
@@ -72,7 +94,7 @@ Future<Null> drive(String name) async {
   print('drive: running commands_$name check...');
   final Process drive = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['drive', '--use-existing-app', 'http://127.0.0.1:8888/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
+    <String>['drive', '--use-existing-app', 'http://127.0.0.1:$kObservatoryPort/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
   );
   drive.stdout
     .transform(UTF8.decoder)
