@@ -22,6 +22,7 @@ export 'package:meta/meta.dart' show
 // bool _first;
 // bool _lights;
 // bool _visible;
+// bool inherit;
 // class Cat { }
 // double _volume;
 // dynamic _calculation;

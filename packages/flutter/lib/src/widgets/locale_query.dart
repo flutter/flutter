@@ -38,8 +38,8 @@ class LocaleQuery extends InheritedWidget {
   bool updateShouldNotify(LocaleQuery old) => data != old.data;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$data');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<LocaleQueryData>('data', data, showName: false));
   }
 }

@@ -490,9 +490,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             if (node != null) {
               information.writeln('The nearest ancestor providing an unbounded width constraint is:');
               information.writeln('  $node');
-              final List<String> description = <String>[];
-              node.debugFillDescription(description);
-              for (String line in description)
+              final List<DiagnosticsNode> description = <DiagnosticsNode>[];
+              node.debugFillProperties(description);
+              for (DiagnosticsNode line in description)
                 information.writeln('  $line');
             }
             information.writeln('See also: https://flutter.io/layout/');
@@ -784,13 +784,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('direction: $_direction');
-    description.add('mainAxisAlignment: $_mainAxisAlignment');
-    description.add('mainAxisSize: $_mainAxisSize');
-    description.add('crossAxisAlignment: $_crossAxisAlignment');
-    description.add('textBaseline: $_textBaseline');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('direction', _direction));
+    description.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', _mainAxisAlignment));
+    description.add(new EnumProperty<MainAxisSize>('mainAxisSize', _mainAxisSize));
+    description.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', _crossAxisAlignment));
+    description.add(new EnumProperty<TextBaseline>('textBaseline', _textBaseline));
   }
 
 }

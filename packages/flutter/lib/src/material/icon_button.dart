@@ -203,12 +203,10 @@ class IconButton extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$icon');
-    if (onPressed == null)
-      description.add('disabled');
-    if (tooltip != null)
-      description.add('tooltip: "$tooltip"');
+  void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Widget>('icon', icon, showName: false));
+    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    description.add(new StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
   }
 }

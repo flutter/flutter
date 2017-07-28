@@ -422,6 +422,22 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   int get hashCode {
     return edgeGradient.hashCode;
   }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({
+    String name,
+    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.singleLine,
+  }) {
+    return new DiagnosticsNode.lazy(
+      name: name,
+      value: this,
+      style: style,
+      description: '$runtimeType',
+      fillProperties: (List<DiagnosticsNode> properties) {
+        properties.add(new DiagnosticsProperty<LinearGradient>('edgeGradient', edgeGradient));
+      },
+    );
+  }
 }
 
 /// A [BoxPainter] used to draw the page transition shadow using gradients.

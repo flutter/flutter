@@ -293,7 +293,7 @@ void main() {
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
         ' │   viewportMainAxisExtent: 600.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 300.0, paintExtent: 300.0,\n'
-        ' │   maxPaintExtent: 300.0, )\n'
+        ' │   maxPaintExtent: 300.0)\n'
         ' │ currently live children: 0 to 2\n'
         ' │\n'
         ' ├─child with index 0: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'

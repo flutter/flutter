@@ -43,10 +43,13 @@ typedef void GestureDragCancelCallback();
 ///
 /// See also:
 ///
-///  * [HorizontalDragGestureRecognizer]
-///  * [VerticalDragGestureRecognizer]
-///  * [PanGestureRecognizer]
+///  * [HorizontalDragGestureRecognizer], for left and right drags.
+///  * [VerticalDragGestureRecognizer], for up and down drags.
+///  * [PanGestureRecognizer], for drags that are not locked to a single axis.
 abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
+  /// Initialize the object.
+  DragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
   /// A pointer has contacted the screen and might begin to move.
   ///
   /// The position of the pointer is provided in the callback's `details`
@@ -194,12 +197,18 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         invokeCallback<Null>('onEnd', () => onEnd(new DragEndDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
           velocity: velocity,
           primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
-        )));
+        )), debugReport: () {
+          return '$estimate; fling at $velocity.';
+        });
       } else {
         invokeCallback<Null>('onEnd', () => onEnd(new DragEndDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
           velocity: Velocity.zero,
           primaryVelocity: 0.0,
-        )));
+        )), debugReport: () {
+          if (estimate == null)
+            return 'Could not estimate velocity.';
+          return '$estimate; judged to not be a fling.';
+        });
       }
     }
     _velocityTrackers.clear();
@@ -218,8 +227,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///
 /// See also:
 ///
-///  * [VerticalMultiDragGestureRecognizer]
+///  * [HorizontalDragGestureRecognizer], for a similar recognizer but for
+///    horizontal movement.
+///  * [MultiDragGestureRecognizer], for a family of gesture recognizers that
+///    track each touch point independently.
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
+  /// Create a gesture recognizer for interactions in the vertical axis.
+  VerticalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
@@ -246,8 +261,14 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///
 /// See also:
 ///
-///  * [HorizontalMultiDragGestureRecognizer]
+///  * [VerticalDragGestureRecognizer], for a similar recognizer but for
+///    vertical movement.
+///  * [MultiDragGestureRecognizer], for a family of gesture recognizers that
+///    track each touch point independently.
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
+  /// Create a gesture recognizer for interactions in the horizontal axis.
+  HorizontalDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
@@ -272,15 +293,21 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 ///
 /// See also:
 ///
-///  * [ImmediateMultiDragGestureRecognizer]
-///  * [DelayedMultiDragGestureRecognizer]
+///  * [ImmediateMultiDragGestureRecognizer], for a similar recognizer that
+///    tracks each touch point independently.
+///  * [DelayedMultiDragGestureRecognizer], for a similar recognizer that
+///    tracks each touch point independently, but that doesn't start until
+///    some time has passed.
 class PanGestureRecognizer extends DragGestureRecognizer {
+  /// Create a gesture recognizer for tracking movement on a plane.
+  PanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
-    return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity &&
-      estimate.offset.distanceSquared > minDistance * minDistance;
+    return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity
+        && estimate.offset.distanceSquared > minDistance * minDistance;
   }
 
   @override

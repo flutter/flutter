@@ -33,16 +33,11 @@ class FlutterDevice {
   DevFS devFS;
   ApplicationPackage package;
 
-  String _viewFilter;
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device);
 
-  String get viewFilter => _viewFilter;
-  set viewFilter(String filter) {
-    _viewFilter = filter;
-    _viewsCache = null;
-  }
+  String viewFilter;
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
   /// will be registered.
@@ -63,33 +58,22 @@ class FlutterDevice {
   }
 
   Future<Null> refreshViews() async {
-    if ((vmServices == null) || vmServices.isEmpty)
+    if (vmServices == null || vmServices.isEmpty)
       return;
     for (VMService service in vmServices)
       await service.vm.refreshViews();
-    _viewsCache = null;
   }
 
-  List<FlutterView> _viewsCache;
   List<FlutterView> get views {
-    if (_viewsCache == null) {
-      if ((vmServices == null) || vmServices.isEmpty)
-        return null;
-      final List<FlutterView> result = <FlutterView>[];
-      if (_viewFilter == null) {
-        for (VMService service in vmServices) {
-          if (!service.isClosed)
-            result.addAll(service.vm.views.toList());
-        }
-      } else {
-        for (VMService service in vmServices) {
-          if (!service.isClosed)
-            result.addAll(service.vm.allViewsWithName(_viewFilter));
-        }
-      }
-      _viewsCache = result;
-    }
-    return _viewsCache;
+    if (vmServices == null)
+      return <FlutterView>[];
+
+    return vmServices
+      .where((VMService service) => !service.isClosed)
+      .expand((VMService service) => viewFilter != null
+          ? service.vm.allViewsWithName(viewFilter)
+          : service.vm.views)
+      .toList();
   }
 
   Future<Null> getVMs() async {
@@ -115,9 +99,9 @@ class FlutterDevice {
   }
 
   Future<Uri> setupDevFS(String fsName,
-                         Directory rootDirectory, {
-                         String packagesFilePath
-                       }) {
+    Directory rootDirectory, {
+    String packagesFilePath
+  }) {
     // One devFS per device. Shared by all running instances.
     devFS = new DevFS(
       vmServices[0],

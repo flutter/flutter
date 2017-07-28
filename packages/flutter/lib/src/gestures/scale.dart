@@ -107,6 +107,9 @@ bool _isFlingGesture(Velocity velocity) {
 /// change, the recognizer calls [onUpdate]. When the pointers are no longer in
 /// contact with the screen, the recognizer calls [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
+  /// Create a gesture recognizer for interactions intended for scaling content.
+  ScaleGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
   /// The pointers in contact with the screen have established a focal point and
   /// initial scale of 1.0.
   GestureScaleStartCallback onStart;

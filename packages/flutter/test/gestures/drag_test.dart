@@ -50,17 +50,21 @@ void main() {
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
-    tester.route(pointer.move(const Offset(20.0, 20.0)));
-    expect(didStartPan, isTrue);
+    // touch should give up when it hits kTouchSlop, which was 18.0 when this test was last updated.
+
+    tester.route(pointer.move(const Offset(20.0, 20.0))); // moved 10 horizontally and 10 vertically which is 14 total
+    expect(didStartPan, isFalse); // 14 < 18
+    tester.route(pointer.move(const Offset(20.0, 30.0))); // moved 10 horizontally and 20 vertically which is 22 total
+    expect(didStartPan, isTrue); // 22 > 18
     didStartPan = false;
-    expect(updatedScrollDelta, const Offset(10.0, 10.0));
+    expect(updatedScrollDelta, const Offset(10.0, 20.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
     tester.route(pointer.move(const Offset(20.0, 25.0)));
     expect(didStartPan, isFalse);
-    expect(updatedScrollDelta, const Offset(0.0, 5.0));
+    expect(updatedScrollDelta, const Offset(0.0, -5.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
