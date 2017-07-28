@@ -13,6 +13,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../resident_runner.dart';
@@ -35,7 +36,8 @@ class BuildAotCommand extends BuildSubCommand {
         allowed: <String>['android-arm', 'ios']
       )
       ..addFlag('interpreter')
-      ..addFlag('quiet', defaultsTo: false);
+      ..addFlag('quiet', defaultsTo: false)
+      ..addFlag('preview-dart-2', negatable: false);
   }
 
   @override
@@ -63,7 +65,8 @@ class BuildAotCommand extends BuildSubCommand {
       platform,
       getBuildMode(),
       outputPath: argResults['output-dir'],
-      interpreter: argResults['interpreter']
+      interpreter: argResults['interpreter'],
+      previewDart2: argResults['preview-dart-2'],
     );
     status?.stop();
 
@@ -90,7 +93,8 @@ Future<String> buildAotSnapshot(
   TargetPlatform platform,
   BuildMode buildMode, {
   String outputPath,
-  bool interpreter: false
+  bool interpreter: false,
+  bool previewDart2: false
 }) async {
   outputPath ??= getAotBuildDirectory();
   try {
@@ -99,7 +103,8 @@ Future<String> buildAotSnapshot(
       platform,
       buildMode,
       outputPath: outputPath,
-      interpreter: interpreter
+      interpreter: interpreter,
+      previewDart2: previewDart2,
     );
   } on String catch (error) {
     // Catch the String exceptions thrown from the `runCheckedSync` methods below.
@@ -113,7 +118,8 @@ Future<String> _buildAotSnapshot(
   TargetPlatform platform,
   BuildMode buildMode, {
   String outputPath,
-  bool interpreter: false
+  bool interpreter: false,
+  bool previewDart2: false
 }) async {
   outputPath ??= getAotBuildDirectory();
   if (!isAotBuildMode(buildMode) && !interpreter) {
@@ -136,7 +142,10 @@ Future<String> _buildAotSnapshot(
   final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
   final String dependencies = fs.path.join(outputDir.path, 'snapshot.d');
 
-  final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
+  final String vmEntryPoints = artifacts.getArtifactPath(
+      Artifact.dartVmEntryPointsTxt,
+      platform,
+      buildMode);
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
@@ -261,6 +270,11 @@ Future<String> _buildAotSnapshot(
       '--no-checked',
       '--conditional_directives',
     ]);
+  }
+
+  if (previewDart2) {
+    mainPath = await compile(packagesPath: packageMap.packagesPath,
+        mainPath: mainPath);
   }
 
   genSnapshotCmd.add(mainPath);

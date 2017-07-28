@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
+import 'package:front_end/incremental_kernel_generator.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:kernel/kernel.dart';
 
 import 'asset.dart';
 import 'base/context.dart';
@@ -361,9 +363,12 @@ class DevFS {
 
   /// Update files on the device and return the number of bytes sync'd
   Future<int> update({
+    String mainPath,
+    String target,
     AssetBundle bundle,
     bool bundleDirty: false,
     Set<String> fileFilter,
+    IncrementalKernelGenerator generator,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -427,6 +432,19 @@ class DevFS {
     });
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
+      if (generator != null) {
+        dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
+          if (content is DevFSFileContent) {
+            generator.invalidate(content.file.uri);
+          }
+        });
+        final DeltaProgram delta = await generator.computeDelta();
+        final Program program = delta.newProgram;
+        await writeProgramToBinary(program, mainPath + ".dill");
+        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
+                () => new DevFSFileContent(fs.file(mainPath + ".dill")));
+      }
+
       if (_httpWriter != null) {
         try {
           await _httpWriter.write(dirtyEntries);

@@ -192,7 +192,7 @@ void updateLocalProperties({String projectPath, String buildMode}) {
     settings.writeContents(localProperties);
 }
 
-Future<Null> buildGradleProject(BuildMode buildMode, String target, String kernelPath) async {
+Future<Null> buildGradleProject(BuildMode buildMode, String target, bool previewDart2) async {
   // Update the local.properties file with the build mode.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
   // uses the standard Android way to determine what to build, but we still
@@ -212,7 +212,7 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target, String kerne
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(gradle, buildModeName, target, kernelPath);
+      return _buildGradleProjectV2(gradle, buildModeName, target, previewDart2);
   }
 }
 
@@ -245,7 +245,7 @@ File findApkFile(String buildDirectory, String buildModeName) {
   return null;
 }
 
-Future<Null> _buildGradleProjectV2(String gradle, String buildModeName, String target, String kernelPath) async {
+Future<Null> _buildGradleProjectV2(String gradle, String buildModeName, String target, bool previewDart2) async {
   final String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
   // Run 'gradlew assemble<BuildMode>'.
@@ -263,8 +263,8 @@ Future<Null> _buildGradleProjectV2(String gradle, String buildModeName, String t
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  if (kernelPath != null)
-    command.add('-Pkernel=$kernelPath');
+  if (previewDart2)
+    command.add('-Ppreview-dart-2=true');
   command.add(assembleTask);
   final int exitcode = await runCommandAndStreamOutput(
       command,

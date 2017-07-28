@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:front_end/incremental_kernel_generator.dart';
 import 'package:meta/meta.dart';
 
 import 'android/gradle.dart';
@@ -235,7 +236,7 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      kernelPath: hotRunner.kernelFilePath,
+      previewDart2: hotRunner.previewDart2,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: hotRunner.usesTerminalUI,
     );
@@ -296,6 +297,7 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
+      previewDart2: coldRunner.previewDart2,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: coldRunner.usesTerminalUI,
     );
@@ -311,9 +313,12 @@ class FlutterDevice {
   }
 
   Future<bool> updateDevFS({
+    String mainPath,
+    String target,
     AssetBundle bundle,
     bool bundleDirty: false,
-    Set<String> fileFilter
+    Set<String> fileFilter,
+    IncrementalKernelGenerator generator
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -322,9 +327,12 @@ class FlutterDevice {
     int bytes = 0;
     try {
       bytes = await devFS.update(
+        mainPath: mainPath,
+        target: target,
         bundle: bundle,
         bundleDirty: bundleDirty,
-        fileFilter: fileFilter
+        fileFilter: fileFilter,
+        generator: generator
       );
     } on DevFSException {
       devFSStatus.cancel();
