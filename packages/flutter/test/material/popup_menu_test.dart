@@ -129,6 +129,7 @@ void main() {
       );
 
       expect(find.byType(IconButton), findsOneWidget);
+      expect(find.byIcon(Icons.view_carousel), findsOneWidget);
     });
   });
 }
