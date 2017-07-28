@@ -91,36 +91,44 @@ void main() {
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
   });
 
-  testWidgets('PopupMenuButton fails when given both child and icon', (WidgetTester tester) async {
-    expect(() {
-      new PopupMenuButton(
-          child: const Text('heyo'),
-          icon: const Icon(Icons.view_carousel),
-      );
-    }, throwsA(new isInstanceOf<AssertionError>()));
-  });
+  group('PopupMenuButton with Icon', () {
 
-  testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
-        home: new Scaffold(
-          appBar: new AppBar(
-            actions: <Widget>[
-              new PopupMenuButton(
-                itemBuilder: (BuildContext context) {
-                  return <PopupMenuItem<int>>[
-                    const PopupMenuItem<int>(
-                        value: 1,
-                        child: const Icon(Icons.view_carousel)
-                    ),
-                  ];
-                },
-              ),
-            ],
+    // Helper function to create simple and valid popup menus.
+    List<PopupMenuItem<int>> simplePopupMenuItemBuilder(BuildContext context) {
+      return <PopupMenuItem<int>>[
+        const PopupMenuItem<int>(
+            value: 1,
+            child: const Text('1'),
+        ),
+      ];
+    }
+
+    testWidgets('PopupMenuButton fails when given both child and icon', (WidgetTester tester) async {
+      expect(() {
+        new PopupMenuButton<int>(
+            child: const Text('heyo'),
+            icon: const Icon(Icons.view_carousel),
+            itemBuilder: simplePopupMenuItemBuilder,
+        );
+      }, throwsA(new isInstanceOf<AssertionError>()));
+    });
+
+    testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {
+      final PopupMenuButton<int> button = new PopupMenuButton<int>(
+        icon: const Icon(Icons.view_carousel),
+        itemBuilder: simplePopupMenuItemBuilder,
+      );
+
+      await tester.pumpWidget(new MaterialApp(
+          home: new Scaffold(
+            appBar: new AppBar(
+              actions: <Widget>[button],
+            ),
           ),
         ),
-      )
-    );
+      );
 
-    expect(find.byType(IconButton), findsOneWidget);
+      expect(find.byType(IconButton), findsOneWidget);
+    });
   });
 }
