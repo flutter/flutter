@@ -1381,7 +1381,7 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Graphical operations that affect pixels entirely outside the given
   /// cullRect might be discarded by the implementation. However, the
   /// implementation might draw outside these bounds if, for example, a command
-  /// draws partially inside and outside the cullRect. To ensure that pixels
+  /// draws partially inside and outside the `cullRect`. To ensure that pixels
   /// outside a given region are discarded, consider using a [clipRect].
   ///
   /// To end the recording, call [PictureRecorder.endRecording] on the
@@ -1402,6 +1402,11 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Saves a copy of the current transform and clip on the save stack.
   ///
   /// Call [restore] to pop the save stack.
+  ///
+  /// See also:
+  ///
+  ///  * [saveLayer], which does the same thing but additionally also groups the
+  ///    commands done until the matching [restore].
   void save() native "Canvas_save";
 
   /// Saves a copy of the current transform and clip on the save stack, and then
@@ -1418,6 +1423,99 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// entire group can be made transparent using the [saveLayer]'s paint.
   ///
   /// Call [restore] to pop the save stack and apply the paint to the group.
+  ///
+  /// ## Using saveLayer with clips
+  ///
+  /// When a rectanglular clip operation (from [clipRect]) is not axis-aligned
+  /// with the raster buffer, or when the clip operation is not rectalinear (e.g.
+  /// because it is a rounded rectangle clip created by [clipRRect] or an
+  /// arbitrarily complicated path clip created by [clipPath]), the edge of the
+  /// clip needs to be anti-aliased.
+  ///
+  /// If two draw calls overlap at the edge of such a clipped region, without
+  /// using [saveLayer], the first drawing will be anti-aliased with the
+  /// background first, and then the second will be anti-aliased with the result
+  /// of blending the first drawing and the background. On the other hand, if
+  /// [saveLayer] is used immediately after establishing the clip, the second
+  /// drawing will cover the first in the layer, and thus the second alone will
+  /// be anti-aliased with the background when the layer is clipped and
+  /// composited (when [restore] is called).
+  ///
+  /// For example, this [CustomPainter.paint] method paints a clean white
+  /// rounded rectangle:
+  ///
+  /// ```dart
+  /// void paint(Canvas canvas, Size size) {
+  ///   Rect rect = Offset.zero & size;
+  ///   canvas.save();
+  ///   canvas.clipRRect(new RRect.fromRectXY(rect, 100.0, 100.0));
+  ///   canvas.saveLayer(rect, new Paint());
+  ///   canvas.drawPaint(new Paint()..color = Colors.red);
+  ///   canvas.drawPaint(new Paint()..color = Colors.white);
+  ///   canvas.restore();
+  ///   canvas.restore();
+  /// }
+  /// ```
+  ///
+  /// On the other hand, this one renders a red outline, the result of the red
+  /// paint being anti-aliased with the background at the clip edge, then the
+  /// white paint being similarly anti-aliased with the background _including
+  /// the clipped red paint_:
+  ///
+  /// ```dart
+  /// void paint(Canvas canvas, Size size) {
+  ///   // (this example renders poorly, prefer the example above)
+  ///   Rect rect = Offset.zero & size;
+  ///   canvas.save();
+  ///   canvas.clipRRect(new RRect.fromRectXY(rect, 100.0, 100.0));
+  ///   canvas.drawPaint(new Paint()..color = Colors.red);
+  ///   canvas.drawPaint(new Paint()..color = Colors.white);
+  ///   canvas.restore();
+  /// }
+  /// ```
+  ///
+  /// This point is moot if the clip only clips one draw operation. For example,
+  /// the following paint method paints a pair of clean white rounded
+  /// rectangles, even though the clips are not done on a separate layer:
+  ///
+  /// ```dart
+  /// void paint(Canvas canvas, Size size) {
+  ///   canvas.save();
+  ///   canvas.clipRRect(new RRect.fromRectXY(Offset.zero & (size / 2.0), 50.0, 50.0));
+  ///   canvas.drawPaint(new Paint()..color = Colors.white);
+  ///   canvas.restore();
+  ///   canvas.save();
+  ///   canvas.clipRRect(new RRect.fromRectXY(size.center(Offset.zero) & (size / 2.0), 50.0, 50.0));
+  ///   canvas.drawPaint(new Paint()..color = Colors.white);
+  ///   canvas.restore();
+  /// }
+  /// ```
+  ///
+  /// (Incidentally, rather than using [clipRRect] and [drawPaint] to draw
+  /// rounded rectangles like this, prefer the [drawRRect] method. These
+  /// examples are using [drawPaint] as a proxy for "complicated draw operations
+  /// that will get clipped", to illustrate the point.)
+  ///
+  /// ## Performance considerations
+  ///
+  /// Generally speaking, [saveLayer] is relatively expensive.
+  ///
+  /// There are a several different hardware architectures for GPUs (graphics
+  /// processing units, the hardware that handles graphics), but most of them
+  /// involve batching commands and reordering them for performance. When layers
+  /// are used, they cause the rendering pipeline to have to switch render
+  /// target (from one layer to another). Render target switches can flush the
+  /// GPU's command buffer, which typically means that optimizations that one
+  /// could get with larger batching are lost. Render target switches also
+  /// generate a lot of memory churn because the GPU needs to copy out the
+  /// current frame buffer contents from the part of memory that's optimized for
+  /// writing, and then needs to copy it back in once the previous render target
+  /// (layer) is restored.
+  ///
+  /// See also:
+  ///
+  ///  * [save], which saves the current state, but does not create a new layer
+  ///    for subsequent commands.
   void saveLayer(Rect bounds, Paint paint) {
     assert(bounds != null);
     assert(paint != null);
@@ -1484,6 +1582,12 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rectangle.
+  ///
+  /// If the clip is not axis-aligned with the display device, and [isAntiAlias]
+  /// is true, then the clip will be anti-aliased. If multiple draw commands
+  /// intersect with the clip boundary, this can result in incorrect blending at
+  /// the clip boundary. See [saveLayer] for a discussion of how to address
+  /// that.
   void clipRect(Rect rect) {
     assert(rect != null);
     _clipRect(rect.left, rect.top, rect.right, rect.bottom);
@@ -1495,6 +1599,11 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rounded rectangle.
+  ///
+  /// If [isAntiAlias] is true, then the clip will be anti-aliased. If multiple
+  /// draw commands intersect with the clip boundary, this can result in
+  /// incorrect blending at the clip boundary. See [saveLayer] for a discussion
+  /// of how to address that and some examples of using [clipRRect].
   void clipRRect(RRect rrect) {
     assert(rrect != null);
     _clipRRect(rrect._value);
@@ -1503,6 +1612,11 @@ class Canvas extends NativeFieldWrapperClass2 {
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
+  ///
+  /// If [isAntiAlias] is true, then the clip will be anti-aliased. If multiple
+  /// draw commands intersect with the clip boundary, this can result in
+  /// incorrect blending at the clip boundary. See [saveLayer] for a discussion
+  /// of how to address that.
   void clipPath(Path path) {
     assert(path != null); // path is checked on the engine side
     _clipPath(path);
@@ -1676,6 +1790,10 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   /// This might sample from outside the `src` rect by up to half the width of
   /// an applied filter.
+  ///
+  /// Multiple calls to this method with different arguments (from the same
+  /// image) can be batched into a single call to [drawAtlas] to improve
+  /// performance.
   void drawImageRect(Image image, Rect src, Rect dst, Paint paint) {
     assert(image != null); // image is checked on the engine side
     assert(src != null);
