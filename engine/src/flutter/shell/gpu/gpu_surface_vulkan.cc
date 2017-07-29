@@ -15,11 +15,6 @@ GPUSurfaceVulkan::GPUSurfaceVulkan(
 
 GPUSurfaceVulkan::~GPUSurfaceVulkan() = default;
 
-bool GPUSurfaceVulkan::Setup() {
-  // This backend does not have an explicit setup task post initialization.
-  return window_.IsValid();
-}
-
 bool GPUSurfaceVulkan::IsValid() {
   return window_.IsValid();
 }

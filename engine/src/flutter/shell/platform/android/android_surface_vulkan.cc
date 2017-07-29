@@ -49,10 +49,6 @@ std::unique_ptr<Surface> AndroidSurfaceVulkan::CreateGPUSurface() {
     return nullptr;
   }
 
-  if (!gpu_surface->Setup()) {
-    return nullptr;
-  }
-
   return gpu_surface;
 }
 
