@@ -21,8 +21,6 @@ class GPUSurfaceVulkan : public Surface {
 
   ~GPUSurfaceVulkan() override;
 
-  bool Setup() override;
-
   bool IsValid() override;
 
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
