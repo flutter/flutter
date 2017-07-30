@@ -117,7 +117,7 @@ linter:
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
-    # - prefer_final_fields # https://github.com/dart-lang/linter/issues/506
+    - prefer_final_fields
     - prefer_final_locals
     # - prefer_foreach # not yet tested
     # - prefer_function_declarations_over_variables # not yet tested
