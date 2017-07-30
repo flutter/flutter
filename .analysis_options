@@ -112,7 +112,7 @@ linter:
     # - prefer_asserts_in_initializer_lists # not yet tested
     - prefer_collection_literals
     # - prefer_conditional_assignment # not yet tested
-    # - prefer_const_constructors # https://github.com/dart-lang/linter/issues/752
+    - prefer_const_constructors
     # - prefer_const_constructors_in_immutables # not yet tested
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
