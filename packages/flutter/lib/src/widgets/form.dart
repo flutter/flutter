@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
-import 'routes.dart';
+import 'navigator.dart';
 import 'will_pop_scope.dart';
 
 /// An optional container for grouping together multiple form field widgets
@@ -55,6 +55,11 @@ class Form extends StatefulWidget {
   ///
   /// If the callback returns a Future that resolves to false, the form's route
   /// will not be popped.
+  ///
+  /// See also:
+  ///
+  ///  * [WillPopScope], another widget that provides a way to intercept the
+  ///    back button.
   final WillPopCallback onWillPop;
 
   @override

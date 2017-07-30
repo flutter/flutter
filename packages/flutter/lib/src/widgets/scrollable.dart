@@ -67,7 +67,7 @@ typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 ///    effects using slivers.
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
 ///    child.
-///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 class Scrollable extends StatefulWidget {
   /// Creates a widget that scrolls.

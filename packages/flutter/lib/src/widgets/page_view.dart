@@ -329,7 +329,7 @@ const PageScrollPhysics _kPagePhysics = const PageScrollPhysics();
 ///  * [SingleChildScrollView], when you need to make a single child scrollable.
 ///  * [ListView], for a scrollable list of boxes.
 ///  * [GridView], for a scrollable grid of boxes.
-///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 class PageView extends StatefulWidget {
   /// Creates a scrollable list that works page by page from an explicit [List]

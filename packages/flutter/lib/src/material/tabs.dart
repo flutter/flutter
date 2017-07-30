@@ -458,9 +458,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   final double indicatorWeight;
 
   /// The horizontal padding for the line that appears below the selected tab.
-  /// For [isScrollable] tab bars, specifying [kDefaultTabLabelPadding] will align
+  /// For [isScrollable] tab bars, specifying [kTabLabelPadding] will align
   /// the indicator with the tab's text for [Tab] widgets and all but the
   /// shortest [Tab.text] values.
+  ///
+  /// The [EdgeInsets.top] and [EdgeInsets.bottom] values of the
+  /// [indicatorPadding] are ignored.
   ///
   /// The default value of [indicatorPadding] is [EdgeInsets.zero].
   final EdgeInsets indicatorPadding;

@@ -40,7 +40,7 @@ import 'scroll_position_with_single_context.dart';
 ///    [PageView].
 ///  * [ScrollPosition], which manages the scroll offset for an individual
 ///    scrolling widget.
-///  * [ScollNotification] and [NotificationListener], which can be used to watch
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
 ///    the scroll position without using a [ScrollController].
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
@@ -285,9 +285,9 @@ class ScrollController extends ChangeNotifier {
 /// ## Sample code
 ///
 /// In this example each [PageView] page contains a [ListView] and all three
-/// [ListView]'s share a [TrackingController]. The scroll offsets of all three
-/// list views will track each other, to the extent that's possible given the
-/// different list lengths.
+/// [ListView]'s share a [TrackingScrollController]. The scroll offsets of all
+/// three list views will track each other, to the extent that's possible given
+/// the different list lengths.
 ///
 /// ```dart
 /// new PageView(

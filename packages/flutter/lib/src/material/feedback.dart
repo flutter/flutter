@@ -15,14 +15,16 @@ import 'theme.dart';
 /// For example, to play the Android-typically click sound when a button is
 /// tapped, call [forTap]. For the Android-specific vibration when long pressing
 /// an element, call [forLongPress]. Alternatively, you can also wrap your
-/// [onTap] or [onLongPress] callback in [wrapForTap] or [wrapForLongPress] to
-/// achieve the same (see example code below).
+/// [GestureDetector.onTap] or [GestureDetector.onLongPress] callback in
+/// [wrapForTap] or [wrapForLongPress] to achieve the same (see example code
+/// below).
 ///
 /// Calling any of these methods is a no-op on iOS as actions on that platform
 /// typically don't provide haptic or acoustic feedback.
 ///
-/// All methods in this class are usually called from within a [build] method
-/// or from a State's methods as you have to provide a [BuildContext].
+/// All methods in this class are usually called from within a
+/// [StatelessWidget.build] method or from a [State]'s methods as you have to
+/// provide a [BuildContext].
 ///
 /// ## Sample code
 ///

@@ -29,6 +29,9 @@ typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
 ///
+/// One of the primary roles that [WidgetsApp] provides is binding the system
+/// back button to popping the [Navigator] or quitting the application.
+///
 /// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
 /// [LocaleQuery], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
 /// widgets wrapped by this one).

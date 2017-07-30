@@ -569,12 +569,12 @@ class _NoDefaultValue {
   const _NoDefaultValue();
 }
 
-/// Marker object indicating that a DiagnosticNode has no default value.
+/// Marker object indicating that a [DiagnosticsNode] has no default value.
 const _NoDefaultValue kNoDefaultValue = const _NoDefaultValue();
 
 /// Defines diagnostics data for a [value].
 ///
-/// DiagnosticsNode provides a high quality multi-line string dump via
+/// [DiagnosticsNode] provides a high quality multi-line string dump via
 /// [toStringDeep]. The core members are the [name], [description], [getProperties],
 /// [value], and [getChildren]. All other members exist typically to provide
 /// hints for how [toStringDeep] and debugging tools should format output.
@@ -629,7 +629,7 @@ abstract class DiagnosticsNode {
   ///
   /// See also:
   ///
-  ///  * [PropertyMessage], which should be used if the message should be
+  ///  * [MessageProperty], which is better suited to messages that are to be
   ///    formatted like a property with a separate name and message.
   factory DiagnosticsNode.message(
     String message, {
@@ -645,7 +645,10 @@ abstract class DiagnosticsNode {
     );
   }
 
-  /// Label describing the Diagnostics node.
+  /// Label describing the [DiagnosticsNode], typically shown before a separator
+  /// (see [showSeparator]).
+  ///
+  /// The name will be omitted if the [showName] property is false.
   final String name;
 
   /// Description with a short summary of the node itself not including children
@@ -678,13 +681,13 @@ abstract class DiagnosticsNode {
   /// Hint for how the node should be displayed.
   final DiagnosticsTreeStyle style;
 
-  /// Properties of this DiagnosticsNode.
+  /// Properties of this [DiagnosticsNode].
   ///
   /// Properties and children are kept distinct even though they are both
-  /// [List<DiagnosticNode>] because they should be grouped differently.
+  /// [List<DiagnosticsNode>] because they should be grouped differently.
   List<DiagnosticsNode> getProperties();
 
-  /// Children of this DiagnosticsNode.
+  /// Children of this [DiagnosticsNode].
   ///
   /// See also:
   ///
@@ -885,30 +888,32 @@ abstract class DiagnosticsNode {
 
 /// Debugging message displayed like a property.
 ///
-/// The following two properties should be a [MessageProperty], not
-/// [StringProperty], as the intent is to show a message with property style
-/// display rather than to describe the value of an actual property of the
-/// object.
+/// ## Sample code
+///
+/// The following two properties are better expressed using this
+/// [MessageProperty] class, rather than [StringProperty], as the intent is to
+/// show a message with property style display rather than to describe the value
+/// of an actual property of the object:
 ///
 /// ```dart
-/// new MessageProperty('table size', '$columns\u00D7$rows'));
-/// new MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
+/// new MessageProperty('table size', '$columns\u00D7$rows')
+/// ```
+/// ```dart
+/// new MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)')
 /// ```
 ///
-/// StringProperty should be used if the property has a concrete value that is
-/// a string.
+/// On the other hand, [StringProperty] is better suited when the property has a
+/// concrete value that is a string:
 ///
 /// ```dart
-/// new StringProperty('fontFamily', fontFamily);
-/// new StringProperty('title', title):
+/// new StringProperty('name', _name)
 /// ```
 ///
 /// See also:
 ///
-///  * [DiagnosticsProperty.message], which serves the same role for messages
+///  * [DiagnosticsNode.message], which serves the same role for messages
 ///    without a clear property name.
-///  * [StringProperty], which should be used instead for properties with string
-///    values.
+///  * [StringProperty], which is a better fit for properties with string values.
 class MessageProperty extends DiagnosticsProperty<Null> {
   /// Create a diagnostics property that displays a message.
   ///
@@ -926,7 +931,7 @@ class MessageProperty extends DiagnosticsProperty<Null> {
 ///
 /// See also:
 ///
-///  * [MessageProperty], which should be used instead if showing a message
+///  * [MessageProperty], which is a better fit for showing a message
 ///    instead of describing a property with a string value.
 class StringProperty extends DiagnosticsProperty<String> {
   /// Create a diagnostics property for strings.
@@ -1025,11 +1030,11 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
     return unit != null ?  '${numberToString()}$unit' : numberToString();
   }
 }
-/// Property describing a [double] [value] with an option [unit] of measurement.
+/// Property describing a [double] [value] with an optional [unit] of measurement.
 ///
 /// Numeric formatting is optimized for debug message readability.
 class DoubleProperty extends _NumProperty<double> {
-  /// If specified, `unit` describes the unit for the [value] (e.g. px).
+  /// If specified, [unit] describes the unit for the [value] (e.g. px).
   DoubleProperty(String name, double value, {
     bool hidden: false,
     String ifNull,
@@ -1782,31 +1787,30 @@ String camelCaseToHyphenatedName(String word) {
   return buffer.toString();
 }
 
-/// An interface providing string and [DiagnosticNode] debug representations.
+/// An interface providing string and [DiagnosticsNode] debug representations.
 ///
 /// The string debug representation is generated from the intermediate
-/// [DiagnosticNode] representation. The [DiagnosticNode] representation is
+/// [DiagnosticsNode] representation. The [DiagnosticsNode] representation is
 /// also used by debugging tools displaying interactive trees of objects and
 /// properties.
 ///
 /// See also:
 ///
-///  * [TreeDiagnosticsMixin], which should be used to implement this interface
-///    in all contexts where a mixin can be used.
-///  * [TreeDiagnosticsMixin.debugFillProperties], which lists best practices
-///    for specifying the properties of a [DiagnosticNode]. The most common use
-///    case is to override [debugFillProperties] defining custom properties for
-///    a subclass of [TreeDiagnosticsMixin] using the existing
+///  * [TreeDiagnosticsMixin], which provides convenience members for implementing
+///    this interface in a consistent way.
+///  * The documentation for [TreeDiagnosticsMixin.debugFillProperties], which
+///    lists best practices for specifying the properties of a
+///    [DiagnosticsNode]. The most common use case is to override
+///    [TreeDiagnosticsMixin.debugFillProperties] to define custom properties
+///    for a subclass of [TreeDiagnosticsMixin] using the existing
 ///    [DiagnosticsProperty] subclasses.
-///  * [TreeDiagnosticsMixin.debugDescribeChildren], which lists best practices
-///    for describing the children of a [DiagnosticNode]. Typically the base
-///    class already describes the children of a node properly or a node has
-///    no children.
-///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
-///    nodes without properties or children. There are many [DiagnosticProperty]
-///    subclasses to handle common use cases.
-///  * [DiagnosticsNode.lazy], which should be used to create a DiagnosticNode
-///    with children and properties where [TreeDiagnosticsMixin] cannot be used.
+///  * The documentation for [TreeDiagnosticsMixin.debugDescribeChildren], which
+///    lists best practices for describing the children of a [DiagnosticsNode].
+///    Typically the base class already describes the children of a node
+///    properly or a node has no children.
+///  * [DiagnosticsProperty], which describes leaf diagnostic nodes without
+///    properties or children. There are many [DiagnosticsProperty] subclasses
+///    to handle common use cases such as strings and doubles.
 abstract class TreeDiagnostics {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1907,10 +1911,10 @@ abstract class TreeDiagnosticsMixin implements TreeDiagnostics {
   ///
   /// Use the most specific [DiagnosticsProperty] existing subclass to describe
   /// each property instead of the [DiagnosticsProperty] base class. There are
-  /// only a small number of [DiagnosticProperty] subclasses each covering a
+  /// only a small number of [DiagnosticsProperty] subclasses each covering a
   /// common use case. Consider what values a property is relevant for users
   /// debugging as users debugging large trees are overloaded with information.
-  /// Common named parameters in [DiagnosticNode] subclasses help filter when
+  /// Common named parameters in [DiagnosticsNode] subclasses help filter when
   /// and how properties are displayed.
   ///
   /// `defaultValue`, `showName`, `showSeparator`, and `hidden` keep string
@@ -1941,7 +1945,7 @@ abstract class TreeDiagnosticsMixin implements TreeDiagnostics {
   /// descriptions clearer. The examples in the code sample below illustrate
   /// good uses of all of these parameters.
   ///
-  /// ## DiagnosticProperty subclasses for primitive types
+  /// ## DiagnosticsProperty subclasses for primitive types
   ///
   ///  * [StringProperty], which supports automatically enclosing a [String]
   ///    value in quotes.
@@ -1953,33 +1957,31 @@ abstract class TreeDiagnosticsMixin implements TreeDiagnostics {
   ///    [int] value.
   ///  * [FlagProperty], which formats a [bool] value as one or more flags.
   ///    Depending on the use case it is better to format a bool as
-  ///    `DiagnosticProperty<bool>` instead of using [FlagProperty] as the
+  ///    `DiagnosticsProperty<bool>` instead of using [FlagProperty] as the
   ///    output is more verbose but unambiguous.
   ///
-  /// ## Other important [DiagnosticProperty] subclasses
+  /// ## Other important [DiagnosticsProperty] variants
   ///
   ///  * [EnumProperty], which provides terse descriptions of enum values
   ///    working around limitations of the `toString` implementation for Dart
   ///    enum types.
   ///  * [IterableProperty], which handles iterable values with display
   ///    customizable depending on the [DiagnosticsTreeStyle] used.
-  ///  * [LazyDiagnosticsProperty], which handles properties where computing the
-  ///    value could throw an exception.
   ///  * [ObjectFlagProperty], which provides terse descriptions of whether a
   ///    property value is present or not. For example, whether an `onClick`
   ///    callback is specified or an animation is in progress.
   ///
-  /// If none of these subclasses apply, use the [DiagnosticProperty]
+  /// If none of these subclasses apply, use the [DiagnosticsProperty]
   /// constructor or in rare cases create your own [DiagnosticsProperty]
   /// subclass as in the case for [TransformProperty] which handles [Matrix4]
   /// that represent transforms. Generally any property value with a good
-  /// `toString` method implementation works fine using [DiagnosticProperty]
+  /// `toString` method implementation works fine using [DiagnosticsProperty]
   /// directly.
   ///
   /// ## Sample code
   ///
   /// This example shows best practices for implementing [debugFillProperties]
-  /// illustrating use of all common [DiagnosticProperty] subclasses and all
+  /// illustrating use of all common [DiagnosticsProperty] subclasses and all
   /// common [DiagnosticsProperty] parameters.
   ///
   /// ```dart

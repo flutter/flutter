@@ -41,7 +41,7 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
     this.trailing,
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
-  }) : assert(middle != null, 'There must be a middle widget, usually a title'),
+  }) : assert(middle != null, 'There must be a middle widget, usually a title.'),
       super(key: key);
 
   /// Widget to place at the start of the nav bar. Normally a back button
@@ -66,7 +66,8 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   /// Default color used for text and icons of the [leading] and [trailing]
   /// widgets in the nav bar.
   ///
-  /// The [title] remains black if it's a text as per iOS standard design.
+  /// The default color for text in the [middle] slot is always black, as per
+  /// iOS standard design.
   final Color actionsForegroundColor;
 
   /// True if the nav bar's background color has no transparency.
@@ -77,15 +78,28 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
 
   @override
   Widget build(BuildContext context) {
-    Widget styledMiddle = middle;
-    if (styledMiddle.runtimeType == Text || styledMiddle.runtimeType == DefaultTextStyle) {
-      // Let the middle be black rather than `actionsForegroundColor` in case
-      // it's a plain text title.
-      styledMiddle = DefaultTextStyle.merge(
-        style: const TextStyle(color: CupertinoColors.black),
-        child: middle,
-      );
-    }
+    final TextStyle actionsStyle = new TextStyle(
+      fontSize: 17.0,
+      letterSpacing: -0.24,
+      color: actionsForegroundColor,
+    );
+
+    final Widget styledLeading = leading == null ? null : DefaultTextStyle.merge(
+      style: actionsStyle,
+      child: leading,
+    );
+
+    final Widget styledTrailing = trailing == null ? null : DefaultTextStyle.merge(
+      style: actionsStyle,
+      child: trailing,
+    );
+
+    // Let the middle be black rather than `actionsForegroundColor` in case
+    // it's a plain text title.
+    final Widget styledMiddle = middle == null ? null : DefaultTextStyle.merge(
+      style: actionsStyle.copyWith(color: CupertinoColors.black),
+      child: middle,
+    );
 
     // TODO(xster): automatically build a CupertinoBackButton.
 
@@ -107,26 +121,19 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
             color: actionsForegroundColor,
             size: 22.0,
           ),
-          child: DefaultTextStyle.merge(
-            style: new TextStyle(
-              fontSize: 17.0,
-              letterSpacing: -0.24,
-              color: actionsForegroundColor,
+          child: new Padding(
+            padding: new EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top,
+              // TODO(xster): dynamically reduce padding when an automatic
+              // CupertinoBackButton is present.
+              left: 16.0,
+              right: 16.0,
             ),
-            child: new Padding(
-              padding: new EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top,
-                // TODO(xster): dynamically reduce padding when an automatic
-                // CupertinoBackButton is present.
-                left: 16.0,
-                right: 16.0,
-              ),
-              child: new NavigationToolbar(
-                leading: leading,
-                middle: styledMiddle,
-                trailing: trailing,
-                centerMiddle: true,
-              ),
+            child: new NavigationToolbar(
+              leading: styledLeading,
+              middle: styledMiddle,
+              trailing: styledTrailing,
+              centerMiddle: true,
             ),
           ),
         ),
