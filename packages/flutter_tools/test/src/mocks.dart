@@ -30,9 +30,9 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
 }
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
-  List<Device> _devices = <Device>[];
-  StreamController<Device> _onAddedController = new StreamController<Device>.broadcast();
-  StreamController<Device> _onRemovedController = new StreamController<Device>.broadcast();
+  final List<Device> _devices = <Device>[];
+  final StreamController<Device> _onAddedController = new StreamController<Device>.broadcast();
+  final StreamController<Device> _onRemovedController = new StreamController<Device>.broadcast();
 
   MockPollingDeviceDiscovery() : super('mock');
 
