@@ -127,7 +127,7 @@ linter:
     - prefer_is_not_empty
     # - prefer_single_quote_strings # not yet tested
     # - public_member_api_docs # this is the only difference from .analysis_options_repo
-    # - recursive_getters # https://github.com/dart-lang/linter/issues/452
+    - recursive_getters
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first
