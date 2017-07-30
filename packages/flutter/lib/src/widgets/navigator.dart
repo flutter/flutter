@@ -756,11 +756,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       ];
       final List<String> routeParts = initialRouteName.split('/');
       if (initialRouteName.isNotEmpty) {
-        String routeName = '';
+        final StringBuffer routeName = new StringBuffer();
         for (String part in routeParts) {
-          routeName += '/$part';
-          plannedInitialRouteNames.add(routeName);
-          plannedInitialRoutes.add(_routeNamed(routeName, allowNull: true));
+          routeName.write('/$part');
+          final String current = routeName.toString();
+          plannedInitialRouteNames.add(current);
+          plannedInitialRoutes.add(_routeNamed(current, allowNull: true));
         }
       }
       if (plannedInitialRoutes.contains(null)) {
