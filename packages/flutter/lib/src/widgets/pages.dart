@@ -83,7 +83,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.transitionDuration: const Duration(milliseconds: 300),
     this.opaque: true,
     this.barrierDismissible: false,
-    this.barrierColor: null,
+    this.barrierColor,
     this.maintainState: true,
   }) : assert(pageBuilder != null),
        assert(transitionsBuilder != null),

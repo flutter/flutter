@@ -40,7 +40,7 @@ class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox
   /// Proxy render boxes are rarely created directly because they simply proxy
   /// the render box protocol to [child]. Instead, consider using one of the
   /// subclasses.
-  RenderProxyBox([RenderBox child = null]) {
+  RenderProxyBox([RenderBox child]) {
     this.child = child;
   }
 }

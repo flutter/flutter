@@ -1199,7 +1199,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
     this.ifFalse,
     bool showName: false,
     bool hidden: false,
-    Object defaultValue: null,
+    Object defaultValue,
   }) : super(
     name,
     value,
