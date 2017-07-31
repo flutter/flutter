@@ -157,12 +157,12 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 
   // Wait for stdout to be fully processed
   // because process.exitCode may complete first causing flaky tests.
-  await waitGroup(<Future<Null>>[
+  await waitGroup<Null>(<Future<Null>>[
     stdoutSubscription.asFuture<Null>(),
     stderrSubscription.asFuture<Null>(),
   ]);
 
-  await waitGroup(<Future<Null>>[
+  await waitGroup<Null>(<Future<Null>>[
     stdoutSubscription.cancel(),
     stderrSubscription.cancel(),
   ]);
