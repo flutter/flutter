@@ -141,6 +141,14 @@ class InputConnectionAdaptor extends BaseInputConnection {
                     Selection.setSelection(mEditable, selStart - 1);
                     deleteSurroundingText(0, 1);
                 }
+            } else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT) {
+                int selStart = Selection.getSelectionStart(mEditable);
+                int newSel = Math.max(selStart - 1, 0);
+                setSelection(newSel, newSel);
+            } else if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                int selStart = Selection.getSelectionStart(mEditable);
+                int newSel = Math.min(selStart + 1, mEditable.length());
+                setSelection(newSel, newSel);
             } else {
                 // Enter a character.
                 int character = event.getUnicodeChar();
