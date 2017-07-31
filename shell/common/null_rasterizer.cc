@@ -39,7 +39,12 @@ void NullRasterizer::Clear(SkColor color, const SkISize& size) {
 
 void NullRasterizer::Draw(
     ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
-  // Null rasterizer. Nothing to do.
+  FTL_ALLOW_UNUSED_LOCAL(
+      pipeline->Consume([](std::unique_ptr<flow::LayerTree>) {
+        // Drop the layer tree on the floor. We only need the pipeline empty so
+        // that frame requests are not deferred indefinitely due to
+        // backpressure.
+      }));
 }
 
 }  // namespace shell
