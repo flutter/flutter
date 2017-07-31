@@ -28,7 +28,7 @@ void main() {
       try {
         await driver.waitForAbsent(presentText, timeout: const Duration(seconds: 1));
         fail('expected DriverError');
-      } on DriverError catch (error) {
+      } on DriverError catch(error) {
         expect(error.message, contains('Timeout while executing waitForAbsent'));
       }
     });
@@ -53,7 +53,7 @@ void main() {
       try {
         await driver.waitFor(presentText, timeout: const Duration(seconds: 1));
         fail('expected DriverError');
-      } on DriverError catch (error) {
+      } on DriverError catch(error) {
         expect(error.message, contains('Timeout while executing waitFor'));
       }
     });
