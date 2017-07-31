@@ -43,10 +43,12 @@ enum AppLifecycleState {
 
   /// The application is in an inactive state and is not receiving user input.
   ///
-  /// On iOS, this state corresponds to an app running in the foreground
-  /// inactive state. Apps transition to this state when in a phone call,
-  /// responding to a TouchID request, or when entering the app switcher. Apps
-  /// in this state should assume that they may be [paused] at any time.
+  /// On iOS, this state corresponds to an app or the Flutter host view running
+  /// in the foreground inactive state. Apps transition to this state when in
+  /// a phone call, responding to a TouchID request, when entering the app
+  /// switcher or the control center, or when the UIViewController hosting the
+  /// Flutter app is transitioning. Apps in this state should assume that they
+  /// may be [paused] at any time.
   ///
   /// On Android, this state is currently unused.
   inactive,
@@ -57,8 +59,8 @@ enum AppLifecycleState {
   /// When the application is in this state, the engine will not call the
   /// [Window.onBeginFrame] and [Window.onDrawFrame] callbacks.
   ///
-  /// Apps in this state should assume that they may enter the [suspending]
-  /// state at any time.
+  /// Android apps in this state should assume that they may enter the
+  /// [suspending] state at any time.
   paused,
 
   /// The application will be suspended momentarily.

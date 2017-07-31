@@ -274,34 +274,80 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   [view release];
 }
 
+#pragma mark - Surface creation and teardown updates
+
+- (void)surfaceUpdated:(BOOL)appeared {
+  FTL_CHECK(_platformView != nullptr);
+
+  if (appeared) {
+    _platformView->NotifyCreated();
+  } else {
+    _platformView->NotifyDestroyed();
+  }
+}
+
 #pragma mark - UIViewController lifecycle notifications
 
 - (void)viewWillAppear:(BOOL)animated {
+  TRACE_EVENT0("flutter", "viewWillAppear");
   [self connectToEngineAndLoad];
+  // Only recreate surface on subsequent appearances when viewport metrics are known.
+  // First time surface creation is done on viewDidLayoutSubviews.
+  if (_viewportMetrics.physical_width)
+    [self surfaceUpdated:YES];
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.inactive"];
+
   [super viewWillAppear:animated];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+  TRACE_EVENT0("flutter", "viewDidAppear");
+  [self onLocaleUpdated:nil];
+  [self onVoiceOverChanged:nil];
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.resumed"];
+
+  [super viewDidAppear:animated];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+  TRACE_EVENT0("flutter", "viewWillDisappear");
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.inactive"];
+
+  [super viewWillDisappear:animated];
+}
+
 - (void)viewDidDisappear:(BOOL)animated {
+  TRACE_EVENT0("flutter", "viewDidDisappear");
+  [self surfaceUpdated:NO];
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.paused"];
 
   [super viewDidDisappear:animated];
 }
 
+- (void)dealloc {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  [super dealloc];
+}
+
 #pragma mark - Application lifecycle notifications
 
 - (void)applicationBecameActive:(NSNotification*)notification {
+  TRACE_EVENT0("flutter", "applicationBecameActive");
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.resumed"];
 }
 
 - (void)applicationWillResignActive:(NSNotification*)notification {
+  TRACE_EVENT0("flutter", "applicationWillResignActive");
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.inactive"];
 }
 
 - (void)applicationDidEnterBackground:(NSNotification*)notification {
+  TRACE_EVENT0("flutter", "applicationDidEnterBackground");
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.paused"];
 }
 
 - (void)applicationWillEnterForeground:(NSNotification*)notification {
+  TRACE_EVENT0("flutter", "applicationWillEnterForeground");
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.inactive"];
 }
 
@@ -426,11 +472,18 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
   CGSize viewSize = self.view.bounds.size;
   CGFloat scale = [UIScreen mainScreen].scale;
 
+  // First time since creation that the dimensions of its view is known.
+  bool firstViewBoundsUpdate = !_viewportMetrics.physical_width;
   _viewportMetrics.device_pixel_ratio = scale;
   _viewportMetrics.physical_width = viewSize.width * scale;
   _viewportMetrics.physical_height = viewSize.height * scale;
   _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
   [self updateViewportMetrics];
+
+  // This must run after updateViewportMetrics so that the surface creation tasks are queued after
+  // the viewport metrics update tasks.
+  if (firstViewBoundsUpdate)
+    [self surfaceUpdated:YES];
 }
 
 #pragma mark - Keyboard events
@@ -524,38 +577,6 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
   NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
   NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
   [_localizationChannel.get() invokeMethod:@"setLocale" arguments:@[ languageCode, countryCode ]];
-}
-
-#pragma mark - Surface creation and teardown updates
-
-- (void)surfaceUpdated:(BOOL)appeared {
-  FTL_CHECK(_platformView != nullptr);
-
-  if (appeared) {
-    _platformView->NotifyCreated();
-  } else {
-    _platformView->NotifyDestroyed();
-  }
-}
-
-- (void)viewDidAppear:(BOOL)animated {
-  [self surfaceUpdated:YES];
-  [self onLocaleUpdated:nil];
-  [self onVoiceOverChanged:nil];
-  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.resumed"];
-
-  [super viewDidAppear:animated];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-  [self surfaceUpdated:NO];
-
-  [super viewWillDisappear:animated];
-}
-
-- (void)dealloc {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-  [super dealloc];
 }
 
 #pragma mark - Status Bar touch event handling
