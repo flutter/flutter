@@ -14,11 +14,13 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        jcenter()
-        maven {
-            url "https://maven.google.com"
+[rootProject, this].each {
+    it.allprojects {
+        repositories {
+            jcenter()
+            maven {
+                url "https://maven.google.com"
+            }
         }
     }
 }
