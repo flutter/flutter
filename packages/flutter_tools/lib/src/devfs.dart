@@ -286,7 +286,8 @@ class _DevFSHttpWriter {
     } catch (e) {
       if (retry < kMaxRetries) {
         printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
-        _scheduleWrite(deviceUri, content, retry + 1);
+        // Synchronization is handled by the _completer below.
+        _scheduleWrite(deviceUri, content, retry + 1); // ignore: unawaited_futures
         return;
       } else {
         printError('Error writing "$deviceUri" to DevFS: $e');
