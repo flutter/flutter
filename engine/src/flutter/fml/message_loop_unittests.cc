@@ -244,7 +244,7 @@ class CustomTaskObserver : public fml::TaskObserver {
 
   ~CustomTaskObserver() override = default;
 
-  void DidProcessTask() {
+  void DidProcessTask() override {
     if (lambda_) {
       lambda_();
     }

@@ -83,7 +83,7 @@ static sk_sp<SkSurface> WrapOnscreenSurface(GrContext* context,
                                             intptr_t fbo,
                                             bool supports_srgb) {
   const GrGLFramebufferInfo framebuffer_info = {
-      .fFBOID = fbo,
+      .fFBOID = static_cast<GrGLuint>(fbo),
   };
 
   const GrPixelConfig pixel_config =
