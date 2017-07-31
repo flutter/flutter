@@ -1351,13 +1351,19 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           );
         }
         canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
-        if (offsetClipRRect.isRect) {
-          canvas.save();
-        } else {
-          canvas.saveLayer(offsetBounds, _defaultPaint);
-        }
+        canvas.save();
         canvas.clipRRect(offsetClipRRect);
+        // We only use a new layer for non-rectangular clips, on the basis that
+        // rectangular clips won't need antialiasing. This is not really
+        // correct, because if we're e.g. rotated, rectangles will also be
+        // aliased. Unfortunately, it's too much of a performance win to err on
+        // the side of correctness here.
+        // TODO(ianh): Find a better solution.
+        if (!offsetClipRRect.isRect)
+          canvas.saveLayer(offsetBounds, _defaultPaint);
         super.paint(context, offset);
+        if (!offsetClipRRect.isRect)
+          canvas.restore();
         canvas.restore();
         assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
       }

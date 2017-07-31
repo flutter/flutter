@@ -466,6 +466,7 @@ class _FlutterLogoPainter extends BoxPainter {
         final double fontSize = 0.35 * logoTargetSquare.height * (1 - (10.4 * 2.0) / 202.0);
         final double scale = fontSize / 100.0;
         if (_config._position > -1.0) {
+          // This limits what the drawRect call below is going to blend with.
           canvas.saveLayer(_textBoundingRect, new Paint());
         } else {
           canvas.save();

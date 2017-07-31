@@ -330,10 +330,12 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipRectLayer(clipRect: offsetClipRect), painter, offset, childPaintBounds: offsetClipRect);
     } else {
-      canvas.save();
-      canvas.clipRect(offsetClipRect);
+      canvas
+        ..save()
+        ..clipRect(offsetClipRect);
       painter(this, offset);
-      canvas.restore();
+      canvas
+        ..restore();
     }
   }
 
@@ -355,10 +357,14 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipRRectLayer(clipRRect: offsetClipRRect), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      canvas.saveLayer(offsetBounds, _defaultPaint);
-      canvas.clipRRect(offsetClipRRect);
+      canvas
+        ..save()
+        ..clipRRect(offsetClipRRect)
+        ..saveLayer(offsetBounds, _defaultPaint);
       painter(this, offset);
-      canvas.restore();
+      canvas
+        ..restore()
+        ..restore();
     }
   }
 
@@ -380,10 +386,14 @@ class PaintingContext {
     if (needsCompositing) {
       pushLayer(new ClipPathLayer(clipPath: offsetClipPath), painter, offset, childPaintBounds: offsetBounds);
     } else {
-      canvas.saveLayer(bounds.shift(offset), _defaultPaint);
-      canvas.clipPath(clipPath.shift(offset));
+      canvas
+        ..save()
+        ..clipPath(clipPath.shift(offset))
+        ..saveLayer(bounds.shift(offset), _defaultPaint);
       painter(this, offset);
-      canvas.restore();
+      canvas
+        ..restore()
+        ..restore();
     }
   }
 
@@ -407,10 +417,12 @@ class PaintingContext {
         childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, canvasBounds),
       );
     } else {
-      canvas.save();
-      canvas.transform(effectiveTransform.storage);
+      canvas
+        ..save()
+        ..transform(effectiveTransform.storage);
       painter(this, offset);
-      canvas.restore();
+      canvas
+        ..restore();
     }
   }
 

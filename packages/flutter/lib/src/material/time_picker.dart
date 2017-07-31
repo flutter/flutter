@@ -429,7 +429,7 @@ class _DialPainter extends CustomPainter {
       center: focusedPoint, radius: focusedRadius
     );
     canvas
-      ..saveLayer(focusedRect, new Paint())
+      ..save()
       ..clipPath(new Path()..addOval(focusedRect));
     paintLabels(secondaryLabels);
     canvas.restore();
