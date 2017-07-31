@@ -492,7 +492,7 @@ class Border {
   /// requirement that the border [isUniform].
   void paint(Canvas canvas, Rect rect, {
     BoxShape shape: BoxShape.rectangle,
-    BorderRadius borderRadius: null,
+    BorderRadius borderRadius,
   }) {
     if (isUniform) {
       if (borderRadius != null) {

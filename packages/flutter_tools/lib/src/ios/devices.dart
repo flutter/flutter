@@ -423,7 +423,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => _forwardedPorts;
 
   @override
-  Future<int> forward(int devicePort, {int hostPort: null}) async {
+  Future<int> forward(int devicePort, {int hostPort}) async {
     if ((hostPort == null) || (hostPort == 0)) {
       // Auto select host port.
       hostPort = await portScanner.findAvailablePort();

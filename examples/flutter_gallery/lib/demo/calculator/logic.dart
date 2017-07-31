@@ -120,10 +120,10 @@ enum ExpressionState {
 class CalcExpression {
   CalcExpression(this._list, this.state);
 
-  CalcExpression.Empty()
+  CalcExpression.empty()
     : this(<ExpressionToken>[], ExpressionState.Start);
 
-  CalcExpression.Result(FloatToken result)
+  CalcExpression.result(FloatToken result)
     : _list = <ExpressionToken>[],
       state = ExpressionState.Result {
     _list.add(result);
