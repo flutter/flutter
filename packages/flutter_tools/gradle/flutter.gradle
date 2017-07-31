@@ -17,12 +17,12 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.bundling.Jar
 
 buildscript {
-  repositories {
-    jcenter()
-  }
-  dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.3'
-  }
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.3'
+    }
 }
 
 apply plugin: FlutterPlugin
@@ -35,6 +35,7 @@ class FlutterPlugin implements Plugin<Project> {
     private Properties localProperties
 
     private File flutterJar
+    private File flutterX86Jar
     private File debugFlutterJar
     private File profileFlutterJar
     private File releaseFlutterJar
@@ -119,7 +120,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
 
             // Add x86/x86_64 native library. Debug mode only, for now.
-            File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
+            flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
             project.tasks.create("flutterBuildX86Jar", Jar) {
                 destinationDir flutterX86Jar.parentFile
                 archiveName flutterX86Jar.name
@@ -130,12 +131,10 @@ class FlutterPlugin implements Plugin<Project> {
                     into "lib/x86_64"
                 }
             }
-
-            project.dependencies {
-                debugCompile project.files(flutterX86Jar, debugFlutterJar)
-                profileCompile project.files(profileFlutterJar)
-                releaseCompile project.files(releaseFlutterJar)
-            }
+            // Add flutter.jar dependencies to all <buildType>Compile configurations, including custom ones
+            // added after applying the Flutter plugin.
+            project.android.buildTypes.each { addFlutterJarCompileDependency(project, it) }
+            project.android.buildTypes.whenObjectAdded { addFlutterJarCompileDependency(project, it) }
         }
 
         project.extensions.create("flutter", FlutterExtension)
@@ -150,14 +149,14 @@ class FlutterPlugin implements Plugin<Project> {
                 project.dependencies {
                     compile pluginProject
                 }
-                pluginProject.afterEvaluate this.&addFlutterJarDependency
+                pluginProject.afterEvaluate this.&addFlutterJarProvidedDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
             }
         }
     }
 
-    private void addFlutterJarDependency(Project project) {
+    private void addFlutterJarProvidedDependency(Project project) {
         project.dependencies {
             if (flutterJar != null) {
                 provided project.files(flutterJar)
@@ -166,6 +165,42 @@ class FlutterPlugin implements Plugin<Project> {
                 releaseProvided project.files(releaseFlutterJar)
             }
         }
+    }
+
+    /**
+     * Adds suitable flutter.jar compile dependencies to the specified buildType.
+     *
+     * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
+     */
+    private void addFlutterJarCompileDependency(Project project, buildType) {
+        project.dependencies {
+            add(buildType.name + "Compile", project.files {
+                String buildMode = buildModeFor(buildType)
+                if (buildMode == "debug") {
+                    [flutterX86Jar, debugFlutterJar]
+                } else if (buildMode == "profile") {
+                    profileFlutterJar
+                } else {
+                    releaseFlutterJar
+                }
+            })
+        }
+    }
+
+    /**
+     * Returns a Flutter build mode suitable for the specified Android buildType.
+     *
+     * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
+     *
+     * @return "debug", "profile", or "release" (fall-back).
+     */
+    private static String buildModeFor(buildType) {
+        if (buildType.name == "profile") {
+            return "profile"
+        } else if (buildType.debuggable) {
+            return "debug"
+        }
+        return "release"
     }
 
     private void addFlutterTask(Project project) {
@@ -181,24 +216,24 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
-        if (project.tasks.findByName('flutterBuildX86Jar')) {
-            project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
-        }
-
         File kernel
         if (project.hasProperty('kernel')) {
             kernel = project.file(project.property('kernel'))
         }
 
         project.android.applicationVariants.all { variant ->
-            if (!["debug", "profile", "release"].contains(variant.name)) {
-                throw new GradleException("Build variant must be one of \"debug\", \"profile\", or \"release\" but was \"${variant.name}\"")
+            if (project.tasks.findByName('flutterBuildX86Jar')) {
+                Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
+                if (task) {
+                    task.dependsOn project.flutterBuildX86Jar
+                }
             }
 
-            GenerateDependencies dependenciesTask = project.tasks.create("flutterDependencies${variant.name.capitalize()}", GenerateDependencies) {
+            String flutterBuildMode = buildModeFor(variant.buildType)
+            GenerateDependencies dependenciesTask = project.tasks.create(name: "flutterDependencies${variant.name.capitalize()}", type: GenerateDependencies) {
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
-                buildMode variant.name
+                buildMode flutterBuildMode
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
@@ -207,11 +242,11 @@ class FlutterPlugin implements Plugin<Project> {
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
 
-            FlutterTask flutterTask = project.tasks.create("flutterBuild${variant.name.capitalize()}", FlutterTask) {
+            FlutterTask flutterTask = project.tasks.create(name: "flutterBuild${variant.name.capitalize()}", type: FlutterTask) {
                 dependsOn dependenciesTask
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
-                buildMode variant.name
+                buildMode flutterBuildMode
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
@@ -254,7 +289,7 @@ abstract class BaseFlutterTask extends DefaultTask {
         if (buildMode != 'debug') {
             return project.file("${intermediateDir}/snapshot.d")
         }
-        return  project.file("${intermediateDir}/snapshot_blob.bin.d")
+        return project.file("${intermediateDir}/snapshot_blob.bin.d")
     }
 
     void buildFlx() {
