@@ -30,9 +30,10 @@ static_library("zlib_x86_simd") {
 
 config("zlib_warnings") {
   visibility = [ ":*" ]
-  if (is_clang) {
-    cflags = [ "-Wno-incompatible-pointer-types" ]
-  }
+  cflags = [
+    "-Wno-incompatible-pointer-types",
+    "-Wno-shift-negative-value",
+  ]
 }
 
 static_library("zlib") {
@@ -74,8 +75,8 @@ static_library("zlib") {
 
   if (!is_ios && (current_cpu == "x86" || current_cpu == "x64")) {
     sources += [ "x86.c" ]
-    configs += [ ":zlib_warnings" ]
   }
+  configs += [ ":zlib_warnings" ]
 
   configs -= [ "//build/config/compiler:chromium_code" ]
   configs += [ "//build/config/compiler:no_chromium_code" ]
