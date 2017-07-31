@@ -170,9 +170,9 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Adds suitable flutter.jar compile dependencies to the specified buildType.
      *
-     * Note: The BuildType DSL type is not public, and is therefore just Object here.
+     * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      */
-    private void addFlutterJarCompileDependency(Project project, Object buildType) {
+    private void addFlutterJarCompileDependency(Project project, buildType) {
         project.dependencies {
             add(buildType.name + "Compile", project.files {
                 String buildMode = buildModeFor(buildType)
@@ -190,11 +190,11 @@ class FlutterPlugin implements Plugin<Project> {
     /**
      * Returns a Flutter build mode suitable for the specified Android buildType.
      *
-     * Note: The BuildType DSL type is not public, and is therefore just Object here.
+     * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      *
      * @return "debug", "profile", or "release" (fall-back).
      */
-    private String buildModeFor(Object buildType) {
+    private static String buildModeFor(buildType) {
         if (buildType.name == "profile") {
             return "profile"
         } else if (buildType.debuggable) {
