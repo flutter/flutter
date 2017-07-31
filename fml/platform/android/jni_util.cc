@@ -85,7 +85,7 @@ std::vector<std::string> StringArrayToVector(JNIEnv* env, jobjectArray array) {
   }
 
   out.resize(length);
-  for (size_t i = 0; i < length; ++i) {
+  for (jsize i = 0; i < length; ++i) {
     ScopedJavaLocalRef<jstring> java_string(
         env, static_cast<jstring>(env->GetObjectArrayElement(array, i)));
     out[i] = JavaStringToString(env, java_string.obj());

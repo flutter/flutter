@@ -22,7 +22,7 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate, public AndroidSurface {
 
   ~AndroidSurfaceGL() override;
 
-  bool IsValid() const;
+  bool IsValid() const override;
 
   bool IsOffscreenContextValid() const;
 
