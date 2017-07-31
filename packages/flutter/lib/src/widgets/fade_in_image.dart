@@ -16,8 +16,8 @@ import 'ticker_provider.dart';
 /// loading, then fades in the new image when it loads.
 ///
 /// Use this class to display long-loading images, such as [new NetworkImage],
-/// so that the image appears on screen with a graceful animation rather than a
-/// sudden jerk.
+/// so that the image appears on screen with a graceful animation rather than
+/// abruptly pops onto the screen.
 ///
 /// If the [image] emits an [ImageInfo] synchronously, such as when the image
 /// has been loaded and cached, the [image] is displayed immediately and the
@@ -30,16 +30,21 @@ import 'ticker_provider.dart';
 /// target [image].
 ///
 /// Prefer a [placeholder] that's already cached so that it is displayed in one
-/// frame. This prevents it from appearing suddenly on the screen.
+/// frame. This prevents it from popping onto the screen.
 ///
 /// When [image] changes it is resolved to a new [ImageStream]. If the new
 /// [ImageStream.key] is different this widget subscribes to the new stream and
-/// replaces the displayed image to images emitted by the new stream.
+/// replaces the displayed image with images emitted by the new stream.
 ///
 /// When [placeholder] changes and the [image] has not yet emitted an
 /// [ImageInfo], then [placeholder] is resolved to a new [ImageStream]. If the
 /// new [ImageStream.key] is different this widget subscribes to the new stream
 /// and replaces the displayed image to images emitted by the new stream.
+///
+/// When either [placeholder] or [image] changes, this widget continues showing
+/// the previously loaded image (if any) until the new image provider provides a
+/// different image. This is known as "gapless playback" (see also
+/// [Image.gaplessPlayback]).
 ///
 /// ## Sample code:
 ///
@@ -55,7 +60,7 @@ class FadeInImage extends StatefulWidget {
   /// then cross-fades to display the [image].
   ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
-  /// [fadeInDuration] and [fadeInCurve] arguments must not be null.
+  /// [fadeInDuration], [fadeInCurve] and [repeat] arguments must not be null.
   const FadeInImage({
     Key key,
     @required this.placeholder,
@@ -75,6 +80,7 @@ class FadeInImage extends StatefulWidget {
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
        assert(fadeInCurve != null),
+       assert(repeat != null),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in memory while
@@ -87,8 +93,9 @@ class FadeInImage extends StatefulWidget {
   /// [placeholderScale] and [imageScale] are passed to their respective
   /// [ImageProvider]s (see also [ImageInfo.scale]).
   ///
-  /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
-  /// [fadeInDuration] and [fadeInCurve] arguments must not be null.
+  /// The [placeholder], [image], [placeholderScale], [imageScale],
+  /// [fadeOutDuration], [fadeOutCurve], [fadeInDuration], [fadeInCurve] and
+  /// [repeat] arguments must not be null.
   ///
   /// See also:
   ///
@@ -113,12 +120,15 @@ class FadeInImage extends StatefulWidget {
     this.repeat: ImageRepeat.noRepeat,
   }) : assert(placeholder != null),
        assert(image != null),
-       placeholder = new MemoryImage(placeholder, scale: placeholderScale),
-       image = new NetworkImage(image, scale: imageScale),
+       assert(placeholderScale != null),
+       assert(imageScale != null),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
        assert(fadeInCurve != null),
+       assert(repeat != null),
+       placeholder = new MemoryImage(placeholder, scale: placeholderScale),
+       image = new NetworkImage(image, scale: imageScale),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -131,8 +141,13 @@ class FadeInImage extends StatefulWidget {
   /// [placeholderScale] and [imageScale] are passed to their respective
   /// [ImageProvider]s (see also [ImageInfo.scale]).
   ///
-  /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
-  /// [fadeInDuration] and [fadeInCurve] arguments must not be null.
+  /// If [placeholderScale] is omitted or is null, the pixel-density-aware asset
+  /// resolution will be attempted for the [placeholder] image. Otherwise, the
+  /// exact asset specified will be used.
+  ///
+  /// The [placeholder], [image], [imageScale], [fadeOutDuration],
+  /// [fadeOutCurve], [fadeInDuration], [fadeInCurve] and [repeat] arguments
+  /// must not be null.
   ///
   /// See also:
   ///
@@ -161,11 +176,13 @@ class FadeInImage extends StatefulWidget {
        placeholder = placeholderScale != null
          ? new ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale)
          : new AssetImage(placeholder, bundle: bundle),
-       image = new NetworkImage(image, scale: imageScale),
+       assert(imageScale != null),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
        assert(fadeInCurve != null),
+       assert(repeat != null),
+       image = new NetworkImage(image, scale: imageScale),
        super(key: key);
 
   /// Image displayed while the target [image] is loading.
@@ -405,7 +422,8 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   }
 
   bool get _isShowingPlaceholder {
-    switch(_phase) {
+    assert(_phase != null);
+    switch (_phase) {
       case FadeInImagePhase.start:
       case FadeInImagePhase.waiting:
       case FadeInImagePhase.fadeOut:
@@ -415,7 +433,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
         return false;
     }
 
-    throw new StateError('Unrecognized FadeInImage phase: $_phase');
+    return null;
   }
 
   ImageInfo get _imageInfo {
@@ -427,11 +445,12 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     assert(_phase != FadeInImagePhase.start);
+    final ImageInfo imageInfo = _imageInfo;
     return new RawImage(
-      image: _imageInfo?.image,
+      image: imageInfo?.image,
       width: widget.width,
       height: widget.height,
-      scale: _imageInfo?.scale ?? 1.0,
+      scale: imageInfo?.scale ?? 1.0,
       color: new Color.fromRGBO(255, 255, 255, _animation?.value ?? 1.0),
       colorBlendMode: BlendMode.modulate,
       fit: widget.fit,

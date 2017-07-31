@@ -133,10 +133,11 @@ class Image extends StatefulWidget {
   /// If the `bundle` argument is omitted or null, then the
   /// [DefaultAssetBundle] will be used.
   ///
-  /// By default, the exact asset specified will be used. In addition:
+  /// By default, the pixel-density-aware asset resolution will be attempted. In
+  /// addition:
   ///
-  /// * If the `scale` argument is omitted or null, then pixel-density-aware
-  ///   asset resolution will be attempted.
+  /// * If the `scale` argument is provided and is not null, then the exact
+  /// asset specified will be used.
   //
   // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
   // ///

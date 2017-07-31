@@ -7,7 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'image_test_utils.dart';
+import '../services/image_test_utils.dart';
 
 Future<Null> main() async {
   // These must run outside test zone to complete
