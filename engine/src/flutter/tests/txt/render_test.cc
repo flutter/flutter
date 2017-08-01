@@ -58,7 +58,7 @@ void RenderTest::SetUp() {
   bitmap_ = std::make_unique<SkBitmap>();
   bitmap_->allocN32Pixels(GetTestCanvasWidth(), GetTestCanvasHeight());
   canvas_ = std::make_unique<SkCanvas>(*bitmap_);
-  canvas_->clear(SK_ColorTRANSPARENT);
+  canvas_->clear(SK_ColorWHITE);
 }
 
 void RenderTest::TearDown() {

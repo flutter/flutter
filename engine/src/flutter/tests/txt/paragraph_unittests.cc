@@ -39,7 +39,6 @@ TEST_F(RenderTest, SimpleParagraph) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  text_style.font_size = 12;
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
 
@@ -1304,7 +1303,7 @@ TEST_F(RenderTest, KernParagraph) {
   txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
-  text_style.font_family = "Roboto";
+  text_style.font_family = "Droid Serif";
   text_style.font_size = 100;
   text_style.letter_spacing = 0;
   text_style.word_spacing = 0;
@@ -1316,8 +1315,11 @@ TEST_F(RenderTest, KernParagraph) {
   builder.AddText("A");
   builder.PushStyle(text_style);
   builder.AddText("V");
+  text_style.font_size = 12;
   builder.PushStyle(text_style);
-  builder.AddText(" Dialog");
+  builder.AddText(
+      " Dialog Text List lots of words to see if kerning works on a bigger set "
+      "of characters AVAVAW");
 
   builder.Pop();
 
@@ -1330,9 +1332,9 @@ TEST_F(RenderTest, KernParagraph) {
 
   EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 441.16796875f);
-  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 506.16796875);
-  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 570.16796875);
+  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 622.015625f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 693.015625);
+  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 760.015625);
 
   ASSERT_TRUE(Snapshot());
 }
