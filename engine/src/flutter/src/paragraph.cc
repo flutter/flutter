@@ -416,7 +416,7 @@ void Paragraph::Layout(double width, bool force) {
                                             run.style.height;
       if (max_line_spacing < temp_line_spacing) {
         max_line_spacing = temp_line_spacing;
-        // Record the alphabetic_baseline_:
+        // Record the alphabetic_baseline_ and idegraphic_baseline_:
         if (lines_ == 0) {
           alphabetic_baseline_ = -metrics.fAscent * run.style.height;
           // TODO(garyq): Properly implement ideographic_baseline_.
@@ -466,8 +466,8 @@ void Paragraph::Layout(double width, bool force) {
   postprocess_line();
   if (line_width != 0)
     line_widths_.push_back(line_width);
-
-  line_heights_.push_back(FLT_MAX);
+  line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
+                          max_line_spacing + max_descent);
   glyph_single_line_position_x.push_back(glyph_single_line_position_x.back() +
                                          prev_char_advance);
   glyph_single_line_position_x.push_back(FLT_MAX);
@@ -830,22 +830,25 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(
   size_t offset = 0;
   size_t y_index = 1;
   size_t prev_count = 0;
-  for (y_index = 1; y_index < line_heights_.size(); ++y_index) {
+  for (y_index = 1; y_index < line_heights_.size() - 2; ++y_index) {
     if (dy < line_heights_[y_index]) {
       offset += prev_count;
+      prev_count = glyph_position_x_[y_index - 1].size() - 3;
       break;
     } else {
       offset += prev_count;
       prev_count = glyph_position_x_[y_index].size() - 3;
     }
   }
+  if (y_index == line_heights_.size() - 2)
+    offset += prev_count;
   prev_count = 0;
   for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size() - 1;
        ++x_index) {
     if (dx < glyph_position_x_[y_index][x_index] -
                  (using_glyph_center_as_boundary
                       ? (glyph_position_x_[y_index][x_index] -
-                         glyph_position_x_[y_index][x_index -1]) /
+                         glyph_position_x_[y_index][x_index - 1]) /
                             2.0f
                       : 0)) {
       break;

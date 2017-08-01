@@ -922,6 +922,7 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 270), 54ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 90), 19ull);
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 10000), 77ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(85, 10000), 74ull);
 }
 
 TEST_F(RenderTest, GetRectsForRangeParagraph) {
