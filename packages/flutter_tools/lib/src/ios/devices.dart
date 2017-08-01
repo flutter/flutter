@@ -21,7 +21,6 @@ import 'mac.dart';
 
 const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
-    'brew update\n'
     'brew install ideviceinstaller.';
 
 const Duration kPortForwardTimeout = const Duration(seconds: 10);
@@ -46,7 +45,6 @@ class IOSDevice extends Device {
     _pusherPath = _checkForCommand(
       'ios-deploy',
       'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
-      'brew update\n'
       'brew install ios-deploy'
     );
   }

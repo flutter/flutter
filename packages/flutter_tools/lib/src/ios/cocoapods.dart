@@ -23,12 +23,10 @@ final String noCocoaPodsConsequence = '''
   For more info, see https://flutter.io/platform-plugins''';
 
 final String cocoaPodsInstallInstructions = '''
-  brew update
   brew install cocoapods
   pod setup''';
 
 final String cocoaPodsUpgradeInstructions = '''
-  brew update
   brew upgrade cocoapods
   pod setup''';
 
