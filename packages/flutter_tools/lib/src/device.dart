@@ -116,35 +116,28 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   final String name;
   ItemListNotifier<Device> _items;
-  Timer _timer;
+  Poller _poller;
 
   Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
-    if (_timer == null) {
+    if (_poller == null) {
       _items ??= new ItemListNotifier<Device>();
-      bool _fetchingDevices = false;
-      _timer = new Timer.periodic(_pollingInterval, (Timer timer) async {
-        if (_fetchingDevices) {
-          printTrace('Skipping device poll: already in progress');
-          return;
-        }
-        _fetchingDevices = true;
+
+      _poller = new Poller(() async {
         try {
           final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
           _items.updateWithNewList(devices);
         } on TimeoutException {
           printTrace('Device poll timed out.');
-        } finally {
-          _fetchingDevices = false;
         }
-      });
+      }, _pollingInterval);
     }
   }
 
   void stopPolling() {
-    _timer?.cancel();
-    _timer = null;
+    _poller?.cancel();
+    _poller = null;
   }
 
   @override
