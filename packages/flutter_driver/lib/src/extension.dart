@@ -200,7 +200,7 @@ class FlutterDriverExtension {
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
 
-    await _waitUntilFrame(() => finder.evaluate().isNotEmpty);
+    await _waitUntilFrame(() => finder.precache());
 
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
@@ -213,7 +213,7 @@ class FlutterDriverExtension {
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
 
-    await _waitUntilFrame(() => finder.evaluate().isEmpty);
+    await _waitUntilFrame(() => !finder.precache());
 
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
@@ -268,8 +268,10 @@ class FlutterDriverExtension {
 
   Future<WaitForResult> _waitFor(Command command) async {
     final WaitFor waitForCommand = command;
-    await _waitForElement(_createFinder(waitForCommand.finder));
-    return new WaitForResult();
+    if ((await _waitForElement(_createFinder(waitForCommand.finder))).evaluate().isNotEmpty)
+      return new WaitForResult();
+    else
+      return null;
   }
 
   Future<WaitForAbsentResult> _waitForAbsent(Command command) async {
