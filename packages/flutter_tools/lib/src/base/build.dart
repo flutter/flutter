@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:convert' show JSON;
 
 import 'package:crypto/crypto.dart' show md5;
@@ -42,22 +41,4 @@ class Checksum {
 
   @override
   int get hashCode => _checksums.hashCode;
-}
-
-/// Parses a VM snapshot dependency file.
-///
-/// Snapshot dependency files are a single line mapping the output snapshot to a
-/// space-separated list of input files used to generate that output. e.g,
-///
-/// outfile : file1.dart file2.dart file3.dart
-Future<Set<String>> readDepfile(String depfilePath) async {
-  // Depfile format:
-  // outfile1 outfile2 : file1.dart file2.dart file3.dart
-  final String contents = await fs.file(depfilePath).readAsString();
-  final String dependencies = contents.split(': ')[1];
-  return dependencies
-      .split(' ')
-      .map((String path) => path.trim())
-      .where((String path) => path.isNotEmpty)
-      .toSet();
 }
