@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import '../artifacts.dart';
-import '../base/build.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -150,14 +149,12 @@ Future<String> _buildAotSnapshot(
   final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
   final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
-  final List<String> inputPaths = <String>[
+  final List<String> filePaths = <String>[
     vmEntryPoints,
     ioEntryPoints,
     uiPath,
     vmServicePath,
   ];
-
-  final Set<String> outputPaths = new Set<String>();
 
   // These paths are used only on iOS.
   String snapshotDartIOS;
@@ -167,15 +164,13 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      outputPaths.addAll(<String>[
-        vmSnapshotData,
-        isolateSnapshotData,
-      ]);
       break;
     case TargetPlatform.ios:
       snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
       assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
-      inputPaths.add(snapshotDartIOS);
+      filePaths.addAll(<String>[
+        snapshotDartIOS,
+      ]);
       break;
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
@@ -184,9 +179,9 @@ Future<String> _buildAotSnapshot(
       assert(false);
   }
 
-  final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
-  if (missingInputs.isNotEmpty) {
-    printError('Missing input files: $missingInputs');
+  final List<String> missingFiles = filePaths.where((String p) => !fs.isFileSync(p)).toList();
+  if (missingFiles.isNotEmpty) {
+    printError('Missing files: $missingFiles');
     return null;
   }
   if (!processManager.canRun(genSnapshot)) {
@@ -212,17 +207,6 @@ Future<String> _buildAotSnapshot(
     genSnapshotCmd.add('--embedder_entry_points_manifest=$ioEntryPoints');
   }
 
-  // iOS symbols used to load snapshot data in the engine.
-  const String kVmSnapshotData = 'kDartVmSnapshotData';
-  const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
-
-  // iOS snapshot generated files, compiled object files.
-  final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
-  final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
-  final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
-  final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
-  final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
-
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
@@ -239,14 +223,9 @@ Future<String> _buildAotSnapshot(
       if (interpreter) {
         genSnapshotCmd.add('--snapshot_kind=core');
         genSnapshotCmd.add(snapshotDartIOS);
-        outputPaths.addAll(<String>[
-          kVmSnapshotDataO,
-          kIsolateSnapshotDataO,
-        ]);
       } else {
         genSnapshotCmd.add('--snapshot_kind=app-aot-assembly');
         genSnapshotCmd.add('--assembly=$assembly');
-        outputPaths.add(assemblyO);
       }
       break;
     case TargetPlatform.darwin_x64:
@@ -265,27 +244,6 @@ Future<String> _buildAotSnapshot(
 
   genSnapshotCmd.add(mainPath);
 
-  final File checksumFile = fs.file('$dependencies.checksum');
-  final List<File> checksumFiles = <File>[checksumFile, fs.file(dependencies)]
-      ..addAll(inputPaths.map(fs.file))
-      ..addAll(outputPaths.map(fs.file));
-  if (checksumFiles.every((File file) => file.existsSync())) {
-    try {
-      final String json = await checksumFile.readAsString();
-      final Checksum oldChecksum = new Checksum.fromJson(json);
-      final Set<String> snapshotInputPaths = await readDepfile(dependencies);
-      snapshotInputPaths.addAll(outputPaths);
-      final Checksum newChecksum = new Checksum.fromFiles(snapshotInputPaths);
-      if (oldChecksum == newChecksum) {
-        printTrace('Skipping AOT snapshot build. Checksums match.');
-        return outputPath;
-      }
-    } catch (e, s) {
-      // Log exception and continue, this step is a performance improvement only.
-      printTrace('Error during AOT snapshot checksum check: $e\n$s');
-    }
-  }
-
   final RunResult results = await runAsync(genSnapshotCmd);
   if (results.exitCode != 0) {
     printError('Dart snapshot generator failed with exit code ${results.exitCode}');
@@ -301,6 +259,16 @@ Future<String> _buildAotSnapshot(
   // end-developer can link into their app.
   if (platform == TargetPlatform.ios) {
     printStatus('Building App.framework...');
+
+    // These names are known to from the engine.
+    const String kVmSnapshotData = 'kDartVmSnapshotData';
+    const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
+
+    final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
+    final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
+    final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
+    final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
+    final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
 
     final List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
 
@@ -346,17 +314,6 @@ Future<String> _buildAotSnapshot(
       linkCommand.add(assemblyO);
     }
     await runCheckedAsync(linkCommand);
-  }
-
-  // Compute and record checksums.
-  try {
-    final Set<String> snapshotInputPaths = await readDepfile(dependencies);
-    snapshotInputPaths..addAll(outputPaths);
-    final Checksum checksum = new Checksum.fromFiles(snapshotInputPaths);
-    await checksumFile.writeAsString(checksum.toJson());
-  } catch (e, s) {
-    // Log exception and continue, this step is a performance improvement only.
-    printTrace('Error during AOT snapshot checksum output: $e\n$s');
   }
 
   return outputPath;
