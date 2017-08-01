@@ -86,11 +86,11 @@ class Paragraph {
   double GetMaxWidth() const;
 
   // Distance from top of paragraph to the Alphabetic baseline of the first
-  // line.
+  // line. Used for alphabetic fonts (A-Z, a-z, greek, etc.)
   double GetAlphabeticBaseline() const;
 
   // Distance from top of paragraph to the Ideographic baseline of the first
-  // line.
+  // line. Used for ideographic fonts (Chinese, Japanese, Korean, etc.)
   double GetIdeographicBaseline() const;
 
   // Returns the total width covered by the paragraph without linebreaking.
@@ -98,6 +98,8 @@ class Paragraph {
 
   // Currently, calculated similarly to as GetLayoutWidth(), however this is not
   // nessecarily 100% correct in all cases.
+  //
+  // Returns the actual max width of the longest line after Layout().
   double GetMinIntrinsicWidth() const;
 
   // Returns a vector of bounding boxes that enclose all text between start and
@@ -108,7 +110,10 @@ class Paragraph {
   // with the top left corner as the origin, and +y direction as down.
   //
   // When using_glyph_center_as_boundary == true, coords to the + direction of
-  // the center x-position of the glyph will be considered as the next glyph.
+  // the center x-position of the glyph will be considered as the next glyph. A
+  // typical use-case for this is when the cursor is meant to be on either side
+  // of any given character. This allows the transition border to be middle of
+  // each character.
   size_t GetGlyphPositionAtCoordinate(
       double dx,
       double dy,
