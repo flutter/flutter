@@ -617,8 +617,13 @@ typedef List<PopupMenuEntry<T>> PopupMenuItemBuilder<T>(BuildContext context);
 
 /// Displays a menu when pressed and calls [onSelected] when the menu is dismissed
 /// because an item was selected. The value passed to [onSelected] is the value of
-/// the selected menu item. If child is null then a standard 'navigation/more_vert'
-/// icon is created.
+/// the selected menu item.
+///
+/// One of [child] or [icon] may be provided, but not both. If [icon] is provided,
+/// then [PopupMenuButton] behaves like an [IconButton].
+///
+/// If both are null, then a standard overflow icon is created (depending on the
+/// platform).
 ///
 /// ## Sample code
 ///
@@ -672,8 +677,10 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.tooltip: 'Show menu',
     this.elevation: 8.0,
     this.padding: const EdgeInsets.all(8.0),
-    this.child
+    this.child,
+    this.icon,
   }) : assert(itemBuilder != null),
+       assert(!(child != null && icon != null)), // fails if passed both parameters
        super(key: key);
 
   /// Called when the button is pressed to create the items to show in the menu.
@@ -702,8 +709,11 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// to set the padding to zero.
   final EdgeInsets padding;
 
-  /// The widget below this widget in the tree.
+  /// If provided, the widget used for this button.
   final Widget child;
+
+  /// If provided, the icon used for this button.
+  final Icon icon;
 
   @override
   _PopupMenuButtonState<T> createState() => new _PopupMenuButtonState<T>();
@@ -747,17 +757,16 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.child == null) {
-      return new IconButton(
-        icon: _getIcon(Theme.of(context).platform),
-        padding: widget.padding,
-        tooltip: widget.tooltip,
-        onPressed: showButtonMenu,
-      );
-    }
-    return new InkWell(
-      onTap: showButtonMenu,
-      child: widget.child,
-    );
+    return widget.child != null
+      ? new InkWell(
+          onTap: showButtonMenu,
+          child: widget.child,
+        )
+      : new IconButton(
+          icon: widget.icon ?? _getIcon(Theme.of(context).platform),
+          padding: widget.padding,
+          tooltip: widget.tooltip,
+          onPressed: showButtonMenu,
+        );
   }
 }
