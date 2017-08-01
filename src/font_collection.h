@@ -18,6 +18,12 @@
 #define LIB_TXT_SRC_FONT_COLLECTION_H_
 
 #define DEFAULT_FAMILY_NAME "Roboto"
+#ifdef ANDROID_FONT_MANAGER_AVAILABLE
+#undef DEFAULT_FAMILY_NAME
+// On Android, Roboto is called 'sans-serif'
+#define DEFAULT_FAMILY_NAME "sans-serif"
+#endif
+
 #define DEFAULT_CACHE_CAPACITY 20
 
 #include <list>

@@ -28,7 +28,7 @@
 namespace txt {
 
 TEST_F(RenderTest, SimpleParagraph) {
-  const char* text = "Hello World";
+  const char* text = "Hello World Text Dialog";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
@@ -39,6 +39,7 @@ TEST_F(RenderTest, SimpleParagraph) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
+  text_style.font_size = 12;
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
 
