@@ -24,7 +24,7 @@ static const size_t kGrCacheMaxByteSize = 512 * (1 << 20);
 
 GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
     : delegate_(delegate),
-      onscreen_surface_supports_sgrb_(delegate_->SurfaceSupportsSRGB()),
+      onscreen_surface_supports_srgb_(delegate_->SurfaceSupportsSRGB()),
       weak_factory_(this) {
   if (!delegate_->GLContextMakeCurrent()) {
     FTL_LOG(ERROR)
@@ -156,13 +156,13 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
 
   onscreen_surface =
       WrapOnscreenSurface(context_.get(), size, delegate_->GLContextFBO(),
-                          onscreen_surface_supports_sgrb_);
+                          onscreen_surface_supports_srgb_);
   if (onscreen_surface == nullptr) {
     FTL_LOG(ERROR) << "Could not wrap onscreen surface.";
     return false;
   }
 
-  if (!onscreen_surface_supports_sgrb_) {
+  if (!onscreen_surface_supports_srgb_) {
     offscreen_surface = CreateOffscreenSurface(context_.get(), size);
     if (offscreen_surface == nullptr) {
       FTL_LOG(ERROR) << "Could not create offscreen surface.";
@@ -208,7 +208,7 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
     return false;
   }
 
-  if (!onscreen_surface_supports_sgrb_) {
+  if (!onscreen_surface_supports_srgb_) {
     // Because the surface did not support sRGB, we rendered to an offscreen
     // surface. Now we must ensure that the texture is copied onscreen.
     TRACE_EVENT0("flutter", "CopyTextureOnscreen");
@@ -241,7 +241,7 @@ sk_sp<SkSurface> GPUSurfaceGL::AcquireRenderSurface(const SkISize& size) {
     return nullptr;
   }
 
-  return onscreen_surface_supports_sgrb_ ? onscreen_surface_
+  return onscreen_surface_supports_srgb_ ? onscreen_surface_
                                          : offscreen_surface_;
 }
 
