@@ -13,9 +13,12 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+// "An Observatory debugger and profiler on iPhone SE is available at: http://127.0.0.1:8100/"
+final RegExp observatoryRegExp = new RegExp(r'An Observatory debugger .* is available at: (\S+:(\d+))');
+
 void main() {
   task(() async {
-    final int vmServicePort = await findAvailablePort();
+    int vmServicePort;
 
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -26,7 +29,7 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '--observatory-port=$vmServicePort', '-d', device.deviceId, 'lib/commands.dart'],
+        <String>['run', '--verbose', '-d', device.deviceId, 'lib/commands.dart'],
       );
       final StreamController<String> stdout = new StreamController<String>.broadcast();
       run.stdout
@@ -35,7 +38,10 @@ void main() {
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
-          if (line.contains(new RegExp(r'^\[\s+\] For a more detailed help message, press "h"\. To quit, press "q"\.'))) {
+          if (line.contains(observatoryRegExp)) {
+            final Match match = observatoryRegExp.firstMatch(line);
+            vmServicePort = int.parse(match.group(2));
+            print('service protocol connection available at ${match.group(1)}');
             print('run: ready!');
             ready.complete();
             ok ??= true;
