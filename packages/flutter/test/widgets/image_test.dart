@@ -196,7 +196,7 @@ void main() {
       )
     );
 
-    expect(imageProvider._configuration.devicePixelRatio, 5.0);
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
 
     // This is the same widget hierarchy as before except that the
     // two MediaQuery objects have exchanged places. The imageProvider
@@ -222,7 +222,7 @@ void main() {
       )
     );
 
-    expect(imageProvider._configuration.devicePixelRatio, 10.0);
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
   });
 
   testWidgets('Verify ImageProvider configuration inheritance again', (WidgetTester tester) async {
@@ -259,7 +259,7 @@ void main() {
       )
     );
 
-    expect(imageProvider._configuration.devicePixelRatio, 5.0);
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
 
     await tester.pumpWidget(
       new Row(
@@ -287,7 +287,7 @@ void main() {
       )
     );
 
-    expect(imageProvider._configuration.devicePixelRatio, 10.0);
+    expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
   });
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
@@ -318,11 +318,33 @@ void main() {
     expect(renderer.color, const Color(0xFF00FF00));
     expect(renderer.colorBlendMode, BlendMode.clear);
   });
+
+  testWidgets('Precache', (WidgetTester tester) async {
+    final TestImageProvider provider = new TestImageProvider();
+    Future<Null> precache;
+    await tester.pumpWidget(
+      new Builder(
+        builder: (BuildContext context) {
+          precache = precacheImage(provider, context);
+          return new Container();
+        }
+      )
+    );
+    provider.complete();
+    await precache;
+    expect(provider._lastResolvedConfiguration, isNotNull);
+
+    // Check that a second resolve of the same image is synchronous.
+    final ImageStream stream = provider.resolve(provider._lastResolvedConfiguration);
+    bool isSync;
+    stream.addListener((ImageInfo image, bool sync) { isSync = sync; });
+    expect(isSync, isTrue);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   final Completer<ImageInfo> _completer = new Completer<ImageInfo>();
-  ImageConfiguration _configuration;
+  ImageConfiguration _lastResolvedConfiguration;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -331,7 +353,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   ImageStream resolve(ImageConfiguration configuration) {
-    _configuration = configuration;
+    _lastResolvedConfiguration = configuration;
     return super.resolve(configuration);
   }
 
