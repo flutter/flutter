@@ -276,8 +276,8 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
   }
 
   @override
-  Future<Null> reassembleApplication() async {
-    await super.reassembleApplication();
+  Future<Null> performReassemble() async {
+    await super.performReassemble();
     Timeline.startSync('Dirty Render Tree');
     try {
       renderView.reassemble();
