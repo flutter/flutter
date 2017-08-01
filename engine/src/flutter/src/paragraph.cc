@@ -842,12 +842,10 @@ size_t Paragraph::GetGlyphPositionAtCoordinate(
   prev_count = 0;
   for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size() - 1;
        ++x_index) {
-    // TODO(garyq): Resolve edge case where second to last glyph position is
-    // skipped/unreachable.
     if (dx < glyph_position_x_[y_index][x_index] -
                  (using_glyph_center_as_boundary
-                      ? (glyph_position_x_[y_index][x_index + 1] -
-                         glyph_position_x_[y_index][x_index]) /
+                      ? (glyph_position_x_[y_index][x_index] -
+                         glyph_position_x_[y_index][x_index -1]) /
                             2.0f
                       : 0)) {
       break;

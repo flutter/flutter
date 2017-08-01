@@ -21,7 +21,7 @@ config("txt_config") {
 }
 
 source_set("txt") {
-  if (current_toolchain == host_toolchain) {
+  if (current_toolchain == host_toolchain && !is_mac) {
     defines = [ "DIRECTORY_FONT_MANAGER_AVAILABLE" ]
   }
   if (is_android) {
