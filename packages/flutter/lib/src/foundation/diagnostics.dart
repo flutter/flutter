@@ -1761,6 +1761,9 @@ class DiagnosticPropertiesBuilder {
   String emptyBodyDescription;
 }
 
+// Examples can assume:
+// class ExampleSuperclass extends Diagnosticable { String message; double stepWidth; double scale; double paintExtent; double hitTestExtent; double paintExtend; double maxWidth; bool primary; double progress; int maxLines; Duration duration; int depth; dynamic boxShadow; dynamic style; bool hasSize; Matrix4 transform; Map<Listenable, VoidCallback> handles; Color color; bool obscureText; ImageRepeat repeat; Size size; Widget widget; bool isCurrent; bool keepAlive; TextAlign textAlign; }
+
 /// A base class for providing string and [DiagnosticsNode] debug
 /// representations describing the properties of an object.
 ///
@@ -1897,7 +1900,7 @@ abstract class Diagnosticable {
   /// common [DiagnosticsProperty] parameters.
   ///
   /// ```dart
-  /// abstract class ExampleObject extends ExampleSuperclass with TreeDiagnosticsMixin {
+  /// class ExampleObject extends ExampleSuperclass  {
   ///
   ///   // ...various members and properties...
   ///
