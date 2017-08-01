@@ -40,7 +40,7 @@ class GPUSurfaceGL : public Surface {
 
  private:
   GPUSurfaceGLDelegate* delegate_;
-  bool onscreen_surface_supports_sgrb_;
+  bool onscreen_surface_supports_srgb_;
   sk_sp<GrContext> context_;
   sk_sp<SkSurface> onscreen_surface_;
   sk_sp<SkSurface> offscreen_surface_;
