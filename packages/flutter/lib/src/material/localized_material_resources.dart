@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 class LocalizedMaterialResources {
@@ -12,7 +13,7 @@ class LocalizedMaterialResources {
   final Locale locale;
 
   static Future<LocalizedMaterialResources> load(Locale locale) {
-    return new Future<LocalizedMaterialResources>.value(new LocalizedMaterialResources(locale));
+    return new SynchronousFuture<LocalizedMaterialResources>(new LocalizedMaterialResources(locale));
   }
 
   static LocalizedMaterialResources of(BuildContext context) {

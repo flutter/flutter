@@ -28,33 +28,35 @@ void main() {
     DateTime _selectedDate = new DateTime(2016, DateTime.JULY, 26);
 
     await tester.pumpWidget(
-      new Overlay(
-        initialEntries: <OverlayEntry>[
-          new OverlayEntry(
-            builder: (BuildContext context) => new StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return new Positioned(
-                  width: 400.0,
-                  child: new SingleChildScrollView(
-                    child: new Material(
-                      child: new MonthPicker(
-                        firstDate: new DateTime(0),
-                        lastDate: new DateTime(9999),
-                        key: _datePickerKey,
-                        selectedDate: _selectedDate,
-                        onChanged: (DateTime value) {
-                          setState(() {
-                            _selectedDate = value;
-                          });
-                        },
+      new MaterialApp(
+        home: new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) => new StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return new Positioned(
+                    width: 400.0,
+                    child: new SingleChildScrollView(
+                      child: new Material(
+                        child: new MonthPicker(
+                          firstDate: new DateTime(0),
+                          lastDate: new DateTime(9999),
+                          key: _datePickerKey,
+                          selectedDate: _selectedDate,
+                          onChanged: (DateTime value) {
+                            setState(() {
+                              _selectedDate = value;
+                            });
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));
@@ -93,29 +95,31 @@ void main() {
 
   testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Overlay(
-        initialEntries: <OverlayEntry>[
-          new OverlayEntry(
-            builder: (BuildContext context) => new StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return new IntrinsicWidth(
-                  child: new IntrinsicHeight(
-                    child: new Material(
-                      child: new SingleChildScrollView(
-                        child: new MonthPicker(
-                          firstDate: new DateTime(0),
-                          lastDate: new DateTime(9999),
-                          onChanged: (DateTime value) { },
-                          selectedDate: new DateTime(2000, DateTime.JANUARY, 1),
+      new MaterialApp(
+        home: new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) => new StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return new IntrinsicWidth(
+                    child: new IntrinsicHeight(
+                      child: new Material(
+                        child: new SingleChildScrollView(
+                          child: new MonthPicker(
+                            firstDate: new DateTime(0),
+                            lastDate: new DateTime(9999),
+                            onChanged: (DateTime value) { },
+                            selectedDate: new DateTime(2000, DateTime.JANUARY, 1),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
     await tester.pump(const Duration(seconds: 5));

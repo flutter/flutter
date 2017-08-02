@@ -11,9 +11,7 @@ import 'package:flutter/rendering.dart' show
   debugPaintLayerBordersEnabled,
   debugPaintPointersEnabled,
   debugRepaintRainbowEnabled;
-import 'package:intl/intl.dart';
 
-import 'i18n/stock_messages_all.dart';
 import 'stock_data.dart';
 import 'stock_home.dart';
 import 'stock_settings.dart';
