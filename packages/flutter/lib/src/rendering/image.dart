@@ -14,7 +14,7 @@ export 'package:flutter/painting.dart' show
 /// An image in the render tree.
 ///
 /// The render image attempts to find a size for itself that fits in the given
-/// constraints and preserves the image's intrinisc aspect ratio.
+/// constraints and preserves the image's intrinsic aspect ratio.
 ///
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
