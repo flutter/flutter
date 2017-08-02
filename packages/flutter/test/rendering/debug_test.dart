@@ -31,6 +31,16 @@ void main() {
     expect(simple.name, equals('transform'));
     expect(simple.value, same(transform));
     expect(
+      simple.toString(parentConfiguration: sparseTextConfiguration),
+      equals(
+        'transform:\n'
+        '  [0] 2.0,0.0,0.0,0.0\n'
+        '  [1] 0.0,2.0,0.0,0.0\n'
+        '  [2] 0.0,0.0,2.0,0.0\n'
+        '  [3] 0.0,0.0,0.0,1.0',
+      ),
+    );
+    expect(
       simple.toString(parentConfiguration: singleLineTextConfiguration),
       equals('transform: [2.0,0.0,0.0,0.0; 0.0,2.0,0.0,0.0; 0.0,0.0,2.0,0.0; 0.0,0.0,0.0,1.0]'),
     );
