@@ -83,10 +83,10 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
                      std::ceil(std::fabs(logical_rect.height() * scale.y())));
 
   const SkImageInfo image_info =
-      SkImageInfo::MakeN32Premul(physical_rect.width(),     // physical width
-                                 physical_rect.height(),    // physical height
-                                 sk_ref_sp(dst_color_space) // colorspace
-                                 );
+      SkImageInfo::MakeN32Premul(physical_rect.width(),      // physical width
+                                 physical_rect.height(),     // physical height
+                                 sk_ref_sp(dst_color_space)  // colorspace
+      );
 
   sk_sp<SkSurface> surface =
       context
@@ -94,7 +94,6 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
           : SkSurface::MakeRaster(image_info);
 
   if (!surface) {
-    FTL_DCHECK(false);
     return {};
   }
 
@@ -161,14 +160,9 @@ RasterCacheResult RasterCache::GetPrerolledImage(
   }
 
   if (!entry.image.is_valid()) {
-    entry.image =
-        RasterizePicture(picture, context, matrix, dst_color_space,
-                         checkerboard_images_);
+    entry.image = RasterizePicture(picture, context, matrix, dst_color_space,
+                                   checkerboard_images_);
   }
-
-  // We are not considering unrasterizable images. So if we don't have an image
-  // by now, we know that rasterization itself failed.
-  FTL_DCHECK(entry.image.is_valid());
 
   return entry.image;
 }
