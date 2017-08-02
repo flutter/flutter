@@ -130,7 +130,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerMoveEvent) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
-      tracker.addPosition(event.timeStamp, event.position);
+      // PointerMoveEvent from platform's gesture up events are positionally redundant
+      // vs the last PointerMoveEvent. Do not use in velocity calculation.
+      if (event.sourceEventType != PointerChange.up)
+        tracker.addPosition(event.timeStamp, event.position);
       final Offset delta = event.delta;
       if (_state == _DragState.accepted) {
         if (onUpdate != null) {
