@@ -16,6 +16,7 @@ Things you will need
  * Python (used by many of our tools, including 'gclient').
  * On Mac OS X and Linux: curl and unzip (used by `gclient sync`).
  * On Windows: Visual Studio (required for non-Googlers only).
+ * Recommended for Googlers: Goma for distributed builds.
 
 You do not need [Dart](https://www.dartlang.org/downloads/linux.html) installed, as a Dart tool chain is automatically downloaded as part of the "getting the code" step. Similarly for the Android SDK, it's downloaded by the `gclient sync` step below.
 
