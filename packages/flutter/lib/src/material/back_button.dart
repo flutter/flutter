@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 
 import 'icon_button.dart';
 import 'icons.dart';
@@ -46,7 +47,9 @@ class BackButtonIcon extends StatelessWidget {
 ///
 /// A [BackButton] is an [IconButton] with a "back" icon appropriate for the
 /// current [TargetPlatform]. When pressed, the back button calls
-/// [Navigator.maybePop] to return to the previous route.
+/// [Navigator.maybePop] to return to the previous route if possible. If not,
+/// the platform-specific system navigator is instructed to back up a level in
+/// the navigation hierarchy.
 ///
 /// When deciding to display a [BackButton], consider using
 /// `ModalRoute.of(context)?.canPop` to check whether the current route can be
@@ -85,7 +88,10 @@ class BackButton extends StatelessWidget {
       color: color,
       tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
       onPressed: () {
-        Navigator.of(context).maybePop();
+        Navigator.of(context).maybePop().then((bool didPop) {
+          if (!didPop)
+            SystemNavigator.pop();
+        }).catchError((dynamic error) {});
       }
     );
   }

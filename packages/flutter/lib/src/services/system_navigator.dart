@@ -13,8 +13,10 @@ class SystemNavigator {
   /// Instructs the system navigator to remove this activity from the stack and
   /// return to the previous activity.
   ///
-  /// On iOS, calls to this method are ignored because Apple's human interface
-  /// guidelines state that applications should not exit themselves.
+  /// On iOS, if the root view is a navigaton controller, it is instructed to
+  /// back up a level in the navigation hierarchy. Otherwise calls to this
+  /// method are ignored because Apple's human interface guidelines state that
+  /// applications should not exit themselves.
   ///
   /// This method should be preferred over calling `dart:io`'s [exit] method, as
   /// the latter may cause the underlying platform to act as if the application
