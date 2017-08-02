@@ -30,6 +30,8 @@ void main() {
       final Completer<Null> ready = new Completer<Null>();
       bool ok;
       print('run: starting...');
+      // TODO(devoncarew): Instead of passing in a specific port, we should let the app
+      // bind to a free port and detect which port was chosen; see commands_test.dart.
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
         <String>['run', '--verbose', '--observatory-port=8888', '-d', device.deviceId, '--route', '/smuggle-it', 'lib/route.dart'],

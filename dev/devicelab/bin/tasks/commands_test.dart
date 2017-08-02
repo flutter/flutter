@@ -13,10 +13,13 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-const int kObservatoryPort = 8888;
+// "An Observatory debugger and profiler on iPhone SE is available at: http://127.0.0.1:8100/"
+final RegExp observatoryRegExp = new RegExp(r'An Observatory debugger .* is available at: (\S+:(\d+))');
 
 void main() {
   task(() async {
+    int vmServicePort;
+
     final Device device = await devices.workingDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
@@ -26,7 +29,7 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '--observatory-port=$kObservatoryPort', '-d', device.deviceId, 'lib/commands.dart'],
+        <String>['run', '--verbose', '-d', device.deviceId, 'lib/commands.dart'],
       );
       final StreamController<String> stdout = new StreamController<String>.broadcast();
       run.stdout
@@ -35,7 +38,10 @@ void main() {
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
-          if (line.contains(new RegExp(r'^\[\s+\] For a more detailed help message, press "h"\. To quit, press "q"\.'))) {
+          if (line.contains(observatoryRegExp)) {
+            final Match match = observatoryRegExp.firstMatch(line);
+            vmServicePort = int.parse(match.group(2));
+            print('service protocol connection available at ${match.group(1)}');
             print('run: ready!');
             ready.complete();
             ok ??= true;
@@ -52,33 +58,35 @@ void main() {
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client = new VMServiceClient.connect('ws://localhost:$kObservatoryPort/ws');
+      final VMServiceClient client = new VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
 
-      await drive('none');
+      final DriveHelper driver = new DriveHelper(vmServicePort);
+
+      await driver.drive('none');
       print('test: pressing "p" to enable debugPaintSize...');
       run.stdin.write('p');
-      await drive('debug_paint');
+      await driver.drive('debug_paint');
       print('test: pressing "p" again...');
       run.stdin.write('p');
-      await drive('none');
+      await driver.drive('none');
       print('test: pressing "P" to enable performance overlay...');
       run.stdin.write('P');
-      await drive('performance_overlay');
+      await driver.drive('performance_overlay');
       print('test: pressing "P" again...');
       run.stdin.write('P');
-      await drive('none');
+      await driver.drive('none');
       final Future<String> reloadStartingText =
         stdout.stream.firstWhere((String line) => line.endsWith('hot reload...'));
       print('test: pressing "r" to perform a hot reload...');
       run.stdin.write('r');
       await reloadStartingText;
-      await drive('none');
+      await driver.drive('none');
       final Future<String> restartStartingText =
         stdout.stream.firstWhere((String line) => line.endsWith('full restart...'));
       print('test: pressing "R" to perform a full reload...');
       run.stdin.write('R');
       await restartStartingText;
-      await drive('none');
+      await driver.drive('none');
       run.stdin.write('q');
       final int result = await run.exitCode;
       if (result != 0)
@@ -90,26 +98,32 @@ void main() {
   });
 }
 
-Future<Null> drive(String name) async {
-  print('drive: running commands_$name check...');
-  final Process drive = await startProcess(
-    path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['drive', '--use-existing-app', 'http://127.0.0.1:$kObservatoryPort/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
-  );
-  drive.stdout
-    .transform(UTF8.decoder)
-    .transform(const LineSplitter())
-    .listen((String line) {
+class DriveHelper {
+  DriveHelper(this.vmServicePort);
+
+  final int vmServicePort;
+
+  Future<Null> drive(String name) async {
+    print('drive: running commands_$name check...');
+    final Process drive = await startProcess(
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      <String>['drive', '--use-existing-app', 'http://127.0.0.1:$vmServicePort/', '--keep-app-running', '--driver', 'test_driver/commands_${name}_test.dart'],
+    );
+    drive.stdout
+        .transform(UTF8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
       print('drive:stdout: $line');
     });
-  drive.stderr
-    .transform(UTF8.decoder)
-    .transform(const LineSplitter())
-    .listen((String line) {
+    drive.stderr
+        .transform(UTF8.decoder)
+        .transform(const LineSplitter())
+        .listen((String line) {
       stderr.writeln('drive:stderr: $line');
     });
-  final int result = await drive.exitCode;
-  if (result != 0)
-    throw 'Failed to drive test app (exit code $result).';
-  print('drive: finished commands_$name check successfully.');
+    final int result = await drive.exitCode;
+    if (result != 0)
+      throw 'Failed to drive test app (exit code $result).';
+    print('drive: finished commands_$name check successfully.');
+  }
 }
