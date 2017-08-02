@@ -11,7 +11,7 @@
 /// text, layout, and rendering subsystems.
 library dart.ui;
 
-import 'dart:_internal';
+import 'dart:_internal' hide Symbol;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
