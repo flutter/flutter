@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io' show File;
 import 'dart:typed_data';
 
@@ -42,6 +43,34 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
     size: size,
     platform: defaultTargetPlatform,
   );
+}
+
+/// Prefetches an image into the image cache.
+///
+/// Returns a [Future] that will complete when the first image yielded by the
+/// [ImageProvider] is available.
+///
+/// If the image is later used by an [Image] or [BoxDecoration] or [FadeInImage],
+/// it will probably be loaded faster.  The consumer of the image does not need
+/// to use the same [ImageProvider] instance.  The [ImageCache] will find the image
+/// as long as both images share the same key.
+///
+/// The [BuildContext] and [Size] are used to select an image configuration
+/// (see [createLocalImageConfiguration]).
+///
+/// See also:
+///
+///   * [ImageCache], which holds images that may be reused.
+Future<Null> precacheImage(ImageProvider provider, BuildContext context, { Size size }) {
+  final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
+  final Completer<Null> completer = new Completer<Null>();
+  final ImageStream stream = provider.resolve(config);
+  void listener(ImageInfo image, bool sync) {
+    completer.complete();
+  }
+  stream.addListener(listener);
+  completer.future.then((Null _) { stream.removeListener(listener); });
+  return completer.future;
 }
 
 /// A widget that displays an image.
