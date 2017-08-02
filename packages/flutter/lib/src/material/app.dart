@@ -10,10 +10,9 @@ import 'arc.dart';
 import 'colors.dart';
 import 'floating_action_button.dart';
 import 'icons.dart';
+import 'localized_material_resources.dart';
 import 'page.dart';
 import 'theme.dart';
-
-export 'dart:ui' show Locale;
 
 const TextStyle _errorTextStyle = const TextStyle(
   color: const Color(0xD0FF0000),
@@ -80,7 +79,8 @@ class MaterialApp extends StatefulWidget {
     this.initialRoute,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.onLocaleChanged,
+    this.locale,
+    this.localizedResourcesDelegate,
     this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
@@ -129,10 +129,9 @@ class MaterialApp extends StatefulWidget {
   /// normally, unless [initialRoute] is specified. It's also the route that's
   /// displayed if the [initialRoute] can't be displayed.
   ///
-  /// To be able to directly call [Theme.of], [MediaQuery.of],
-  /// [LocaleQuery.of], etc, in the code sets the [home] argument in
-  /// the constructor, you can use a [Builder] widget to get a
-  /// [BuildContext].
+  /// To be able to directly call [Theme.of], [MediaQuery.of], etc, in the code
+  /// sets the [home] argument in the constructor, you can use a [Builder]
+  /// widget to get a [BuildContext].
   ///
   /// If [home] is specified, then [routes] must not include an entry for `/`,
   /// as [home] takes its place.
@@ -210,9 +209,9 @@ class MaterialApp extends StatefulWidget {
   /// message.
   final RouteFactory onUnknownRoute;
 
-  /// Callback that is called when the operating system changes the
-  /// current locale.
-  final LocaleChangedCallback onLocaleChanged;
+  final Locale locale;
+
+  final LocalizedResourcesDelegate localizedResourcesDelegate;
 
   /// Turns on a performance overlay.
   ///
@@ -289,6 +288,12 @@ class _MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
+  static final LocalizedResourcesDelegate _resourcesDelegate = new DefaultLocalizedResourcesDelegate(
+    <Type, LocalizedResourceLoader>{
+      LocalizedMaterialResources: LocalizedMaterialResources.load,
+    }
+  );
+
   HeroController _heroController;
 
   @override
@@ -318,6 +323,7 @@ class _MaterialAppState extends State<MaterialApp> {
       return widget.onGenerateRoute(settings);
     return null;
   }
+
 
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
     assert(() {
@@ -369,7 +375,8 @@ class _MaterialAppState extends State<MaterialApp> {
         initialRoute: widget.initialRoute,
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
-        onLocaleChanged: widget.onLocaleChanged,
+        locale: widget.locale,
+        localizedResourcesDelegate: widget.localizedResourcesDelegate ?? _resourcesDelegate,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,

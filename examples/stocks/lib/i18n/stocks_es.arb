@@ -1,4 +1,6 @@
 {
+  "_locale": "es_STOCKS",
+
   "title": "Acciones",
   "@title": {
     "description": "Title for the Stocks application",

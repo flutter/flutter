@@ -56,6 +56,7 @@ export 'src/material/ink_splash.dart';
 export 'src/material/ink_well.dart';
 export 'src/material/input_decorator.dart';
 export 'src/material/list_tile.dart';
+export 'src/material/localized_material_resources.dart';
 export 'src/material/material.dart';
 export 'src/material/mergeable_material.dart';
 export 'src/material/page.dart';

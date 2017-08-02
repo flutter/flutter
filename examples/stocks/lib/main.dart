@@ -4,8 +4,6 @@
 
 library stocks;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show
   debugPaintSizeEnabled,
@@ -29,6 +27,13 @@ class StocksApp extends StatefulWidget {
 }
 
 class StocksAppState extends State<StocksApp> {
+  static final LocalizedResourcesDelegate delegate = new DefaultLocalizedResourcesDelegate(
+    <Type, LocalizedResourceLoader>{
+      LocalizedMaterialResources: LocalizedMaterialResources.load,
+      StockStrings: StockStrings.load,
+    }
+  );
+
   StockData stocks;
 
   StockConfiguration _configuration = new StockConfiguration(
@@ -99,13 +104,6 @@ class StocksAppState extends State<StocksApp> {
     return null;
   }
 
-  Future<LocaleQueryData> _onLocaleChanged(Locale locale) async {
-    final String localeString = locale.toString();
-    await initializeMessages(localeString);
-    Intl.defaultLocale = localeString;
-    return StockStrings.instance;
-  }
-
   @override
   Widget build(BuildContext context) {
     assert(() {
@@ -119,6 +117,7 @@ class StocksAppState extends State<StocksApp> {
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,
+      localizedResourcesDelegate: delegate,
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
@@ -127,7 +126,6 @@ class StocksAppState extends State<StocksApp> {
          '/settings': (BuildContext context) => new StockSettings(_configuration, configurationUpdater)
       },
       onGenerateRoute: _getRoute,
-      onLocaleChanged: _onLocaleChanged
     );
   }
 }
