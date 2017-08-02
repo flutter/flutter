@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -30,14 +31,8 @@ void main() {
     expect(simple.name, equals('transform'));
     expect(simple.value, same(transform));
     expect(
-      simple.toString(),
-      equals(
-        'transform:\n'
-            '  [0] 2.0,0.0,0.0,0.0\n'
-            '  [1] 0.0,2.0,0.0,0.0\n'
-            '  [2] 0.0,0.0,2.0,0.0\n'
-            '  [3] 0.0,0.0,0.0,1.0',
-      ),
+      simple.toString(parentConfiguration: singleLineTextConfiguration),
+      equals('transform: [2.0,0.0,0.0,0.0; 0.0,2.0,0.0,0.0; 0.0,0.0,2.0,0.0; 0.0,0.0,0.0,1.0]'),
     );
 
     final TransformProperty nullProperty = new TransformProperty(

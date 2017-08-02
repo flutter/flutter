@@ -179,7 +179,20 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
   );
 
   @override
-  String valueToString() => debugDescribeTransform(value).join('\n');
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+      // Format the value on a single line to be compatible with the parent's
+      // style.
+      final List<Vector4> rows = <Vector4>[
+        value.getRow(0),
+        value.getRow(1),
+        value.getRow(2),
+        value.getRow(3),
+      ];
+      return '[${rows.join("; ")}]';
+    }
+    return debugDescribeTransform(value).join('\n');
+  }
 }
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {

@@ -33,6 +33,9 @@ class TestTree extends Object with DiagnosticableTreeMixin {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    if (style != null)
+      properties.defaultDiagnosticsTreeStyle = style;
+
     for (DiagnosticsNode property in this.properties)
       properties.add(property);
   }
@@ -232,7 +235,9 @@ void main() {
         style: lastChildStyle,
       );
 
-      expect(tree, hasAGoodToStringDeep);
+      if (tree.style != DiagnosticsTreeStyle.singleLine)
+        expect(tree, hasAGoodToStringDeep);
+
       expect(
         tree.toDiagnosticsNode(style: style).toStringDeep(),
         equalsIgnoringHashCodes(golden),
@@ -281,10 +286,7 @@ void main() {
         '│├child node B1: TestTree#00000\n'
         '│├child node B2: TestTree#00000(property1: value1)\n'
         '│└child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
-        '└child node C: TestTree#00000(foo:\n'
-        '  multi\n'
-        '  line\n'
-        '  value!)\n',
+        '└child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
 
     goldenStyleTest(
@@ -454,10 +456,7 @@ void main() {
       ' │ │   property1: value1\n'
       ' │ │\n'
       ' │ └─child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
-      ' └─child node C: TestTree#00000(foo:\n'
-      '   multi\n'
-      '   line\n'
-      '   value!)\n',
+      ' └─child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
   });
 
@@ -1279,10 +1278,6 @@ void main() {
       objectsProperty.toString(),
       equals('objects: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)'),
     );
-    expect(
-      objectsProperty.toStringDeep(),
-      equals('objects: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)'),
-    );
 
     final IterableProperty<Object> multiLineProperty = new IterableProperty<Object>(
       'objects',
@@ -1310,7 +1305,6 @@ void main() {
 
     expect(
       new TestTree(
-        name: 'root',
         properties: <DiagnosticsNode>[multiLineProperty],
       ).toStringDeep(),
       equalsIgnoringHashCodes(
@@ -1318,6 +1312,16 @@ void main() {
         '   objects:\n'
         '     Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
         '     Color(0xffffffff)\n',
+      ),
+    );
+
+    expect(
+      new TestTree(
+        properties: <DiagnosticsNode>[objectsProperty, new IntProperty('foo', 42)],
+        style: DiagnosticsTreeStyle.singleLine,
+      ).toStringDeep(),
+      equalsIgnoringHashCodes(
+        'TestTree#00000(objects: [Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)], foo: 42)',
       ),
     );
 

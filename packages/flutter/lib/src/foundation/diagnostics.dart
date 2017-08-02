@@ -619,9 +619,13 @@ abstract class DiagnosticsNode {
   /// The name will be omitted if the [showName] property is false.
   final String name;
 
-  /// Description with a short summary of the node itself not including children
-  /// or properties.
-  String get description;
+  /// Returns a description with a short summary of the node itself not
+  /// including children or properties.
+  ///
+  /// `parentConfiguration` specifies how the parent is rendered as text art.
+  /// For example, if the parent does not line break between properties, the
+  /// description of a property should also be a single line if possible.
+  String toDescription({ TextTreeConfiguration parentConfiguration });
 
   /// Whether to show a separator between [name] and [description].
   ///
@@ -664,11 +668,19 @@ abstract class DiagnosticsNode {
 
   String get _separator => showSeparator ? ':' : '';
 
+  /// Returns a string representation of this diagnostic that is compatible with
+  /// the style of the parent if the node is not the root.
+  ///
+  /// `parentConfiguration` specifies how the parent is rendered as text art.
+  /// For example, if the parent places all properties on one line, the
+  /// [toString] for each property should avoid line breaks if possible.
   @override
-  String toString() {
+  String toString({ TextTreeConfiguration parentConfiguration }) {
     assert(style != null);
     if (style == DiagnosticsTreeStyle.singleLine)
-      return toStringDeep();
+      return toStringDeep('', '', parentConfiguration);
+
+    final String description = toDescription(parentConfiguration: parentConfiguration);
 
     if (name == null || name.isEmpty || !showName)
       return description;
@@ -723,7 +735,7 @@ abstract class DiagnosticsNode {
   ///  * [toString], for a brief description of the [value] but not its children.
   ///  * [toStringShallow], for a detailed description of the [value] but not its
   ///    children.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines]) {
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines, TextTreeConfiguration parentConfiguration]) {
     prefixOtherLines ??= prefixLineOne;
 
     final List<DiagnosticsNode> children = getChildren();
@@ -734,6 +746,7 @@ abstract class DiagnosticsNode {
     final _PrefixedStringBuilder builder =  new _PrefixedStringBuilder(
         prefixLineOne, prefixOtherLines);
 
+    final String description = toDescription(parentConfiguration: parentConfiguration);
     if (description == null || description.isEmpty) {
       if (showName && name != null)
         builder.write(name);
@@ -784,11 +797,12 @@ abstract class DiagnosticsNode {
         builder.writeRaw(property.toStringDeep(
             '${builder.prefixOtherLines}${propertyStyle.prefixLineOne}',
             '${builder.prefixOtherLines}${propertyStyle.linkCharacter}${propertyStyle.prefixOtherLines}',
+            config,
         ));
         continue;
       }
       assert(property.style == DiagnosticsTreeStyle.singleLine);
-      final String message = property == null ? '<null>' : property.toString();
+      final String message = property.toString(parentConfiguration: config);
       if (!config.lineBreakProperties || message.length < kWrapWidth) {
         builder.write(message);
       } else {
@@ -841,10 +855,10 @@ abstract class DiagnosticsNode {
           builder.writeRawLine(child.toStringDeep(
             lastChildPrefixLineOne,
             '$prefixChildren${childConfig.childLinkSpace}${childConfig.prefixOtherLines}',
+            config,
           ));
           if (childConfig.footer.isNotEmpty)
             builder.writeRaw('$prefixChildren${childConfig.childLinkSpace}${childConfig.footer}');
-
         } else {
           final TextTreeConfiguration nextChildStyle = _childTextConfiguration(children[i + 1], config);
 
@@ -940,8 +954,17 @@ class StringProperty extends DiagnosticsProperty<String> {
   final bool quoted;
 
   @override
-  String valueToString() {
-    final String text = _description ?? value;
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+    String text = _description ?? value;
+    if (parentConfiguration != null &&
+        !parentConfiguration.lineBreakProperties &&
+        text != null) {
+      // Escape linebreaks in multiline strings to avoid confusing output when
+      // the parent of this node is trying to display all properties on the same
+      // line.
+      text = text.replaceAll('\n', '\\n');
+    }
+
     if (quoted && text != null) {
       // An empty value would not appear empty after being surrounded with
       // quotes so we have to handle this case separately.
@@ -1002,7 +1025,7 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
   String numberToString();
 
   @override
-  String valueToString() {
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == null)
       return value.toString();
 
@@ -1117,7 +1140,7 @@ class PercentProperty extends DoubleProperty {
   );
 
   @override
-  String valueToString() {
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == null)
       return value.toString();
     return unit != null ?  '${numberToString()} $unit' : numberToString();
@@ -1202,7 +1225,7 @@ class FlagProperty extends DiagnosticsProperty<bool> {
   final String ifFalse;
 
   @override
-  String valueToString() {
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == true)
       return ifTrue ?? '';
     if (value == false)
@@ -1256,11 +1279,17 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   );
 
   @override
-  String valueToString() {
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == null)
       return value.toString();
-    return style == DiagnosticsTreeStyle.singleLine ? value.join(', ')
-                                                    : value.join('\n');
+
+    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+      // Always display the value as a single line and enclose the iterable
+      // value in brackets to avoid ambiguity.
+      return '[${value.join(', ')}]';
+    }
+
+    return value.join(style == DiagnosticsTreeStyle.singleLine ? ', ' : '\n');
   }
 }
 
@@ -1288,7 +1317,7 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
   );
 
   @override
-  String valueToString() {
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == null)
       return value.toString();
     return camelCaseToHyphenatedName(describeEnum(value));
@@ -1357,7 +1386,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   final String ifPresent;
 
   @override
-  String valueToString() {
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value != null)
       return ifPresent ?? '';
 
@@ -1463,14 +1492,18 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 
   /// Returns a string representation of the property value.
   ///
-  /// Subclasses should override this method instead of [description] to
+  /// Subclasses should override this method instead of [toDescription] to
   /// customize how property values are converted to strings.
   ///
   /// Overriding this method ensures that behavior controlling how property
   /// values are decorated to generate a nice description are consistent across
   /// all implementations. Debugging tools may also choose to use
   /// [valueToString] directly instead of [description].
-  String valueToString() {
+  ///
+  /// `parentConfiguration` specifies how the parent is rendered as text art.
+  /// For example, if the parent places all properties on one line, the value
+  /// of the property should be displayed without line breaks if possible.
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
     final T v = value;
     // DiagnosticableTree values are shown using the shorter toStringShort()
     // instead of the longer toString() because the toString() for a
@@ -1479,7 +1512,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   }
 
   @override
-  String get description {
+  String toDescription({ TextTreeConfiguration parentConfiguration }) {
     if (_description != null)
       return _addTooltip(_description);
 
@@ -1489,7 +1522,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     if (ifNull != null && value == null)
       return _addTooltip(ifNull);
 
-    String result = valueToString();
+    String result = valueToString(parentConfiguration: parentConfiguration);
     if (result.isEmpty && ifEmpty != null)
       result = ifEmpty;
     return _addTooltip(result);
@@ -1651,7 +1684,9 @@ class _DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   }
 
   @override
-  String get description => value.toStringShort();
+  String toDescription({ TextTreeConfiguration parentConfiguration }) {
+    return value.toStringShort();
+  }
 
   @override bool get hidden => false;
 }
