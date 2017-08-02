@@ -9,20 +9,16 @@ import 'package:flutter/widgets.dart';
 
 import 'i18n/stock_messages_all.dart';
 
-// Wrappers for strings that are shown in the UI.  The strings can be
-// translated for different locales using the Dart intl package.
-//
-// Locale-specific values for the strings live in the i18n/*.arb files.
+// Information about how this file relates to i18n/stock_messages_all.dart and how the i18n files
+// were generated can be found in i18n/regenerate.md.
 
 class StockStrings {
-  const StockStrings(this.locale);
+  StockStrings(Locale locale) : _localeName = locale.toString();
 
-  final Locale locale;
-
-  String get _scopedLocaleName => '${locale.languageCode}_STOCKS';
+  final String _localeName;
 
   static Future<StockStrings> load(Locale locale) {
-    return initializeMessages('${locale.languageCode}_STOCKS')
+    return initializeMessages(locale.toString())
       .then((Null _) {
         return new Future<StockStrings>.value(new StockStrings(locale));
       });
@@ -37,7 +33,7 @@ class StockStrings {
       '<Stocks>',
       name: 'title',
       desc: 'Title for the Stocks application',
-      locale: _scopedLocaleName,
+      locale: _localeName,
     );
   }
 
@@ -45,13 +41,13 @@ class StockStrings {
     '<MARKET>',
     name: 'market',
     desc: 'Label for the Market tab',
-    locale: _scopedLocaleName,
+    locale: _localeName,
   );
 
   String portfolio() => Intl.message(
     '<PORTFOLIO>',
     name: 'portfolio',
     desc: 'Label for the Portfolio tab',
-    locale: _scopedLocaleName,
+    locale: _localeName,
   );
 }
