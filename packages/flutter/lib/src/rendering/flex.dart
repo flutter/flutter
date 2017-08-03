@@ -776,8 +776,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   Rect describeApproximatePaintClip(RenderObject child) => _overflow > 0.0 ? Offset.zero & size : null;
 
   @override
-  String toString() {
-    String header = super.toString();
+  String toShortDescription() {
+    String header = super.toShortDescription();
     if (_overflow is double && _overflow > 0.0)
       header += ' OVERFLOWING';
     return header;

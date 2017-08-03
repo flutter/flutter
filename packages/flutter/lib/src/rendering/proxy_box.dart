@@ -1485,7 +1485,7 @@ class RenderDecoratedBox extends RenderProxyBox {
             'After painting it, the canvas save count was ${context.canvas.getSaveCount()}. '
             'Every call to save() or saveLayer() must be matched by a call to restore().\n'
             'The decoration was:\n'
-            '${decoration.toStringDeep()}\n'
+            '  $decoration\n'
             'The painter was:\n'
             '  $_painter'
           );

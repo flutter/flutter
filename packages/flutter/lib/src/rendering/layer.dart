@@ -32,7 +32,7 @@ import 'node.dart';
 ///
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the the display.
-abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
+abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This layer's parent in the layer tree.
   ///
   /// The [parent] of the root node in the layer tree is null.
@@ -102,7 +102,7 @@ abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
   dynamic debugCreator;
 
   @override
-  String toString() => '${super.toString()}${ owner == null ? " DETACHED" : ""}';
+  String toShortDescription() => '${super.toShortDescription()}${ owner == null ? " DETACHED" : ""}';
 
   @override
   void debugFillProperties(List<DiagnosticsNode> description) {

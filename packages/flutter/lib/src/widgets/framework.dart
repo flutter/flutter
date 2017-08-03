@@ -428,7 +428,7 @@ class TypeMatcher<T> {
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 @immutable
-abstract class Widget {
+abstract class Widget extends DiagnosticableTree {
   /// Initializes [key] for subclasses.
   const Widget({ this.key });
 
@@ -470,28 +470,12 @@ abstract class Widget {
   }
 
   @override
-  String toString() {
-    final String name = toStringShort();
-    List<DiagnosticsNode> data = <DiagnosticsNode>[];
-    debugFillProperties(data);
-    data = data.where((DiagnosticsNode n) => !n.hidden).toList();
-    if (data.isEmpty)
-      return '$name';
-    return '$name(${data.join("; ")})';
-  }
+  String toShortDescription() => '$runtimeType';
 
-  /// Add additional information to the given description for use by [toString].
-  ///
-  /// This method makes it easier for subclasses to coordinate to provide a
-  /// high-quality [toString] implementation. The [toString] implementation on
-  /// the [State] base class calls [debugFillProperties] to collect useful
-  /// information from subclasses to incorporate into its return value.
-  ///
-  /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillProperties(description)`.
-  @protected
-  @mustCallSuper
-  void debugFillProperties(List<DiagnosticsNode> description) { }
+  @override
+  DiagnosticsTreeStyle get debugDefaultDiagnosticsTreeStyle {
+    return DiagnosticsTreeStyle.dense;
+  }
 
   /// Whether the `newWidget` can be used to update an [Element] that currently
   /// has the `oldWidget` as its configuration.
@@ -1390,7 +1374,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// See also:
   ///
-  ///  * [TreeDiagnosticsMixin.debugFillProperties], which provides detailed
+  ///  * [DiagnosticableTree.debugFillProperties], which provides detailed
   ///    best practices for defining diagnostic properties.
   @protected
   @mustCallSuper
@@ -2522,7 +2506,7 @@ class BuildOwner {
 ///    element.
 ///  * At this point, the element is considered "defunct" and will not be
 ///    incorporated into the tree in the future.
-abstract class Element implements BuildContext, TreeDiagnostics {
+abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
@@ -3296,12 +3280,8 @@ abstract class Element implements BuildContext, TreeDiagnostics {
   }
 
   @override
-  String toString() {
-    List<DiagnosticsNode> data = <DiagnosticsNode>[];
-    debugFillProperties(data);
-    data = data.where((DiagnosticsNode n) => !n.hidden).toList();
-    final String name = widget != null ? '${widget.runtimeType}' : '[$runtimeType]';
-    return '$name(${data.join("; ")})';
+  String toShortDescription() {
+    return widget != null ? '${widget.toShortDescription()}' : '[$runtimeType]';
   }
 
   /// Add additional properties to the given description used by
@@ -3317,11 +3297,13 @@ abstract class Element implements BuildContext, TreeDiagnostics {
   ///
   /// See also:
   ///
-  ///  * [TreeDiagnosticsMixin.debugFillProperties], which provides detailed
+  ///  * [DiagnosticableTree.debugFillProperties], which provides detailed
   ///    best practices for defining diagnostic properties.
   @protected
   @mustCallSuper
+  @override
   void debugFillProperties(List<DiagnosticsNode> description) {
+    super.debugFillProperties(description);
     description.add(new ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
     description.add(new ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
     if (widget != null) {
@@ -3331,26 +3313,18 @@ abstract class Element implements BuildContext, TreeDiagnostics {
     description.add(new FlagProperty('dirty', value: dirty, ifTrue: 'dirty'));
   }
 
-  /// A detailed, textual description of this element, includings its children.
   @override
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    visitChildren((Element child) {
+      children.add(child.toDiagnosticsNode());
+    });
+    return children;
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return new DiagnosticsNode.lazy(
-      name: name,
-      value: this,
-      getChildren: () {
-        final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-        visitChildren((Element child) {
-          children.add(child.toDiagnosticsNode());
-        });
-        return children;
-      },
-      style: style ?? DiagnosticsTreeStyle.dense,
-    );
+  DiagnosticsTreeStyle get debugDefaultDiagnosticsTreeStyle {
+    return DiagnosticsTreeStyle.dense;
   }
 
   /// Returns true if the element has been marked as needing rebuilding.
