@@ -311,6 +311,8 @@ void main() {
 
     final AnimationController controller = new AnimationController(
       value: 1.0,
+      upperBound: 1.0,
+      lowerBound: 0.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
@@ -325,6 +327,8 @@ void main() {
 
     final AnimationController controller = new AnimationController(
       value: 0.0,
+      upperBound: 1.0,
+      lowerBound: 0.0,
       vsync: const TestVSync(),
     )..addStatusListener(statusLog.add);
 
