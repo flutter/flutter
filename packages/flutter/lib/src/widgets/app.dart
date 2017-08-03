@@ -12,7 +12,7 @@ import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
-import 'localized_resources.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
 import 'performance_overlay.dart';
@@ -30,7 +30,7 @@ export 'dart:ui' show Locale;
 /// back button to popping the [Navigator] or quitting the application.
 ///
 /// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
-/// [LocalizedResources], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
+/// [Localizations], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
 /// widgets wrapped by this one).
 ///
 /// The [onGenerateRoute] argument is required, and corresponds to
@@ -51,7 +51,7 @@ class WidgetsApp extends StatefulWidget {
     this.navigatorObservers: const <NavigatorObserver>[],
     this.initialRoute,
     this.locale,
-    this.localizedResourcesDelegate,
+    this.localizationsDelegate,
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
@@ -127,16 +127,16 @@ class WidgetsApp extends StatefulWidget {
   ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
-  /// The initial locale for this app's [LocalizedResources] widget.
+  /// The initial locale for this app's [Localizations] widget.
   ///
   /// If the 'locale' is null the system's locale value is used.
   final Locale locale;
 
-  /// The delegate for this app's [LocalizedResources] widget.
+  /// The delegate for this app's [Localizations] widget.
   ///
   /// This delegate defines all of the localized resources for this
-  /// application. It is typically an instance of [DefaultLocalizedResourcesDelegate].
-  final LocalizedResourcesDelegate localizedResourcesDelegate;
+  /// application. It is typically an instance of [DefaultLocalizationsDelegate].
+  final LocalizationsDelegate localizationsDelegate;
 
   /// Turns on a performance overlay.
   /// https://flutter.io/debugging/#performanceoverlay
@@ -279,9 +279,9 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   Widget build(BuildContext context) {
     Widget result = new MediaQuery(
       data: new MediaQueryData.fromWindow(ui.window),
-      child: new LocalizedResources(
+      child: new Localizations(
         locale: widget.locale ?? _locale,
-        delegate: widget.localizedResourcesDelegate,
+        delegate: widget.localizationsDelegate,
         child: new Title(
           title: widget.title,
           color: widget.color,

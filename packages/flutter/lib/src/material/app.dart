@@ -11,6 +11,7 @@ import 'colors.dart';
 import 'floating_action_button.dart';
 import 'icons.dart';
 import 'localized_material_resources.dart';
+import 'material_localizations.dart';
 import 'page.dart';
 import 'theme.dart';
 
@@ -80,7 +81,7 @@ class MaterialApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onUnknownRoute,
     this.locale,
-    this.localizedResourcesDelegate,
+    this.localizationsDelegate,
     this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
@@ -209,16 +210,16 @@ class MaterialApp extends StatefulWidget {
   /// message.
   final RouteFactory onUnknownRoute;
 
-  /// The initial locale for this app's [LocalizedResources] widget.
+  /// The initial locale for this app's [Localizations] widget.
   ///
   /// If the 'locale' is null the system's locale value is used.
   final Locale locale;
 
-  /// The delegate for this app's [LocalizedResources] widget.
+  /// The delegate for this app's [Localizations] widget.
   ///
   /// This delegate defines all of the localized resources for this
-  /// application. It is typically an instance of [DefaultLocalizedResourcesDelegate].
-  final LocalizedResourcesDelegate localizedResourcesDelegate;
+  /// application. It is typically an instance of [DefaultLocalizationsDelegate].
+  final LocalizationsDelegate localizationsDelegate;
 
   /// Turns on a performance overlay.
   ///
@@ -295,9 +296,9 @@ class _MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
-  static final LocalizedResourcesDelegate _resourcesDelegate = new DefaultLocalizedResourcesDelegate(
-    <Type, LocalizedResourceLoader>{
-      LocalizedMaterialResources: LocalizedMaterialResources.load,
+  static final LocalizationsDelegate _resourcesDelegate = new DefaultLocalizationsDelegate(
+    <Type, LocalizationsLoader>{
+      MaterialLocalizations: MaterialLocalizations.load,
     }
   );
 
@@ -383,7 +384,7 @@ class _MaterialAppState extends State<MaterialApp> {
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
-        localizedResourcesDelegate: widget.localizedResourcesDelegate ?? _resourcesDelegate,
+        localizationsDelegate: widget.localizationsDelegate ?? _resourcesDelegate,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,

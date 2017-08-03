@@ -25,9 +25,9 @@ class StocksApp extends StatefulWidget {
 }
 
 class StocksAppState extends State<StocksApp> {
-  static final LocalizedResourcesDelegate delegate = new DefaultLocalizedResourcesDelegate(
-    <Type, LocalizedResourceLoader>{
-      LocalizedMaterialResources: LocalizedMaterialResources.load,
+  static final LocalizationsDelegate delegate = new DefaultLocalizationsDelegate(
+    <Type, LocalizationsLoader>{
+      MaterialLocalizations: MaterialLocalizations.load,
       StockStrings: StockStrings.load,
     }
   );
@@ -115,7 +115,7 @@ class StocksAppState extends State<StocksApp> {
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,
-      localizedResourcesDelegate: delegate,
+      localizationsDelegate: delegate,
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,

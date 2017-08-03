@@ -10,30 +10,30 @@ import 'package:flutter/foundation.dart';
 import 'container.dart';
 import 'framework.dart';
 
-/// Progress for a [LocalizedResourcesDelegate.load] method.
-enum LocalizedResourcesStatus {
-  /// Loading has not been started, [LocalizedResourcesDelegate.resourcesFor] will return null.
+/// Progress for a [LocalizationsDelegate.load] method.
+enum LocalizationsStatus {
+  /// Loading has not been started, [LocalizationsDelegate.resourcesFor] will return null.
   none,
 
-  /// Loading is underway, [LocalizedResourcesDelegate.resourcesFor] will return null.
+  /// Loading is underway, [LocalizationsDelegate.resourcesFor] will return null.
   loading,
 
-  /// Loading is complete, [LocalizedResourcesDelegate.resourcesFor] will return a valid non-null value.
+  /// Loading is complete, [LocalizationsDelegate.resourcesFor] will return a valid non-null value.
   loaded,
 }
 
 /// An encapsulation of all of the resources to be loaded by a
-/// [LocalizedResources] widget.
+/// [Localizations] widget.
 ///
-/// Typical applications have one [LocalizedResources] widget which is
+/// Typical applications have one [Localizations] widget which is
 /// created by the [WidgetsApp] and configured with the app's
-/// `localizedResourcesDelegate` parameter.
+/// `localizationsDelegate` parameter.
 ///
 /// See also:
 ///
 ///  * [DefaultLocalizedresorucesDelegate], a simple concrete version of
 ///    this class.
-abstract class LocalizedResourcesDelegate {
+abstract class LocalizationsDelegate {
   /// Start loading the resources for `locale`. The returned future completes
   /// when the resources have been loaded and cached.
   ///
@@ -45,9 +45,9 @@ abstract class LocalizedResourcesDelegate {
 
   /// Indicates the progress on loading resources for `locale`.
   ///
-  /// If the returned value is not [LocalizedResourcesStatus.loaded] then
+  /// If the returned value is not [LocalizationsStatus.loaded] then
   /// [resourcesFor] will return null.
-  LocalizedResourcesStatus statusFor(Locale locale);
+  LocalizationsStatus statusFor(Locale locale);
 
   /// Returns an instance with the specified type that contains all of
   /// the resources for `locale`.
@@ -56,12 +56,12 @@ abstract class LocalizedResourcesDelegate {
   T resourcesFor<T>(Locale locale, Type type);
 
   /// Returns true if widgets that depend on this delegate should be rebuilt.
-  bool updateShouldNotify(covariant LocalizedResourcesDelegate old);
+  bool updateShouldNotify(covariant LocalizationsDelegate old);
 }
 
 /// Signature for the async localized resource loading callback used
-/// by [DefaultLocalizedResourceLoader].
-typedef Future<dynamic> LocalizedResourceLoader(Locale locale);
+/// by [DefaultLocalizationsLoader].
+typedef Future<dynamic> LocalizationsLoader(Locale locale);
 
 /// Defines all of an application's resources in terms of `allLoaders`:
 /// a map from a [Type] to a _load_ function that creates an instance of
@@ -79,14 +79,14 @@ typedef Future<dynamic> LocalizedResourceLoader(Locale locale);
 ///
 /// See also:
 ///
-///  * [WidgetsApp.localizedResourcesDelegate] and [MaterialApp.localizedResourcesDelegate],
-///    which enable configuring the app's LocalizedResourcesLoader.
-class DefaultLocalizedResourcesDelegate extends LocalizedResourcesDelegate {
-  DefaultLocalizedResourcesDelegate(this.allLoaders) {
+///  * [WidgetsApp.localizationsDelegate] and [MaterialApp.localizationsDelegate],
+///    which enable configuring the app's LocalizationsLoader.
+class DefaultLocalizationsDelegate extends LocalizationsDelegate {
+  DefaultLocalizationsDelegate(this.allLoaders) {
     assert(allLoaders != null);
   }
 
-  final Map<Type, LocalizedResourceLoader> allLoaders;
+  final Map<Type, LocalizationsLoader> allLoaders;
 
   final Map<Locale, Map<Type, dynamic>> _localeToResources = <Locale, Map<Type, dynamic>>{};
   final Set<Locale> _loading = new Set<Locale>();
@@ -104,7 +104,7 @@ class DefaultLocalizedResourcesDelegate extends LocalizedResourcesDelegate {
     // because some of the loaders may return SynchronousFutures. We don't want
     // to Future.wait for the synchronous futures.
     Map<Type, Future<dynamic>> resourceMapFutures;
-    for(Type type in allLoaders.keys) {
+    for (Type type in allLoaders.keys) {
       dynamic completedValue;
       final Future<dynamic> futureValue = allLoaders[type](locale).then<dynamic>((dynamic value) {
         return completedValue = value;
@@ -144,12 +144,12 @@ class DefaultLocalizedResourcesDelegate extends LocalizedResourcesDelegate {
   }
 
   @override
-  LocalizedResourcesStatus statusFor(Locale locale) {
+  LocalizationsStatus statusFor(Locale locale) {
     if (_localeToResources[locale] != null)
-      return LocalizedResourcesStatus.loaded;
+      return LocalizationsStatus.loaded;
     if (_loading.contains(locale))
-      return LocalizedResourcesStatus.loading;
-    return LocalizedResourcesStatus.none;
+      return LocalizationsStatus.loading;
+    return LocalizationsStatus.none;
   }
 
   @override
@@ -159,16 +159,17 @@ class DefaultLocalizedResourcesDelegate extends LocalizedResourcesDelegate {
     final Map<Type, dynamic> resources = _localeToResources[locale];
     if (resources == null)
       return null;
-    // TBD: assert(resources[type].runtimeType, type)? Too restrictive?
+    // TODO(hansmuller) assert(resources[type] is type) when
+    // https://github.com/dart-lang/sdk/issues/27680 has been resolved.
     return resources[type];
   }
 
   @override
-  bool updateShouldNotify(DefaultLocalizedResourcesDelegate old) => false;
+  bool updateShouldNotify(DefaultLocalizationsDelegate old) => false;
 }
 
-class _LocalizedResourcesScope extends InheritedWidget {
-  _LocalizedResourcesScope ({
+class _LocalizationsScope extends InheritedWidget {
+  _LocalizationsScope ({
     Key key,
     @required this.locale,
     @required this.localizedResourcesState,
@@ -178,18 +179,18 @@ class _LocalizedResourcesScope extends InheritedWidget {
   }
 
   final Locale locale;
-  final _LocalizedResourcesState localizedResourcesState;
+  final _LocalizationsState localizedResourcesState;
 
   @override
-  bool updateShouldNotify(_LocalizedResourcesScope old) {
+  bool updateShouldNotify(_LocalizationsScope old) {
     if (locale != old.locale)
       localizedResourcesState.load(locale);
     return false;
   }
 }
 
-/// The value returned by [LocalizedResources.of].
-abstract class LocalizedResourcesData {
+/// The value returned by [Localizations.of].
+abstract class LocalizationsData {
   /// The resources returned by `resourcesFor` will be specific to this locale.
   Locale get locale;
 
@@ -200,35 +201,35 @@ abstract class LocalizedResourcesData {
 /// Defines the [Locale] for its `child` and the localized resources that the
 /// child depends on.
 ///
-/// Localized resources are loaded by the [LocalizedResourcesDelegate] `delegate`.
-/// Most apps should be able to use the [DefaultLocalizedResourcesDelegate] to
+/// Localized resources are loaded by the [LocalizationsDelegate] `delegate`.
+/// Most apps should be able to use the [DefaultLocalizationsDelegate] to
 /// specify a class that contains the app's localized resources and a function
 /// that creates an instance of that class.
 ///
-/// The [WidgetsApp] class creates a `LocalizedResources` widget so most apps
-/// will not need to create one. The widget app's `LocalizedResources` delegate can
-/// be initialized with [WidgetsApp.localizedResourcesDelegate]. The [MaterialApp]
-/// class also provides a `localizedResourcesDelegate` parameter that's just
+/// The [WidgetsApp] class creates a `Localizations` widget so most apps
+/// will not need to create one. The widget app's `Localizations` delegate can
+/// be initialized with [WidgetsApp.localizationsDelegate]. The [MaterialApp]
+/// class also provides a `localizationsDelegate` parameter that's just
 /// pass along to the [WidgetsApp].
 ///
 /// Apps should retrieve localized resources with the [LocalizedResourceData]
-/// returned by `LocalizedResources.of(context)`. This is conventionally done
+/// returned by `Localizations.of(context)`. This is conventionally done
 /// by a static `.of` method on the class that defines the app's localized
 /// resources.
 ///
 /// For example, using the `MyLocalizedResouces` class defined below, one would
 /// lookup a localized title string like this:
 /// ```dart
-/// MyLocalizedResources.of(context).title()
+/// MyLocalizations.of(context).title()
 /// ```
-/// If the `LocalizedResources` were to be rebuilt with a new locale then
+/// If the `Localizations` were to be rebuilt with a new locale then
 /// the widget subtree that corresponds to [BuildContext] `context` would
 /// be rebuilt after the corresponding resources had been loaded.
 ///
 /// This class is effectively an [InheritedWidget]. If it's rebuilt with
 /// a new `locale` or if its `delegate.updateShouldNotify` returns true,
 /// widgets that have created a dependency by calling
-/// `LocalizedResources.of(context)` will be rebuilt after the resources
+/// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
 ///
 /// ## Sample code
@@ -238,20 +239,20 @@ abstract class LocalizedResourcesData {
 /// package isn't required.
 ///
 /// ```dart
-/// class MyLocalizedResources {
-///   MyLocalizedResources(this.locale);
+/// class MyLocalizations {
+///   MyLocalizations(this.locale);
 ///
 ///   final Locale locale;
 ///
-///   static Future<MyLocalizedResources> load(Locale locale) {
+///   static Future<MyLocalizations> load(Locale locale) {
 ///     return initializeMessages(locale.toString())
 ///       .then((Null _) {
-///         return new Future<MyLocalizedResources>.value(new MyLocalizedResources(locale));
+///         return new Future<MyLocalizations>.value(new MyLocalizations(locale));
 ///       });
 ///   }
 ///
-///   static MyLocalizedResources of(BuildContext context) {
-///     return LocalizedResources.of(context).resourcesFor<MyLocalizedResources>(MyLocalizedResources);
+///   static MyLocalizations of(BuildContext context) {
+///     return Localizations.of(context).resourcesFor<MyLocalizations>(MyLocalizations);
 ///   }
 ///
 ///   String title() => Intl.message('<title>', name: 'title', locale: locale.toString());
@@ -262,12 +263,12 @@ abstract class LocalizedResourcesData {
 /// the `initializeMessages()` function and the per-locale backing store for `Intl.message()`.
 /// The message catalog is produced by an `intl` tool that analyzes the source code for
 /// classes that contain `Intl.message()` calls. In this case that would just be the
-/// `MyLocalizedResources` class.
+/// `MyLocalizations` class.
 ///
 /// One could choose another approach for loading localized resources and looking them up while
 /// still conforming to the structure of this example.
-class LocalizedResources extends StatefulWidget {
-  LocalizedResources({
+class Localizations extends StatefulWidget {
+  Localizations({
     Key key,
     @required this.locale,
     this.delegate,
@@ -276,13 +277,13 @@ class LocalizedResources extends StatefulWidget {
     assert(locale != null);
   }
 
-  /// The resources returned by [LocalizedResources.of] will be specific to this locale.
+  /// The resources returned by [Localizations.of] will be specific to this locale.
   final Locale locale;
 
   /// This delegate is responsible for loading and caching resources for `locale`.
   ///
-  /// Typically defined with [DefaultLocalizedResourcesDelegate].
-  final LocalizedResourcesDelegate delegate;
+  /// Typically defined with [DefaultLocalizationsDelegate].
+  final LocalizationsDelegate delegate;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -290,26 +291,26 @@ class LocalizedResources extends StatefulWidget {
   /// Returns the localized resources for the widget tree that corresponds to
   /// [BuildContext] `context`.
   ///
-  /// This method is typically combined with [LocalizedResourcesData.for] to defined
+  /// This method is typically combined with [LocalizationsData.for] to define
   /// a static method that looks up a collection of related related resources. For
   /// example Flutter looks up Material resources with a method defined like this:
   ///
   /// ```dart
   /// static LocalizedMaterialResources of(BuildContext context) {
-  ///  return LocalizedResources.of(context)
+  ///  return Localizations.of(context)
   ///    .resourcesFor<LocalizedMaterialResources>(LocalizedMaterialResources);
   /// }
   /// ```
-  static LocalizedResourcesData of(BuildContext context) {
-    final _LocalizedResourcesScope scope = context.inheritFromWidgetOfExactType(_LocalizedResourcesScope);
+  static LocalizationsData of(BuildContext context) {
+    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
     return scope?.localizedResourcesState;
   }
 
   @override
-  _LocalizedResourcesState createState() => new _LocalizedResourcesState();
+  _LocalizationsState createState() => new _LocalizationsState();
 }
 
-class _LocalizedResourcesState extends State<LocalizedResources> implements LocalizedResourcesData {
+class _LocalizationsState extends State<Localizations> implements LocalizationsData {
   final GlobalKey _localizedResourcesScopeKey = new GlobalKey();
 
   @override
@@ -331,6 +332,8 @@ class _LocalizedResourcesState extends State<LocalizedResources> implements Loca
     }
 
     widget.delegate.load(locale).then((_) {
+      if (!mounted)
+        return;
       setState(() {
         _locale = locale;
       });
@@ -344,7 +347,7 @@ class _LocalizedResourcesState extends State<LocalizedResources> implements Loca
 
   @override
   Widget build(BuildContext context) {
-    return new _LocalizedResourcesScope(
+    return new _LocalizationsScope(
       key: _localizedResourcesScopeKey,
       locale: widget.locale,
       localizedResourcesState: this,

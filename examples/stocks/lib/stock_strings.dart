@@ -25,7 +25,7 @@ class StockStrings {
   }
 
   static StockStrings of(BuildContext context) {
-    return LocalizedResources.of(context).resourcesFor<StockStrings>(StockStrings);
+    return Localizations.of(context).resourcesFor<StockStrings>(StockStrings);
   }
 
   String title() {

@@ -10,18 +10,18 @@ import 'package:flutter/widgets.dart';
 /// Default localized resource values for the material widgets.
 ///
 /// This class is just a placeholder, it only provides english values.
-class LocalizedMaterialResources {
-  const LocalizedMaterialResources(this.locale) : assert(locale != null);
+class MaterialLocalizations {
+  const MaterialLocalizations(this.locale) : assert(locale != null);
 
   final Locale locale;
 
-  static Future<LocalizedMaterialResources> load(Locale locale) {
-    return new SynchronousFuture<LocalizedMaterialResources>(new LocalizedMaterialResources(locale));
+  static Future<MaterialLocalizations> load(Locale locale) {
+    return new SynchronousFuture<MaterialLocalizations>(new MaterialLocalizations(locale));
   }
 
-  static LocalizedMaterialResources of(BuildContext context) {
-    return LocalizedResources.of(context)
-      .resourcesFor<LocalizedMaterialResources>(LocalizedMaterialResources);
+  static MaterialLocalizations of(BuildContext context) {
+    return Localizations.of(context)
+      .resourcesFor<MaterialLocalizations>(MaterialLocalizations);
   }
 
   String get openAppDrawerTooltip => 'Open navigation menu';
