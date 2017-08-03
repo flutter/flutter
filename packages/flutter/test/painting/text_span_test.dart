@@ -49,7 +49,7 @@ void main() {
         ),
       ]
     );
-    expect(test.toString(), equals(
+    expect(test.toStringDeep(), equals(
       'TextSpan:\n'
       '  inherit: true\n'
       '  size: 10.0\n'

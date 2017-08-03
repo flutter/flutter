@@ -613,12 +613,12 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     if (_recognizers == null) {
       description.add(new DiagnosticsNode.message('DISPOSED'));
     } else {
-      final List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.toStringShort()).toList();
+      final List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.debugDescription).toList();
       if (gestures.isEmpty)
         gestures.add('<none>');
       description.add(new IterableProperty<String>('gestures', gestures));

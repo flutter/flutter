@@ -222,7 +222,7 @@ abstract class ScrollView extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<Axis>('scrollDirection', scrollDirection));
     description.add(new FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
@@ -382,7 +382,7 @@ abstract class BoxScrollView extends ScrollView {
   Widget buildChildLayout(BuildContext context);
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
   }
@@ -675,7 +675,7 @@ class ListView extends BoxScrollView {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DoubleProperty('itemExtent', itemExtent, defaultValue: null));
   }

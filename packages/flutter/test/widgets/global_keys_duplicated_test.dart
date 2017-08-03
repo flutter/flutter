@@ -46,8 +46,8 @@ void main() {
     expect(error, isFlutterError);
     expect(error.toString(), startsWith('Multiple widgets used the same GlobalKey.\n'));
     expect(error.toString(), isNot(contains('different widgets that both had the following description')));
-    expect(error.toString(), contains('Container()'));
-    expect(error.toString(), contains('Container([<\'x\'>])'));
+    expect(error.toString(), contains('Container'));
+    expect(error.toString(), contains('Container-[<\'x\'>]'));
     expect(error.toString(), contains('[GlobalObjectKey ${describeIdentity(0)}]'));
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));
   });
@@ -75,7 +75,7 @@ void main() {
     // We should probably also verify the three other combinations that can be generated...
     expect(error.toString(), contains('This was determined by noticing that after the widget with the above global key was moved out of its previous parent, that previous parent never updated during this frame, meaning that it either did not update at all or updated before the widget was moved, in either case implying that it still thinks that it should have a child with that global key.'));
     expect(error.toString(), contains('[GlobalObjectKey ${describeIdentity(0)}]'));
-    expect(error.toString(), contains('Container()'));
+    expect(error.toString(), contains('Container'));
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));
     expect(error, isFlutterError);
   });

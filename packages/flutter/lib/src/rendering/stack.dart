@@ -524,7 +524,7 @@ class RenderStack extends RenderBox
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
     description.add(new EnumProperty<StackFit>('fit', fit));
@@ -600,7 +600,7 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new IntProperty('index', index));
   }

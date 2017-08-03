@@ -179,7 +179,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   AnimatedWidgetBaseState<ImplicitlyAnimatedWidget> createState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
   }
@@ -392,7 +392,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   _AnimatedContainerState createState() => new _AnimatedContainerState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
@@ -439,7 +439,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<FractionalOffsetTween>('alignment', _alignment, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsTween>('padding', _padding, defaultValue: null));
@@ -527,7 +527,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   _AnimatedPositionedState createState() => new _AnimatedPositionedState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DoubleProperty('left', left, defaultValue: null));
     description.add(new DoubleProperty('top', top, defaultValue: null));
@@ -570,7 +570,7 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new ObjectFlagProperty<Tween<double>>.has('left', _left));
     description.add(new ObjectFlagProperty<Tween<double>>.has('top', _top));
@@ -615,7 +615,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   _AnimatedOpacityState createState() => new _AnimatedOpacityState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DoubleProperty('opacity', opacity));
   }
@@ -668,7 +668,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   _AnimatedDefaultTextStyleState createState() => new _AnimatedDefaultTextStyleState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     style?.debugFillProperties(description);
   }
@@ -749,7 +749,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   _AnimatedPhysicalModelState createState() => new _AnimatedPhysicalModelState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<BoxShape>('shape', shape));
     description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));

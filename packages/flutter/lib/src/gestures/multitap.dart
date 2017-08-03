@@ -221,7 +221,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  String toStringShort() => 'double tap';
+  String get debugDescription => 'double tap';
 }
 
 /// TapGesture represents a full gesture resulting from a single tap sequence,
@@ -404,5 +404,5 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  String toStringShort() => 'multitap';
+  String get debugDescription => 'multitap';
 }

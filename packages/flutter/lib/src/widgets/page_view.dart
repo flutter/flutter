@@ -495,7 +495,7 @@ class _PageViewState extends State<PageView> {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<Axis>('scrollDirection', widget.scrollDirection));
     description.add(new FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));

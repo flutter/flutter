@@ -526,7 +526,7 @@ void main() {
     expect(
       element.toStringDeep(),
       equalsIgnoringHashCodes(
-        'Table([GlobalKey#00000]; renderObject: RenderTable#00000)\n'
+        'Table-[GlobalKey#00000](renderObject: RenderTable#00000)\n'
         '├Text("A")\n'
         '│└RichText(renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("B")\n'

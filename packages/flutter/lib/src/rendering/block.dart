@@ -156,7 +156,7 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<Axis>('mainAxis', mainAxis));
   }

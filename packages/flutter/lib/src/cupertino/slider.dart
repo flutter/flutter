@@ -111,7 +111,7 @@ class CupertinoSlider extends StatefulWidget {
   _CupertinoSliderState createState() => new _CupertinoSliderState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DoubleProperty('value', value));
     description.add(new DoubleProperty('min', min));

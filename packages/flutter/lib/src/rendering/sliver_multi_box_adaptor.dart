@@ -517,7 +517,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsNode.message(firstChild != null ? 'currently live children: ${indexOf(firstChild)} to ${indexOf(lastChild)}' : 'no children current live'));
   }

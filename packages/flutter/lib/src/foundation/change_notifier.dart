@@ -6,8 +6,8 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'diagnostics.dart';
 import 'observer_list.dart';
-import 'tree_diagnostics_mixin.dart';
 
 /// An object that maintains a list of listeners.
 abstract class Listenable {

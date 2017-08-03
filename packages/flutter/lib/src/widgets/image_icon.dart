@@ -80,7 +80,7 @@ class ImageIcon extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ImageProvider>('image', image, ifNull: '<empty>', showName: false));
     description.add(new DoubleProperty('size', size, defaultValue: null));

@@ -379,7 +379,7 @@ class _ModalScopeStatus extends InheritedWidget {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
     description.add(new FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));

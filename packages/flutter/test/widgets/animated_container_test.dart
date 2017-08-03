@@ -76,7 +76,7 @@ void main() {
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
-        ' │ decoration:\n'
+        ' │ decoration: BoxDecoration:\n'
         ' │   color: Color(0xff0000ff)\n'
         ' │ configuration: ImageConfiguration(bundle:\n'
         ' │   PlatformAssetBundle#00000(), devicePixelRatio: 1.0, platform:\n'

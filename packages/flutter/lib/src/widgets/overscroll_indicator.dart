@@ -98,7 +98,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   _GlowingOverscrollIndicatorState createState() => new _GlowingOverscrollIndicatorState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
     String showDescription;

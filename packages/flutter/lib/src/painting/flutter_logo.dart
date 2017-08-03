@@ -212,19 +212,12 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
-  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return new DiagnosticsNode.lazy(
-      name: name,
-      description: '$runtimeType',
-      value: this,
-      style: style,
-      fillProperties: (List<DiagnosticsNode> properties) {
-        properties.add(new DiagnosticsNode.message('$lightColor/$darkColor on $textColor'));
-        properties.add(new EnumProperty<FlutterLogoStyle>('style', this.style));
-        if (_inTransition)
-          properties.add(new DiagnosticsNode.message('transition $_position:$_opacity'));
-      }
-    );
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsNode.message('$lightColor/$darkColor on $textColor'));
+    properties.add(new EnumProperty<FlutterLogoStyle>('style', style));
+    if (_inTransition)
+      properties.add(new DiagnosticsNode.message('transition $_position:$_opacity'));
   }
 }
 

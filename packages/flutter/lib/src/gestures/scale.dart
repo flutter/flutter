@@ -276,5 +276,5 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  String toStringShort() => 'scale';
+  String get debugDescription => 'scale';
 }

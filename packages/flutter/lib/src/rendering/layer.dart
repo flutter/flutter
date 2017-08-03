@@ -32,7 +32,7 @@ import 'node.dart';
 ///
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
 ///    for painting [RenderObject] trees on the the display.
-abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
+abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This layer's parent in the layer tree.
   ///
   /// The [parent] of the root node in the layer tree is null.
@@ -102,10 +102,10 @@ abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
   dynamic debugCreator;
 
   @override
-  String toString() => '${super.toString()}${ owner == null ? " DETACHED" : ""}';
+  String toStringShort() => '${super.toStringShort()}${ owner == null ? " DETACHED" : ""}';
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Object>('owner', owner, hidden: parent != null, defaultValue: null));
     description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null));
@@ -162,7 +162,7 @@ class PictureLayer extends Layer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
   }
@@ -460,7 +460,7 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Offset>('offset', offset));
   }
@@ -488,7 +488,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Rect>('clipRect', clipRect));
   }
@@ -516,7 +516,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<RRect>('clipRRect', clipRRect));
   }
@@ -544,7 +544,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Path>('clipPath', clipPath));
   }
@@ -596,7 +596,7 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new TransformProperty('transform', transform));
   }
@@ -627,7 +627,7 @@ class OpacityLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new IntProperty('alpha', alpha));
   }
@@ -667,7 +667,7 @@ class ShaderMaskLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Shader>('shader', shader));
     description.add(new DiagnosticsProperty<Rect>('maskRect', maskRect));
@@ -745,7 +745,7 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<RRect>('clipRRect', clipRRect));
     description.add(new DoubleProperty('elevation', elevation));
@@ -854,7 +854,7 @@ class LeaderLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<Offset>('offset', offset));
     description.add(new DiagnosticsProperty<LayerLink>('link', link));
@@ -1043,7 +1043,7 @@ class FollowerLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<LayerLink>('link', link));
     description.add(new TransformProperty('transform', getLastTransform(), defaultValue: null));

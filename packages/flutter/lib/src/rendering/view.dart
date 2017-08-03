@@ -211,7 +211,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     // call to ${super.debugFillProperties(description)} is omitted because the
     // root superclasses don't include any interesting information for this
     // class

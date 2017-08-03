@@ -6,7 +6,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestTree extends Object with TreeDiagnosticsMixin {
+class TestTree extends Object with DiagnosticableTreeMixin {
   TestTree({
     this.name,
     this.style,
@@ -32,8 +32,12 @@ class TestTree extends Object with TreeDiagnosticsMixin {
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> properties) {
-    properties.addAll(this.properties);
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    if (style != null)
+      properties.defaultDiagnosticsTreeStyle = style;
+
+    for (DiagnosticsNode property in this.properties)
+      properties.add(property);
   }
 }
 
@@ -231,7 +235,9 @@ void main() {
         style: lastChildStyle,
       );
 
-      expect(tree, hasAGoodToStringDeep);
+      if (tree.style != DiagnosticsTreeStyle.singleLine)
+        expect(tree, hasAGoodToStringDeep);
+
       expect(
         tree.toDiagnosticsNode(style: style).toStringDeep(),
         equalsIgnoringHashCodes(golden),
@@ -274,29 +280,13 @@ void main() {
       'dense',
       style: DiagnosticsTreeStyle.dense,
       golden:
-      'TestTree#00000\n'
-      '│stringProperty1: value1\n'
-      '│doubleProperty1: 42.5\n'
-      '│roundedProperty: 0.3\n'
-      '│nullProperty: null\n'
-      '│<root node>\n'
-      '│\n'
-      '├child node A: TestTree#00000\n'
-      '├child node B: TestTree#00000\n'
-      '││p1: v1\n'
-      '││p2: v2\n'
-      '││\n'
-      '│├child node B1: TestTree#00000\n'
-      '│├child node B2: TestTree#00000\n'
-      '││ property1: value1\n'
-      '│└child node B3: TestTree#00000\n'
-      '│  <leaf node>\n'
-      '│  foo: 42\n'
-      '└child node C: TestTree#00000\n'
-      '  foo:\n'
-      '  multi\n'
-      '  line\n'
-      '  value!\n',
+        'TestTree#00000(stringProperty1: value1, doubleProperty1: 42.5, roundedProperty: 0.3, nullProperty: null, <root node>)\n'
+        '├child node A: TestTree#00000\n'
+        '├child node B: TestTree#00000(p1: v1, p2: v2)\n'
+        '│├child node B1: TestTree#00000\n'
+        '│├child node B2: TestTree#00000(property1: value1)\n'
+        '│└child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
+        '└child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
 
     goldenStyleTest(
@@ -365,12 +355,10 @@ void main() {
       '   ╚═══════════\n',
     );
 
-    // You would never really want to make everything a leaf child like this
-    // but you can and still get a readable tree.
-    // The joint between single and double lines here is a bit clunky
-    // but we could correct that if there is any real use for this style.
+    // You would never really want to make everything a transition child like
+    // this but you can and still get a readable tree.
     goldenStyleTest(
-      'leaf',
+      'transition',
       style: DiagnosticsTreeStyle.transition,
       golden:
       'TestTree#00000:\n'
@@ -468,10 +456,7 @@ void main() {
       ' │ │   property1: value1\n'
       ' │ │\n'
       ' │ └─child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
-      ' └─child node C: TestTree#00000(foo:\n'
-      '   multi\n'
-      '   line\n'
-      '   value!)\n',
+      ' └─child node C: TestTree#00000(foo: multi\\nline\\nvalue!)\n',
     );
   });
 
@@ -534,11 +519,8 @@ void main() {
         ' │ ║   tree property: TestTree#00000:\n'
         ' │ ║     survived: true\n'
         ' │ ║   ├child dense child: TestTree#00000\n'
-        ' │ ║   ├child dense: TestTree#00000\n'
-        ' │ ║   │ property1: "value1"\n'
-        ' │ ║   └child node B3: TestTree#00000\n'
-        ' │ ║     <leaf node>\n'
-        ' │ ║     foo: 42\n'
+        ' │ ║   ├child dense: TestTree#00000(property1: "value1")\n'
+        ' │ ║   └child node B3: TestTree#00000(<leaf node>, foo: 42)\n'
         ' │ ╚═══════════\n'
         ' └─child node C: TestTree#00000\n'
         '     foo:\n'
@@ -1296,10 +1278,6 @@ void main() {
       objectsProperty.toString(),
       equals('objects: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)'),
     );
-    expect(
-      objectsProperty.toStringDeep(),
-      equals('objects: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)'),
-    );
 
     final IterableProperty<Object> multiLineProperty = new IterableProperty<Object>(
       'objects',
@@ -1327,7 +1305,6 @@ void main() {
 
     expect(
       new TestTree(
-        name: 'root',
         properties: <DiagnosticsNode>[multiLineProperty],
       ).toStringDeep(),
       equalsIgnoringHashCodes(
@@ -1335,6 +1312,16 @@ void main() {
         '   objects:\n'
         '     Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)\n'
         '     Color(0xffffffff)\n',
+      ),
+    );
+
+    expect(
+      new TestTree(
+        properties: <DiagnosticsNode>[objectsProperty, new IntProperty('foo', 42)],
+        style: DiagnosticsTreeStyle.singleLine,
+      ).toStringDeep(),
+      equalsIgnoringHashCodes(
+        'TestTree#00000(objects: [Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)], foo: 42)',
       ),
     );
 

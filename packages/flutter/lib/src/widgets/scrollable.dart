@@ -156,7 +156,7 @@ class Scrollable extends StatefulWidget {
   ScrollableState createState() => new ScrollableState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
     description.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
@@ -484,7 +484,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<ScrollPosition>('position', position));
   }

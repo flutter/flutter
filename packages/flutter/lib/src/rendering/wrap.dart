@@ -593,7 +593,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<Axis>('direction', direction));
     description.add(new EnumProperty<WrapAlignment>('alignment', alignment));

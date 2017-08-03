@@ -215,7 +215,7 @@ class AnimatedCrossFade extends StatefulWidget {
   _AnimatedCrossFadeState createState() => new _AnimatedCrossFadeState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
     description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, defaultValue: FractionalOffset.topCenter));
@@ -352,7 +352,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<CrossFadeState>('crossFadeState', widget.crossFadeState));
     description.add(new DiagnosticsProperty<AnimationController>('controller', _controller, showName: false));

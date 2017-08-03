@@ -468,7 +468,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   // TODO(ianh): semantics - shouldn't walk the invisible children
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
     description.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
@@ -1045,7 +1045,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DoubleProperty('anchor', anchor));
   }

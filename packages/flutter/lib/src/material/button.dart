@@ -249,7 +249,7 @@ class MaterialButton extends StatefulWidget {
   _MaterialButtonState createState() => new _MaterialButtonState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }

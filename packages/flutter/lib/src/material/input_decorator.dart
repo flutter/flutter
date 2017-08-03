@@ -372,7 +372,7 @@ class InputDecorator extends StatelessWidget {
   final Widget child;
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
     description.add(new EnumProperty<TextStyle>('baseStyle', baseStyle));
@@ -615,7 +615,7 @@ class _AnimatedLabel extends ImplicitlyAnimatedWidget {
   _AnimatedLabelState createState() => new _AnimatedLabelState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     style?.debugFillProperties(description);
   }

@@ -176,7 +176,7 @@ class TextField extends StatefulWidget {
   _TextFieldState createState() => new _TextFieldState();
 
   @override
-  void debugFillProperties(List<DiagnosticsNode> description) {
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
