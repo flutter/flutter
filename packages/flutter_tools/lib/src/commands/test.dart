@@ -85,20 +85,23 @@ class TestCommand extends FlutterCommand {
   String get description => 'Run Flutter unit tests for the current project.';
 
   Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
+    print('***** _collectCoverageData start');
     final Status status = logger.startProgress('Collecting coverage information...');
     final String coverageData = await collector.finalizeCoverage(
       timeout: const Duration(seconds: 30),
     );
+    print('***** _collectCoverageData coverageData=${coverageData != null}');
     status.stop();
-    printTrace('coverage information collection complete');
+    print('coverage information collection complete');
     if (coverageData == null)
       return false;
 
     final String coveragePath = argResults['coverage-path'];
+    print('***** _collectCoverageData coveragePath=$coveragePath');
     final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
-    printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
+    print('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     final String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {

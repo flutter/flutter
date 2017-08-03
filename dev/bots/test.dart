@@ -138,15 +138,18 @@ Future<Null> _runTests() async {
 }
 
 Future<Null> _runCoverage() async {
+  /*
   if (Platform.environment['TRAVIS'] == null ||
       Platform.environment['TRAVIS_PULL_REQUEST'] != 'false' ||
       Platform.environment['TRAVIS_OS_NAME'] != 'linux') {
     print('${bold}DONE: test.dart does not run coverage for Travis pull requests or not non-Linux environments');
     return;
   }
+  */
 
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
-    options: const <String>['--coverage'],
+    options: const <String>['--coverage', 'test/widgets/media_query_test.dart'],
+    verbose: true,
   );
 
   print('${bold}DONE: Coverage collection successful.$reset');
@@ -212,8 +215,12 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     bool printOutput: true,
     List<String> options: const <String>[],
     bool skip: false,
+    bool verbose: false,
 }) {
-  final List<String> args = <String>['test']..addAll(options);
+  final List<String> args = <String>[];
+  if (verbose) args.add('-v');
+  args.add('test');
+  args.addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.add(flutterTestArgs);
   if (script != null)
