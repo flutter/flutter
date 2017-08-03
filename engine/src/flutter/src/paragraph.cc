@@ -102,7 +102,7 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   // size.
   paint->letterSpacing = style.letter_spacing / style.font_size;
   paint->wordSpacing = style.word_spacing;
-  paint->scaleX = 1;
+  paint->scaleX = 1.0f;
   // Prevent spacing rounding in Minikin.
   paint->paintFlags = 0xFF;
 }

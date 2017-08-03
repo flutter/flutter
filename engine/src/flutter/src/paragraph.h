@@ -157,7 +157,7 @@ class Paragraph {
   FRIEND_TEST(RenderTest, DISABLED_ArabicParagraph);
   FRIEND_TEST(RenderTest, SpacingParagraph);
   FRIEND_TEST(RenderTest, LongWordParagraph);
-  FRIEND_TEST(RenderTest, KernParagraph);
+  FRIEND_TEST(RenderTest, KernScaleParagraph);
   FRIEND_TEST(RenderTest, NewlineParagraph);
 
   // Starting data to layout.
