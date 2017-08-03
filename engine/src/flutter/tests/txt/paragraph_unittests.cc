@@ -779,7 +779,7 @@ TEST_F(RenderTest, ChineseParagraph) {
 
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
-  paragraph_style.text_align = TextAlign::right;
+  paragraph_style.text_align = TextAlign::justify;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
@@ -1337,7 +1337,6 @@ TEST_F(RenderTest, KernScaleParagraph) {
   EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 207.37109375f);
   EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 230.87109375f);
   EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 253.36328125f);
-
 }
 
 TEST_F(RenderTest, NewlineParagraph) {
@@ -1393,7 +1392,51 @@ TEST_F(RenderTest, NewlineParagraph) {
   EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().y(), 336.9140625);
   EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().y(), 407.2265625);
+}
 
+TEST_F(RenderTest, EmojiParagraph) {
+  const char* text =
+      "😀😃😄😁😆😅😂🤣☺😇🙂😍😡😟😢😻👽💩👍👎🙏👌👋👄👁👦👼👨‍🚀👨‍🚒🙋‍♂️👳👨‍👨‍👧‍👧\
+      💼👡👠☂🐶🐰🐻🐼🐷🐒🐵🐔🐧🐦🐋🐟🐡🕸🐌🐴🐊🐄🐪🐘🌸🌏🔥🌟🌚🌝💦💧\
+      ❄🍕🍔🍟🥝🍱🕶🎩🏈⚽🚴‍♀️🎻🎼🎹🚨🚎🚐⚓🛳🚀🚁🏪🏢🖱⏰📱💾💉📉🛏🔑🔓\
+      📁🗓📊❤💯🚫🔻♠♣🕓❗🏳🏁🏳️‍🌈🇮🇹🇱🇷🇺🇸🇬🇧🇨🇳🇧🇴";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  text_style.font_family = "Noto Color Emoji";
+  text_style.font_size = 50;
+  text_style.decoration = TextDecoration::kUnderline;
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth());
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
+  ASSERT_EQ(paragraph->records_.size(), 8ull);
+
+  EXPECT_EQ(paragraph->records_[0].line(), 0ull);
+  EXPECT_EQ(paragraph->records_[1].line(), 1ull);
+  EXPECT_EQ(paragraph->records_[2].line(), 2ull);
+  EXPECT_EQ(paragraph->records_[3].line(), 3ull);
+  EXPECT_EQ(paragraph->records_[7].line(), 7ull);
+
+  // TODO(garyq): Add more robust tests for emojis, currently, look at the
+  // resulting file to check if emojis are drawn properly.
+
+  ASSERT_TRUE(Snapshot());
 }
 
 }  // namespace txt
