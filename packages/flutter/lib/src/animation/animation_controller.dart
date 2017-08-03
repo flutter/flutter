@@ -38,10 +38,6 @@ const Tolerance _kFlingTolerance = const Tolerance(
   distance: 0.01,
 );
 
-/// Don't start the animation if the target value is within this tolerance of
-/// the current value.
-const Tolerance _kAnimateToTolerance = const Tolerance();
-
 /// A controller for an animation.
 ///
 /// This class lets you perform tasks such as:
@@ -339,14 +335,9 @@ class AnimationController extends Animation<double>
       final double range = upperBound - lowerBound;
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       simulationDuration = this.duration * remainingFraction;
-    } else if (target < _value + _kAnimateToTolerance.distance && target > _value - _kAnimateToTolerance.distance) {
-      // We are basically at the target, don't animate.
+    } else if (target == value) {
+      // Already at target, don't animate.
       simulationDuration = Duration.ZERO;
-      if (target != _value) {
-        _internalSetValue(target);
-        notifyListeners();
-        target = _value;
-      }
     }
     stop();
     if (simulationDuration == Duration.ZERO) {

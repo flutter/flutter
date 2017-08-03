@@ -174,6 +174,12 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     @required Duration duration,
     @required Curve curve,
   }) {
+    if (nearEqual(to, pixels, physics.tolerance.distance)) {
+      // Skip the animation, go straight to the position as we are already close.
+      jumpTo(to);
+      return new Future<Null>.value();
+    }
+
     final DrivenScrollActivity activity = new DrivenScrollActivity(
       this,
       from: pixels,

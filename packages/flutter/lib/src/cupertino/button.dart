@@ -112,11 +112,10 @@ class CupertinoButton extends StatefulWidget {
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
-  static const Duration kFadeInDuration = const Duration(milliseconds: 350);
+  static const Duration kFadeInDuration = const Duration(milliseconds: 100);
   Tween<double> _opacityTween;
 
   AnimationController _animationController;
-  TickerFuture _lastAnimation;
 
   void _setTween() {
     _opacityTween = new Tween<double>(
@@ -149,19 +148,39 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     _setTween();
   }
 
-  Future<Null> _handleTapDown(PointerDownEvent event) async {
-    await _lastAnimation;
-    _lastAnimation = _animationController.animateTo(1.0, duration: kFadeOutDuration);
+  bool _buttonHeldDown = false;
+
+  void _handleTapDown(PointerDownEvent event) {
+    if (!_buttonHeldDown) {
+      _buttonHeldDown = true;
+      _animate();
+    }
   }
 
-  Future<Null> _handleTapUp(PointerUpEvent event) async {
-    await _lastAnimation;
-    _lastAnimation = _animationController.animateTo(0.0, duration: kFadeInDuration);
+  void _handleTapUp(PointerUpEvent event) {
+    if (_buttonHeldDown) {
+      _buttonHeldDown = false;
+      _animate();
+    }
   }
 
-  Future<Null>  _handleTapCancel(PointerCancelEvent event) async {
-    await _lastAnimation;
-    _lastAnimation = _animationController.animateTo(0.0, duration: kFadeInDuration);
+  void _handleTapCancel(PointerCancelEvent event) {
+    if (_buttonHeldDown) {
+      _buttonHeldDown = false;
+      _animate();
+    }
+  }
+
+  Future<Null> _animate() async {
+    if (!_animationController.isAnimating) {
+      final bool wasHeldDown = _buttonHeldDown;
+      if (_buttonHeldDown)
+        await _animationController.animateTo(1.0, duration: kFadeOutDuration);
+      else
+        await _animationController.animateTo(0.0, duration: kFadeInDuration);
+      if (mounted && wasHeldDown != _buttonHeldDown)
+        _animate();
+    }
   }
 
   @override
