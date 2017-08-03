@@ -972,7 +972,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_EQ(rects.size(), 1ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 0);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 28);
+  EXPECT_FLOAT_EQ(rects[0].right(), 28.417969);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
   rects = paragraph->GetRectsForRange(0, 1);
@@ -982,7 +982,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_EQ(rects.size(), 1ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 0);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 28);
+  EXPECT_FLOAT_EQ(rects[0].right(), 28.417969);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
   paint.setColor(SK_ColorBLUE);
@@ -991,19 +991,19 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 3ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 56);
+  EXPECT_FLOAT_EQ(rects[0].left(), 56.835938);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 151);
+  EXPECT_FLOAT_EQ(rects[0].right(), 153);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
-  EXPECT_FLOAT_EQ(rects[1].left(), 151);
+  EXPECT_FLOAT_EQ(rects[1].left(), 153);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 163);
+  EXPECT_FLOAT_EQ(rects[1].right(), 165);
   EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
 
-  EXPECT_FLOAT_EQ(rects[2].left(), 163);
+  EXPECT_FLOAT_EQ(rects[2].left(), 165);
   EXPECT_FLOAT_EQ(rects[2].top(), 0);
-  EXPECT_FLOAT_EQ(rects[2].right(), 175);
+  EXPECT_FLOAT_EQ(rects[2].right(), 177);
   EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
 
   paint.setColor(SK_ColorGREEN);
@@ -1012,19 +1012,19 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 3ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 175);
+  EXPECT_FLOAT_EQ(rects[0].left(), 177);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 347);
+  EXPECT_FLOAT_EQ(rects[0].right(), 352);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
-  EXPECT_FLOAT_EQ(rects[1].left(), 347);
+  EXPECT_FLOAT_EQ(rects[1].left(), 352);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 359);
+  EXPECT_FLOAT_EQ(rects[1].right(), 364);
   EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
 
-  EXPECT_FLOAT_EQ(rects[2].left(), 359);
+  EXPECT_FLOAT_EQ(rects[2].left(), 364);
   EXPECT_FLOAT_EQ(rects[2].top(), 0);
-  EXPECT_FLOAT_EQ(rects[2].right(), 499);
+  EXPECT_FLOAT_EQ(rects[2].right(), 507);
   EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
 
   paint.setColor(SK_ColorRED);
@@ -1033,16 +1033,16 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 17ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 208);
+  EXPECT_FLOAT_EQ(rects[0].left(), 210.83594);
   EXPECT_FLOAT_EQ(rects[0].top(), 58.59375);
-  EXPECT_FLOAT_EQ(rects[0].right(), 292);
+  EXPECT_FLOAT_EQ(rects[0].right(), 296);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 117.1875);
 
   // TODO(garyq): The following set of vals are definetly wrong and
   // end of paragraph handling needs to be fixed in a later patch.
   EXPECT_FLOAT_EQ(rects[16].left(), 0);
   EXPECT_FLOAT_EQ(rects[16].top(), 234.375);
-  EXPECT_FLOAT_EQ(rects[16].right(), 140);
+  EXPECT_FLOAT_EQ(rects[16].right(), 142.08984);
   EXPECT_FLOAT_EQ(rects[16].bottom(), 292.96875);
 
   paint.setColor(SK_ColorBLUE);
@@ -1051,9 +1051,9 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 2ull);
-  EXPECT_FLOAT_EQ(rects[1].left(), 499);
+  EXPECT_FLOAT_EQ(rects[1].left(), 507);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 511);
+  EXPECT_FLOAT_EQ(rects[1].right(), 519.44922);
   EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
 
   paint.setColor(SK_ColorRED);
@@ -1081,8 +1081,8 @@ TEST_F(RenderTest, GetWordBoundaryParagraph) {
   txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
-  text_style.font_size = 50;
-  text_style.letter_spacing = 1;
+  text_style.font_size = 52;
+  text_style.letter_spacing = 1.19039;
   text_style.word_spacing = 5;
   text_style.color = SK_ColorBLACK;
   text_style.height = 1.5;
@@ -1296,7 +1296,9 @@ TEST_F(RenderTest, LongWordParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, KernParagraph) {
+TEST_F(RenderTest, KernScaleParagraph) {
+  float scale = 3.0f;
+
   txt::ParagraphStyle paragraph_style;
   paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
@@ -1304,7 +1306,7 @@ TEST_F(RenderTest, KernParagraph) {
 
   txt::TextStyle text_style;
   text_style.font_family = "Droid Serif";
-  text_style.font_size = 100;
+  text_style.font_size = 100 / scale;
   text_style.letter_spacing = 0;
   text_style.word_spacing = 0;
   text_style.color = SK_ColorBLACK;
@@ -1315,7 +1317,7 @@ TEST_F(RenderTest, KernParagraph) {
   builder.AddText("A");
   builder.PushStyle(text_style);
   builder.AddText("V");
-  text_style.font_size = 12;
+  text_style.font_size = 14 / scale;
   builder.PushStyle(text_style);
   builder.AddText(
       " Dialog Text List lots of words to see if kerning works on a bigger set "
@@ -1324,19 +1326,18 @@ TEST_F(RenderTest, KernParagraph) {
   builder.Pop();
 
   auto paragraph = builder.Build();
-  paragraph->Layout(GetTestCanvasWidth());
-
+  paragraph->Layout(GetTestCanvasWidth() / scale);
+  GetCanvas()->scale(scale, scale);
   paragraph->Paint(GetCanvas(), 0, 0);
-
+  GetCanvas()->scale(1.0, 1.0);
   ASSERT_TRUE(Snapshot());
 
   EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 622.015625f);
-  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 693.015625);
-  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 760.015625);
+  EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 207.37109375f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 230.87109375f);
+  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 253.36328125f);
 
-  ASSERT_TRUE(Snapshot());
 }
 
 TEST_F(RenderTest, NewlineParagraph) {
@@ -1378,16 +1379,16 @@ TEST_F(RenderTest, NewlineParagraph) {
 
   ASSERT_EQ(paragraph->records_.size(), 10ull);
   EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 129);
+  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 127.69921875);
   EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().y(),
                    paragraph->records_[0].offset().y());
   EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 593);
+  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 586.9921875);
   EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().y(),
                    paragraph->records_[4].offset().y());
   EXPECT_DOUBLE_EQ(paragraph->records_[5].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 129);
+  EXPECT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 127.69921875);
   EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().y(), 336.9140625);
