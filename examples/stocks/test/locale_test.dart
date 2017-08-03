@@ -13,10 +13,13 @@ void main() {
     stocks.main();
     await tester.idle(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump();
+    // Note that the initial test app's locale is "_", so we're seeing
+    // the fallback translation here.
     expect(find.text('MARKET'), findsOneWidget);
     await tester.binding.setLocale('es', 'US');
     await tester.idle();
     await tester.pump();
+    await tester.pumpAndSettle(); // Wait for the localized resources to load.
     expect(find.text('MERCADO'), findsOneWidget);
   });
 }
