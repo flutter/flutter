@@ -20,8 +20,7 @@ class MaterialLocalizations {
   }
 
   static MaterialLocalizations of(BuildContext context) {
-    return Localizations.of(context)
-      .resourcesFor<MaterialLocalizations>(MaterialLocalizations);
+    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
   }
 
   String get openAppDrawerTooltip => 'Open navigation menu';

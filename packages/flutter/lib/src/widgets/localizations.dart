@@ -189,15 +189,6 @@ class _LocalizationsScope extends InheritedWidget {
   }
 }
 
-/// The value returned by [Localizations.of].
-abstract class LocalizationsData {
-  /// The resources returned by `resourcesFor` will be specific to this locale.
-  Locale get locale;
-
-  /// Returns a `type` object that contains a collection of resources for `locale`.
-  T resourcesFor<T>(Type type);
-}
-
 /// Defines the [Locale] for its `child` and the localized resources that the
 /// child depends on.
 ///
@@ -210,19 +201,20 @@ abstract class LocalizationsData {
 /// will not need to create one. The widget app's `Localizations` delegate can
 /// be initialized with [WidgetsApp.localizationsDelegate]. The [MaterialApp]
 /// class also provides a `localizationsDelegate` parameter that's just
-/// pass along to the [WidgetsApp].
+/// passed along to the [WidgetsApp].
 ///
-/// Apps should retrieve localized resources with the [LocalizedResourceData]
-/// returned by `Localizations.of(context)`. This is conventionally done
-/// by a static `.of` method on the class that defines the app's localized
-/// resources.
+/// Apps should retrieve collections of localized resources with
+/// `Localizations.of<MyLocalizations>(context, MyLocalizations)`,
+/// where MyLocalizations is an app specific class defines one function per
+/// resource. This is conventionally done by a static `.of` method on the
+/// MyLocalizations class.
 ///
-/// For example, using the `MyLocalizedResouces` class defined below, one would
+/// For example, using the `MyLocalizations` class defined below, one would
 /// lookup a localized title string like this:
 /// ```dart
 /// MyLocalizations.of(context).title()
 /// ```
-/// If the `Localizations` were to be rebuilt with a new locale then
+/// If `Localizations` were to be rebuilt with a new `locale` then
 /// the widget subtree that corresponds to [BuildContext] `context` would
 /// be rebuilt after the corresponding resources had been loaded.
 ///
@@ -252,7 +244,7 @@ abstract class LocalizationsData {
 ///   }
 ///
 ///   static MyLocalizations of(BuildContext context) {
-///     return Localizations.of(context).resourcesFor<MyLocalizations>(MyLocalizations);
+///     return Localizations.of<MyLocalizations>(context, MyLocalizations);
 ///   }
 ///
 ///   String title() => Intl.message('<title>', name: 'title', locale: locale.toString());
@@ -288,32 +280,37 @@ class Localizations extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
-  /// Returns the localized resources for the widget tree that corresponds to
-  /// [BuildContext] `context`.
+  /// The locale of the Localizations widget for the widget tree that
+  /// corresponds to [BuildContext] `context`.
+  static Locale localeOf(BuildContext context) {
+    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    return scope?.localizedResourcesState.locale;
+  }
+
+  /// Returns the 'type' localized resources for the widget tree that
+  /// corresponds to [BuildContext] `context`.
   ///
-  /// This method is typically combined with [LocalizationsData.for] to define
-  /// a static method that looks up a collection of related related resources. For
-  /// example Flutter looks up Material resources with a method defined like this:
+  /// This method is typically used by a static factory method on the 'type'
+  /// class. For example Flutter's MaterialLocalizations class looks up Material
+  /// resources with a method defined like this:
   ///
   /// ```dart
-  /// static LocalizedMaterialResources of(BuildContext context) {
-  ///  return Localizations.of(context)
-  ///    .resourcesFor<LocalizedMaterialResources>(LocalizedMaterialResources);
+  /// static MaterialLocalizations of(BuildContext context) {
+  ///    return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
   /// }
   /// ```
-  static LocalizationsData of(BuildContext context) {
+  static T of<T>(BuildContext context, Type type) {
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
-    return scope?.localizedResourcesState;
+    return scope?.localizedResourcesState.resourcesFor<T>(type);
   }
 
   @override
   _LocalizationsState createState() => new _LocalizationsState();
 }
 
-class _LocalizationsState extends State<Localizations> implements LocalizationsData {
+class _LocalizationsState extends State<Localizations> {
   final GlobalKey _localizedResourcesScopeKey = new GlobalKey();
 
-  @override
   Locale get locale => _locale;
   Locale _locale;
 
@@ -342,7 +339,6 @@ class _LocalizationsState extends State<Localizations> implements LocalizationsD
     });
   }
 
-  @override
   T resourcesFor<T>(Type type) => widget.delegate.resourcesFor<T>(_locale, type);
 
   @override
