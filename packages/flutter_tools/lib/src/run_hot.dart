@@ -467,16 +467,19 @@ class HotRunner extends ResidentRunner {
       final String entryPath = fs.path.relative(mainPath, from: projectRootPath);
       if (benchmarkMode)
         vmReloadTimer.start();
-      Map<String, dynamic> reloadReport;
-      final List<Future<Map<String, dynamic>>> reloadReports = <Future<Map<String, dynamic>>>[];
+      final List<Future<Map<String, dynamic>>> reloadReportFutures = <Future<Map<String, dynamic>>>[];
       for (FlutterDevice device in flutterDevices) {
         final List<Future<Map<String, dynamic>>> reports = device.reloadSources(
           entryPath,
           pause: pause
         );
-        reloadReports.addAll(reports);
+        reloadReportFutures.addAll(reports);
       }
-      reloadReport = (await Future.wait(reloadReports)).first;
+      if (reloadReportFutures.isEmpty) {
+        printError('Unable to hot reload. No instance of Flutter is currently running.');
+        return new OperationResult(1, 'No instances running');
+      }
+      final Map<String, dynamic> reloadReport = (await Future.wait(reloadReportFutures)).first;
 
       if (!validateReloadReport(reloadReport)) {
         // Reload failed.
