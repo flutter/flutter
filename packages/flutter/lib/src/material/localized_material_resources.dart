@@ -7,6 +7,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+/// Default localized resource values for the material widgets.
+///
+/// This class is just a placeholder, it only provides english values.
 class LocalizedMaterialResources {
   const LocalizedMaterialResources(this.locale) : assert(locale != null);
 

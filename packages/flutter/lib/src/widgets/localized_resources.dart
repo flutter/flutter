@@ -49,8 +49,8 @@ abstract class LocalizedResourcesDelegate {
   /// [resourcesFor] will return null.
   LocalizedResourcesStatus statusFor(Locale locale);
 
-  /// Return an instance of `Type` that contains all of the resources for
-  /// `locale`.
+  /// Returns an instance with the specified type that contains all of
+  /// the resources for `locale`.
   ///
   /// This method's type parameter `T` must match the `type` parameter.
   T resourcesFor<T>(Locale locale, Type type);
@@ -62,7 +62,6 @@ abstract class LocalizedResourcesDelegate {
 /// Signature for the async localized resource loading callback used
 /// by [DefaultLocalizedResourceLoader].
 typedef Future<dynamic> LocalizedResourceLoader(Locale locale);
-
 
 /// Defines all of an application's resources in terms of `allLoaders`:
 /// a map from a [Type] to a _load_ function that creates an instance of
@@ -217,11 +216,6 @@ abstract class LocalizedResourcesData {
 /// by a static `.of` method on the class that defines the app's localized
 /// resources.
 ///
-/// This class is effectively an [InheritedWidget]. If it's rebuilt with
-/// a new `locale` or if its `delegate.updateShouldNotify` returns true,
-/// widgets that have created a dependency by calling
-/// `LocalizedResources.of(context)` will be rebuilt.
-///
 /// For example, using the `MyLocalizedResouces` class defined below, one would
 /// lookup a localized title string like this:
 /// ```dart
@@ -230,6 +224,12 @@ abstract class LocalizedResourcesData {
 /// If the `LocalizedResources` were to be rebuilt with a new locale then
 /// the widget subtree that corresponds to [BuildContext] `context` would
 /// be rebuilt after the corresponding resources had been loaded.
+///
+/// This class is effectively an [InheritedWidget]. If it's rebuilt with
+/// a new `locale` or if its `delegate.updateShouldNotify` returns true,
+/// widgets that have created a dependency by calling
+/// `LocalizedResources.of(context)` will be rebuilt after the resources
+/// for the new locale have been loaded.
 ///
 /// ## Sample code
 ///

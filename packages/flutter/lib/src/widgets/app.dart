@@ -127,8 +127,15 @@ class WidgetsApp extends StatefulWidget {
   ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
+  /// The initial locale for this app's [LocalizedResources] widget.
+  ///
+  /// If the 'locale' is null the system's locale value is used.
   final Locale locale;
 
+  /// The delegate for this app's [LocalizedResources] widget.
+  ///
+  /// This delegate defines all of the localized resources for this
+  /// application. It is typically an instance of [DefaultLocalizedResourcesDelegate].
   final LocalizedResourcesDelegate localizedResourcesDelegate;
 
   /// Turns on a performance overlay.
