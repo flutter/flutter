@@ -37,7 +37,7 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
     ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
     blink::Threads::Platform()->PostTask(
         ftl::MakeCopyable([ self, data = std::move(data) ]() mutable {
-          std::shared_ptr<PlatformView> view{self->view_};
+          std::shared_ptr<PlatformView> view = self->view_.lock();
           if (!view)
             return;
           static_cast<PlatformViewAndroid*>(view.get())
@@ -49,7 +49,7 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
   void CompleteEmpty() override {
     ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
     blink::Threads::Platform()->PostTask(ftl::MakeCopyable([self]() mutable {
-      std::shared_ptr<PlatformView> view{self->view_};
+      std::shared_ptr<PlatformView> view = self->view_.lock();
       if (!view)
         return;
       static_cast<PlatformViewAndroid*>(view.get())
