@@ -1,4 +1,0 @@
-breakpoint set --name UIApplicationMain
-breakpoint set --name objc_exception_throw
-continue
-script print "........ Debugger break on main() ........"

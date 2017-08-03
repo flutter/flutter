@@ -16,9 +16,6 @@ declare_args() {
   # Version of iOS that we're targeting.
   ios_deployment_target = "8.0"
 
-  # The iOS Code signing identity to use
-  ios_code_signing_identity = ""
-
   # The path to the iOS device SDK.
   ios_device_sdk_path = ""
 
@@ -38,21 +35,11 @@ if (ios_simulator_sdk_path == "") {
   ios_simulator_sdk_path = _ios_sim_sdk_result[0]
 }
 
-# Compute default target.
-if (use_ios_simulator) {
-  ios_sdk_path = ios_simulator_sdk_path
-} else {
-  ios_sdk_path = ios_device_sdk_path
-}
-
-if (use_ios_simulator) {
-  # Always disable code signing on the simulator
-  ios_code_signing_identity = ""
-} else {
-  # If an identity is not provided, look for one on the host
-  if (ios_code_signing_identity == "") {
-    _ios_identities = exec_script("find_signing_identity.py", 
-                                  [], "list lines")
-    ios_code_signing_identity = _ios_identities[0]
+if (ios_sdk_path != "") {
+  # Compute default target.
+  if (use_ios_simulator) {
+    ios_sdk_path = ios_simulator_sdk_path
+  } else {
+    ios_sdk_path = ios_device_sdk_path
   }
 }
