@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -114,6 +116,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   Tween<double> _opacityTween;
 
   AnimationController _animationController;
+  TickerFuture _lastAnimation;
 
   void _setTween() {
     _opacityTween = new Tween<double>(
@@ -146,16 +149,19 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     _setTween();
   }
 
-  void _handleTapDown(PointerDownEvent event) {
-    _animationController.animateTo(1.0, duration: kFadeOutDuration);
+  Future<Null> _handleTapDown(PointerDownEvent event) async {
+    await _lastAnimation;
+    _lastAnimation = _animationController.animateTo(1.0, duration: kFadeOutDuration);
   }
 
-  void _handleTapUp(PointerUpEvent event) {
-    _animationController.animateTo(0.0, duration: kFadeInDuration);
+  Future<Null> _handleTapUp(PointerUpEvent event) async {
+    await _lastAnimation;
+    _lastAnimation = _animationController.animateTo(0.0, duration: kFadeInDuration);
   }
 
-  void _handleTapCancel(PointerCancelEvent event) {
-    _animationController.animateTo(0.0, duration: kFadeInDuration);
+  Future<Null>  _handleTapCancel(PointerCancelEvent event) async {
+    await _lastAnimation;
+    _lastAnimation = _animationController.animateTo(0.0, duration: kFadeInDuration);
   }
 
   @override

@@ -292,4 +292,30 @@ void main() {
     expect((){ controller.repeat(period: null); }, throwsFlutterError);
   });
 
+  test('Do not animate if already at target', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+
+    final AnimationController controller = new AnimationController(
+      value: 0.5,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    controller.animateTo(0.5, duration: const Duration(milliseconds: 100),);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
+    expect(controller.value, equals(0.5));
+  });
+
+  test('Do not animate if already at target within tolerance', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+
+    final AnimationController controller = new AnimationController(
+      value: 0.5,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    controller.animateTo(0.5001, duration: const Duration(milliseconds: 100),);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
+    expect(controller.value, equals(0.5001));
+  });
+
 }
