@@ -255,7 +255,7 @@ abstract class IntelliJValidator extends DoctorValidator {
   };
 
   static final Version kMinIdeaVersion = new Version(2017, 1, 0);
-  static final Version kMinFlutterPluginVersion = new Version(14, 0, 0);
+  static final Version kMinFlutterPluginVersion = new Version(16, 0, 0);
 
   static Iterable<DoctorValidator> get installedValidators {
     if (platform.isLinux || platform.isWindows)
