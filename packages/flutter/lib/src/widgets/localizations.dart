@@ -31,7 +31,7 @@ enum LocalizationsStatus {
 ///
 /// See also:
 ///
-///  * [DefaultLocalizedresorucesDelegate], a simple concrete version of
+///  * [DefaultLocalizationsDelegate], a simple concrete version of
 ///    this class.
 abstract class LocalizationsDelegate {
   /// Start loading the resources for `locale`. The returned future completes
@@ -86,6 +86,11 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
     assert(allLoaders != null);
   }
 
+  /// The [LocalizationsLoader]s in this map define all of the collections
+  /// of resources for a [Localizations] widget.
+  ///
+  /// The [load] method's Future completes when all of the loaders' load functions
+  /// have completed.
   final Map<Type, LocalizationsLoader> allLoaders;
 
   final Map<Locale, Map<Type, dynamic>> _localeToResources = <Locale, Map<Type, dynamic>>{};
