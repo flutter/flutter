@@ -34,7 +34,7 @@ bool IsInvalid(const ftl::WeakPtr<Rasterizer>& rasterizer) {
 }
 
 bool IsViewInvalid(const std::weak_ptr<PlatformView>& platform_view) {
-  return !(platform_view.expired());
+  return platform_view.expired();
 }
 
 template <typename T>
@@ -266,7 +266,7 @@ void Shell::GetPlatformViewIds(
     std::vector<PlatformViewInfo>* platform_view_ids) {
   std::lock_guard<std::mutex> lk(platform_views_mutex_);
   for (auto it = platform_views_.begin(); it != platform_views_.end(); it++) {
-    std::shared_ptr <PlatformView> view{*it};
+    std::shared_ptr<PlatformView> view = it->lock();
     if (!view) {
       // Skip dead views.
       continue;
@@ -317,7 +317,7 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
   *view_existed = false;
 
   for (auto it = platform_views_.begin(); it != platform_views_.end(); it++) {
-    std::shared_ptr<PlatformView> view{*it};
+    std::shared_ptr<PlatformView> view = it->lock();
     if (!view) continue;
     if (reinterpret_cast<uintptr_t>(view.get()) == view_id) {
       *view_existed = true;
