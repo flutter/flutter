@@ -274,10 +274,6 @@ class AnimationController extends Animation<double>
   /// During the animation, [status] is reported as [AnimationStatus.forward],
   /// which switches to [AnimationStatus.completed] when [upperBound] is
   /// reached at the end of the animation.
-  ///
-  /// You should not call [forward] or [reverse] on the same instance of an
-  /// [AnimationController] on which you also call [animateTo]. If you do mix
-  /// those calls, [status] might not have the expected value.
   TickerFuture forward({ double from }) {
     assert(() {
       if (duration == null) {
@@ -306,10 +302,6 @@ class AnimationController extends Animation<double>
   /// During the animation, [status] is reported as [AnimationStatus.reverse],
   /// which switches to [AnimationStatus.dismissed] when [lowerBound] is
   /// reached at the end of the animation.
-  ///
-  /// You should not call [forward] or [reverse] on the same instance of an
-  /// [AnimationController] on which you also call [animateTo]. If you do mix
-  /// those calls, [status] might not have the expected value.
   TickerFuture reverse({ double from }) {
     assert(() {
       if (duration == null) {
@@ -339,10 +331,6 @@ class AnimationController extends Animation<double>
   /// regardless of whether `target` > [value] or not. At the end of the
   /// animation, when `target` is reached, [status] is reported as
   /// [AnimationStatus.completed].
-  ///
-  /// You should not call [forward] or [reverse] on the same instance of an
-  /// [AnimationController] on which you also call [animateTo]. If you do mix
-  /// those calls, [status] might not have the expected value.
   TickerFuture animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     _direction = _AnimationDirection.forward;
     return _animateToInternal(target, duration: duration, curve: curve);

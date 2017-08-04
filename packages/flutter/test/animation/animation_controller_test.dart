@@ -469,4 +469,60 @@ void main() {
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
   });
+
+  test('after a reverse call animateTo sets correct status', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      value: 1.0,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, 1.0);
+    expect(controller.status, AnimationStatus.completed);
+
+    controller.reverse();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 0.0);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
+    statusLog.clear();
+
+    controller.animateTo(0.5);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 0.5);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
+    statusLog.clear();
+  });
+
+  test('after a forward call animateTo sets correct status', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      value: 0.0,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 1.0);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
+    statusLog.clear();
+
+    controller.animateTo(0.5);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 0.5);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
+    statusLog.clear();
+  });
 }
