@@ -194,8 +194,8 @@ void main() {
     expect(iconBox.size.height, equals(barBox.size.height));
   });
 
-  // This test is very similar to the test in buttons_test.dart. If you change
-  // this one, you may want to also change that one.
+  // This test is very similar to the '...explicit splashColor and highlightColor' test
+  // in buttons_test.dart. If you change this one, you may want to also change that one.
   testWidgets('IconButton with explicit splashColor and highlightColor', (WidgetTester tester) async {
     final Color directSplashColor = const Color(0xFF00000F);
     final Color directHighlightColor = const Color(0xFF0000F0);
