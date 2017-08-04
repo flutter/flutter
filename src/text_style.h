@@ -35,7 +35,8 @@ class TextStyle {
   // value to indicate no decoration color was set.
   SkColor decoration_color = SK_ColorTRANSPARENT;
   TextDecorationStyle decoration_style = TextDecorationStyle::kSolid;
-  double decoration_thickness = 1.0;
+  // Thickness is applied as a multiplier to the default thickness of the font.
+  double decoration_thickness_multiplier = 1.0;
   FontWeight font_weight = FontWeight::w400;
   FontStyle font_style = FontStyle::normal;
   TextBaseline text_baseline = TextBaseline::kAlphabetic;
@@ -44,6 +45,16 @@ class TextStyle {
   double letter_spacing = 0.0;
   double word_spacing = 0.0;
   double height = 1.0;
+
+  // When disabled, the x coordinates of glyphs will be rounded, eliminating
+  // potential mismatch between one long run and mutiple shorter runs of the
+  // same text.
+  //
+  // When set to false, there may be jitter when switching between same text
+  // content with different runs composing it, however, it also produces more
+  // accurate layouts. Setting to true removs this, but sacrifices layout
+  // accuracy.
+  bool round_char_advances = false;
 
   bool equals(const TextStyle& other) const;
 };

@@ -30,7 +30,7 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (decoration_style != other.decoration_style)
     return false;
-  if (decoration_thickness != other.decoration_thickness)
+  if (decoration_thickness_multiplier != other.decoration_thickness_multiplier)
     return false;
   if (font_weight != other.font_weight)
     return false;
@@ -43,6 +43,8 @@ bool TextStyle::equals(const TextStyle& other) const {
   if (word_spacing != other.word_spacing)
     return false;
   if (height != other.height)
+    return false;
+  if (round_char_advances != other.round_char_advances)
     return false;
 
   return true;
