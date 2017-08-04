@@ -34,14 +34,18 @@ enum LocalizationsStatus {
 ///  * [DefaultLocalizationsDelegate], a simple concrete version of
 ///    this class.
 abstract class LocalizationsDelegate {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  LocalizationsDelegate();
+
   /// Start loading the resources for `locale`. The returned future completes
   /// when the resources have been loaded and cached.
   ///
   /// It's assumed that the this method will create one or more objects
   /// each of which contains a collection or related resources (typically
-  /// defined by one method per resources). The objects will be retrieved
+  /// defined with one method per resource). The objects will be retrieved
   /// by [Type] with [resourcesFor].
-  Future<Null> load(Locale locale);
+  Future<Iterable<Type>> load(Locale locale);
 
   /// Indicates the progress on loading resources for `locale`.
   ///
@@ -62,6 +66,43 @@ abstract class LocalizationsDelegate {
 /// Signature for the async localized resource loading callback used
 /// by [DefaultLocalizationsLoader].
 typedef Future<dynamic> LocalizationsLoader(Locale locale);
+
+// The returned Future<Map> will resolve when all of the input map's
+// values have resolved. If all of the input map's values are
+// SynchronousFutures then a SynchronousFuture will be returned.
+//
+// This is more complicated than just applying Future.wait to input.values
+// because some of the input.values may be SynchronousFutures. We don't want
+// to Future.wait for the synchronous futures.
+Future<Map<K, V>> _loadMap<K, V>(Map<K, Future<V>> input) {
+  final Map<K, V> output = <K, V>{};
+  Map<K, Future<V>> outputFutures;
+
+  for (K key in input.keys) {
+    V completedValue;
+    final Future<V> futureValue = input[key].then<V>((V value) {
+      return completedValue = value;
+    });
+    if (completedValue != null) { // input[key] was a SynchronousFuture
+      output[key] = completedValue;
+    } else {
+      outputFutures ??= <K, Future<V>>{};
+      outputFutures[key] = futureValue;
+    }
+  }
+
+  // All of the input.values were synchronous futures, we're done.
+  if (outputFutures == null)
+    return new SynchronousFuture<Map<K, V>>(output);
+
+  // Some of input.values were asynchronous futures. Wait for them.
+  return Future.wait<V>(outputFutures.values).then<Map<K, V>>((List<V> values) {
+    final List<K> keys = outputFutures.keys.toList();
+    for (int i = 0; i < keys.length; i++)
+      output[keys[i]] = values[i];
+    return output;
+  });
+}
 
 /// Defines all of an application's resources in terms of `allLoaders`:
 /// a map from a [Type] to a _load_ function that creates an instance of
@@ -97,55 +138,25 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
   final Set<Locale> _loading = new Set<Locale>();
 
   @override
-  Future<Null> load(Locale locale) {
+  Future<Iterable<Type>> load(Locale locale) {
     assert(locale != null);
     assert(!_loading.contains(locale));
-    final Map<Type, dynamic> resourceMap = <Type, dynamic>{};
+
+    Iterable<Type> types;
 
     _loading.add(locale);
-
-    // This is more complicated then just making a list of allLoaders[type](locale)
-    // for each type in allTypes and then Future.wait-ing for all of the futures
-    // because some of the loaders may return SynchronousFutures. We don't want
-    // to Future.wait for the synchronous futures.
-    Map<Type, Future<dynamic>> resourceMapFutures;
-    for (Type type in allLoaders.keys) {
-      dynamic completedValue;
-      final Future<dynamic> futureValue = allLoaders[type](locale).then<dynamic>((dynamic value) {
-        return completedValue = value;
-      });
-      if (completedValue != null) {
-        resourceMap[type] = completedValue;
-      } else {
-        resourceMapFutures ??= <Type, Future<dynamic>>{};
-        resourceMapFutures[type] = futureValue;
-      }
-    }
-
-    // Common case: only the toolkit resources were loaded and they were all
-    // synchronous futures.
-    if (resourceMapFutures == null) {
+    final Future<Type> typesFuture = _loadMap<Type, dynamic>(
+      new Map<Type, dynamic>.fromIterables(
+        allLoaders.keys,
+        allLoaders.values.map((LocalizationsLoader loader) => loader(locale))
+      ),
+    ).then<Iterable<Type>>((Map<Type, dynamic> resources) {
       _loading.remove(locale);
-      _localeToResources[locale] = resourceMap;
-      return new SynchronousFuture<Null>(null);
-    }
-
-    // Wait on the remaining futures and update resourceMap.
-    return Future.wait<Null>(resourceMapFutures.values,
-      eagerError: true,
-      cleanUp: (dynamic value) {
-        _loading.remove(locale);
-      }
-    ).then((List<dynamic> allValues) {
-      final List<Type> allTypes = resourceMapFutures.keys.toList();
-      _loading.remove(locale);
-      for (int i = 0; i < allTypes.length; i += 1) {
-        assert(allValues[i] != null);
-        resourceMap[allTypes[i]] = allValues[i];
-      }
-      _localeToResources[locale] = resourceMap;
-      return null;
+      _localeToResources[locale] = resources;
+      return types = resources.keys;
     });
+
+    return types == null ? typesFuture : new SynchronousFuture<Iterable<Type>>(types);
   }
 
   @override
@@ -333,7 +344,7 @@ class _LocalizationsState extends State<Localizations> {
       return;
     }
 
-    widget.delegate.load(locale).then((_) {
+    widget.delegate.load(locale).then((Iterable<Type> _) {
       if (!mounted)
         return;
       setState(() {
