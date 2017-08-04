@@ -35,6 +35,7 @@ template("mac_toolchain") {
     assert(defined(invoker.cc), "mac_toolchain() must specify a \"cc\" value")
     assert(defined(invoker.cxx), "mac_toolchain() must specify a \"cxx\" value")
     assert(defined(invoker.ld), "mac_toolchain() must specify a \"ld\" value")
+    assert(defined(invoker.ar), "mac_toolchain() must specify a \"ar\" value")
     assert(defined(invoker.toolchain_cpu),
            "mac_toolchain() must specify a \"toolchain_cpu\"")
     assert(defined(invoker.toolchain_os),
@@ -46,6 +47,7 @@ template("mac_toolchain") {
     cc = invoker.cc
     cxx = invoker.cxx
     ld = invoker.ld
+    ar = invoker.ar
 
     # Make these apply to all tools below.
     lib_switch = "-l"
@@ -62,9 +64,14 @@ template("mac_toolchain") {
       toolchain_flags = "-m32"
     }
 
+    lto_flags = ""
+    if (enable_lto) {
+      lto_flags = "-flto"
+    }
+
     tool("cc") {
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs = [
@@ -74,7 +81,7 @@ template("mac_toolchain") {
 
     tool("cxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs = [
@@ -85,7 +92,7 @@ template("mac_toolchain") {
     tool("asm") {
       # For GCC we can just use the C compiler to compile assembly.
       depfile = "{{output}}.d"
-      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} $sysroot_flags $toolchain_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
@@ -95,7 +102,7 @@ template("mac_toolchain") {
 
     tool("objc") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags {{cflags}} {{cflags_c}} {{cflags_objc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} {{cflags_objc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJC {{output}}"
       outputs = [
@@ -105,7 +112,7 @@ template("mac_toolchain") {
 
     tool("objcxx") {
       depfile = "{{output}}.d"
-      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags {{cflags}} {{cflags_cc}} {{cflags_objcc}} -c {{source}} -o {{output}}"
+      command = "$cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_cc}} {{cflags_objcc}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
       outputs = [
@@ -114,8 +121,8 @@ template("mac_toolchain") {
     }
 
     tool("alink") {
-      command = "rm -f {{output}} && ./gyp-mac-tool filter-libtool libtool -static -o {{output}} {{inputs}}"
-      description = "LIBTOOL-STATIC {{output}}"
+      command = "rm -f {{output}} && $ar rcs {{output}} {{inputs}}"
+      description = "CREATE ARCHIVE {{output}}"
       outputs = [
         "{{target_out_dir}}/{{target_output_name}}{{output_extension}}",
       ]
@@ -139,7 +146,7 @@ template("mac_toolchain") {
       temporary_tocname = dylib + ".tmp"
 
       does_reexport_command = "[ ! -e $dylib -o ! -e $tocname ] || otool -l $dylib | grep -q LC_REEXPORT_DYLIB"
-      link_command = "$ld -shared $sysroot_flags $toolchain_flags {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      link_command = "$ld -shared $sysroot_flags $toolchain_flags $lto_flags {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
       replace_command = "if ! cmp -s $temporary_tocname $tocname; then mv $temporary_tocname $tocname"
       extract_toc_command = "{ otool -l $dylib | grep LC_ID_DYLIB -A 5; nm -gP $dylib | cut -f1-2 -d' ' | grep -v U\$\$; true; }"
 
@@ -175,7 +182,7 @@ template("mac_toolchain") {
       outfile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = "$outfile.rsp"
 
-      command = "$ld $sysroot_flags $toolchain_flags {{ldflags}} -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      command = "$ld $sysroot_flags $toolchain_flags $lto_flags {{ldflags}} -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
       description = "LINK $outfile"
       rspfile_content = "{{inputs_newline}}"
       outputs = [
@@ -193,7 +200,7 @@ template("mac_toolchain") {
       description = "COPY {{source}} {{output}}"
     }
 
-    toolchain_args =  {
+    toolchain_args = {
       current_cpu = invoker.toolchain_cpu
       current_os = invoker.toolchain_os
 
@@ -215,6 +222,7 @@ mac_toolchain("ios_clang_arm") {
   toolchain_cpu = "arm"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
+  ar = "${goma_prefix}$prefix/llvm-ar"
   cc = "${goma_prefix}$prefix/clang"
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
@@ -227,6 +235,7 @@ mac_toolchain("ios_clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
+  ar = "${goma_prefix}$prefix/llvm-ar"
   cc = "${goma_prefix}$prefix/clang"
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
@@ -239,6 +248,7 @@ mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
+  ar = "${goma_prefix}$prefix/llvm-ar"
   cc = "${goma_prefix}$prefix/clang"
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
@@ -251,6 +261,7 @@ mac_toolchain("clang_i386") {
   toolchain_cpu = "i386"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
+  ar = "${goma_prefix}$prefix/llvm-ar"
   cc = "${goma_prefix}$prefix/clang"
   cxx = "${goma_prefix}$prefix/clang++"
   ld = cxx
