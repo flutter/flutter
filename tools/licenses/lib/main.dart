@@ -2142,6 +2142,7 @@ class Progress {
   int _withoutLicense = 0;
   String get label => _label;
   String _label = '';
+  int _lastLength = 0;
   set label(String value) {
     if (value.length > 50)
       value = '.../' + value.substring(math.max(0, value.lastIndexOf('/', value.length - 45) + 1));
@@ -2158,19 +2159,25 @@ class Progress {
     update();
   }
   Stopwatch _lastUpdate;
-  void update() {
-    if (_lastUpdate == null || _lastUpdate.elapsedMilliseconds > 90) {
+  void update({bool flush = false}) {
+    if (_lastUpdate == null || _lastUpdate.elapsedMilliseconds > 90 || flush) {
       _lastUpdate ??= new Stopwatch();
-      system.stderr.write('\r$this');
+      final String line = toString();
+      system.stderr.write('\r$line');
+      if (_lastLength > line.length) {
+	system.stderr.write(' ' * (_lastLength - line.length));
+      }
+      _lastLength = line.length;
       _lastUpdate.reset();
       _lastUpdate.start();
     }
   }
+  void flush() => update(flush: true);
   bool get hadErrors => _withoutLicense > 0;
   @override
   String toString() {
     int percent = (100.0 * (_withLicense + _withoutLicense) / max).round();
-    return '${(_withLicense + _withoutLicense).toString().padLeft(10)} of $max ${'█' * (percent ~/ 10)}${'░' * (10 - (percent ~/ 10))} $percent% ($_withoutLicense missing licenses)  $label    ';
+    return '${(_withLicense + _withoutLicense).toString().padLeft(10)} of $max ${'█' * (percent ~/ 10)}${'░' * (10 - (percent ~/ 10))} $percent% ($_withoutLicense missing licenses)  $label';
   }
 }
 
@@ -2219,6 +2226,7 @@ Future<Null> main(List<String> arguments) async {
       if (progress.hadErrors)
         throw 'Had failures while collecting licenses.';
       progress.label = 'Dumping results...';
+      progress.flush();
       List<String> output = licenses
         .where((License license) => license.isUsed)
         .map((License license) => license.toStringFormal())
@@ -2226,6 +2234,9 @@ Future<Null> main(List<String> arguments) async {
         .toList();
       output.sort();
       print(output.join('\n${"-" * 80}\n'));
+      progress.label = 'Done.';
+      progress.flush();
+      system.stderr.writeln('');
     } else {
       RegExp signaturePattern = new RegExp(r'Signature: (\w+)');
 
@@ -2303,6 +2314,7 @@ Future<Null> main(List<String> arguments) async {
 
         await sink.close();
         progress.label = 'Done.';
+        progress.flush();
         system.stderr.writeln('');
       }
     }
