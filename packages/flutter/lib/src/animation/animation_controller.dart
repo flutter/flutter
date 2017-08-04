@@ -335,6 +335,9 @@ class AnimationController extends Animation<double>
       final double range = upperBound - lowerBound;
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       simulationDuration = this.duration * remainingFraction;
+    } else if (target == value) {
+      // Already at target, don't animate.
+      simulationDuration = Duration.ZERO;
     }
     stop();
     if (simulationDuration == Duration.ZERO) {

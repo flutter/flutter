@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -110,7 +112,7 @@ class CupertinoButton extends StatefulWidget {
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
   // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
-  static const Duration kFadeInDuration = const Duration(milliseconds: 350);
+  static const Duration kFadeInDuration = const Duration(milliseconds: 100);
   Tween<double> _opacityTween;
 
   AnimationController _animationController;
@@ -146,16 +148,40 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     _setTween();
   }
 
-  void _handleTapDown(PointerDownEvent event) {
-    _animationController.animateTo(1.0, duration: kFadeOutDuration);
+  bool _buttonHeldDown = false;
+
+  void _handleTapDown(TapDownDetails event) {
+    if (!_buttonHeldDown) {
+      _buttonHeldDown = true;
+      _animate();
+    }
   }
 
-  void _handleTapUp(PointerUpEvent event) {
-    _animationController.animateTo(0.0, duration: kFadeInDuration);
+  void _handleTapUp(TapUpDetails event) {
+    if (_buttonHeldDown) {
+      _buttonHeldDown = false;
+      _animate();
+    }
   }
 
-  void _handleTapCancel(PointerCancelEvent event) {
-    _animationController.animateTo(0.0, duration: kFadeInDuration);
+  void _handleTapCancel() {
+    if (_buttonHeldDown) {
+      _buttonHeldDown = false;
+      _animate();
+    }
+  }
+
+  void _animate() {
+    if (_animationController.isAnimating)
+      return;
+    final bool wasHeldDown = _buttonHeldDown;
+    final Future<Null> ticker = _buttonHeldDown
+        ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
+        : _animationController.animateTo(0.0, duration: kFadeInDuration);
+    ticker.then((Null value) {
+      if (mounted && wasHeldDown != _buttonHeldDown)
+        _animate();
+    });
   }
 
   @override
@@ -163,46 +189,44 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final bool enabled = widget.enabled;
     final Color backgroundColor = widget.color;
 
-    return new Listener(
-      onPointerDown: enabled ? _handleTapDown : null,
-      onPointerUp: enabled ? _handleTapUp : null,
-      onPointerCancel: enabled ? _handleTapCancel : null,
-      child: new GestureDetector(
-        onTap: widget.onPressed,
-        child: new ConstrainedBox(
-          constraints: widget.minSize == null
-              ? const BoxConstraints()
-              : new BoxConstraints(
-                minWidth: widget.minSize,
-                minHeight: widget.minSize,
-              ),
-          child: new FadeTransition(
-            opacity: _opacityTween.animate(new CurvedAnimation(
-              parent: _animationController,
-              curve: Curves.decelerate,
-            )),
-            child: new DecoratedBox(
-              decoration: new BoxDecoration(
-                borderRadius: widget.borderRadius,
-                color: backgroundColor != null && !enabled
-                    ? _kDisabledBackground
-                    : backgroundColor,
-              ),
-              child: new Padding(
-                padding: widget.padding ?? (backgroundColor != null
-                  ? _kBackgroundButtonPadding
-                  : _kButtonPadding),
-                child: new Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: new DefaultTextStyle(
-                    style: backgroundColor != null
-                        ? _kBackgroundButtonTextStyle
-                        : enabled
-                            ? _kButtonTextStyle
-                            : _kDisabledButtonTextStyle,
-                    child: widget.child,
-                  ),
+    return new GestureDetector(
+      onTapDown: enabled ? _handleTapDown : null,
+      onTapUp: enabled ? _handleTapUp : null,
+      onTapCancel: enabled ? _handleTapCancel : null,
+      onTap: widget.onPressed,
+      child: new ConstrainedBox(
+        constraints: widget.minSize == null
+            ? const BoxConstraints()
+            : new BoxConstraints(
+              minWidth: widget.minSize,
+              minHeight: widget.minSize,
+            ),
+        child: new FadeTransition(
+          opacity: _opacityTween.animate(new CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.decelerate,
+          )),
+          child: new DecoratedBox(
+            decoration: new BoxDecoration(
+              borderRadius: widget.borderRadius,
+              color: backgroundColor != null && !enabled
+                  ? _kDisabledBackground
+                  : backgroundColor,
+            ),
+            child: new Padding(
+              padding: widget.padding ?? (backgroundColor != null
+                ? _kBackgroundButtonPadding
+                : _kButtonPadding),
+              child: new Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: new DefaultTextStyle(
+                  style: backgroundColor != null
+                      ? _kBackgroundButtonTextStyle
+                      : enabled
+                          ? _kButtonTextStyle
+                          : _kDisabledButtonTextStyle,
+                  child: widget.child,
                 ),
               ),
             ),

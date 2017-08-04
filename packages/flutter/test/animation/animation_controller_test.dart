@@ -292,4 +292,93 @@ void main() {
     expect((){ controller.repeat(period: null); }, throwsFlutterError);
   });
 
+  test('Do not animate if already at target', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+
+    final AnimationController controller = new AnimationController(
+      value: 0.5,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, equals(0.5));
+    controller.animateTo(0.5, duration: const Duration(milliseconds: 100));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
+    expect(controller.value, equals(0.5));
+  });
+
+  test('Do not animate to upperBound if already at upperBound', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+
+    final AnimationController controller = new AnimationController(
+      value: 1.0,
+      upperBound: 1.0,
+      lowerBound: 0.0,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, equals(1.0));
+    controller.animateTo(1.0, duration: const Duration(milliseconds: 100));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
+    expect(controller.value, equals(1.0));
+  });
+
+  test('Do not animate to lowerBound if already at lowerBound', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+
+    final AnimationController controller = new AnimationController(
+      value: 0.0,
+      upperBound: 1.0,
+      lowerBound: 0.0,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, equals(0.0));
+    controller.animateTo(0.0, duration: const Duration(milliseconds: 100));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.completed ]));
+    expect(controller.value, equals(0.0));
+  });
+
+  test('Do not animate if already at target mid-flight (forward)', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = new AnimationController(
+      value: 0.0,
+      duration: const Duration(milliseconds: 1000),
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, equals(0.0));
+
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 500));
+    expect(controller.value, inInclusiveRange(0.4, 0.6));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward ]));
+
+    final double currentValue = controller.value;
+    controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
+    expect(controller.value, currentValue);
+  });
+
+  test('Do not animate if already at target mid-flight (reverse)', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = new AnimationController(
+      value: 1.0,
+      duration: const Duration(milliseconds: 1000),
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, equals(1.0));
+
+    controller.reverse();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 500));
+    expect(controller.value, inInclusiveRange(0.4, 0.6));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse ]));
+
+    final double currentValue = controller.value;
+    controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
+    expect(controller.value, currentValue);
+  });
 }
