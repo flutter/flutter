@@ -25,6 +25,7 @@
 
 #include <minikin/Layout.h>
 #include "lib/ftl/logging.h"
+#include "lib/txt/include/minikin/MinikinFont.h"
 #include "lib/txt/libs/minikin/HbFontCache.h"
 #include "lib/txt/libs/minikin/LayoutUtils.h"
 #include "lib/txt/src/font_collection.h"
@@ -103,8 +104,11 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   paint->letterSpacing = style.letter_spacing / style.font_size;
   paint->wordSpacing = style.word_spacing;
   paint->scaleX = 1.0f;
-  // Prevent spacing rounding in Minikin.
-  paint->paintFlags = 0xFF;
+  // Prevent spacing rounding in Minikin. This causes jitter when switching
+  // between same text content with different runs composing it, however, it
+  // also produces more accurate layouts.
+  paint->paintFlags |=
+      style.round_char_advances ? 0x00 : minikin::LinearTextFlag;
 }
 
 void GetPaint(const TextStyle& style, SkPaint* paint) {
@@ -649,7 +653,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
             // Backup value if the fUnderlineThickness metric is not available:
             // Divide by 14pt as it is the default size.
             : record.style().font_size / 14.0f *
-                  record.style().decoration_thickness);
+                  record.style().decoration_thickness_multiplier);
 
     // Setup the decorations.
     switch (record.style().decoration_style) {
@@ -740,7 +744,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
         if (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
                                           kStrikeoutThicknessIsValid_Flag))
           paint.setStrokeWidth(metrics.fStrikeoutThickness *
-                               record.style().decoration_thickness);
+                               record.style().decoration_thickness_multiplier);
         // Make sure the double line is "centered" vertically.
         y_offset += (decoration_count - 1.0) * metrics.fUnderlineThickness *
                     kDoubleDecorationSpacing / -2.0;
