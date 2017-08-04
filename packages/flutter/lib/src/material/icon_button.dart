@@ -76,6 +76,8 @@ class IconButton extends StatelessWidget {
     this.alignment: FractionalOffset.center,
     @required this.icon,
     this.color,
+    this.highlightColor,
+    this.splashColor,
     this.disabledColor,
     @required this.onPressed,
     this.tooltip
@@ -136,6 +138,24 @@ class IconButton extends StatelessWidget {
   /// ```
   final Color color;
 
+  /// The primary color of the button when the button is in the down (pressed) state.
+  /// The splash is represented as a circular overlay that appears above the
+  /// [highlightColor] overlay. The splash overlay has a center point that matches
+  /// the hit point of the user touch event. The splash overlay will expand to
+  /// fill the button area if the touch is held for long enough time. If the splash
+  /// color has transparency then the highlight and button color will show through.
+  ///
+  /// Defaults to the splash color from the [Theme].
+  final Color splashColor;
+
+  /// The secondary color of the button when the button is in the down (pressed)
+  /// state. The higlight color is represented as a solid color that is overlaid over the
+  /// button color (if any). If the highlight color has transparency, the button color
+  /// will show through. The highlight fades in quickly as the button is held down.
+  ///
+  /// Defaults to the highlight color from the [Theme].
+  final Color highlightColor;
+
   /// The color to use for the icon inside the button, if the icon is disabled.
   /// Defaults to the [ThemeData.disabledColor] of the current [Theme].
   ///
@@ -194,6 +214,8 @@ class IconButton extends StatelessWidget {
     return new InkResponse(
       onTap: onPressed,
       child: result,
+      highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+      splashColor: splashColor ?? Theme.of(context).splashColor,
       radius: math.max(
         Material.defaultSplashRadius,
         (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
