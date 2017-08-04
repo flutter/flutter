@@ -354,7 +354,7 @@ void main() {
     expect(controller.value, inInclusiveRange(0.4, 0.6));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward ]));
 
-    double currentValue = controller.value;
+    final double currentValue = controller.value;
     controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     expect(controller.value, currentValue);
@@ -376,7 +376,7 @@ void main() {
     expect(controller.value, inInclusiveRange(0.4, 0.6));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse ]));
 
-    double currentValue = controller.value;
+    final double currentValue = controller.value;
     controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
     expect(controller.value, currentValue);
