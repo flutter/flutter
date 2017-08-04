@@ -395,4 +395,78 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
     expect(controller.value, 1.0);
   });
+
+  test('setting value directly sets correct status', () {
+    final AnimationController controller = new AnimationController(
+      value: 0.0,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      vsync: const TestVSync(),
+    );
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    controller.value = 0.5;
+    expect(controller.value, 0.5);
+    expect(controller.status, AnimationStatus.forward);
+
+    controller.value = 1.0;
+    expect(controller.value, 1.0);
+    expect(controller.status, AnimationStatus.completed);
+
+    controller.value = 0.5;
+    expect(controller.value, 0.5);
+    expect(controller.status, AnimationStatus.forward); // ???
+
+    controller.value = 0.0;
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+  });
+
+  test('animateTo sets correct status', () {
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      value: 0.0,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    // Animate from 0.0 to 0.5
+    controller.animateTo(0.5);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 0.5);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
+    statusLog.clear();
+
+    // Animate from 0.5 to 1.0
+    controller.animateTo(1.0);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 1.0);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
+    statusLog.clear();
+
+    // Animate from 1.0 to 0.5
+    controller.animateTo(0.5);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 0.5);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ])); // ???
+    statusLog.clear();
+
+    // Animate from 0.5 to 1.0
+    controller.animateTo(0.0);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.value, 0.0);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ])); // ???
+    statusLog.clear();
+  });
 }
