@@ -80,7 +80,8 @@ class Chip extends StatelessWidget {
 
   /// The style to be applied to the chip's label.
   ///
-  /// This only has effect on widgets that use a [TextStyle], such as [Text].
+  /// This only has effect on widgets that respect the [DefaultTextStyle],
+  /// such as [Text].
   final TextStyle labelStyle;
 
   /// Color to be used for the chip's background, the default being grey.
