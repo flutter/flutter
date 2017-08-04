@@ -83,9 +83,11 @@ class CoverageCollector extends TestWatcher {
     coverage.Formatter formatter,
     Duration timeout,
   }) async {
-    printTrace('formating coverage data');
-    if (_globalHitmap == null)
+    print('formating coverage data');
+    if (_globalHitmap == null) {
+      print('***** globalHitmap is null');
       return null;
+    }
     if (formatter == null) {
       final coverage.Resolver resolver = new coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
       final String packagePath = fs.currentDirectory.path;
@@ -93,6 +95,10 @@ class CoverageCollector extends TestWatcher {
       formatter = new coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
     final String result = await formatter.format(_globalHitmap);
+    if (result == null)
+      print('***** null result');
+    else
+      print('***** result=${result.substring(0, 20)}');
     _globalHitmap = null;
     return result;
   }

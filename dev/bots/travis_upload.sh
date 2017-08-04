@@ -8,9 +8,9 @@ LCOV_FILE=./packages/flutter/coverage/lcov.info
 
 if [ "$TRAVIS_OS_NAME" = "linux" ] && \
    [ "$SHARD" = "coverage" ] && \
-   [ "$TRAVIS_PULL_REQUEST" = "false" ] && \
-   [ "$TRAVIS_BRANCH" = "master" ] && \
    [ -f "$LCOV_FILE" ]; then
+  echo "---------- uploading coverage"
+  ls -l $LCOV_FILE
   GSUTIL=$HOME/google-cloud-sdk/bin/gsutil
   GCLOUD=$HOME/google-cloud-sdk/bin/gcloud
 
