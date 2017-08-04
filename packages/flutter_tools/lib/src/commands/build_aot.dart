@@ -200,6 +200,7 @@ Future<String> _buildAotSnapshot(
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
     '--print_snapshot_sizes',
     '--dependencies=$dependencies',
+    '--causal_async_stacks',
   ];
 
   if (!interpreter) {
