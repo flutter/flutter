@@ -993,17 +993,17 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_EQ(rects.size(), 3ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 56.835938);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 153);
+  EXPECT_FLOAT_EQ(rects[0].right(), 153.07422);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
-  EXPECT_FLOAT_EQ(rects[1].left(), 153);
+  EXPECT_FLOAT_EQ(rects[1].left(), 153.07422);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 165);
+  EXPECT_FLOAT_EQ(rects[1].right(), 165.52344);
   EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
 
-  EXPECT_FLOAT_EQ(rects[2].left(), 165);
+  EXPECT_FLOAT_EQ(rects[2].left(), 165.52344);
   EXPECT_FLOAT_EQ(rects[2].top(), 0);
-  EXPECT_FLOAT_EQ(rects[2].right(), 177);
+  EXPECT_FLOAT_EQ(rects[2].right(), 177.97266);
   EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
 
   paint.setColor(SK_ColorGREEN);
@@ -1012,19 +1012,19 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 3ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 177);
+  EXPECT_FLOAT_EQ(rects[0].left(), 177.97266);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 352);
+  EXPECT_FLOAT_EQ(rects[0].right(), 352.48438);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
 
-  EXPECT_FLOAT_EQ(rects[1].left(), 352);
+  EXPECT_FLOAT_EQ(rects[1].left(), 352.48438);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 364);
+  EXPECT_FLOAT_EQ(rects[1].right(), 364.93359);
   EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
 
-  EXPECT_FLOAT_EQ(rects[2].left(), 364);
+  EXPECT_FLOAT_EQ(rects[2].left(), 364.93359);
   EXPECT_FLOAT_EQ(rects[2].top(), 0);
-  EXPECT_FLOAT_EQ(rects[2].right(), 507);
+  EXPECT_FLOAT_EQ(rects[2].right(), 507.02344);
   EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
 
   paint.setColor(SK_ColorRED);
@@ -1033,9 +1033,9 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 17ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 210.83594);
+  EXPECT_FLOAT_EQ(rects[0].left(), 211.375);
   EXPECT_FLOAT_EQ(rects[0].top(), 58.59375);
-  EXPECT_FLOAT_EQ(rects[0].right(), 296);
+  EXPECT_FLOAT_EQ(rects[0].right(), 296.62891);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 117.1875);
 
   // TODO(garyq): The following set of vals are definetly wrong and
@@ -1051,9 +1051,9 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 2ull);
-  EXPECT_FLOAT_EQ(rects[1].left(), 507);
+  EXPECT_FLOAT_EQ(rects[1].left(), 507.02344);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 519.44922);
+  EXPECT_FLOAT_EQ(rects[1].right(), 519.47266);
   EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
 
   paint.setColor(SK_ColorRED);

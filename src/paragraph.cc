@@ -109,6 +109,17 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   // also produces more accurate layouts.
   paint->paintFlags |=
       style.round_char_advances ? 0x00 : minikin::LinearTextFlag;
+  // Disable ligatures
+  // TODO(garyq): Re-enable ligatures.
+  std::vector<hb_feature_t> features;
+  hb_feature_t no_liga = {HB_TAG('l', 'i', 'g', 'a'), 0, 0, ~0u};
+  hb_feature_t no_clig = {HB_TAG('c', 'l', 'i', 'g'), 0, 0, ~0u};
+  char buff[HB_FEATURE_BUFFER_SIZE * 2];
+  hb_feature_to_string(&no_liga, buff, HB_FEATURE_BUFFER_SIZE);
+  hb_feature_to_string(&no_clig, buff + HB_FEATURE_BUFFER_SIZE,
+                       HB_FEATURE_BUFFER_SIZE);
+  paint->fontFeatureSettings =
+      std::string(buff) + "," + std::string(buff + HB_FEATURE_BUFFER_SIZE);
 }
 
 void GetPaint(const TextStyle& style, SkPaint* paint) {
@@ -236,6 +247,7 @@ void Paragraph::Layout(double width, bool force) {
   double justify_spacing = 0.0f;
   double prev_word_pos = 0.0f;
   double prev_char_advance = 0.0f;
+  double current_x_position = previous_run_x_position;
 
   std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
   std::vector<size_t> buffer_sizes;
@@ -319,7 +331,7 @@ void Paragraph::Layout(double width, bool force) {
       const size_t layout_end = std::min(run.end, next_break);
 
       bool bidiFlags = paragraph_style_.rtl;
-      // NOTE: Minikin Layout doLayout() has an O(N^2) (according to
+      // Minikin Layout doLayout() has an O(N^2) (according to
       // benchmarks) time complexity where N is the total number of characters.
       // However, this is not significant for reasonably sized paragraphs. It is
       // currently recommended to break up very long paragraphs (10k+
@@ -339,8 +351,7 @@ void Paragraph::Layout(double width, bool force) {
       buffer_sizes = std::vector<size_t>();
       word_count = 0;
       double temp_line_spacing = 0;
-      double current_x_position = previous_run_x_position;
-      double run_width = 0.0f;
+      current_x_position = 0;
       while (blob_start < glyph_count) {
         const size_t blob_length = GetBlobLength(layout, blob_start);
         buffer_sizes.push_back(blob_length);
@@ -356,6 +367,7 @@ void Paragraph::Layout(double width, bool force) {
                layout_end == next_break) {
           ++trailing_length;
         }
+        trailing_length = 0;
 
         buffers.push_back(
             &builder.allocRunPos(paint, blob_length - trailing_length));
@@ -363,19 +375,22 @@ void Paragraph::Layout(double width, bool force) {
         // TODO(garyq): Implement RTL.
         // Each Glyph/Letter.
         bool whitespace_ended = true;
+        float letter_spacing = 0;
         for (size_t blob_index = 0; blob_index < blob_length - trailing_length;
              ++blob_index) {
           const size_t glyph_index = blob_start + blob_index;
           buffers.back()->glyphs[blob_index] = layout.getGlyphId(glyph_index);
 
           const size_t pos_index = 2 * blob_index;
-
-          current_x_position = layout.getX(glyph_index);
-          buffers.back()->pos[pos_index] = current_x_position;
-          glyph_single_line_position_x.push_back(current_x_position +
-                                                 previous_run_x_position);
+          letter_spacing = run.style.letter_spacing == 0
+                               ? 0
+                               : layout.getX(glyph_index) - current_x_position;
+          buffers.back()->pos[pos_index] = current_x_position + letter_spacing;
+          glyph_single_line_position_x.push_back(
+              current_x_position + previous_run_x_position + letter_spacing);
           buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
 
+          current_x_position += layout.getCharAdvance(glyph_index);
           // Check if the current Glyph is a whitespace and handle multiple
           // whitespaces in a row.
           if (whitespace_set_.count(layout.getGlyphId(glyph_index)) > 0) {
@@ -390,10 +405,9 @@ void Paragraph::Layout(double width, bool force) {
           }
 
           prev_char_advance = layout.getCharAdvance(glyph_index);
-          run_width += layout.getCharAdvance(glyph_index);
         }
         blob_start += blob_length;
-        previous_run_x_position += current_x_position + prev_char_advance;
+        previous_run_x_position += current_x_position + letter_spacing;
       }
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
@@ -405,8 +419,8 @@ void Paragraph::Layout(double width, bool force) {
           buffer_sizes.size() > 0) {
         JustifyLine(buffers, buffer_sizes, word_count, justify_spacing);
       }
-      records_.push_back(
-          PaintRecord{run.style, builder.make(), metrics, lines_, run_width});
+      records_.push_back(PaintRecord{run.style, builder.make(), metrics, lines_,
+                                     layout.getAdvance()});
       line_width +=
           std::abs(records_[records_.size() - 1].text()->bounds().fRight +
                    records_[records_.size() - 1].text()->bounds().fLeft);
@@ -452,6 +466,7 @@ void Paragraph::Layout(double width, bool force) {
         prev_word_pos = 0;
         prev_char_advance = 0.0f;
         previous_run_x_position = 0.0f;
+        current_x_position = 0.0f;
         line_width = 0.0f;
         break_index += 1;
         lines_++;
