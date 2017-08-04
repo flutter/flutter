@@ -38,15 +38,17 @@ class CreateCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'package',
-      negatable: true,
+      negatable: false,
       defaultsTo: false,
-      help: 'Generate a Flutter package project.'
+      help: 'Generate a shareable Flutter project containing modular Dart code.'
     );
     argParser.addFlag(
         'plugin',
-        negatable: true,
+        negatable: false,
         defaultsTo: false,
-        help: 'Generate a Flutter plugin project.'
+        help: 'Generate a shareable Flutter project containing an API in Dart '
+              'code with a platform-specific implementation for Android, for '
+              'iOS code, or for both.'
     );
     argParser.addOption(
       'description',
@@ -161,8 +163,10 @@ class CreateCommand extends FlutterCommand {
       if (argResults['pub'])
         await pubGet(directory: dirPath);
 
+      final String relativePath = fs.path.relative(dirPath);
       printStatus('Wrote $generatedCount files.');
-      // TODO: Print next steps.
+      printStatus('');
+      printStatus('Your plugin code is in lib/$projectName.dart in the $relativePath directory.');
       return;
     }
 
