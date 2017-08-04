@@ -19,7 +19,7 @@ const TextStyle _kLabelStyle = const TextStyle(
   fontSize: 13.0,
   fontWeight: FontWeight.w400,
   color: Colors.black87,
-  textBaseline: TextBaseline.alphabetic
+  textBaseline: TextBaseline.alphabetic,
 );
 
 /// A material design chip.
@@ -57,6 +57,10 @@ class Chip extends StatelessWidget {
     this.avatar,
     @required this.label,
     this.onDeleted,
+    this.labelStyle,
+    this.deleteButtonTooltipMessage,
+    this.backgroundColor,
+    this.deleteIconColor,
   }) : super(key: key);
 
   /// A widget to display prior to the chip's label.
@@ -74,6 +78,18 @@ class Chip extends StatelessWidget {
   /// The delete button is included in the chip only if this callback is non-null.
   final VoidCallback onDeleted;
 
+  /// The style to be used for the label text.
+  final TextStyle labelStyle;
+
+  /// Message for the chip delete button's tooltip.
+  final String deleteButtonTooltipMessage;
+
+  /// Background color for the widget.
+  final Color backgroundColor;
+
+  /// Color for the "Delete" icon.
+  final Color deleteIconColor;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -90,14 +106,14 @@ class Chip extends StatelessWidget {
           margin: const EdgeInsets.only(right: 8.0),
           width: _kAvatarDiamater,
           height: _kAvatarDiamater,
-          child: avatar
-        )
+          child: avatar,
+        ),
       ));
     }
 
     children.add(new DefaultTextStyle(
-      style: _kLabelStyle,
-      child: label
+      style: labelStyle ?? _kLabelStyle,
+      child: label,
     ));
 
     if (deletable) {
@@ -105,16 +121,16 @@ class Chip extends StatelessWidget {
       children.add(new GestureDetector(
         onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
-          message: 'Delete "$label"',
+          message: deleteButtonTooltipMessage ?? 'Delete "$label"',
           child: new Container(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: const Icon(
+            child: new Icon(
               Icons.cancel,
               size: 18.0,
-              color: Colors.black54
-            )
-          )
-        )
+              color: deleteIconColor ?? Colors.black54,
+            ),
+          ),
+        ),
       ));
     }
 
@@ -124,14 +140,14 @@ class Chip extends StatelessWidget {
         height: _kChipHeight,
         padding: new EdgeInsets.only(left: leftPadding, right: rightPadding),
         decoration: new BoxDecoration(
-          color: Colors.grey.shade300,
-          borderRadius: new BorderRadius.circular(16.0)
+          color: backgroundColor ?? Colors.grey.shade300,
+          borderRadius: new BorderRadius.circular(16.0),
         ),
         child: new Row(
           children: children,
-          mainAxisSize: MainAxisSize.min
-        )
-      )
+          mainAxisSize: MainAxisSize.min,
+        ),
+      ),
     );
   }
 }
