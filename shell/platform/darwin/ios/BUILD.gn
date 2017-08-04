@@ -5,7 +5,6 @@
 assert(is_ios)
 
 import("//flutter/common/config.gni")
-import("//build/config/ios/rules.gni")
 import("//build/config/ios/ios_sdk.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
