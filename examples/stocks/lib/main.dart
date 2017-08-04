@@ -27,7 +27,6 @@ class StocksApp extends StatefulWidget {
 class StocksAppState extends State<StocksApp> {
   static final LocalizationsDelegate delegate = new DefaultLocalizationsDelegate(
     <Type, LocalizationsLoader>{
-      MaterialLocalizations: MaterialLocalizations.load,
       StockStrings: StockStrings.load,
     }
   );

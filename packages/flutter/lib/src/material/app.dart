@@ -296,18 +296,25 @@ class _MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
-  static final LocalizationsDelegate _resourcesDelegate = new DefaultLocalizationsDelegate(
-    <Type, LocalizationsLoader>{
-      MaterialLocalizations: MaterialLocalizations.load,
-    }
-  );
-
+  LocalizationsDelegate _localizationsDelegate;
   HeroController _heroController;
 
   @override
   void initState() {
     super.initState();
     _heroController = new HeroController(createRectTween: _createRectTween);
+
+    _localizationsDelegate = new DefaultLocalizationsDelegate(
+      <Type, LocalizationsLoader>{
+        MaterialLocalizations: MaterialLocalizations.load,
+      }
+    );
+    if (widget.localizationsDelegate != null) {
+      _localizationsDelegate = new MergedLocalizationsDelegate(<LocalizationsDelegate>[
+        _localizationsDelegate,
+        widget.localizationsDelegate,
+      ]);
+    }
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {
@@ -384,7 +391,7 @@ class _MaterialAppState extends State<MaterialApp> {
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
-        localizationsDelegate: widget.localizationsDelegate ?? _resourcesDelegate,
+        localizationsDelegate: _localizationsDelegate,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,

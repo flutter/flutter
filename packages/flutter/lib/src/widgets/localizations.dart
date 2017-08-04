@@ -145,10 +145,10 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
     Iterable<Type> types;
 
     _loading.add(locale);
-    final Future<Type> typesFuture = _loadMap<Type, dynamic>(
-      new Map<Type, dynamic>.fromIterables(
+    final Future<Iterable<Type>> typesFuture = _loadMap<Type, dynamic>(
+      new Map<Type, Future<dynamic>>.fromIterables(
         allLoaders.keys,
-        allLoaders.values.map((LocalizationsLoader loader) => loader(locale))
+        allLoaders.values.map<Future<dynamic>>((LocalizationsLoader loader) => loader(locale)),
       ),
     ).then<Iterable<Type>>((Map<Type, dynamic> resources) {
       _loading.remove(locale);
@@ -366,4 +366,78 @@ class _LocalizationsState extends State<Localizations> {
       child: _locale != null ? widget.child : new Container(),
     );
   }
+}
+
+/// Create single [LocalizationsDelegate] from a list of them.
+///
+/// All of the delegates' load methods must return disjoint lists of types, i.e.
+/// only one delegate's [resourcesFor] method can be responsible for a set of
+/// localizations of a particular [Type].
+///
+/// Using DefaultLocalizationsDelegate should be preferred to this class since
+/// it's one less level of indirection simpler.
+class MergedLocalizationsDelegate extends LocalizationsDelegate {
+  /// Creates a single [LocalizationsDelegate] whose methods delegate to the
+  /// elements of `allDelegates`.
+  MergedLocalizationsDelegate(this.allDelegates) {
+    assert(allDelegates != null && allDelegates.isNotEmpty);
+  }
+
+  /// This class's [load], [statusFor], and [resourcesFor] methods delegate
+  /// to the members of this list.
+  final Iterable<LocalizationsDelegate> allDelegates;
+
+  final Map<Locale, Map<Type, LocalizationsDelegate>> _localeToDelegate = <Locale, Map<Type, LocalizationsDelegate>>{};
+  final Set<Locale> _loading = new Set<Locale>();
+
+  @override
+  Future<Iterable<Type>> load(Locale locale) {
+    assert(locale != null);
+    assert(!_loading.contains(locale));
+
+    List<Type> types;
+
+    _loading.add(locale);
+    final Future<Iterable<Type>> typesFuture = _loadMap<LocalizationsDelegate, Iterable<Type>>(
+      new Map<LocalizationsDelegate, Future<Iterable<Type>>>.fromIterables(
+        allDelegates,
+        allDelegates.map<Future<Iterable<Type>>>((LocalizationsDelegate delegate) => delegate.load(locale)),
+      ),
+    ).then<Iterable<Type>>((Map<LocalizationsDelegate, Iterable<Type>> resources) {
+      _loading.remove(locale);
+      final Map<Type, LocalizationsDelegate> typeToDelegate = <Type, LocalizationsDelegate>{};
+      for (LocalizationsDelegate delegate in resources.keys) {
+        for (Type type in resources[delegate]) {
+          assert(type != null && !typeToDelegate.containsKey(type));
+          typeToDelegate[type] = delegate;
+          types ??= <Type>[];
+          types.add(type);
+        }
+      }
+      _localeToDelegate[locale] = typeToDelegate;
+      return types;
+    });
+
+    return types == null ? typesFuture : new SynchronousFuture<Iterable<Type>>(types);
+  }
+
+  @override
+  LocalizationsStatus statusFor(Locale locale) {
+    if (_localeToDelegate[locale] != null)
+      return LocalizationsStatus.loaded;
+    if (_loading.contains(locale))
+      return LocalizationsStatus.loading;
+    return LocalizationsStatus.none;
+  }
+
+  @override
+  T resourcesFor<T>(Locale locale, Type type) {
+    assert(locale != null);
+    assert(type != null);
+    final Map<Type, LocalizationsDelegate> resources = _localeToDelegate[locale];
+    return resources[type]?.resourcesFor<T>(locale, type);
+  }
+
+  @override
+  bool updateShouldNotify(MergedLocalizationsDelegate old) => false;
 }
