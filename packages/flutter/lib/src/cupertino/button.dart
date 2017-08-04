@@ -171,16 +171,17 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     }
   }
 
-  Future<Null> _animate() async {
-    if (!_animationController.isAnimating) {
-      final bool wasHeldDown = _buttonHeldDown;
-      if (_buttonHeldDown)
-        await _animationController.animateTo(1.0, duration: kFadeOutDuration);
-      else
-        await _animationController.animateTo(0.0, duration: kFadeInDuration);
+  void _animate() {
+    if (_animationController.isAnimating)
+      return;
+    final bool wasHeldDown = _buttonHeldDown;
+    final Future<Null> ticker = _buttonHeldDown
+        ? _animationController.animateTo(1.0, duration: kFadeOutDuration)
+        : _animationController.animateTo(0.0, duration: kFadeInDuration);
+    ticker.then((Null value) {
       if (mounted && wasHeldDown != _buttonHeldDown)
         _animate();
-    }
+    });
   }
 
   @override
