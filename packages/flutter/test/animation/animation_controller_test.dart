@@ -417,7 +417,7 @@ void main() {
 
     controller.value = 0.5;
     expect(controller.value, 0.5);
-    expect(controller.status, AnimationStatus.forward); // ???
+    expect(controller.status, AnimationStatus.forward);
 
     controller.value = 0.0;
     expect(controller.value, 0.0);
@@ -458,7 +458,7 @@ void main() {
     tick(const Duration(milliseconds: 0));
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.5);
-    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ])); // ???
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
 
     // Animate from 0.5 to 1.0
@@ -466,7 +466,7 @@ void main() {
     tick(const Duration(milliseconds: 0));
     tick(const Duration(milliseconds: 150));
     expect(controller.value, 0.0);
-    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ])); // ???
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed ]));
     statusLog.clear();
   });
 }
