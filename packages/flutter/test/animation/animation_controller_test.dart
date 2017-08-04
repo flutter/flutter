@@ -379,7 +379,7 @@ void main() {
 
     final double currentValue = controller.value;
     controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
-    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.completed ]));
     expect(controller.value, currentValue);
   });
 
