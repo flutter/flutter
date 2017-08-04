@@ -31,6 +31,8 @@
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
+#define HB_FEATURE_BUFFER_SIZE 128
+
 class SkCanvas;
 
 namespace txt {
