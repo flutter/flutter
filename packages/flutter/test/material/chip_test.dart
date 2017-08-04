@@ -10,12 +10,12 @@ import 'feedback_tester.dart';
 void main() {
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = new FeedbackTester();
-    final deletedChipLabels = <String>[];
+    final List<String> deletedChipLabels = <String>[];
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
           child: new Column(
-            children: [
+            children: <Widget>[
               new Chip(
                 avatar: const CircleAvatar(
                   child: const Text('A')
@@ -49,13 +49,13 @@ void main() {
 
     expect(deletedChipLabels, isEmpty);
     await tester.tap(find.byTooltip('Delete chip A'));
-    expect(deletedChipLabels, equals(['A']));
+    expect(deletedChipLabels, equals(<String>['A']));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.clickSoundCount, 1);
 
     await tester.tap(find.byTooltip('Delete chip B'));
-    expect(deletedChipLabels, equals(['A', 'B']));
+    expect(deletedChipLabels, equals(<String>['A', 'B']));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.clickSoundCount, 2);

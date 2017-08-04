@@ -78,17 +78,28 @@ class Chip extends StatelessWidget {
   /// The delete button is included in the chip only if this callback is non-null.
   final VoidCallback onDeleted;
 
-  /// The style to be used for the label text.
+  /// The style to be applied to the chip's label.
+  ///
+  /// This only has effect on widgets that use a [TextStyle], such as [Text].
   final TextStyle labelStyle;
 
-  /// Message for the chip delete button's tooltip.
-  final String deleteButtonTooltipMessage;
-
-  /// Background color for the widget.
+  /// Color to be used for the chip's background, the default being grey.
+  ///
+  /// This color is used as the background of the container that will hold the
+  /// widget's label.
   final Color backgroundColor;
 
-  /// Color for the "Delete" icon.
+  /// Color for delete icon, the default being black.
+  ///
+  /// This has no effect when [onDelete] is null since no delete icon will be
+  /// shown.
   final Color deleteIconColor;
+
+  /// Message to be used for the chip delete button's tooltip.
+  ///
+  /// This has no effect when [onDelete] is null since no delete icon will be
+  /// shown.
+  final String deleteButtonTooltipMessage;
 
   @override
   Widget build(BuildContext context) {
