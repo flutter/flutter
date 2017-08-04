@@ -150,21 +150,21 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
   bool _buttonHeldDown = false;
 
-  void _handleTapDown(PointerDownEvent event) {
+  void _handleTapDown(TapDownDetails event) {
     if (!_buttonHeldDown) {
       _buttonHeldDown = true;
       _animate();
     }
   }
 
-  void _handleTapUp(PointerUpEvent event) {
+  void _handleTapUp(TapUpDetails event) {
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
     }
   }
 
-  void _handleTapCancel(PointerCancelEvent event) {
+  void _handleTapCancel() {
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -188,46 +188,44 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final bool enabled = widget.enabled;
     final Color backgroundColor = widget.color;
 
-    return new Listener(
-      onPointerDown: enabled ? _handleTapDown : null,
-      onPointerUp: enabled ? _handleTapUp : null,
-      onPointerCancel: enabled ? _handleTapCancel : null,
-      child: new GestureDetector(
-        onTap: widget.onPressed,
-        child: new ConstrainedBox(
-          constraints: widget.minSize == null
-              ? const BoxConstraints()
-              : new BoxConstraints(
-                minWidth: widget.minSize,
-                minHeight: widget.minSize,
-              ),
-          child: new FadeTransition(
-            opacity: _opacityTween.animate(new CurvedAnimation(
-              parent: _animationController,
-              curve: Curves.decelerate,
-            )),
-            child: new DecoratedBox(
-              decoration: new BoxDecoration(
-                borderRadius: widget.borderRadius,
-                color: backgroundColor != null && !enabled
-                    ? _kDisabledBackground
-                    : backgroundColor,
-              ),
-              child: new Padding(
-                padding: widget.padding ?? (backgroundColor != null
-                  ? _kBackgroundButtonPadding
-                  : _kButtonPadding),
-                child: new Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: new DefaultTextStyle(
-                    style: backgroundColor != null
-                        ? _kBackgroundButtonTextStyle
-                        : enabled
-                            ? _kButtonTextStyle
-                            : _kDisabledButtonTextStyle,
-                    child: widget.child,
-                  ),
+    return new GestureDetector(
+      onTapDown: enabled ? _handleTapDown : null,
+      onTapUp: enabled ? _handleTapUp : null,
+      onTapCancel: enabled ? _handleTapCancel : null,
+      onTap: widget.onPressed,
+      child: new ConstrainedBox(
+        constraints: widget.minSize == null
+            ? const BoxConstraints()
+            : new BoxConstraints(
+              minWidth: widget.minSize,
+              minHeight: widget.minSize,
+            ),
+        child: new FadeTransition(
+          opacity: _opacityTween.animate(new CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.decelerate,
+          )),
+          child: new DecoratedBox(
+            decoration: new BoxDecoration(
+              borderRadius: widget.borderRadius,
+              color: backgroundColor != null && !enabled
+                  ? _kDisabledBackground
+                  : backgroundColor,
+            ),
+            child: new Padding(
+              padding: widget.padding ?? (backgroundColor != null
+                ? _kBackgroundButtonPadding
+                : _kButtonPadding),
+              child: new Center(
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: new DefaultTextStyle(
+                  style: backgroundColor != null
+                      ? _kBackgroundButtonTextStyle
+                      : enabled
+                          ? _kButtonTextStyle
+                          : _kDisabledButtonTextStyle,
+                  child: widget.child,
                 ),
               ),
             ),
