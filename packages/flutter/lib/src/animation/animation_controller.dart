@@ -341,7 +341,10 @@ class AnimationController extends Animation<double>
     }
     stop();
     if (simulationDuration == Duration.ZERO) {
-      assert(value == target);
+      if (value != target) {
+        _value = target.clamp(lowerBound, upperBound);
+        notifyListeners();
+      }
       _status = (_direction == _AnimationDirection.forward) ?
         AnimationStatus.completed :
         AnimationStatus.dismissed;

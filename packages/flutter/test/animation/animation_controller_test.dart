@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../scheduler/scheduler_tester.dart';
@@ -380,5 +381,18 @@ void main() {
     controller.animateTo(currentValue, duration: const Duration(milliseconds: 100));
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
     expect(controller.value, currentValue);
+  });
+
+  test('animateTo can deal with duration == Duration.ZERO', () {
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+
+    controller.forward(from: 0.2);
+    expect(controller.value, 0.2);
+    controller.animateTo(1.0, duration: Duration.ZERO);
+    expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
+    expect(controller.value, 1.0);
   });
 }
