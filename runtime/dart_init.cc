@@ -77,6 +77,7 @@ static const char* kDartLanguageArgs[] = {
     "--background_compilation",
     "--await_is_keyword",
     "--assert_initializer",
+    "--causal_async_stacks",
 };
 
 static const char* kDartPrecompilationArgs[] = {
