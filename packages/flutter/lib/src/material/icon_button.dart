@@ -145,7 +145,7 @@ class IconButton extends StatelessWidget {
   /// fill the button area if the touch is held for long enough time. If the splash
   /// color has transparency then the highlight and button color will show through.
   ///
-  /// Defaults to the splash color from the [Theme].
+  /// Defaults to the Theme's splash color, [ThemeData.splashColor].
   final Color splashColor;
 
   /// The secondary color of the button when the button is in the down (pressed)
@@ -153,7 +153,7 @@ class IconButton extends StatelessWidget {
   /// button color (if any). If the highlight color has transparency, the button color
   /// will show through. The highlight fades in quickly as the button is held down.
   ///
-  /// Defaults to the highlight color from the [Theme].
+  /// Defaults to the Theme's highlight color, [ThemeData.highlightColor].
   final Color highlightColor;
 
   /// The color to use for the icon inside the button, if the icon is disabled.
