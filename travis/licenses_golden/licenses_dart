@@ -1,4 +1,4 @@
-Signature: c3d9128ec5d67bc82b246c20b7d2f9a7
+Signature: 736f3eee97ce76936e495a9f0f5179b3
 
 UNUSED LICENSES:
 
@@ -551,7 +551,6 @@ FILE: ../../../dart/runtime/observatory/lib/src/elements/class_tree.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/debugger.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/heap_map.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/isolate_reconnect.dart
-FILE: ../../../dart/runtime/observatory/lib/src/elements/memory_dashboard.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/metrics.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/vm_connect.dart
 FILE: ../../../dart/runtime/observatory/lib/src/service/object.dart
@@ -1558,6 +1557,9 @@ FILE: ../../../dart/runtime/bin/sync_socket_patch.dart
 FILE: ../../../dart/runtime/bin/sync_socket_unsupported.cc
 FILE: ../../../dart/runtime/bin/sync_socket_win.cc
 FILE: ../../../dart/runtime/lib/async.cc
+FILE: ../../../dart/runtime/observatory/lib/src/elements/memory/dashboard.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/memory/graph.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/memory/profile.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/nav/reload.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_ref.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_view.dart
