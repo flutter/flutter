@@ -373,6 +373,7 @@ class Localizations extends StatefulWidget {
   /// The locale of the Localizations widget for the widget tree that
   /// corresponds to [BuildContext] `context`.
   static Locale localeOf(BuildContext context) {
+    assert(context != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
     return scope?.localizedResourcesState.locale;
   }
@@ -390,6 +391,8 @@ class Localizations extends StatefulWidget {
   /// }
   /// ```
   static T of<T>(BuildContext context, Type type) {
+    assert(context != null);
+    assert(type != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
     return scope?.localizedResourcesState.resourcesFor<T>(type);
   }
@@ -407,28 +410,28 @@ class _LocalizationsState extends State<Localizations> {
   @override
   void initState() {
     super.initState();
-    load(widget.locale);
+    if (widget.delegate == null)
+      _locale = widget.locale;
+    else
+      load(widget.locale);
   }
 
   @override
   void didUpdateWidget(Localizations old) {
     super.didUpdateWidget(old);
-    if (widget.delegate != old.delegate)
+    if (widget.delegate != old.delegate && widget.delegate != null)
       load(widget.locale);
   }
 
-  @override
   void load(Locale locale) {
-    if (widget.delegate == null) {
-      setState(() {
-        _locale = locale;
-      });
+    final LocalizationsDelegate delegate = widget.delegate;
+    if (delegate == null) {
+      _locale = locale;
       return;
     }
 
     // Don't rebuild the dependent widgets until the resources for the new locale
     // have finished loading. Until then the old locale will continue to be used.
-    final LocalizationsDelegate delegate = widget.delegate;
     delegate.load(locale).then((Iterable<Type> _) {
       // If the widget was disposed or its delegate was changed while we were
       // waiting, then we're done.
@@ -442,7 +445,7 @@ class _LocalizationsState extends State<Localizations> {
     });
   }
 
-  T resourcesFor<T>(Type type) => widget.delegate.resourcesFor<T>(_locale, type);
+  T resourcesFor<T>(Type type) => widget.delegate?.resourcesFor<T>(_locale, type);
 
   @override
   Widget build(BuildContext context) {

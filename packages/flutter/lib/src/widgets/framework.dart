@@ -3438,7 +3438,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       owner._debugCurrentBuildTarget = debugPreviousBuildTarget;
       return true;
     });
-    assert(!_dirty);
+    assert(!_dirty, "$this");
   }
 
   /// Called by rebuild() after the appropriate checks have been made.
