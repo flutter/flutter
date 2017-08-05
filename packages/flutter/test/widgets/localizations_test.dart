@@ -38,11 +38,13 @@ void main() {
       )
     );
 
+    // ... testing didUpdateWidget() here
+
     expect(Localizations.of<Null>(pageContext, Null), null);
 
-    // Rebuld the frame with a non-null delegate
+    // TBD: Rebuld the frame with a non-null delegate
 
-    // Rebuild the frame with a null delegate again
+    // TBD: Rebuild the frame with a null delegate again
 
   });
 
