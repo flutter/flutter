@@ -163,6 +163,7 @@ class Paragraph {
   FRIEND_TEST(RenderTest, NewlineParagraph);
   FRIEND_TEST(RenderTest, EmojiParagraph);
   FRIEND_TEST(RenderTest, HyphenBreakParagraph);
+  FRIEND_TEST(RenderTest, RepeatLayoutParagraph);
 
   // Starting data to layout.
   std::vector<uint16_t> text_;
@@ -187,7 +188,7 @@ class Paragraph {
 
   // The max width of the paragraph as provided in the most recent Layout()
   // call.
-  double width_ = 0.0f;
+  double width_ = -1.0f;
   SkScalar height_ = 0.0f;
   size_t lines_ = 0;
   double max_intrinsic_width_ = 0;
@@ -207,7 +208,13 @@ class Paragraph {
         : x_start(x_s), y_start(y_s), x_end(x_e), y_end(y_e) {}
   };
 
+  // Passes in the text and Styled Runs. text_ and runs_ will later be passed
+  // into breaker_ in InitBreaker(), which is called in Layout().
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
+
+  // Sets up breaker_ with the contents of text_ and runs_. This is called every
+  // Layout() call to allow for different widths to be used.
+  void InitBreaker();
 
   void SetParagraphStyle(const ParagraphStyle& style);
 

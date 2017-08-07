@@ -140,7 +140,9 @@ void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
     return;
   text_ = std::move(text);
   runs_ = std::move(runs);
+}
 
+void Paragraph::InitBreaker() {
   breaker_.setLocale(icu::Locale(), nullptr);
   breaker_.resize(text_.size());
   memcpy(breaker_.buffer(), text_.data(), text_.size() * sizeof(text_[0]));
@@ -182,7 +184,7 @@ void Paragraph::FillWhitespaceSet(size_t start,
 
 void Paragraph::Layout(double width, bool force) {
   // Do not allow calling layout multiple times without changing anything.
-  if (!needs_layout_ && !force && width == width_)
+  if (!needs_layout_ && width == width_ && !force)
     return;
   needs_layout_ = false;
 
@@ -199,6 +201,7 @@ void Paragraph::Layout(double width, bool force) {
   //     minikin::Hyphenator::loadBinary(<paramsgohere>);
   //   breaker_.setLocale(icu::Locale::getRoot(), &hyph);
   //
+  InitBreaker();
   AddRunsToLineBreaker(collection_map);
   breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
   breaker_.setStrategy(paragraph_style_.break_strategy);
@@ -505,6 +508,7 @@ void Paragraph::Layout(double width, bool force) {
   line_widths_ =
       std::vector<double>(breaker_.getWidths(), breaker_.getWidths() + lines_);
   CalculateIntrinsicWidths();
+  breaker_.finish();
 }
 
 // Amends the buffers to incorporate justification.
