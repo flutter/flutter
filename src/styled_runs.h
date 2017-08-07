@@ -76,6 +76,7 @@ class StyledRuns {
   FRIEND_TEST(RenderTest, DISABLED_ArabicParagraph);
   FRIEND_TEST(RenderTest, LongWordParagraph);
   FRIEND_TEST(RenderTest, KernParagraph);
+  FRIEND_TEST(RenderTest, HyphenBreakParagraph);
 
   struct IndexedRun {
     size_t style_index = 0;

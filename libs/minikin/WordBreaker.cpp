@@ -70,7 +70,8 @@ static bool isBreakValid(const uint16_t* buf, size_t bufEnd, size_t i) {
     U16_PREV(buf, 0, prev_offset, codePoint);
     // Do not break on hard or soft hyphens. These are handled by automatic hyphenation.
     if (Hyphenator::isLineBreakingHyphen(codePoint) || codePoint == CHAR_SOFT_HYPHEN) {
-        return false;
+        // txt addition: Temporarily always break on hyphen. Changed from false to true.
+        return true;
     }
     // For Myanmar kinzi sequences, created by <consonant, ASAT, VIRAMA, consonant>. This is to go
     // around a bug in ICU line breaking: http://bugs.icu-project.org/trac/ticket/12561. To avoid
