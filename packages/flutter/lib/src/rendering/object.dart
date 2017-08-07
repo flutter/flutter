@@ -2572,16 +2572,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       // and dirty the nearest _semantics-laden ancestor of the
       // affected node to rebuild the tree.
       RenderObject node = this;
-
-      // If the node has already been added to [owner._nodesNeedingSemantics]
-      // remove it as it is now not guaranteed that the [node]'s semantics node
-      // will continue to be in the tree. If it still is in the tree, the node
-      // added to [owner._nodesNeedingSemantics] at the end of this block will
-      // ensure that the semantics of [node] actually get updated.
-      // (See semantics_10_test.dart for an example why this is required).
-      if (node._semantics != null && node._needsSemanticsUpdate)
-        owner._nodesNeedingSemantics.remove(node);
-
       do {
         if (node.parent is! RenderObject)
           break;
@@ -2590,6 +2580,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         node = node.parent;
       } while (node._semantics == null);
       node._semantics?.reset();
+      if (node != this && this._semantics != null && this._needsSemanticsUpdate) {
+        // If [this] node has already been added to [owner._nodesNeedingSemantics]
+        // remove it as it is no longer guaranteed that its semantics
+        // node will continue to be in the tree. If it still is in the tree, the
+        // ancestor [node] added to [owner._nodesNeedingSemantics] at the end of
+        // this block will ensure that the semantics of [this] node actually get
+        // updated.
+        // (See semantics_10_test.dart for an example why this is required).
+        owner._nodesNeedingSemantics.remove(this);
+      }
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
         if (owner != null) {
