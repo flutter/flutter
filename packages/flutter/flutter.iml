@@ -5,23 +5,6 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
-      <excludeFolder url="file://$MODULE_DIR$/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/animation/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/cupertino/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/engine/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/examples/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/foundation/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/gestures/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/harness/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/material/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/painting/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/physics/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/rendering/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/scheduler/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/services/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/ui/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/widgets/packages" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
