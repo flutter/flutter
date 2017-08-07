@@ -2061,6 +2061,33 @@ class RepositoryRootLibDirectory extends RepositoryDirectory {
 
   @override
   bool get subdirectoriesAreLicenseRoots => true;
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'txt')
+      return new RepositoryLibTxtDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryLibTxtDirectory extends RepositoryDirectory {
+  RepositoryLibTxtDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'third_party')
+      return new RepositoryLibTxtThirdPartyDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryLibTxtThirdPartyDirectory extends RepositoryDirectory {
+  RepositoryLibTxtThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'fonts';
+  }
 }
 
 class RepositoryFlutterDirectory extends RepositoryDirectory {
