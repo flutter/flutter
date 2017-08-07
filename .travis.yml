@@ -19,11 +19,7 @@ install:
 env:
   - SHARD=analyze
   - SHARD=tests
-  # Temporarily disable the coverage shard.  The test package is exiting
-  # the process after tests run, preventing the flutter test command from
-  # writing coverage results.
-  # TODO(jsimmons): reenable coverage when a new test package is available.
-  # - SHARD=coverage
+  - SHARD=coverage
   - SHARD=docs
 before_script:
   - ./dev/bots/travis_setup.sh
