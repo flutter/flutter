@@ -26,6 +26,7 @@ previous run for a given device, then you can skip this step by passing
 
 ADB_LOCAL_PATH = 'third_party/android_tools/sdk/platform-tools/adb'
 
+
 def _get_flutter_root():
     path = os.path.dirname(os.path.abspath(__file__))
     while os.path.basename(path) != 'src':
@@ -43,6 +44,24 @@ def _find_package_pid(adb_path, package):
     return int(ps_match.group(1))
 
 
+def _get_device_abi(adb_path):
+    abi_output = subprocess.check_output(
+        [adb_path, 'shell', 'getprop', 'ro.product.cpu.abi']).strip()
+    if abi_output.startswith('arm'):
+        return 'arm'
+    return abi_output
+
+
+def _default_local_engine(abi):
+    """Return the default Flutter build output directory for a given target ABI."""
+    if abi == 'x86':
+        return 'android_debug_unopt_x86'
+    elif abi == 'x86_64':
+        return 'android_debug_unopt_x64'
+    else:
+        return 'android_debug_unopt'
+
+
 class GdbClient(object):
     SYSTEM_LIBS_PATH = '/tmp/flutter_gdb_device_libs'
 
@@ -57,7 +76,7 @@ class GdbClient(object):
         parser = subparsers.add_parser('client',
             help='run a GDB client')
         parser.add_argument('package', type=str)
-        parser.add_argument('--local-engine', type=str, default='android_debug_unopt')
+        parser.add_argument('--local-engine', type=str)
         parser.add_argument('--gdb-port', type=int, default=8888)
         parser.add_argument('--no-pull-libs', action="store_false",
             default=True, dest="pull_libs",
@@ -81,11 +100,13 @@ class GdbClient(object):
             device_libs = set((lib, lib[1:]) for lib in proc_libs)
             device_libs.add(('/system/bin/linker', 'system/bin/linker'))
             device_libs.add(('/system/bin/app_process32', 'system/bin/app_process32'))
+            device_libs.add(('/system/bin/app_process64', 'system/bin/app_process64'))
         else:
             device_libs = set((lib, os.path.basename(lib)) for lib in proc_libs)
             device_libs.add(('/system/bin/linker', 'linker'))
 
-        shutil.rmtree(GdbClient.SYSTEM_LIBS_PATH)
+        if os.path.isdir(GdbClient.SYSTEM_LIBS_PATH):
+            shutil.rmtree(GdbClient.SYSTEM_LIBS_PATH)
 
         dev_null = open(os.devnull, 'w')
         for lib, local_path in sorted(device_libs):
@@ -93,7 +114,7 @@ class GdbClient(object):
             local_path = os.path.join(GdbClient.SYSTEM_LIBS_PATH, local_path)
             if not os.path.exists(os.path.dirname(local_path)):
                 os.makedirs(os.path.dirname(local_path))
-            subprocess.check_call([adb_path, 'pull', lib, local_path], stderr=dev_null)
+            subprocess.call([adb_path, 'pull', lib, local_path], stderr=dev_null)
 
         return True
 
@@ -111,7 +132,13 @@ class GdbClient(object):
         subprocess.check_call(
             [adb_path, 'forward', 'tcp:%d' % args.gdb_port, 'tcp:%d' % args.gdb_port])
 
-        debug_out_path = os.path.join(flutter_root, 'out/%s' % args.local_engine)
+        if args.local_engine is None:
+            abi = _get_device_abi(adb_path)
+            local_engine = _default_local_engine(abi)
+        else:
+            local_engine = args.local_engine
+
+        debug_out_path = os.path.join(flutter_root, 'out/%s' % local_engine)
         if not os.path.exists(os.path.join(debug_out_path, 'libflutter.so')):
             print 'Unable to find libflutter.so. Make sure you have completed a %s build' % args.local_engine
             return 1
@@ -131,7 +158,6 @@ class GdbClient(object):
 
 
 class GdbServer(object):
-    GDB_SERVER_LOCAL_PATH = 'third_party/android_tools/ndk/prebuilt/android-arm/gdbserver/gdbserver'
     GDB_SERVER_DEVICE_TMP_PATH = '/data/local/tmp/gdbserver'
 
     def add_subparser(self, subparsers):
@@ -152,9 +178,12 @@ class GdbServer(object):
         if package_pid is None:
             return 1
 
+        abi = _get_device_abi(adb_path)
+        gdb_server_local_path = 'third_party/android_tools/ndk/prebuilt/android-%s/gdbserver/gdbserver' % abi
+
         # Copy gdbserver to the package's data directory.
         subprocess.check_call([adb_path, 'push',
-                               os.path.join(flutter_root, GdbServer.GDB_SERVER_LOCAL_PATH),
+                               os.path.join(flutter_root, gdb_server_local_path),
                                GdbServer.GDB_SERVER_DEVICE_TMP_PATH])
         gdb_server_device_path = '/data/data/%s/gdbserver' % args.package
         subprocess.check_call([adb_path, 'shell', 'run-as', args.package, 'cp',
