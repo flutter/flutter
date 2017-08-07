@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "flutter/common/threads.h"
+#include "flutter/fml/platform/darwin/platform_version.h"
 #include "flutter/fml/platform/darwin/scoped_block.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/platform/darwin/common/buffer_conversions.h"
@@ -71,6 +72,9 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   fml::scoped_nsprotocol<FlutterMethodChannel*> _textInputChannel;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _lifecycleChannel;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _systemChannel;
+  bool _platformSupportsTouchTypes;
+  bool _platformSupportsTouchPressure;
+  bool _platformSupportsTouchOrientationAndTilt;
   BOOL _initialized;
   BOOL _connected;
 }
@@ -115,6 +119,10 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
     return;
 
   _initialized = YES;
+
+  _platformSupportsTouchTypes = fml::IsPlatformVersionAtLeast(9);
+  _platformSupportsTouchPressure = fml::IsPlatformVersionAtLeast(9);
+  _platformSupportsTouchOrientationAndTilt = fml::IsPlatformVersionAtLeast(9, 1);
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
@@ -165,7 +173,6 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   }];
 
   [self setupNotificationCenterObservers];
-
 }
 
 - (void)setupNotificationCenterObservers {
@@ -226,10 +233,8 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
                object:nil];
 }
 
-
 - (void)setInitialRoute:(NSString*)route {
-  [_navigationChannel.get() invokeMethod:@"setInitialRoute"
-                               arguments:route];
+  [_navigationChannel.get() invokeMethod:@"setInitialRoute" arguments:route];
 }
 #pragma mark - Initializing the engine
 
@@ -378,6 +383,23 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
   return PointerChangeMapperPhase(blink::PointerData::Change::kCancel, MapperPhase::Accessed);
 }
 
+static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch,
+                                                                     bool touchTypeSupported) {
+  if (!touchTypeSupported) {
+    return blink::PointerData::DeviceKind::kTouch;
+  }
+
+  switch (touch.type) {
+    case UITouchTypeDirect:
+    case UITouchTypeIndirect:
+      return blink::PointerData::DeviceKind::kTouch;
+    case UITouchTypeStylus:
+      return blink::PointerData::DeviceKind::kStylus;
+  }
+
+  return blink::PointerData::DeviceKind::kTouch;
+}
+
 - (void)dispatchTouches:(NSSet*)touches phase:(UITouchPhase)phase {
   // Note: we cannot rely on touch.phase, since in some cases, e.g.,
   // handleStatusBarTouches, we synthesize touches from existing events.
@@ -412,13 +434,68 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
 
     constexpr int kMicrosecondsPerSecond = 1000 * 1000;
     pointer_data.time_stamp = touch.timestamp * kMicrosecondsPerSecond;
+
     pointer_data.change = eventTypePhase.first;
-    pointer_data.kind = blink::PointerData::DeviceKind::kTouch;
+
+    pointer_data.kind = DeviceKindFromTouchType(touch, _platformSupportsTouchTypes);
+
     pointer_data.device = device_id;
+
     pointer_data.physical_x = windowCoordinates.x * scale;
     pointer_data.physical_y = windowCoordinates.y * scale;
-    pointer_data.pressure = 1.0;
-    pointer_data.pressure_max = 1.0;
+
+    // pressure_min is always 0.0
+    if (_platformSupportsTouchPressure) {
+      // These properties were introduced in iOS 9.0.
+      pointer_data.pressure = touch.force;
+      pointer_data.pressure_max = touch.maximumPossibleForce;
+    } else {
+      pointer_data.pressure = 1.0;
+      pointer_data.pressure_max = 1.0;
+    }
+
+    // These properties were introduced in iOS 8.0
+    pointer_data.radius_major = touch.majorRadius;
+    pointer_data.radius_min = touch.majorRadius - touch.majorRadiusTolerance;
+    pointer_data.radius_max = touch.majorRadius + touch.majorRadiusTolerance;
+
+    // These properties were introduced in iOS 9.1
+    if (_platformSupportsTouchOrientationAndTilt) {
+      // iOS Documentation: altitudeAngle
+      // A value of 0 radians indicates that the stylus is parallel to the surface. The value of
+      // this property is Pi/2 when the stylus is perpendicular to the surface.
+      //
+      // PointerData Documentation: tilt
+      // The angle of the stylus, in radians in the range:
+      //    0 <= tilt <= pi/2
+      // giving the angle of the axis of the stylus, relative to the axis perpendicular to the input
+      // surface (thus 0.0 indicates the stylus is orthogonal to the plane of the input surface,
+      // while pi/2 indicates that the stylus is flat on that surface).
+      //
+      // Discussion:
+      // The ranges are the same. Origins are swapped.
+      pointer_data.tilt = M_PI_2 - touch.altitudeAngle;
+
+      // iOS Documentation: azimuthAngleInView:
+      // With the tip of the stylus touching the screen, the value of this property is 0 radians
+      // when the cap end of the stylus (that is, the end opposite of the tip) points along the
+      // positive x axis of the device's screen. The azimuth angle increases as the user swings the
+      // cap end of the stylus in a clockwise direction around the tip.
+      //
+      // PointerData Documentation: orientation
+      // The angle of the stylus, in radians in the range:
+      //    -pi < orientation <= pi
+      // giving the angle of the axis of the stylus projected onto the input surface, relative to
+      // the positive y-axis of that surface (thus 0.0 indicates the stylus, if projected onto that
+      // surface, would go from the contact point vertically up in the positive y-axis direction, pi
+      // would indicate that the stylus would go down in the negative y-axis direction; pi/4 would
+      // indicate that the stylus goes up and to the right, -pi/2 would indicate that the stylus
+      // goes to the left, etc).
+      //
+      // Discussion:
+      // Sweep direction is the same. Phase of M_PI_2.
+      pointer_data.orientation = [touch azimuthAngleInView:nil] - M_PI_2;
+    }
 
     packet->SetPointerData(i++, pointer_data);
   }
@@ -490,8 +567,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
 
 - (void)keyboardWillChangeFrame:(NSNotification*)notification {
   NSDictionary* info = [notification userInfo];
-  CGFloat bottom =
-      CGRectGetHeight([[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue]);
+  CGFloat bottom = CGRectGetHeight([[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue]);
   CGFloat scale = [UIScreen mainScreen].scale;
   _viewportMetrics.physical_padding_bottom = bottom * scale;
   [self updateViewportMetrics];
@@ -567,7 +643,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
 #pragma mark - Memory Notifications
 
 - (void)onMemoryWarning:(NSNotification*)notification {
-  [_systemChannel.get() sendMessage:@{ @"type" : @"memoryPressure" }];
+  [_systemChannel.get() sendMessage:@{@"type" : @"memoryPressure"}];
 }
 
 #pragma mark - Locale updates

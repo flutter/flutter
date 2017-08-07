@@ -1401,6 +1401,8 @@ FILE: ../../../flutter/fml/platform/darwin/cf_utils.h
 FILE: ../../../flutter/fml/platform/darwin/message_loop_darwin.h
 FILE: ../../../flutter/fml/platform/darwin/message_loop_darwin.mm
 FILE: ../../../flutter/fml/platform/darwin/paths_darwin.mm
+FILE: ../../../flutter/fml/platform/darwin/platform_version.h
+FILE: ../../../flutter/fml/platform/darwin/platform_version.mm
 FILE: ../../../flutter/fml/platform/darwin/resource_mapping_darwin.h
 FILE: ../../../flutter/fml/platform/darwin/resource_mapping_darwin.mm
 FILE: ../../../flutter/fml/platform/darwin/scoped_block.mm
