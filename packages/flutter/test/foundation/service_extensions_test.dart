@@ -40,9 +40,9 @@ class TestServiceExtensionsBinding extends BindingBase
 
   int reassembled = 0;
   @override
-  Future<Null> reassembleApplication() {
+  Future<Null> performReassemble() {
     reassembled += 1;
-    return super.reassembleApplication();
+    return super.performReassemble();
   }
 
   bool frameScheduled = false;

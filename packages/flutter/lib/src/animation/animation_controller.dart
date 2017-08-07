@@ -270,6 +270,10 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// During the animation, [status] is reported as [AnimationStatus.forward],
+  /// which switches to [AnimationStatus.completed] when [upperBound] is
+  /// reached at the end of the animation.
   TickerFuture forward({ double from }) {
     assert(() {
       if (duration == null) {
@@ -284,7 +288,7 @@ class AnimationController extends Animation<double>
     _direction = _AnimationDirection.forward;
     if (from != null)
       value = from;
-    return animateTo(upperBound);
+    return _animateToInternal(upperBound);
   }
 
   /// Starts running this animation in reverse (towards the beginning).
@@ -294,6 +298,10 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// During the animation, [status] is reported as [AnimationStatus.reverse],
+  /// which switches to [AnimationStatus.dismissed] when [lowerBound] is
+  /// reached at the end of the animation.
   TickerFuture reverse({ double from }) {
     assert(() {
       if (duration == null) {
@@ -308,7 +316,7 @@ class AnimationController extends Animation<double>
     _direction = _AnimationDirection.reverse;
     if (from != null)
       value = from;
-    return animateTo(lowerBound);
+    return _animateToInternal(lowerBound);
   }
 
   /// Drives the animation from its current value to target.
@@ -318,7 +326,17 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// During the animation, [status] is reported as [AnimationStatus.forward]
+  /// regardless of whether `target` > [value] or not. At the end of the
+  /// animation, when `target` is reached, [status] is reported as
+  /// [AnimationStatus.completed].
   TickerFuture animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
+    _direction = _AnimationDirection.forward;
+    return _animateToInternal(target, duration: duration, curve: curve);
+  }
+
+  TickerFuture _animateToInternal(double target, { Duration duration, Curve curve: Curves.linear }) {
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
       assert(() {
@@ -335,10 +353,16 @@ class AnimationController extends Animation<double>
       final double range = upperBound - lowerBound;
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       simulationDuration = this.duration * remainingFraction;
+    } else if (target == value) {
+      // Already at target, don't animate.
+      simulationDuration = Duration.ZERO;
     }
     stop();
     if (simulationDuration == Duration.ZERO) {
-      assert(value == target);
+      if (value != target) {
+        _value = target.clamp(lowerBound, upperBound);
+        notifyListeners();
+      }
       _status = (_direction == _AnimationDirection.forward) ?
         AnimationStatus.completed :
         AnimationStatus.dismissed;

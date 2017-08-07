@@ -654,6 +654,9 @@ abstract class ResidentRunner {
       final bool handled = await _commonTerminalInputHandler(command);
       if (!handled)
         await handleTerminalCommand(command);
+    } catch (error, st) {
+      printError('$error\n$st');
+      _cleanUpAndExit(null);
     } finally {
       _processingUserRequest = false;
     }

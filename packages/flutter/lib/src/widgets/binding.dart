@@ -544,12 +544,12 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   }
 
   @override
-  Future<Null> reassembleApplication() {
+  Future<Null> performReassemble() {
     _needToReportFirstFrame = true;
     preventThisFrameFromBeingReportedAsFirstFrame();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.reassembleApplication();
+    return super.performReassemble();
   }
 }
 

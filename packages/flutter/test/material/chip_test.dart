@@ -10,33 +10,55 @@ import 'feedback_tester.dart';
 void main() {
   testWidgets('Chip control test', (WidgetTester tester) async {
     final FeedbackTester feedback = new FeedbackTester();
-    bool didDeleteChip = false;
+    final List<String> deletedChipLabels = <String>[];
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
-          child: new Center(
-            child: new Chip(
-              avatar: const CircleAvatar(
-                child: const Text('C')
+          child: new Column(
+            children: <Widget>[
+              new Chip(
+                avatar: const CircleAvatar(
+                  child: const Text('A')
+                ),
+                label: const Text('Chip A'),
+                onDeleted: () {
+                  deletedChipLabels.add('A');
+                },
+                deleteButtonTooltipMessage: 'Delete chip A',
               ),
-              label: const Text('Chip'),
-              onDeleted: () {
-                didDeleteChip = true;
-              }
-            )
+              new Chip(
+                avatar: const CircleAvatar(
+                  child: const Text('B')
+                ),
+                label: const Text('Chip B'),
+                onDeleted: () {
+                  deletedChipLabels.add('B');
+                },
+                deleteButtonTooltipMessage: 'Delete chip B',
+              ),
+            ]
           )
         )
       )
     );
 
+    expect(tester.widget(find.byTooltip('Delete chip A')), isNotNull);
+    expect(tester.widget(find.byTooltip('Delete chip B')), isNotNull);
+
     expect(feedback.clickSoundCount, 0);
 
-    expect(didDeleteChip, isFalse);
-    await tester.tap(find.byType(Tooltip));
-    expect(didDeleteChip, isTrue);
+    expect(deletedChipLabels, isEmpty);
+    await tester.tap(find.byTooltip('Delete chip A'));
+    expect(deletedChipLabels, equals(<String>['A']));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(feedback.clickSoundCount, 1);
+
+    await tester.tap(find.byTooltip('Delete chip B'));
+    expect(deletedChipLabels, equals(<String>['A', 'B']));
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(feedback.clickSoundCount, 2);
 
     feedback.dispose();
   });
