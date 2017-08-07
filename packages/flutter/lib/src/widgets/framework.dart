@@ -3113,6 +3113,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           'resulting object.\n'
           'The size getter was called for the following element:\n'
           '  $this\n'
+          'The associated render sliver was:\n'
+          '  ${renderObject.toStringShallow("\n  ")}'
         );
       }
       if (renderObject is! RenderBox) {
@@ -3124,10 +3126,12 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           'and extracting its size manually.\n'
           'The size getter was called for the following element:\n'
           '  $this\n'
+          'The associated render object was:\n'
+          '  ${renderObject.toStringShallow("\n  ")}'
         );
       }
       final RenderBox box = renderObject;
-      if (!box.hasSize || box.debugNeedsLayout) {
+      if (!box.hasSize) {
         throw new FlutterError(
           'Cannot get size from a render object that has not been through layout.\n'
           'The size of this render object has not yet been determined because '
@@ -3137,6 +3141,24 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           'the size and position of the render objects during layout.\n'
           'The size getter was called for the following element:\n'
           '  $this\n'
+          'The render object from which the size was to be obtained was:\n'
+          '  ${box.toStringShallow("\n  ")}'
+        );
+      }
+      if (box.debugNeedsLayout) {
+        throw new FlutterError(
+          'Cannot get size from a render object that has been marked dirty for layout.\n'
+          'The size of this render object is ambiguous because this render object has '
+          'been modified since it was last laid out, which typically means that the size '
+          'getter was called too early in the pipeline (e.g., during the build phase) '
+          'before the framework has determined the size and position of the render '
+          'objects during layout.\n'
+          'The size getter was called for the following element:\n'
+          '  $this\n'
+          'The render object from which the size was to be obtained was:\n'
+          '  ${box.toStringShallow("\n  ")}\n'
+          'Consider using debugPrintMarkNeedsLayoutStacks to determine why the render '
+          'object in question is dirty, if you did not expect this.'
         );
       }
       return true;
