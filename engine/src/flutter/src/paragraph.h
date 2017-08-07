@@ -162,6 +162,7 @@ class Paragraph {
   FRIEND_TEST(RenderTest, KernScaleParagraph);
   FRIEND_TEST(RenderTest, NewlineParagraph);
   FRIEND_TEST(RenderTest, EmojiParagraph);
+  FRIEND_TEST(RenderTest, HyphenBreakParagraph);
 
   // Starting data to layout.
   std::vector<uint16_t> text_;
