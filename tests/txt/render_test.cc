@@ -15,6 +15,10 @@
  */
 
 #include "render_test.h"
+
+#include <string>
+
+#include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkStream.h"
 
@@ -31,7 +35,8 @@ std::string RenderTest::GetNextSnapshotName() {
       ::testing::UnitTest::GetInstance()->current_test_info();
 
   std::stringstream stream;
-  stream << test_info->test_case_name() << "_" << test_info->name();
+  stream << "snapshots/" << test_info->test_case_name() << "_"
+         << test_info->name();
   stream << "_" << ++snapshots_ << ".png";
 
   return stream.str();
@@ -39,6 +44,22 @@ std::string RenderTest::GetNextSnapshotName() {
 
 bool RenderTest::Snapshot() {
   if (!canvas_ || !bitmap_) {
+    return false;
+  }
+  std::string snapshot_dir = "snapshots";
+  int error = 0;
+// _WIN32 defined by Windows Visual compiler.
+#if defined(_WIN32)
+  // Handle windows path creation.
+  error = _mkdir(snapshot_dir.c_str());
+#else
+  // Handle non-windows path creation with Unix permissions.
+  mode_t permissions = 0733;
+  error = mkdir(snapshot_dir.c_str(), permissions);
+#endif
+  if (error > 0) {
+    FTL_LOG(ERROR) << "'snapshot/' Directory not available and could not be "
+                      "created. Please create manually to save snapshot.";
     return false;
   }
   auto file_name = GetNextSnapshotName();
