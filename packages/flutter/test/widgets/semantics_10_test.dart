@@ -4,55 +4,115 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 
 import 'semantics_tester.dart';
 
+List<String> callLog = <String>[];
+
 void main() {
-  testWidgets('canDrag update does not trigger assert in semantics', (WidgetTester tester) async {
+  testWidgets('can call markNeedsSemanticsUpdate(onlyChanges: true) followed by markNeedsSemanticsUpdate(onlyChanges: false)', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
-    await tester.pumpWidget(buildTestWidget(
-      excludeListSemantics: false,
-      listIsDragable: true,
-      numOfListEntries: 100,
-    ));
+    await tester.pumpWidget(
+        bildTestWidgets(
+          excludeSemantics: false,
+          label: 'label',
+          isSemanticsBoundary: true,
+        )
+    );
+
+    callLog.clear();
 
     // The following should not trigger an assert.
-    await tester.pumpWidget(buildTestWidget(
-      excludeListSemantics: true,
-      listIsDragable: false,
-      numOfListEntries: 2,
-    ));
+    await tester.pumpWidget(
+        bildTestWidgets(
+          excludeSemantics: true,
+          label: 'label CHANGED',
+          isSemanticsBoundary: false,
+        )
+    );
 
-    semantics.dispose();
+    expect(callLog, <String>['markNeedsSemanticsUpdate(onlyChanges: true)', 'markNeedsSemanticsUpdate(onlyChanges: false)']);
   });
 }
 
-Widget buildTestWidget({
-    @required bool excludeListSemantics,
-    @required bool listIsDragable,
-    @required int numOfListEntries
-}) {
-  final List<Widget> children = new List<Widget>.generate(numOfListEntries, (int i) {
-    return new Container(
-      child: new Semantics(
-        label: 'child$i',
-      ),
-      height: 40.0,
-    );
-  });
-
+Widget bildTestWidgets({bool excludeSemantics, String label, bool isSemanticsBoundary}) {
   return new Semantics(
-    container: true,
     label: 'container',
+    container: true,
     child: new ExcludeSemantics(
-      excluding: excludeListSemantics,
-      child: new ListView(
-        physics: listIsDragable ? null : const NeverScrollableScrollPhysics(),
-        children: children,
+      excluding: excludeSemantics,
+      child: new TestWidget(
+        label: label,
+        isSemanticBoundary: isSemanticsBoundary,
+        child: new Column(
+          children: <Widget>[
+            new Semantics(
+              label: 'child1',
+            ),
+            new Semantics(
+              label: 'child2',
+            ),
+          ],
+        ),
       ),
     ),
   );
+}
+
+class TestWidget extends SingleChildRenderObjectWidget {
+  const TestWidget({
+    Key key,
+    Widget child,
+    this.label,
+    this.isSemanticBoundary,
+  }) : super(key: key, child: child);
+
+  final String label;
+  final bool isSemanticBoundary;
+
+  @override
+  RenderTest createRenderObject(BuildContext context) {
+    return new RenderTest()
+      ..label = label
+      ..isSemanticBoundary = isSemanticBoundary;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderTest renderObject) {
+    renderObject
+      ..label = label
+      ..isSemanticBoundary = isSemanticBoundary;
+  }
+}
+
+class RenderTest extends RenderProxyBox {
+  @override
+  SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
+
+  void _annotate(SemanticsNode node) {
+    node.label = _label;
+  }
+
+  String _label;
+  set label(String value) {
+    if (value == _label)
+      return;
+    _label = value;
+    markNeedsSemanticsUpdate(onlyChanges: true);
+    callLog.add('markNeedsSemanticsUpdate(onlyChanges: true)');
+  }
+
+  @override
+  bool get isSemanticBoundary => _isSemanticBoundary;
+  bool _isSemanticBoundary;
+  set isSemanticBoundary(bool value) {
+    if (_isSemanticBoundary == value)
+      return;
+    _isSemanticBoundary = value;
+    markNeedsSemanticsUpdate(onlyChanges: false);
+    callLog.add('markNeedsSemanticsUpdate(onlyChanges: false)');
+  }
 }
