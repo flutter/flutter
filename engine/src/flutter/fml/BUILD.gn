@@ -42,6 +42,8 @@ source_set("fml") {
       "platform/darwin/message_loop_darwin.h",
       "platform/darwin/message_loop_darwin.mm",
       "platform/darwin/paths_darwin.mm",
+      "platform/darwin/platform_version.h",
+      "platform/darwin/platform_version.mm",
       "platform/darwin/resource_mapping_darwin.h",
       "platform/darwin/resource_mapping_darwin.mm",
       "platform/darwin/scoped_block.h",
