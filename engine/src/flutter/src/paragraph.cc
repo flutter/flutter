@@ -109,17 +109,6 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   // also produces more accurate layouts.
   paint->paintFlags |=
       style.round_char_advances ? 0x00 : minikin::LinearTextFlag;
-  // Disable ligatures
-  // TODO(garyq): Re-enable ligatures.
-  std::vector<hb_feature_t> features;
-  hb_feature_t no_liga = {HB_TAG('l', 'i', 'g', 'a'), 0, 0, ~0u};
-  hb_feature_t no_clig = {HB_TAG('c', 'l', 'i', 'g'), 0, 0, ~0u};
-  char buff[HB_FEATURE_BUFFER_SIZE * 2];
-  hb_feature_to_string(&no_liga, buff, HB_FEATURE_BUFFER_SIZE);
-  hb_feature_to_string(&no_clig, buff + HB_FEATURE_BUFFER_SIZE,
-                       HB_FEATURE_BUFFER_SIZE);
-  paint->fontFeatureSettings =
-      std::string(buff) + "," + std::string(buff + HB_FEATURE_BUFFER_SIZE);
 }
 
 void GetPaint(const TextStyle& style, SkPaint* paint) {
@@ -219,6 +208,10 @@ void Paragraph::Layout(double width, bool force) {
   minikin::FontStyle font;
   minikin::MinikinPaint minikin_paint;
   minikin::Layout layout;
+
+  // Disable ligatures
+  // TODO(garyq): Re-enable ligatures.
+  minikin_paint.fontFeatureSettings += "-liga,-clig,";
 
   SkTextBlobBuilder builder;
 
@@ -370,7 +363,6 @@ void Paragraph::Layout(double width, bool force) {
                layout_end == next_break) {
           ++trailing_length;
         }
-        trailing_length = 0;
 
         buffers.push_back(
             &builder.allocRunPos(paint, blob_length - trailing_length));
@@ -385,6 +377,7 @@ void Paragraph::Layout(double width, bool force) {
           buffers.back()->glyphs[blob_index] = layout.getGlyphId(glyph_index);
 
           const size_t pos_index = 2 * blob_index;
+          // Extract the letter spacing by itself out of the minikin layout.
           letter_spacing = run.style.letter_spacing == 0
                                ? 0
                                : layout.getX(glyph_index) - current_x_position;
@@ -625,9 +618,9 @@ void Paragraph::SetFontCollection(FontCollection* font_collection) {
 void Paragraph::Paint(SkCanvas* canvas, double x, double y) {
   SkAutoCanvasRestore canvas_restore(canvas, true);
   canvas->translate(x, y);
+  SkPaint paint;
   for (size_t index = 0; index < records_.size(); ++index) {
     PaintRecord& record = records_[index];
-    SkPaint paint;
     paint.setColor(record.style().color);
     SkPoint offset = record.offset();
     canvas->drawTextBlob(record.text(), offset.x(), offset.y(), paint);
