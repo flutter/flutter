@@ -38,6 +38,20 @@ abstract class LocalizationsDelegate {
   /// const constructors so that they can be used in const expressions.
   LocalizationsDelegate();
 
+  /// Create single [LocalizationsDelegate] from a list of them.
+  ///
+  /// All of the delegates' load methods must return disjoint lists of types, i.e.
+  /// only one delegate's [resourcesFor] method can be responsible for a set of
+  /// localizations of a particular [Type].
+  ///
+  /// When possible, using DefaultLocalizationsDelegate should be preferred to
+  /// using this factory constructor, since it's one less level of indirection.
+  factory LocalizationsDelegate.merge(Iterable<LocalizationsDelegate> delegates) {
+    assert(delegates != null && delegates.isNotEmpty);
+    return new _MergedLocalizationsDelegate(delegates);
+  }
+
+
   /// Start loading the resources for `locale`. The returned future completes
   /// when the resources have been loaded and cached.
   ///
@@ -184,23 +198,13 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
   bool updateShouldNotify(DefaultLocalizationsDelegate old) => false;
 }
 
-/// Create single [LocalizationsDelegate] from a list of them.
-///
-/// All of the delegates' load methods must return disjoint lists of types, i.e.
-/// only one delegate's [resourcesFor] method can be responsible for a set of
-/// localizations of a particular [Type].
-///
-/// When possible, using DefaultLocalizationsDelegate should be preferred to
-/// using this class since it's one less level of indirection.
-class MergedLocalizationsDelegate extends LocalizationsDelegate {
-  /// Creates a single [LocalizationsDelegate] whose methods delegate to the
-  /// elements of `allDelegates`.
-  MergedLocalizationsDelegate(this.allDelegates) {
-    assert(allDelegates != null && allDelegates.isNotEmpty);
-  }
+class _MergedLocalizationsDelegate extends LocalizationsDelegate {
+  // Creates a single [LocalizationsDelegate] whose methods delegate to the
+  // elements of `allDelegates`.
+  _MergedLocalizationsDelegate(this.allDelegates);
 
-  /// This class's [load], [statusFor], and [resourcesFor] methods delegate
-  /// to the members of this list.
+  // This class's [load], [statusFor], and [resourcesFor] methods delegate
+  // to the members of this list.
   final Iterable<LocalizationsDelegate> allDelegates;
 
   final Map<Locale, Map<Type, LocalizationsDelegate>> _localeToDelegate = <Locale, Map<Type, LocalizationsDelegate>>{};
@@ -255,7 +259,7 @@ class MergedLocalizationsDelegate extends LocalizationsDelegate {
   }
 
   @override
-  bool updateShouldNotify(MergedLocalizationsDelegate old) => false;
+  bool updateShouldNotify(_MergedLocalizationsDelegate old) => false;
 }
 
 class _LocalizationsScope extends InheritedWidget {
@@ -375,7 +379,7 @@ class Localizations extends StatefulWidget {
   static Locale localeOf(BuildContext context) {
     assert(context != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
-    return scope?.localizedResourcesState.locale;
+    return scope.localizedResourcesState.locale;
   }
 
   /// Returns the 'type' localized resources for the widget tree that
@@ -394,7 +398,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     assert(type != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
-    return scope?.localizedResourcesState.resourcesFor<T>(type);
+    return scope.localizedResourcesState.resourcesFor<T>(type);
   }
 
   @override
@@ -430,19 +434,26 @@ class _LocalizationsState extends State<Localizations> {
       return;
     }
 
-    // Don't rebuild the dependent widgets until the resources for the new locale
-    // have finished loading. Until then the old locale will continue to be used.
-    delegate.load(locale).then((Iterable<Type> _) {
-      // If the widget was disposed or its delegate was changed while we were
-      // waiting, then we're done.
-      if (!mounted || delegate != widget.delegate)
-        return;
-      setState(() {
-        _locale = locale;
+    Iterable<Type> types;
+    final Future<Iterable<Type>> futureTypes = delegate.load(locale)
+      .then<Iterable<Type>>((Iterable<Type> value) {
+        return types = value;
       });
-      final InheritedElement scopeElement = _localizedResourcesScopeKey.currentContext;
-      scopeElement?.dispatchDidChangeDependencies();
-    });
+
+    if (types != null) {
+      // The delegate loaded its resources synchronously, do not rebuild
+      _locale = locale;
+    } else {
+      // Don't rebuild the dependent widgets until the resources for the new locale
+      // have finished loading. Until then the old locale will continue to be used.
+      futureTypes.then<Iterable<Type>>((Iterable<Type> value) {
+        setState(() {
+          _locale = locale;
+        });
+        final InheritedElement scopeElement = _localizedResourcesScopeKey.currentContext;
+        scopeElement?.dispatchDidChangeDependencies();
+      });
+    }
   }
 
   T resourcesFor<T>(Type type) => widget.delegate?.resourcesFor<T>(_locale, type);

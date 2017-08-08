@@ -310,7 +310,7 @@ class _MaterialAppState extends State<MaterialApp> {
       }
     );
     if (widget.localizationsDelegate != null) {
-      _localizationsDelegate = new MergedLocalizationsDelegate(<LocalizationsDelegate>[
+      _localizationsDelegate = new LocalizationsDelegate.merge(<LocalizationsDelegate>[
         _localizationsDelegate,
         widget.localizationsDelegate,
       ]);
