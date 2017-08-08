@@ -8,15 +8,15 @@ import sys
 # This script returns the path to the SDK of the given type. Pass the type of
 # SDK you want, which is typically "iphone" or "iphonesimulator".
 
-if len(sys.argv) != 3:
-  print "Takes two args (SDK to find and the version)"
+if len(sys.argv) != 2:
+  print "Takes one arg (SDK to find)"
   sys.exit(1)
 
 command =  [
   'xcodebuild',
   '-version',
   '-sdk',
-  ''.join([sys.argv[1], sys.argv[2]]),
+  sys.argv[1],
   'Path'
 ]
 
