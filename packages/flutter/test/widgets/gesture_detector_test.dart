@@ -218,7 +218,7 @@ void main() {
     expect(didTap, isFalse);
   });
 
-  test('RenderSemanticsGestureHandler.setGestureCallbacks calls markNeedsSemanticsUpdate appropriatly', () {
+  test('RenderSemanticsGestureHandler.setGestureCallbacks calls markNeedsSemanticsUpdate appropriately', () {
     final TestRenderSemanticsGestureHandler renderObject = new TestRenderSemanticsGestureHandler();
 
     expect(renderObject.callCount, 0);
