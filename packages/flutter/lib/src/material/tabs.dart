@@ -737,7 +737,10 @@ class _TabBarState extends State<TabBar> {
           children: <Widget>[
             new InkWell(
               onTap: () { _handleTap(index); },
-              child: wrappedTabs[index],
+              child: new Padding(
+                padding: new EdgeInsets.only(bottom: widget.indicatorWeight),
+                child: wrappedTabs[index],
+              ),
             ),
             new Semantics(
               selected: index == _currentIndex,
@@ -753,9 +756,7 @@ class _TabBarState extends State<TabBar> {
 
     Widget tabBar = new CustomPaint(
       painter: _indicatorPainter,
-      child: new Padding(
-        padding: new EdgeInsets.only(bottom: widget.indicatorWeight),
-        child: new _TabStyle(
+      child: new _TabStyle(
           animation: kAlwaysDismissedAnimation,
           selected: false,
           labelColor: widget.labelColor,
@@ -767,7 +768,6 @@ class _TabBarState extends State<TabBar> {
             children:  wrappedTabs,
           ),
         ),
-      ),
     );
 
     if (widget.isScrollable) {

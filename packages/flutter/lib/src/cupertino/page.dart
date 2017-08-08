@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-const double _kMinFlingVelocity = 1.0;  // screen width per second.
+const double _kBackGestureWidth = 20.0;
+const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
 // Fractional offset from offscreen to the right to fully on screen.
 final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
@@ -48,11 +51,11 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
 
 /// A modal route that replaces the entire screen with an iOS transition.
 ///
-/// The page slides in from the right and exits in reverse.
-/// The page also shifts to the left in parallax when another page enters to cover it.
+/// The page slides in from the right and exits in reverse. The page also shifts
+/// to the left in parallax when another page enters to cover it.
 ///
-/// The page slides in from the bottom and exits in reverse with no parallax effect
-/// for fullscreen dialogs.
+/// The page slides in from the bottom and exits in reverse with no parallax
+/// effect for fullscreen dialogs.
 ///
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
@@ -60,16 +63,24 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
 ///
 /// See also:
 ///
-///  * [MaterialPageRoute] for an adaptive [PageRoute] that uses a platform appropriate transition.
+///  * [MaterialPageRoute] for an adaptive [PageRoute] that uses a platform
+///    appropriate transition.
 class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in an iOS designed app.
+  ///
+  /// The [builder], [settings], [maintainState], and [fullscreenDialog]
+  /// arguments must not be null.
   CupertinoPageRoute({
     @required this.builder,
     RouteSettings settings: const RouteSettings(),
     this.maintainState: true,
     bool fullscreenDialog: false,
+    this.hostRoute,
   }) : assert(builder != null),
-       assert(opaque),
+       assert(settings != null),
+       assert(maintainState != null),
+       assert(fullscreenDialog != null),
+       assert(opaque), // PageRoute makes it return true.
        super(settings: settings, fullscreenDialog: fullscreenDialog);
 
   /// Builds the primary contents of the route.
@@ -78,6 +89,16 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   @override
   final bool maintainState;
 
+  /// The route that owns this one.
+  ///
+  /// The [MaterialPageRoute] creates a [CupertinoPageRoute] to handle iOS-style
+  /// navigation. When this happens, the [MaterialPageRoute] is the [hostRoute]
+  /// of this [CupertinoPageRoute].
+  ///
+  /// The [hostRoute] is responsible for calling [dispose] on the route. When
+  /// there is a [hostRoute], the [CupertinoPageRoute] must not be [install]ed.
+  final PageRoute<T> hostRoute;
+
   @override
   Duration get transitionDuration => const Duration(milliseconds: 350);
 
@@ -85,8 +106,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   Color get barrierColor => null;
 
   @override
-  bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) {
-    return nextRoute is CupertinoPageRoute<dynamic>;
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    return previousRoute is CupertinoPageRoute;
   }
 
   @override
@@ -96,63 +117,108 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void dispose() {
-    _backGestureController?.dispose();
-    // If the route is never installed (i.e. pushed into a Navigator) such as the
-    // case when [MaterialPageRoute] delegates transition building to [CupertinoPageRoute],
-    // don't dispose super.
-    if (overlayEntries.isNotEmpty)
-      super.dispose();
+  void install(OverlayEntry insertionPoint) {
+    assert(() {
+      if (hostRoute == null)
+        return true;
+      throw new FlutterError(
+        'Cannot install a subsidiary route (one with a hostRoute).\n'
+        'This route ($this) cannot be installed, because it has a host route ($hostRoute).'
+      );
+    });
+    super.install(insertionPoint);
   }
 
-  CupertinoBackGestureController _backGestureController;
+  @override
+  void dispose() {
+    _backGestureController?.dispose();
+    _backGestureController = null;
+    super.dispose();
+  }
 
-  /// Support for dismissing this route with a horizontal swipe.
+  _CupertinoBackGestureController _backGestureController;
+
+  /// Whether a pop gesture is currently underway.
+  ///
+  /// This starts returning true when the [startPopGesture] method returns a new
+  /// [NavigationGestureController]. It returns false if that has not yet
+  /// occurred or if the most recent such gesture has completed.
+  ///
+  /// See also:
+  ///
+  ///  * [popGestureEnabled], which returns whether a pop gesture is appropriate
+  ///    in the first place.
+  bool get popGestureInProgress => _backGestureController != null;
+
+  /// Whether a pop gesture will be considered acceptable by [startPopGesture].
+  ///
+  /// This returns true if the user can edge-swipe to a previous route,
+  /// otherwise false.
+  ///
+  /// This will return false if [popGestureInProgress] is true.
+  ///
+  /// This should only be used between frames, not during build.
+  bool get popGestureEnabled {
+    final PageRoute<T> route = hostRoute ?? this;
+    // If there's nothing to go back to, then obviously we don't support
+    // the back gesture.
+    if (route.isFirst)
+      return false;
+    // If the route wouldn't actually pop if we popped it, then the gesture
+    // would be really confusing (or would skip internal routes), so disallow it.
+    if (route.willHandlePopInternally)
+      return false;
+    // If attempts to dismiss this route might be vetoed such as in a page
+    // with forms, then do not allow the user to dismiss the route with a swipe.
+    if (route.hasScopedWillPopCallback)
+      return false;
+    // Fullscreen dialogs aren't dismissable by back swipe.
+    if (fullscreenDialog)
+      return false;
+    // If we're in an animation already, we cannot be manually swiped.
+    if (route.controller.status != AnimationStatus.completed)
+      return false;
+    // If we're in a gesture already, we cannot start another.
+    if (popGestureInProgress)
+      return false;
+    // Looks like a back gesture would be welcome!
+    return true;
+  }
+
+  /// Begin dismissing this route from a horizontal swipe, if appropriate.
   ///
   /// Swiping will be disabled if the page is a fullscreen dialog or if
   /// dismissals can be overriden because a [WillPopCallback] was
   /// defined for the route.
   ///
+  /// When this method decides a pop gesture is appropriate, it returns a
+  /// [CupertinoBackGestureController].
+  ///
   /// See also:
   ///
   ///  * [hasScopedWillPopCallback], which is true if a `willPop` callback
   ///    is defined for this route.
-  @override
-  NavigationGestureController startPopGesture() {
-    return startPopGestureForRoute(this);
+  ///  * [popGestureEnabled], which returns whether a pop gesture is
+  ///    appropriate.
+  ///  * [Route.startPopGesture], which describes the contract that this method
+  ///    must implement.
+  _CupertinoBackGestureController _startPopGesture() {
+    assert(!popGestureInProgress);
+    assert(popGestureEnabled);
+    final PageRoute<T> route = hostRoute ?? this;
+    _backGestureController = new _CupertinoBackGestureController(
+      navigator: route.navigator,
+      controller: route.controller,
+      onEnded: _endPopGesture,
+    );
+    return _backGestureController;
   }
 
-  /// Create a CupertinoBackGestureController using a specific PageRoute.
-  ///
-  /// Used when [MaterialPageRoute] delegates the back gesture to [CupertinoPageRoute]
-  /// since the [CupertinoPageRoute] is not actually inserted into the Navigator.
-  NavigationGestureController startPopGestureForRoute(PageRoute<T> hostRoute) {
-    // If attempts to dismiss this route might be vetoed such as in a page
-    // with forms, then do not allow the user to dismiss the route with a swipe.
-    if (hostRoute.hasScopedWillPopCallback)
-      return null;
-    // Fullscreen dialogs aren't dismissable by back swipe.
-    if (fullscreenDialog)
-      return null;
-    if (hostRoute.controller.status != AnimationStatus.completed)
-      return null;
-    assert(_backGestureController == null);
-    _backGestureController = new CupertinoBackGestureController(
-      navigator: hostRoute.navigator,
-      controller: hostRoute.controller,
-    );
-
-    Function handleBackGestureEnded;
-    handleBackGestureEnded = (AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        _backGestureController?.dispose();
-        _backGestureController = null;
-        hostRoute.controller.removeStatusListener(handleBackGestureEnded);
-      }
-    };
-
-    hostRoute.controller.addStatusListener(handleBackGestureEnded);
-    return _backGestureController;
+  void _endPopGesture() {
+    // In practice this only gets called if for some reason popping the route
+    // did not cause this route to get disposed.
+    _backGestureController?.dispose();
+    _backGestureController = null;
   }
 
   @override
@@ -172,20 +238,25 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    if (fullscreenDialog)
+    if (fullscreenDialog) {
       return new CupertinoFullscreenDialogTransition(
         animation: animation,
         child: child,
       );
-    else
+    } else {
       return new CupertinoPageTransition(
         primaryRouteAnimation: animation,
         secondaryRouteAnimation: secondaryAnimation,
-        child: child,
-        // In the middle of a back gesture drag, let the transition be linear to match finger
-        // motions.
-        linearTransition: _backGestureController != null,
+        // In the middle of a back gesture drag, let the transition be linear to
+        // match finger motions.
+        linearTransition: popGestureInProgress,
+        child: new _CupertinoBackGestureDetector(
+          enabledCallback: () => popGestureEnabled,
+          onStartPopGesture: _startPopGesture,
+          child: child,
+        ),
       );
+    }
   }
 
   @override
@@ -294,49 +365,145 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
   }
 }
 
+/// This is the widget side of [_CupertinoBackGestureController].
+///
+/// This widget provides a gesture recognizer which, when it determines the
+/// route can be closed with a back gesture, creates the controller and
+/// feeds it the input from the gesture recognizer.
+class _CupertinoBackGestureDetector extends StatefulWidget {
+  const _CupertinoBackGestureDetector({
+    Key key,
+    @required this.enabledCallback,
+    @required this.onStartPopGesture,
+    @required this.child,
+  }) : assert(enabledCallback != null),
+       assert(onStartPopGesture != null),
+       assert(child != null),
+       super(key: key);
+
+  final Widget child;
+
+  final ValueGetter<bool> enabledCallback;
+
+  final ValueGetter<_CupertinoBackGestureController> onStartPopGesture;
+
+  @override
+  _CupertinoBackGestureDetectorState createState() => new _CupertinoBackGestureDetectorState();
+}
+
+class _CupertinoBackGestureDetectorState extends State<_CupertinoBackGestureDetector> {
+  _CupertinoBackGestureController _backGestureController;
+
+  HorizontalDragGestureRecognizer _recognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _recognizer = new HorizontalDragGestureRecognizer(debugOwner: this)
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..onEnd = _handleDragEnd
+      ..onCancel = _handleDragCancel;
+  }
+
+  @override
+  void dispose() {
+    _recognizer.dispose();
+    super.dispose();
+  }
+
+  void _handleDragStart(DragStartDetails details) {
+    assert(mounted);
+    assert(_backGestureController == null);
+    _backGestureController = widget.onStartPopGesture();
+  }
+
+  void _handleDragUpdate(DragUpdateDetails details) {
+    assert(mounted);
+    assert(_backGestureController != null);
+    _backGestureController.dragUpdate(details.primaryDelta / context.size.width);
+  }
+
+  void _handleDragEnd(DragEndDetails details) {
+    assert(mounted);
+    assert(_backGestureController != null);
+    _backGestureController.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width);
+    _backGestureController = null;
+  }
+
+  void _handleDragCancel() {
+    assert(mounted);
+    // This can be called even if start is not called, paired with the "down" event
+    // that we don't consider here.
+    _backGestureController?.dragEnd(0.0);
+    _backGestureController = null;
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (widget.enabledCallback())
+      _recognizer.addPointer(event);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Stack(
+      fit: StackFit.passthrough,
+      children: <Widget>[
+        widget.child,
+        new Listener(
+          onPointerDown: _handlePointerDown,
+          behavior: HitTestBehavior.translucent,
+          child: new SizedBox(width: _kBackGestureWidth),
+        ),
+      ],
+    );
+  }
+}
+
+
 /// A controller for an iOS-style back gesture.
 ///
-/// Uses a drag gesture to control the route's transition animation progress.
-class CupertinoBackGestureController extends NavigationGestureController {
+/// This is created by a [CupertinoPageRoute] in response from a gesture caught
+/// by a [_CupertinoBackGestureDetector] widget, which then also feeds it input
+/// from the gesture. It controls the animation controller owned by the route,
+/// based on the input provided by the gesture detector.
+class _CupertinoBackGestureController {
   /// Creates a controller for an iOS-style back gesture.
   ///
   /// The [navigator] and [controller] arguments must not be null.
-  CupertinoBackGestureController({
-    @required NavigatorState navigator,
+  _CupertinoBackGestureController({
+    @required this.navigator,
     @required this.controller,
-  }) : assert(controller != null),
-       super(navigator);
+    @required this.onEnded,
+  }) : assert(navigator != null),
+       assert(controller != null),
+       assert(onEnded != null) {
+    navigator.didStartUserGesture();
+  }
+
+  /// The navigator that this object is controlling.
+  final NavigatorState navigator;
 
   /// The animation controller that the route uses to drive its transition
   /// animation.
   final AnimationController controller;
 
-  @override
-  void dispose() {
-    controller.removeStatusListener(_handleStatusChanged);
-    super.dispose();
-  }
+  final VoidCallback onEnded;
 
-  @override
+  bool _animating = false;
+
+  /// The drag gesture has changed by [fractionalDelta]. The total range of the
+  /// drag should be 0.0 to 1.0.
   void dragUpdate(double delta) {
-    // This assert can be triggered the Scaffold is reparented out of the route
-    // associated with this gesture controller and continues to feed it events.
-    // TODO(abarth): Change the ownership of the gesture controller so that the
-    // object feeding it these events (e.g., the Scaffold) is responsible for
-    // calling dispose on it as well.
-    assert(controller != null);
     controller.value -= delta;
   }
 
-  @override
-  bool dragEnd(double velocity) {
-    // This assert can be triggered the Scaffold is reparented out of the route
-    // associated with this gesture controller and continues to feed it events.
-    // TODO(abarth): Change the ownership of the gesture controller so that the
-    // object feeding it these events (e.g., the Scaffold) is responsible for
-    // calling dispose on it as well.
-    assert(controller != null);
-
+  /// The drag gesture has ended with a horizontal motion of
+  /// [fractionalVelocity] as a fraction of screen width per second.
+  void dragEnd(double velocity) {
+    // Fling in the appropriate direction.
+    // AnimationController.fling is guaranteed to
+    // take at least one frame.
     if (velocity.abs() >= _kMinFlingVelocity) {
       controller.fling(velocity: -velocity);
     } else if (controller.value <= 0.5) {
@@ -344,18 +511,28 @@ class CupertinoBackGestureController extends NavigationGestureController {
     } else {
       controller.fling(velocity: 1.0);
     }
+    assert(controller.isAnimating);
+    assert(controller.status != AnimationStatus.completed);
+    assert(controller.status != AnimationStatus.dismissed);
 
     // Don't end the gesture until the transition completes.
-    final AnimationStatus status = controller.status;
-    _handleStatusChanged(status);
-    controller?.addStatusListener(_handleStatusChanged);
-
-    return (status == AnimationStatus.reverse || status == AnimationStatus.dismissed);
+    _animating = true;
+    controller.addStatusListener(_handleStatusChanged);
   }
 
   void _handleStatusChanged(AnimationStatus status) {
+    assert(_animating);
+    controller.removeStatusListener(_handleStatusChanged);
+    _animating = false;
     if (status == AnimationStatus.dismissed)
-      navigator.pop();
+      navigator.pop(); // this will cause the route to get disposed, which will dispose us
+    onEnded(); // this will call dispose if popping the route failed to do so
+  }
+
+  void dispose() {
+    if (_animating)
+      controller.removeStatusListener(_handleStatusChanged);
+    navigator.didStopUserGesture();
   }
 }
 

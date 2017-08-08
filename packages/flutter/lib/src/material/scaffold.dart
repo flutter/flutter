@@ -23,8 +23,6 @@ const double _kFloatingActionButtonMargin = 16.0; // TODO(hmuller): should be de
 const Duration _kFloatingActionButtonSegue = const Duration(milliseconds: 200);
 final Tween<double> _kFloatingActionButtonTurnTween = new Tween<double>(begin: -0.125, end: 0.0);
 
-const double _kBackGestureWidth = 20.0;
-
 enum _ScaffoldSlot {
   body,
   appBar,
@@ -717,40 +715,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
-  final GlobalKey _backGestureKey = new GlobalKey();
-  NavigationGestureController _backGestureController;
-
-  bool _shouldHandleBackGesture() {
-    assert(mounted);
-    return Theme.of(context).platform == TargetPlatform.iOS && Navigator.canPop(context);
-  }
-
-  void _handleDragStart(DragStartDetails details) {
-    assert(mounted);
-    _backGestureController = Navigator.of(context).startPopGesture();
-  }
-
-  void _handleDragUpdate(DragUpdateDetails details) {
-    assert(mounted);
-    _backGestureController?.dragUpdate(details.primaryDelta / context.size.width);
-  }
-
-  void _handleDragEnd(DragEndDetails details) {
-    assert(mounted);
-    final bool willPop = _backGestureController?.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width) ?? false;
-    if (willPop)
-      _currentBottomSheet?.close();
-    _backGestureController = null;
-  }
-
-  void _handleDragCancel() {
-    assert(mounted);
-    final bool willPop = _backGestureController?.dragEnd(0.0) ?? false;
-    if (willPop)
-      _currentBottomSheet?.close();
-    _backGestureController = null;
-  }
-
 
   // INTERNALS
 
@@ -885,25 +849,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         child: new DrawerController(
           key: _drawerKey,
           child: widget.drawer,
-        )
-      ));
-    } else if (_shouldHandleBackGesture()) {
-      assert(!hasDrawer);
-      // Add a gesture for navigating back.
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.drawer,
-        child: new Align(
-          alignment: FractionalOffset.centerLeft,
-          child: new GestureDetector(
-            key: _backGestureKey,
-            onHorizontalDragStart: _handleDragStart,
-            onHorizontalDragUpdate: _handleDragUpdate,
-            onHorizontalDragEnd: _handleDragEnd,
-            onHorizontalDragCancel: _handleDragCancel,
-            behavior: HitTestBehavior.translucent,
-            excludeFromSemantics: true,
-            child: new Container(width: _kBackGestureWidth)
-          )
         )
       ));
     }

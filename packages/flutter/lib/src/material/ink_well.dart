@@ -165,7 +165,7 @@ class InkResponse extends StatefulWidget {
   final BorderRadius borderRadius;
 
   /// The highlight color of the ink response. If this property is null then the
-  /// highlight color of the theme will be used.
+  /// highlight color of the theme, [ThemeData.highlightColor], will be used.
   ///
   /// See also:
   ///
@@ -174,7 +174,7 @@ class InkResponse extends StatefulWidget {
   final Color highlightColor;
 
   /// The splash color of the ink response. If this property is null then the
-  /// splash color of the theme will be used.
+  /// splash color of the theme, [ThemeData.splashColor], will be used.
   ///
   /// See also:
   ///
