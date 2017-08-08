@@ -38,13 +38,13 @@ class PaintRecord {
               SkPoint offset,
               sk_sp<SkTextBlob> text,
               SkPaint::FontMetrics metrics,
-              int line,
+              size_t line,
               double run_width);
 
   PaintRecord(TextStyle style,
               sk_sp<SkTextBlob> text,
               SkPaint::FontMetrics metrics,
-              int line,
+              size_t line,
               double run_width);
 
   PaintRecord(PaintRecord&& other);
