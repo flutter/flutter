@@ -719,9 +719,9 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final RenderSemanticsGestureHandler result = new RenderSemanticsGestureHandler();
-    updateRenderObject(context, result);
-    return result;
+    final RenderSemanticsGestureHandler renderObject = new RenderSemanticsGestureHandler();
+    _updateHandlers(renderObject);
+    return renderObject;
   }
 
   void _updateHandlers(RenderSemanticsGestureHandler renderObject) {
