@@ -1186,7 +1186,7 @@ class PipelineOwner {
   }
 
   bool _debugDoingSemantics = false;
-  final List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
+  final Set<RenderObject> _nodesNeedingSemantics = new Set<RenderObject>();
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -1206,14 +1206,16 @@ class PipelineOwner {
     assert(_semanticsOwner != null);
     assert(() { _debugDoingSemantics = true; return true; });
     try {
-      _nodesNeedingSemantics.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
-      for (RenderObject node in _nodesNeedingSemantics) {
+      final List<RenderObject> nodesToProcess = _nodesNeedingSemantics.toList()
+        ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+      _nodesNeedingSemantics.clear();
+      for (RenderObject node in nodesToProcess) {
         if (node._needsSemanticsUpdate && node.owner == this)
           node._updateSemantics();
       }
       _semanticsOwner.sendSemanticsUpdate();
     } finally {
-      _nodesNeedingSemantics.clear();
+      assert(_nodesNeedingSemantics.isEmpty);
       assert(() { _debugDoingSemantics = false; return true; });
       Timeline.finishSync();
     }
@@ -2580,6 +2582,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         node = node.parent;
       } while (node._semantics == null);
       node._semantics?.reset();
+      if (node != this && _semantics != null && _needsSemanticsUpdate) {
+        // If [this] node has already been added to [owner._nodesNeedingSemantics]
+        // remove it as it is no longer guaranteed that its semantics
+        // node will continue to be in the tree. If it still is in the tree, the
+        // ancestor [node] added to [owner._nodesNeedingSemantics] at the end of
+        // this block will ensure that the semantics of [this] node actually get
+        // updated.
+        // (See semantics_10_test.dart for an example why this is required).
+        owner._nodesNeedingSemantics.remove(this);
+      }
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
         if (owner != null) {
