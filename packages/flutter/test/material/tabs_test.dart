@@ -7,6 +7,7 @@ import 'dart:ui' show SemanticsFlags, SemanticsAction;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/physics.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -1007,14 +1008,14 @@ void main() {
               actions: SemanticsAction.tap.index,
               flags: SemanticsFlags.isSelected.index,
               label: 'TAB #0\nTab 1 of 2',
-              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, 46.0),
+              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
               transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
             ),
             new TestSemantics(
               id: 5,
               actions: SemanticsAction.tap.index,
               label: 'TAB #1\nTab 2 of 2',
-              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, 46.0),
+              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
               transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
             ),
           ]),
@@ -1120,4 +1121,40 @@ void main() {
     expect(find.text('PAGE'), findsOneWidget);
   });
 
+  testWidgets('can tap on indicator at very bottom of TabBar to switch tabs', (WidgetTester tester) async {
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: 2,
+      initialIndex: 0,
+    );
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Column(
+          children: <Widget>[
+            new TabBar(
+              controller: controller,
+              indicatorWeight: 30.0,
+              tabs: const <Widget>[const Tab(text: 'TAB1'), const Tab(text: 'TAB2')],
+            ),
+            new Flexible(
+              child: new TabBarView(
+                controller: controller,
+                children: const <Widget>[const Text('PAGE1'), const Text('PAGE2')],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(controller.index, 0);
+
+    final Offset bottomRight = tester.getBottomRight(find.byType(TabBar)) - const Offset(1.0, 1.0);
+    final TestGesture gesture = await tester.startGesture(bottomRight);
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.index, 1);
+  });
 }
