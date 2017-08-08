@@ -2760,16 +2760,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   /// The [scrollFactor] argument must not be null.
   RenderSemanticsGestureHandler({
     RenderBox child,
-    GestureTapCallback onTap,
-    GestureLongPressCallback onLongPress,
-    GestureDragUpdateCallback onHorizontalDragUpdate,
-    GestureDragUpdateCallback onVerticalDragUpdate,
     this.scrollFactor: 0.8
   }) : assert(scrollFactor != null),
-       _onTap = onTap,
-       _onLongPress = onLongPress,
-       _onHorizontalDragUpdate = onHorizontalDragUpdate,
-       _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
@@ -2794,55 +2786,61 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     markNeedsSemanticsUpdate(onlyChanges: true);
   }
 
-   /// Called when the user taps on the render object.
+  /// Called when the user taps on the render object.
   GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
-  set onTap(GestureTapCallback value) {
-    if (_onTap == value)
-      return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
-    final bool hadHandler = _onTap != null;
-    _onTap = value;
-    if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
-  }
 
   /// Called when the user presses on the render object for a long period of time.
   GestureLongPressCallback get onLongPress => _onLongPress;
   GestureLongPressCallback _onLongPress;
-  set onLongPress(GestureLongPressCallback value) {
-    if (_onLongPress == value)
-      return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
-    final bool hadHandler = _onLongPress != null;
-    _onLongPress = value;
-    if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
-  }
 
   /// Called when the user scrolls to the left or to the right.
   GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
   GestureDragUpdateCallback _onHorizontalDragUpdate;
-  set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
-    if (_onHorizontalDragUpdate == value)
-      return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
-    final bool hadHandler = _onHorizontalDragUpdate != null;
-    _onHorizontalDragUpdate = value;
-    if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
-  }
 
   /// Called when the user scrolls up or down.
   GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
   GestureDragUpdateCallback _onVerticalDragUpdate;
-  set onVerticalDragUpdate(GestureDragUpdateCallback value) {
-    if (_onVerticalDragUpdate == value)
-      return;
+
+  /// Sets the gesture handlers, which are called when the corresponding gesture
+  /// is detected.
+  ///
+  /// All parameters are required, but they can be null to disable the
+  /// recognition of that gesture.
+  void setGestureCallbacks({
+    @required GestureTapCallback onTap,
+    @required GestureLongPressCallback onLongPress,
+    @required GestureDragUpdateCallback onHorizontalDragUpdate,
+    @required GestureDragUpdateCallback onVerticalDragUpdate
+  }) {
+    bool needsSemanticsUpdate = false;
     final bool wasSemanticBoundary = isSemanticBoundary;
-    final bool hadHandler = _onVerticalDragUpdate != null;
-    _onVerticalDragUpdate = value;
-    if ((value != null) != hadHandler)
+
+    if (_onTap != onTap) {
+      final bool hadHandler = _onTap != null;
+      _onTap = onTap;
+      needsSemanticsUpdate = needsSemanticsUpdate || (onTap != null) != hadHandler;
+    }
+
+    if (_onLongPress != onLongPress) {
+      final bool hadHandler = _onLongPress != null;
+      _onLongPress = onLongPress;
+      needsSemanticsUpdate = needsSemanticsUpdate || (onLongPress != null) != hadHandler;
+    }
+
+    if (_onHorizontalDragUpdate != onHorizontalDragUpdate) {
+      final bool hadHandler = _onHorizontalDragUpdate != null;
+      _onHorizontalDragUpdate = onHorizontalDragUpdate;
+      needsSemanticsUpdate = needsSemanticsUpdate || (onHorizontalDragUpdate != null) != hadHandler;
+    }
+
+    if (_onVerticalDragUpdate != onVerticalDragUpdate) {
+      final bool hadHandler = _onVerticalDragUpdate != null;
+      _onVerticalDragUpdate = onVerticalDragUpdate;
+      needsSemanticsUpdate = needsSemanticsUpdate || (onVerticalDragUpdate != null) != hadHandler;
+    }
+
+    if (needsSemanticsUpdate)
       markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
   }
 
