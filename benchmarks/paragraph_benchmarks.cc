@@ -28,6 +28,8 @@
 #include "lib/txt/src/paragraph_builder.h"
 #include "lib/txt/src/text_align.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "utils.h"
 
@@ -222,6 +224,35 @@ BENCHMARK(BM_ParagraphStylesBigO)
     ->RangeMultiplier(4)
     ->Range(1 << 3, 1 << 12)
     ->Complexity(benchmark::oN);
+
+static void BM_ParagraphPaintSimple(benchmark::State& state) {
+  const char* text = "Hello world! This is a simple sentence to test drawing.";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  auto paragraph = builder.Build();
+  paragraph->Layout(300, true);
+
+  std::unique_ptr<SkBitmap> bitmap = std::make_unique<SkBitmap>();
+  std::unique_ptr<SkCanvas> canvas = std::make_unique<SkCanvas>(*bitmap);
+  bitmap->allocN32Pixels(1000, 1000);
+  canvas->clear(SK_ColorWHITE);
+  int offset = 0;
+  while (state.KeepRunning()) {
+    paragraph->Paint(canvas.get(), offset % 700, 10);
+    offset++;
+  }
+}
+BENCHMARK(BM_ParagraphPaintSimple);
 
 // -----------------------------------------------------------------------------
 //

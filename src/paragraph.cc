@@ -221,7 +221,6 @@ void Paragraph::Layout(double width, bool force) {
   line_heights_ = std::vector<double>();
   line_heights_.push_back(0);
   records_ = std::vector<PaintRecord>();
-  height_ = 0.0f;
 
   // Set padding elements to have a minimum point.
   glyph_position_x_ = std::vector<std::vector<double>>();
@@ -477,7 +476,6 @@ void Paragraph::Layout(double width, bool force) {
   }
   // Handle last line tasks.
   y += roundf(max_line_spacing + prev_max_descent);
-  height_ = y + roundf(max_descent);
   postprocess_line();
   if (line_width != 0)
     line_widths_.push_back(line_width);
@@ -589,7 +587,7 @@ size_t Paragraph::TextSize() const {
 }
 
 double Paragraph::GetHeight() const {
-  return height_;
+  return line_heights_[line_heights_.size() - 2];
 }
 
 double Paragraph::GetLayoutWidth() const {
