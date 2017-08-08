@@ -1149,6 +1149,9 @@ class RRect {
   /// Negative areas are considered empty.
   bool get isEmpty => left >= right || top >= bottom;
 
+  /// Whether all coordinates of this rounded rectangle are finite.
+  bool get isFinite => left.isFinite && top.isFinite && right.isFinite && bottom.isFinite;
+
   /// Whether this rounded rectangle is a simple rectangle with zero
   /// corner radii.
   bool get isRect {

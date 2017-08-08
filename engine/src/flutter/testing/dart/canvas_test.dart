@@ -29,7 +29,7 @@ void main() {
     dynamic fake = new FakeEverything();
     dynamic no = new NegativeSpace();
     Paint paint = new Paint();
-    Rect rect = new Rect.fromLTRB(0.0, 0.0, 0.0, 0.0);
+    Rect rect = new Rect.fromLTRB(double.NAN, double.NAN, double.NAN, double.NAN);
     List<dynamic> list = <dynamic>[fake, fake];
     Offset offset = new Offset(double.NAN, double.NAN);
     Path path = new Path();
