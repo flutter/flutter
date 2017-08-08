@@ -123,9 +123,11 @@ class Chip extends StatelessWidget {
       ));
     }
 
-    children.add(new DefaultTextStyle(
-      style: labelStyle ?? _kLabelStyle,
-      child: label,
+    children.add(new Flexible(
+      child: new DefaultTextStyle(
+        style: labelStyle ?? _kLabelStyle,
+        child: label,
+      ),
     ));
 
     if (deletable) {
