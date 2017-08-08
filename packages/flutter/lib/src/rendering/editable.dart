@@ -334,7 +334,7 @@ class RenderEditable extends RenderBox {
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      final Offset start = new Offset(0.0, _preferredLineHeight) + caretOffset + paintOffset;
+      final Offset start = new Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[new TextSelectionPoint(start, null)];
     } else {
       final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
@@ -360,7 +360,7 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, _preferredLineHeight).shift(caretOffset + _paintOffset);
+    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
   }
 
   @override
@@ -375,12 +375,20 @@ class RenderEditable extends RenderBox {
     return _textPainter.maxIntrinsicWidth;
   }
 
-  // This does not required the layout to be updated.
-  double get _preferredLineHeight => _textPainter.preferredLineHeight;
+  /// The height of a typical text line in logical pixels.
+  ///
+  /// This height is based on properties of the text's style such as
+  /// font size etc and could change when those properties change.
+  ///
+  /// The [RenderEditable] does not need to be laid out for this property
+  /// to be available.
+  ///
+  /// Use for defining UI based on the text's height.
+  double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
     if (maxLines != null)
-      return _preferredLineHeight * maxLines;
+      return preferredLineHeight * maxLines;
     if (width == double.INFINITY) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
@@ -388,10 +396,10 @@ class RenderEditable extends RenderBox {
         if (text.codeUnitAt(index) == 0x0A) // count explicit line breaks
           lines += 1;
       }
-      return _preferredLineHeight * lines;
+      return preferredLineHeight * lines;
     }
     _layoutText(width);
-    return math.max(_preferredLineHeight, _textPainter.height);
+    return math.max(preferredLineHeight, _textPainter.height);
   }
 
   @override
@@ -477,7 +485,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
