@@ -246,6 +246,6 @@ void main() {
     final GestureTapCallback actualCallback2 = renderObj2.onTap;
 
     expect(renderObj1, same(renderObj2));
-    expect(actualCallback1, same(actualCallback2));  // This call fails.
+    expect(actualCallback1, same(actualCallback2)); // Should be cached.
   });
 }
