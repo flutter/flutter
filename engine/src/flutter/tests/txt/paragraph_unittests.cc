@@ -315,26 +315,26 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
-  double expected_y = 24.12109375;
+  double expected_y = 24;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
 
   ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
 
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 0);
 
   ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
-  expected_y += 30.46875 * 10;
+  expected_y += 30 * 10;
   ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 0);
 
   ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
@@ -411,11 +411,11 @@ TEST_F(RenderTest, RightAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
-  double expected_y = 24.12109375;
+  double expected_y = 24;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(
       paragraph->records_[0].offset().x(),
       paragraph->width_ -
@@ -423,7 +423,7 @@ TEST_F(RenderTest, RightAlignParagraph) {
 
   ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(
       paragraph->records_[1].offset().x(),
       paragraph->width_ -
@@ -431,7 +431,7 @@ TEST_F(RenderTest, RightAlignParagraph) {
 
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(
       paragraph->records_[2].offset().x(),
       paragraph->width_ -
@@ -439,7 +439,7 @@ TEST_F(RenderTest, RightAlignParagraph) {
 
   ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
-  expected_y += 30.46875 * 10;
+  expected_y += 30 * 10;
   ASSERT_DOUBLE_EQ(
       paragraph->records_[3].offset().x(),
       paragraph->width_ -
@@ -515,11 +515,11 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
-  double expected_y = 24.12109375;
+  double expected_y = 24;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(
       paragraph->records_[0].offset().x(),
       (paragraph->width_ -
@@ -528,7 +528,7 @@ TEST_F(RenderTest, CenterAlignParagraph) {
 
   ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(
       paragraph->records_[1].offset().x(),
       (paragraph->width_ -
@@ -537,7 +537,7 @@ TEST_F(RenderTest, CenterAlignParagraph) {
 
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_EQ(paragraph->records_[2].offset().x(),
             (paragraph->width_ -
              paragraph->breaker_.getWidths()[paragraph->records_[2].line()]) /
@@ -545,7 +545,7 @@ TEST_F(RenderTest, CenterAlignParagraph) {
 
   ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
-  expected_y += 30.46875 * 10;
+  expected_y += 30 * 10;
   ASSERT_DOUBLE_EQ(
       paragraph->records_[3].offset().x(),
       (paragraph->width_ -
@@ -621,26 +621,26 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
-  double expected_y = 24.12109375;
+  double expected_y = 24;
 
   ASSERT_TRUE(paragraph->records_[0].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
 
   ASSERT_TRUE(paragraph->records_[1].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
 
   ASSERT_TRUE(paragraph->records_[2].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().y(), expected_y);
-  expected_y += 30.46875;
+  expected_y += 30;
   ASSERT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 0);
 
   ASSERT_TRUE(paragraph->records_[3].style().equals(text_style));
   ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().y(), expected_y);
-  expected_y += 30.46875 * 10;
+  expected_y += 30 * 10;
   ASSERT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 0);
 
   ASSERT_TRUE(paragraph->records_[13].style().equals(text_style));
@@ -973,7 +973,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[0].left(), 0);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 28.417969);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
 
   rects = paragraph->GetRectsForRange(0, 1);
   for (size_t i = 0; i < rects.size(); ++i) {
@@ -983,7 +983,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[0].left(), 0);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 28.417969);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
 
   paint.setColor(SK_ColorBLUE);
   rects = paragraph->GetRectsForRange(2, 8);
@@ -994,17 +994,17 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[0].left(), 56.835938);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 153.07422);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
 
   EXPECT_FLOAT_EQ(rects[1].left(), 153.07422);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
   EXPECT_FLOAT_EQ(rects[1].right(), 165.52344);
-  EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[1].bottom(), 59);
 
   EXPECT_FLOAT_EQ(rects[2].left(), 165.52344);
   EXPECT_FLOAT_EQ(rects[2].top(), 0);
   EXPECT_FLOAT_EQ(rects[2].right(), 177.97266);
-  EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[2].bottom(), 59);
 
   paint.setColor(SK_ColorGREEN);
   rects = paragraph->GetRectsForRange(8, 21);
@@ -1015,17 +1015,17 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[0].left(), 177.97266);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
   EXPECT_FLOAT_EQ(rects[0].right(), 352.48438);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
 
   EXPECT_FLOAT_EQ(rects[1].left(), 352.48438);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
   EXPECT_FLOAT_EQ(rects[1].right(), 364.93359);
-  EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[1].bottom(), 59);
 
   EXPECT_FLOAT_EQ(rects[2].left(), 364.93359);
   EXPECT_FLOAT_EQ(rects[2].top(), 0);
   EXPECT_FLOAT_EQ(rects[2].right(), 507.02344);
-  EXPECT_FLOAT_EQ(rects[2].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[2].bottom(), 59);
 
   paint.setColor(SK_ColorRED);
   rects = paragraph->GetRectsForRange(30, 100);
@@ -1034,16 +1034,16 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   }
   EXPECT_EQ(rects.size(), 17ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 211.375);
-  EXPECT_FLOAT_EQ(rects[0].top(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[0].top(), 59);
   EXPECT_FLOAT_EQ(rects[0].right(), 296.62891);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 117.1875);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 118);
 
   // TODO(garyq): The following set of vals are definetly wrong and
   // end of paragraph handling needs to be fixed in a later patch.
   EXPECT_FLOAT_EQ(rects[16].left(), 0);
-  EXPECT_FLOAT_EQ(rects[16].top(), 234.375);
+  EXPECT_FLOAT_EQ(rects[16].top(), 236);
   EXPECT_FLOAT_EQ(rects[16].right(), 142.08984);
-  EXPECT_FLOAT_EQ(rects[16].bottom(), 292.96875);
+  EXPECT_FLOAT_EQ(rects[16].bottom(), 295);
 
   paint.setColor(SK_ColorBLUE);
   rects = paragraph->GetRectsForRange(19, 22);
@@ -1054,7 +1054,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   EXPECT_FLOAT_EQ(rects[1].left(), 507.02344);
   EXPECT_FLOAT_EQ(rects[1].top(), 0);
   EXPECT_FLOAT_EQ(rects[1].right(), 519.47266);
-  EXPECT_FLOAT_EQ(rects[1].bottom(), 58.59375);
+  EXPECT_FLOAT_EQ(rects[1].bottom(), 59);
 
   paint.setColor(SK_ColorRED);
   rects = paragraph->GetRectsForRange(21, 21);
@@ -1390,8 +1390,8 @@ TEST_F(RenderTest, NewlineParagraph) {
   EXPECT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 127.69921875);
   EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().y(), 336.9140625);
-  EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().y(), 407.2265625);
+  EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().y(), 336);
+  EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().y(), 406);
 }
 
 TEST_F(RenderTest, EmojiParagraph) {
