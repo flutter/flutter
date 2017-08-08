@@ -16,7 +16,7 @@ void main() {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
-        bildTestWidgets(
+        buildTestWidgets(
           excludeSemantics: false,
           label: 'label',
           isSemanticsBoundary: true,
@@ -27,7 +27,7 @@ void main() {
 
     // The following should not trigger an assert.
     await tester.pumpWidget(
-        bildTestWidgets(
+        buildTestWidgets(
           excludeSemantics: true,
           label: 'label CHANGED',
           isSemanticsBoundary: false,
@@ -40,7 +40,7 @@ void main() {
   });
 }
 
-Widget bildTestWidgets({bool excludeSemantics, String label, bool isSemanticsBoundary}) {
+Widget buildTestWidgets({bool excludeSemantics, String label, bool isSemanticsBoundary}) {
   return new Semantics(
     label: 'container',
     container: true,

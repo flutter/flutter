@@ -1186,7 +1186,7 @@ class PipelineOwner {
   }
 
   bool _debugDoingSemantics = false;
-  final List<RenderObject> _nodesNeedingSemantics = <RenderObject>[];
+  final Set<RenderObject> _nodesNeedingSemantics = new Set<RenderObject>();
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -1206,14 +1206,16 @@ class PipelineOwner {
     assert(_semanticsOwner != null);
     assert(() { _debugDoingSemantics = true; return true; });
     try {
-      _nodesNeedingSemantics.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
-      for (RenderObject node in _nodesNeedingSemantics) {
+      final List<RenderObject> nodesToProcess = _nodesNeedingSemantics.toList()
+        ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
+      _nodesNeedingSemantics.clear();
+      for (RenderObject node in nodesToProcess) {
         if (node._needsSemanticsUpdate && node.owner == this)
           node._updateSemantics();
       }
       _semanticsOwner.sendSemanticsUpdate();
     } finally {
-      _nodesNeedingSemantics.clear();
+      assert(_nodesNeedingSemantics.isEmpty);
       assert(() { _debugDoingSemantics = false; return true; });
       Timeline.finishSync();
     }
