@@ -35,6 +35,8 @@ void main() {
     );
 
     expect(callLog, <String>['markNeedsSemanticsUpdate(onlyChanges: true)', 'markNeedsSemanticsUpdate(onlyChanges: false)']);
+
+    semantics.dispose();
   });
 }
 

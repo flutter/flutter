@@ -2580,7 +2580,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         node = node.parent;
       } while (node._semantics == null);
       node._semantics?.reset();
-      if (node != this && this._semantics != null && this._needsSemanticsUpdate) {
+      if (node != this && _semantics != null && _needsSemanticsUpdate) {
         // If [this] node has already been added to [owner._nodesNeedingSemantics]
         // remove it as it is no longer guaranteed that its semantics
         // node will continue to be in the tree. If it still is in the tree, the
