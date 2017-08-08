@@ -2786,9 +2786,20 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     markNeedsSemanticsUpdate(onlyChanges: true);
   }
 
+  /// Called when the user taps on the render object.
+  GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
+
+  /// Called when the user presses on the render object for a long period of time.
+  GestureLongPressCallback get onLongPress => _onLongPress;
   GestureLongPressCallback _onLongPress;
+
+  /// Called when the user scrolls to the left or to the right.
+  GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
   GestureDragUpdateCallback _onHorizontalDragUpdate;
+
+  /// Called when the user scrolls up or down.
+  GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
   GestureDragUpdateCallback _onVerticalDragUpdate;
 
   /// Sets the gesture handlers, which are called when the corresponding gesture
@@ -2842,10 +2853,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
   @override
   bool get isSemanticBoundary {
-    return _onTap != null
-        || _onLongPress != null
-        || _onHorizontalDragUpdate != null
-        || _onVerticalDragUpdate != null;
+    return onTap != null
+        || onLongPress != null
+        || onHorizontalDragUpdate != null
+        || onVerticalDragUpdate != null;
   }
 
   @override
@@ -2853,15 +2864,15 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
   void _annotate(SemanticsNode node) {
     List<SemanticsAction> actions = <SemanticsAction>[];
-    if (_onTap != null)
+    if (onTap != null)
       actions.add(SemanticsAction.tap);
-    if (_onLongPress != null)
+    if (onLongPress != null)
       actions.add(SemanticsAction.longPress);
-    if (_onHorizontalDragUpdate != null) {
+    if (onHorizontalDragUpdate != null) {
       actions.add(SemanticsAction.scrollRight);
       actions.add(SemanticsAction.scrollLeft);
     }
-    if (_onVerticalDragUpdate != null) {
+    if (onVerticalDragUpdate != null) {
       actions.add(SemanticsAction.scrollUp);
       actions.add(SemanticsAction.scrollDown);
     }
@@ -2877,44 +2888,44 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   void performAction(SemanticsAction action) {
     switch (action) {
       case SemanticsAction.tap:
-        if (_onTap != null)
-          _onTap();
+        if (onTap != null)
+          onTap();
         break;
       case SemanticsAction.longPress:
-        if (_onLongPress != null)
-          _onLongPress();
+        if (onLongPress != null)
+          onLongPress();
         break;
       case SemanticsAction.scrollLeft:
-        if (_onHorizontalDragUpdate != null) {
+        if (onHorizontalDragUpdate != null) {
           final double primaryDelta = size.width * -scrollFactor;
-          _onHorizontalDragUpdate(new DragUpdateDetails(
+          onHorizontalDragUpdate(new DragUpdateDetails(
             delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
             globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
       case SemanticsAction.scrollRight:
-        if (_onHorizontalDragUpdate != null) {
+        if (onHorizontalDragUpdate != null) {
           final double primaryDelta = size.width * scrollFactor;
-          _onHorizontalDragUpdate(new DragUpdateDetails(
+          onHorizontalDragUpdate(new DragUpdateDetails(
             delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
             globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
       case SemanticsAction.scrollUp:
-        if (_onVerticalDragUpdate != null) {
+        if (onVerticalDragUpdate != null) {
           final double primaryDelta = size.height * -scrollFactor;
-          _onVerticalDragUpdate(new DragUpdateDetails(
+          onVerticalDragUpdate(new DragUpdateDetails(
             delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
             globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
       case SemanticsAction.scrollDown:
-        if (_onVerticalDragUpdate != null) {
+        if (onVerticalDragUpdate != null) {
           final double primaryDelta = size.height * scrollFactor;
-          _onVerticalDragUpdate(new DragUpdateDetails(
+          onVerticalDragUpdate(new DragUpdateDetails(
             delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
             globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
@@ -2931,13 +2942,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     final List<String> gestures = <String>[];
-    if (_onTap != null)
+    if (onTap != null)
       gestures.add('tap');
-    if (_onLongPress != null)
+    if (onLongPress != null)
       gestures.add('long press');
-    if (_onHorizontalDragUpdate != null)
+    if (onHorizontalDragUpdate != null)
       gestures.add('horizontal scroll');
-    if (_onVerticalDragUpdate != null)
+    if (onVerticalDragUpdate != null)
       gestures.add('vertical scroll');
     if (gestures.isEmpty)
       gestures.add('<none>');
