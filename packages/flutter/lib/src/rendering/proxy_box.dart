@@ -2760,16 +2760,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   /// The [scrollFactor] argument must not be null.
   RenderSemanticsGestureHandler({
     RenderBox child,
-    GestureTapCallback onTap,
-    GestureLongPressCallback onLongPress,
-    GestureDragUpdateCallback onHorizontalDragUpdate,
-    GestureDragUpdateCallback onVerticalDragUpdate,
     this.scrollFactor: 0.8
   }) : assert(scrollFactor != null),
-       _onTap = onTap,
-       _onLongPress = onLongPress,
-       _onHorizontalDragUpdate = onHorizontalDragUpdate,
-       _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
@@ -2794,55 +2786,45 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     markNeedsSemanticsUpdate(onlyChanges: true);
   }
 
-   /// Called when the user taps on the render object.
-  GestureTapCallback get onTap => _onTap;
   GestureTapCallback _onTap;
-  set onTap(GestureTapCallback value) {
-    if (_onTap == value)
-      return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
-    final bool hadHandler = _onTap != null;
-    _onTap = value;
-    if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
-  }
-
-  /// Called when the user presses on the render object for a long period of time.
-  GestureLongPressCallback get onLongPress => _onLongPress;
   GestureLongPressCallback _onLongPress;
-  set onLongPress(GestureLongPressCallback value) {
-    if (_onLongPress == value)
-      return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
-    final bool hadHandler = _onLongPress != null;
-    _onLongPress = value;
-    if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
-  }
-
-  /// Called when the user scrolls to the left or to the right.
-  GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
   GestureDragUpdateCallback _onHorizontalDragUpdate;
-  set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
-    if (_onHorizontalDragUpdate == value)
-      return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
-    final bool hadHandler = _onHorizontalDragUpdate != null;
-    _onHorizontalDragUpdate = value;
-    if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
-  }
-
-  /// Called when the user scrolls up or down.
-  GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
   GestureDragUpdateCallback _onVerticalDragUpdate;
-  set onVerticalDragUpdate(GestureDragUpdateCallback value) {
-    if (_onVerticalDragUpdate == value)
-      return;
+
+  void setGestureCallbacks({
+    @required GestureTapCallback onTap,
+    @required GestureLongPressCallback onLongPress,
+    @required GestureDragUpdateCallback onHorizontalDragUpdate,
+    @required GestureDragUpdateCallback onVerticalDragUpdate
+  }) {
+    bool needsSemanticsUpdate = false;
     final bool wasSemanticBoundary = isSemanticBoundary;
-    final bool hadHandler = _onVerticalDragUpdate != null;
-    _onVerticalDragUpdate = value;
-    if ((value != null) != hadHandler)
+
+    if (_onTap != onTap) {
+      final bool hadHandler = _onTap != null;
+      _onTap = onTap;
+      needsSemanticsUpdate = needsSemanticsUpdate || (onTap != null) != hadHandler;
+    }
+
+    if (_onLongPress != onLongPress) {
+      final bool hadHandler = _onLongPress != null;
+      _onLongPress = onLongPress;
+      needsSemanticsUpdate = needsSemanticsUpdate || (onLongPress != null) != hadHandler;
+    }
+
+    if (_onHorizontalDragUpdate != onHorizontalDragUpdate) {
+      final bool hadHandler = _onHorizontalDragUpdate != null;
+      _onHorizontalDragUpdate = onHorizontalDragUpdate;
+      needsSemanticsUpdate = needsSemanticsUpdate || (onHorizontalDragUpdate != null) != hadHandler;
+    }
+
+    if (_onVerticalDragUpdate != onVerticalDragUpdate) {
+      final bool hadHandler = _onVerticalDragUpdate != null;
+      _onVerticalDragUpdate = onVerticalDragUpdate;
+      needsSemanticsUpdate = needsSemanticsUpdate || (onVerticalDragUpdate != null) != hadHandler;
+    }
+
+    if (needsSemanticsUpdate)
       markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
   }
 
@@ -2855,10 +2837,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
   @override
   bool get isSemanticBoundary {
-    return onTap != null
-        || onLongPress != null
-        || onHorizontalDragUpdate != null
-        || onVerticalDragUpdate != null;
+    return _onTap != null
+        || _onLongPress != null
+        || _onHorizontalDragUpdate != null
+        || _onVerticalDragUpdate != null;
   }
 
   @override
@@ -2866,15 +2848,15 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
   void _annotate(SemanticsNode node) {
     List<SemanticsAction> actions = <SemanticsAction>[];
-    if (onTap != null)
+    if (_onTap != null)
       actions.add(SemanticsAction.tap);
-    if (onLongPress != null)
+    if (_onLongPress != null)
       actions.add(SemanticsAction.longPress);
-    if (onHorizontalDragUpdate != null) {
+    if (_onHorizontalDragUpdate != null) {
       actions.add(SemanticsAction.scrollRight);
       actions.add(SemanticsAction.scrollLeft);
     }
-    if (onVerticalDragUpdate != null) {
+    if (_onVerticalDragUpdate != null) {
       actions.add(SemanticsAction.scrollUp);
       actions.add(SemanticsAction.scrollDown);
     }
@@ -2890,44 +2872,44 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   void performAction(SemanticsAction action) {
     switch (action) {
       case SemanticsAction.tap:
-        if (onTap != null)
-          onTap();
+        if (_onTap != null)
+          _onTap();
         break;
       case SemanticsAction.longPress:
-        if (onLongPress != null)
-          onLongPress();
+        if (_onLongPress != null)
+          _onLongPress();
         break;
       case SemanticsAction.scrollLeft:
-        if (onHorizontalDragUpdate != null) {
+        if (_onHorizontalDragUpdate != null) {
           final double primaryDelta = size.width * -scrollFactor;
-          onHorizontalDragUpdate(new DragUpdateDetails(
+          _onHorizontalDragUpdate(new DragUpdateDetails(
             delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
             globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
       case SemanticsAction.scrollRight:
-        if (onHorizontalDragUpdate != null) {
+        if (_onHorizontalDragUpdate != null) {
           final double primaryDelta = size.width * scrollFactor;
-          onHorizontalDragUpdate(new DragUpdateDetails(
+          _onHorizontalDragUpdate(new DragUpdateDetails(
             delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
             globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
       case SemanticsAction.scrollUp:
-        if (onVerticalDragUpdate != null) {
+        if (_onVerticalDragUpdate != null) {
           final double primaryDelta = size.height * -scrollFactor;
-          onVerticalDragUpdate(new DragUpdateDetails(
+          _onVerticalDragUpdate(new DragUpdateDetails(
             delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
             globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
       case SemanticsAction.scrollDown:
-        if (onVerticalDragUpdate != null) {
+        if (_onVerticalDragUpdate != null) {
           final double primaryDelta = size.height * scrollFactor;
-          onVerticalDragUpdate(new DragUpdateDetails(
+          _onVerticalDragUpdate(new DragUpdateDetails(
             delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
             globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
@@ -2944,13 +2926,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     final List<String> gestures = <String>[];
-    if (onTap != null)
+    if (_onTap != null)
       gestures.add('tap');
-    if (onLongPress != null)
+    if (_onLongPress != null)
       gestures.add('long press');
-    if (onHorizontalDragUpdate != null)
+    if (_onHorizontalDragUpdate != null)
       gestures.add('horizontal scroll');
-    if (onVerticalDragUpdate != null)
+    if (_onVerticalDragUpdate != null)
       gestures.add('vertical scroll');
     if (gestures.isEmpty)
       gestures.add('<none>');
