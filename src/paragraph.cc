@@ -443,10 +443,10 @@ void Paragraph::Layout(double width, bool force) {
         max_descent = temp_line_spacing;
 
       if (layout_end == next_break || is_newline) {
-        y += max_line_spacing + prev_max_descent;
+        y += roundf(max_line_spacing + prev_max_descent);
         line_heights_.push_back(
             (line_heights_.empty() ? 0 : line_heights_.back()) +
-            max_line_spacing + max_descent);
+            roundf(max_line_spacing + max_descent));
         glyph_single_line_position_x.push_back(
             glyph_single_line_position_x.back() + prev_char_advance);
         glyph_single_line_position_x.push_back(FLT_MAX);
@@ -476,13 +476,13 @@ void Paragraph::Layout(double width, bool force) {
     }
   }
   // Handle last line tasks.
-  y += max_line_spacing;
-  height_ = y + max_descent;
+  y += roundf(max_line_spacing + prev_max_descent);
+  height_ = y + roundf(max_descent);
   postprocess_line();
   if (line_width != 0)
     line_widths_.push_back(line_width);
   line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
-                          max_line_spacing + max_descent);
+                          roundf(max_line_spacing + max_descent));
   glyph_single_line_position_x.push_back(glyph_single_line_position_x.back() +
                                          prev_char_advance);
   glyph_single_line_position_x.push_back(FLT_MAX);
@@ -589,7 +589,7 @@ size_t Paragraph::TextSize() const {
 }
 
 double Paragraph::GetHeight() const {
-  return line_heights_[line_heights_.size() - 2];
+  return height_;
 }
 
 double Paragraph::GetLayoutWidth() const {
