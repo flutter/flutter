@@ -2791,6 +2791,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   GestureDragUpdateCallback _onHorizontalDragUpdate;
   GestureDragUpdateCallback _onVerticalDragUpdate;
 
+  /// Sets the gesture handlers, which are called when the corresponding gesture
+  /// is detected.
+  ///
+  /// All parameters are required, but they can be null to disable the
+  /// recognition of that gesture.
   void setGestureCallbacks({
     @required GestureTapCallback onTap,
     @required GestureLongPressCallback onLongPress,
