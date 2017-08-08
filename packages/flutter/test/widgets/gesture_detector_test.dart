@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
@@ -215,5 +216,36 @@ void main() {
     expect(didTap, isFalse);
     await tester.tapAt(const Offset(10.0, 10.0));
     expect(didTap, isFalse);
+  });
+
+  testWidgets('cache unchanged callbacks', (WidgetTester tester) async {
+    final GestureTapCallback inputCallback = () {};
+
+    await tester.pumpWidget(
+        new Center(
+            child: new GestureDetector(
+              onTap: inputCallback,
+              child: new Container(),
+            )
+        )
+    );
+
+    final RenderSemanticsGestureHandler renderObj1 = tester.renderObject(find.byType(GestureDetector));
+    final GestureTapCallback actualCallback1 = renderObj1.onTap;
+
+    await tester.pumpWidget(
+        new Center(
+            child: new GestureDetector(
+              onTap: inputCallback,
+              child: new Container(),
+            )
+        )
+    );
+
+    final RenderSemanticsGestureHandler renderObj2 = tester.renderObject(find.byType(GestureDetector));
+    final GestureTapCallback actualCallback2 = renderObj2.onTap;
+
+    expect(renderObj1, same(renderObj2));
+    expect(actualCallback1, same(actualCallback2)); // Should be cached.
   });
 }
