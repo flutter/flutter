@@ -187,7 +187,6 @@ class Paragraph {
   // The max width of the paragraph as provided in the most recent Layout()
   // call.
   double width_ = -1.0f;
-  SkScalar height_ = 0.0f;
   size_t lines_ = 0;
   double max_intrinsic_width_ = 0;
   double min_intrinsic_width_ = 0;
