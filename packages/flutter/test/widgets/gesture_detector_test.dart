@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 
 void main() {
@@ -216,4 +217,89 @@ void main() {
     await tester.tapAt(const Offset(10.0, 10.0));
     expect(didTap, isFalse);
   });
+
+  test('RenderSemanticsGestureHandler.setGestureCallbacks calls markNeedsSemanticsUpdate appropriatly', () {
+    final TestRenderSemanticsGestureHandler renderObject = new TestRenderSemanticsGestureHandler();
+
+    expect(renderObject.callCount, 0);
+    renderObject.setGestureCallbacks(
+      onTap: null,
+      onLongPress: null,
+      onHorizontalDragUpdate: null,
+      onVerticalDragUpdate: null,
+    );
+    expect(renderObject.callCount, 0);
+
+    final GestureTapCallback onTap = () {};
+    renderObject.setGestureCallbacks(
+      onTap: onTap,
+      onLongPress: null,
+      onHorizontalDragUpdate: null,
+      onVerticalDragUpdate: null,
+    );
+    expect(renderObject.callCount, 1);
+
+    final GestureLongPressCallback onLongPress = () {};
+    renderObject.setGestureCallbacks(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      onHorizontalDragUpdate: null,
+      onVerticalDragUpdate: null,
+    );
+    expect(renderObject.callCount, 2);
+
+    final GestureDragUpdateCallback onHorizontalDragUpdate = (DragUpdateDetails details) {};
+    renderObject.setGestureCallbacks(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      onHorizontalDragUpdate: onHorizontalDragUpdate,
+      onVerticalDragUpdate: null,
+    );
+    expect(renderObject.callCount, 3);
+
+    final GestureDragUpdateCallback onVerticalDragUpdate = (DragUpdateDetails details) {};
+    renderObject.setGestureCallbacks(
+      onTap: onTap,
+      onLongPress: onLongPress,
+      onHorizontalDragUpdate: onHorizontalDragUpdate,
+      onVerticalDragUpdate: onVerticalDragUpdate,
+    );
+    expect(renderObject.callCount, 4);
+
+    // Change all of them
+    renderObject.setGestureCallbacks(
+      onTap: () {
+        print('tap');
+      },
+      onLongPress: () {
+        print('longPress');
+      },
+      onHorizontalDragUpdate: (DragUpdateDetails details) {
+        print('horizontalDrag');
+      },
+      onVerticalDragUpdate: (DragUpdateDetails details) {
+        print('verticalDrag');
+      },
+    );
+    expect(renderObject.callCount, 4); // no extra call!
+
+    // Remove all
+    renderObject.setGestureCallbacks(
+      onTap: null,
+      onLongPress: null,
+      onHorizontalDragUpdate: null,
+      onVerticalDragUpdate: null,
+    );
+    expect(renderObject.callCount, 5);
+  });
+}
+
+
+class TestRenderSemanticsGestureHandler extends RenderSemanticsGestureHandler {
+  int callCount = 0;
+
+  @override
+  void markNeedsSemanticsUpdate({ bool onlyChanges: false, bool noGeometry: false }) {
+    callCount++;
+  }
 }
