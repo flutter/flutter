@@ -46,16 +46,6 @@ class TextStyle {
   double word_spacing = 0.0;
   double height = 1.0;
 
-  // When disabled, the x coordinates of glyphs will be rounded, eliminating
-  // potential mismatch between one long run and mutiple shorter runs of the
-  // same text.
-  //
-  // When set to false, there may be jitter when switching between same text
-  // content with different runs composing it, however, it also produces more
-  // accurate layouts. Setting to true removs this, but sacrifices layout
-  // accuracy.
-  bool round_char_advances = false;
-
   bool equals(const TextStyle& other) const;
 };
 

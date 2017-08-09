@@ -44,8 +44,6 @@ bool TextStyle::equals(const TextStyle& other) const {
     return false;
   if (height != other.height)
     return false;
-  if (round_char_advances != other.round_char_advances)
-    return false;
 
   return true;
 }

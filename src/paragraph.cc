@@ -107,8 +107,7 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   // Prevent spacing rounding in Minikin. This causes jitter when switching
   // between same text content with different runs composing it, however, it
   // also produces more accurate layouts.
-  paint->paintFlags |=
-      style.round_char_advances ? 0x00 : minikin::LinearTextFlag;
+  paint->paintFlags |= minikin::LinearTextFlag;
 }
 
 void GetPaint(const TextStyle& style, SkPaint* paint) {
