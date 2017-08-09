@@ -125,11 +125,11 @@ class AssetBundle {
         return 1;
       }
       // The file name for an asset's "main" entry is whatever appears in
-      // the pubspec.yaml file. The main entry will always exist for font
-      // assets. It need not be specified for an image if resolution-specific
-      // variants exist. An image's main entry is treated the same as a "1x"
-      // resolution variant and if both exist then the explicit variant is
-      // preferred.
+      // the pubspec.yaml file. The main entry's file must always exist for
+      // font assets. It need not exist for an image if resolution-specific
+      // variant files exist. An image's main entry is treated the same as a
+      // "1x" resolution variant and if both exist then the explicit 1x
+      // variant is preferred.
       if (asset.assetFileExists) {
         assert(!assetVariants[asset].contains(asset));
         assetVariants[asset].insert(0, asset);
