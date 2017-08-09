@@ -152,6 +152,10 @@ class SystemChrome {
   /// overwrite the pending value, such that only the last specified value takes
   /// effect.
   ///
+  /// Call this API in code whose lifecyle matches that of the desired
+  /// system UI styles. For instance, to change the system UI style on a new
+  /// page, consider calling when pushing/popping a new [PageRoute].
+  ///
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
