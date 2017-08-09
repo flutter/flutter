@@ -68,9 +68,11 @@ def to_gn_args(args):
     gn_args['skia_use_fontconfig'] = False # Use the custom font manager instead.
 
     gn_args['is_debug'] = args.unoptimized
-    gn_args['enable_lto'] = not args.unoptimized
     gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
     gn_args['is_clang'] = not sys.platform.startswith(('cygwin', 'win'))
+
+    if args.target_os != 'win':
+      gn_args['enable_lto'] = not args.unoptimized
 
     aot = args.runtime_mode != 'debug'
     if args.target_os == 'android':
