@@ -152,7 +152,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerMoveEvent) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
-      tracker.addPosition(event.timeStamp, event.position);
+      if (!event.synthesized)
+        tracker.addPosition(event.timeStamp, event.position);
       _pointerLocations[event.pointer] = event.position;
       shouldStartIfAccepted = true;
     } else if (event is PointerDownEvent) {

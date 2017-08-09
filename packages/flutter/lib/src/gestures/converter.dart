@@ -170,7 +170,8 @@ class PointerEventConverter {
               radiusMin: datum.radiusMin,
               radiusMax: datum.radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
+              synthesized: true,
             );
             state.lastPosition = position;
           }
@@ -257,7 +258,8 @@ class PointerEventConverter {
               radiusMin: datum.radiusMin,
               radiusMax: datum.radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
+              synthesized: true,
             );
             state.lastPosition = position;
           }
