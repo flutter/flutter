@@ -34,9 +34,10 @@ class TestByteData implements ByteData {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-String testManifest = '''
+const String testManifest = '''
 {
   "assets/image.png" : [
+    "assets/image.png",
     "assets/1.5x/image.png",
     "assets/2.0x/image.png",
     "assets/3.0x/image.png",
@@ -46,12 +47,19 @@ String testManifest = '''
 ''';
 
 class TestAssetBundle extends CachingAssetBundle {
+  TestAssetBundle({ this.manifest: testManifest });
+
+  final String manifest;
+
   @override
   Future<ByteData> load(String key) {
     ByteData data;
     switch (key) {
       case 'assets/image.png':
         data = new TestByteData(1.0);
+        break;
+      case 'assets/1.0x/image.png':
+        data = new TestByteData(10.0); // see "...with a main asset and a 1.0x asset"
         break;
       case 'assets/1.5x/image.png':
         data = new TestByteData(1.5);
@@ -72,7 +80,7 @@ class TestAssetBundle extends CachingAssetBundle {
   @override
   Future<String> loadString(String key, { bool cache: true }) {
     if (key == 'AssetManifest.json')
-      return new SynchronousFuture<String>(testManifest);
+      return new SynchronousFuture<String>(manifest);
     return null;
   }
 
@@ -101,7 +109,7 @@ class TestAssetImage extends AssetImage {
   }
 }
 
-Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
+Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [AssetBundle bundle]) {
   const double windowSize = 500.0; // 500 logical pixels
   const double imageSize = 200.0; // 200 logical pixels
 
@@ -112,7 +120,7 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
       padding: const EdgeInsets.all(0.0)
     ),
     child: new DefaultAssetBundle(
-      bundle: new TestAssetBundle(),
+      bundle: bundle ?? new TestAssetBundle(),
       child: new Center(
         child: inferSize ?
           new Image(
@@ -229,6 +237,59 @@ void main() {
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 4.0);
+  });
+
+  testWidgets('Image for device pixel ratio 1.0, with no main asset', (WidgetTester tester) async {
+    const String manifest = '''
+    {
+      "assets/image.png" : [
+        "assets/1.5x/image.png",
+        "assets/2.0x/image.png",
+        "assets/3.0x/image.png",
+        "assets/4.0x/image.png"
+      ]
+    }
+    ''';
+    final AssetBundle bundle = new TestAssetBundle(manifest: manifest);
+
+    const double ratio = 1.0;
+    Key key = new GlobalKey();
+    await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, bundle));
+    expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
+    expect(getTestImage(tester, key).scale, 1.5);
+    key = new GlobalKey();
+    await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, bundle));
+    expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
+    expect(getTestImage(tester, key).scale, 1.5);
+  });
+
+  testWidgets('Image for device pixel ratio 1.0, with a main asset and a 1.0x asset', (WidgetTester tester) async {
+    // If both a main asset and a 1.0x asset are specified, then prefer
+    // the 1.0x asset.
+
+    const String manifest = '''
+    {
+      "assets/image.png" : [
+        "assets/image.png",
+        "assets/1.0x/image.png",
+        "assets/1.5x/image.png",
+        "assets/2.0x/image.png",
+        "assets/3.0x/image.png",
+        "assets/4.0x/image.png"
+      ]
+    }
+    ''';
+    final AssetBundle bundle = new TestAssetBundle(manifest: manifest);
+
+    const double ratio = 1.0;
+    Key key = new GlobalKey();
+    await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, bundle));
+    expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
+    expect(getTestImage(tester, key).scale, 10.0);
+    key = new GlobalKey();
+    await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, bundle));
+    expect(getRenderImage(tester, key).size, const Size(480.0, 480.0));
+    expect(getTestImage(tester, key).scale, 10.0);
   });
 
 }

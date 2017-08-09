@@ -118,8 +118,10 @@ class AssetBundle {
         printError('No file or variants found for $asset.\n');
         return 1;
       }
-      if (asset.assetFileExists)
-        entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
+      if (asset.assetFileExists) {
+        assert(!assetVariants[asset].contains(asset));
+        assetVariants[asset].insert(0, asset);
+      }
       for (_Asset variant in assetVariants[asset]) {
         assert(variant.assetFileExists);
         entries[variant.assetEntry] = new DevFSFileContent(variant.assetFile);
