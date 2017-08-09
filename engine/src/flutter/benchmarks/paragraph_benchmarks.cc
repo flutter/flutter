@@ -254,6 +254,97 @@ static void BM_ParagraphPaintSimple(benchmark::State& state) {
 }
 BENCHMARK(BM_ParagraphPaintSimple);
 
+static void BM_ParagraphPaintLarge(benchmark::State& state) {
+  const char* text =
+      "Hello world! This is a simple sentence to test drawing. Hello world! "
+      "This is a simple sentence to test drawing. Hello world! This is a "
+      "simple sentence to test drawing.Hello world! This is a simple sentence "
+      "to test drawing. Hello world! "
+      "This is a simple sentence to test drawing. Hello world! This is a "
+      "simple sentence to test drawing.Hello world! This is a simple sentence "
+      "to test drawing. Hello world! "
+      "This is a simple sentence to test drawing. Hello world! This is a "
+      "simple sentence to test drawing.Hello world! This is a simple sentence "
+      "to test drawing. Hello world! "
+      "This is a simple sentence to test drawing. Hello world! This is a "
+      "simple sentence to test drawing.Hello world! This is a simple sentence "
+      "to test drawing. Hello world! "
+      "This is a simple sentence to test drawing. Hello world! This is a "
+      "simple sentence to test drawing.Hello world! This is a simple sentence "
+      "to test drawing. Hello world! "
+      "This is a simple sentence to test drawing. Hello world! This is a "
+      "simple sentence to test drawing.";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+  auto paragraph = builder.Build();
+  paragraph->Layout(300, true);
+
+  std::unique_ptr<SkBitmap> bitmap = std::make_unique<SkBitmap>();
+  std::unique_ptr<SkCanvas> canvas = std::make_unique<SkCanvas>(*bitmap);
+  bitmap->allocN32Pixels(1000, 1000);
+  canvas->clear(SK_ColorWHITE);
+  int offset = 0;
+  while (state.KeepRunning()) {
+    paragraph->Paint(canvas.get(), offset % 700, 10);
+    offset++;
+  }
+}
+BENCHMARK(BM_ParagraphPaintLarge);
+
+static void BM_ParagraphPaintDecoration(benchmark::State& state) {
+  const char* text =
+      "Hello world! This is a simple sentence to test drawing. Hello world! "
+      "This is a simple sentence to test drawing.";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+
+  txt::TextStyle text_style;
+  text_style.decoration = TextDecoration(0x1 | 0x2 | 0x4);
+  text_style.decoration_style = TextDecorationStyle(kSolid);
+  text_style.color = SK_ColorBLACK;
+
+  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  text_style.decoration_style = TextDecorationStyle(kDotted);
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  text_style.decoration_style = TextDecorationStyle(kWavy);
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(300, true);
+
+  std::unique_ptr<SkBitmap> bitmap = std::make_unique<SkBitmap>();
+  std::unique_ptr<SkCanvas> canvas = std::make_unique<SkCanvas>(*bitmap);
+  bitmap->allocN32Pixels(1000, 1000);
+  canvas->clear(SK_ColorWHITE);
+  int offset = 0;
+  while (state.KeepRunning()) {
+    paragraph->Paint(canvas.get(), offset % 700, 10);
+    offset++;
+  }
+}
+BENCHMARK(BM_ParagraphPaintDecoration);
+
 // -----------------------------------------------------------------------------
 //
 // The following benchmarks break down the layout function and attempts to time
