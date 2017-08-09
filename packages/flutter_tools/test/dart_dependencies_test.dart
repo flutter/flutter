@@ -82,5 +82,19 @@ void main()  {
       final Set<String> deps = builder.build();
       expect(deps, contains(endsWith('This_Import_Has_fuNNy_casING.dart')));
     });
+
+    testUsingContext('bad_import', () {
+      final String testPath = fs.path.join(dataPath, 'bad_import');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
+      final DartDependencySetBuilder builder =
+          new DartDependencySetBuilder(mainPath, packagesPath);
+      try {
+        builder.build();
+        fail('expect an exception to be thrown.');
+      } on DartDependencyException catch (error) {
+        expect(error.toString(), contains('Unable to parse URI'));
+      }
+    });
   });
 }
