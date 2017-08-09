@@ -4,9 +4,9 @@
     <item android:drawable="@android:color/white" />
 
     <item>
-        <!-- You can replace the image here with your own -->
-        <bitmap
+        <!-- You can insert your own image assets here -->
+        <!-- <bitmap
             android:gravity="center"
-            android:src="@mipmap/launch_image" />
+            android:src="@mipmap/launch_image" /> -->
     </item>
 </layer-list>
