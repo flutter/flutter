@@ -1,0 +1,10 @@
+name: platform_interaction
+description: Integration test for platform interactions.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+flutter:
+  uses-material-design: true

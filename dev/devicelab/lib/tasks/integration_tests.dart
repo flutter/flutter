@@ -16,6 +16,13 @@ TaskFunction createChannelsIntegrationTest() {
   );
 }
 
+TaskFunction createPlatformInteractionTest() {
+  return new DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/platform_interaction',
+    'lib/main.dart',
+  );
+}
+
 TaskFunction createPlatformChannelSampleTest() {
   return new DriverTest(
     '${flutterDirectory.path}/examples/platform_channel',
