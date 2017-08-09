@@ -450,10 +450,15 @@ class _CupertinoBackGestureDetectorState extends State<_CupertinoBackGestureDete
       fit: StackFit.passthrough,
       children: <Widget>[
         widget.child,
-        new Listener(
-          onPointerDown: _handlePointerDown,
-          behavior: HitTestBehavior.translucent,
-          child: new SizedBox(width: _kBackGestureWidth),
+        new Positioned(
+          left: 0.0,
+          width: _kBackGestureWidth,
+          top: 0.0,
+          bottom: 0.0,
+          child: new Listener(
+            onPointerDown: _handlePointerDown,
+            behavior: HitTestBehavior.translucent,
+          ),
         ),
       ],
     );
