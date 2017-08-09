@@ -630,162 +630,157 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
                                  double y,
                                  size_t record_index) {
   PaintRecord& record = records_[record_index];
-  if (record.style().decoration != TextDecoration::kNone) {
-    const SkPaint::FontMetrics& metrics = record.metrics();
-    SkPaint paint;
-    paint.setStyle(SkPaint::kStroke_Style);
-    if (record.style().decoration_color == SK_ColorTRANSPARENT) {
-      paint.setColor(record.style().color);
-    } else {
-      paint.setColor(record.style().decoration_color);
+  if (record.style().decoration == TextDecoration::kNone)
+    return;
+
+  const SkPaint::FontMetrics& metrics = record.metrics();
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  if (record.style().decoration_color == SK_ColorTRANSPARENT) {
+    paint.setColor(record.style().color);
+  } else {
+    paint.setColor(record.style().decoration_color);
+  }
+  paint.setAntiAlias(true);
+
+  // This is set to 2 for the double line style
+  int decoration_count = 1;
+
+  // Filled when drawing wavy decorations.
+  SkPath path;
+
+  double width = 0;
+  if (paragraph_style_.text_align == TextAlign::justify &&
+      record.line() != lines_ - 1) {
+    width = width_;
+  } else {
+    width = record.GetRunWidth();
+  }
+
+  paint.setStrokeWidth(
+      (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
+                                     kUnderlineThicknessIsValid_Flag))
+          ? metrics.fUnderlineThickness *
+                record.style().decoration_thickness_multiplier
+          // Backup value if the fUnderlineThickness metric is not available:
+          // Divide by 14pt as it is the default size.
+          : record.style().font_size / 14.0f *
+                record.style().decoration_thickness_multiplier);
+
+  // Setup the decorations.
+  switch (record.style().decoration_style) {
+    case TextDecorationStyle::kSolid: {
+      break;
     }
-    paint.setAntiAlias(true);
-
-    // This is set to 2 for the double line style
-    int decoration_count = 1;
-
-    // Filled when drawing wavy decorations.
-    std::vector<WaveCoordinates> wave_coords;
-
-    double width = 0;
-    if (paragraph_style_.text_align == TextAlign::justify &&
-        record.line() != lines_ - 1) {
-      width = width_;
-    } else {
-      width = record.GetRunWidth();
+    case TextDecorationStyle::kDouble: {
+      decoration_count = 2;
+      break;
     }
-
-    paint.setStrokeWidth(
-        (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
-                                       kUnderlineThicknessIsValid_Flag))
-            ? metrics.fUnderlineThickness
-            // Backup value if the fUnderlineThickness metric is not available:
-            // Divide by 14pt as it is the default size.
-            : record.style().font_size / 14.0f *
-                  record.style().decoration_thickness_multiplier);
-
-    // Setup the decorations.
-    switch (record.style().decoration_style) {
-      case TextDecorationStyle::kSolid: {
-        break;
-      }
-      case TextDecorationStyle::kDouble: {
-        decoration_count = 2;
-        break;
-      }
-      // Note: the intervals are scaled by the thickness of the line, so it is
-      // possible to change spacing by changing the decoration_thickness
-      // property of TextStyle.
-      case TextDecorationStyle::kDotted: {
-        // Divide by 14pt as it is the default size.
-        const float scale = record.style().font_size / 14.0f;
-        const SkScalar intervals[] = {1.0f * scale, 1.5f * scale, 1.0f * scale,
-                                      1.5f * scale};
-        size_t count = sizeof(intervals) / sizeof(intervals[0]);
-        paint.setPathEffect(SkPathEffect::MakeCompose(
-            SkDashPathEffect::Make(intervals, count, 0.0f),
-            SkDiscretePathEffect::Make(0, 0)));
-        break;
-      }
-      // Note: the intervals are scaled by the thickness of the line, so it is
-      // possible to change spacing by changing the decoration_thickness
-      // property of TextStyle.
-      case TextDecorationStyle::kDashed: {
-        // Divide by 14pt as it is the default size.
-        const float scale = record.style().font_size / 14.0f;
-        const SkScalar intervals[] = {4.0f * scale, 2.0f * scale, 4.0f * scale,
-                                      2.0f * scale};
-        size_t count = sizeof(intervals) / sizeof(intervals[0]);
-        paint.setPathEffect(SkPathEffect::MakeCompose(
-            SkDashPathEffect::Make(intervals, count, 0.0f),
-            SkDiscretePathEffect::Make(0, 0)));
-        break;
-      }
-      case TextDecorationStyle::kWavy: {
-        int wave_count = 0;
-        double x_start = 0;
-        double y_top = -metrics.fUnderlineThickness;
-        double y_bottom = metrics.fUnderlineThickness;
-        while (x_start + metrics.fUnderlineThickness * 2 < width) {
-          wave_coords.push_back(
-              WaveCoordinates(x_start, wave_count % 2 == 0 ? y_bottom : y_top,
-                              x_start + metrics.fUnderlineThickness * 2,
-                              wave_count % 2 == 0 ? y_top : y_bottom));
-          x_start += metrics.fUnderlineThickness * 2;
-          ++wave_count;
-        }
-        break;
-      }
+    // Note: the intervals are scaled by the thickness of the line, so it is
+    // possible to change spacing by changing the decoration_thickness
+    // property of TextStyle.
+    case TextDecorationStyle::kDotted: {
+      // Divide by 14pt as it is the default size.
+      const float scale = record.style().font_size / 14.0f;
+      const SkScalar intervals[] = {1.0f * scale, 1.5f * scale, 1.0f * scale,
+                                    1.5f * scale};
+      size_t count = sizeof(intervals) / sizeof(intervals[0]);
+      paint.setPathEffect(SkPathEffect::MakeCompose(
+          SkDashPathEffect::Make(intervals, count, 0.0f),
+          SkDiscretePathEffect::Make(0, 0)));
+      break;
     }
-
-    // Draw the decorations.
-    // Use a for loop for "kDouble" decoration style
-    for (int i = 0; i < decoration_count; i++) {
-      double y_offset =
-          i * metrics.fUnderlineThickness * kDoubleDecorationSpacing;
-      double y_offset_original = y_offset;
-      // Underline
-      if (record.style().decoration & 0x1) {
-        y_offset +=
-            (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
-                                           kUnderlinePositionIsValid_Flag))
-                ? metrics.fUnderlinePosition
-                : metrics.fUnderlineThickness;
-        if (record.style().decoration_style != TextDecorationStyle::kWavy)
-          canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
-        else
-          PaintWavyDecoration(canvas, wave_coords, paint, x, y, y_offset,
-                              width);
-        y_offset = y_offset_original;
+    // Note: the intervals are scaled by the thickness of the line, so it is
+    // possible to change spacing by changing the decoration_thickness
+    // property of TextStyle.
+    case TextDecorationStyle::kDashed: {
+      // Divide by 14pt as it is the default size.
+      const float scale = record.style().font_size / 14.0f;
+      const SkScalar intervals[] = {4.0f * scale, 2.0f * scale, 4.0f * scale,
+                                    2.0f * scale};
+      size_t count = sizeof(intervals) / sizeof(intervals[0]);
+      paint.setPathEffect(SkPathEffect::MakeCompose(
+          SkDashPathEffect::Make(intervals, count, 0.0f),
+          SkDiscretePathEffect::Make(0, 0)));
+      break;
+    }
+    case TextDecorationStyle::kWavy: {
+      int wave_count = 0;
+      double x_start = 0;
+      double wavelength = metrics.fUnderlineThickness *
+                          record.style().decoration_thickness_multiplier;
+      path.moveTo(x, y);
+      while (x_start + wavelength * 2 < width) {
+        path.rQuadTo(wavelength, wave_count % 2 != 0 ? wavelength : -wavelength,
+                     wavelength * 2, 0);
+        x_start += wavelength * 2;
+        ++wave_count;
       }
-      // Overline
-      if (record.style().decoration & 0x2) {
-        y_offset -= metrics.fAscent;
-        if (record.style().decoration_style != TextDecorationStyle::kWavy)
-          canvas->drawLine(x, y - y_offset, x + width, y - y_offset, paint);
-        else
-          PaintWavyDecoration(canvas, wave_coords, paint, x, y, -y_offset,
-                              width);
-        y_offset = y_offset_original;
-      }
-      // Strikethrough
-      if (record.style().decoration & 0x4) {
-        if (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
-                                          kStrikeoutThicknessIsValid_Flag))
-          paint.setStrokeWidth(metrics.fStrikeoutThickness *
-                               record.style().decoration_thickness_multiplier);
-        // Make sure the double line is "centered" vertically.
-        y_offset += (decoration_count - 1.0) * metrics.fUnderlineThickness *
-                    kDoubleDecorationSpacing / -2.0;
-        y_offset +=
-            (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
-                                           kStrikeoutThicknessIsValid_Flag))
-                ? metrics.fStrikeoutPosition
-                // Backup value if the strikeoutposition metric is not
-                // available:
-                : metrics.fXHeight / -2.0;
-        if (record.style().decoration_style != TextDecorationStyle::kWavy)
-          canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
-        else
-          PaintWavyDecoration(canvas, wave_coords, paint, x, y, y_offset,
-                              width);
-        y_offset = y_offset_original;
-      }
+      break;
     }
   }
-}
 
-void Paragraph::PaintWavyDecoration(SkCanvas* canvas,
-                                    std::vector<WaveCoordinates> wave_coords,
-                                    SkPaint paint,
-                                    double x,
-                                    double y,
-                                    double y_offset,
-                                    double width) {
-  for (size_t i = 0; i < wave_coords.size(); ++i) {
-    WaveCoordinates coords = wave_coords[i];
-    canvas->drawLine(x + coords.x_start, y + y_offset + coords.y_start,
-                     x + coords.x_end, y + y_offset + coords.y_end, paint);
+  // Draw the decorations.
+  // Use a for loop for "kDouble" decoration style
+  for (int i = 0; i < decoration_count; i++) {
+    double y_offset =
+        i * metrics.fUnderlineThickness * kDoubleDecorationSpacing;
+    double y_offset_original = y_offset;
+    // Underline
+    if (record.style().decoration & 0x1) {
+      y_offset +=
+          (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
+                                         kUnderlinePositionIsValid_Flag))
+              ? metrics.fUnderlinePosition
+              : metrics.fUnderlineThickness;
+      if (record.style().decoration_style != TextDecorationStyle::kWavy) {
+        canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
+      } else {
+        SkPath offsetPath = path;
+        offsetPath.offset(0, y_offset);
+        canvas->drawPath(offsetPath, paint);
+      }
+      y_offset = y_offset_original;
+    }
+    // Overline
+    if (record.style().decoration & 0x2) {
+      // We subtract fAscent here because for double overlines, we want the
+      // second line to be above, not below the first.
+      y_offset -= metrics.fAscent;
+      if (record.style().decoration_style != TextDecorationStyle::kWavy) {
+        canvas->drawLine(x, y - y_offset, x + width, y - y_offset, paint);
+      } else {
+        SkPath offsetPath = path;
+        offsetPath.offset(0, -y_offset);
+        canvas->drawPath(offsetPath, paint);
+      }
+      y_offset = y_offset_original;
+    }
+    // Strikethrough
+    if (record.style().decoration & 0x4) {
+      if (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
+                                        kStrikeoutThicknessIsValid_Flag))
+        paint.setStrokeWidth(metrics.fStrikeoutThickness *
+                             record.style().decoration_thickness_multiplier);
+      // Make sure the double line is "centered" vertically.
+      y_offset += (decoration_count - 1.0) * metrics.fUnderlineThickness *
+                  kDoubleDecorationSpacing / -2.0;
+      y_offset +=
+          (SkToBool(metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
+                                         kStrikeoutThicknessIsValid_Flag))
+              ? metrics.fStrikeoutPosition
+              // Backup value if the strikeoutposition metric is not
+              // available:
+              : metrics.fXHeight / -2.0;
+      if (record.style().decoration_style != TextDecorationStyle::kWavy) {
+        canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
+      } else {
+        SkPath offsetPath = path;
+        offsetPath.offset(0, y_offset);
+        canvas->drawPath(offsetPath, paint);
+      }
+      y_offset = y_offset_original;
+    }
   }
 }
 
