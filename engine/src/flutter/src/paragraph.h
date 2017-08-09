@@ -242,15 +242,6 @@ class Paragraph {
                         double y,
                         size_t record_index);
 
-  // Calculates wavy decorations and Draws them onto the canvas.
-  void PaintWavyDecoration(SkCanvas* canvas,
-                           std::vector<WaveCoordinates> wave_coords,
-                           SkPaint paint,
-                           double x,
-                           double y,
-                           double y_offset,
-                           double width);
-
   void CalculateIntrinsicWidths();
 
   FTL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
