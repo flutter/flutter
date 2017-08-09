@@ -54,8 +54,8 @@ TEST_F(RenderTest, SimpleParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 }
@@ -88,8 +88,8 @@ TEST_F(RenderTest, SimpleRedParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 }
@@ -176,11 +176,11 @@ TEST_F(RenderTest, RainbowParagraph) {
   }
   ASSERT_TRUE(Snapshot());
   ASSERT_EQ(paragraph->runs_.runs_.size(), 4ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 4ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style1));
-  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style2));
-  ASSERT_TRUE(paragraph->runs_.styles_[2].equals(text_style3));
-  ASSERT_TRUE(paragraph->runs_.styles_[3].equals(text_style4));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 5ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style1));
+  ASSERT_TRUE(paragraph->runs_.styles_[2].equals(text_style2));
+  ASSERT_TRUE(paragraph->runs_.styles_[3].equals(text_style3));
+  ASSERT_TRUE(paragraph->runs_.styles_[4].equals(text_style4));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style1.color);
   ASSERT_EQ(paragraph->records_[1].style().color, text_style2.color);
   ASSERT_EQ(paragraph->records_[2].style().color, text_style3.color);
@@ -214,8 +214,8 @@ TEST_F(RenderTest, DefaultStyleParagraph) {
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
-  ASSERT_EQ(paragraph->runs_.runs_.size(), 0ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 0ull);
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -251,8 +251,8 @@ TEST_F(RenderTest, BoldParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_TRUE(Snapshot());
 }
@@ -312,8 +312,8 @@ TEST_F(RenderTest, LeftAlignParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
   double expected_y = 24;
 
@@ -408,8 +408,8 @@ TEST_F(RenderTest, RightAlignParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
   double expected_y = 24;
 
@@ -512,8 +512,8 @@ TEST_F(RenderTest, CenterAlignParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
   double expected_y = 24;
 
@@ -618,8 +618,8 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_.size(), paragraph_style.max_lines);
   double expected_y = 24;
 
@@ -731,38 +731,34 @@ TEST_F(RenderTest, DecorationsParagraph) {
 }
 
 TEST_F(RenderTest, ItalicsParagraph) {
-  const char* text = "I am Italicized!                           ";
-  auto icu_text = icu::UnicodeString::fromUTF8(text);
-  std::u16string u16_text(icu_text.getBuffer(),
-                          icu_text.getBuffer() + icu_text.length());
-
   txt::ParagraphStyle paragraph_style;
   auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
   txt::ParagraphBuilder builder(paragraph_style, &font_collection);
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorRED;
-  text_style.font_style = txt::FontStyle::italic;
-  text_style.font_size = 35;
+  text_style.font_size = 10;
   builder.PushStyle(text_style);
+  builder.AddText("No italic ");
 
-  builder.AddText(u16_text);
+  text_style.font_style = txt::FontStyle::italic;
+  builder.PushStyle(text_style);
+  builder.AddText("Yes Italic ");
 
   builder.Pop();
+  builder.AddText("No Italic again.");
 
   auto paragraph = builder.Build();
   paragraph->Layout(GetTestCanvasWidth());
 
-  paragraph->Paint(GetCanvas(), 10.0, 35.0);
+  paragraph->Paint(GetCanvas(), 0, 0);
 
-  ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
-  for (size_t i = 0; i < u16_text.length(); i++) {
-    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
-  }
-  ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
-  ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
+  ASSERT_EQ(paragraph->runs_.runs_.size(), 3ull);
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 3ull);
+  ASSERT_EQ(paragraph->records_[1].style().color, text_style.color);
+  ASSERT_EQ(paragraph->records_[1].style().font_style, txt::FontStyle::italic);
+  ASSERT_EQ(paragraph->records_[2].style().font_style, txt::FontStyle::normal);
+  ASSERT_EQ(paragraph->records_[0].style().font_style, txt::FontStyle::normal);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -803,8 +799,8 @@ TEST_F(RenderTest, ChineseParagraph) {
   paragraph->Paint(GetCanvas(), 0, 0);
 
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->records_.size(), 7ull);
 
@@ -849,8 +845,8 @@ TEST_F(RenderTest, DISABLED_ArabicParagraph) {
   ASSERT_EQ(paragraph->text_.size(), std::string{text}.length());
 
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->records_.size(), 2ull);
   ASSERT_EQ(paragraph->paragraph_style_.rtl, true);
@@ -1289,8 +1285,8 @@ TEST_F(RenderTest, LongWordParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->GetLineCount(), 4);
   ASSERT_TRUE(Snapshot());
@@ -1477,8 +1473,8 @@ TEST_F(RenderTest, HyphenBreakParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->GetLineCount(), 5);
   ASSERT_TRUE(Snapshot());
@@ -1522,8 +1518,8 @@ TEST_F(RenderTest, RepeatLayoutParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->GetLineCount(), 12);
 
@@ -1538,8 +1534,8 @@ TEST_F(RenderTest, RepeatLayoutParagraph) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
   ASSERT_EQ(paragraph->runs_.runs_.size(), 1ull);
-  ASSERT_EQ(paragraph->runs_.styles_.size(), 1ull);
-  ASSERT_TRUE(paragraph->runs_.styles_[0].equals(text_style));
+  ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
+  ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->GetLineCount(), 6);
   ASSERT_TRUE(Snapshot());

@@ -478,6 +478,8 @@ void Paragraph::Layout(double width, bool force) {
   postprocess_line();
   if (line_width != 0)
     line_widths_.push_back(line_width);
+
+  // Finalize measurements
   line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
                           roundf(max_line_spacing + max_descent));
   glyph_single_line_position_x.push_back(glyph_single_line_position_x.back() +
@@ -489,11 +491,6 @@ void Paragraph::Layout(double width, bool force) {
   if (paragraph_style_.text_align == TextAlign::justify &&
       buffer_sizes.size() > 0) {
     JustifyLine(buffers, buffer_sizes, word_count, justify_spacing, -1);
-    // Remove decoration extra width if the last line.
-    size_t i = records_.size() - 1;
-    while (records_[i].line() == lines_ - 1) {
-      --i;
-    }
   }
   line_widths_ =
       std::vector<double>(breaker_.getWidths(), breaker_.getWidths() + lines_);
@@ -543,24 +540,22 @@ const ParagraphStyle& Paragraph::GetParagraphStyle() const {
 }
 
 double Paragraph::GetAlphabeticBaseline() const {
+  // Currently -fAscent
   return alphabetic_baseline_;
 }
 
 double Paragraph::GetIdeographicBaseline() const {
-  // TODO(garyq): Currently fCapHeight + fUnderlinePosition. Verify this.
+  // TODO(garyq): Currently -fAscent + fUnderlinePosition. Verify this.
   return ideographic_baseline_;
 }
 
 void Paragraph::CalculateIntrinsicWidths() {
-  // TODO(garyq): Investigate correctness of the following implementation of max
-  // intrinsic width. This is currently the sum of all the widths of each line
-  // after layout.
   max_intrinsic_width_ = 0;
   for (size_t i = 0; i < line_widths_.size(); ++i) {
     max_intrinsic_width_ += line_widths_[i];
   }
 
-  // TODO(garyq): Investigate correctness of the following implementation of max
+  // TODO(garyq): Investigate correctness of the following implementation of min
   // intrinsic width. This is currently the longest line in the text after
   // layout.
   min_intrinsic_width_ = 0;

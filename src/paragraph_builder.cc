@@ -25,15 +25,25 @@ namespace txt {
 
 ParagraphBuilder::ParagraphBuilder(ParagraphStyle style,
                                    FontCollection* font_collection)
-    : paragraph_style_(style), font_collection_(font_collection) {}
+    : font_collection_(font_collection) {
+  SetParagraphStyle(style);
+}
 
-ParagraphBuilder::ParagraphBuilder(ParagraphStyle style)
-    : paragraph_style_(style) {}
+ParagraphBuilder::ParagraphBuilder(ParagraphStyle style) {
+  SetParagraphStyle(style);
+}
 
 ParagraphBuilder::ParagraphBuilder() {}
 
 void ParagraphBuilder::SetParagraphStyle(const ParagraphStyle& style) {
   paragraph_style_ = style;
+  // Keep a default style to fall back to.
+  TextStyle text_style;
+  text_style.font_weight = paragraph_style_.font_weight;
+  text_style.font_style = paragraph_style_.font_style;
+  text_style.font_family = paragraph_style_.font_family;
+  text_style.font_size = paragraph_style_.font_size;
+  PushStyle(text_style);
 }
 
 void ParagraphBuilder::SetFontCollection(FontCollection* font_collection) {

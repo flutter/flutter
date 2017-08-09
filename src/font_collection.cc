@@ -103,23 +103,27 @@ void FontCollection::AddFontMgr(std::string dir, bool rediscover_family_names) {
 #endif
 
   if (rediscover_family_names)
-    DiscoverFamilyNames();
+    DiscoverFamilyNames(skia_font_managers_.back());
 }
 
 void FontCollection::AddFontMgr(sk_sp<SkFontMgr> font_mgr,
                                 bool rediscover_family_names) {
   skia_font_managers_.push_back(font_mgr);
   if (rediscover_family_names)
-    DiscoverFamilyNames();
+    DiscoverFamilyNames(font_mgr);
 }
 
 void FontCollection::DiscoverFamilyNames() {
-  SkString str;
   for (sk_sp<SkFontMgr> mgr : skia_font_managers_) {
-    for (int i = 0; i < mgr->countFamilies(); i++) {
-      mgr->getFamilyName(i, &str);
-      family_names_.insert(std::string{str.writable_str()});
-    }
+    DiscoverFamilyNames(mgr);
+  }
+}
+
+void FontCollection::DiscoverFamilyNames(sk_sp<SkFontMgr> mgr) {
+  SkString str;
+  for (int i = 0; i < mgr->countFamilies(); i++) {
+    mgr->getFamilyName(i, &str);
+    family_names_.insert(std::string{str.writable_str()});
   }
 }
 

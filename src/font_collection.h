@@ -129,8 +129,12 @@ class FontCollection {
   // when not found and reverting to the default name when no fallback is found.
   const std::string ProcessFamilyName(const std::string& family);
 
-  // Polls the SkFontMgrs to obtain a set of all available font family names.
+  // Polls all of the SkFontMgrs to obtain a set of all available font family
+  // names.
   void DiscoverFamilyNames();
+
+  // Add the family names of mgr to set of available font family names.
+  void DiscoverFamilyNames(sk_sp<SkFontMgr> mgr);
 
   void TrimCache();
 
