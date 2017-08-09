@@ -98,6 +98,10 @@ class AssetBundle {
 
     final PackageMap packageMap = new PackageMap(packagesPath);
 
+    // The _assetVariants map contains an entry for each asset listed
+    // in the pubspec.yaml file's assets and font and sections. The
+    // value of each image asset is a list of resolution-specific "variants",
+    // see _AssetDirectoryCache.
     final Map<_Asset, List<_Asset>> assetVariants = _parseAssets(
       packageMap,
       manifestDescriptor,
@@ -112,12 +116,20 @@ class AssetBundle {
         manifestDescriptor.containsKey('uses-material-design') &&
         manifestDescriptor['uses-material-design'];
 
+    // Save the contents of each image, image variant, and font
+    // asset in entries.
     for (_Asset asset in assetVariants.keys) {
       if (!asset.assetFileExists && assetVariants[asset].isEmpty) {
         printStatus('Error detected in pubspec.yaml:', emphasis: true);
         printError('No file or variants found for $asset.\n');
         return 1;
       }
+      // The file name for an asset's "main" entry is whatever appears in
+      // the pubspec.yaml file. The main entry will always exist for font
+      // assets. It need not be specified for an image if resolution-specific
+      // variants exist. An image's main entry is treated the same as a "1x"
+      // resolution variant and if both exist then the explicit variant is
+      // preferred.
       if (asset.assetFileExists) {
         assert(!assetVariants[asset].contains(asset));
         assetVariants[asset].insert(0, asset);
