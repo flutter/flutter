@@ -13,5 +13,6 @@
 #include "FlutterMacros.h"
 #include "FlutterPlugin.h"
 #include "FlutterViewController.h"
+#include "FlutterNavigationController.h"
 
 #endif  // FLUTTER_FLUTTER_H_
