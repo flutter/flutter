@@ -12,8 +12,9 @@ void main() {
   /// further constraining the size of its child, the label widget.
   /// Optionally, adding an avatar or delete icon to the chip should not
   /// cause the chip or label to exceed its constrained size.
-  Future<Null> _testConstrainedLabel(WidgetTester tester,
-      {CircleAvatar avatar, VoidCallback onDeleted}) async {
+  Future<Null> _testConstrainedLabel(WidgetTester tester, {
+    CircleAvatar avatar, VoidCallback onDeleted,
+  }) async {
     const double labelWidth = 100.0;
     const double labelHeight = 50.0;
     const double chipParentWidth = 75.0;
