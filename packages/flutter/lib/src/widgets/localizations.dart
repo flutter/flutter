@@ -10,6 +10,10 @@ import 'package:flutter/foundation.dart';
 import 'container.dart';
 import 'framework.dart';
 
+// Examples can assume:
+// class Intl { static String message(String s, { String name, String locale }) => ''; }
+// Future<Null> initializeMessages(String locale) => null;
+
 /// Progress for a [LocalizationsDelegate.load] method.
 enum LocalizationsStatus {
   /// Loading has not been started, [LocalizationsDelegate.resourcesFor] will return null.
