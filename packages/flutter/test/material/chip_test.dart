@@ -68,7 +68,7 @@ void main() {
                   deletedChipLabels.add('A');
                 },
                 deleteButtonTooltipMessage: 'Delete chip A',
-                ),
+              ),
               new Chip(
                 avatar: const CircleAvatar(
                   child: const Text('B')
@@ -112,7 +112,7 @@ void main() {
     const double labelWidth = 50.0;
     const double labelHeight = 30.0;
     final Key labelKey = new UniqueKey();
-    
+
     await tester.pumpWidget(
       new Material(
         child: new Center(
