@@ -8,6 +8,31 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
+/// Base class for [FractionalOffset] that allows for text-direction aware
+/// resolution.
+///
+/// A property or argument of this type accepts classes created either with [new
+/// FractionalOffset] and its variants, or [new FractionalOffsetDirectional].
+///
+/// To convert a [FractionalOffsetGeometry] object of indeterminate type into a
+/// [FractionalOffset] object, call the [resolve] method.
+abstract class FractionalOffsetGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const FractionalOffsetGeometry();
+
+  /// Convert this instance into a [FractionalOffset], which uses literal
+  /// coordinates (the `x` coordinate being explicitly a distance from the
+  /// left).
+  ///
+  /// See also:
+  ///
+  ///  * [FractionalOffset], for which this is a no-op (returns itself).
+  ///  * [FractionalOffsetDirectional], which flips the horizontal direction
+  ///    based on the `direction` argument.
+  FractionalOffset resolve(TextDirection direction);
+}
+
 /// An offset that's expressed as a fraction of a [Size].
 ///
 /// `FractionalOffset(1.0, 0.0)` represents the top right of the [Size].
@@ -22,8 +47,14 @@ import 'basic_types.dart';
 ///
 ///  * [Align] positions a child according to a [FractionalOffset].
 ///  * [FractionalTranslation] moves a child according to a [FractionalOffset].
+///
+/// See also:
+///
+///  * [FractionalOffsetDirectional], which (for properties and arguments that
+///    accept the type [FractionalOffsetGeometry]) allows the horizontal
+///    coordinate to be specified in a [TextDirection]-aware manner.
 @immutable
-class FractionalOffset {
+class FractionalOffset extends FractionalOffsetGeometry {
   /// Creates a fractional offset.
   ///
   /// The [dx] and [dy] arguments must not be null.
@@ -70,7 +101,7 @@ class FractionalOffset {
   ///
   /// A value of 0.0 corresponds to the topmost edge. A value of 1.0 corresponds
   /// to the bottommost edge. Values are not limited to that range; negative
-  /// values represent positions above the top, and values greated than 1.0
+  /// values represent positions above the top, and values greater than 1.0
   /// represent positions below the bottom.
   final double dy;
 
@@ -165,18 +196,6 @@ class FractionalOffset {
     );
   }
 
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! FractionalOffset)
-      return false;
-    final FractionalOffset typedOther = other;
-    return dx == typedOther.dx &&
-           dy == typedOther.dy;
-  }
-
-  @override
-  int get hashCode => hashValues(dx, dy);
-
   /// Linearly interpolate between two EdgeInsets.
   ///
   /// If either is null, this function interpolates from [FractionalOffset.topLeft].
@@ -193,5 +212,86 @@ class FractionalOffset {
   }
 
   @override
+  FractionalOffset resolve(TextDirection direction) => this;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final FractionalOffset typedOther = other;
+    return dx == typedOther.dx &&
+           dy == typedOther.dy;
+  }
+
+  @override
+  int get hashCode => hashValues(dx, dy);
+
+  @override
   String toString() => '$runtimeType($dx, $dy)';
+}
+
+/// An offset that's expressed as a fraction of a [Size], but whose horizontal
+/// component is dependent on the writing direction.
+///
+/// This can be used to indicate an offset from the left in [TextDirection.ltr]
+/// text and an offset from the right in [TextDirection.rtl] text without having
+/// to be aware of the current text direction.
+class FractionalOffsetDirectional extends FractionalOffsetGeometry {
+  /// Creates a directional fractional offset.
+  ///
+  /// The [start] and [dy] arguments must not be null.
+  const FractionalOffsetDirectional(this.start, this.dy)
+    : assert(start != null),
+      assert(dy != null);
+
+  /// The distance fraction in the horizontal direction.
+  ///
+  /// A value of 0.0 corresponds to the edge on the "start" side, which is the
+  /// left side in [TextDirection.ltr] contexts and the right side in
+  /// [TextDirection.rtl] contexts. A value of 1.0 corresponds to the opposite
+  /// edge, the "end" side. Values are not limited to that range; negative
+  /// values represent positions beyond the start edge, and values greater than
+  /// 1.0 represent positions beyond the end edge.
+  ///
+  /// This value is normalized into a [FractionalOffset.dx] value by the
+  /// [resolve] method.
+  final double start;
+
+  /// The distance fraction in the vertical direction.
+  ///
+  /// A value of 0.0 corresponds to the topmost edge. A value of 1.0 corresponds
+  /// to the bottommost edge. Values are not limited to that range; negative
+  /// values represent positions above the top, and values greater than 1.0
+  /// represent positions below the bottom.
+  ///
+  /// This value is passed through to [FractionalOffset.dy] unmodified by the
+  /// [resolve] method.
+  final double dy;
+
+  @override
+  FractionalOffset resolve(TextDirection direction) {
+    assert(direction != null);
+    switch (direction) {
+      case TextDirection.ltr:
+        return new FractionalOffset(start, dy);
+      case TextDirection.rtl:
+        return new FractionalOffset(1.0 - start, dy);
+    }
+    return null;
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final FractionalOffsetDirectional typedOther = other;
+    return start == typedOther.start &&
+           dy == typedOther.dy;
+  }
+
+  @override
+  int get hashCode => hashValues(start, dy);
+
+  @override
+  String toString() => '$runtimeType($start, $dy)';
 }

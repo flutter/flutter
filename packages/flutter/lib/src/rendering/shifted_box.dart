@@ -91,29 +91,58 @@ class RenderPadding extends RenderShiftedBox {
   ///
   /// The [padding] argument must not be null and must have non-negative insets.
   RenderPadding({
-    @required EdgeInsets padding,
-    RenderBox child
+    @required EdgeInsetsGeometry padding,
+    TextDirection textDirection,
+    RenderBox child,
   }) : assert(padding != null),
        assert(padding.isNonNegative),
+       _textDirection = textDirection,
        _padding = padding,
-       super(child);
+       super(child) {
+    _applyUpdate();
+  }
+
+  // The resolved absolute insets.
+  EdgeInsets _resolvedPadding;
+
+  void _applyUpdate() {
+    final EdgeInsets resolvedPadding = padding.resolve(textDirection);
+    assert(resolvedPadding.isNonNegative);
+    if (resolvedPadding != _resolvedPadding) {
+      _resolvedPadding = resolvedPadding;
+      markNeedsLayout();
+    }
+  }
 
   /// The amount to pad the child in each dimension.
-  EdgeInsets get padding => _padding;
-  EdgeInsets _padding;
-  set padding(EdgeInsets value) {
+  ///
+  /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
+  /// must be non-null.
+  EdgeInsetsGeometry get padding => _padding;
+  EdgeInsetsGeometry _padding;
+  set padding(EdgeInsetsGeometry value) {
     assert(value != null);
     assert(value.isNonNegative);
     if (_padding == value)
       return;
     _padding = value;
-    markNeedsLayout();
+    _applyUpdate();
+  }
+
+  /// The text direction with which to resolve [padding].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    _applyUpdate();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    final double totalHorizontalPadding = padding.left + padding.right;
-    final double totalVerticalPadding = padding.top + padding.bottom;
+    final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
+    final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
       return child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
@@ -121,8 +150,8 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    final double totalHorizontalPadding = padding.left + padding.right;
-    final double totalVerticalPadding = padding.top + padding.bottom;
+    final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
+    final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
       return child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
     return totalHorizontalPadding;
@@ -130,8 +159,8 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    final double totalHorizontalPadding = padding.left + padding.right;
-    final double totalVerticalPadding = padding.top + padding.bottom;
+    final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
+    final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
       return child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
@@ -139,8 +168,8 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    final double totalHorizontalPadding = padding.left + padding.right;
-    final double totalVerticalPadding = padding.top + padding.bottom;
+    final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
+    final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
       return child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
     return totalVerticalPadding;
@@ -148,21 +177,21 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   void performLayout() {
-    assert(padding != null);
+    assert(_resolvedPadding != null);
     if (child == null) {
       size = constraints.constrain(new Size(
-        padding.left + padding.right,
-        padding.top + padding.bottom
+        _resolvedPadding.left + _resolvedPadding.right,
+        _resolvedPadding.top + _resolvedPadding.bottom
       ));
       return;
     }
-    final BoxConstraints innerConstraints = constraints.deflate(padding);
+    final BoxConstraints innerConstraints = constraints.deflate(_resolvedPadding);
     child.layout(innerConstraints, parentUsesSize: true);
     final BoxParentData childParentData = child.parentData;
-    childParentData.offset = new Offset(padding.left, padding.top);
+    childParentData.offset = new Offset(_resolvedPadding.left, _resolvedPadding.top);
     size = constraints.constrain(new Size(
-      padding.left + child.size.width + padding.right,
-      padding.top + child.size.height + padding.bottom
+      _resolvedPadding.left + child.size.width + _resolvedPadding.right,
+      _resolvedPadding.top + child.size.height + _resolvedPadding.bottom
     ));
   }
 
@@ -171,7 +200,7 @@ class RenderPadding extends RenderShiftedBox {
     super.debugPaintSize(context, offset);
     assert(() {
       final Rect outerRect = offset & size;
-      debugPaintPadding(context.canvas, outerRect, child != null ? padding.deflateRect(outerRect) : null);
+      debugPaintPadding(context.canvas, outerRect, child != null ? _resolvedPadding.deflateRect(outerRect) : null);
       return true;
     });
   }
@@ -179,7 +208,8 @@ class RenderPadding extends RenderShiftedBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection));
   }
 }
 

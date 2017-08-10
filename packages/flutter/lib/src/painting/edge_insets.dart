@@ -8,13 +8,36 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
-/// The two cardinal directions in two dimensions.
-enum Axis {
-  /// Left and right
-  horizontal,
+/// Base class for [EdgeInsets] that allows for text-direction aware
+/// resolution.
+///
+/// A property or argument of this type accepts classes created either with [new
+/// EdgeInsets.fromLTRB] and its variants, or [new EdgeInsetsDirectional].
+///
+/// To convert a [EdgeInsetsGeometry] object of indeterminate type into a
+/// [EdgeInsets] object, call the [resolve] method.
+///
+/// See also:
+///
+///  * [Padding], a widget that describes margins using [EdgeInsetsGeometry].
+abstract class EdgeInsetsGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const EdgeInsetsGeometry();
 
-  /// Up and down
-  vertical,
+  /// Whether every dimension is non-negative.
+  bool get isNonNegative;
+
+  /// Convert this instance into a [EdgeInsets], which uses literal coordinates
+  /// (i.e. the `left` coordinate being explicitly a distance from the left, and
+  /// the `right` coordinate being explicitly a distance from the right).
+  ///
+  /// See also:
+  ///
+  ///  * [EdgeInsets], for which this is a no-op (returns itself).
+  ///  * [EdgeInsetsDirectional], which flips the horizontal direction
+  ///    based on the `direction` argument.
+  EdgeInsets resolve(TextDirection direction);
 }
 
 /// An immutable set of offsets in each of the four cardinal directions.
@@ -46,13 +69,16 @@ enum Axis {
 ///
 /// See also:
 ///
-///  * [Padding], a widget that describes margins using [EdgeInsets].
+///  * [Padding], a widget that accepts [EdgeInsets] to describe its margins.
+///  * [EdgeInsetsDirectional], which (for properties and arguments that accept
+///    the type [EdgeInsetsGeometry]) allows the horizontal insets to be
+///    specified in a [TextDirection]-aware manner.
 @immutable
-class EdgeInsets {
+class EdgeInsets extends EdgeInsetsGeometry {
   /// Creates insets from offsets from the left, top, right, and bottom.
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
 
-  /// Creates insets where all the offsets are value.
+  /// Creates insets where all the offsets are `value`.
   ///
   /// ## Sample code
   ///
@@ -133,7 +159,7 @@ class EdgeInsets {
   /// bottom right of that rectangle inset by this object.
   Offset get bottomRight => new Offset(-right, -bottom);
 
-  /// Whether every dimension is non-negative.
+  @override
   bool get isNonNegative => left >= 0.0 && top >= 0.0 && right >= 0.0 && bottom >= 0.0;
 
   /// The total offset in the vertical direction.
@@ -298,10 +324,13 @@ class EdgeInsets {
   static const EdgeInsets zero = const EdgeInsets.all(0.0);
 
   @override
+  EdgeInsets resolve(TextDirection direction) => this;
+
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! EdgeInsets)
+    if (other.runtimeType != runtimeType)
       return false;
     final EdgeInsets typedOther = other;
     return left == typedOther.left &&
@@ -314,5 +343,90 @@ class EdgeInsets {
   int get hashCode => hashValues(left, top, right, bottom);
 
   @override
-  String toString() => "EdgeInsets($left, $top, $right, $bottom)";
+  String toString() => '$runtimeType($left, $top, $right, $bottom)';
+}
+
+/// An immutable set of offsets in each of the four cardinal directions, but
+/// whose horizontal components are dependent on the writing direction.
+///
+/// This can be used to indicate padding from the left in [TextDirection.ltr]
+/// text and padding from the right in [TextDirection.rtl] text without having
+/// to be aware of the current text direction.
+class EdgeInsetsDirectional extends EdgeInsetsGeometry {
+  /// Creates insets from offsets from the start, top, end, and bottom.
+  const EdgeInsetsDirectional.fromSTEB(this.start, this.top, this.end, this.bottom);
+
+  /// Creates insets with only the given values non-zero.
+  ///
+  /// ## Sample code
+  ///
+  /// A margin indent of 40 pixels on the leading side:
+  ///
+  /// ```dart
+  /// const EdgeInsetsDirectional.only(start: 40.0)
+  /// ```
+  const EdgeInsetsDirectional.only({
+    this.start: 0.0,
+    this.top: 0.0,
+    this.end: 0.0,
+    this.bottom: 0.0
+  });
+
+  /// The offset from the start side, the side from which the user will start
+  /// reading text.
+  ///
+  /// This value is normalized into an [EdgeInsets.left] or [EdgeInsets.right]
+  /// value by the [resolve] method.
+  final double start;
+
+  /// The offset from the top.
+  ///
+  /// This value is passed through to [EdgeInsets.top] unmodified by the
+  /// [resolve] method.
+  final double top;
+
+  /// The offset from the end side, the side on which the user ends reading
+  /// text.
+  ///
+  /// This value is normalized into an [EdgeInsets.left] or [EdgeInsets.right]
+  /// value by the [resolve] method.
+  final double end;
+
+  /// The offset from the bottom.
+  ///
+  /// This value is passed through to [EdgeInsets.bottom] unmodified by the
+  /// [resolve] method.
+  final double bottom;
+
+  @override
+  bool get isNonNegative => start >= 0.0 && top >= 0.0 && end >= 0.0 && bottom >= 0.0;
+
+  @override
+  EdgeInsets resolve(TextDirection direction) {
+    assert(direction != null);
+    switch (direction) {
+      case TextDirection.ltr:
+        return new EdgeInsets.fromLTRB(start, top, end, bottom);
+      case TextDirection.rtl:
+        return new EdgeInsets.fromLTRB(end, top, start, bottom);
+    }
+    return null;
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final EdgeInsetsDirectional typedOther = other;
+    return start == typedOther.start &&
+           top == typedOther.top &&
+           end == typedOther.end &&
+           bottom == typedOther.bottom;
+  }
+
+  @override
+  int get hashCode => hashValues(start, top, end, bottom);
+
+  @override
+  String toString() => '$runtimeType($start, $top, $end, $bottom)';
 }
