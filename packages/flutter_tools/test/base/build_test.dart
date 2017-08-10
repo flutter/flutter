@@ -75,7 +75,7 @@ void main() {
     testUsingContext('returns one file if only one is listed', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart');
       expect(await readDepfile('a.d'), unorderedEquals(<String>['/foo/a.dart']));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
     testUsingContext('returns multiple files', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart /foo/b.dart');
@@ -92,7 +92,7 @@ void main() {
         '/foo/b.dart',
         '/foo/c.dart',
       ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
     testUsingContext('returns files with spaces and backslashes', () async {
       await fs.file('a.d').writeAsString(r'snapshot.d: /foo/a\ a.dart /foo/b\\b.dart /foo/c\\ c.dart');
@@ -101,6 +101,6 @@ void main() {
         r'/foo/b\b.dart',
         r'/foo/c\ c.dart',
       ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
   });
 }
