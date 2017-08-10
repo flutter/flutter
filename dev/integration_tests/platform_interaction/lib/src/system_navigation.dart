@@ -6,17 +6,19 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'test_step.dart';
 
-Future<TestStepResult> systemNavigatorPop() async {
+Future<TestStepResult> systemNavigatorPop() {
   const BasicMessageChannel<String> channel = const BasicMessageChannel<String>(
-    'SystemNavigator.pop',
+    'navigation-test',
     const StringCodec(),
   );
 
-  TestStatus status = TestStatus.failed;
+  Completer<TestStepResult> completer = new Completer<TestStepResult>();
+
   channel.setMessageHandler((String message) async {
-    status = TestStatus.ok;
+    completer.complete(
+        new TestStepResult('System navigation pop', '', TestStatus.ok));
     return '';
   });
-  await SystemNavigator.pop();
-  return new TestStepResult('System navigation pop', '', status);
+  SystemNavigator.pop();
+  return completer.future;
 }

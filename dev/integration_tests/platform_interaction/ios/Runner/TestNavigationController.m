@@ -17,7 +17,7 @@
   FlutterViewController* root = (FlutterViewController*)[self.viewControllers objectAtIndex:0];
   
   FlutterBasicMessageChannel* messageChannel =
-      [FlutterBasicMessageChannel messageChannelWithName:@"SystemNavigator.pop"
+      [FlutterBasicMessageChannel messageChannelWithName:@"navigation-test"
                                          binaryMessenger:root
                                                    codec:[FlutterStringCodec sharedInstance]];
   [messageChannel sendMessage:@"ping"];

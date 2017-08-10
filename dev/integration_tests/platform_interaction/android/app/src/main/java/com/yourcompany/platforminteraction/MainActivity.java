@@ -18,7 +18,7 @@ public class MainActivity extends FlutterActivity {
   }
   public void finish() {
     BasicMessageChannel channel =
-        new BasicMessageChannel<>(getFlutterView(), "SystemNavigator.pop", StringCodec.INSTANCE);
+        new BasicMessageChannel<>(getFlutterView(), "navigation-test", StringCodec.INSTANCE);
     channel.send("ping");
   }
 }
