@@ -56,6 +56,9 @@ class ParagraphBuilder {
   //   builder.AddText(" Back to normal again.");
   void Pop();
 
+  // Returns the last TextStyle on the stack.
+  const TextStyle& PeekStyle() const;
+
   // Adds text to the builder. Forms the proper runs to use the upper-most style
   // on the style_stack_;
   void AddText(const std::u16string& text);
