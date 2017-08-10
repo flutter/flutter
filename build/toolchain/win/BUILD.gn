@@ -115,8 +115,14 @@ template("msvc_toolchain") {
     tool("asm") {
       # TODO(brettw): "/safeseh" assembler argument is hardcoded here. Extract
       # assembler flags to a variable like cflags. crbug.com/418613
-      command = "$python_path gyp-win-tool asm-wrapper $env ml.exe {{defines}} {{include_dirs}} {{asmflags}} /safeseh /c /Fo {{output}} {{source}}"
-      description = "ASM {{output}}"
+      if (invoker.current_cpu == "x64") {
+        ml = "ml64.exe"
+        x64 = "-D_ML64_X64"
+      } else {
+        ml = "ml.exe"
+        x64 = ""
+      }
+      command = "$python_path gyp-win-tool asm-wrapper $env $ml $x64 {{defines}} {{include_dirs}} {{asmflags}} /safeseh /c /Fo {{output}} {{source}}"
       outputs = [
         "{{target_out_dir}}/{{target_output_name}}/{{source_name_part}}.obj",
       ]
@@ -166,9 +172,11 @@ template("msvc_toolchain") {
     }
 
     tool("link") {
-      rspfile = "{{output}}.rsp"
+      binary_output =
+          "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
+      rspfile = "$binary_output.rsp"
 
-      link_command = "$python_path gyp-win-tool link-wrapper $env False link.exe /nologo /OUT:{{output}} /PDB:{{output}}.pdb @$rspfile"
+      link_command = "$python_path gyp-win-tool link-wrapper $env False link.exe /nologo /OUT:$binary_output /PDB:$binary_output.pdb @$rspfile"
 
       # TODO(brettw) support manifests
       #manifest_command = "$python_path gyp-win-tool manifest-wrapper $env mt.exe -nologo -manifest $manifests -out:{{output}}.manifest"
@@ -176,9 +184,10 @@ template("msvc_toolchain") {
       command = link_command
 
       default_output_extension = ".exe"
-      description = "LINK {{output}}"
+      description = "LINK $binary_output"
       outputs = [
-        "{{root_out_dir}}/{{target_output_name}}{{output_extension}}",
+        binary_output,
+        "{{root_out_dir}}/{{target_output_name}}.lib",
       ]
 
       # The use of inputs_newline is to work around a fixed per-line buffer
