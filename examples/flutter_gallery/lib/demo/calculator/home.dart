@@ -18,7 +18,7 @@ class _CalculatorState extends State<Calculator> {
   /// keep a stack of previous expressions so we can return to earlier states
   /// when the user hits the DEL key.
   final List<CalcExpression> _expressionStack = <CalcExpression>[];
-  CalcExpression _expression = new CalcExpression.Empty();
+  CalcExpression _expression = new CalcExpression.empty();
 
   // Make `expression` the current expression and push the previous current
   // expression onto the stack.
@@ -32,7 +32,7 @@ class _CalculatorState extends State<Calculator> {
     if (_expressionStack.isNotEmpty) {
       _expression = _expressionStack.removeLast();
     } else {
-      _expression = new CalcExpression.Empty();
+      _expression = new CalcExpression.empty();
     }
   }
 

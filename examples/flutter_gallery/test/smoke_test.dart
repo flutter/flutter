@@ -164,7 +164,7 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
 void main() {
   testWidgets('Flutter Gallery app smoke test', runSmokeTest);
 
-  testWidgets('Flutter Gallery app smoke test', (WidgetTester tester) async {
+  testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
     RendererBinding.instance.setSemanticsEnabled(true);
     await runSmokeTest(tester);
     RendererBinding.instance.setSemanticsEnabled(false);

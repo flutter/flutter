@@ -530,7 +530,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
       context.visitChildElements((Element element) {
         final _GestureSemantics widget = element.widget;
-        widget._updateHandlers(semanticsGestureHandler, _recognizers);
+        widget._updateHandlers(semanticsGestureHandler);
       });
     }
   }
@@ -600,6 +600,86 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
+  void _handleSemanticsTap() {
+    final TapGestureRecognizer recognizer = _recognizers[TapGestureRecognizer];
+    assert(recognizer != null);
+    if (recognizer.onTapDown != null)
+      recognizer.onTapDown(new TapDownDetails());
+    if (recognizer.onTapUp != null)
+      recognizer.onTapUp(new TapUpDetails());
+    if (recognizer.onTap != null)
+      recognizer.onTap();
+  }
+
+  void _handleSemanticsLongPress() {
+    final LongPressGestureRecognizer recognizer = _recognizers[LongPressGestureRecognizer];
+    assert(recognizer != null);
+    if (recognizer.onLongPress != null)
+      recognizer.onLongPress();
+  }
+
+  void _handleSemanticsHorizontalDragUpdate(DragUpdateDetails updateDetails) {
+    {
+      final HorizontalDragGestureRecognizer recognizer = _recognizers[HorizontalDragGestureRecognizer];
+      if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
+        if (recognizer.onStart != null)
+          recognizer.onStart(new DragStartDetails());
+        if (recognizer.onUpdate != null)
+          recognizer.onUpdate(updateDetails);
+        if (recognizer.onEnd != null)
+          recognizer.onEnd(new DragEndDetails(primaryVelocity: 0.0));
+        return;
+      }
+    }
+    {
+      final PanGestureRecognizer recognizer = _recognizers[PanGestureRecognizer];
+      if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
+        if (recognizer.onStart != null)
+          recognizer.onStart(new DragStartDetails());
+        if (recognizer.onUpdate != null)
+          recognizer.onUpdate(updateDetails);
+        if (recognizer.onEnd != null)
+          recognizer.onEnd(new DragEndDetails());
+        return;
+      }
+    }
+  }
+
+  void _handleSemanticsVerticalDragUpdate(DragUpdateDetails updateDetails) {
+    {
+      final VerticalDragGestureRecognizer recognizer = _recognizers[VerticalDragGestureRecognizer];
+      if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
+        if (recognizer.onStart != null)
+          recognizer.onStart(new DragStartDetails());
+        if (recognizer.onUpdate != null)
+          recognizer.onUpdate(updateDetails);
+        if (recognizer.onEnd != null)
+          recognizer.onEnd(new DragEndDetails(primaryVelocity: 0.0));
+        return;
+      }
+    }
+    {
+      final PanGestureRecognizer recognizer = _recognizers[PanGestureRecognizer];
+      if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
+        if (recognizer.onStart != null)
+          recognizer.onStart(new DragStartDetails());
+        if (recognizer.onUpdate != null)
+          recognizer.onUpdate(updateDetails);
+        if (recognizer.onEnd != null)
+          recognizer.onEnd(new DragEndDetails());
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget result = new Listener(
@@ -637,101 +717,22 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   final RawGestureDetectorState owner;
 
-  void _handleTap() {
-    final TapGestureRecognizer recognizer = owner._recognizers[TapGestureRecognizer];
-    assert(recognizer != null);
-    if (recognizer.onTapDown != null)
-      recognizer.onTapDown(new TapDownDetails());
-    if (recognizer.onTapUp != null)
-      recognizer.onTapUp(new TapUpDetails());
-    if (recognizer.onTap != null)
-      recognizer.onTap();
-  }
-
-  void _handleLongPress() {
-    final LongPressGestureRecognizer recognizer = owner._recognizers[LongPressGestureRecognizer];
-    assert(recognizer != null);
-    if (recognizer.onLongPress != null)
-      recognizer.onLongPress();
-  }
-
-  void _handleHorizontalDragUpdate(DragUpdateDetails updateDetails) {
-    {
-      final HorizontalDragGestureRecognizer recognizer = owner._recognizers[HorizontalDragGestureRecognizer];
-      if (recognizer != null) {
-        if (recognizer.onDown != null)
-          recognizer.onDown(new DragDownDetails());
-        if (recognizer.onStart != null)
-          recognizer.onStart(new DragStartDetails());
-        if (recognizer.onUpdate != null)
-          recognizer.onUpdate(updateDetails);
-        if (recognizer.onEnd != null)
-          recognizer.onEnd(new DragEndDetails(primaryVelocity: 0.0));
-        return;
-      }
-    }
-    {
-      final PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
-      if (recognizer != null) {
-        if (recognizer.onDown != null)
-          recognizer.onDown(new DragDownDetails());
-        if (recognizer.onStart != null)
-          recognizer.onStart(new DragStartDetails());
-        if (recognizer.onUpdate != null)
-          recognizer.onUpdate(updateDetails);
-        if (recognizer.onEnd != null)
-          recognizer.onEnd(new DragEndDetails());
-        return;
-      }
-    }
-  }
-
-  void _handleVerticalDragUpdate(DragUpdateDetails updateDetails) {
-    {
-      final VerticalDragGestureRecognizer recognizer = owner._recognizers[VerticalDragGestureRecognizer];
-      if (recognizer != null) {
-        if (recognizer.onDown != null)
-          recognizer.onDown(new DragDownDetails());
-        if (recognizer.onStart != null)
-          recognizer.onStart(new DragStartDetails());
-        if (recognizer.onUpdate != null)
-          recognizer.onUpdate(updateDetails);
-        if (recognizer.onEnd != null)
-          recognizer.onEnd(new DragEndDetails(primaryVelocity: 0.0));
-        return;
-      }
-    }
-    {
-      final PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
-      if (recognizer != null) {
-        if (recognizer.onDown != null)
-          recognizer.onDown(new DragDownDetails());
-        if (recognizer.onStart != null)
-          recognizer.onStart(new DragStartDetails());
-        if (recognizer.onUpdate != null)
-          recognizer.onUpdate(updateDetails);
-        if (recognizer.onEnd != null)
-          recognizer.onEnd(new DragEndDetails());
-        return;
-      }
-    }
-  }
-
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final RenderSemanticsGestureHandler result = new RenderSemanticsGestureHandler();
-    updateRenderObject(context, result);
-    return result;
+    final RenderSemanticsGestureHandler renderObject = new RenderSemanticsGestureHandler();
+    _updateHandlers(renderObject);
+    return renderObject;
   }
 
-  void _updateHandlers(RenderSemanticsGestureHandler renderObject, Map<Type, GestureRecognizer> recognizers) {
+  void _updateHandlers(RenderSemanticsGestureHandler renderObject) {
+    final Map<Type, GestureRecognizer> recognizers = owner._recognizers;
     renderObject
-      ..onTap = recognizers.containsKey(TapGestureRecognizer) ? _handleTap : null
-      ..onLongPress = recognizers.containsKey(LongPressGestureRecognizer) ? _handleLongPress : null
-      ..onHorizontalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
-          recognizers.containsKey(PanGestureRecognizer) ? _handleHorizontalDragUpdate : null
+      ..onTap = recognizers.containsKey(TapGestureRecognizer) ? owner._handleSemanticsTap : null
+      ..onLongPress = recognizers.containsKey(LongPressGestureRecognizer) ? owner._handleSemanticsLongPress : null
+      ..onHorizontalDragUpdate = recognizers.containsKey(HorizontalDragGestureRecognizer) ||
+          recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsHorizontalDragUpdate : null
       ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
-          recognizers.containsKey(PanGestureRecognizer) ? _handleVerticalDragUpdate : null;
+          recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsVerticalDragUpdate : null;
   }
 
   void _updateSemanticsActions(RenderSemanticsGestureHandler renderObject, Set<SemanticsAction> actions) {
@@ -740,6 +741,6 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
-    _updateHandlers(renderObject, owner._recognizers);
+    _updateHandlers(renderObject);
   }
 }

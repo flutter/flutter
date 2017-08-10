@@ -65,7 +65,13 @@ class DartDependencySetBuilder {
           uriAsString = uriBasedDirective.uri.stringValue;
         }
 
-        Uri resolvedUri = analyzer.resolveRelativeUri(currentUri, Uri.parse(uriAsString));
+        Uri uri;
+        try {
+          uri = Uri.parse(uriAsString);
+        } on FormatException {
+          throw new DartDependencyException('Unable to parse URI: $uriAsString');
+        }
+        Uri resolvedUri = analyzer.resolveRelativeUri(currentUri, uri);
         if (resolvedUri.scheme.startsWith('dart'))
           continue;
         if (resolvedUri.scheme == 'package') {
