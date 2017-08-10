@@ -157,7 +157,7 @@ void Canvas::transform(const tonic::Float64List& matrix4) {
 void Canvas::clipRect(double left, double top, double right, double bottom) {
   if (!canvas_)
     return;
-  canvas_->clipRect(SkRect::MakeLTRB(left, top, right, bottom));
+  canvas_->clipRect(SkRect::MakeLTRB(left, top, right, bottom), SkClipOp::kIntersect, true);
 }
 
 void Canvas::clipRRect(const RRect& rrect) {
