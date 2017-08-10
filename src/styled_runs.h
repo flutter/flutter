@@ -49,6 +49,9 @@ class StyledRuns {
 
   size_t AddStyle(const TextStyle& style);
 
+  // Returns the last TextStyle on the stack.
+  const TextStyle& PeekStyle() const;
+
   void StartRun(size_t style_index, size_t start);
 
   void EndRunIfNeeded(size_t end);

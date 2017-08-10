@@ -52,7 +52,7 @@ class Paragraph {
 
   ~Paragraph();
 
-  // NOTE: Minikin Layout doLayout() and LineBreaker addStyleRun() has an
+  // Minikin Layout doLayout() and LineBreaker addStyleRun() has an
   // O(N^2) (according to benchmarks) time complexity where N is the total
   // number of characters. However, this is not significant for reasonably sized
   // paragraphs. It is currently recommended to break up very long paragraphs

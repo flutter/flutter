@@ -72,6 +72,10 @@ void ParagraphBuilder::Pop() {
   runs_.StartRun(style_index, text_index);
 }
 
+const TextStyle& ParagraphBuilder::PeekStyle() const {
+  return runs_.PeekStyle();
+}
+
 void ParagraphBuilder::AddText(const std::u16string& text) {
   text_.insert(text_.end(), text.begin(), text.end());
 }
