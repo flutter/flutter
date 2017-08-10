@@ -7,6 +7,7 @@ import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
 import 'container.dart';
 import 'framework.dart';
 
@@ -77,8 +78,13 @@ abstract class LocalizationsDelegate {
   /// This method's type parameter `T` must match the `type` parameter.
   T resourcesFor<T>(Locale locale, Type type);
 
-  /// Returns true if widgets that depend on this delegate should be rebuilt.
-  bool updateShouldNotify(covariant LocalizationsDelegate old);
+  /// Returns true if the resources for this delegate should be loaded
+  /// again by calling the [load] method.
+  ///
+  /// This method is called whenever its [Localizations] widget is
+  /// rebuilt. If it returns true then dependent widgets will be rebuilt
+  /// after [load] has completed.
+  bool shouldReload(covariant LocalizationsDelegate old);
 }
 
 /// Signature for the async localized resource loading callback used
@@ -193,13 +199,13 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
     final Map<Type, dynamic> resources = _localeToResources[locale];
     if (resources == null)
       return null;
-    // TODO(hansmuller) assert(resources[type] is type) when
+    // TODO(hansmuller): assert(resources[type] is type) when
     // https://github.com/dart-lang/sdk/issues/27680 has been resolved.
     return resources[type];
   }
 
   @override
-  bool updateShouldNotify(DefaultLocalizationsDelegate old) => false;
+  bool shouldReload(DefaultLocalizationsDelegate old) => false;
 }
 
 class _MergedLocalizationsDelegate extends LocalizationsDelegate {
@@ -263,26 +269,29 @@ class _MergedLocalizationsDelegate extends LocalizationsDelegate {
   }
 
   @override
-  bool updateShouldNotify(_MergedLocalizationsDelegate old) => false;
+  bool shouldReload(_MergedLocalizationsDelegate old) => false;
 }
 
 class _LocalizationsScope extends InheritedWidget {
   _LocalizationsScope ({
     Key key,
     @required this.locale,
-    @required this.localizedResourcesState,
+    @required this.localizationsState,
     Widget child,
   }) : super(key: key, child: child) {
-    assert(localizedResourcesState != null);
+    assert(localizationsState != null);
   }
 
   final Locale locale;
-  final _LocalizationsState localizedResourcesState;
+  final _LocalizationsState localizationsState;
 
   @override
   bool updateShouldNotify(_LocalizationsScope old) {
-    if (locale != old.locale)
-      localizedResourcesState.load(locale);
+    final LocalizationsDelegate delegate = localizationsState.widget.delegate;
+    final bool shouldReload = locale != old.locale ||
+      (delegate != null && delegate.shouldReload(old.localizationsState.widget.delegate));
+    if (shouldReload)
+      localizationsState.load(locale);
     return false;
   }
 }
@@ -317,7 +326,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// be rebuilt after the corresponding resources had been loaded.
 ///
 /// This class is effectively an [InheritedWidget]. If it's rebuilt with
-/// a new `locale` or if its `delegate.updateShouldNotify` returns true,
+/// a new `locale` or if its `delegate.shouldReload` returns true,
 /// widgets that have created a dependency by calling
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
@@ -383,7 +392,7 @@ class Localizations extends StatefulWidget {
   static Locale localeOf(BuildContext context) {
     assert(context != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
-    return scope.localizedResourcesState.locale;
+    return scope.localizationsState.locale;
   }
 
   /// Returns the 'type' localized resources for the widget tree that
@@ -402,7 +411,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     assert(type != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
-    return scope.localizedResourcesState.resourcesFor<T>(type);
+    return scope.localizationsState.resourcesFor<T>(type);
   }
 
   @override
@@ -450,7 +459,9 @@ class _LocalizationsState extends State<Localizations> {
     } else {
       // Don't rebuild the dependent widgets until the resources for the new locale
       // have finished loading. Until then the old locale will continue to be used.
-      futureTypes.then<Iterable<Type>>((Iterable<Type> value) {
+      futureTypes.then((Iterable<Type> value) {
+        if (!mounted)
+          return;
         setState(() {
           _locale = locale;
         });
@@ -464,10 +475,15 @@ class _LocalizationsState extends State<Localizations> {
 
   @override
   Widget build(BuildContext context) {
+    // If we're still waiting for resources to load don't call this the "first frame".
+    // See https://github.com/flutter/flutter/issues/1865
+    if (_locale == null)
+      WidgetsBinding.instance.preventThisFrameFromBeingReportedAsFirstFrame();
+
     return new _LocalizationsScope(
       key: _localizedResourcesScopeKey,
       locale: widget.locale,
-      localizedResourcesState: this,
+      localizationsState: this,
       child: _locale != null ? widget.child : new Container(),
     );
   }

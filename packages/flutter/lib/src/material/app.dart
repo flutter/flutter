@@ -303,18 +303,33 @@ class _MaterialAppState extends State<MaterialApp> {
   void initState() {
     super.initState();
     _heroController = new HeroController(createRectTween: _createRectTween);
+    _localizationsDelegate = _createLocalizationsDelegate();
+  }
 
-    _localizationsDelegate = new DefaultLocalizationsDelegate(
+  @override
+  void didUpdateWidget(MaterialApp old) {
+    super.didUpdateWidget(old);
+    if (widget.localizationsDelegate != old.localizationsDelegate)
+      _localizationsDelegate = _createLocalizationsDelegate();
+  }
+
+  // Combine the Localizations for Material with the ones contributed
+  // by the localizationsDelegate parameter, if any.
+  LocalizationsDelegate _createLocalizationsDelegate() {
+    LocalizationsDelegate delegate = new DefaultLocalizationsDelegate(
       <Type, LocalizationsLoader>{
         MaterialLocalizations: MaterialLocalizations.load,
       }
     );
+
     if (widget.localizationsDelegate != null) {
-      _localizationsDelegate = new LocalizationsDelegate.merge(<LocalizationsDelegate>[
-        _localizationsDelegate,
+      delegate = new LocalizationsDelegate.merge(<LocalizationsDelegate>[
+        delegate,
         widget.localizationsDelegate,
       ]);
     }
+
+    return delegate;
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {

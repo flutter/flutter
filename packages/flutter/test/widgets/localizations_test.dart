@@ -50,8 +50,8 @@ class MoreLocalizations {
 }
 
 Widget buildFrame({
-  Locale locale: null,
-  LocalizationsDelegate delegate: null,
+  Locale locale,
+  LocalizationsDelegate delegate,
   WidgetBuilder buildContent,
 }) {
   return new WidgetsApp(
