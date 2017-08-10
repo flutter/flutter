@@ -130,6 +130,9 @@ you run `flutter upgrade`. If you want to alter and re-test the tool's behavior 
 locally commit your tool changes in git and the tool will be rebuilt from Dart sources
 in `packages/flutter_tools` the next time you run `flutter`.
 
+Alternatively, delete the `bin/cache/flutter_tools.snapshot` file. Doing so will
+force a rebuild of the tool from your local sources the next time you run `flutter`.
+
 flutter_tools' tests run inside the Dart command line VM rather than in the
 flutter shell. To run the test:
 
