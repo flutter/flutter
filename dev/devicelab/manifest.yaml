@@ -65,6 +65,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  platform_interaction_test:
+    description: >
+      Checks platform interaction on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
   platform_channel_sample_test:
     description: >
      Runs a driver test on the Platform Channel sample app on Android.
@@ -158,6 +164,12 @@ tasks:
   channels_integration_test_ios:
     description: >
       Checks that platform channels work on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
+  platform_interaction_test_ios:
+    description: >
+      Checks platform interaction on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
