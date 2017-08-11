@@ -1408,7 +1408,7 @@ class Canvas extends NativeFieldWrapperClass2 {
     assert(recorder != null);
     if (recorder.isRecording)
       throw new ArgumentError('"recorder" must not already be associated with another Canvas.');
-    assert(_rectIsValid(cullRect));
+    assert(cullRect != null);
     _constructor(recorder, cullRect.left, cullRect.top, cullRect.right, cullRect.bottom);
   }
   void _constructor(PictureRecorder recorder,
