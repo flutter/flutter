@@ -53,7 +53,7 @@ class BuildApkCommand extends BuildSubCommand {
     await super.runCommand();
 
     final BuildMode buildMode = getBuildMode();
-    await buildApk(buildMode: buildMode, 
+    await buildApk(buildMode: buildMode,
       previewDart2: argResults['preview-dart-2'],
       target: targetFile);
   }

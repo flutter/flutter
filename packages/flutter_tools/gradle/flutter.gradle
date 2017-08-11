@@ -216,10 +216,6 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
-        if (project.tasks.findByName('flutterBuildX86Jar')) {
-            project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
-        }
-
         Boolean previewDart2Value = false
         if (project.hasProperty('preview-dart-2')) {
             previewDart2Value = project.property('preview-dart-2')

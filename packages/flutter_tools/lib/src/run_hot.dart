@@ -10,13 +10,13 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'package:front_end/compiler_options.dart' show CompilerOptions;
 import 'package:front_end/incremental_kernel_generator.dart' show IncrementalKernelGenerator;
+import 'package:flutter_tools/src/artifacts.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -122,7 +122,8 @@ class HotRunner extends ResidentRunner {
     if (previewDart2 && (generator == null)) {
       final CompilerOptions options = new CompilerOptions()
         ..packagesFileUri = Uri.parse(packagesFilePath)
-        ..dartLibraries = loadDartLibraries(fs);
+        ..librariesSpecificationUri = new Uri.file(
+            artifacts.getArtifactPath(Artifact.platformLibrariesJson));
       generator = await IncrementalKernelGenerator.newInstance(
           options, new Uri.file(mainPath));
     }
