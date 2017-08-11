@@ -8,10 +8,30 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'globals.dart';
 
-enum BuildType {
-  prebuilt,
-  release,
-  debug,
+/// Information about a build to be performed.
+class BuildInfo {
+  final BuildMode mode;
+  /// Represents a custom Android product flavor or an Xcode scheme, null for
+  /// using the default.
+  ///
+  /// If not null, the Gradle build task will be `assembleFlavorMode` (e.g.
+  /// `assemblePaidRelease`), and the XCode build configuration will be
+  /// Mode-Flavor (e.g. Release-Paid).
+  final String flavor;
+
+  static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
+  static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);
+  static const BuildInfo release = const BuildInfo(BuildMode.release, null);
+
+  const BuildInfo(this.mode, this.flavor);
+
+  bool get isDebug => mode == BuildMode.debug;
+  bool get isProfile => mode == BuildMode.profile;
+  bool get isRelease => mode == BuildMode.release;
+  bool get usesAot => isAotBuildMode(mode);
+  bool get supportsEmulator => isEmulatorBuildMode(mode);
+  bool get supportsSimulator => isEmulatorBuildMode(mode);
+  String get modeName => getModeName(mode);
 }
 
 /// The type of build - `debug`, `profile`, or `release`.

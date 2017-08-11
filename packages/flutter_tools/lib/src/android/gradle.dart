@@ -164,7 +164,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 }
 
 /// Create android/local.properties if needed, and update Flutter settings.
-void updateLocalProperties({String projectPath, String buildMode}) {
+void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
   final File localProperties = (projectPath == null)
       ? fs.file(fs.path.join('android', 'local.properties'))
       : fs.file(fs.path.join(projectPath, 'android', 'local.properties'));
@@ -183,8 +183,8 @@ void updateLocalProperties({String projectPath, String buildMode}) {
     settings.values['flutter.sdk'] = escapedRoot;
     changed = true;
   }
-  if (buildMode != null && settings.values['flutter.buildMode'] != buildMode) {
-    settings.values['flutter.buildMode']  = buildMode;
+  if (buildInfo != null && settings.values['flutter.buildMode'] != buildInfo.modeName) {
+    settings.values['flutter.buildMode'] = buildInfo.modeName;
     changed = true;
   }
 
@@ -192,13 +192,12 @@ void updateLocalProperties({String projectPath, String buildMode}) {
     settings.writeContents(localProperties);
 }
 
-Future<Null> buildGradleProject(BuildMode buildMode, String target, String kernelPath) async {
+Future<Null> buildGradleProject(BuildInfo buildInfo, String target, String kernelPath) async {
   // Update the local.properties file with the build mode.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
   // uses the standard Android way to determine what to build, but we still
   // update local.properties, in case we want to use it in the future.
-  final String buildModeName = getModeName(buildMode);
-  updateLocalProperties(buildMode: buildModeName);
+  updateLocalProperties(buildInfo: buildInfo);
 
   injectPlugins();
 
@@ -212,7 +211,7 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target, String kerne
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(gradle, buildModeName, target, kernelPath);
+      return _buildGradleProjectV2(gradle, buildInfo, target, kernelPath);
   }
 }
 
@@ -234,19 +233,21 @@ Future<Null> _buildGradleProjectV1(String gradle) async {
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
-File findApkFile(String buildDirectory, String buildModeName) {
-  final String apkFilename = 'app-$buildModeName.apk';
+File findApkFile(String buildDirectory, BuildInfo buildInfo) {
+  final String flavorString = buildInfo.flavor == null ? '' : '-' + buildInfo.flavor;
+  final String apkFilename = 'app$flavorString-${buildInfo.modeName}.apk';
   File apkFile = fs.file('$buildDirectory/$apkFilename');
   if (apkFile.existsSync())
     return apkFile;
-  apkFile = fs.file('$buildDirectory/$buildModeName/$apkFilename');
+  apkFile = fs.file('$buildDirectory/${buildInfo.modeName}/$apkFilename');
   if (apkFile.existsSync())
     return apkFile;
   return null;
 }
 
-Future<Null> _buildGradleProjectV2(String gradle, String buildModeName, String target, String kernelPath) async {
-  final String assembleTask = "assemble${toTitleCase(buildModeName)}";
+Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String target, String kernelPath) async {
+  final String flavorString = buildInfo.flavor == null ? '' : toTitleCase(buildInfo.flavor);
+  final String assembleTask = 'assemble$flavorString${toTitleCase(buildInfo.modeName)}';
 
   // Run 'gradlew assemble<BuildMode>'.
   final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
@@ -278,7 +279,7 @@ Future<Null> _buildGradleProjectV2(String gradle, String buildModeName, String t
     throwToolExit('Gradle build failed: $exitcode', exitCode: exitcode);
 
   final String buildDirectory = await _getGradleAppOutDirV2();
-  final File apkFile = findApkFile(buildDirectory, buildModeName);
+  final File apkFile = findApkFile(buildDirectory, buildInfo);
   if (apkFile == null)
     throwToolExit('Gradle build failed to produce an Android package.');
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.

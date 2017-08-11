@@ -133,6 +133,14 @@ abstract class FlutterCommand extends Command<Null> {
     return _defaultBuildMode;
   }
 
+  void usesFlavorOption() {
+    argParser.addOption('flavor', abbr: 'f', defaultsTo: null);
+  }
+
+  BuildInfo getBuildInfo() {
+    return new BuildInfo(getBuildMode(), argResults['flavor']);
+  }
+
   void setupApplicationPackages() {
     applicationPackages ??= new ApplicationPackageStore();
   }
