@@ -76,11 +76,11 @@ main ways to run it. In either case you will want to run `flutter update-package
 first, or you will get version conflict issues or bogus error messages about core clases like
 Offset from `dart:ui`.
 
-For a one-off, use `flutter analyze --flutter-repo`. This uses the `.analysis_options_repo` file
+For a one-off, use `flutter analyze --flutter-repo`. This uses the `analysis_options_repo.yaml` file
 at the root of the repository for its configuration.
 
 For continuous analysis, use `flutter analyze --flutter-repo --watch`. This uses normal
-`.analysis_options` files, and they can differ from package to package.
+`analysis_options.yaml` files, and they can differ from package to package.
 
 If you want to see how many members are missing dartdocs, you should use the first option,
 providing the additional command `--dartdocs`.

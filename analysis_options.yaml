@@ -8,13 +8,13 @@
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
 # There are four similar analysis options files in the flutter repos:
-#   - .analysis_options (this file)
-#   - .analysis_options_repo
+#   - analysis_options.yaml (this file)
+#   - analysis_options_repo.yaml
 #   - packages/flutter/lib/analysis_options_user.yaml
-#   - https://github.com/flutter/plugins/blob/master/.analysis_options
+#   - https://github.com/flutter/plugins/blob/master/analysis_options.yaml
 #
 # This file contains the analysis options used by Flutter editors, such as Atom.
-# It is very similar to the .analysis_options_repo file in this same directory;
+# It is very similar to the analysis_options_repo.yaml file in this same directory;
 # the only difference (currently) is the public_member_api_docs option,
 # which triggers too many messages to be used in editors.
 #
@@ -122,7 +122,7 @@ linter:
     # - prefer_interpolation_to_compose_strings # not yet tested
     - prefer_is_empty
     - prefer_is_not_empty
-    # - public_member_api_docs # this is the only difference from .analysis_options_repo
+    # - public_member_api_docs # this is the only difference from analysis_options_repo.yaml
     # - recursive_getters # https://github.com/dart-lang/linter/issues/452
     - slash_for_doc_comments
     - sort_constructors_first
