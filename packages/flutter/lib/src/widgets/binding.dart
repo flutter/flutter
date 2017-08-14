@@ -221,12 +221,12 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     );
 
     registerBoolServiceExtension(
-        name: 'widgetInspector',
-        getter: () async => WidgetsApp.showWidgetInspectorOverride,
+        name: 'debugWidgetInspector',
+        getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
         setter: (bool value) {
-          if (WidgetsApp.showWidgetInspectorOverride == value)
+          if (WidgetsApp.debugShowWidgetInspectorOverride == value)
             return new Future<Null>.value();
-          WidgetsApp.showWidgetInspectorOverride = value;
+          WidgetsApp.debugShowWidgetInspectorOverride = value;
           return _forceRebuild();
         }
     );

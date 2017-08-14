@@ -12,7 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -20,6 +19,27 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 
 /// A widget that enables inspecting the child widget's structure.
+///
+/// Select a location on your device or emulator and view what widgets and
+/// render object that best matches the location. An outline of the selected
+/// widget and terse summary information is shown on device with detailed
+/// information is shown in the observatory or in IntelliJ when using the
+/// Flutter Plugin.
+///
+/// The inspector has a select mode and a view mode.
+///
+/// In the select mode, tapping the device selects the widget that best matches
+/// the location of the touch and switches to view mode. Dragging a finger on
+/// the device selects the widget under the drag location but does not switch
+/// modes. Touching the very edge of the bounding box of a widget triggers
+/// selecting the widget even if another widget that also overlaps that
+/// location would otherwise have priority.
+///
+/// In the view mode, the previous;y selected widget is outlined however
+/// touching the device has the same effect it would have if the inspector
+/// wasn't present. This allows interacting with the application and viewing how
+/// the selected widget changes position. Clicking on the select icon in th
+/// bottom left corner of the application switches back to select mode.
 class WidgetInspector extends StatefulWidget {
   /// Creates a widget that enables inspection for the child.
   ///
@@ -58,36 +78,16 @@ class _WidgetInspectorState extends State<WidgetInspector>
   static const double _kEdgeHitMargin = 2.0;
 
   bool _hitTestHelper(
-    LinkedHashMap<RenderObject, bool> hits,
-    LinkedHashSet<RenderObject> edgeHits,
+    List<RenderObject> hits,
+    List<RenderObject> edgeHits,
     Offset position,
     RenderObject object,
     Matrix4 transform,
   ) {
-    if (hits.containsKey(object))
-      return hits[object];
-
+    bool hit = false;
     final Matrix4 inverse = new Matrix4.inverted(transform);
     final Offset localPosition = MatrixUtils.transformPoint(inverse, position);
 
-    // Leverage the hitTest method on RenderBox to prioritize hits that
-    // correspond to actual hit test matches. All other hits will still be shown
-    // but these are the hit test matches that make the most intuitive sense to
-    // users.
-    if (object is RenderBox) {
-      final HitTestResult hitTestResult = new HitTestResult();
-      object.hitTest(hitTestResult, position: localPosition);
-      if (hitTestResult.path.isNotEmpty) {
-        final RenderObject target = hitTestResult.path.first.target;
-        if (target != object) {
-          // TODO(jacobr): be more efficient about computing childTransform.
-          final Matrix4 childTransform = target.getTransformTo(null);
-          _hitTestHelper(hits, edgeHits, position, target, childTransform);
-        }
-      }
-    }
-
-    bool hit = false;
     final List<DiagnosticsNode> children = object.debugDescribeChildren();
     for (int i = children.length - 1; i >= 0; i--) {
       final DiagnosticsNode diagnostics = children[i];
@@ -114,7 +114,8 @@ class _WidgetInspectorState extends State<WidgetInspector>
       if (!bounds.deflate(_kEdgeHitMargin).contains(localPosition))
         edgeHits.add(object);
     }
-    hits[object] = hit;
+    if (hit)
+      hits.add(object);
     return hit;
   }
 
@@ -126,16 +127,18 @@ class _WidgetInspectorState extends State<WidgetInspector>
   /// on the edge of a render object's bounding box and to matches found by
   /// [RenderBox.hitTest].
   List<RenderObject> hitTest(Offset position, RenderObject root) {
-    final LinkedHashMap<RenderObject, bool> result = new LinkedHashMap<RenderObject, bool>();
-    final LinkedHashSet<RenderObject> edgeHits = new LinkedHashSet<RenderObject>();
+    final List<RenderObject> regularHits = <RenderObject>[];
+    final List<RenderObject> edgeHits = <RenderObject>[];
 
-    _hitTestHelper(result, edgeHits, position, root, root.getTransformTo(null));
+    _hitTestHelper(regularHits, edgeHits, position, root, root.getTransformTo(null));
+    // Order matches by the size of the hit area.
+    double _area(RenderObject object) {
+      final Size size = object.semanticBounds?.size;
+      return size == null ? double.MAX_FINITE : size.width * size.height;
+    }
+    regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
     final Set<RenderObject> hits = new LinkedHashSet<RenderObject>();
-    hits.addAll(edgeHits);
-    result.forEach((RenderObject o, bool value) {
-      if (value)
-        hits.add(o);
-    });
+    hits..addAll(edgeHits)..addAll(regularHits);
     return hits.toList();
   }
 
@@ -167,7 +170,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     // pointer is being dragged off the edge of the display not a regular touch
     // on the edge of the display. If the pointer is being dragged off the edge
     // of the display we do not want to select anything. A user can still select
-    // a widget that is only at the exact screen margin by taping.
+    // a widget that is only at the exact screen margin by tapping.
     final Rect bounds = (Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation)) {
       setState(() {
@@ -234,20 +237,20 @@ class _WidgetInspectorState extends State<WidgetInspector>
 
 /// Mutable selection state of the inspector.
 class _InspectorSelection {
-  List<RenderObject> _candidates = <RenderObject>[];
-
   /// Render objects that are candidates to be selected.
   ///
   /// Tools may wish to iterate through the list of candidates
   List<RenderObject> get candidates => _candidates;
 
-  /// Index within the list of candidates that is currently selected.
-  int index = 0;
-
   set candidates(List<RenderObject> value) {
     _candidates = value;
     index = 0;
   }
+
+  List<RenderObject> _candidates = <RenderObject>[];
+
+  /// Index within the list of candidates that is currently selected.
+  int index = 0;
 
   void clear() {
     _candidates = <RenderObject>[];
@@ -269,6 +272,7 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 
   final _InspectorSelection selection;
 
+
   @override
   _RenderInspectorOverlay createRenderObject(BuildContext context) {
     return new _RenderInspectorOverlay(selection: selection);
@@ -277,6 +281,7 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderInspectorOverlay renderObject) {
     renderObject.selection = selection;
+    renderObject.markNeedsPaint();
   }
 }
 
@@ -300,7 +305,7 @@ class _RenderInspectorOverlay extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(needsCompositing);
-    context.addLayer(new InspectorOverlayLayer(
+    context.addLayer(new _InspectorOverlayLayer(
       overlayRect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       selection: selection,
     ));
@@ -317,9 +322,10 @@ class _TransformedRect {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! _TransformedRect)
+    if (other.runtimeType != runtimeType)
       return false;
-    return rect == other.rect && transform == other.transform;
+    final _TransformedRect typedOther = other;
+    return rect == typedOther.rect && transform == typedOther.transform;
   }
 
   @override
@@ -345,28 +351,48 @@ class _InspectorOverlayRenderState {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! _InspectorOverlayRenderState)
+    if (other.runtimeType != runtimeType)
       return false;
-    return overlayRect == other.overlayRect
-        && selected == other.selected
-        && listEquals<_TransformedRect>(candidates, other.candidates)
-        && tooltip == other.tooltip;
+
+    final _InspectorOverlayRenderState typedOther = other;
+    return overlayRect == typedOther.overlayRect
+        && selected == typedOther.selected
+        && listEquals<_TransformedRect>(candidates, typedOther.candidates)
+        && tooltip == typedOther.tooltip;
   }
 
   @override
   int get hashCode => hashValues(overlayRect, selected, hashList(candidates), tooltip);
 }
 
-/// A layer that indicates to the compositor that it should display
-/// certain performance statistics within it.
+final int _kMaxTooltipLines = 5;
+final Color _kTooltipBackgroundColor = const Color.fromARGB(230, 60, 60, 60);
+final Color _kHighlightedRenderObjectFillColor = const Color.fromARGB(128, 128, 128, 255);
+final Color _kHighlightedRenderObjectBorderColor = const Color.fromARGB(128, 64, 64, 128);
+
+/// A layer that outlines the selected [RenderObject] and candidate render
+/// objects that also match the last pointer location.
 ///
-/// Performance overlay layers are always leaves in the layer tree.
-class InspectorOverlayLayer extends Layer {
-  /// Creates a layer that displays a performance overlay.
-  InspectorOverlayLayer({
+/// This approach is horrific for performance and is only used here because this
+/// is limited to debug mode. Do not duplicate the logic in production code.
+class _InspectorOverlayLayer extends Layer {
+  /// Creates a layer that displays the inspector overlay.
+  _InspectorOverlayLayer({
     @required this.overlayRect,
     @required this.selection,
-  }) : assert(overlayRect != null), assert(selection != null);
+  }) : assert(overlayRect != null), assert(selection != null) {
+    bool inDebugMode = false;
+    assert(() {
+      inDebugMode = true;
+      return true;
+    });
+    if (inDebugMode == false) {
+      throw new FlutterError(
+        'The inspector should never be used in production mode due to the '
+        'negative performance impact.'
+      );
+    }
+  }
 
   _InspectorSelection selection;
 
@@ -381,6 +407,9 @@ class InspectorOverlayLayer extends Layer {
 
   /// Picture generated from _lastState.
   ui.Picture _picture;
+
+  TextPainter _textPainter;
+  double _textPainterMaxWidth;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
@@ -409,7 +438,7 @@ class InspectorOverlayLayer extends Layer {
     builder.addPicture(layerOffset, _picture);
   }
 
-  static ui.Picture _buildPicture(_InspectorOverlayRenderState state) {
+  ui.Picture _buildPicture(_InspectorOverlayRenderState state) {
     final ui.PictureRecorder recorder = new ui.PictureRecorder();
     final Canvas canvas = new Canvas(recorder, state.overlayRect);
     final Size size = state.overlayRect.size;
@@ -449,12 +478,60 @@ class InspectorOverlayLayer extends Layer {
     final double offsetFromWidget = 9.0;
     final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
 
-    _paintDescription(
-        canvas, state.tooltip, target, verticalOffset, size, targetRect);
+    _paintDescription(canvas, state.tooltip, target, verticalOffset, size, targetRect);
 
     // TODO(jacobr): provide an option to perform a debug paint of just the
     // selected widget.
     return recorder.endRecording();
+  }
+
+  void _paintDescription(Canvas canvas, String message, Offset target,
+      double verticalOffset, Size size, Rect targetRect) {
+    canvas.save();
+    final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
+    if (_textPainter == null || _textPainter.text.text != message || _textPainterMaxWidth != maxWidth) {
+      _textPainterMaxWidth = maxWidth;
+      _textPainter = new TextPainter()
+        ..maxLines = _kMaxTooltipLines
+        ..ellipsis = '...'
+        ..text = new TextSpan(style: _messageStyle, text: message)
+        ..layout(maxWidth: maxWidth);
+    }
+
+    final Size tooltipSize = _textPainter.size + const Offset(_kTooltipPadding * 2, _kTooltipPadding * 2);
+    final TooltipPositionDelegate tooltipPositionDelegate = new TooltipPositionDelegate(
+      target: target,
+      verticalOffset: verticalOffset,
+      preferBelow: false,
+    );
+    final Offset tipOffset = tooltipPositionDelegate.getPositionForChild(size, tooltipSize);
+    final Paint tooltipBackground = new Paint()
+      ..style = PaintingStyle.fill
+      ..color = _kTooltipBackgroundColor;
+    canvas.drawRect(
+      new Rect.fromPoints(
+        tipOffset,
+        tipOffset.translate(tooltipSize.width, tooltipSize.height),
+      ),
+      tooltipBackground,
+    );
+
+    double wedgeY = tipOffset.dy;
+    final bool tooltipBelow = tipOffset.dy > target.dy;
+    if (!tooltipBelow)
+      wedgeY += tooltipSize.height;
+
+    final double wedgeSize = _kTooltipPadding * 2;
+    double wedgeX = math.max(tipOffset.dx, target.dx) + wedgeSize * 2;
+    wedgeX = math.min(wedgeX, tipOffset.dx + tooltipSize.width - wedgeSize * 2);
+    final List<Offset> wedge = <Offset>[
+      new Offset(wedgeX - wedgeSize, wedgeY),
+      new Offset(wedgeX + wedgeSize, wedgeY),
+      new Offset(wedgeX, wedgeY + (tooltipBelow ? -wedgeSize : wedgeSize)),
+    ];
+    canvas.drawPath(new Path()..addPolygon(wedge, true,), tooltipBackground);
+    _textPainter.paint(canvas, tipOffset + const Offset(_kTooltipPadding, _kTooltipPadding));
+    canvas.restore();
   }
 }
 
@@ -471,56 +548,3 @@ const TextStyle _messageStyle = const TextStyle(
   fontSize: 10.0,
   height: 1.2,
 );
-
-final int _kMaxTooltipLines = 5;
-final Color _kTooltipBackgroundColor = const Color.fromARGB(230, 60, 60, 60);
-final Color _kHighlightedRenderObjectFillColor = const Color.fromARGB(128, 128, 128, 255);
-final Color _kHighlightedRenderObjectBorderColor = const Color.fromARGB(128, 64, 64, 128);
-
-void _paintDescription(Canvas canvas, String message, Offset target,
-    double verticalOffset, Size size, Rect targetRect) {
-  canvas.save();
-  final TextPainter textPainter = new TextPainter()
-    ..maxLines = _kMaxTooltipLines
-    ..ellipsis = '...'
-    ..text = new TextSpan(style: _messageStyle, text: message)
-    ..layout(maxWidth: size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding));
-
-  final Size tooltipSize = textPainter.size + const Offset(_kTooltipPadding * 2, _kTooltipPadding * 2);
-  final TooltipPositionDelegate tooltipPositionDelegate = new TooltipPositionDelegate(
-    target: target,
-    verticalOffset: verticalOffset,
-    preferBelow: false,
-  );
-  final Offset tipOffset = tooltipPositionDelegate.getPositionForChild(size, tooltipSize);
-  final Paint tooltipBackground = new Paint()
-    ..style = PaintingStyle.fill
-    ..color = _kTooltipBackgroundColor;
-  canvas.drawRect(
-    new Rect.fromPoints(
-      tipOffset,
-      tipOffset.translate(tooltipSize.width, tooltipSize.height),
-    ),
-    tooltipBackground,
-  );
-
-  double wedgeY = tipOffset.dy;
-  final bool tooltipBelow = tipOffset.dy > target.dy;
-  if (!tooltipBelow)
-    wedgeY += tooltipSize.height;
-
-  final double wedgeSize = _kTooltipPadding * 2;
-  double wedgeX = math.max(tipOffset.dx, target.dx) + wedgeSize * 2;
-  wedgeX = math.min(wedgeX, tipOffset.dx + tooltipSize.width - wedgeSize * 2);
-  final List<Offset> wedge = <Offset>[
-    new Offset(wedgeX - wedgeSize, wedgeY),
-    new Offset(wedgeX + wedgeSize, wedgeY),
-    new Offset(wedgeX, wedgeY + (tooltipBelow ? -wedgeSize : wedgeSize)),
-  ];
-  canvas.drawPath(new Path()..addPolygon(wedge, true,), tooltipBackground);
-  textPainter.paint(
-    canvas,
-    tipOffset + const Offset(_kTooltipPadding, _kTooltipPadding),
-  );
-  canvas.restore();
-}

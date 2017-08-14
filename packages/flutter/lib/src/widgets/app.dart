@@ -59,7 +59,7 @@ class WidgetsApp extends StatefulWidget {
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
-    this.showWidgetInspector: false,
+    this.debugShowWidgetInspector: false,
     this.debugShowCheckedModeBanner: true
   }) : assert(onGenerateRoute != null),
        assert(color != null),
@@ -69,7 +69,7 @@ class WidgetsApp extends StatefulWidget {
        assert(checkerboardOffscreenLayers != null),
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
-       assert(showWidgetInspector != null),
+       assert(debugShowWidgetInspector != null),
        super(key: key);
 
   /// A one-line description of this app for use in the window manager.
@@ -151,9 +151,12 @@ class WidgetsApp extends StatefulWidget {
   /// reported by the framework.
   final bool showSemanticsDebugger;
 
-  /// Turns on an overlay that shows render information about widgets
-  /// reported by the framework.
-  final bool showWidgetInspector;
+  /// Turns on an overlay that enables inspecting the widget tree.
+  ///
+  /// The inspector is only available in checked mode as it depends on
+  /// [RenderObject.debugDescribeChildren] which should not be called outside of
+  /// checked mode.
+  final bool debugShowWidgetInspector;
 
   /// Turns on a "SLOW MODE" little banner in checked mode to indicate
   /// that the app is in checked mode. This is on by default (in
@@ -175,17 +178,22 @@ class WidgetsApp extends StatefulWidget {
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///
-  /// Used by `showPerformanceOverlay` observatory extension.
+  /// Used by the `showPerformanceOverlay` observatory extension.
   static bool showPerformanceOverlayOverride = false;
 
   /// If true, forces the widget inspector to be visible.
   ///
-  /// Used by `showWidgetInspector` debugging extension.
-  static bool showWidgetInspectorOverride = false;
+  /// Used by the `debugShowWidgetInspector` debugging extension.
+  ///
+  /// The inspector allows you to select a location on your device or emulator
+  /// and view what widgets and render objects associated with it. An outline of
+  /// the selected widget and some summary information is shown on device and
+  /// more detailed information is shown in the IDE or Observatory.
+  static bool debugShowWidgetInspectorOverride = false;
 
   /// If false, prevents the debug banner from being visible.
   ///
-  /// Used by `debugAllowBanner` observatory extension.
+  /// Used by the `debugAllowBanner` observatory extension.
   ///
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".
@@ -313,13 +321,13 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         ]
       );
     }
+    if (widget.showSemanticsDebugger) {
+      result = new SemanticsDebugger(
+        child: result,
+      );
+    }
     assert(() {
-      if (widget.showSemanticsDebugger) {
-        result = new SemanticsDebugger(
-          child: result,
-        );
-      }
-      if (widget.showWidgetInspector || WidgetsApp.showWidgetInspectorOverride) {
+      if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
         result = new WidgetInspector (
           child: result,
         );

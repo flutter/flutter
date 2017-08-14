@@ -1090,18 +1090,7 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride() => _flutterToggle('showPerformanceOverlay');
 
-  Future<Map<String, dynamic>> flutterToggleWidgetInspector() async {
-    Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.widgetInspector');
-    if (state != null && state.containsKey('enabled') && state['enabled'] is String) {
-      state = await invokeFlutterExtensionRpcRaw(
-        'ext.flutter.widgetInspector',
-        params: <String, dynamic>{ 'enabled': state['enabled'] == 'true' ? 'false' : 'true' },
-        timeout: const Duration(milliseconds: 150),
-        timeoutFatal: false,
-      );
-    }
-    return state;
-  }
+  Future<Map<String, dynamic>> flutterToggleWidgetInspector()  => _flutterToggle('debugWidgetInspector');
 
   Future<Null> flutterDebugAllowBanner(bool show) async {
     await invokeFlutterExtensionRpcRaw(

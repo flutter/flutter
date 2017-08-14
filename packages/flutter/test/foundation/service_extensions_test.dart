@@ -433,6 +433,29 @@ void main() {
     expect(binding.frameScheduled, isFalse);
   });
 
+  test('Service extensions - debugWidgetInspector', () async {
+    Map<String, String> result;
+
+    expect(binding.frameScheduled, isFalse);
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{ 'enabled': 'true' });
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, true);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'true' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, true);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{ 'enabled': 'false' });
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
+    result = await binding.testExtension('debugWidgetInspector', <String, String>{});
+    expect(result, <String, String>{ 'enabled': 'false' });
+    expect(WidgetsApp.debugShowWidgetInspectorOverride, false);
+    expect(binding.frameScheduled, isFalse);
+  });
+
   test('Service extensions - timeDilation', () async {
     Map<String, String> result;
 
