@@ -26,7 +26,7 @@ import 'material.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-enum _DatePickerMode { day, year }
+enum DatePickerMode { day, year }
 
 const double _kDatePickerHeaderPortraitHeight = 100.0;
 const double _kDatePickerHeaderLandscapeWidth = 168.0;
@@ -57,11 +57,11 @@ class _DatePickerHeader extends StatelessWidget {
        super(key: key);
 
   final DateTime selectedDate;
-  final _DatePickerMode mode;
-  final ValueChanged<_DatePickerMode> onModeChanged;
+  final DatePickerMode mode;
+  final ValueChanged<DatePickerMode> onModeChanged;
   final Orientation orientation;
 
-  void _handleChangeMode(_DatePickerMode value) {
+  void _handleChangeMode(DatePickerMode value) {
     if (value != mode)
       onModeChanged(value);
   }
@@ -74,12 +74,12 @@ class _DatePickerHeader extends StatelessWidget {
     Color yearColor;
     switch(themeData.primaryColorBrightness) {
       case Brightness.light:
-        dayColor = mode == _DatePickerMode.day ? Colors.black87 : Colors.black54;
-        yearColor = mode == _DatePickerMode.year ? Colors.black87 : Colors.black54;
+        dayColor = mode == DatePickerMode.day ? Colors.black87 : Colors.black54;
+        yearColor = mode == DatePickerMode.year ? Colors.black87 : Colors.black54;
         break;
       case Brightness.dark:
-        dayColor = mode == _DatePickerMode.day ? Colors.white : Colors.white70;
-        yearColor = mode == _DatePickerMode.year ? Colors.white : Colors.white70;
+        dayColor = mode == DatePickerMode.day ? Colors.white : Colors.white70;
+        yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
     final TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor, height: 1.4);
@@ -114,17 +114,17 @@ class _DatePickerHeader extends StatelessWidget {
 
     Widget yearButton = new _DateHeaderButton(
       color: backgroundColor,
-      onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.year), context),
+      onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
       child: new Text(new DateFormat('yyyy').format(selectedDate), style: yearStyle),
     );
     Widget dayButton = new _DateHeaderButton(
       color: backgroundColor,
-      onTap: Feedback.wrapForTap(() => _handleChangeMode(_DatePickerMode.day), context),
+      onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
       child: new Text(new DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle),
     );
 
     // Disable the button for the current mode.
-    if (mode == _DatePickerMode.day)
+    if (mode == DatePickerMode.day)
       dayButton = new IgnorePointer(child: dayButton);
     else
       yearButton = new IgnorePointer(child: yearButton);
@@ -658,12 +658,14 @@ class _DatePickerDialog extends StatefulWidget {
     this.firstDate,
     this.lastDate,
     this.selectableDayPredicate,
+    this.initialDatePickerMode,
   }) : super(key: key);
 
   final DateTime initialDate;
   final DateTime firstDate;
   final DateTime lastDate;
   final SelectableDayPredicate selectableDayPredicate;
+  final DatePickerMode initialDatePickerMode;
 
   @override
   _DatePickerDialogState createState() => new _DatePickerDialogState();
@@ -674,10 +676,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   void initState() {
     super.initState();
     _selectedDate = widget.initialDate;
+    _mode = widget.initialDatePickerMode;
   }
 
   DateTime _selectedDate;
-  _DatePickerMode _mode = _DatePickerMode.day;
+  DatePickerMode _mode;
   final GlobalKey _pickerKey = new GlobalKey();
 
   void _vibrate() {
@@ -691,7 +694,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     }
   }
 
-  void _handleModeChanged(_DatePickerMode mode) {
+  void _handleModeChanged(DatePickerMode mode) {
     _vibrate();
     setState(() {
       _mode = mode;
@@ -701,7 +704,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   void _handleYearChanged(DateTime value) {
     _vibrate();
     setState(() {
-      _mode = _DatePickerMode.day;
+      _mode = DatePickerMode.day;
       _selectedDate = value;
     });
   }
@@ -724,7 +727,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   Widget _buildPicker() {
     assert(_mode != null);
     switch (_mode) {
-      case _DatePickerMode.day:
+      case DatePickerMode.day:
         return new MonthPicker(
           key: _pickerKey,
           selectedDate: _selectedDate,
@@ -732,9 +735,9 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
           selectableDayPredicate: widget.selectableDayPredicate,
-          onMonthHeaderTap: () { _handleModeChanged(_DatePickerMode.year); },
+          onMonthHeaderTap: () { _handleModeChanged(DatePickerMode.year); },
         );
-      case _DatePickerMode.year:
+      case DatePickerMode.year:
         return new YearPicker(
           key: _pickerKey,
           selectedDate: _selectedDate,
@@ -831,6 +834,10 @@ typedef bool SelectableDayPredicate(DateTime day);
 /// the days to enable for selection. If provided, only the days that
 /// [selectableDayPredicate] returned true for will be selectable.
 ///
+/// An optional [initialDatePickerMode] argument can be used to display the
+/// date picker initially in the year or month+day picker mode. It defaults
+/// to month+day, but cannot be null.
+///
 /// See also:
 ///
 ///  * [showTimePicker]
@@ -841,6 +848,7 @@ Future<DateTime> showDatePicker({
   @required DateTime firstDate,
   @required DateTime lastDate,
   SelectableDayPredicate selectableDayPredicate,
+  DatePickerMode initialDatePickerMode: DatePickerMode.day,
 }) async {
   assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
   assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
@@ -849,6 +857,7 @@ Future<DateTime> showDatePicker({
     selectableDayPredicate == null || selectableDayPredicate(initialDate),
     'Provided initialDate must satisfy provided selectableDayPredicate'
   );
+  assert(initialDatePickerMode != null, 'initialDatePickerMode cannot be null');
   return await showDialog(
     context: context,
     child: new _DatePickerDialog(
@@ -856,6 +865,7 @@ Future<DateTime> showDatePicker({
       firstDate: firstDate,
       lastDate: lastDate,
       selectableDayPredicate: selectableDayPredicate,
+      initialDatePickerMode: initialDatePickerMode,
     )
   );
 }
