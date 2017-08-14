@@ -26,7 +26,18 @@ import 'material.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-enum DatePickerMode { day, year }
+/// Date picker UI mode for either showing a list of available years or a
+/// monthly calendar.
+///
+/// Also see:
+///
+///  * <https://material.io/guidelines/components/pickers.html#pickers-date-pickers>
+enum DatePickerMode {
+  /// Show a date picker UI for choosing a month and day.
+  day,
+  /// Show a date picker UI for choosing a year.
+  year,
+}
 
 const double _kDatePickerHeaderPortraitHeight = 100.0;
 const double _kDatePickerHeaderLandscapeWidth = 168.0;
