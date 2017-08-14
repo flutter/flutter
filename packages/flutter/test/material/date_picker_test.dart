@@ -303,6 +303,7 @@ void main() {
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.pump();
       // 2018 wouldn't be available if the year picker wasn't showing.
+      // The initial current year is 2016.
       await tester.tap(find.text('2018'));
       await tester.tap(find.text('OK'));
       expect(await date, equals(new DateTime(2018, DateTime.JANUARY, 15)));
