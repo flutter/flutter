@@ -11,6 +11,8 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:front_end/compiler_options.dart' show CompilerOptions;
 import 'package:front_end/incremental_kernel_generator.dart' show IncrementalKernelGenerator;
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:kernel/target/flutter_fasta.dart';
+import 'package:kernel/target/targets.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -122,8 +124,10 @@ class HotRunner extends ResidentRunner {
     if (previewDart2 && (generator == null)) {
       final CompilerOptions options = new CompilerOptions()
         ..packagesFileUri = Uri.parse(packagesFilePath)
-        ..librariesSpecificationUri = new Uri.file(
-            artifacts.getArtifactPath(Artifact.platformLibrariesJson));
+        ..sdkRoot = Uri.parse(artifacts.getHostFlutterPatchedSdkPath())
+        ..linkedDependencies = <Uri>[new Uri.file(
+            artifacts.getArtifactPath(Artifact.platformKernelDill))]
+        ..target = new FlutterFastaTarget(new TargetFlags());
       generator = await IncrementalKernelGenerator.newInstance(
           options, new Uri.file(mainPath));
     }

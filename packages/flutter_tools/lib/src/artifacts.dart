@@ -124,7 +124,7 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
-  String _getHostFlutterPatchedSdkPath() {
+  String getHostFlutterPatchedSdkPath() {
     final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
     return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk');
   }
@@ -146,9 +146,9 @@ class CachedArtifacts extends Artifacts {
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
-        return fs.path.join(_getHostFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+        return fs.path.join(getHostFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return fs.path.join(_getHostFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
+        return fs.path.join(getHostFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;

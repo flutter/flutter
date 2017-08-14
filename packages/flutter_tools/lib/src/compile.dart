@@ -14,13 +14,14 @@ import 'package:kernel/kernel.dart';
 import 'package:kernel/target/flutter_fasta.dart';
 import 'package:kernel/target/targets.dart';
 
-Future<String> compile({String packagesPath, String mainPath}) async {
+Future<String> compile({String sdkRoot, String packagesPath, String mainPath}) async {
   final String platformKernelDill = artifacts.getArtifactPath(
       Artifact.platformKernelDill);
   // TODO(aam): Move FlutterFastaTarget to flutter tools.
   final CompilerOptions options = new CompilerOptions()
     ..packagesFileUri = Uri.parse(packagesPath)
     ..compileSdk = true
+    ..sdkRoot = Uri.parse(sdkRoot)
     ..linkedDependencies = <Uri>[Uri.parse(platformKernelDill)]
     ..target = new FlutterFastaTarget(new TargetFlags());
   final Program program =
