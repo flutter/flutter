@@ -299,11 +299,12 @@ void main() {
   });
 
   testWidgets('Can select initial date picker mode', (WidgetTester tester) async {
+    initialDate = new DateTime(2014, DateTime.JANUARY, 15);
     initialDatePickerMode = DatePickerMode.year;
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.pump();
       // 2018 wouldn't be available if the year picker wasn't showing.
-      // The initial current year is 2016.
+      // The initial current year is 2014.
       await tester.tap(find.text('2018'));
       await tester.tap(find.text('OK'));
       expect(await date, equals(new DateTime(2018, DateTime.JANUARY, 15)));
