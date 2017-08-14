@@ -64,43 +64,4 @@ void main() {
       });
     });
   });
-
-  group('readDepfile', () {
-    MemoryFileSystem fs;
-
-    setUp(() {
-      fs = new MemoryFileSystem();
-    });
-
-    testUsingContext('returns one file if only one is listed', () async {
-      await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart');
-      expect(await readDepfile('a.d'), unorderedEquals(<String>['/foo/a.dart']));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
-
-    testUsingContext('returns multiple files', () async {
-      await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart /foo/b.dart');
-      expect(await readDepfile('a.d'), unorderedEquals(<String>[
-        '/foo/a.dart',
-        '/foo/b.dart',
-      ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
-
-    testUsingContext('trims extra spaces between files', () async {
-      await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart    /foo/b.dart  /foo/c.dart');
-      expect(await readDepfile('a.d'), unorderedEquals(<String>[
-        '/foo/a.dart',
-        '/foo/b.dart',
-        '/foo/c.dart',
-      ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
-
-    testUsingContext('returns files with spaces and backslashes', () async {
-      await fs.file('a.d').writeAsString(r'snapshot.d: /foo/a\ a.dart /foo/b\\b.dart /foo/c\\ c.dart');
-      expect(await readDepfile('a.d'), unorderedEquals(<String>[
-        r'/foo/a a.dart',
-        r'/foo/b\b.dart',
-        r'/foo/c\ c.dart',
-      ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
-  });
 }
