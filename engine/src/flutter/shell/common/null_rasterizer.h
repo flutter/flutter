@@ -30,6 +30,8 @@ class NullRasterizer : public Rasterizer {
 
   void Draw(ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
+  void AddNextFrameCallback(ftl::Closure nextFrameCallback) override;
+
  private:
   std::unique_ptr<Surface> surface_;
   ftl::WeakPtrFactory<NullRasterizer> weak_factory_;

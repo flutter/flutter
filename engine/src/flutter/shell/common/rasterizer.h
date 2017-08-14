@@ -35,6 +35,9 @@ class Rasterizer {
 
   virtual void Draw(
       ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
+
+  // Set a callback to be called once when the next frame is drawn.
+  virtual void AddNextFrameCallback(ftl::Closure nextFrameCallback) = 0;
 };
 
 }  // namespace shell

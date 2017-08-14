@@ -8,12 +8,20 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.content.res.Resources.NotFoundException;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.widget.FrameLayout;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.ActivityResultListener;
@@ -50,6 +58,11 @@ public final class FlutterActivityDelegate
         implements FlutterActivityEvents,
                    FlutterView.Provider,
                    PluginRegistry {
+    private static final String LAUNCH_DRAWABLE_META_DATA_KEY = "io.flutter.app.LaunchScreen";
+    private static final String TAG = "FlutterActivityDelegate";
+    private static final LayoutParams matchParent =
+        new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+
     /**
      * Specifies the mechanism by which Flutter views are created during the
      * operation of a {@code FlutterActivityDelegate}.
@@ -71,6 +84,7 @@ public final class FlutterActivityDelegate
     private final List<UserLeaveHintListener> userLeaveHintListeners = new ArrayList<>(0);
 
     private FlutterView flutterView;
+    private View launchView;
 
     public FlutterActivityDelegate(Activity activity, ViewFactory viewFactory) {
         this.activity = Preconditions.checkNotNull(activity);
@@ -138,9 +152,9 @@ public final class FlutterActivityDelegate
         flutterView = viewFactory.createFlutterView(activity);
         if (flutterView == null) {
             flutterView = new FlutterView(activity);
-            flutterView.setLayoutParams(
-                    new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-            activity.setContentView(flutterView);
+            flutterView.setLayoutParams(matchParent);
+            launchView = createLaunchView();
+            setContentView();
         }
 
         if (loadIntent(activity.getIntent())) {
@@ -270,6 +284,96 @@ public final class FlutterActivityDelegate
         }
 
         return false;
+    }
+
+    /**
+     * Creates a {@link View} containing the same {@link Drawable} as the one set as the
+     * {@code windowBackground} of the parent activity for use as a launch splash view.
+     *
+     * Returns null if no {@code windowBackground} is set for the activity.
+     */
+    private View createLaunchView() {
+        final Drawable launchScreenDrawable = getLaunchScreenDrawableFromActivityTheme();
+        if (launchScreenDrawable == null) {
+            return null;
+        }
+        final View view = new View(activity);
+        view.setLayoutParams(matchParent);
+        view.setBackground(launchScreenDrawable);
+        return view;
+    }
+
+    /**
+     * Extracts a {@link Drawable} from the parent activity's {@code windowBackground}.
+     *
+     * {@code android:windowBackground} is specifically reused instead of a custom defined meta-data
+     * because the Android framework can display it fast enough when launching the app as opposed
+     * to anything defined in the Activity subclass.
+     *
+     * Returns null if no {@code windowBackground} is set for the activity.
+     */
+    private Drawable getLaunchScreenDrawableFromActivityTheme() {
+        TypedValue typedValue = new TypedValue();
+        if (!activity.getTheme().resolveAttribute(
+            android.R.attr.windowBackground,
+            typedValue,
+            true)) {;
+            return null;
+        }
+        if (typedValue.resourceId == 0) {
+            return null;
+        }
+        try {
+            return activity.getResources().getDrawable(typedValue.resourceId);
+        } catch (NotFoundException e) {
+            Log.e(TAG, "Referenced launch screen drawable resource '"
+                + LAUNCH_DRAWABLE_META_DATA_KEY + "' does not exist");
+            return null;
+        }
+    }
+
+    /**
+     * Sets the root content view of the activity.
+     *
+     * If no launch screens are defined in the user application's AndroidManifest.xml as the
+     * activity's {@code windowBackground}, then set the {@link FlutterView} as the root.
+     *
+     * Otherwise, extract the {@code windowBackground}'s {@link Drawable} onto a new launch View to
+     * put in front of the {@link FlutterView}, remove the activity's {@code windowBackground},
+     * and finally remove the launch view when the {@link FlutterView} renders its first frame.
+     */
+    private void setContentView() {
+        // No transient launch screen. Set the FlutterView as root.
+        if (launchView == null) {
+            activity.setContentView(flutterView);
+            return;
+        }
+
+        final FrameLayout layout = new FrameLayout(activity);
+        layout.setLayoutParams(matchParent);
+
+        layout.addView(flutterView);
+        layout.addView(launchView);
+
+        flutterView.addFirstFrameListener(new FlutterView.FirstFrameListener() {
+            @Override
+            public void onFirstFrame() {
+                // Views need to be unparented before adding directly to activity.
+                layout.removeAllViews();
+                FlutterActivityDelegate.this.activity.setContentView(
+                    FlutterActivityDelegate.this.flutterView);
+                FlutterActivityDelegate.this.launchView = null;
+                FlutterActivityDelegate.this.flutterView.removeFirstFrameListener(this);
+            }
+        });
+
+        activity.setContentView(layout);
+        // Resets the activity theme from the one containing the launch screen in the window
+        // background to a blank one since the launch screen is now in a view in front of the
+        // FlutterView.
+        //
+        // We can make this configurable if users want it.
+        activity.setTheme(android.R.style.Theme_Black_NoTitleBar);
     }
 
     private class FlutterRegistrar implements Registrar {

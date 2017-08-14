@@ -26,8 +26,21 @@ PlatformViewIOS::PlatformViewIOS(CALayer* layer)
 PlatformViewIOS::~PlatformViewIOS() = default;
 
 void PlatformViewIOS::Attach() {
+  Attach(NULL);
+}
+
+void PlatformViewIOS::Attach(ftl::Closure firstFrameCallback) {
   CreateEngine();
   PostAddToShellTask();
+  if (firstFrameCallback) {
+    firstFrameCallback_ = firstFrameCallback;
+    rasterizer_->AddNextFrameCallback([weakSelf = GetWeakPtr()] {
+      if (weakSelf) {
+        weakSelf->firstFrameCallback_();
+        weakSelf->firstFrameCallback_ = nullptr;
+      }
+    });
+  }
 }
 
 void PlatformViewIOS::NotifyCreated() {

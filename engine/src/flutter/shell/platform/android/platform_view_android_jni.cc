@@ -49,6 +49,12 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
   FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
 }
 
+static jmethodID g_on_first_frame_method = nullptr;
+void FlutterViewOnFirstFrame(JNIEnv* env, jobject obj) {
+  env->CallVoidMethod(obj, g_on_first_frame_method);
+  FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+}
+
 // Called By Java
 
 static jlong Attach(JNIEnv* env, jclass clazz, jobject flutterView) {
@@ -342,6 +348,12 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_on_first_frame_method =
+      env->GetMethodID(g_flutter_view_class->obj(), "onFirstFrame", "()V");
+
+  if (g_on_first_frame_method == nullptr) {
+    return false;
+  }
   return true;
 }
 
