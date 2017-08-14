@@ -30,7 +30,7 @@ import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
-
+import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.*;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
@@ -101,6 +101,7 @@ public class FlutterView extends SurfaceView
     private final BasicMessageChannel<Object> mFlutterSystemChannel;
     private final BroadcastReceiver mDiscoveryReceiver;
     private final List<ActivityLifecycleListener> mActivityLifecycleListeners;
+    private final List<FirstFrameListener> mFirstFrameListeners;
     private long mNativePlatformView;
     private boolean mIsSoftwareRenderingEnabled = false; // using the software renderer or not
 
@@ -157,6 +158,7 @@ public class FlutterView extends SurfaceView
 
         mMessageHandlers = new HashMap<>();
         mActivityLifecycleListeners = new ArrayList<>();
+        mFirstFrameListeners = new ArrayList<>();
 
         // Configure the platform plugins and flutter channels.
         mFlutterLocalizationChannel = new MethodChannel(this, "flutter/localization",
@@ -245,6 +247,21 @@ public class FlutterView extends SurfaceView
         Map<String, Object> message = new HashMap<>(1);
         message.put("type", "memoryPressure");
         mFlutterSystemChannel.send(message);
+    }
+
+    /**
+     * Provide a listener that will be called once when the FlutterView renders its first frame
+     * to the underlaying SurfaceView.
+     */
+    public void addFirstFrameListener(FirstFrameListener listener) {
+        mFirstFrameListeners.add(listener);
+    }
+
+    /**
+     * Remove an existing first frame listener.
+     */
+    public void removeFirstFrameListener(FirstFrameListener listener) {
+        mFirstFrameListeners.remove(listener);
     }
 
     public void setInitialRoute(String route) {
@@ -693,6 +710,13 @@ public class FlutterView extends SurfaceView
         }
     }
 
+    // Called by native to notify first Flutter frame rendered.
+    private void onFirstFrame() {
+        for (FirstFrameListener listener : mFirstFrameListeners) {
+            listener.onFirstFrame();
+        }
+    }
+
     // ACCESSIBILITY
 
     private boolean mAccessibilityEnabled = false;
@@ -863,5 +887,12 @@ public class FlutterView extends SurfaceView
             } catch (JSONException e) {
             }
         }
+    }
+
+    /**
+     * Listener will be called on the Android UI thread once when Flutter renders the first frame.
+     */
+    public interface FirstFrameListener {
+        void onFirstFrame();
     }
 }

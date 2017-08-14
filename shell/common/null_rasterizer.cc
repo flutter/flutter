@@ -47,4 +47,8 @@ void NullRasterizer::Draw(
       }));
 }
 
+void NullRasterizer::AddNextFrameCallback(ftl::Closure nextFrameCallback) {
+  // Null rasterizer. Nothing to do.
+}
+
 }  // namespace shell

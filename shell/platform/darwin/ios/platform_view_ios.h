@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
+#include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 
@@ -25,7 +26,9 @@ class PlatformViewIOS : public PlatformView {
 
   ~PlatformViewIOS() override;
 
-  virtual void Attach() override;
+  void Attach() override;
+
+  void Attach(ftl::Closure firstFrameCallback);
 
   void NotifyCreated();
 
@@ -56,6 +59,7 @@ class PlatformViewIOS : public PlatformView {
   std::unique_ptr<IOSSurface> ios_surface_;
   PlatformMessageRouter platform_message_router_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+  ftl::Closure firstFrameCallback_;
   ftl::WeakPtrFactory<PlatformViewIOS> weak_factory_;
 
   void SetupAndLoadFromSource(const std::string& assets_directory,

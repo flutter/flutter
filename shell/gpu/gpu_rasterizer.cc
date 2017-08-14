@@ -114,6 +114,8 @@ void GPURasterizer::DoDraw(std::unique_ptr<flow::LayerTree> layer_tree) {
 
   DrawToSurface(*layer_tree);
 
+  NotifyNextFrameOnce();
+
   last_layer_tree_ = std::move(layer_tree);
 }
 
@@ -138,6 +140,23 @@ void GPURasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
   layer_tree.Raster(compositor_frame);
 
   frame->Submit();
+}
+
+void GPURasterizer::AddNextFrameCallback(ftl::Closure nextFrameCallback) {
+  nextFrameCallback_ = nextFrameCallback;
+}
+
+void GPURasterizer::NotifyNextFrameOnce() {
+  if (nextFrameCallback_) {
+    blink::Threads::Platform()->PostTask([weak_this = weak_factory_.GetWeakPtr()] {
+      TRACE_EVENT0("flutter", "GPURasterizer::NotifyNextFrameOnce");
+      if (weak_this) {
+        ftl::Closure callback = weak_this->nextFrameCallback_;
+        callback();
+        weak_this->nextFrameCallback_ = nullptr;
+      }
+    });
+  }
 }
 
 }  // namespace shell
