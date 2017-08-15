@@ -148,14 +148,11 @@ void GPURasterizer::AddNextFrameCallback(ftl::Closure nextFrameCallback) {
 
 void GPURasterizer::NotifyNextFrameOnce() {
   if (nextFrameCallback_) {
-    blink::Threads::Platform()->PostTask([weak_this = weak_factory_.GetWeakPtr()] {
+    blink::Threads::Platform()->PostTask([callback = nextFrameCallback_] {
       TRACE_EVENT0("flutter", "GPURasterizer::NotifyNextFrameOnce");
-      if (weak_this) {
-        ftl::Closure callback = weak_this->nextFrameCallback_;
-        callback();
-        weak_this->nextFrameCallback_ = nullptr;
-      }
+      callback();
     });
+    nextFrameCallback_ = nullptr;
   }
 }
 
