@@ -429,8 +429,9 @@ class InputDecorator extends StatelessWidget {
       decoration: new BoxDecoration(
         border: new Border(
           bottom: new BorderSide(
-            color: hideUnderline ? Colors.transparent : borderColor,
+            color: borderColor,
             width: bottomBorder,
+            style: hideUnderline ? BorderStyle.none : BorderStyle.solid,
           ),
         ),
       ),
