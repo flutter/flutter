@@ -328,7 +328,7 @@ public final class FlutterActivityDelegate
             return null;
         }
         try {
-            return activity.getResources().getDrawable(typedValue.resourceId);
+            return activity.getDrawable(typedValue.resourceId);
         } catch (NotFoundException e) {
             Log.e(TAG, "Referenced launch screen windowBackground resource does not exist");
             return null;
