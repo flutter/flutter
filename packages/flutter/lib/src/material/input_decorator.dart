@@ -54,6 +54,7 @@ class InputDecoration {
     this.prefixStyle,
     this.suffixText,
     this.suffixStyle,
+    this.hideUnderline: false,
   }) : isCollapsed = false;
 
   /// Creates a decoration that is the same size as the input field.
@@ -78,7 +79,8 @@ class InputDecoration {
        prefixText = null,
        prefixStyle = null,
        suffixText = null,
-       suffixStyle = null;
+       suffixStyle = null,
+       hideUnderline = false;
 
   /// An icon to show before the input field.
   ///
@@ -189,6 +191,11 @@ class InputDecoration {
   /// If null, defaults to the [hintStyle].
   final TextStyle suffixStyle;
 
+  /// Whether to hide the line under the input field.
+  ///
+  /// Defaults to false.
+  final bool hideUnderline;
+
   /// Creates a copy of this input decoration but with the given fields replaced
   /// with the new values.
   ///
@@ -209,6 +216,7 @@ class InputDecoration {
     TextStyle prefixStyle,
     String suffixText,
     TextStyle suffixStyle,
+    bool hideUnderline,
   }) {
     return new InputDecoration(
       icon: icon ?? this.icon,
@@ -226,6 +234,7 @@ class InputDecoration {
       prefixStyle: prefixStyle ?? this.prefixStyle,
       suffixText: suffixText ?? this.suffixText,
       suffixStyle: suffixStyle ?? this.suffixStyle,
+      hideUnderline: hideUnderline ?? this.hideUnderline,
     );
   }
 
@@ -251,7 +260,8 @@ class InputDecoration {
         && typedOther.prefixText == prefixText
         && typedOther.prefixStyle == prefixStyle
         && typedOther.suffixText == suffixText
-        && typedOther.suffixStyle == suffixStyle;
+        && typedOther.suffixStyle == suffixStyle
+        && typedOther.hideUnderline == hideUnderline;
   }
 
   @override
@@ -273,6 +283,7 @@ class InputDecoration {
       prefixStyle,
       suffixText,
       suffixStyle,
+      hideUnderline,
     );
   }
 
@@ -303,6 +314,8 @@ class InputDecoration {
       description.add('suffixText: $suffixText');
     if (suffixStyle != null)
       description.add('suffixStyle: $suffixStyle');
+    if (hideUnderline != null)
+      description.add('hideUnderline: $hideUnderline');
     return 'InputDecoration(${description.join(', ')})';
   }
 }
@@ -392,7 +405,7 @@ class InputDecorator extends StatelessWidget {
     return themeData.hintColor;
   }
 
-  Widget _buildContent(Color borderColor, double topPadding, bool isDense, Widget inputChild) {
+  Widget _buildContent(Color borderColor, double topPadding, bool isDense, bool hideUnderline, Widget inputChild) {
     final double bottomPadding = isDense ? 8.0 : 1.0;
     const double bottomBorder = 2.0;
     final double bottomHeight = isDense ? 14.0 : 18.0;
@@ -416,7 +429,7 @@ class InputDecorator extends StatelessWidget {
       decoration: new BoxDecoration(
         border: new Border(
           bottom: new BorderSide(
-            color: borderColor,
+            color: hideUnderline ? Colors.transparent : borderColor,
             width: bottomBorder,
           ),
         ),
@@ -441,6 +454,7 @@ class InputDecorator extends StatelessWidget {
 
     final TextStyle baseStyle = this.baseStyle ?? themeData.textTheme.subhead;
     final TextStyle hintStyle = decoration.hintStyle ?? baseStyle.copyWith(color: themeData.hintColor);
+    final bool hideUnderline = decoration.hideUnderline;
 
     final Color activeColor = _getActiveColor(themeData);
 
@@ -538,7 +552,7 @@ class InputDecorator extends StatelessWidget {
       stackChildren.add(inputChild);
     } else {
       final Color borderColor = errorText == null ? activeColor : themeData.errorColor;
-      stackChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild));
+      stackChildren.add(_buildContent(borderColor, topPadding, isDense, hideUnderline, inputChild));
     }
 
     if (!isDense && (errorText != null || helperText != null)) {
