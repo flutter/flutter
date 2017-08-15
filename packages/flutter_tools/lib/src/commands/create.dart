@@ -36,19 +36,26 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: false,
       help: 'Also add a flutter_driver dependency and generate a sample \'flutter drive\' test.'
     );
-    argParser.addFlag(
-      'package',
-      negatable: false,
-      defaultsTo: false,
-      help: 'Generate a shareable Flutter project containing modular Dart code.'
+    argParser.addOption(
+      'template',
+      abbr: 't',
+      allowed: <String>['app', 'package', 'plugin'],
+      help: 'Specify the type of project to create.',
+      valueHelp: 'type',
+      allowedHelp: <String, String>{
+        'app': '(default) Generate a Flutter application.',
+        'package': 'Generate a shareable Flutter project containing modular Dart code.',
+        'plugin': 'Generate a shareable Flutter project containing an API in Dart '
+            'code with a platform-specific implementation for Android, for '
+            'iOS code, or for both.',
+      },
+      defaultsTo: 'app',
     );
     argParser.addFlag(
         'plugin',
         negatable: false,
         defaultsTo: false,
-        help: 'Generate a shareable Flutter project containing an API in Dart '
-              'code with a platform-specific implementation for Android, for '
-              'iOS code, or for both.'
+        hide: true,
     );
     argParser.addOption(
       'description',
@@ -118,10 +125,11 @@ class CreateCommand extends FlutterCommand {
     if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
-    final bool generatePlugin = argResults['plugin'];
-    final bool generatePackage = argResults['package'];
-    if (generatePlugin && generatePackage)
-      throwToolExit('Both --plugin and --package specified. Cannot generate both at the same time.');
+    String template = argResults['template'];
+    if (argResults['plugin'])
+      template = 'plugin';
+    final bool generatePlugin = template == 'plugin';
+    final bool generatePackage = template == 'package';
 
     final Directory projectDir = fs.directory(argResults.rest.first);
     String dirPath = fs.path.normalize(projectDir.absolute.path);

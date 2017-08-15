@@ -70,7 +70,53 @@ void main() {
       );
     });
 
+    testUsingContext('package project', () async {
+      return _createAndAnalyzeProject(
+        projectDir,
+        <String>['--template=package'],
+        <String>[
+          'lib/flutter_project.dart',
+          'test/flutter_project_test.dart',
+        ],
+        unexpectedPaths: <String>[
+          'android/app/src/main/java/com/yourcompany/flutterproject/MainActivity.java',
+          'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
+          'ios/Classes/FlutterProjectPlugin.h',
+          'ios/Classes/FlutterProjectPlugin.m',
+          'ios/Runner/AppDelegate.h',
+          'ios/Runner/AppDelegate.m',
+          'ios/Runner/main.m',
+          'lib/main.dart',
+          'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
+          'example/ios/Runner/AppDelegate.h',
+          'example/ios/Runner/AppDelegate.m',
+          'example/ios/Runner/main.m',
+          'example/lib/main.dart',
+          'test/widget_test.dart',
+        ],
+      );
+    });
+
     testUsingContext('plugin project', () async {
+      return _createAndAnalyzeProject(
+        projectDir,
+        <String>['--template=plugin'],
+        <String>[
+          'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
+          'ios/Classes/FlutterProjectPlugin.h',
+          'ios/Classes/FlutterProjectPlugin.m',
+          'lib/flutter_project.dart',
+          'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
+          'example/ios/Runner/AppDelegate.h',
+          'example/ios/Runner/AppDelegate.m',
+          'example/ios/Runner/main.m',
+          'example/lib/main.dart',
+        ],
+        plugin: true,
+      );
+    });
+
+    testUsingContext('plugin project (legacy)', () async {
       return _createAndAnalyzeProject(
         projectDir,
         <String>['--plugin'],
@@ -92,7 +138,7 @@ void main() {
     testUsingContext('kotlin/swift plugin project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--plugin', '-a', 'kotlin', '--ios-language', 'swift'],
+        <String>['--template=plugin', '-a', 'kotlin', '--ios-language', 'swift'],
         <String>[
           'android/src/main/kotlin/com/yourcompany/flutterproject/FlutterProjectPlugin.kt',
           'ios/Classes/FlutterProjectPlugin.h',
@@ -118,7 +164,7 @@ void main() {
     testUsingContext('plugin project with custom org', () async {
       return _createAndAnalyzeProject(
           projectDir,
-          <String>['--plugin', '--org', 'com.bar.foo'],
+          <String>['--template=plugin', '--org', 'com.bar.foo'],
           <String>[
             'android/src/main/java/com/bar/foo/flutterproject/FlutterProjectPlugin.java',
             'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
