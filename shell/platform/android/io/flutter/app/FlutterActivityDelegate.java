@@ -7,6 +7,7 @@ package io.flutter.app;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -58,7 +59,7 @@ public final class FlutterActivityDelegate
         implements FlutterActivityEvents,
                    FlutterView.Provider,
                    PluginRegistry {
-    private static final String LAUNCH_DRAWABLE_META_DATA_KEY = "io.flutter.app.LaunchScreen";
+    private static final String SPLASH_SCREEN_META_DATA_KEY = "io.flutter.app.android.SplashScreenUntilFirstFrame";
     private static final String TAG = "FlutterActivityDelegate";
     private static final LayoutParams matchParent =
         new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
@@ -293,6 +294,9 @@ public final class FlutterActivityDelegate
      * Returns null if no {@code windowBackground} is set for the activity.
      */
     private View createLaunchView() {
+        if (!showSplashScreenUntilFirstFrame()) {
+            return null;
+        }
         final Drawable launchScreenDrawable = getLaunchScreenDrawableFromActivityTheme();
         if (launchScreenDrawable == null) {
             return null;
@@ -326,9 +330,20 @@ public final class FlutterActivityDelegate
         try {
             return activity.getResources().getDrawable(typedValue.resourceId);
         } catch (NotFoundException e) {
-            Log.e(TAG, "Referenced launch screen drawable resource '"
-                + LAUNCH_DRAWABLE_META_DATA_KEY + "' does not exist");
+            Log.e(TAG, "Referenced launch screen windowBackground resource does not exist");
             return null;
+        }
+    }
+
+    private Boolean showSplashScreenUntilFirstFrame() {
+        try {
+            ActivityInfo activityInfo = activity.getPackageManager().getActivityInfo(
+                activity.getComponentName(),
+                PackageManager.GET_META_DATA|PackageManager.GET_ACTIVITIES);
+            Bundle metadata = activityInfo.metaData;
+            return metadata != null && metadata.getBoolean(SPLASH_SCREEN_META_DATA_KEY);
+        } catch (NameNotFoundException e) {
+            return false;
         }
     }
 
