@@ -102,7 +102,7 @@ source_set("common") {
   deps = [
     ":generate_embedder_diagnostic_server_resources_cc",
     "//dart/runtime:dart_api",
-    "//dart/runtime/vm:libdart_platform",
+    "//dart/runtime/platform:libdart_platform",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",

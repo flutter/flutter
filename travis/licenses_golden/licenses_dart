@@ -1,4 +1,4 @@
-Signature: e483654ccc9cf903555060e165b85d99
+Signature: 0bd87bd9c9b110e66a5579d3ec5ea053
 
 UNUSED LICENSES:
 
@@ -56,13 +56,12 @@ FILE: ../../../dart/runtime/lib/timeline.dart
 FILE: ../../../dart/runtime/lib/vmservice.cc
 FILE: ../../../dart/runtime/observatory/lib/allocation_profile.dart
 FILE: ../../../dart/runtime/observatory/lib/cli.dart
-FILE: ../../../dart/runtime/observatory/lib/cpu_profile.dart
 FILE: ../../../dart/runtime/observatory/lib/debugger.dart
 FILE: ../../../dart/runtime/observatory/lib/heap_snapshot.dart
+FILE: ../../../dart/runtime/observatory/lib/sample_profile.dart
 FILE: ../../../dart/runtime/observatory/lib/src/allocation_profile/allocation_profile.dart
 FILE: ../../../dart/runtime/observatory/lib/src/app/analytics.dart
 FILE: ../../../dart/runtime/observatory/lib/src/cli/command.dart
-FILE: ../../../dart/runtime/observatory/lib/src/cpu_profile/cpu_profile.dart
 FILE: ../../../dart/runtime/observatory/lib/src/debugger/debugger.dart
 FILE: ../../../dart/runtime/observatory/lib/src/debugger/debugger_location.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/heap_snapshot.dart
@@ -74,6 +73,7 @@ FILE: ../../../dart/runtime/observatory/lib/src/elements/persistent_handles.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/ports.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/timeline_page.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/view_footer.dart
+FILE: ../../../dart/runtime/observatory/lib/src/sample_profile/sample_profile.dart
 FILE: ../../../dart/runtime/observatory/web/timeline.js
 FILE: ../../../dart/runtime/vm/atomic_test.cc
 FILE: ../../../dart/runtime/vm/log.cc
@@ -564,7 +564,6 @@ FILE: ../../../dart/runtime/vm/assembler_arm64.cc
 FILE: ../../../dart/runtime/vm/assembler_arm64.h
 FILE: ../../../dart/runtime/vm/ast_transformer.cc
 FILE: ../../../dart/runtime/vm/ast_transformer.h
-FILE: ../../../dart/runtime/vm/atomic_simulator.h
 FILE: ../../../dart/runtime/vm/bigint_test.cc
 FILE: ../../../dart/runtime/vm/bit_set_test.cc
 FILE: ../../../dart/runtime/vm/code_patcher_arm64.cc
@@ -1530,6 +1529,8 @@ FILE: ../../../dart/runtime/bin/dfe.cc
 FILE: ../../../dart/runtime/bin/dfe.h
 FILE: ../../../dart/runtime/bin/error_exit.cc
 FILE: ../../../dart/runtime/bin/error_exit.h
+FILE: ../../../dart/runtime/bin/gzip.cc
+FILE: ../../../dart/runtime/bin/gzip.h
 FILE: ../../../dart/runtime/bin/isolate_data.cc
 FILE: ../../../dart/runtime/bin/secure_socket_filter.cc
 FILE: ../../../dart/runtime/bin/secure_socket_filter.h
@@ -1574,9 +1575,11 @@ FILE: ../../../dart/runtime/observatory/lib/src/models/objects/unlinked_call.dar
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/single_target_cache.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/subtype_test_cache.dart
 FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/unlinked_call.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/vm.dart
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/single_target_cache.dart
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/subtype_test_cache.dart
 FILE: ../../../dart/runtime/observatory/lib/src/repositories/unlinked_call.dart
+FILE: ../../../dart/runtime/observatory/lib/src/repositories/vm.dart
 FILE: ../../../dart/runtime/platform/allocation.h
 FILE: ../../../dart/runtime/platform/growable_array.h
 FILE: ../../../dart/runtime/vm/compilation_trace.cc
