@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
+
 import 'asset.dart';
 import 'base/build.dart';
 import 'base/common.dart';
@@ -70,7 +72,7 @@ Future<Null> build({
   if (!precompiledSnapshot && previewDart2) {
     final String kernelBinaryFilename =
         await compile(
-            sdkRoot: artifacts.getHostFlutterPatchedSdkPath(),
+            sdkRoot: artifacts.getArtifactPath(Artifact.hostFlutterPatchedSdkPath),
             packagesPath: packagesPath,
             mainPath: fs.file(mainPath).absolute.path);
     kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));

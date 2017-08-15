@@ -18,7 +18,8 @@ enum Artifact {
   vmSnapshotData,
   isolateSnapshotData,
   platformKernelDill,
-  platformLibrariesJson
+  platformLibrariesJson,
+  hostFlutterPatchedSdkPath
 }
 
 String _artifactToFileName(Artifact artifact) {
@@ -43,6 +44,8 @@ String _artifactToFileName(Artifact artifact) {
       return 'platform.dill';
     case Artifact.platformLibrariesJson:
       return 'libraries.json';
+    case Artifact.hostFlutterPatchedSdkPath:
+      return '';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -124,7 +127,7 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
-  String getHostFlutterPatchedSdkPath() {
+  String _getHostFlutterPatchedSdkPath() {
     final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
     return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk');
   }
@@ -146,9 +149,11 @@ class CachedArtifacts extends Artifacts {
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
-        return fs.path.join(getHostFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+        return fs.path.join(_getHostFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return fs.path.join(getHostFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
+        return fs.path.join(_getHostFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
+      case Artifact.hostFlutterPatchedSdkPath:
+        return _getHostFlutterPatchedSdkPath();
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -219,6 +224,8 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
+      case Artifact.hostFlutterPatchedSdkPath:
+        return _getFlutterPatchedSdkPath();
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
