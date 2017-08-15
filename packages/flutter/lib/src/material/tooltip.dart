@@ -3,17 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const double _kScreenEdgeMargin = 10.0;
 const Duration _kFadeDuration = const Duration(milliseconds: 200);
 const Duration _kShowDuration = const Duration(milliseconds: 1500);
 
@@ -200,11 +199,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
 /// A delegate for computing the layout of a tooltip to be displayed above or
 /// bellow a target specified in the global coordinate system.
-class TooltipPositionDelegate extends SingleChildLayoutDelegate {
+class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
   ///
   /// The arguments cannot be null.
-  TooltipPositionDelegate({
+  _TooltipPositionDelegate({
     @required this.target,
     @required this.verticalOffset,
     @required this.preferBelow,
@@ -231,30 +230,17 @@ class TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    // VERTICAL DIRECTION
-    final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
-    final bool fitsAbove = target.dy - verticalOffset - childSize.height >= _kScreenEdgeMargin;
-    final bool tooltipBelow = preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
-    double y;
-    if (tooltipBelow)
-      y = math.min(target.dy + verticalOffset, size.height - _kScreenEdgeMargin);
-    else
-      y = math.max(target.dy - verticalOffset - childSize.height, _kScreenEdgeMargin);
-    // HORIZONTAL DIRECTION
-    final double normalizedTargetX = target.dx.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
-    double x;
-    if (normalizedTargetX < _kScreenEdgeMargin + childSize.width / 2.0) {
-      x = _kScreenEdgeMargin;
-    } else if (normalizedTargetX > size.width - _kScreenEdgeMargin - childSize.width / 2.0) {
-      x = size.width - _kScreenEdgeMargin - childSize.width;
-    } else {
-      x = normalizedTargetX - childSize.width / 2.0;
-    }
-    return new Offset(x, y);
+    return positionDependentBox(
+      size: size,
+      childSize: childSize,
+      target: target,
+      verticalOffset: verticalOffset,
+      preferBelow: preferBelow,
+    );
   }
 
   @override
-  bool shouldRelayout(TooltipPositionDelegate oldDelegate) {
+  bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target
         || verticalOffset != oldDelegate.verticalOffset
         || preferBelow != oldDelegate.preferBelow;
@@ -292,7 +278,7 @@ class _TooltipOverlay extends StatelessWidget {
     return new Positioned.fill(
       child: new IgnorePointer(
         child: new CustomSingleChildLayout(
-          delegate: new TooltipPositionDelegate(
+          delegate: new _TooltipPositionDelegate(
             target: target,
             verticalOffset: verticalOffset,
             preferBelow: preferBelow

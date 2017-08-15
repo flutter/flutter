@@ -9,7 +9,6 @@ import 'dart:ui' as ui show window, Picture, SceneBuilder, PictureRecorder;
 import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 
@@ -17,6 +16,8 @@ import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+
+typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
 
 /// A widget that enables inspecting the child widget's structure.
 ///
@@ -47,11 +48,15 @@ class WidgetInspector extends StatefulWidget {
   const WidgetInspector({
     Key key,
     @required this.child,
+    @required this.selectButtonBuilder,
   }) : assert(child != null),
        super(key: key);
 
   /// The widget that is being inspected.
   final Widget child;
+
+  /// A builder that is called to create the select button
+  final InspectorSelectButtonBuilder selectButtonBuilder;
 
   @override
   _WidgetInspectorState createState() => new _WidgetInspectorState();
@@ -69,7 +74,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
   /// In select mode, pointer interactions trigger widget selection instead of
   /// normal interactions. Otherwise the previously selected widget is
   /// highlighted but the application can be interacted with normally.
-  bool _isSelectMode = false;
+  bool _isSelectMode = true;
 
   final GlobalKey _ignorePointerKey = new GlobalKey();
 
@@ -192,7 +197,9 @@ class _WidgetInspectorState extends State<WidgetInspector>
       }
     }
     setState(() {
-      _isSelectMode = false;
+      // Only exit select mode if there is a button to return to select mode.
+      if (widget.selectButtonBuilder != null)
+        _isSelectMode = false;
     });
   }
 
@@ -219,15 +226,11 @@ class _WidgetInspectorState extends State<WidgetInspector>
         child: widget.child,
       ),
     ));
-    if (!_isSelectMode) {
+    if (!_isSelectMode && widget.selectButtonBuilder != null) {
       children.add(new Positioned(
         left: _kInspectButtonMargin,
         bottom: _kInspectButtonMargin,
-        child: new FloatingActionButton(
-          child: const Icon(Icons.search),
-          onPressed: _handleEnableSelect,
-          mini: true,
-        ),
+        child:  widget.selectButtonBuilder(context, _handleEnableSelect)
       ));
     }
     children.add(new _InspectorOverlay(selection: _selection));
@@ -281,15 +284,21 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, _RenderInspectorOverlay renderObject) {
     renderObject.selection = selection;
-    renderObject.markNeedsPaint();
   }
 }
 
 class _RenderInspectorOverlay extends RenderBox {
   /// The arguments must not be null.
-  _RenderInspectorOverlay({ @required this.selection }) : assert(selection != null);
+  _RenderInspectorOverlay({ @required _InspectorSelection selection }) : _selection = selection, assert(selection != null);
 
-  _InspectorSelection selection;
+  _InspectorSelection get selection => _selection;
+  _InspectorSelection _selection;
+  set selection(_InspectorSelection value) {
+    if (value != _selection) {
+      _selection = value;
+    }
+    markNeedsPaint();
+  }
 
   @override
   bool get sizedByParent => true;
@@ -499,12 +508,14 @@ class _InspectorOverlayLayer extends Layer {
     }
 
     final Size tooltipSize = _textPainter.size + const Offset(_kTooltipPadding * 2, _kTooltipPadding * 2);
-    final TooltipPositionDelegate tooltipPositionDelegate = new TooltipPositionDelegate(
+    final Offset tipOffset = positionDependentBox(
+      size: size,
+      childSize: tooltipSize,
       target: target,
       verticalOffset: verticalOffset,
       preferBelow: false,
     );
-    final Offset tipOffset = tooltipPositionDelegate.getPositionForChild(size, tooltipSize);
+
     final Paint tooltipBackground = new Paint()
       ..style = PaintingStyle.fill
       ..color = _kTooltipBackgroundColor;
