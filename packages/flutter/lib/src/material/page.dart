@@ -55,6 +55,10 @@ class _MountainViewPageTransition extends StatelessWidget {
 /// Specify whether the incoming page is a fullscreen modal dialog. On iOS, those
 /// pages animate bottom->up rather than right->left.
 ///
+/// The type `T` specifies the return type of the route which can be supplied as
+/// the route is popped from the stack via [Navigator.pop] when an optional
+/// `result` can be provided.
+///
 /// See also:
 ///
 ///  * [CupertinoPageRoute], that this [PageRoute] delegates transition animations to for iOS.
