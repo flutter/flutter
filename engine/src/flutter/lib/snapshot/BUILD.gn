@@ -4,7 +4,18 @@
 
 import("//flutter/lib/ui/dart_ui.gni")
 
-import("//dart/runtime/vm/gypi_contents.gni")
+import("//dart/runtime/bin/io_sources.gni")
+import("//dart/runtime/lib/async_sources.gni")
+import("//dart/runtime/lib/collection_sources.gni")
+import("//dart/runtime/lib/convert_sources.gni")
+import("//dart/runtime/lib/core_sources.gni")
+import("//dart/runtime/lib/developer_sources.gni")
+import("//dart/runtime/lib/internal_sources.gni")
+import("//dart/runtime/lib/isolate_sources.gni")
+import("//dart/runtime/lib/math_sources.gni")
+import("//dart/runtime/lib/mirrors_sources.gni")
+import("//dart/runtime/lib/typed_data_sources.gni")
+
 import("//dart/utils/generate_patch_sdk.gni")
 
 if (is_fuchsia) {
@@ -321,57 +332,57 @@ generate_vm_patched_sdk("flutter_patched_sdk") {
   libraries = [
     [
       "async",
-      processed_gypis.async_runtime_sources,
+      async_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "collection",
-      processed_gypis.collection_runtime_sources,
+      collection_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "convert",
-      processed_gypis.convert_runtime_sources,
+      convert_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "core",
-      processed_gypis.core_runtime_sources,
+      core_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "developer",
-      processed_gypis.developer_runtime_sources,
+      developer_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "internal",
-      processed_gypis.internal_runtime_sources,
+      internal_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "io",
-      processed_gypis.bin_io_sources,
+      io_runtime_sources,
       "//dart/runtime/bin",
     ],
     [
       "isolate",
-      processed_gypis.isolate_runtime_sources,
+      isolate_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "math",
-      processed_gypis.math_runtime_sources,
+      math_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "mirrors",
-      processed_gypis.mirrors_runtime_sources,
+      mirrors_runtime_sources,
       "//dart/runtime/lib",
     ],
     [
       "typed_data",
-      processed_gypis.typed_data_runtime_sources,
+      typed_data_runtime_sources,
       "//dart/runtime/lib",
     ],
   ]

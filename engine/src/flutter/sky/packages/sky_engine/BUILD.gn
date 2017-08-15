@@ -2,7 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//dart/sdk/lib/rules.gni")
+import("//dart/sdk/lib/async/async_sources.gni")
+import("//dart/sdk/lib/collection/collection_sources.gni")
+import("//dart/sdk/lib/convert/convert_sources.gni")
+import("//dart/sdk/lib/core/core_sources.gni")
+import("//dart/sdk/lib/developer/developer_sources.gni")
+import("//dart/sdk/lib/internal/internal_sources.gni")
+import("//dart/sdk/lib/io/io_sources.gni")
+import("//dart/sdk/lib/isolate/isolate_sources.gni")
+import("//dart/sdk/lib/math/math_sources.gni")
+import("//dart/sdk/lib/typed_data/typed_data_sources.gni")
+
 import("//flutter/build/dart/rules.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//flutter/sky/engine/core/core.gni")
@@ -19,54 +29,69 @@ if (!is_fuchsia) {
   }
 }
 
-dart_sdk_lib_copy("async") {
-  sdk_lib_name = "async"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+
+dart_sdk_lib_path = rebase_path("//dart/sdk/lib")
+
+copy("async") {
+  lib_path = rebase_path("async", "", dart_sdk_lib_path)
+  sources = rebase_path(async_sdk_sources, "", lib_path)
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_engine/lib/async/{{source_file_part}}"
+  ]
 }
 
-dart_sdk_lib_copy("collection") {
-  sdk_lib_name = "collection"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("collection") {
+  lib_path = rebase_path("collection", "", dart_sdk_lib_path)
+  sources = rebase_path(collection_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/collection/{{source_file_part}}" ]
 }
 
-dart_sdk_lib_copy("convert") {
-  sdk_lib_name = "convert"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("convert") {
+  lib_path = rebase_path("convert", "", dart_sdk_lib_path)
+  sources = rebase_path(convert_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/convert/{{source_file_part}}" ]
 }
 
-dart_sdk_lib_copy("core") {
-  sdk_lib_name = "core"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("core") {
+  lib_path = rebase_path("core", "", dart_sdk_lib_path)
+  sources = rebase_path(core_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/core/{{source_file_part}}" ]
 }
 
-dart_sdk_lib_copy("developer") {
-  sdk_lib_name = "developer"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("developer") {
+  lib_path = rebase_path("developer", "", dart_sdk_lib_path)
+  sources = rebase_path(developer_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/developer/{{source_file_part}}" ]
 }
 
-dart_sdk_lib_copy("internal") {
-  sdk_lib_name = "internal"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("internal") {
+  lib_path = rebase_path("internal", "", dart_sdk_lib_path)
+  sources = rebase_path(internal_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/internal/{{source_file_part}}" ]
 }
 
-dart_sdk_lib_copy("io") {
-  sdk_lib_name = "io"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("io") {
+  lib_path = rebase_path("io", "", dart_sdk_lib_path)
+  sources = rebase_path(io_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/io/{{source_file_part}}" ]
 }
 
-dart_sdk_lib_copy("isolate") {
-  sdk_lib_name = "isolate"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("isolate") {
+  lib_path = rebase_path("isolate", "", dart_sdk_lib_path)
+  sources = rebase_path(isolate_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/isolate/{{source_file_part}}" ]
 }
 
-dart_sdk_lib_copy("math") {
-  sdk_lib_name = "math"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("math") {
+  lib_path = rebase_path("math", "", dart_sdk_lib_path)
+  sources = rebase_path(math_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/math/{{source_file_part}}" ]
 }
 
-dart_sdk_lib_copy("typed_data") {
-  sdk_lib_name = "typed_data"
-  destination = "$root_gen_dir/dart-pkg/sky_engine/lib"
+copy("typed_data") {
+  lib_path = rebase_path("typed_data", "", dart_sdk_lib_path)
+  sources = rebase_path(typed_data_sdk_sources, "", lib_path)
+  outputs = [ "$root_gen_dir/dart-pkg/sky_engine/lib/typed_data/{{source_file_part}}" ]
 }
 
 copy("copy_dart_ui") {

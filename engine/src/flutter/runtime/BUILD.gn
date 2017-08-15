@@ -2,14 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//dart/runtime/bin/vmservice/vmservice_sources.gni")
 import("//flutter/common/config.gni")
-
-vmservice_sources_gypi =
-    exec_script(
-        "//build/gypi_to_gn.py",
-        [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ],
-        "scope",
-        [ rebase_path("//dart/runtime/bin/vmservice/vmservice_sources.gypi") ])
 
 action("gen_embedded_resources_cc") {
   script = "//dart/runtime/tools/create_resources.py"
@@ -18,7 +12,7 @@ action("gen_embedded_resources_cc") {
     output_file,
   ]
 
-  inputs = rebase_path(vmservice_sources_gypi.sources,
+  inputs = rebase_path(vmservice_sources,
                        "",
                        "//dart/runtime/bin/vmservice")
 
