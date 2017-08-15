@@ -132,7 +132,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   }
 
   // A cache of VMService connections.
-  HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
+  final HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
 
   VMService _getVMService(int port) {
     if (!_vmServiceCache.containsKey(port)) {
