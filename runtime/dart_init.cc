@@ -437,6 +437,12 @@ void PushBackAll(std::vector<const char*>* args,
   }
 }
 
+static void EmbedderInformationCallback(Dart_EmbedderInformation* info) {
+  info->version = DART_EMBEDDER_INFORMATION_CURRENT_VERSION;
+  dart::bin::GetIOEmbedderInformation(info);
+  info->name = "Flutter";
+}
+
 void InitDartVM(const uint8_t* vm_snapshot_data,
                 const uint8_t* vm_snapshot_instructions,
                 const uint8_t* default_isolate_snapshot_data,
@@ -574,6 +580,8 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
   // Allow streaming of stdout and stderr by the Dart vm.
   Dart_SetServiceStreamCallbacks(&ServiceStreamListenCallback,
                                  &ServiceStreamCancelCallback);
+
+  Dart_SetEmbedderInformationCallback(&EmbedderInformationCallback);
 }
 
 }  // namespace blink
