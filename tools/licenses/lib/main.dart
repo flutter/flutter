@@ -1846,6 +1846,7 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
   @override
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'appurify-python' // only used by tests
+        && entry.name != 'benchmark' // only used by tests
         && entry.name != 'dart-sdk' // redundant with //engine/dart; https://github.com/flutter/flutter/issues/2618
         && entry.name != 'firebase' // only used by bots; https://github.com/flutter/flutter/issues/3722
         && entry.name != 'gyp' // build-time only
