@@ -278,7 +278,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           children.add(
             new Expanded(
               child: new InkResponse(
-                onTap: widget.onTap != null ? () { widget.onTap(i); } : null,
+                onTap: () {
+                  if (widget.onTap != null)
+                    widget.onTap(i);
+                },
                 child: new Stack(
                   alignment: FractionalOffset.center,
                   children: <Widget>[
