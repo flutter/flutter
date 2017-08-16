@@ -13,19 +13,25 @@ part of dart.ui;
 // would cause a crash. It is, however, acceptable for error messages to be much
 // less useful or correct in release mode than in debug mode.
 //
-// Painting APIs will also warn about arguments representing NaN or infinite
-// coordinates, which can not be rendered by Skia.
+// Painting APIs will also warn about arguments representing NaN coordinates,
+// which can not be rendered by Skia.
 
 bool _rectIsValid(Rect rect) {
-  return rect != null && rect.isFinite;
+  assert(rect != null, 'Rect argument was null.');
+  assert(!rect._value.any((double value) => value.isNaN), 'Rect argument contained a NaN value.');
+  return true;
 }
 
 bool _rrectIsValid(RRect rrect) {
-  return rrect != null && rrect.isFinite;
+  assert(rrect != null, 'RRect argument was null.');
+  assert(!rrect._value.any((double value) => value.isNaN), 'RRect argument contained a NaN value.');
+  return true;
 }
 
 bool _offsetIsValid(Offset offset) {
-  return offset != null && offset.isFinite;
+  assert(offset != null, 'Offset argument was null.');
+  assert(!offset.dx.isNaN && !offset.dy.isNaN, 'Offset argument contained a NaN value.');
+  return true;
 }
 
 Color _scaleAlpha(Color a, double factor) {
