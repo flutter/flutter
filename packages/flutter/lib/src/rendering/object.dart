@@ -818,6 +818,7 @@ class _ScrollingSemanticsFragment extends _ConcreteSemanticsFragment {
 
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
+    print('hi!');
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
     final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
@@ -838,34 +839,23 @@ class _ScrollingSemanticsFragment extends _ConcreteSemanticsFragment {
         }
       }
     }
-//    if (excluded.isNotEmpty) {
-      node.helper ??= new SemanticsNode(
-        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-        showOnScreen: renderObjectOwner.showOnScreen
-      );
-      node.helper.rect = node.rect;
-      node.helper.transform = node.transform;
-      node.transform = null;
-      node.helper.addChildren(included);
-      excluded.add(node.helper);
-      node.addChildren(excluded);
-      if (annotator != null)
-        annotator(node.helper);
-      if (haveConcreteNode) {
-        node.finalizeChildren();
-        node.helper.finalizeChildren();
-        yield node;
-      }
-//    } else {
-//      node.addChildren(included);
-//      if (annotator != null) {
-//        annotator(node);
-//      }
-//      if (haveConcreteNode) {
-//        node.finalizeChildren();
-//        yield node;
-//      }
-//    }
+    node.helper ??= new SemanticsNode(
+      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+      showOnScreen: renderObjectOwner.showOnScreen
+    );
+    node.helper.rect = node.rect;
+    node.helper.transform = node.transform;
+    node.transform = null;
+    node.helper.addChildren(included);
+    excluded.add(node.helper);
+    node.addChildren(excluded);
+    if (annotator != null)
+      annotator(node.helper);
+    if (haveConcreteNode) {
+      node.finalizeChildren();
+      node.helper.finalizeChildren();
+      yield node;
+    }
   }
 }
 

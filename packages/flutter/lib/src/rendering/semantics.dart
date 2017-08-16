@@ -323,6 +323,7 @@ class SemanticsNode extends AbstractNode {
       _inheritedMergeAllDescendantsIntoThisNodeValue = true;
     _label = '';
     _markDirty();
+    helper?.reset();
   }
 
   List<SemanticsNode> _newChildren;
