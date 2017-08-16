@@ -2863,6 +2863,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
+  bool get hasSpecialScrollSemantics => onHorizontalDragUpdate != null || onVerticalDragUpdate != null;
+
+  @override
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   void _annotate(SemanticsNode node) {

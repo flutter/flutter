@@ -1307,6 +1307,18 @@ abstract class RenderSliver extends RenderObject {
     });
   }
 
+  @override
+  bool get isIncludedInSemanticsScrollable => _isIncludedInSemanticsScrollable;
+  bool _isIncludedInSemanticsScrollable = true;
+  set isIncludedInSemanticsScrollable(bool value) {
+    print('gggggggg $value');
+    if (_isIncludedInSemanticsScrollable == value)
+      return;
+    print('+++ $this -- $_isIncludedInSemanticsScrollable -> $value');
+    _isIncludedInSemanticsScrollable = value;
+    markNeedsSemanticsUpdate();
+  }
+
   // This override exists only to change the type of the second argument.
   @override
   void handleEvent(PointerEvent event, SliverHitTestEntry entry) { }

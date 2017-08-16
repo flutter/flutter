@@ -8,6 +8,7 @@ import 'dart:ui' as ui show PictureRecorder;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -647,6 +648,12 @@ abstract class _SemanticsFragment {
   bool _debugCompiled = false;
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics });
 
+  bool isExcludedFromScrolling(SemanticsNode node) => _isExcludedFromScrolling;
+  bool _isExcludedFromScrolling = false;
+  void excludeFromScrolling() {
+    _isExcludedFromScrolling = true;
+  }
+
   @override
   String toString() => describeIdentity(this);
 }
@@ -800,6 +807,68 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
+class _ScrollingSemanticsFragment extends _ConcreteSemanticsFragment {
+  _ScrollingSemanticsFragment({
+    RenderObject renderObjectOwner,
+    SemanticsAnnotator annotator,
+    Iterable<_SemanticsFragment> children,
+    bool dropSemanticsOfPreviousSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+
+
+  @override
+  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
+    assert(!_debugCompiled);
+    assert(() { _debugCompiled = true; return true; });
+    final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
+    final List<SemanticsNode> excluded = <SemanticsNode>[];
+    final List<SemanticsNode> included = <SemanticsNode>[];
+    for (_SemanticsFragment child in _children) {
+      assert(child._ancestorChain.last == renderObjectOwner);
+      final Iterable<SemanticsNode> nodes = child.compile(
+          geometry: createSemanticsGeometryForChild(geometry),
+          currentSemantics: _children.length > 1 ? null : node,
+          parentSemantics: node
+      );
+      for (SemanticsNode node in nodes) {
+        if (child.isExcludedFromScrolling(node)) {
+          excluded.add(node);
+        } else {
+          included.add(node);
+        }
+      }
+    }
+//    if (excluded.isNotEmpty) {
+      node.helper ??= new SemanticsNode(
+        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
+        showOnScreen: renderObjectOwner.showOnScreen
+      );
+      node.helper.rect = node.rect;
+      node.helper.transform = node.transform;
+      node.transform = null;
+      node.helper.addChildren(included);
+      excluded.add(node.helper);
+      node.addChildren(excluded);
+      if (annotator != null)
+        annotator(node.helper);
+      if (haveConcreteNode) {
+        node.finalizeChildren();
+        node.helper.finalizeChildren();
+        yield node;
+      }
+//    } else {
+//      node.addChildren(included);
+//      if (annotator != null) {
+//        annotator(node);
+//      }
+//      if (haveConcreteNode) {
+//        node.finalizeChildren();
+//        yield node;
+//      }
+//    }
+  }
+}
+
 /// Represents a RenderObject that does not have [isSemanticBoundary] set to
 /// `true`, but which does have some semantic annotators.
 ///
@@ -868,6 +937,8 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
          dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings
        );
 
+  final Set<SemanticsNode> _nodesExcludedFromScrolling = new Set<SemanticsNode>();
+
   @override
   Iterable<SemanticsNode> compile({
     @required _SemanticsGeometry geometry,
@@ -880,12 +951,26 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
     geometry.applyAncestorChain(_ancestorChain);
     for (_SemanticsFragment child in _children) {
       assert(child._ancestorChain.last == renderObjectOwner);
-      yield* child.compile(
-        geometry: new _SemanticsGeometry.copy(geometry),
-        currentSemantics: null,
-        parentSemantics: parentSemantics
+      final Iterable<SemanticsNode> nodes = child.compile(
+          geometry: new _SemanticsGeometry.copy(geometry),
+          currentSemantics: null,
+          parentSemantics: parentSemantics
       );
+      if (child._isExcludedFromScrolling) {
+        for (SemanticsNode node in nodes) {
+          print('Added by $this -- $node');
+          _nodesExcludedFromScrolling.add(node);
+          yield node;
+        }
+      } else {
+        yield* nodes;
+      }
     }
+  }
+
+  @override
+  bool isExcludedFromScrolling(SemanticsNode node) {
+    return super.isExcludedFromScrolling(node) || _nodesExcludedFromScrolling.contains(node);
   }
 }
 
@@ -1358,6 +1443,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       child.reassemble();
     });
   }
+
+  bool get hasSpecialScrollSemantics => false;
 
   // LAYOUT
 
@@ -2490,6 +2577,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool _needsSemanticsGeometryUpdate = true;
   SemanticsNode _semantics;
 
+  bool get isIncludedInSemanticsScrollable => true;
+
   /// The semantics of this render object.
   ///
   /// Exposed only for testing and debugging. To learn about the semantics of
@@ -2652,6 +2741,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         dropSemanticsOfPreviousSiblings = true;
       }
       if (fragment.producesSemanticNodes) {
+        if (!child.isIncludedInSemanticsScrollable) {
+          fragment.excludeFromScrolling();
+          print('$this -> $fragment');
+        }
         fragment.addAncestor(this);
         children ??= <_SemanticsFragment>[];
         assert(!children.contains(fragment));
@@ -2667,6 +2760,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final SemanticsAnnotator annotator = semanticsAnnotator;
     if (parent is! RenderObject)
       return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+    if (hasSpecialScrollSemantics && isSemanticBoundary)
+      return new _ScrollingSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     if (isSemanticBoundary)
       return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     if (annotator != null)

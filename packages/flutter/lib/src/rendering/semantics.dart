@@ -149,6 +149,8 @@ class SemanticsNode extends AbstractNode {
        _showOnScreen = showOnScreen,
        _actionHandler = handler;
 
+  SemanticsNode helper;
+
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
   /// The root node is assigned an identifier of zero.
