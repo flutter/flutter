@@ -179,7 +179,6 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
-
   void _navigatorPop() {
     Navigator.pop(context);
   }
