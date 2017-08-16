@@ -457,9 +457,13 @@ class _LocalizationsState extends State<Localizations> {
       // The delegate loaded its resources synchronously, do not rebuild
       _locale = locale;
     } else {
-      // Don't rebuild the dependent widgets until the resources for the new locale
+      // - Don't rebuild the dependent widgets until the resources for the new locale
       // have finished loading. Until then the old locale will continue to be used.
+      // - If we're running at app startup time then defer reporting the first
+      // "useful" frame until after the async load has completed.
+      WidgetsBinding.instance.deferFirstFrameReport();
       futureTypes.then((Iterable<Type> value) {
+        WidgetsBinding.instance.allowFirstFrameReport();
         if (!mounted)
           return;
         setState(() {
@@ -475,11 +479,6 @@ class _LocalizationsState extends State<Localizations> {
 
   @override
   Widget build(BuildContext context) {
-    // If we're still waiting for resources to load don't call this the "first frame".
-    // See https://github.com/flutter/flutter/issues/1865
-    if (_locale == null)
-      WidgetsBinding.instance.preventThisFrameFromBeingReportedAsFirstFrame();
-
     return new _LocalizationsScope(
       key: _localizedResourcesScopeKey,
       locale: widget.locale,
