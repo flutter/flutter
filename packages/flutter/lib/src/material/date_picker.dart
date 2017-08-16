@@ -735,6 +735,10 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     Navigator.pop(context, _selectedDate);
   }
 
+  void _handleMonthHeaderTap() {
+    _handleModeChanged(DatePickerMode.year);
+  }
+
   Widget _buildPicker() {
     assert(_mode != null);
     switch (_mode) {
@@ -746,7 +750,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           firstDate: widget.firstDate,
           lastDate: widget.lastDate,
           selectableDayPredicate: widget.selectableDayPredicate,
-          onMonthHeaderTap: () { _handleModeChanged(DatePickerMode.year); },
+          onMonthHeaderTap: _handleMonthHeaderTap,
         );
       case DatePickerMode.year:
         return new YearPicker(
