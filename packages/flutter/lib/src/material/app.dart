@@ -309,7 +309,9 @@ class _MaterialAppState extends State<MaterialApp> {
   @override
   void didUpdateWidget(MaterialApp old) {
     super.didUpdateWidget(old);
-    if (widget.localizationsDelegate != old.localizationsDelegate)
+    final LocalizationsDelegate delegate = widget.localizationsDelegate;
+    final bool shouldReload = delegate != null && delegate.shouldReload(old.localizationsDelegate);
+    if (delegate != old.localizationsDelegate || shouldReload)
       _localizationsDelegate = _createLocalizationsDelegate();
   }
 

@@ -66,12 +66,6 @@ abstract class LocalizationsDelegate {
   /// by [Type] with [resourcesFor].
   Future<Iterable<Type>> load(Locale locale);
 
-  /// Indicates the progress on loading resources for `locale`.
-  ///
-  /// If the returned value is not [LocalizationsStatus.loaded] then
-  /// [resourcesFor] will return null.
-  LocalizationsStatus statusFor(Locale locale);
-
   /// Returns an instance with the specified type that contains all of
   /// the resources for `locale`.
   ///
@@ -184,15 +178,6 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
   }
 
   @override
-  LocalizationsStatus statusFor(Locale locale) {
-    if (_localeToResources[locale] != null)
-      return LocalizationsStatus.loaded;
-    if (_loading.contains(locale))
-      return LocalizationsStatus.loading;
-    return LocalizationsStatus.none;
-  }
-
-  @override
   T resourcesFor<T>(Locale locale, Type type) {
     assert(locale != null);
     assert(type != null);
@@ -213,7 +198,7 @@ class _MergedLocalizationsDelegate extends LocalizationsDelegate {
   // elements of `allDelegates`.
   _MergedLocalizationsDelegate(this.allDelegates);
 
-  // This class's [load], [statusFor], and [resourcesFor] methods delegate
+  // This class's [load] and [resourcesFor] methods delegate
   // to the members of this list.
   final Iterable<LocalizationsDelegate> allDelegates;
 
@@ -249,15 +234,6 @@ class _MergedLocalizationsDelegate extends LocalizationsDelegate {
     });
 
     return types == null ? typesFuture : new SynchronousFuture<Iterable<Type>>(types);
-  }
-
-  @override
-  LocalizationsStatus statusFor(Locale locale) {
-    if (_localeToDelegate[locale] != null)
-      return LocalizationsStatus.loaded;
-    if (_loading.contains(locale))
-      return LocalizationsStatus.loading;
-    return LocalizationsStatus.none;
   }
 
   @override

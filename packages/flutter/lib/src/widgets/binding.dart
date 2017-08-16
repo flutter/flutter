@@ -568,7 +568,10 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.performReassemble().then((Null _) {
+    // TODO(hansmuller): eliminate the value variable after analyzer bug
+    // https://github.com/flutter/flutter/issues/11646 is fixed.
+    final Future<Null> value = super.performReassemble();
+    return value.then((Null _) {
       allowFirstFrameReport();
     });
   }
