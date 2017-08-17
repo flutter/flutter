@@ -59,22 +59,22 @@ class WidgetInspector extends StatefulWidget {
   final InspectorSelectButtonBuilder selectButtonBuilder;
 
   @override
-  _WidgetInspectorState createState() => new _WidgetInspectorState();
+  WidgetInspectorState createState() => new WidgetInspectorState();
 }
 
-class _WidgetInspectorState extends State<WidgetInspector>
+class WidgetInspectorState extends State<WidgetInspector>
     with WidgetsBindingObserver {
 
   Offset _lastPointerLocation;
 
-  final _InspectorSelection _selection = new _InspectorSelection();
+  final InspectorSelection selection = new InspectorSelection();
 
   /// Whether the inspector is in select mode.
   ///
   /// In select mode, pointer interactions trigger widget selection instead of
   /// normal interactions. Otherwise the previously selected widget is
   /// highlighted but the application can be interacted with normally.
-  bool _isSelectMode = true;
+  bool isSelectMode = true;
 
   final GlobalKey _ignorePointerKey = new GlobalKey();
 
@@ -148,7 +148,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
   }
 
   void _inspectAt(Offset position) {
-    if (!_isSelectMode)
+    if (!isSelectMode)
       return;
 
     final RenderIgnorePointer ignorePointer = _ignorePointerKey.currentContext.findRenderObject();
@@ -156,7 +156,7 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final List<RenderObject> selected = hitTest(position, userRender);
 
     setState(() {
-      _selection.candidates = selected;
+      selection.candidates = selected;
     });
   }
 
@@ -179,33 +179,33 @@ class _WidgetInspectorState extends State<WidgetInspector>
     final Rect bounds = (Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio)).deflate(_kOffScreenMargin);
     if (!bounds.contains(_lastPointerLocation)) {
       setState(() {
-        _selection.clear();
+        selection.clear();
       });
     }
   }
 
   void _handleTap() {
-    if (!_isSelectMode)
+    if (!isSelectMode)
       return;
     if (_lastPointerLocation != null) {
       _inspectAt(_lastPointerLocation);
 
-      if (_selection != null) {
+      if (selection != null) {
         // Notify debuggers to open an inspector on the object.
-        developer.inspect(_selection.current);
-        print(_selection.current.toStringDeep());
+        developer.inspect(selection.current);
+        print(selection.current.toStringDeep());
       }
     }
     setState(() {
       // Only exit select mode if there is a button to return to select mode.
       if (widget.selectButtonBuilder != null)
-        _isSelectMode = false;
+        isSelectMode = false;
     });
   }
 
   void _handleEnableSelect() {
     setState(() {
-      _isSelectMode = true;
+      isSelectMode = true;
     });
   }
 
@@ -220,26 +220,26 @@ class _WidgetInspectorState extends State<WidgetInspector>
       behavior: HitTestBehavior.opaque,
       excludeFromSemantics: true,
       child: new IgnorePointer(
-        ignoring: _isSelectMode,
+        ignoring: isSelectMode,
         key: _ignorePointerKey,
         ignoringSemantics: false,
         child: widget.child,
       ),
     ));
-    if (!_isSelectMode && widget.selectButtonBuilder != null) {
+    if (!isSelectMode && widget.selectButtonBuilder != null) {
       children.add(new Positioned(
         left: _kInspectButtonMargin,
         bottom: _kInspectButtonMargin,
         child:  widget.selectButtonBuilder(context, _handleEnableSelect)
       ));
     }
-    children.add(new _InspectorOverlay(selection: _selection));
+    children.add(new _InspectorOverlay(selection: selection));
     return new Stack(children: children);
   }
 }
 
 /// Mutable selection state of the inspector.
-class _InspectorSelection {
+class InspectorSelection {
   /// Render objects that are candidates to be selected.
   ///
   /// Tools may wish to iterate through the list of candidates
@@ -273,8 +273,7 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
     @required this.selection,
   }) : super(key: key);
 
-  final _InspectorSelection selection;
-
+  final InspectorSelection selection;
 
   @override
   _RenderInspectorOverlay createRenderObject(BuildContext context) {
@@ -289,11 +288,11 @@ class _InspectorOverlay extends LeafRenderObjectWidget {
 
 class _RenderInspectorOverlay extends RenderBox {
   /// The arguments must not be null.
-  _RenderInspectorOverlay({ @required _InspectorSelection selection }) : _selection = selection, assert(selection != null);
+  _RenderInspectorOverlay({ @required InspectorSelection selection }) : _selection = selection, assert(selection != null);
 
-  _InspectorSelection get selection => _selection;
-  _InspectorSelection _selection;
-  set selection(_InspectorSelection value) {
+  InspectorSelection get selection => _selection;
+  InspectorSelection _selection;
+  set selection(InspectorSelection value) {
     if (value != _selection) {
       _selection = value;
     }
@@ -403,7 +402,7 @@ class _InspectorOverlayLayer extends Layer {
     }
   }
 
-  _InspectorSelection selection;
+  InspectorSelection selection;
 
   /// The rectangle in this layer's coordinate system that the overlay should
   /// occupy.
