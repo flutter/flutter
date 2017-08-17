@@ -452,9 +452,11 @@ class RawGestureDetector extends StatefulWidget {
     this.child,
     this.gestures: const <Type, GestureRecognizerFactory>{},
     this.behavior,
-    this.excludeFromSemantics: false
+    this.excludeFromSemantics: false,
+    this.canExcludeFromSemanticsScrolling: false,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
+       assert(canExcludeFromSemanticsScrolling != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -478,6 +480,8 @@ class RawGestureDetector extends StatefulWidget {
   /// tree directly and so having a gesture to show it would result in
   /// duplication of information.
   final bool excludeFromSemantics;
+
+  final bool canExcludeFromSemanticsScrolling;
 
   @override
   RawGestureDetectorState createState() => new RawGestureDetectorState();
@@ -688,7 +692,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       child: widget.child
     );
     if (!widget.excludeFromSemantics)
-      result = new _GestureSemantics(owner: this, child: result);
+      result = new _GestureSemantics(owner: this, child: result, canExcludeFromScrolling: widget.canExcludeFromSemanticsScrolling);
     return result;
   }
 
@@ -712,14 +716,16 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
     Key key,
     Widget child,
-    this.owner
-  }) : super(key: key, child: child);
+    this.owner,
+    this.canExcludeFromScrolling: false,
+  }) : assert(canExcludeFromScrolling != null), super(key: key, child: child);
 
   final RawGestureDetectorState owner;
+  final bool canExcludeFromScrolling;
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final RenderSemanticsGestureHandler renderObject = new RenderSemanticsGestureHandler();
+    final RenderSemanticsGestureHandler renderObject = new RenderSemanticsGestureHandler(hasTwoLayerScrollSemantics: canExcludeFromScrolling);
     _updateHandlers(renderObject);
     return renderObject;
   }
@@ -742,5 +748,6 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsGestureHandler renderObject) {
     _updateHandlers(renderObject);
+    renderObject.hasTwoLayerScrollSemantics = canExcludeFromScrolling;
   }
 }

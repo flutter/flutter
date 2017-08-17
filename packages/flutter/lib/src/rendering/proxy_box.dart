@@ -2765,8 +2765,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     GestureLongPressCallback onLongPress,
     GestureDragUpdateCallback onHorizontalDragUpdate,
     GestureDragUpdateCallback onVerticalDragUpdate,
+    this.hasTwoLayerScrollSemantics: false,
     this.scrollFactor: 0.8
   }) : assert(scrollFactor != null),
+       assert(hasTwoLayerScrollSemantics != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
@@ -2863,7 +2865,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
-  bool get hasTwoLayerScrollSemantics => onHorizontalDragUpdate != null || onVerticalDragUpdate != null;
+  bool hasTwoLayerScrollSemantics;
 
   @override
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;

@@ -470,6 +470,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,
+      canExcludeFromSemanticsScrolling: true,
       child: new IgnorePointer(
         key: _ignorePointerKey,
         ignoring: _shouldIgnorePointer,
