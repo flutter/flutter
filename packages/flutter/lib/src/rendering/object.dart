@@ -2768,14 +2768,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final SemanticsAnnotator annotator = semanticsAnnotator;
     if (parent is! RenderObject)
       return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
-    if (hasTwoLayerScrollSemantics && isSemanticBoundary) {
-      return new _ScrollingSemanticsFragment(
-        renderObjectOwner: this,
-        annotator: annotator,
-        children: children,
-        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-      );
-    }
+    if (hasTwoLayerScrollSemantics && isSemanticBoundary)
+      return new _ScrollingSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     if (isSemanticBoundary)
       return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     if (annotator != null)
