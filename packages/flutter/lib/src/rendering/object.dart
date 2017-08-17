@@ -8,7 +8,6 @@ import 'dart:ui' as ui show PictureRecorder;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -648,11 +647,13 @@ abstract class _SemanticsFragment {
   bool _debugCompiled = false;
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics });
 
-  bool isExcludedFromScrolling(SemanticsNode node) => _isExcludedFromScrolling;
-  bool _isExcludedFromScrolling = false;
-  void excludeFromScrolling() {
-    _isExcludedFromScrolling = true;
-  }
+  /// Whether [node], which was returned by this fragment from [compile],
+  /// should be included in the scrollable area.
+  ///
+  /// An example of a node that is excluded from scrolling even though it is
+  /// part of a [Scrollable] is a floating AppBar in its compact state.
+  bool isExcludedFromScrolling(SemanticsNode node) => _excludeNodesFromScrolling;
+  bool _excludeNodesFromScrolling = false;
 
   @override
   String toString() => describeIdentity(this);
@@ -946,7 +947,7 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
           currentSemantics: null,
           parentSemantics: parentSemantics
       );
-      if (child._isExcludedFromScrolling) {
+      if (child._excludeNodesFromScrolling) {
         for (SemanticsNode node in nodes) {
           print('Added by $this -- $node');
           _nodesExcludedFromScrolling.add(node);
@@ -2567,7 +2568,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool _needsSemanticsGeometryUpdate = true;
   SemanticsNode _semantics;
 
-  bool get isIncludedInSemanticsScrollable => true;
+  /// Whether this render object should be excluded from the semantic scrolling
+  /// area.
+  ///
+  /// This setting is only relevant for [RenderSliver]s. Certain slivers (e.g.
+  /// a floating app bar) can be part of a [Scrollable], but they no longer
+  /// trigger semantic scrolling actions. Slivers, that return `true` for
+  /// [excludedFromSemanticsScrolling], are treated as if they are located
+  /// outside of the [Scrollable] for semantics purposes.
+  bool get excludedFromSemanticsScrolling => false;
 
   /// The semantics of this render object.
   ///
@@ -2731,10 +2740,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         dropSemanticsOfPreviousSiblings = true;
       }
       if (fragment.producesSemanticNodes) {
-        if (!child.isIncludedInSemanticsScrollable) {
-          fragment.excludeFromScrolling();
-          print('$this -> $fragment');
-        }
+        if (child.excludedFromSemanticsScrolling)
+          fragment._excludeNodesFromScrolling = true;
         fragment.addAncestor(this);
         children ??= <_SemanticsFragment>[];
         assert(!children.contains(fragment));
@@ -2911,7 +2918,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// If [child] is provided, that [RenderObject] is made visible. If [child] is
   /// omitted, this [RenderObject] is made visible.
   void showOnScreen([RenderObject child]) {
-    print('show ${this._semantics} on screen');
     if (parent is RenderObject) {
       final RenderObject renderParent = parent;
       renderParent.showOnScreen(child ?? this);
