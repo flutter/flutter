@@ -599,9 +599,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
       final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
       final double currentOffset = offset.pixels;
+      print('+++++ >>> $leadingEdgeOffset -- $trailingEdgeOffset -- $currentOffset');
       if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
+        print('going to leading');
         offset.jumpTo(leadingEdgeOffset);
       } else {
+        print('going to trailing');
         offset.jumpTo(trailingEdgeOffset);
       }
     }

@@ -2911,6 +2911,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// If [child] is provided, that [RenderObject] is made visible. If [child] is
   /// omitted, this [RenderObject] is made visible.
   void showOnScreen([RenderObject child]) {
+    print('show ${this._semantics} on screen');
     if (parent is RenderObject) {
       final RenderObject renderParent = parent;
       renderParent.showOnScreen(child ?? this);
