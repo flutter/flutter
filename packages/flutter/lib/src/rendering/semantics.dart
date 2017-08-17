@@ -740,7 +740,6 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.
   void performAction(int id, SemanticsAction action) {
-    print('---->> $id --- $action');
     assert(action != null);
     final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {

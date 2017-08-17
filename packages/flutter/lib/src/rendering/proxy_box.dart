@@ -2870,7 +2870,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
-    print('annoating $node');
     List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
       actions.add(SemanticsAction.tap);
