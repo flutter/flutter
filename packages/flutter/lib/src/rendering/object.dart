@@ -847,21 +847,14 @@ class _ScrollingSemanticsFragment extends _ConcreteSemanticsFragment {
         }
       }
     }
-    node.helper ??= new SemanticsNode(
-      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-      showOnScreen: renderObjectOwner.showOnScreen
-    );
-    node.helper.rect = node.rect;
-    node.helper.transform = node.transform;
-    node.transform = null;
-    node.helper.addChildren(included);
-    excluded.add(node.helper);
+    node.innerNode.addChildren(included);
+    excluded.add(node.innerNode);
     node.addChildren(excluded);
     if (annotator != null)
-      annotator(node.helper);
+      annotator(node.innerNode);
     if (haveConcreteNode) {
       node.finalizeChildren();
-      node.helper.finalizeChildren();
+      node.innerNode.finalizeChildren();
       yield node;
     }
   }

@@ -149,8 +149,6 @@ class SemanticsNode extends AbstractNode {
        _showOnScreen = showOnScreen,
        _actionHandler = handler;
 
-  SemanticsNode helper;
-
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
   /// The root node is assigned an identifier of zero.
@@ -323,7 +321,7 @@ class SemanticsNode extends AbstractNode {
       _inheritedMergeAllDescendantsIntoThisNodeValue = true;
     _label = '';
     _markDirty();
-    helper?.reset();
+    _innerNode?.reset();
   }
 
   List<SemanticsNode> _newChildren;
@@ -571,6 +569,14 @@ class SemanticsNode extends AbstractNode {
       children: children,
     );
     _dirty = false;
+  }
+
+  SemanticsNode _innerNode;
+  SemanticsNode get innerNode {
+    _innerNode ??= new SemanticsNode(handler: _actionHandler, showOnScreen: _showOnScreen)
+        ..rect = new Rect.fromLTRB(0.0, 0.0, rect.right - rect.left, rect.bottom - rect.top)
+        ..wasAffectedByClip = wasAffectedByClip;
+    return _innerNode;
   }
 
   @override
