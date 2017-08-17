@@ -180,4 +180,47 @@ void main() {
       onDeleted: () {},
     );
   });
+
+  testWidgets('Chip in row works ok', (WidgetTester tester) async {
+    final TextStyle style = new TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Row(
+            children: <Widget>[
+              new Chip(label: new Text('Test'), labelStyle: style),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 32.0));
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Row(
+            children: <Widget>[
+              new Flexible(child: new Chip(label: new Text('Test'), labelStyle: style)),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 32.0));
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Row(
+            children: <Widget>[
+              new Expanded(child: new Chip(label: new Text('Test'), labelStyle: style)),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(800.0, 32.0));
+  });
 }

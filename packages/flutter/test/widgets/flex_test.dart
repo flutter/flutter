@@ -7,8 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('Can hit test flex children of stacks',
-      (WidgetTester tester) async {
+  testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       new Container(

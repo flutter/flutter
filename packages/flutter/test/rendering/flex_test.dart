@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -75,7 +76,7 @@ void main() {
     expect(flex.getMaxIntrinsicWidth(200.0), equals(0.0));
   });
 
-  // We can't right a horizontal version of the above test due to
+  // We can't write a horizontal version of the above test due to
   // RenderAspectRatio being height-in, width-out.
 
   test('Defaults', () {
@@ -283,5 +284,103 @@ void main() {
     expect(getOffset(box3).dx, equals(200.0));
     expect(box3.size.width, equals(100.0));
     expect(flex.size.width, equals(300.0));
+  });
+
+  test('MainAxisSize.min inside unconstrained', () {
+    FlutterError.onError = (FlutterErrorDetails details) => throw details.exception;
+    final BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderFlex flex = new RenderFlex(
+      mainAxisSize: MainAxisSize.min,
+    );
+    final RenderConstrainedOverflowBox parent = new RenderConstrainedOverflowBox(
+      minWidth: 0.0,
+      maxWidth: double.INFINITY,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+      child: flex,
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    layout(parent);
+    expect(flex.size, const Size(300.0, 100.0));
+    final FlexParentData box2ParentData = box2.parentData;
+    box2ParentData.flex = 1;
+    box2ParentData.fit = FlexFit.loose;
+    flex.markNeedsLayout();
+    pumpFrame();
+    expect(flex.size, const Size(300.0, 100.0));
+    parent.maxWidth = 500.0; // NOW WITH CONSTRAINED BOUNDARIES
+    pumpFrame();
+    expect(flex.size, const Size(300.0, 100.0));
+    flex.mainAxisSize = MainAxisSize.max;
+    pumpFrame();
+    expect(flex.size, const Size(500.0, 100.0));
+    flex.mainAxisSize = MainAxisSize.min;
+    box2ParentData.fit = FlexFit.tight;
+    flex.markNeedsLayout();
+    pumpFrame();
+    expect(flex.size, const Size(500.0, 100.0));
+    parent.maxWidth = 505.0;
+    pumpFrame();
+    expect(flex.size, const Size(505.0, 100.0));
+  });
+
+  test('MainAxisSize.min inside unconstrained', () {
+    final List<dynamic> exceptions = <dynamic>[];
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+    final BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderFlex flex = new RenderFlex(
+      mainAxisSize: MainAxisSize.min,
+    );
+    final RenderConstrainedOverflowBox parent = new RenderConstrainedOverflowBox(
+      minWidth: 0.0,
+      maxWidth: double.INFINITY,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+      child: flex,
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    final FlexParentData box2ParentData = box2.parentData;
+    box2ParentData.flex = 1;
+    expect(exceptions, isEmpty);
+    layout(parent);
+    expect(exceptions, isNotEmpty);
+    expect(exceptions.first, new isInstanceOf<FlutterError>());
+  });
+
+  test('MainAxisSize.min inside unconstrained', () {
+    final List<dynamic> exceptions = <dynamic>[];
+    FlutterError.onError = (FlutterErrorDetails details) {
+      exceptions.add(details.exception);
+    };
+    final BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderFlex flex = new RenderFlex(
+      mainAxisSize: MainAxisSize.max,
+    );
+    final RenderConstrainedOverflowBox parent = new RenderConstrainedOverflowBox(
+      minWidth: 0.0,
+      maxWidth: double.INFINITY,
+      minHeight: 0.0,
+      maxHeight: 400.0,
+      child: flex,
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    final FlexParentData box2ParentData = box2.parentData;
+    box2ParentData.flex = 1;
+    box2ParentData.fit = FlexFit.loose;
+    expect(exceptions, isEmpty);
+    layout(parent);
+    expect(exceptions, isNotEmpty);
+    expect(exceptions.first, new isInstanceOf<FlutterError>());
   });
 }
