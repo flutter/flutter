@@ -322,7 +322,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     return engineSourcePath;
   }
 
-  String _findEngineBuildPath(ArgResults globalResults, String enginePath) {
+  EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
     String localEngine;
     if (globalResults['local-engine'] != null) {
       localEngine = globalResults['local-engine'];
@@ -337,7 +337,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throw new ProcessExit(2);
     }
 
-    return engineBuildPath;
+    String hostLocalEngine = 'host_' + localEngine.substring(localEngine.indexOf('_') + 1);
+    final String engineHostBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', hostLocalEngine));
+    if (!fs.isDirectorySync(engineHostBuildPath)) {
+      printError('No Flutter host engine build found at $engineHostBuildPath.');
+      throw new ProcessExit(2);
+    }
+
+    return new EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
   static void initFlutterRoot() {

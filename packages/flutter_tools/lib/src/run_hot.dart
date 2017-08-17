@@ -124,7 +124,7 @@ class HotRunner extends ResidentRunner {
     if (previewDart2 && (generator == null)) {
       final CompilerOptions options = new CompilerOptions()
         ..packagesFileUri = Uri.parse(packagesFilePath)
-        ..sdkRoot = Uri.parse(artifacts.getHostFlutterPatchedSdkPath())
+        ..sdkRoot = Uri.base.resolve(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath))
         ..linkedDependencies = <Uri>[new Uri.file(
             artifacts.getArtifactPath(Artifact.platformKernelDill))]
         ..target = new FlutterFastaTarget(new TargetFlags());

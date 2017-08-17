@@ -19,7 +19,9 @@ enum Artifact {
   isolateSnapshotData,
   platformKernelDill,
   platformLibrariesJson,
-  hostFlutterPatchedSdkPath
+  flutterPatchedSdkPath,
+  frontendServerSnapshotForEngineDartSdk,
+  engineDartSdkPath
 }
 
 String _artifactToFileName(Artifact artifact) {
@@ -44,19 +46,31 @@ String _artifactToFileName(Artifact artifact) {
       return 'platform.dill';
     case Artifact.platformLibrariesJson:
       return 'libraries.json';
-    case Artifact.hostFlutterPatchedSdkPath:
+    case Artifact.flutterPatchedSdkPath:
       return '';
+    case Artifact.engineDartSdkPath:
+      return '';
+    case Artifact.frontendServerSnapshotForEngineDartSdk:
+      return 'frontend_server.dart.snapshot';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
+}
+
+class EngineBuildPaths {
+  String targetEngine;
+  String hostEngine;
+  EngineBuildPaths({this.targetEngine, this.hostEngine}) {
+    assert(targetEngine != null && hostEngine != null);
+  }
 }
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
   static Artifacts get instance => context[Artifacts];
 
-  static void useLocalEngine(String engineSrcPath, String engineOutPath) {
-    context.setVariable(Artifacts, new LocalEngineArtifacts(engineSrcPath, engineOutPath));
+  static void useLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
+    context.setVariable(Artifacts, new LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine));
   }
 
   // Returns the requested [artifact] for the [platform] and [mode] combination.
@@ -100,6 +114,7 @@ class CachedArtifacts extends Artifacts {
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
+      case Artifact.frontendServerSnapshotForEngineDartSdk:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.genSnapshot:
@@ -120,6 +135,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.genSnapshot:
       case Artifact.snapshotDart:
       case Artifact.flutterFramework:
+      case Artifact.frontendServerSnapshotForEngineDartSdk:
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
@@ -127,7 +143,7 @@ class CachedArtifacts extends Artifacts {
     }
   }
 
-  String _getHostFlutterPatchedSdkPath() {
+  String _getFlutterPatchedSdkPath() {
     final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
     return fs.path.join(engineArtifactsPath, 'common', 'flutter_patched_sdk');
   }
@@ -145,15 +161,16 @@ class CachedArtifacts extends Artifacts {
       fallThrough:
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
+      case Artifact.frontendServerSnapshotForEngineDartSdk:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       case Artifact.platformKernelDill:
-        return fs.path.join(_getHostFlutterPatchedSdkPath(), _artifactToFileName(artifact));
+        return fs.path.join(_getFlutterPatchedSdkPath(), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return fs.path.join(_getHostFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
-      case Artifact.hostFlutterPatchedSdkPath:
-        return _getHostFlutterPatchedSdkPath();
+        return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
+      case Artifact.flutterPatchedSdkPath:
+        return _getFlutterPatchedSdkPath();
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -199,8 +216,9 @@ class CachedArtifacts extends Artifacts {
 class LocalEngineArtifacts extends Artifacts {
   final String _engineSrcPath;
   final String engineOutPath; // TODO(goderbauer): This should be private.
+  String _hostEngineOutPath;
 
-  LocalEngineArtifacts(this._engineSrcPath, this.engineOutPath);
+  LocalEngineArtifacts(this._engineSrcPath, this.engineOutPath, this._hostEngineOutPath);
 
   @override
   String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
@@ -224,8 +242,12 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_getFlutterPatchedSdkPath(), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
-      case Artifact.hostFlutterPatchedSdkPath:
+      case Artifact.flutterPatchedSdkPath:
         return _getFlutterPatchedSdkPath();
+      case Artifact.frontendServerSnapshotForEngineDartSdk:
+        return fs.path.join(_hostEngineOutPath, 'gen', _artifactToFileName(artifact));
+      case Artifact.engineDartSdkPath:
+        return fs.path.join(_hostEngineOutPath, 'dart-sdk');
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
