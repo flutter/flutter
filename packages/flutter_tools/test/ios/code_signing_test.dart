@@ -338,6 +338,74 @@ void main() {
       ProcessManager: () => mockProcessManager,
       Config: () => mockConfig,
     });
+
+    testUsingContext('Test invalid saved certificate shows error and prompts again', () async {
+      when(mockProcessManager.runSync(<String>['which', 'security']))
+          .thenReturn(exitsHappy);
+      when(mockProcessManager.runSync(<String>['which', 'openssl']))
+          .thenReturn(exitsHappy);
+      when(mockProcessManager.runSync(
+        argThat(contains('find-identity')), environment: any, workingDirectory: any,
+      )).thenReturn(new ProcessResult(
+        1,     // pid
+        0,     // exitCode
+        '''
+1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
+2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
+3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
+    3 valid identities found''',
+        ''
+      ));
+      mockTerminalStdInStream =
+          new Stream<String>.fromFuture(new Future<String>.value('3'));
+      when(mockProcessManager.runSync(
+        <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+        environment: any,
+        workingDirectory: any,
+      )).thenReturn(new ProcessResult(
+        1,     // pid
+        0,     // exitCode
+        'This is a mock certificate',
+        '',
+      ));
+
+
+      final MockProcess mockOpenSslProcess = new MockProcess();
+      final MockStdIn mockOpenSslStdIn = new MockStdIn();
+      final MockStream mockOpenSslStdErr = new MockStream();
+
+      when(mockProcessManager.start(
+        argThat(contains('openssl')), environment: any, workingDirectory: any,
+      )).thenReturn(new Future<Process>.value(mockOpenSslProcess));
+
+      when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
+      when(mockOpenSslProcess.stdout).thenReturn(new Stream<List<int>>.fromFuture(
+        new Future<List<int>>.value(UTF8.encode(
+          'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
+        ))
+      ));
+      when(mockOpenSslProcess.stderr).thenReturn(mockOpenSslStdErr);
+      when(mockOpenSslProcess.exitCode).thenReturn(0);
+      when(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Invalid Profile');
+
+      final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+
+      expect(
+        testLogger.errorText,
+        contains('Saved signing certificate "iPhone Developer: Invalid Profile" is not a valid development certificate')
+      );
+      expect(
+        testLogger.statusText,
+        contains('Certificate choice "iPhone Developer: Profile 3 (3333CCCC33)"')
+      );
+      expect(developmentTeam, '4444DDDD44');
+      verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Config: () => mockConfig,
+      AnsiTerminal: () => testTerminal,
+    });
   });
 }
 
