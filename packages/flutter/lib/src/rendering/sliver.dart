@@ -1309,7 +1309,7 @@ abstract class RenderSliver extends RenderObject {
 
   @override
   bool get excludedFromSemanticsScrolling => _excludedFromSemanticsScrolling;
-  bool _excludedFromSemanticsScrolling = true;
+  bool _excludedFromSemanticsScrolling = false;
   set excludedFromSemanticsScrolling(bool value) {
     if (_excludedFromSemanticsScrolling == value)
       return;
