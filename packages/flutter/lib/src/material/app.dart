@@ -131,7 +131,7 @@ class MaterialApp extends StatefulWidget {
   /// displayed if the [initialRoute] can't be displayed.
   ///
   /// To be able to directly call [Theme.of], [MediaQuery.of], etc, in the code
-  /// sets the [home] argument in the constructor, you can use a [Builder]
+  /// that sets the [home] argument in the constructor, you can use a [Builder]
   /// widget to get a [BuildContext].
   ///
   /// If [home] is specified, then [routes] must not include an entry for `/`,
@@ -212,7 +212,7 @@ class MaterialApp extends StatefulWidget {
 
   /// The initial locale for this app's [Localizations] widget.
   ///
-  /// If the 'locale' is null the system's locale value is used.
+  /// If the `locale` is null the system's locale value is used.
   final Locale locale;
 
   /// The delegate for this app's [Localizations] widget.
@@ -310,8 +310,7 @@ class _MaterialAppState extends State<MaterialApp> {
   void didUpdateWidget(MaterialApp old) {
     super.didUpdateWidget(old);
     final LocalizationsDelegate delegate = widget.localizationsDelegate;
-    final bool shouldReload = delegate != null && delegate.shouldReload(old.localizationsDelegate);
-    if (delegate != old.localizationsDelegate || shouldReload)
+    if (delegate != old.localizationsDelegate || (delegate != null && delegate.shouldReload()))
       _localizationsDelegate = _createLocalizationsDelegate();
   }
 

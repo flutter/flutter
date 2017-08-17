@@ -403,8 +403,11 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     _deferFirstFrameReportCount += 1;
   }
 
-  /// Tell the framework to report the frame it is building as a "useful"
-  /// first frame.
+  /// When called after [deferFirstFrameReport]: tell the framework to report
+  /// the frame it is building as a "useful" first frame.
+  ///
+  /// This method may only be called once for each corresponding call
+  /// to [deferFirstFrameReport].
   ///
   /// This is used by [WidgetsApp] to report the first frame.
   //

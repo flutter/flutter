@@ -78,7 +78,7 @@ abstract class LocalizationsDelegate {
   /// This method is called whenever its [Localizations] widget is
   /// rebuilt. If it returns true then dependent widgets will be rebuilt
   /// after [load] has completed.
-  bool shouldReload(covariant LocalizationsDelegate old);
+  bool shouldReload();
 }
 
 /// Signature for the async localized resource loading callback used
@@ -190,7 +190,7 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
   }
 
   @override
-  bool shouldReload(DefaultLocalizationsDelegate old) => false;
+  bool shouldReload() => false;
 }
 
 class _MergedLocalizationsDelegate extends LocalizationsDelegate {
@@ -245,7 +245,10 @@ class _MergedLocalizationsDelegate extends LocalizationsDelegate {
   }
 
   @override
-  bool shouldReload(_MergedLocalizationsDelegate old) => false;
+  bool shouldReload() {
+    return allDelegates != null &&
+      allDelegates.any((LocalizationsDelegate delegate) => delegate.shouldReload());
+  }
 }
 
 class _LocalizationsScope extends InheritedWidget {
@@ -263,11 +266,7 @@ class _LocalizationsScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_LocalizationsScope old) {
-    final LocalizationsDelegate delegate = localizationsState.widget.delegate;
-    final bool shouldReload = locale != old.locale ||
-      (delegate != null && delegate.shouldReload(old.localizationsState.widget.delegate));
-    if (shouldReload)
-      localizationsState.load(locale);
+    // Changes in Localizations.locale trigger a load(), see _LocalizationsState.didUpdateWidget()
     return false;
   }
 }
@@ -302,8 +301,8 @@ class _LocalizationsScope extends InheritedWidget {
 /// be rebuilt after the corresponding resources had been loaded.
 ///
 /// This class is effectively an [InheritedWidget]. If it's rebuilt with
-/// a new `locale` or if its `delegate.shouldReload` returns true,
-/// widgets that have created a dependency by calling
+/// a new `locale` a new delegate, or if its `delegate.shouldReload()`
+/// method returns true, then widgets that have created a dependency by calling
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
 ///
@@ -322,7 +321,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///   static Future<MyLocalizations> load(Locale locale) {
 ///     return initializeMessages(locale.toString())
 ///       .then((Null _) {
-///         return new Future<MyLocalizations>.value(new MyLocalizations(locale));
+///         return new MyLocalizations(locale);
 ///       });
 ///   }
 ///
@@ -403,16 +402,15 @@ class _LocalizationsState extends State<Localizations> {
   @override
   void initState() {
     super.initState();
-    if (widget.delegate == null)
-      _locale = widget.locale;
-    else
-      load(widget.locale);
+    load(widget.locale);
   }
 
   @override
   void didUpdateWidget(Localizations old) {
     super.didUpdateWidget(old);
-    if (widget.delegate != old.delegate && widget.delegate != null)
+    if (widget.delegate != old.delegate
+        || widget.locale != old.locale
+        || widget.delegate != null && widget.delegate.shouldReload())
       load(widget.locale);
   }
 

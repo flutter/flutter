@@ -9,16 +9,16 @@ import 'package:flutter/widgets.dart';
 
 /// Default localized resource values for the material widgets.
 ///
-/// This class is just a placeholder, it only provides english values.
+/// This class is just a placeholder, it only provides English values.
 class MaterialLocalizations {
   const MaterialLocalizations._(this.locale) : assert(locale != null);
 
-  /// The locale that the values of this class's localized resources
-  /// have been translated for.
+  /// The locale for which the values of this class's localized resources
+  /// have been translated.
   final Locale locale;
 
   /// Creates an object that provides default localized resource values for the
-  /// material widgets.
+  /// for the widgets of the material library.
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [MaterialApp] does so by default.
@@ -50,9 +50,9 @@ class MaterialLocalizations {
   /// The [CloseButton]'s tooltip.
   String get closeButtonTooltip => 'Close';
 
-  /// The tooltip for the [MonthPicker]'s next month button.
+  /// The tooltip for the [MonthPicker]'s "next month" button.
   String get nextMonthTooltip => 'Next month';
 
-  /// The tooltip for the [MonthPicker]'s previous month button.
+  /// The tooltip for the [MonthPicker]'s "previous month" button.
   String get previousMonthTooltip => 'Previous month';
 }
