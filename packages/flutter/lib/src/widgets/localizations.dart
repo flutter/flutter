@@ -15,18 +15,6 @@ import 'framework.dart';
 // class Intl { static String message(String s, { String name, String locale }) => ''; }
 // Future<Null> initializeMessages(String locale) => null;
 
-/// Progress for a [LocalizationsDelegate.load] method.
-enum LocalizationsStatus {
-  /// Loading has not been started, [LocalizationsDelegate.resourcesFor] will return null.
-  none,
-
-  /// Loading is underway, [LocalizationsDelegate.resourcesFor] will return null.
-  loading,
-
-  /// Loading is complete, [LocalizationsDelegate.resourcesFor] will return a valid non-null value.
-  loaded,
-}
-
 /// An encapsulation of all of the resources to be loaded by a
 /// [Localizations] widget.
 ///
