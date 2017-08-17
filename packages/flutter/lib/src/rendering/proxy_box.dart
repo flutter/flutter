@@ -2792,7 +2792,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     if (setEquals<SemanticsAction>(value, _validActions))
       return;
     _validActions = value;
-    print('---> $value');
     markNeedsSemanticsUpdate(onlyChanges: true);
   }
 
@@ -2864,7 +2863,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
-  bool get hasSpecialScrollSemantics => onHorizontalDragUpdate != null || onVerticalDragUpdate != null;
+  bool get hasTwoLayerScrollSemantics => onHorizontalDragUpdate != null || onVerticalDragUpdate != null;
 
   @override
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
@@ -2887,8 +2886,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     // If a set of validActions has been provided only expose those.
     if (validActions != null)
       actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
-
-    print(actions);
 
     actions.forEach(node.addAction);
   }

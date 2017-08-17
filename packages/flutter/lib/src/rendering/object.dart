@@ -651,7 +651,7 @@ abstract class _SemanticsFragment {
   /// should be included in the scrollable area.
   ///
   /// An example of a node that is excluded from scrolling even though it is
-  /// part of a [Scrollable] is a floating AppBar in its compact state.
+  /// part of a [Scrollable] is a floating app bar in its compact state.
   bool isExcludedFromScrolling(SemanticsNode node) => _excludeNodesFromScrolling;
   bool _excludeNodesFromScrolling = false;
 
@@ -808,6 +808,14 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
+/// Represents a RenderObject that has [hasSpecialScrollSemantics] set to `true`.
+///
+/// It places the semantics nodes of its children in one of two layers, which
+/// are each represented by a semantics node. The first layer contains semantics
+/// nodes that are excluded from scrolling (e.g. the semantics nodes of a
+/// floating app bar) and the second one contains the nodes that are actually
+/// scrollable. The node representing the second layer is a child of the node
+/// representing the first layer.
 class _ScrollingSemanticsFragment extends _ConcreteSemanticsFragment {
   _ScrollingSemanticsFragment({
     RenderObject renderObjectOwner,
@@ -819,7 +827,6 @@ class _ScrollingSemanticsFragment extends _ConcreteSemanticsFragment {
 
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
-    print('hi!');
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
     final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
@@ -949,7 +956,6 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
       );
       if (child._excludeNodesFromScrolling) {
         for (SemanticsNode node in nodes) {
-          print('Added by $this -- $node');
           _nodesExcludedFromScrolling.add(node);
           yield node;
         }
@@ -1435,7 +1441,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     });
   }
 
-  bool get hasSpecialScrollSemantics => false;
+  /// Whether this [RenderObject] requires two [SemanticsNode]s to express its
+  /// scroll semantics.
+  ///
+  /// This needs to return `true` for scrollable viewports that support
+  /// floating slivers (like app bars).
+  bool get hasTwoLayerScrollSemantics => false;
 
   // LAYOUT
 
@@ -2757,7 +2768,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final SemanticsAnnotator annotator = semanticsAnnotator;
     if (parent is! RenderObject)
       return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
-    if (hasSpecialScrollSemantics && isSemanticBoundary)
+    if (hasTwoLayerScrollSemantics && isSemanticBoundary)
       return new _ScrollingSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     if (isSemanticBoundary)
       return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
