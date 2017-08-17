@@ -808,7 +808,7 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// Represents a RenderObject that has [hasSpecialScrollSemantics] set to `true`.
+/// Represents a RenderObject that has [hasTwoLayerScrollSemantics] set to `true`.
 ///
 /// It places the semantics nodes of its children in one of two layers, which
 /// are each represented by a semantics node. The first layer contains semantics

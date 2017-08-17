@@ -156,7 +156,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       }
     }
 
-    return new MergeSemantics(child: new ClipRect(child: new Stack(children: children)));
+    return new ClipRect(child: new Stack(children: children));
   }
 }
 
