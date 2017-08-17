@@ -120,7 +120,7 @@ public class FlutterView extends SurfaceView
         setFocusableInTouchMode(true);
 
         attach();
-        assert mNativePlatformView != 0;
+        assertAttached();
 
         int color = 0xFF000000;
         TypedValue typedValue = new TypedValue();
@@ -135,19 +135,19 @@ public class FlutterView extends SurfaceView
         mSurfaceCallback = new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
-                assert mNativePlatformView != 0;
+                assertAttached();
                 nativeSurfaceCreated(mNativePlatformView, holder.getSurface(), backgroundColor);
             }
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-                assert mNativePlatformView != 0;
+                assertAttached();
                 nativeSurfaceChanged(mNativePlatformView, width, height);
             }
 
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
-                assert mNativePlatformView != 0;
+                assertAttached();
                 nativeSurfaceDestroyed(mNativePlatformView);
             }
         };
@@ -292,6 +292,9 @@ public class FlutterView extends SurfaceView
     }
 
     public void destroy() {
+        if (!isAttached())
+            return;
+
         if (mDiscoveryReceiver != null) {
             getContext().unregisterReceiver(mDiscoveryReceiver);
         }
@@ -529,6 +532,11 @@ public class FlutterView extends SurfaceView
         return mNativePlatformView != 0;
     }
 
+    void assertAttached() {
+        if (!isAttached())
+            throw new AssertionError("Platform view is not attached");
+    }
+
     private void preRun() {
         resetAccessibilityTree();
     }
@@ -537,6 +545,7 @@ public class FlutterView extends SurfaceView
     }
 
     public void runFromBundle(String bundlePath, String snapshotOverride) {
+        assertAttached();
         preRun();
         nativeRunBundleAndSnapshot(mNativePlatformView, bundlePath, snapshotOverride);
         postRun();
@@ -547,6 +556,7 @@ public class FlutterView extends SurfaceView
         final String packages) {
         Runnable runnable = new Runnable() {
             public void run() {
+                assertAttached();
                 preRun();
                 nativeRunBundleAndSource(mNativePlatformView, assetsDirectory, main, packages);
                 postRun();
@@ -574,6 +584,7 @@ public class FlutterView extends SurfaceView
      * @return A bitmap.
      */
     public Bitmap getBitmap() {
+        assertAttached();
         return nativeGetBitmap(mNativePlatformView);
     }
 
@@ -641,6 +652,8 @@ public class FlutterView extends SurfaceView
     private static native boolean nativeGetIsSoftwareRenderingEnabled();
 
     private void updateViewportMetrics() {
+        if (!isAttached())
+            return;
         nativeSetViewportMetrics(mNativePlatformView,
             mMetrics.devicePixelRatio,
             mMetrics.physicalWidth,
@@ -653,6 +666,7 @@ public class FlutterView extends SurfaceView
 
     // Called by native to send us a platform message.
     private void handlePlatformMessage(String channel, byte[] message, final int replyId) {
+        assertAttached();
         BinaryMessageHandler handler = mMessageHandlers.get(channel);
         if (handler != null) {
             try {
@@ -662,6 +676,7 @@ public class FlutterView extends SurfaceView
                         private final AtomicBoolean done = new AtomicBoolean(false);
                         @Override
                         public void reply(ByteBuffer reply) {
+                            assertAttached();
                             if (done.getAndSet(true)) {
                                 throw new IllegalStateException("Reply already submitted");
                             }
@@ -724,6 +739,8 @@ public class FlutterView extends SurfaceView
     private TouchExplorationListener mTouchExplorationListener;
 
     protected void dispatchSemanticsAction(int id, int action) {
+        if (!isAttached())
+            return;
         nativeDispatchSemanticsAction(mNativePlatformView, id, action);
     }
 
@@ -803,6 +820,8 @@ public class FlutterView extends SurfaceView
     private AccessibilityBridge mAccessibilityNodeProvider;
 
     void ensureAccessibilityEnabled() {
+        if (!isAttached())
+            return;
         mAccessibilityEnabled = true;
         if (mAccessibilityNodeProvider == null) {
             mAccessibilityNodeProvider = new AccessibilityBridge(this);
