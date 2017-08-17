@@ -481,8 +481,8 @@ class RawGestureDetector extends StatefulWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
-  /// Whether this object's semantics node has children that should be
-  /// excluded from semantic scrolling actions.
+  /// Whether this object's semantics node has children that potentially need to
+  /// be excluded from semantic scrolling actions.
   final bool hasTwoLayerScrollSemantics;
 
   @override
