@@ -235,9 +235,13 @@ class _MergedLocalizationsDelegate extends LocalizationsDelegate {
     return resources[type]?.resourcesFor<T>(locale, type);
   }
 
-  bool _anyDelegatesShouldReload(oldAllDelegates) {
+  bool _anyDelegatesShouldReload(_MergedLocalizationsDelegate old) {
+    if (allDelegates.length != old.allDelegates.length)
+      return true;
+    final List<LocalizationsDelegate> allDelegatesList = allDelegates.toList();
+    final List<LocalizationsDelegate> oldAllDelegatesList = old.allDelegates.toList();
     for (int i = 0; i < allDelegates.length; i++) {
-      if (allDelegates[i].shouldReload(oldAllDelegates[i]))
+      if (allDelegatesList[i].shouldReload(oldAllDelegatesList[i]))
         return true;
     }
     return false;
@@ -247,8 +251,7 @@ class _MergedLocalizationsDelegate extends LocalizationsDelegate {
   bool shouldReload(LocalizationsDelegate old) {
     return old == null
       || runtimeType != old.runtimeType
-      || old.allDelegates.length != allDelegates.length
-      || _anyDelegatesShouldReload(old.allDelegates);
+      || _anyDelegatesShouldReload(old);
   }
 }
 
