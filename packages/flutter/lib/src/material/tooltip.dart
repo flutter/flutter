@@ -41,7 +41,7 @@ class Tooltip extends StatefulWidget {
   /// By default, tooltips prefer to appear below the [child] widget when the
   /// user long presses on the widget.
   ///
-  /// The [message] argument cannot be null.
+  /// The [message] argument must not be null.
   const Tooltip({
     Key key,
     @required this.message,

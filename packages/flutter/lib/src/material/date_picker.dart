@@ -851,7 +851,7 @@ typedef bool SelectableDayPredicate(DateTime day);
 ///
 /// An optional [initialDatePickerMode] argument can be used to display the
 /// date picker initially in the year or month+day picker mode. It defaults
-/// to month+day, but cannot be null.
+/// to month+day, but must not be null.
 ///
 /// See also:
 ///
@@ -872,7 +872,7 @@ Future<DateTime> showDatePicker({
     selectableDayPredicate == null || selectableDayPredicate(initialDate),
     'Provided initialDate must satisfy provided selectableDayPredicate'
   );
-  assert(initialDatePickerMode != null, 'initialDatePickerMode cannot be null');
+  assert(initialDatePickerMode != null, 'initialDatePickerMode must not be null');
   return await showDialog(
     context: context,
     child: new _DatePickerDialog(
