@@ -66,7 +66,7 @@ abstract class LocalizationsDelegate {
   /// This method is called whenever its [Localizations] widget is
   /// rebuilt. If it returns true then dependent widgets will be rebuilt
   /// after [load] has completed.
-  bool shouldReload();
+  bool shouldReload(LocalizationsDelegate old);
 }
 
 /// Signature for the async localized resource loading callback used
@@ -178,13 +178,16 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
   }
 
   @override
-  bool shouldReload() => false;
+  bool shouldReload(LocalizationsDelegate old) => false;
 }
 
 class _MergedLocalizationsDelegate extends LocalizationsDelegate {
   // Creates a single [LocalizationsDelegate] whose methods delegate to the
   // elements of `allDelegates`.
-  _MergedLocalizationsDelegate(this.allDelegates);
+  _MergedLocalizationsDelegate(this.allDelegates) {
+    assert(allDelegates != null);
+    assert(allDelegates.every((LocalizationsDelegate delegate) => delegate != null));
+  }
 
   // This class's [load] and [resourcesFor] methods delegate
   // to the members of this list.
@@ -232,10 +235,20 @@ class _MergedLocalizationsDelegate extends LocalizationsDelegate {
     return resources[type]?.resourcesFor<T>(locale, type);
   }
 
+  bool _anyDelegatesShouldReload(oldAllDelegates) {
+    for (int i = 0; i < allDelegates.length; i++) {
+      if (allDelegates[i].shouldReload(oldAllDelegates[i]))
+        return true;
+    }
+    return false;
+  }
+
   @override
-  bool shouldReload() {
-    return allDelegates != null &&
-      allDelegates.any((LocalizationsDelegate delegate) => delegate.shouldReload());
+  bool shouldReload(LocalizationsDelegate old) {
+    return old == null
+      || runtimeType != old.runtimeType
+      || old.allDelegates.length != allDelegates.length
+      || _anyDelegatesShouldReload(old.allDelegates);
   }
 }
 
@@ -396,9 +409,9 @@ class _LocalizationsState extends State<Localizations> {
   @override
   void didUpdateWidget(Localizations old) {
     super.didUpdateWidget(old);
-    if (widget.delegate != old.delegate
-        || widget.locale != old.locale
-        || widget.delegate != null && widget.delegate.shouldReload())
+    if (widget.locale != old.locale
+        || widget.delegate == null && old.delegate != null
+        || widget.delegate != null && widget.delegate.shouldReload(old.delegate))
       load(widget.locale);
   }
 
