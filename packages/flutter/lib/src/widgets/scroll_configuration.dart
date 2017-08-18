@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' show min, pow;
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -29,7 +29,7 @@ const Color _kDefaultGlowColor = const Color(0xFFFFFFFF);
 /// and (related) time since last fling are.
 MomentumCarryFunction iosMomentumCarryFunction = (double existingVelocity) {
   return existingVelocity.sign *
-      min(0.06 * pow(existingVelocity.abs(), 1.42).toDouble(), 30000.0);
+      math.min(0.000287 * math.pow(existingVelocity.abs(), 2.13).toDouble(), 40000.0);
 };
 
 /// Platforms other than iOS don't carry scrolling momentum with repeated scrolls.
