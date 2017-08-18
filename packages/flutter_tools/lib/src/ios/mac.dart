@@ -234,7 +234,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  final XcodeProjectInfo projectInfo = XcodeProjectInfo.listSync(app.appDirectory);
+  final XcodeProjectInfo projectInfo = new XcodeProjectInfo.fromProjectSync(app.appDirectory);
   if (!projectInfo.targets.contains('Runner')) {
     printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
@@ -276,7 +276,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (hasFlutterPlugins)
     await cocoaPods.processPods(
       appIosDir: appDirectory,
-      iosEngineDir: flutterFrameworkDir(buildInfo),
+      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: app.isSwift,
     );
 
@@ -356,12 +356,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       ),
     );
   } else {
-    // Look for 'clean build/Release-iphoneos/Runner.app'.
-    final RegExp regexp = new RegExp(r' clean (\S*\.app)$', multiLine: true);
+    // Look for 'clean build/<configuration>-<sdk>/Runner.app'.
+    final RegExp regexp = new RegExp(r' clean ([^.]*\.app)$', multiLine: true);
     final Match match = regexp.firstMatch(result.stdout);
     String outputDir;
     if (match != null) {
-      final String actualOutputDir = fs.path.join(app.appDirectory, match.group(1));
+      final String actualOutputDir = match.group(1).replaceAll('\\ ', ' ');
       // Copy app folder to a place where other tools can find it without knowing
       // the BuildInfo.
       outputDir = actualOutputDir.replaceFirst('/$configuration-', '/');

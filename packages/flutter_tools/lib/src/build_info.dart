@@ -8,14 +8,14 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'globals.dart';
 
-/// Information about a build to be performed.
+/// Information about a build to be performed or used.
 class BuildInfo {
   final BuildMode mode;
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
   ///
   /// If not null, the Gradle build task will be `assembleFlavorMode` (e.g.
-  /// `assemblePaidRelease`), and the XCode build configuration will be
+  /// `assemblePaidRelease`), and the Xcode build configuration will be
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
 

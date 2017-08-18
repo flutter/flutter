@@ -15,8 +15,8 @@ import '../globals.dart';
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(\S+)');
 final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
-String flutterFrameworkDir(BuildInfo buildInfo) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, buildInfo.mode)));
+String flutterFrameworkDir(BuildMode mode) {
+  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
 void updateXcodeGeneratedProperties({
@@ -46,14 +46,14 @@ void updateXcodeGeneratedProperties({
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo)}');
+  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
   }
 
-  // Add dependency to CocoaPods' generated project only if plugns are used.
+  // Add dependency to CocoaPods' generated project only if plugins are used.
   if (hasPlugins)
     localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
 
@@ -91,6 +91,13 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
 class XcodeProjectInfo {
   XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes);
 
+  factory XcodeProjectInfo.fromProjectSync(String projectPath) {
+    final String out = runCheckedSync(<String>[
+      '/usr/bin/xcodebuild', '-list',
+    ], workingDirectory: projectPath);
+    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+  }
+
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output) {
     final List<String> targets = <String>[];
     final List<String> buildConfigurations = <String>[];
@@ -118,13 +125,6 @@ class XcodeProjectInfo {
   final List<String> targets;
   final List<String> buildConfigurations;
   final List<String> schemes;
-
-  static XcodeProjectInfo listSync(String projectPath) {
-    final String out = runCheckedSync(<String>[
-      '/usr/bin/xcodebuild', '-list',
-    ], workingDirectory: projectPath);
-    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
-  }
 
   bool get definesCustomTargets => !(targets.contains('Runner') && targets.length == 1);
   bool get definesCustomSchemes => !(schemes.contains('Runner') && schemes.length == 1);

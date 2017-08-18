@@ -23,8 +23,9 @@ const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
 const String gradleAppOutDirV1 = 'android/app/build/outputs/apk';
 const String gradleVersion = '3.3';
+final RegExp _assembleTaskPattern = new RegExp(r'assemble([^:]+): task ');
 
-String _cachedGradleAppOutDirV2;
+GradleProject _cachedGradleProject;
 String _cachedGradleExecutable;
 
 enum FlutterPluginVersion {
@@ -58,6 +59,8 @@ FlutterPluginVersion get flutterPluginVersion {
   return FlutterPluginVersion.none;
 }
 
+/// Returns the path to the apk file created by [buildGradleProject], relative
+/// to current directory.
 Future<String> getGradleAppOut() async {
   switch (flutterPluginVersion) {
     case FlutterPluginVersion.none:
@@ -67,19 +70,19 @@ Future<String> getGradleAppOut() async {
     case FlutterPluginVersion.managed:
       // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
-      return '${await _getGradleAppOutDirV2()}/app.apk';
+      return fs.path.relative(fs.path.join((await _gradleProject()).apkDirectory, 'app.apk'));
   }
   return null;
 }
 
-Future<String> _getGradleAppOutDirV2() async {
-  _cachedGradleAppOutDirV2 ??= await _calculateGradleAppOutDirV2();
-  return _cachedGradleAppOutDirV2;
+Future<GradleProject> _gradleProject() async {
+  _cachedGradleProject ??= await _readGradleProject();
+  return _cachedGradleProject;
 }
 
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
-Future<String> _calculateGradleAppOutDirV2() async {
+Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
   updateLocalProperties();
   try {
@@ -90,28 +93,20 @@ Future<String> _calculateGradleAppOutDirV2() async {
       environment: _gradleEnv,
     );
     final String properties = runResult.stdout.trim();
-    String buildDir = properties
-        .split('\n')
-        .firstWhere((String s) => s.startsWith('buildDir: '))
-        .substring('buildDir: '.length)
-        .trim();
-    final String currentDirectory = fs.currentDirectory.path;
-    if (buildDir.startsWith(currentDirectory)) {
-      // Relativize path, snip current directory + separating '/'.
-      buildDir = buildDir.substring(currentDirectory.length + 1);
-    }
+    final GradleProject project = new GradleProject.fromAppProperties(properties);
     status.stop();
-    return '$buildDir/outputs/apk';
+    return project;
   } catch (e) {
     printError('Error running gradle: $e');
   }
   // Fall back to the default
-  return gradleAppOutDirV1;
+  return new GradleProject(<String>['debug', 'profile', 'release'], <String>[], gradleAppOutDirV1);
 }
 
 String _locateProjectGradlew({ bool ensureExecutable: true }) {
   final String path = fs.path.join(
-      'android', platform.isWindows ? 'gradlew.bat' : 'gradlew'
+    'android',
+    platform.isWindows ? 'gradlew.bat' : 'gradlew',
   );
 
   if (fs.isFileSync(path)) {
@@ -233,23 +228,25 @@ Future<Null> _buildGradleProjectV1(String gradle) async {
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
-File findApkFile(String buildDirectory, BuildInfo buildInfo) {
-  final String flavorString = buildInfo.flavor == null ? '' : '-' + buildInfo.flavor;
-  final String apkFilename = 'app$flavorString-${buildInfo.modeName}.apk';
-  File apkFile = fs.file('$buildDirectory/$apkFilename');
-  if (apkFile.existsSync())
-    return apkFile;
-  apkFile = fs.file('$buildDirectory/${buildInfo.modeName}/$apkFilename');
-  if (apkFile.existsSync())
-    return apkFile;
-  return null;
-}
-
 Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String target, String kernelPath) async {
-  final String flavorString = buildInfo.flavor == null ? '' : toTitleCase(buildInfo.flavor);
-  final String assembleTask = 'assemble$flavorString${toTitleCase(buildInfo.modeName)}';
-
-  // Run 'gradlew assemble<BuildMode>'.
+  final GradleProject project = await _gradleProject();
+  final String assembleTask = project.assembleTaskFor(buildInfo);
+  if (assembleTask == null) {
+    printError('');
+    printError('The Gradle project does not define a task suitable for the requested build.');
+    if (!project.buildTypes.contains(buildInfo.modeName)) {
+      printError('Review the android/app/build.gradle file and ensure it defines a ${buildInfo.modeName} build type.');
+    } else {
+      if (project.productFlavors.isEmpty) {
+        printError('The android/app/build.gradle file does not define any custom product flavors.');
+        printError('You cannot use the --flavor option.');
+      } else {
+        printError('The android/app/build.gradle file defines product flavors: ${project.productFlavors.join(', ')}');
+        printError('You must specify a --flavor option to select one of them.');
+      }
+      throwToolExit('Gradle build aborted.');
+    }
+  }
   final Status status = logger.startProgress('Running \'gradlew $assembleTask\'...', expectSlowOperation: true);
   final String gradlePath = fs.file(gradle).absolute.path;
   final List<String> command = <String>[gradlePath];
@@ -267,7 +264,7 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   if (kernelPath != null)
     command.add('-Pkernel=$kernelPath');
   command.add(assembleTask);
-  final int exitcode = await runCommandAndStreamOutput(
+  final int exitCode = await runCommandAndStreamOutput(
       command,
       workingDirectory: 'android',
       allowReentrantFlutter: true,
@@ -275,21 +272,33 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   );
   status.stop();
 
-  if (exitcode != 0)
-    throwToolExit('Gradle build failed: $exitcode', exitCode: exitcode);
+  if (exitCode != 0)
+    throwToolExit('Gradle build failed: $exitCode', exitCode: exitCode);
 
-  final String buildDirectory = await _getGradleAppOutDirV2();
-  final File apkFile = findApkFile(buildDirectory, buildInfo);
+  final File apkFile = _findApkFile(project, buildInfo);
   if (apkFile == null)
     throwToolExit('Gradle build failed to produce an Android package.');
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
-  apkFile.copySync('$buildDirectory/app.apk');
+  apkFile.copySync(fs.path.join(project.apkDirectory, 'app.apk'));
 
-  printTrace('calculateSha: $buildDirectory/app.apk');
-  final File apkShaFile = fs.file('$buildDirectory/app.apk.sha1');
+  printTrace('calculateSha: ${project.apkDirectory}/app.apk');
+  final File apkShaFile = fs.file(fs.path.join(project.apkDirectory, 'app.apk.sha1'));
   apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
-  printStatus('Built ${apkFile.path} (${getSizeAsMB(apkFile.lengthSync())}).');
+  printStatus('Built ${fs.path.relative(apkFile.path)} (${getSizeAsMB(apkFile.lengthSync())}).');
+}
+
+File _findApkFile(GradleProject project, BuildInfo buildInfo) {
+  final String apkFileName = project.apkFileFor(buildInfo);
+  if (apkFileName == null)
+    return null;
+  File apkFile = fs.file(fs.path.join(project.apkDirectory, apkFileName));
+  if (apkFile.existsSync())
+    return apkFile;
+  apkFile = fs.file(fs.path.join(project.apkDirectory, buildInfo.modeName, apkFileName));
+  if (apkFile.existsSync())
+    return apkFile;
+  return null;
 }
 
 Map<String, String> get _gradleEnv {
@@ -299,4 +308,84 @@ Map<String, String> get _gradleEnv {
     env['JAVA_HOME'] = javaPath;
   }
   return env;
+}
+
+class GradleProject {
+  GradleProject(this.buildTypes, this.productFlavors, this.apkDirectory);
+
+  factory GradleProject.fromAppProperties(String properties) {
+    // Extract build directory.
+    final String buildDir = properties
+        .split('\n')
+        .firstWhere((String s) => s.startsWith('buildDir: '))
+        .substring('buildDir: '.length)
+        .trim();
+
+    // Extract build types and product flavors.
+    final Set<String> variants = new Set<String>();
+    properties.split('\n').forEach((String s) {
+      final Match match = _assembleTaskPattern.matchAsPrefix(s);
+      if (match != null) {
+        final String variant = match.group(1).toLowerCase();
+        if (!variant.endsWith('test'))
+          variants.add(variant);
+      }
+    });
+    final Set<String> buildTypes = new Set<String>();
+    final Set<String> productFlavors = new Set<String>();
+    for (final String variant1 in variants) {
+      for (final String variant2 in variants) {
+        if (variant2.startsWith(variant1) && variant2 != variant1) {
+          final String buildType = variant2.substring(variant1.length);
+          if (variants.contains(buildType)) {
+            buildTypes.add(buildType);
+            productFlavors.add(variant1);
+          }
+        }
+      }
+    }
+    if (productFlavors.isEmpty)
+      buildTypes.addAll(variants);
+    return new GradleProject(
+      buildTypes.toList(),
+      productFlavors.toList(),
+      fs.path.join(buildDir, 'outputs', 'apk'),
+    );
+  }
+
+  final List<String> buildTypes;
+  final List<String> productFlavors;
+  final String apkDirectory;
+
+  String _buildTypeFor(BuildInfo buildInfo) {
+    if (buildTypes.contains(buildInfo.modeName))
+      return buildInfo.modeName;
+    return null;
+  }
+
+  String _productFlavorFor(BuildInfo buildInfo) {
+    if (buildInfo.flavor == null)
+      return productFlavors.isEmpty ? '' : null;
+    else if (productFlavors.contains(buildInfo.flavor.toLowerCase()))
+      return buildInfo.flavor.toLowerCase();
+    else
+      return null;
+  }
+
+  String assembleTaskFor(BuildInfo buildInfo) {
+    final String buildType = _buildTypeFor(buildInfo);
+    final String productFlavor = _productFlavorFor(buildInfo);
+    if (buildType == null || productFlavor == null)
+      return null;
+    return 'assemble${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
+  }
+
+  String apkFileFor(BuildInfo buildInfo) {
+    final String buildType = _buildTypeFor(buildInfo);
+    final String productFlavor = _productFlavorFor(buildInfo);
+    if (buildType == null || productFlavor == null)
+      return null;
+    final String flavorString = productFlavor.isEmpty ? '' : '-' + productFlavor;
+    return 'app$flavorString-$buildType.apk';
+  }
 }
