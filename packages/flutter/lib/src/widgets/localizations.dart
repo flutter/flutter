@@ -410,7 +410,7 @@ class _LocalizationsState extends State<Localizations> {
   void didUpdateWidget(Localizations old) {
     super.didUpdateWidget(old);
     if (widget.locale != old.locale
-        || widget.delegate == null && old.delegate != null
+        || widget.delegate.runtimeType != old.delegate.runtimeType
         || widget.delegate != null && widget.delegate.shouldReload(old.delegate))
       load(widget.locale);
   }
