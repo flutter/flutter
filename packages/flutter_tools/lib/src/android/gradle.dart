@@ -349,7 +349,7 @@ class GradleProject {
     return new GradleProject(
       buildTypes.toList(),
       productFlavors.toList(),
-      fs.path.join(buildDir, 'outputs', 'apk'),
+      fs.path.normalize(fs.path.join(buildDir, 'outputs', 'apk')),
     );
   }
 

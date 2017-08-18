@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:test/test.dart';
+
 
 const String _kBuildDirectory = '/build/app/outputs';
 
@@ -18,7 +20,7 @@ someProperty: someValue
 buildDir: /Users/some/apps/hello/build/app
 someOtherProperty: someOtherValue
       ''');
-      expect(project.apkDirectory, '/Users/some/apps/hello/build/app/outputs/apk');
+      expect(project.apkDirectory, fs.path.normalize('/Users/some/apps/hello/build/app/outputs/apk'));
     });
     test('should extract default build variants from app properties', () {
       final GradleProject project = projectFrom('''
