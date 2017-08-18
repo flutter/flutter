@@ -179,10 +179,14 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 }
 
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
+  void _navigatorPop() {
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onTap: () => Navigator.pop(context),
+      onTap: _navigatorPop,
       child: new AnimatedBuilder(
         animation: widget.route.animation,
         builder: (BuildContext context, Widget child) {

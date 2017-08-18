@@ -272,6 +272,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     return result;
   }
 
+  void _handlePrevious() {
+    pageTo(math.max(_firstRowIndex - widget.rowsPerPage, 0));
+  }
+
+  void _handleNext() {
+    pageTo(_firstRowIndex + widget.rowsPerPage);
+  }
+
   final GlobalKey _tableKey = new GlobalKey();
 
   @override
@@ -346,18 +354,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         icon: const Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
         tooltip: 'Previous page',
-        onPressed: _firstRowIndex <= 0 ? null : () {
-          pageTo(math.max(_firstRowIndex - widget.rowsPerPage, 0));
-        }
+        onPressed: _firstRowIndex <= 0 ? null : _handlePrevious
       ),
       new Container(width: 24.0),
       new IconButton(
         icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
         tooltip: 'Next page',
-        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : () {
-          pageTo(_firstRowIndex + widget.rowsPerPage);
-        }
+        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext
       ),
       new Container(width: 14.0),
     ]);

@@ -265,11 +265,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
           shape: widget.highlightShape,
           borderRadius: widget.borderRadius,
           rectCallback: widget.getRectCallback(referenceBox),
-          onRemoved: () {
-            assert(_lastHighlight != null);
-            _lastHighlight = null;
-            updateKeepAlive();
-          },
+          onRemoved: _handleInkHighlightRemoval,
         );
         updateKeepAlive();
       } else {
@@ -281,6 +277,12 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     assert(value == (_lastHighlight != null && _lastHighlight.active));
     if (widget.onHighlightChanged != null)
       widget.onHighlightChanged(value);
+  }
+
+  void _handleInkHighlightRemoval() {
+    assert(_lastHighlight != null);
+    _lastHighlight = null;
+    updateKeepAlive();
   }
 
   void _handleTapDown(TapDownDetails details) {

@@ -203,7 +203,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, b
       throwToolExit('Aborted. Code signing is required to build a deployable iOS app.');
     } else {
       final String selectedCert = validCodeSigningIdentities[int.parse(choice) - 1];
-      printStatus('Certificate choice "$savedCertChoice" saved');
+      printStatus('Certificate choice "$selectedCert" saved');
       config.setValue('ios-signing-cert', selectedCert);
       return selectedCert;
     }

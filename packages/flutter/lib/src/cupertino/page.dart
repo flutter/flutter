@@ -61,6 +61,10 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
 /// remains in memory. To free all the resources when this is not necessary, set
 /// [maintainState] to false.
 ///
+/// The type `T` specifies the return type of the route which can be supplied as
+/// the route is popped from the stack via [Navigator.pop] when an optional
+/// `result` can be provided.
+///
 /// See also:
 ///
 ///  * [MaterialPageRoute] for an adaptive [PageRoute] that uses a platform

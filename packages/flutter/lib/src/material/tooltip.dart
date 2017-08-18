@@ -177,16 +177,18 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  void _handleLongPress() {
+    final bool tooltipCreated = ensureTooltipVisible();
+    if (tooltipCreated)
+      Feedback.forLongPress(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: () {
-        final bool tooltipCreated = ensureTooltipVisible();
-        if (tooltipCreated)
-          Feedback.forLongPress(context);
-      },
+      onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: new Semantics(
         label: widget.message,
