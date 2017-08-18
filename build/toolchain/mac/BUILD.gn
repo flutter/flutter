@@ -215,7 +215,7 @@ template("mac_toolchain") {
   }
 }
 
-llvm_bin_path = "//buildtools/toolchain/clang+llvm-x86_64-darwin/bin"
+llvm_bin_path = "//buildtools/toolchain/mac-x64/clang/bin"
 
 # Toolchain used for iOS device targets.
 mac_toolchain("ios_clang_arm") {
