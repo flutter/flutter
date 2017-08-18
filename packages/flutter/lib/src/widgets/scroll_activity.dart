@@ -118,6 +118,11 @@ abstract class ScrollActivity {
   /// [ScrollDirection.idle].
   bool get isScrolling;
 
+  /// If applicable, the velocity at which the scroll offset is currently
+  /// independently changing (i.e. without external stimuli such as a dragging
+  /// gestures) in logical pixels per second for this activity.
+  double get velocity;
+
   /// Called when the scroll view stops performing this activity.
   @mustCallSuper
   void dispose() {
@@ -148,6 +153,9 @@ class IdleScrollActivity extends ScrollActivity {
 
   @override
   bool get isScrolling => false;
+
+  @override
+  double get velocity => 0.0;
 }
 
 /// Interface for holding a [Scrollable] stationary.
@@ -188,6 +196,9 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
   bool get isScrolling => false;
 
   @override
+  double get velocity => 0.0;
+
+  @override
   void cancel() {
     delegate.goBallistic(0.0);
   }
@@ -215,10 +226,12 @@ class ScrollDragController implements Drag {
     @required ScrollActivityDelegate delegate,
     @required DragStartDetails details,
     this.onDragCanceled,
+    this.carriedVelocity,
   }) : assert(delegate != null),
        assert(details != null),
        _delegate = delegate,
-       _lastDetails = details;
+       _lastDetails = details,
+       _retainMomentum = carriedVelocity != 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -226,6 +239,12 @@ class ScrollDragController implements Drag {
 
   /// Called when [dispose] is called.
   final VoidCallback onDragCanceled;
+
+  /// Velocity that was present from a previous [ScrollActivity] when this
+  /// drag began.
+  final double carriedVelocity;
+
+  bool _retainMomentum;
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
 
@@ -243,8 +262,12 @@ class ScrollDragController implements Drag {
     assert(details.primaryDelta != null);
     _lastDetails = details;
     double offset = details.primaryDelta;
-    if (offset == 0.0)
+    if (offset == 0.0) {
+      // No axis motion over 2 consecutive frames breaks previous momentum.
+      if (_lastDetails is DragUpdateDetails && _lastDetails.primaryDelta == 0.0)
+        _retainMomentum = false;
       return;
+    }
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
     delegate.applyUserOffset(offset);
@@ -260,7 +283,12 @@ class ScrollDragController implements Drag {
     // We negate the velocity here because if the touch is moving downwards,
     // the scroll has to move upwards. It's the same reason that update()
     // above negates the delta before applying it to the scroll offset.
-    delegate.goBallistic(-velocity);
+    velocity = -velocity;
+
+    // Build momentum only if dragging in the same direction.
+    if (_retainMomentum && velocity.sign == carriedVelocity.sign)
+      velocity += carriedVelocity;
+    delegate.goBallistic(velocity);
   }
 
   @override
@@ -340,6 +368,11 @@ class DragScrollActivity extends ScrollActivity {
   @override
   bool get isScrolling => true;
 
+  // DragScrollActivity is not independently changing velocity yet
+  // until the drag is ended.
+  @override
+  double get velocity => 0.0;
+
   @override
   void dispose() {
     _controller = null;
@@ -383,8 +416,7 @@ class BallisticScrollActivity extends ScrollActivity {
        .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
-  /// The velocity at which the scroll offset is currently changing (in logical
-  /// pixels per second).
+  @override
   double get velocity => _controller.velocity;
 
   AnimationController _controller;
@@ -491,8 +523,7 @@ class DrivenScrollActivity extends ScrollActivity {
   /// animation to stop before it reaches the end.
   Future<Null> get done => _completer.future;
 
-  /// The velocity at which the scroll offset is currently changing (in logical
-  /// pixels per second).
+  @override
   double get velocity => _controller.velocity;
 
   void _tick() {

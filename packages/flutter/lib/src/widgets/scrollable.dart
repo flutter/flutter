@@ -247,6 +247,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   AxisDirection get axisDirection => widget.axisDirection;
 
+  @override
+  MomentumCarryFunction get momentumCarryFunction =>
+      _configuration.getScrollMomentumCarryFunction(context);
+
   ScrollBehavior _configuration;
   ScrollPhysics _physics;
 
