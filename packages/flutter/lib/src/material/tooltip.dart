@@ -202,7 +202,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// Creates a delegate for computing the layout of a tooltip.
   ///
-  /// The arguments cannot be null.
+  /// The arguments must not be null.
   _TooltipPositionDelegate({
     @required this.target,
     @required this.verticalOffset,

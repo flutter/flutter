@@ -61,7 +61,7 @@ class WidgetsApp extends StatefulWidget {
     this.showSemanticsDebugger: false,
     this.debugShowWidgetInspector: false,
     this.debugShowCheckedModeBanner: true,
-    InspectorSelectButtonBuilder inspectorSelectButtonBuilder,
+    this.inspectorSelectButtonBuilder,
   }) : assert(onGenerateRoute != null),
        assert(color != null),
        assert(navigatorObservers != null),
@@ -71,7 +71,6 @@ class WidgetsApp extends StatefulWidget {
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
        assert(debugShowWidgetInspector != null),
-       _inspectorSelectButtonBuilder = inspectorSelectButtonBuilder,
        super(key: key);
 
   /// A one-line description of this app for use in the window manager.
@@ -160,6 +159,14 @@ class WidgetsApp extends StatefulWidget {
   /// checked mode.
   final bool debugShowWidgetInspector;
 
+  /// Builds the widget the [WidgetInspector] uses to switch between view and
+  /// inspect modes.
+  ///
+  /// This lets [MaterialApp] to use a material button to toggle the inspector
+  /// select mode without requiring [WidgetInspector] to depend on the the
+  /// material package.
+  final InspectorSelectButtonBuilder inspectorSelectButtonBuilder;
+
   /// Turns on a "SLOW MODE" little banner in checked mode to indicate
   /// that the app is in checked mode. This is on by default (in
   /// checked mode), to turn it off, set the constructor argument to
@@ -200,8 +207,6 @@ class WidgetsApp extends StatefulWidget {
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".
   static bool debugAllowBannerOverride = true;
-
-  final InspectorSelectButtonBuilder _inspectorSelectButtonBuilder;
 
   @override
   _WidgetsAppState createState() => new _WidgetsAppState();
@@ -334,7 +339,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
         result = new WidgetInspector(
           child: result,
-          selectButtonBuilder: widget._inspectorSelectButtonBuilder,
+          selectButtonBuilder: widget.inspectorSelectButtonBuilder,
         );
       }
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {

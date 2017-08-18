@@ -4,11 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/widgets/widget_inspector.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
+  testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
     // This is a smoke test to verify that adding the inspector doesn't crash.
     await tester.pumpWidget(
       new Stack(
@@ -21,7 +21,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new SemanticsDebugger(
+      new WidgetInspector(
+        selectButtonBuilder: null,
         child: new Stack(
           children: <Widget>[
             const Text('a'),
@@ -44,7 +45,8 @@ void main() {
     Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
       return new Material(child: new RaisedButton(onPressed: onPressed, key: selectButtonKey));
     }
-    WidgetInspectorState getInspectorState() => inspectorKey.currentState;
+    // State type is private, hence using dynamic.
+    dynamic getInspectorState() => inspectorKey.currentState;
     String paragraphText(RenderParagraph paragraph) => paragraph.text.text;
 
     await tester.pumpWidget(
@@ -112,7 +114,8 @@ void main() {
     Widget selectButtonBuilder(BuildContext context, VoidCallback onPressed) {
       return new Material(child: new RaisedButton(onPressed: onPressed, key: selectButtonKey));
     }
-    WidgetInspectorState getInspectorState() => inspectorKey.currentState;
+    // State type is private, hence using dynamic.
+    dynamic getInspectorState() => inspectorKey.currentState;
 
     await tester.pumpWidget(
       new WidgetInspector(
@@ -225,7 +228,8 @@ void main() {
     );
 
     await tester.longPress(find.byKey(clickTarget));
-    final WidgetInspectorState inspectorState = inspectorKey.currentState;
+    // State type is private, hence using dynamic.
+    final dynamic inspectorState = inspectorKey.currentState;
     // The object with width 95.0 wins over the object with width 94.0 because
     // the subtree with width 94.0 is offstage.
     expect(inspectorState.selection.current.semanticBounds.width, equals(95.0));

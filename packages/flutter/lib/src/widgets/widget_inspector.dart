@@ -17,6 +17,8 @@ import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 
+/// Signature for the builder callback used by
+/// [WidgetInspector.selectButtonBuilder].
 typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
 
 /// A widget that enables inspecting the child widget's structure.
@@ -36,10 +38,10 @@ typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback o
 /// selecting the widget even if another widget that also overlaps that
 /// location would otherwise have priority.
 ///
-/// In the view mode, the previous;y selected widget is outlined however
+/// In the view mode, the previously selected widget is outlined, however,
 /// touching the device has the same effect it would have if the inspector
 /// wasn't present. This allows interacting with the application and viewing how
-/// the selected widget changes position. Clicking on the select icon in th
+/// the selected widget changes position. Clicking on the select icon in the
 /// bottom left corner of the application switches back to select mode.
 class WidgetInspector extends StatefulWidget {
   /// Creates a widget that enables inspection for the child.
@@ -55,14 +57,17 @@ class WidgetInspector extends StatefulWidget {
   /// The widget that is being inspected.
   final Widget child;
 
-  /// A builder that is called to create the select button
+  /// A builder that is called to create the select button.
+  ///
+  /// The `onPressed` callback passed as an argument to the builder should be
+  /// hooked up to the returned widget.
   final InspectorSelectButtonBuilder selectButtonBuilder;
 
   @override
-  WidgetInspectorState createState() => new WidgetInspectorState();
+  _WidgetInspectorState createState() => new _WidgetInspectorState();
 }
 
-class WidgetInspectorState extends State<WidgetInspector>
+class _WidgetInspectorState extends State<WidgetInspector>
     with WidgetsBindingObserver {
 
   Offset _lastPointerLocation;
@@ -94,7 +99,7 @@ class WidgetInspectorState extends State<WidgetInspector>
     final Offset localPosition = MatrixUtils.transformPoint(inverse, position);
 
     final List<DiagnosticsNode> children = object.debugDescribeChildren();
-    for (int i = children.length - 1; i >= 0; i--) {
+    for (int i = children.length - 1; i >= 0; i -= 1) {
       final DiagnosticsNode diagnostics = children[i];
       if (diagnostics.style == DiagnosticsTreeStyle.offstage ||
           diagnostics.value is! RenderObject)

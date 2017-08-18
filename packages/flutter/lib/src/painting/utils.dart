@@ -19,7 +19,7 @@ const double _kScreenEdgeMargin = 10.0;
 ///
 /// Used by [Tooltip] to position a tooltip relative to its parent.
 ///
-/// The arguments cannot be null.
+/// The arguments must not be null.
 Offset positionDependentBox({
   @required Size size,
   @required Size childSize,
