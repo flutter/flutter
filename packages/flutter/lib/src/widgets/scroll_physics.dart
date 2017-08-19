@@ -15,6 +15,15 @@ import 'scroll_simulation.dart';
 
 export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
 
+/// Function applied to existing velocity when carrying scrolling momentum with
+/// repeated scrolls.
+typedef double MomentumCarryFunction(double existingVelocity);
+
+/// Platforms other than iOS don't carry scrolling momentum with repeated scrolls.
+///
+/// Previous velocity is discarded and not carried forward.
+MomentumCarryFunction noMomentumCarryFunction = (double existingVelocity) => 0.0;
+
 /// Determines the physics of a [Scrollable] widget.
 ///
 /// For example, determines how the [Scrollable] will behave when the user
@@ -195,6 +204,16 @@ class ScrollPhysics {
   /// Scroll fling velocity magnitudes will be clamped to this value.
   double get maxFlingVelocity => parent?.maxFlingVelocity ?? kMaxFlingVelocity;
 
+  /// A function for carrying scrolling momentum on repeated flings.
+  ///
+  /// The function is applied to the existing scroll velocity when another
+  /// scroll drag is applied in the same direction.
+  ///
+  /// By default, physics for platforms other than iOS doesn't carry momentum.
+  MomentumCarryFunction get momentumCarryFunction {
+    return parent?.momentumCarryFunction ?? noMomentumCarryFunction;
+  }
+
   @override
   String toString() {
     if (parent == null)
@@ -216,6 +235,25 @@ class ScrollPhysics {
 ///  * [ClampingScrollPhysics], which is the analogous physics for Android's
 ///    clamping behavior.
 class BouncingScrollPhysics extends ScrollPhysics {
+  // Methodology:
+  // 1- Use https://github.com/flutter/scroll_overlay to test with Flutter and
+  //    platform scroll views superimposed.
+  // 2- Record incoming speed and make rapid flings in the test app.
+  // 3- If the scrollables stopped overlapping at any moment, adjust the desired
+  //    output value of this function at that input speed.
+  // 4- Feed new input/output set into a power curve fitter. Change function
+  //    and repeat from 2.
+  // 5- Repeat from 2 with medium and slow flings.
+  /// Momentum build-up function that mimics iOS's scroll speed increase with repeated flings.
+  ///
+  /// The velocity of the last fling is not an important factor. Existing speed
+  /// and (related) time since last fling are factors for the velocity transfer
+  /// calculations.
+  static final MomentumCarryFunction cupertinoMomentumCarryFunction = (double existingVelocity) {
+    return existingVelocity.sign *
+        math.min(0.000287 * math.pow(existingVelocity.abs(), 2.13).toDouble(), 40000.0);
+  };
+
   /// Creates scroll physics that bounce back from the edge.
   const BouncingScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
@@ -294,6 +332,9 @@ class BouncingScrollPhysics extends ScrollPhysics {
   // to trigger a fling.
   @override
   double get minFlingVelocity => kMinFlingVelocity * 2.0;
+
+  @override
+  MomentumCarryFunction get momentumCarryFunction => cupertinoMomentumCarryFunction;
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching
@@ -403,7 +444,6 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   AlwaysScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
     return new AlwaysScrollableScrollPhysics(parent: buildParent(ancestor));
   }
-
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) => true;

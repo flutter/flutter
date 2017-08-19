@@ -2,40 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
 import 'overscroll_indicator.dart';
-import 'scroll_context.dart';
 import 'scroll_physics.dart';
 
 const Color _kDefaultGlowColor = const Color(0xFFFFFFFF);
-
-// Methodology:
-// 1- Use https://github.com/flutter/scroll_overlay to test with Flutter and
-//    platform scroll views superimposed.
-// 2- Record incoming speed and make rapid flings in the test app.
-// 3- If the scrollables stopped overlapping at any moment, adjust the desired
-//    output value of this function at that input speed.
-// 4- Feed new input/output set into a power curve fitter. Change function
-//    and repeat from 2.
-// 5- Repeat from 2 with medium and slow flings.
-/// Momentum build-up function that mimics iOS's scroll speed increase with repeated flings.
-///
-/// Note the velocity of the last fling is not an important factor. Existing speed
-/// and (related) time since last fling are.
-MomentumCarryFunction iosMomentumCarryFunction = (double existingVelocity) {
-  return existingVelocity.sign *
-      math.min(0.000287 * math.pow(existingVelocity.abs(), 2.13).toDouble(), 40000.0);
-};
-
-/// Platforms other than iOS don't carry scrolling momentum with repeated scrolls.
-///
-/// Previous velocity is discarded and not carried forward.
-MomentumCarryFunction noMomentumCarryFunction = (double existingVelocity) => 0.0;
 
 /// Describes how [Scrollable] widgets should behave.
 ///
@@ -86,20 +60,6 @@ class ScrollBehavior {
         return const ClampingScrollPhysics();
     }
     return null;
-  }
-
-  /// A function for carrying scrolling momentum depending on the platform.
-  ///
-  /// The function is applied to the existing scroll velocity when another
-  /// scroll drag is applied in the same direction.
-  ///
-  /// Scrolling momentum is not carried on Android and grows exponentially
-  /// on iOS.
-  MomentumCarryFunction getScrollMomentumCarryFunction(BuildContext context) {
-    if (getPlatform(context) == TargetPlatform.iOS)
-      return iosMomentumCarryFunction;
-
-    return noMomentumCarryFunction;
   }
 
   /// Called whenever a [ScrollConfiguration] is rebuilt with a new

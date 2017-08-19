@@ -245,7 +245,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       delegate: this,
       details: details,
       onDragCanceled: onDragCanceled,
-      carriedVelocity: context.momentumCarryFunction(_heldPreviousVelocity),
+      carriedVelocity: physics.momentumCarryFunction(_heldPreviousVelocity),
     );
     beginActivity(new DragScrollActivity(this, drag));
     assert(_currentDrag == null);

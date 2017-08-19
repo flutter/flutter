@@ -73,7 +73,7 @@ class BouncingScrollSimulation extends Simulation {
   }
 
   /// The maximum velocity that can be transfered from the inertia of a ballistic
-  /// scroll into overscroll on iOS.
+  /// scroll into overscroll.
   static const double maxSpringTransferVelocity = 10000.0;
 
   /// When [x] falls below this value the simulation switches from an internal friction

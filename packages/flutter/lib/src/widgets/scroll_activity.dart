@@ -231,7 +231,7 @@ class ScrollDragController implements Drag {
        assert(details != null),
        _delegate = delegate,
        _lastDetails = details,
-       _retainMomentum = carriedVelocity?.abs() > 0.0;
+       _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -260,15 +260,16 @@ class ScrollDragController implements Drag {
   @override
   void update(DragUpdateDetails details) {
     assert(details.primaryDelta != null);
+    final bool lastEventWasStationary = _lastDetails is DragUpdateDetails
+        && _lastDetails.primaryDelta == 0.0;
+    _lastDetails = details;
     double offset = details.primaryDelta;
     if (offset == 0.0) {
       // No axis motion over 2 consecutive frames breaks previous momentum.
-      if (_lastDetails is DragUpdateDetails && _lastDetails.primaryDelta == 0.0) {
+      if (lastEventWasStationary)
         _retainMomentum = false;
-      }
       return;
     }
-    _lastDetails = details;
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
     delegate.applyUserOffset(offset);

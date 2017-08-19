@@ -8,15 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 import 'ticker_provider.dart';
 
-/// Function applied to existing velocity when carrying scrolling momentum with
-/// repeated scrolls.
-///
-/// See also:
-///
-///  * [ScrollBehavior.getScrollMomentumCarryFunction] where the platform specific
-///    carry function is read.
-typedef double MomentumCarryFunction(double existingVelocity);
-
 /// An interface that [Scrollable] widgets implement in order to use
 /// [ScrollPosition].
 ///
@@ -49,10 +40,6 @@ abstract class ScrollContext {
 
   /// The direction in which the widget scrolls.
   AxisDirection get axisDirection;
-
-  /// Platform specific function applied to existing velocity during repeated
-  /// scrolls.
-  MomentumCarryFunction get momentumCarryFunction;
 
   /// Whether the contents of the widget should ignore [PointerEvent] inputs.
   ///
