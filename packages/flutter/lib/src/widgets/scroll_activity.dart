@@ -260,8 +260,8 @@ class ScrollDragController implements Drag {
   @override
   void update(DragUpdateDetails details) {
     assert(details.primaryDelta != null);
-    final bool lastEventWasStationary = _lastDetails is DragUpdateDetails
-        && _lastDetails.primaryDelta == 0.0;
+    final bool lastEventWasStationary =
+        _lastDetails is DragUpdateDetails && _lastDetails.primaryDelta == 0.0;
     _lastDetails = details;
     double offset = details.primaryDelta;
     if (offset == 0.0) {
