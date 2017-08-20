@@ -289,6 +289,18 @@ class FormFieldState<T> extends State<FormField<T>> {
     Form.of(context)?._fieldDidChange();
   }
 
+  /// Sets the value associated with this form field.
+  ///
+  /// Do not call this method directly: instead call [onChanged] in the
+  /// [FormField] builder function.
+  ///
+  /// This method should be called by sublasses that need to update the form
+  /// field value due to state changes identified in the widget build phase.
+  @protected
+  void setValue(T value) {
+    _value = value;
+  }
+
   @override
   void initState() {
     super.initState();

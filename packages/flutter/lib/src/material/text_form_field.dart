@@ -34,7 +34,8 @@ class TextFormField extends FormField<String> {
   /// and [new TextField], the constructor.
   TextFormField({
     Key key,
-    TextEditingController controller,
+    this.controller,
+    String initialValue,
     FocusNode focusNode,
     InputDecoration decoration: const InputDecoration(),
     TextInputType keyboardType: TextInputType.text,
@@ -53,12 +54,13 @@ class TextFormField extends FormField<String> {
        assert(maxLines == null || maxLines > 0),
        super(
     key: key,
-    initialValue: controller != null ? controller.value.text : '',
+    initialValue: initialValue ?? '',
     onSaved: onSaved,
     validator: validator,
     builder: (FormFieldState<String> field) {
+      final _TextFormFieldState state = field;
       return new TextField(
-        controller: controller,
+        controller: state._effectiveController,
         focusNode: focusNode,
         decoration: decoration.copyWith(errorText: field.errorText),
         keyboardType: keyboardType,
@@ -72,4 +74,69 @@ class TextFormField extends FormField<String> {
       );
     },
   );
+
+  /// Controls the text being edited.
+  ///
+  /// If null, this widget will create its own [TextEditingController].
+  final TextEditingController controller;
+
+  @override
+  _TextFormFieldState createState() => new _TextFormFieldState();
+}
+
+class _TextFormFieldState extends FormFieldState<String> {
+  TextEditingController _controller;
+
+  TextEditingController get _effectiveController => widget.controller ?? _controller;
+
+  @override
+  TextFormField get widget => super.widget;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.controller == null) {
+      _controller = new TextEditingController(text: widget.initialValue);
+    } else {
+      widget.controller.text = widget.initialValue;
+      widget.controller.addListener(_handleControllerChanged);
+    }
+  }
+
+  @override
+  void didUpdateWidget(TextFormField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller == null && oldWidget.controller != null)
+      _controller = new TextEditingController.fromValue(oldWidget.controller.value);
+    else if (widget.controller != null && oldWidget.controller == null)
+      _controller = null;
+
+    if (widget.controller != oldWidget.controller) {
+      if (oldWidget.controller != null)
+        oldWidget.controller.removeListener(_handleControllerChanged);
+      if (widget.controller != null)
+        widget.controller.addListener(_handleControllerChanged);
+    }
+    setValue(_effectiveController.text);
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller != null)
+      widget.controller.removeListener(_handleControllerChanged);
+    super.dispose();
+  }
+
+  @override
+  void reset() {
+    super.reset();
+    setState(() {
+      _effectiveController.text = widget.initialValue;
+    });
+  }
+
+  void _handleControllerChanged() {
+    if (_effectiveController.text != value)
+      onChanged(_effectiveController.text);
+  }
 }
