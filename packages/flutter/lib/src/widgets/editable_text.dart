@@ -370,8 +370,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     _lastKnownRemoteTextEditingValue = value;
     _formatAndSetValue(value);
-    if (widget.onChanged != null)
-      widget.onChanged(value.text);
   }
 
   @override
@@ -524,6 +522,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _formatAndSetValue(TextEditingValue value) {
+    final bool textChanged = _value?.text != value?.text;
     if (widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
       for (TextInputFormatter formatter in widget.inputFormatters)
         value = formatter.formatEditUpdate(_value, value);
@@ -532,6 +531,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       _value = value;
     }
+    if (textChanged && widget.onChanged != null)
+      widget.onChanged(value.text);
   }
 
   /// Whether the blinking cursor is actually visible at this precise moment
