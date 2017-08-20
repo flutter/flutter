@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:meta/meta.dart' show required;
 
 import 'artifacts.dart';
