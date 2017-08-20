@@ -22,7 +22,7 @@ import 'framework.dart';
 abstract class UniqueWidget<T extends State<StatefulWidget>> extends StatefulWidget {
   /// Creates a widget that has exactly one inflated instance in the tree.
   ///
-  /// The [key] argument cannot be null because it identifies the unique
+  /// The [key] argument must not be null because it identifies the unique
   /// inflated instance of this widget.
   const UniqueWidget({
     @required GlobalKey<T> key,

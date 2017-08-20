@@ -112,7 +112,7 @@ class AnimationController extends Animation<double>
   ///   null.
   ///
   /// * `vsync` is the [TickerProvider] for the current context. It can be
-  ///   changed by calling [resync]. It is required and cannot be null. See
+  ///   changed by calling [resync]. It is required and must not be null. See
   ///   [TickerProvider] for advice on obtaining a ticker provider.
   AnimationController({
     double value,
@@ -140,7 +140,7 @@ class AnimationController extends Animation<double>
   ///   debugging (used by [toString]).
   ///
   /// * `vsync` is the [TickerProvider] for the current context. It can be
-  ///   changed by calling [resync]. It is required and cannot be null. See
+  ///   changed by calling [resync]. It is required and must not be null. See
   ///   [TickerProvider] for advice on obtaining a ticker provider.
   ///
   /// This constructor is most useful for animations that will be driven using a

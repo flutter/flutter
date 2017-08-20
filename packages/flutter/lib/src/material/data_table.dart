@@ -233,7 +233,7 @@ class DataTable extends StatelessWidget {
   /// The [columns] argument must be a list of as many [DataColumn]
   /// objects as the table is to have columns, ignoring the leading
   /// checkbox column if any. The [columns] argument must have a
-  /// length greater than zero and cannot be null.
+  /// length greater than zero and must not be null.
   ///
   /// The [rows] argument must be a list of as many [DataRow] objects
   /// as the table is to have rows, ignoring the leading heading row
