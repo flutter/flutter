@@ -98,6 +98,7 @@ Future<GradleProject> _readGradleProject() async {
     return project;
   } catch (e) {
     printError('Error running gradle: $e');
+    throwToolExit('Please review your Gradle project setup in the android/ folder.');
   }
   // Fall back to the default
   return new GradleProject(<String>['debug', 'profile', 'release'], <String>[], gradleAppOutDirV1);
