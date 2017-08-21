@@ -355,6 +355,8 @@ class SemanticsNode extends AbstractNode {
   List<SemanticsNode> _newChildren;
 
   /// Append the given children as children of this node.
+  ///
+  /// You need to call [finalizeChildren] after all children have been added.
   void addChildren(Iterable<SemanticsNode> children) {
     _newChildren ??= <SemanticsNode>[];
     _newChildren.addAll(children);
