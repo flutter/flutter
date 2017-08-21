@@ -712,19 +712,33 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
     final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
-    if (annotator != null)
-      annotator(node);
-    for (_SemanticsFragment child in _children) {
-      assert(child._ancestorChain.last == renderObjectOwner);
-      node.addChildren(child.compile(
-        geometry: createSemanticsGeometryForChild(geometry),
-        currentSemantics: _children.length > 1 ? null : node,
-        parentSemantics: node
-      ));
-    }
-    if (haveConcreteNode) {
-      node.finalizeChildren();
+    if (renderObjectOwner.isSemanticBoundary) {
+      final List<SemanticsNode> children = <SemanticsNode>[];
+      for (_SemanticsFragment child in _children) {
+        assert(child._ancestorChain.last == renderObjectOwner);
+        children.addAll(child.compile(
+            geometry: createSemanticsGeometryForChild(geometry),
+            currentSemantics: _children.length > 1 ? null : node,
+            parentSemantics: node
+        ));
+      }
+      renderObjectOwner.assembleSemanticsNode(node, children);
       yield node;
+    } else {
+      if (annotator != null)
+        annotator(node);
+      for (_SemanticsFragment child in _children) {
+        assert(child._ancestorChain.last == renderObjectOwner);
+        node.addChildren(child.compile(
+          geometry: createSemanticsGeometryForChild(geometry),
+          currentSemantics: _children.length > 1 ? null : node,
+          parentSemantics: node,
+        ));
+      }
+      if (haveConcreteNode) {
+        node.finalizeChildren();
+        yield node;
+      }
     }
   }
 
@@ -2718,6 +2732,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [markNeedsSemanticsUpdate] must not have `onlyChanges` set, as it is
   /// possible that the node should be entirely removed.
   SemanticsAnnotator get semanticsAnnotator => null;
+
+  /// Assemble the [SemanticsNode] for this [RenderObject].
+  ///
+  /// If [isSemanticBoundary] is true, this method is called with the semantics
+  /// [node] created for this [RenderObject] and its semantics [children].
+  /// By default, the method will annotate [node] with the [semanticsAnnotator]
+  /// and add the [children] to it.
+  ///
+  /// Subclasses can override this method to add additional [SemanticNode]s
+  /// to the tree.
+  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
+    assert(node == _semantics);
+    if (semanticsAnnotator != null)
+      semanticsAnnotator(node);
+    node.addChildren(children);
+    node.finalizeChildren();
+  }
 
 
   // EVENTS

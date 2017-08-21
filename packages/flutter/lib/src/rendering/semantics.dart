@@ -46,6 +46,25 @@ typedef void SemanticsAnnotator(SemanticsNode semantics);
 /// Used by [SemanticsNode.visitChildren].
 typedef bool SemanticsNodeVisitor(SemanticsNode node);
 
+/// A tag for a [SemanticsNode].
+///
+/// Tags can be interpreted by the parent of a [SemanticsNode]
+/// and depending on the presence of a tag the parent can for example decide
+/// how to add the tagged note as a child.
+///
+/// As an example, the [RenderSemanticsGestureHandler] uses tags to determine
+/// if a child node should be excluded from the scrollable area for semantic
+/// purposes.
+class SemanticsTag {
+  SemanticsTag(this.name);
+
+  /// A human-readable name for this tag used for debugging.
+  final String name;
+
+  @override
+  String toString() => 'SemanticsTag($name)';
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -311,6 +330,16 @@ class SemanticsNode extends AbstractNode {
       _markDirty();
     }
   }
+
+  Set<SemanticsTag> _tags = new Set<SemanticsTag>();
+
+  /// Tag the [SemanticsNode] with [tag].
+  void addTag(SemanticsTag tag) {
+    _tags.add(tag);
+  }
+
+  /// Check if the [SemanticsNode] is tagged with [tag].
+  bool hasTag(SemanticsTag tag) => _tags.contains(tag);
 
   /// Restore this node to its default state.
   void reset() {
@@ -598,6 +627,8 @@ class SemanticsNode extends AbstractNode {
       if ((_actions & action.index) != 0)
         buffer.write('; $action');
     }
+    for (SemanticsTag tag in _tags)
+      buffer.write('; $tag');
     if (hasCheckedState) {
       if (isChecked)
         buffer.write('; checked');

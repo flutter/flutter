@@ -2773,6 +2773,17 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+  /// When a [SemanticsNode] that is a direct child of this object's
+  /// [SemanticsNode] is tagged with [excludeFromScrolling] it will not be
+  /// part of the scrolling area for semantic purposes.
+  ///
+  /// As an example, a [RenderSliver] that stays on the screen within a
+  /// [Scrollable] even though the user has scrolled past it (e.g. a pinned app
+  /// bar) can tag its [SemanticNode] with [excludeFromScrolling] to indicate
+  /// that it should no longer be considered for semantic actions related to
+  /// scrolling.
+  static SemanticsTag excludeFromScrolling = new SemanticsTag('RenderSemanticsGestureHandler.excludeFromScrolling');
+
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
   ///
@@ -2864,6 +2875,39 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
   @override
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
+
+  SemanticsNode _innerNode;
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
+    if (onHorizontalDragUpdate == null && onVerticalDragUpdate == null) {
+      super.assembleSemanticsNode(node, children);
+      return;
+    }
+    print('$node');
+    _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
+    _innerNode
+      ..wasAffectedByClip = node.wasAffectedByClip
+      ..rect = Offset.zero & node.rect.size;
+
+    semanticsAnnotator(_innerNode);
+
+    print(_innerNode);
+
+    final List<SemanticsNode> excluded = <SemanticsNode>[];
+    final List<SemanticsNode> included = <SemanticsNode>[];
+    for (SemanticsNode child in children) {
+      if (child.hasTag(excludeFromScrolling))
+        excluded.add(child);
+      else
+        included.add(child);
+    }
+    excluded.add(_innerNode);
+    node.addChildren(excluded);
+    _innerNode.addChildren(included);
+    _innerNode.finalizeChildren();
+    node.finalizeChildren();
+  }
 
   void _annotate(SemanticsNode node) {
     List<SemanticsAction> actions = <SemanticsAction>[];
