@@ -1,0 +1,156 @@
+name: frontend_server
+version: 0.1.1-dev
+description: Communication pipe to Dart Frontend
+homepage: http://flutter.io
+author: Flutter Authors <flutter-dev@googlegroups.com>
+
+dependencies:
+  args: any
+  async: any
+  charcode: any
+  collection: any
+  convert: any
+  crypto: any
+  front_end: any
+  kernel: any
+  logging: any
+  meta: any
+  quiver: any
+  package_config: any
+  path: any
+  source_span: any
+  typed_data: any
+  usage: any
+
+dev_dependencies:
+  analyzer: any
+  barback: any
+  boolean_selector: any
+  cli_util: any
+  csslib: any
+  glob: any
+  html: any
+  http: any
+  http_multi_server: any
+  http_parser: any
+  isolate: any
+  matcher: any
+  mime: any
+  package_resolver: any
+  plugin: any
+  pool: any
+  pub_semver: any
+  shelf: any
+  shelf_packages_handler: any
+  shelf_static: any
+  shelf_web_socket: any
+  source_map_stack_trace: any
+  source_maps: any
+  stack_trace: any
+  stream_channel: any
+  string_scanner: any
+  test: any
+  utf: any
+  watcher: any
+  web_socket_channel: any
+  when: any
+  yaml: any
+
+dependency_overrides:
+  args:
+    path: ../../dart/third_party/pkg/args
+  async:
+    path: ../../dart/third_party/pkg/async
+  charcode:
+    path: ../../dart/third_party/pkg/charcode
+  collection:
+    path: ../../dart/third_party/pkg/collection
+  convert:
+    path: ../../dart/third_party/pkg/convert
+  crypto:
+    path: ../../dart/third_party/pkg/crypto
+  front_end:
+    path: ../../dart/pkg/front_end/
+  kernel:
+    path: ../../dart/pkg/kernel/
+  logging:
+    path: ../../dart/third_party/pkg/logging
+  meta:
+    path: ../../dart/pkg/meta
+  quiver:
+    path: ../../dart/third_party/pkg/quiver
+  package_config:
+    path: ../../dart/third_party/pkg_tested/package_config
+  path:
+    path: ../../dart/third_party/pkg/path
+  source_span:
+    path: ../../dart/third_party/pkg/source_span
+  typed_data:
+    path: ../../dart/third_party/pkg/typed_data
+  usage:
+    path: ../../dart/third_party/pkg/usage
+
+  analyzer:
+    path: ../../dart/pkg/analyzer
+  barback:
+    path: ../../dart/third_party/pkg/barback
+  boolean_selector:
+    path: ../../dart/third_party/pkg/boolean_selector
+  cli_util:
+    path: ../../dart/third_party/pkg/cli_util
+  csslib:
+    path: ../../dart/third_party/pkg/csslib
+  glob:
+    path: ../../dart/third_party/pkg/glob
+  html:
+    path: ../../dart/third_party/pkg/html
+  http:
+    path: ../../dart/third_party/pkg/http
+  http_multi_server:
+    path: ../../dart/third_party/pkg/http_multi_server
+  http_parser:
+    path: ../../dart/third_party/pkg/http_parser
+  isolate:
+    path: ../../dart/third_party/pkg/isolate
+  matcher:
+    path: ../../dart/third_party/pkg/matcher
+  mime:
+    path: ../../dart/third_party/pkg/mime
+  package_resolver:
+    path: ../../dart/third_party/pkg_tested/package_resolver
+  plugin:
+    path: ../../dart/third_party/pkg/plugin
+  pool:
+    path: ../../dart/third_party/pkg/pool
+  pub_semver:
+    path: ../../dart/third_party/pkg/pub_semver
+  shelf:
+    path: ../../dart/third_party/pkg/shelf
+  shelf_packages_handler:
+    path: ../../dart/third_party/pkg/shelf_packages_handler
+  shelf_static:
+    path: ../../dart/third_party/pkg/shelf_static
+  shelf_web_socket:
+    path: ../../dart/third_party/pkg/shelf_web_socket
+  source_map_stack_trace:
+    path: ../../dart/third_party/pkg/source_map_stack_trace
+  source_maps:
+    path: ../../dart/third_party/pkg/source_maps
+  stack_trace:
+    path: ../../dart/third_party/pkg/stack_trace
+  stream_channel:
+    path: ../../dart/third_party/pkg/stream_channel
+  string_scanner:
+    path: ../../dart/third_party/pkg/string_scanner
+  test:
+    path: ../../dart/third_party/pkg/test
+  utf:
+    path: ../../dart/third_party/pkg/utf
+  watcher:
+    path: ../../dart/third_party/pkg/watcher
+  web_socket_channel:
+    path: ../../dart/third_party/pkg/web_socket_channel
+  when:
+    path: ../../third_party/pkg/when
+  yaml:
+    path: ../../dart/third_party/pkg/yaml

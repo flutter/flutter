@@ -54,7 +54,7 @@ abstract class RepositoryLicensedFile extends RepositoryFile {
   static final RegExp _readmeNamePattern = new RegExp(r'\b_*(?:readme|contributing|patents)_*\b', caseSensitive: false);
   static final RegExp _buildTimePattern = new RegExp(r'^(?!.*gen$)(?:CMakeLists\.txt|(?:pkgdata)?Makefile(?:\.inc)?(?:\.am|\.in|)|configure(?:\.ac|\.in)?|config\.(?:sub|guess)|.+\.m4|install-sh|.+\.sh|.+\.bat|.+\.pyc?|.+\.pl|icu-configure|.+\.gypi?|.*\.gni?|.+\.mk|.+\.cmake|.+\.gradle|.+\.yaml|vms_make\.com|pom\.xml|\.project|source\.properties)$', caseSensitive: false);
   static final RegExp _docsPattern = new RegExp(r'^(?:INSTALL|NEWS|OWNERS|AUTHORS|ChangeLog(?:\.rst|\.[0-9]+)?|.+\.txt|.+\.md|.+\.log|.+\.css|.+\.1|doxygen\.config|.+\.spec(?:\.in)?)$', caseSensitive: false);
-  static final RegExp _devPattern = new RegExp(r'^(?:codereview\.settings|.+\.~|.+\.~[0-9]+~|\.clang-format|\.gitattributes|\.landmines|\.DS_Store)$', caseSensitive: false);
+  static final RegExp _devPattern = new RegExp(r'^(?:codereview\.settings|.+\.~|.+\.~[0-9]+~|\.clang-format|\.gitattributes|\.landmines|\.DS_Store|\.travis\.yml)$', caseSensitive: false);
   static final RegExp _testsPattern = new RegExp(r'^(?:tj(?:bench|example)test\.(?:java\.)?in|example\.c)$', caseSensitive: false);
 
   bool get isIncludedInBuildProducts {
@@ -1746,6 +1746,27 @@ class RepositoryLibPngDirectory extends RepositoryDirectory {
   }
 }
 
+class RepositoryPkgDirectory extends RepositoryDirectory {
+  RepositoryPkgDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'when')
+      return new RepositoryPkgWhenDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryPkgWhenDirectory extends RepositoryDirectory {
+  RepositoryPkgWhenDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'example' // contains nothing that ends up in the binary executable
+        && super.shouldRecurse(entry);
+  }
+}
+
 class RepositoryOkHttpDirectory extends RepositoryDirectory {
   RepositoryOkHttpDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1889,6 +1910,8 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositoryLibPngDirectory(this, entry);
     if (entry.name == 'okhttp')
       return new RepositoryOkHttpDirectory(this, entry);
+    if (entry.name == 'pkg')
+      return new RepositoryPkgDirectory(this, entry);
     if (entry.name == 'skia')
       return new RepositorySkiaDirectory(this, entry);
     if (entry.name == 'vulkan')

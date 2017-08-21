@@ -330,10 +330,10 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     pattern: new RegExp(
       r'(' + kIndent +
       r'Copyright .+(the .+ authors)\[?\. '
-      r'Please see the AUTHORS file for details. All rights (?:re|solve)served\. '
+      r'Please see the AUTHORS file for details. All rights (?:re|solve)served\.) '
       r'Use of this source(?: code)? is governed by a BS?D-style license '
       r'that can be found in the '.replaceAll(' ', _linebreakLoose) +
-      r'([^ ]+) file\b)(?! or at)',
+      r'([^ ]+) file\b(?! or at)',
       multiLine: true,
       caseSensitive: false,
     )

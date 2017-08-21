@@ -1060,8 +1060,10 @@ USED LICENSES:
 LIBRARY: engine
 ORIGIN: ../../../LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../flutter/.travis.yml
 FILE: ../../../flutter/DEPS
+FILE: ../../../flutter/frontend_server/.packages
+FILE: ../../../flutter/frontend_server/bin/starter.dart
+FILE: ../../../flutter/frontend_server/lib/server.dart
 FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h
 FILE: ../../../flutter/lib/ui/dart_runtime_hooks.cc

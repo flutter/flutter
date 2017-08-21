@@ -14,7 +14,8 @@ group("flutter") {
   if (!is_fuchsia) {
     if (current_toolchain == host_toolchain) {
       deps += [
-          "//dart:create_sdk"
+          "//dart:create_sdk",
+          "//flutter/frontend_server",
       ]
     }
   }
