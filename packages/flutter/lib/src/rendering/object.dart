@@ -2543,6 +2543,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     });
   }
 
+  /// Restore the [SemanticsNode]s owned by this render object to its default
+  /// state.
+  @mustCallSuper
+  void resetSemantics() {
+    _semantics?.reset();
+  }
+
   /// Mark this node as needing an update to its semantics
   /// description.
   ///
@@ -2602,10 +2609,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         if (node.parent is! RenderObject)
           break;
         node._needsSemanticsUpdate = true;
-        node._semantics?.reset();
+        node.resetSemantics();
         node = node.parent;
       } while (node._semantics == null);
-      node._semantics?.reset();
+      node.resetSemantics();
       if (node != this && _semantics != null && _needsSemanticsUpdate) {
         // If [this] node has already been added to [owner._nodesNeedingSemantics]
         // remove it as it is no longer guaranteed that its semantics
@@ -2751,7 +2758,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// and add the [children] to it.
   ///
   /// Subclasses can override this method to add additional [SemanticNode]s
-  /// to the tree.
+  /// to the tree. If you do that, you also need to override [resetSemantics].
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
     assert(node == _semantics);
     if (semanticsAnnotator != null)

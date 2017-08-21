@@ -2928,6 +2928,12 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     node.finalizeChildren();
   }
 
+  @override
+  void resetSemantics() {
+    _innerNode?.reset();
+    super.resetSemantics();
+  }
+
   void _annotate(SemanticsNode node) {
     List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
