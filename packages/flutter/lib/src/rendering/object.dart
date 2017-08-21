@@ -863,6 +863,7 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
       node.finalizeChildren();
       yield node;
     } else {
+      // Transparently forward children to the borrowed node.
       yield* children;
     }
   }

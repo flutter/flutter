@@ -2777,12 +2777,33 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   /// [SemanticsNode] is tagged with [excludeFromScrolling] it will not be
   /// part of the scrolling area for semantic purposes.
   ///
+  /// This behavior is only active if the [SemanticsNode] of this
+  /// [RenderSemanticsGestureHandler] is tagged with [useTwoPaneSemantics].
+  /// Otherwise, the [excludeFromScrolling] tag is ignored.
+  ///
   /// As an example, a [RenderSliver] that stays on the screen within a
   /// [Scrollable] even though the user has scrolled past it (e.g. a pinned app
   /// bar) can tag its [SemanticNode] with [excludeFromScrolling] to indicate
   /// that it should no longer be considered for semantic actions related to
   /// scrolling.
   static SemanticsTag excludeFromScrolling = new SemanticsTag('RenderSemanticsGestureHandler.excludeFromScrolling');
+
+
+  /// If the [SemanticsNode] of this [RenderSemanticsGestureHandler] is tagged
+  /// with [useTwoPaneSemantics], two semantics nodes will be used to represent
+  /// this render object in the semantics tree.
+  ///
+  /// Two semantics nodes are necessary to exclude certain child nodes (via the
+  /// [excludeFromScrolling] tag) from the scrollable area for semantic
+  /// purposes.
+  ///
+  /// If this tag is used, the first "outer" semantics node is the regular node
+  /// of this object. The second "inner" node is introduces as a child to that
+  /// node. All scrollable children are now a child of the inner node, which has
+  /// the semantic scrolling logic enabled. All children that have been
+  /// excluded from scrolling with [excludeFromScrolling] are turned into
+  /// children of the outer node.
+  static SemanticsTag useTwoPaneSemantics = const SemanticsTag('RenderSemanticsGestureHandler.twoPane');
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
@@ -2877,8 +2898,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   SemanticsNode _innerNode;
-
-  static SemanticsTag useTwoPaneSemantics = const SemanticsTag('RenderSemanticsGestureHandler.twoPane');
 
   @override
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
