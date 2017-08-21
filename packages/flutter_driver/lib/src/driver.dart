@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:file/file.dart' as f;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
@@ -207,29 +208,29 @@ class FlutterDriver {
       });
     }
 
+    // Waits for a signal from the VM service that the extension is registered
+    Future<String> waitForServiceExtension() {
+      return isolate.onExtensionAdded.firstWhere((String extension) {
+        return extension == _kFlutterExtensionMethod;
+      });
+    }
+
+    /// Tells the Dart VM Service to notify us about "Isolate" events.
+    ///
+    /// This is a workaround for an issue in package:vm_service_client, which
+    /// subscribes to the "Isolate" stream lazily upon subscription, which
+    /// results in lost events.
+    ///
+    /// Details: https://github.com/dart-lang/vm_service_client/issues/17
+    Future<Null> enableIsolateStreams() async {
+      await connection.peer.sendRequest('streamListen', <String, String>{
+        'streamId': 'Isolate',
+      });
+    }
+
     // Attempt to resume isolate if it was paused
     if (isolate.pauseEvent is VMPauseStartEvent) {
       _log.trace('Isolate is paused at start.');
-
-      // Waits for a signal from the VM service that the extension is registered
-      Future<String> waitForServiceExtension() {
-        return isolate.onExtensionAdded.firstWhere((String extension) {
-          return extension == _kFlutterExtensionMethod;
-        });
-      }
-
-      /// Tells the Dart VM Service to notify us about "Isolate" events.
-      ///
-      /// This is a workaround for an issue in package:vm_service_client, which
-      /// subscribes to the "Isolate" stream lazily upon subscription, which
-      /// results in lost events.
-      ///
-      /// Details: https://github.com/dart-lang/vm_service_client/issues/17
-      Future<Null> enableIsolateStreams() async {
-        await connection.peer.sendRequest('streamListen', <String, String>{
-          'streamId': 'Isolate',
-        });
-      }
 
       // If the isolate is paused at the start, e.g. via the --start-paused
       // option, then the VM service extension is not registered yet. Wait for
@@ -269,8 +270,27 @@ class FlutterDriver {
       );
     }
 
-    // At this point the service extension must be installed. Verify it.
-    final Health health = await driver.checkHealth();
+    // Invoked checkHealth and try to fix dalays in the registration of Service
+    // extensions
+    Future<Health> checkHealth() async {
+      try {
+        // At this point the service extension must be installed. Verify it.
+        return await driver.checkHealth();
+      } on rpc.RpcException catch (e) {
+        if (e.code != error_code.METHOD_NOT_FOUND) {
+          rethrow;
+        }
+        _log.trace(
+          'Check Health failed, try to wait for the service extensions to be'
+          'registered.'
+        );
+        await enableIsolateStreams();
+        await waitForServiceExtension().timeout(_kLongTimeout * 2);
+        return driver.checkHealth();
+      }
+    }
+
+    final Health health = await checkHealth();
     if (health.status != HealthStatus.ok) {
       await client.close();
       throw new DriverError('Flutter application health check failed.');

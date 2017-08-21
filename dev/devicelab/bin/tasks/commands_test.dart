@@ -77,15 +77,21 @@ void main() {
       await driver.drive('none');
       final Future<String> reloadStartingText =
         stdout.stream.firstWhere((String line) => line.endsWith('hot reload...'));
+      final Future<String> reloadEndingText =
+        stdout.stream.firstWhere((String line) => line.contains('Hot reload performed in '));
       print('test: pressing "r" to perform a hot reload...');
       run.stdin.write('r');
       await reloadStartingText;
+      await reloadEndingText;
       await driver.drive('none');
       final Future<String> restartStartingText =
         stdout.stream.firstWhere((String line) => line.endsWith('full restart...'));
+      final Future<String> restartEndingText =
+        stdout.stream.firstWhere((String line) => line.contains('Restart performed in '));
       print('test: pressing "R" to perform a full reload...');
       run.stdin.write('R');
       await restartStartingText;
+      await restartEndingText;
       await driver.drive('none');
       run.stdin.write('q');
       final int result = await run.exitCode;
