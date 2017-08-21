@@ -1,0 +1,16 @@
+# Copyright 2017 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//dart/utils/application_snapshot.gni")
+
+application_snapshot("frontend_server") {
+  main_dart = "bin/starter.dart"
+  dot_packages = rebase_path(".packages")
+  training_args = [ "--train" ]
+
+  frontend_server_files = exec_script("//dart/tools/list_dart_files.py",
+     [ "absolute", rebase_path("."), ], "list lines")
+
+  inputs = frontend_server_files
+}

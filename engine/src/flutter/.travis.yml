@@ -5,3 +5,4 @@ before_script:
   - ./travis/setup.sh
 script:
   - ./travis/build.sh
+  - ./travis/test.sh
