@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
-import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:json_rpc_2/error_code.dart' as error_code;
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
@@ -270,7 +270,7 @@ class FlutterDriver {
       );
     }
 
-    // Invoked checkHealth and try to fix dalays in the registration of Service
+    // Invoked checkHealth and try to fix delays in the registration of Service
     // extensions
     Future<Health> checkHealth() async {
       try {
