@@ -10,6 +10,8 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
+  const BuildInfo(this.mode, this.flavor);
+
   final BuildMode mode;
   /// Represents a custom Android product flavor or an Xcode scheme, null for
   /// using the default.
@@ -23,11 +25,21 @@ class BuildInfo {
   static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);
   static const BuildInfo release = const BuildInfo(BuildMode.release, null);
 
-  const BuildInfo(this.mode, this.flavor);
-
+  /// Returns whether a debug build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
   bool get isDebug => mode == BuildMode.debug;
+
+  /// Returns whether a profile build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
   bool get isProfile => mode == BuildMode.profile;
+
+  /// Returns whether a release build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
   bool get isRelease => mode == BuildMode.release;
+
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);

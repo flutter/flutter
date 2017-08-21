@@ -64,6 +64,7 @@ tasks:
       Checks that flavored builds work on Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
+    flaky: true
 
   channels_integration_test:
     description: >
@@ -172,6 +173,7 @@ tasks:
       Checks that flavored builds work on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   channels_integration_test_ios:
     description: >
@@ -259,6 +261,7 @@ tasks:
       Checks that flavored builds work on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
+    flaky: true
 
   channels_integration_test_win:
     description: >
