@@ -11,6 +11,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'semantics.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
@@ -90,8 +91,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   SemanticsAnnotator get semanticsAnnotator => _annotate;
 
   void _annotate(SemanticsNode node) {
-    print('here');
-    node.addTag(new SemanticsTag('fooo'));
+    node.addTag(RenderSemanticsGestureHandler.useTwoPaneSemantics);
   }
 
   /// The direction in which the [SliverConstraints.scrollOffset] increases.

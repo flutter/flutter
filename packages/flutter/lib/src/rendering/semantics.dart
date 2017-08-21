@@ -56,7 +56,7 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 /// if a child node should be excluded from the scrollable area for semantic
 /// purposes.
 class SemanticsTag {
-  SemanticsTag(this.name);
+  const SemanticsTag(this.name);
 
   /// A human-readable name for this tag used for debugging.
   final String name;

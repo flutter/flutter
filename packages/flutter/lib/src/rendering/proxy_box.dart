@@ -2878,21 +2878,21 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
   SemanticsNode _innerNode;
 
+  static SemanticsTag useTwoPaneSemantics = const SemanticsTag('RenderSemanticsGestureHandler.twoPane');
+
   @override
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
-    if (onHorizontalDragUpdate == null && onVerticalDragUpdate == null) {
+    if (!node.hasTag(useTwoPaneSemantics)) {
       super.assembleSemanticsNode(node, children);
       return;
     }
-    print('$node');
+    
     _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
     _innerNode
       ..wasAffectedByClip = node.wasAffectedByClip
       ..rect = Offset.zero & node.rect.size;
 
     semanticsAnnotator(_innerNode);
-
-    print(_innerNode);
 
     final List<SemanticsNode> excluded = <SemanticsNode>[];
     final List<SemanticsNode> included = <SemanticsNode>[];

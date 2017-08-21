@@ -705,44 +705,25 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     bool dropSemanticsOfPreviousSiblings,
   }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
-  bool get haveConcreteNode => true;
-
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
     final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
-    if (renderObjectOwner.isSemanticBoundary) {
-      final List<SemanticsNode> children = <SemanticsNode>[];
-      for (_SemanticsFragment child in _children) {
-        assert(child._ancestorChain.last == renderObjectOwner);
-        children.addAll(child.compile(
-            geometry: createSemanticsGeometryForChild(geometry),
-            currentSemantics: _children.length > 1 ? null : node,
-            parentSemantics: node
-        ));
-      }
-      renderObjectOwner.assembleSemanticsNode(node, children);
-      yield node;
-    } else {
-      if (annotator != null)
-        annotator(node);
-      for (_SemanticsFragment child in _children) {
-        assert(child._ancestorChain.last == renderObjectOwner);
-        node.addChildren(child.compile(
+    final List<SemanticsNode> children = <SemanticsNode>[];
+    for (_SemanticsFragment child in _children) {
+      assert(child._ancestorChain.last == renderObjectOwner);
+      children.addAll(child.compile(
           geometry: createSemanticsGeometryForChild(geometry),
           currentSemantics: _children.length > 1 ? null : node,
-          parentSemantics: node,
-        ));
-      }
-      if (haveConcreteNode) {
-        node.finalizeChildren();
-        yield node;
-      }
+          parentSemantics: node
+      ));
     }
+    yield* finalizeSemanticsNode(node, children);
   }
 
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics);
+  Iterable<SemanticsNode> finalizeSemanticsNode(SemanticsNode node, List<SemanticsNode> children);
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry);
 }
 
@@ -773,6 +754,15 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(!node.wasAffectedByClip);
     node.rect = renderObjectOwner.semanticBounds;
     return node;
+  }
+
+  @override
+  Iterable<SemanticsNode> finalizeSemanticsNode(SemanticsNode node, List<SemanticsNode> children) sync* {
+    if (annotator != null)
+      annotator(node);
+    node.addChildren(children);
+    node.finalizeChildren();
+    yield node;
   }
 
   @override
@@ -809,6 +799,12 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 
   @override
+  Iterable<SemanticsNode> finalizeSemanticsNode(SemanticsNode node, List<SemanticsNode> children) sync* {
+    renderObjectOwner.assembleSemanticsNode(node, children);
+    yield node;
+  }
+
+  @override
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry) {
     return new _SemanticsGeometry.withClipFrom(geometry);
   }
@@ -829,16 +825,16 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     bool dropSemanticsOfPreviousSiblings,
   }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
-  @override
-  bool get haveConcreteNode => _haveConcreteNode;
-  bool _haveConcreteNode;
+  // If true, this fragment will introduce its own node into the Semantics Tree.
+  // If false, a borrowed semantics node from an ancestor is used.
+  bool _introducesOwnNode;
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
     SemanticsNode node;
-    assert(_haveConcreteNode == null);
-    _haveConcreteNode = currentSemantics == null && annotator != null;
-    if (haveConcreteNode) {
+    assert(_introducesOwnNode == null);
+    _introducesOwnNode = currentSemantics == null && annotator != null;
+    if (_introducesOwnNode) {
       renderObjectOwner._semantics ??= new SemanticsNode(
         handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
         showOnScreen: renderObjectOwner.showOnScreen,
@@ -850,7 +846,7 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     }
     if (geometry != null) {
       geometry.applyAncestorChain(_ancestorChain);
-      if (haveConcreteNode)
+      if (_introducesOwnNode)
         geometry.updateSemanticsNode(rendering: renderObjectOwner, semantics: node, parentSemantics: parentSemantics);
     } else {
       assert(_ancestorChain.length == 1);
@@ -859,8 +855,21 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
   }
 
   @override
+  Iterable<SemanticsNode> finalizeSemanticsNode(SemanticsNode node, List<SemanticsNode> children) sync* {
+    if (annotator != null)
+      annotator(node);
+    if (_introducesOwnNode) {
+      node.addChildren(children);
+      node.finalizeChildren();
+      yield node;
+    } else {
+      yield* children;
+    }
+  }
+
+  @override
   _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry) {
-    if (haveConcreteNode)
+    if (_introducesOwnNode)
       return new _SemanticsGeometry.withClipFrom(geometry);
     return new _SemanticsGeometry.copy(geometry);
   }
@@ -2749,7 +2758,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     node.addChildren(children);
     node.finalizeChildren();
   }
-
 
   // EVENTS
 
