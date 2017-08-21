@@ -714,9 +714,9 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     for (_SemanticsFragment child in _children) {
       assert(child._ancestorChain.last == renderObjectOwner);
       children.addAll(child.compile(
-          geometry: createSemanticsGeometryForChild(geometry),
-          currentSemantics: _children.length > 1 ? null : node,
-          parentSemantics: node
+        geometry: createSemanticsGeometryForChild(geometry),
+        currentSemantics: _children.length > 1 ? null : node,
+        parentSemantics: node,
       ));
     }
     yield* finalizeSemanticsNode(node, children);
@@ -2546,6 +2546,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Restore the [SemanticsNode]s owned by this render object to its default
   /// state.
   @mustCallSuper
+  @protected
   void resetSemantics() {
     _semantics?.reset();
   }
@@ -2758,7 +2759,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// and add the [children] to it.
   ///
   /// Subclasses can override this method to add additional [SemanticNode]s
-  /// to the tree. If you do that, you also need to override [resetSemantics].
+  /// to the tree. If a subclass adds additional nodes in this method, it also
+  /// needs to override [resetSemantics] to call [SemanticsNodes.reset] on those
+  /// additional [SemanticsNode]s.
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
     assert(node == _semantics);
     if (semanticsAnnotator != null)

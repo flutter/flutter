@@ -2786,8 +2786,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   /// bar) can tag its [SemanticNode] with [excludeFromScrolling] to indicate
   /// that it should no longer be considered for semantic actions related to
   /// scrolling.
-  static SemanticsTag excludeFromScrolling = new SemanticsTag('RenderSemanticsGestureHandler.excludeFromScrolling');
-
+  static const SemanticsTag excludeFromScrolling = const SemanticsTag('RenderSemanticsGestureHandler.excludeFromScrolling');
 
   /// If the [SemanticsNode] of this [RenderSemanticsGestureHandler] is tagged
   /// with [useTwoPaneSemantics], two semantics nodes will be used to represent
@@ -2803,7 +2802,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   /// the semantic scrolling logic enabled. All children that have been
   /// excluded from scrolling with [excludeFromScrolling] are turned into
   /// children of the outer node.
-  static SemanticsTag useTwoPaneSemantics = const SemanticsTag('RenderSemanticsGestureHandler.twoPane');
+  static const SemanticsTag useTwoPaneSemantics = const SemanticsTag('RenderSemanticsGestureHandler.twoPane');
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.

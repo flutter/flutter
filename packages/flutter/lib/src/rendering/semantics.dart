@@ -55,14 +55,28 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 /// As an example, the [RenderSemanticsGestureHandler] uses tags to determine
 /// if a child node should be excluded from the scrollable area for semantic
 /// purposes.
+///
+/// The provided [name] is only used for debugging. Two tags created with the
+/// same [name] and the `new` operator are not considered identical. However,
+/// two tags created with the same [name] and the `const` operator are always
+/// identical.
 class SemanticsTag {
+
+  /// Creates a [SemanticsTag].
+  ///
+  /// The provided [name] is only used for debugging. Two tags created with the
+  /// same [name] and the `new` operator are not considered identical. However,
+  /// two tags created with the same [name] and the `const` operator are always
+  /// identical.
   const SemanticsTag(this.name);
 
   /// A human-readable name for this tag used for debugging.
+  ///
+  /// This string is not used to determine if two tags are identical.
   final String name;
 
   @override
-  String toString() => 'SemanticsTag($name)';
+  String toString() => '$runtimeType($name)';
 }
 
 /// Summary information about a [SemanticsNode] object.
@@ -334,11 +348,21 @@ class SemanticsNode extends AbstractNode {
   Set<SemanticsTag> _tags = new Set<SemanticsTag>();
 
   /// Tag the [SemanticsNode] with [tag].
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
   void addTag(SemanticsTag tag) {
     _tags.add(tag);
   }
 
   /// Check if the [SemanticsNode] is tagged with [tag].
+  ///
+  /// Tags can be added with [addTag].
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
   bool hasTag(SemanticsTag tag) => _tags.contains(tag);
 
   /// Restore this node to its default state.
@@ -356,7 +380,8 @@ class SemanticsNode extends AbstractNode {
 
   /// Append the given children as children of this node.
   ///
-  /// You need to call [finalizeChildren] after all children have been added.
+  /// The [finalizeChildren] method must be called after all children have been
+  /// added.
   void addChildren(Iterable<SemanticsNode> children) {
     _newChildren ??= <SemanticsNode>[];
     _newChildren.addAll(children);

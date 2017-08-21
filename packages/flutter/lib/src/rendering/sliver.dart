@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -1318,6 +1319,8 @@ abstract class RenderSliver extends RenderObject {
   ///
   /// [RenderSliver]s that stay on the screen even though the user has scrolled
   /// past them (e.g. a pinned app bar) should set this to `true`.
+  @protected
+  bool get excludeFromSemanticsScrolling => _excludeFromSemanticsScrolling;
   set excludeFromSemanticsScrolling(bool value) {
     if (_excludeFromSemanticsScrolling == value)
       return;
