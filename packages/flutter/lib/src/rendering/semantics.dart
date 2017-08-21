@@ -321,6 +321,7 @@ class SemanticsNode extends AbstractNode {
       _inheritedMergeAllDescendantsIntoThisNodeValue = true;
     _label = '';
     _markDirty();
+    _innerNode?.reset();
   }
 
   List<SemanticsNode> _newChildren;
@@ -569,6 +570,14 @@ class SemanticsNode extends AbstractNode {
     );
     _dirty = false;
   }
+
+  SemanticsNode get innerNode {
+    _innerNode ??= new SemanticsNode(handler: _actionHandler, showOnScreen: _showOnScreen)
+        ..rect = new Rect.fromLTRB(0.0, 0.0, rect.right - rect.left, rect.bottom - rect.top)
+        ..wasAffectedByClip = wasAffectedByClip;
+    return _innerNode;
+  }
+  SemanticsNode _innerNode;
 
   @override
   String toString() {

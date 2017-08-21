@@ -647,6 +647,14 @@ abstract class _SemanticsFragment {
   bool _debugCompiled = false;
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics });
 
+  /// Whether [node], which was returned by this fragment from [compile],
+  /// should be included in the scrollable area.
+  ///
+  /// An example of a node that is excluded from scrolling even though it is
+  /// part of a [Scrollable] is a floating app bar in its compact state.
+  bool isExcludedFromScrolling(SemanticsNode node) => _excludeNodesFromScrolling;
+  bool _excludeNodesFromScrolling = false;
+
   @override
   String toString() => describeIdentity(this);
 }
@@ -800,6 +808,58 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
+/// Represents a RenderObject that has [hasTwoLayerScrollSemantics] set to `true`.
+///
+/// It places the semantics nodes of its children in one of two layers, which
+/// are each represented by a semantics node. The first layer contains semantics
+/// nodes that are excluded from scrolling (e.g. the semantics nodes of a
+/// floating app bar) and the second one contains the nodes that are actually
+/// scrollable. The node representing the second layer is a child of the node
+/// representing the first layer.
+class _ScrollingSemanticsFragment extends _ConcreteSemanticsFragment {
+  _ScrollingSemanticsFragment({
+    RenderObject renderObjectOwner,
+    SemanticsAnnotator annotator,
+    Iterable<_SemanticsFragment> children,
+    bool dropSemanticsOfPreviousSiblings,
+  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+
+
+  @override
+  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
+    assert(!_debugCompiled);
+    assert(() { _debugCompiled = true; return true; });
+    final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
+    final List<SemanticsNode> excluded = <SemanticsNode>[];
+    final List<SemanticsNode> included = <SemanticsNode>[];
+    for (_SemanticsFragment child in _children) {
+      assert(child._ancestorChain.last == renderObjectOwner);
+      final Iterable<SemanticsNode> nodes = child.compile(
+          geometry: createSemanticsGeometryForChild(geometry),
+          currentSemantics: _children.length > 1 ? null : node,
+          parentSemantics: node
+      );
+      for (SemanticsNode node in nodes) {
+        if (child.isExcludedFromScrolling(node)) {
+          excluded.add(node);
+        } else {
+          included.add(node);
+        }
+      }
+    }
+    node.innerNode.addChildren(included);
+    excluded.add(node.innerNode);
+    node.addChildren(excluded);
+    if (annotator != null)
+      annotator(node.innerNode);
+    if (haveConcreteNode) {
+      node.finalizeChildren();
+      node.innerNode.finalizeChildren();
+      yield node;
+    }
+  }
+}
+
 /// Represents a RenderObject that does not have [isSemanticBoundary] set to
 /// `true`, but which does have some semantic annotators.
 ///
@@ -868,6 +928,8 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
          dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings
        );
 
+  final Set<SemanticsNode> _nodesExcludedFromScrolling = new Set<SemanticsNode>();
+
   @override
   Iterable<SemanticsNode> compile({
     @required _SemanticsGeometry geometry,
@@ -880,12 +942,25 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
     geometry.applyAncestorChain(_ancestorChain);
     for (_SemanticsFragment child in _children) {
       assert(child._ancestorChain.last == renderObjectOwner);
-      yield* child.compile(
-        geometry: new _SemanticsGeometry.copy(geometry),
-        currentSemantics: null,
-        parentSemantics: parentSemantics
+      final Iterable<SemanticsNode> nodes = child.compile(
+          geometry: new _SemanticsGeometry.copy(geometry),
+          currentSemantics: null,
+          parentSemantics: parentSemantics
       );
+      if (child._excludeNodesFromScrolling) {
+        for (SemanticsNode node in nodes) {
+          _nodesExcludedFromScrolling.add(node);
+          yield node;
+        }
+      } else {
+        yield* nodes;
+      }
     }
+  }
+
+  @override
+  bool isExcludedFromScrolling(SemanticsNode node) {
+    return super.isExcludedFromScrolling(node) || _nodesExcludedFromScrolling.contains(node);
   }
 }
 
@@ -1358,6 +1433,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       child.reassemble();
     });
   }
+
+  /// Whether this [RenderObject] requires two [SemanticsNode]s to express its
+  /// scroll semantics.
+  ///
+  /// This needs to return `true` for scrollable viewports that support
+  /// floating slivers (like app bars).
+  bool get hasTwoLayerScrollSemantics => false;
 
   // LAYOUT
 
@@ -2490,6 +2572,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   bool _needsSemanticsGeometryUpdate = true;
   SemanticsNode _semantics;
 
+  /// Whether this render object should be excluded from the semantic scrolling
+  /// area.
+  ///
+  /// This setting is only relevant for [RenderSliver]s. Certain slivers (e.g.
+  /// a floating app bar) can be part of a [Scrollable], but they no longer
+  /// trigger semantic scrolling actions. Slivers, that return `true` for
+  /// [excludedFromSemanticsScrolling], are treated as if they are located
+  /// outside of the [Scrollable] for semantics purposes.
+  bool get excludedFromSemanticsScrolling => false;
+
   /// The semantics of this render object.
   ///
   /// Exposed only for testing and debugging. To learn about the semantics of
@@ -2652,6 +2744,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         dropSemanticsOfPreviousSiblings = true;
       }
       if (fragment.producesSemanticNodes) {
+        if (child.excludedFromSemanticsScrolling)
+          fragment._excludeNodesFromScrolling = true;
         fragment.addAncestor(this);
         children ??= <_SemanticsFragment>[];
         assert(!children.contains(fragment));
@@ -2665,6 +2759,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     _needsSemanticsUpdate = false;
     _needsSemanticsGeometryUpdate = false;
     final SemanticsAnnotator annotator = semanticsAnnotator;
+    if (hasTwoLayerScrollSemantics && isSemanticBoundary) {
+      assert(parent is RenderObject);
+      return new _ScrollingSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+    }
     if (parent is! RenderObject)
       return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
     if (isSemanticBoundary)

@@ -1307,6 +1307,16 @@ abstract class RenderSliver extends RenderObject {
     });
   }
 
+  @override
+  bool get excludedFromSemanticsScrolling => _excludedFromSemanticsScrolling;
+  bool _excludedFromSemanticsScrolling = false;
+  set excludedFromSemanticsScrolling(bool value) {
+    if (_excludedFromSemanticsScrolling == value)
+      return;
+    _excludedFromSemanticsScrolling = value;
+    markNeedsSemanticsUpdate();
+  }
+
   // This override exists only to change the type of the second argument.
   @override
   void handleEvent(PointerEvent event, SliverHitTestEntry entry) { }
