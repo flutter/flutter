@@ -211,6 +211,10 @@ class RenderEditable extends RenderBox {
     markNeedsTextLayout();
   }
 
+  /// The height of a typical line in the text.
+  //  See [TextPainter.preferredLineHeight].
+  double get preferredLineHeight => _textPainter.preferredLineHeight;
+
   /// The color to use when painting the selection.
   Color get selectionColor => _selectionColor;
   Color _selectionColor;
