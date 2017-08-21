@@ -2817,7 +2817,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     description.add(new FlagProperty('isSemanticBoundary', value: isSemanticBoundary, ifTrue: 'semantic boundary'));
   }
 
-  @protected
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[];
 
