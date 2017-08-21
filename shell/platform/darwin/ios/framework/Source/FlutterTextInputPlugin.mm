@@ -196,8 +196,12 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
     [self.inputDelegate selectionDidChange:self];
   }
 
-  if (textChanged)
+  if (textChanged) {
     [self.inputDelegate textDidChange:self];
+
+    // For consistency with Android behavior, send an update to the framework.
+    [self updateEditingState];
+  }
 }
 
 #pragma mark - UIResponder Overrides
