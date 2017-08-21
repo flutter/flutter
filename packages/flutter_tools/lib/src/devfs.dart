@@ -5,16 +5,14 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
-import 'package:front_end/incremental_kernel_generator.dart';
-import 'package:front_end/src/fasta/kernel/utils.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:kernel/kernel.dart';
 
 import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 import 'vmservice.dart';
@@ -369,7 +367,7 @@ class DevFS {
     AssetBundle bundle,
     bool bundleDirty: false,
     Set<String> fileFilter,
-    IncrementalKernelGenerator generator,
+    ResidentCompiler generator,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -439,12 +437,12 @@ class DevFS {
             generator.invalidate(content.file.uri);
           }
         });
-        final DeltaProgram delta = await generator.computeDelta();
-        final Program program = delta.newProgram;
-        final List<int> bytes = serializeProgram(program, filter: (_) => true);
-        await fs.file(mainPath + ".dill").writeAsBytes(bytes);
-        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
-                () => new DevFSFileContent(fs.file(mainPath + ".dill")));
+//        final DeltaProgram delta = await generator.computeDelta();
+//        final Program program = delta.newProgram;
+//        final List<int> bytes = serializeProgram(program, filter: (_) => true);
+//        await fs.file(mainPath + ".dill").writeAsBytes(bytes);
+//        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
+//                () => new DevFSFileContent(fs.file(mainPath + ".dill")));
       }
 
       if (_httpWriter != null) {

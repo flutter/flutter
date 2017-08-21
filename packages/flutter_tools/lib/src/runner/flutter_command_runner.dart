@@ -337,7 +337,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throw new ProcessExit(2);
     }
 
-    String hostLocalEngine = 'host_' + localEngine.substring(localEngine.indexOf('_') + 1);
+    final String hostLocalEngine = 'host_' + localEngine.substring(localEngine.indexOf('_') + 1);
     final String engineHostBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', hostLocalEngine));
     if (!fs.isDirectorySync(engineHostBuildPath)) {
       printError('No Flutter host engine build found at $engineHostBuildPath.');

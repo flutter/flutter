@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
@@ -49,7 +51,7 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.flutterPatchedSdkPath:
       return '';
     case Artifact.engineDartSdkPath:
-      return '';
+      return 'dart-sdk';
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
   }
@@ -60,7 +62,7 @@ String _artifactToFileName(Artifact artifact) {
 class EngineBuildPaths {
   String targetEngine;
   String hostEngine;
-  EngineBuildPaths({this.targetEngine, this.hostEngine}) {
+  EngineBuildPaths({@required this.targetEngine, @required this.hostEngine}) {
     assert(targetEngine != null && hostEngine != null);
   }
 }
@@ -162,6 +164,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
+      case Artifact.engineDartSdkPath:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));

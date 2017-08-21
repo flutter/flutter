@@ -4,15 +4,10 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-
-import 'package:front_end/compiler_options.dart' show CompilerOptions;
-import 'package:front_end/incremental_kernel_generator.dart' show IncrementalKernelGenerator;
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:kernel/target/flutter_fasta.dart';
-import 'package:kernel/target/targets.dart';
+import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -59,7 +54,7 @@ class HotRunner extends ResidentRunner {
              projectAssets: projectAssets,
              stayResident: stayResident);
 
-  IncrementalKernelGenerator generator;
+  ResidentCompiler generator;
 
   final String applicationBinary;
   Set<String> _dartDependencies;
@@ -122,14 +117,15 @@ class HotRunner extends ResidentRunner {
       device.initLogReader();
 
     if (previewDart2 && (generator == null)) {
-      final CompilerOptions options = new CompilerOptions()
-        ..packagesFileUri = Uri.parse(packagesFilePath)
-        ..sdkRoot = Uri.base.resolve(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath))
-        ..linkedDependencies = <Uri>[new Uri.file(
-            artifacts.getArtifactPath(Artifact.platformKernelDill))]
-        ..target = new FlutterFastaTarget(new TargetFlags());
-      generator = await IncrementalKernelGenerator.newInstance(
-          options, new Uri.file(mainPath));
+      generator = new ResidentCompiler();
+//      final CompilerOptions options = new CompilerOptions()
+//        ..packagesFileUri = Uri.parse(packagesFilePath)
+//        ..sdkRoot = Uri.base.resolve(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath))
+//        ..linkedDependencies = <Uri>[new Uri.file(
+//            artifacts.getArtifactPath(Artifact.platformKernelDill))]
+//        ..target = new FlutterFastaTarget(new TargetFlags());
+//      generator = await IncrementalKernelGenerator.newInstance(
+//          options, new Uri.file(mainPath));
     }
 
     try {

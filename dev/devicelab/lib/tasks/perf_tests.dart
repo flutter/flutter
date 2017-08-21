@@ -194,12 +194,12 @@ class BuildTest {
   static Future<Map<String, dynamic>> _buildAot(bool previewDart2) async {
     await flutter('build', options: <String>['clean']);
     final Stopwatch watch = new Stopwatch()..start();
-    List<String> options = <String>[
+    final List<String> options = <String>[
       'aot',
       '-v',
       '--release',
       '--no-pub',
-      '--target-platform', 'android-arm'  // Generate blobs instead of assembly.
+      '--target-platform', 'android-arm',  // Generate blobs instead of assembly.
     ];
     if (previewDart2) {
       options.add('--preview-dart-2');
@@ -230,7 +230,7 @@ class BuildTest {
       watch.stop();
     } else {
       watch.start();
-      List<String> options = <String>['apk', '--debug'];
+      final List<String> options = <String>['apk', '--debug'];
       if (previewDart2) {
         options.add('--preview-dart-2');
       }

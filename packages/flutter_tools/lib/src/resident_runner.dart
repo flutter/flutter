@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:front_end/incremental_kernel_generator.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
 
 import 'android/gradle.dart';
@@ -318,7 +318,7 @@ class FlutterDevice {
     AssetBundle bundle,
     bool bundleDirty: false,
     Set<String> fileFilter,
-    IncrementalKernelGenerator generator
+    ResidentCompiler generator
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',

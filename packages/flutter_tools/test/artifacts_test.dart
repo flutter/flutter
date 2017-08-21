@@ -68,7 +68,10 @@ void main() {
 
     setUp(() {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_temp');
-      artifacts = new LocalEngineArtifacts(tempDir.path, fs.path.join(tempDir.path, 'out', 'android_debug_unopt'));
+      artifacts = new LocalEngineArtifacts(tempDir.path,
+        fs.path.join(tempDir.path, 'out', 'android_debug_unopt'),
+        fs.path.join(tempDir.path, 'out', 'host_debug_unopt'),
+      );
     });
 
     tearDown(() {
