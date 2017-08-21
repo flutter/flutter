@@ -77,6 +77,11 @@ Future<Null> pubGet({
 }
 
 typedef String MessageFilter(String message);
+typedef bool _ArgumentPredicate(String argument);
+
+final _ArgumentPredicate _avoidsInteractiveModeInPublish = new Set<String>.from(
+  <String>['-h', '-n', '-f', '--help', '--dry-run', '--force'],
+).contains;
 
 Future<Null> pub(List<String> arguments, {
   String directory,

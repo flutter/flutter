@@ -101,6 +101,53 @@ void main() {
         });
       },
     });
+    testUsingContext('publish with forced non-interactive mode, no arguments', () async {
+      log.clear();
+      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
+      expect(log, hasLength(1));
+      expect(log[0], hasLength(3));
+      expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(log[0][1], 'publish');
+      expect(log[0][2], '--force');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () {
+        return new MockProcessManager((List<dynamic> command) {
+          log.add(command);
+        });
+      },
+    });
+    testUsingContext('publish with forced non-interactive mode, with arguments', () async {
+      log.clear();
+      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish', '--server', 'foo']);
+      expect(log, hasLength(1));
+      expect(log[0], hasLength(5));
+      expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(log[0][1], 'publish');
+      expect(log[0][2], '--force');
+      expect(log[0][3], '--server');
+      expect(log[0][4], 'foo');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () {
+        return new MockProcessManager((List<dynamic> command) {
+          log.add(command);
+        });
+      },
+    });
+    testUsingContext('publish in non-interactive mode', () async {
+      log.clear();
+      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish', '--dry-run']);
+      expect(log, hasLength(1));
+      expect(log[0], hasLength(3));
+      expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(log[0][1], 'publish');
+      expect(log[0][2], '--dry-run');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () {
+        return new MockProcessManager((List<dynamic> command) {
+          log.add(command);
+        });
+      },
+    });
   });
 }
 
