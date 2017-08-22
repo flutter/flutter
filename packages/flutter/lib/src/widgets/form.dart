@@ -66,7 +66,7 @@ class Form extends StatefulWidget {
   FormState createState() => new FormState();
 }
 
-/// State assocated with a [Form] widget.
+/// State associated with a [Form] widget.
 ///
 /// A [FormState] object can be used to [save], [reset], and [validate] every
 /// [FormField] that is a descendant of the associated [Form].

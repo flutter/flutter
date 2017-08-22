@@ -29,3 +29,4 @@ export 'src/painting/text_painter.dart';
 export 'src/painting/text_span.dart';
 export 'src/painting/text_style.dart';
 export 'src/painting/transforms.dart';
+export 'src/painting/utils.dart';
