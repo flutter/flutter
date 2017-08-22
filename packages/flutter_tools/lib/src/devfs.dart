@@ -432,17 +432,15 @@ class DevFS {
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
       if (generator != null) {
+        final List<String> invalidatedFiles = <String>[];
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           if (content is DevFSFileContent) {
-            generator.invalidate(content.file.uri);
+            invalidatedFiles.add(content.file.uri.toFilePath());
           }
         });
-//        final DeltaProgram delta = await generator.computeDelta();
-//        final Program program = delta.newProgram;
-//        final List<int> bytes = serializeProgram(program, filter: (_) => true);
-//        await fs.file(mainPath + ".dill").writeAsBytes(bytes);
-//        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
-//                () => new DevFSFileContent(fs.file(mainPath + ".dill")));
+        final String kernelFile = await generator.recompile(invalidatedFiles);
+        dirtyEntries.putIfAbsent(Uri.parse(kernelFile),
+                () => new DevFSFileContent(fs.file(kernelFile)));
       }
 
       if (_httpWriter != null) {
