@@ -20,8 +20,9 @@ void main() {
     //     / \     C=node with checked
     //    C   C*   *=node removed next pass
     //
-    await tester.pumpWidget(
-      new Stack(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
           const Semantics(
@@ -43,7 +44,7 @@ void main() {
           ),
         ],
       ),
-    );
+    ));
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
@@ -79,8 +80,9 @@ void main() {
     //  L* LC      C=node with checked
     //             *=node removed next pass
     //
-    await tester.pumpWidget(
-      new Stack(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
           const Semantics(
@@ -100,7 +102,7 @@ void main() {
           ),
         ],
       ),
-    );
+    ));
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
@@ -124,8 +126,9 @@ void main() {
     //    OLC      L=node with label
     //             C=node with checked
     //
-    await tester.pumpWidget(
-      new Stack(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
           const Semantics(),
@@ -143,7 +146,7 @@ void main() {
           ),
         ],
       ),
-    );
+    ));
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(

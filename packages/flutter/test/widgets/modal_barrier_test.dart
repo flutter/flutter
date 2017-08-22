@@ -23,7 +23,7 @@ void main() {
       child: const SizedBox(
         width: 10.0,
         height: 10.0,
-        child: const Text('target')
+        child: const Text('target', textDirection: TextDirection.ltr)
       )
     );
   });

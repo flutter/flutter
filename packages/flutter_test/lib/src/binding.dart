@@ -269,20 +269,22 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   static const TextStyle _kMessageStyle = const TextStyle(
     color: const Color(0xFF917FFF),
-    fontSize: 40.0
+    fontSize: 40.0,
   );
 
   static final Widget _kPreTestMessage = const Center(
     child: const Text(
       'Test starting...',
-      style: _kMessageStyle
+      style: _kMessageStyle,
+      textDirection: TextDirection.ltr,
     )
   );
 
   static final Widget _kPostTestMessage = const Center(
     child: const Text(
       'Test finished.',
-      style: _kMessageStyle
+      style: _kMessageStyle,
+      textDirection: TextDirection.ltr,
     )
   );
 
@@ -1019,7 +1021,8 @@ class _LiveTestRenderView extends RenderView {
       _label = null;
       return;
     }
-    _label ??= new TextPainter(textAlign: TextAlign.left);
+    // TODO(ianh): Figure out if the test name is actually RTL.
+    _label ??= new TextPainter(textAlign: TextAlign.left, textDirection: TextDirection.ltr);
     _label.text = new TextSpan(text: value, style: _labelStyle);
     _label.layout();
     if (onNeedPaint != null)

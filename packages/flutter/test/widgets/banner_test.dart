@@ -19,7 +19,8 @@ class TestCanvas implements Canvas {
 void main() {
   test('A Banner with a location of topLeft paints in the top left', () {
     final BannerPainter bannerPainter = new BannerPainter(
-      message:"foo",
+      message: 'foo',
+      textDirection: TextDirection.ltr,
       location: BannerLocation.topLeft
     );
 
@@ -45,7 +46,8 @@ void main() {
 
   test('A Banner with a location of topRight paints in the top right', () {
     final BannerPainter bannerPainter = new BannerPainter(
-      message:"foo",
+      message: 'foo',
+      textDirection: TextDirection.ltr,
       location: BannerLocation.topRight
     );
 
@@ -71,7 +73,8 @@ void main() {
 
   test('A Banner with a location of bottomLeft paints in the bottom left', () {
     final BannerPainter bannerPainter = new BannerPainter(
-      message:"foo",
+      message: 'foo',
+      textDirection: TextDirection.ltr,
       location: BannerLocation.bottomLeft
     );
 
@@ -97,7 +100,8 @@ void main() {
 
   test('A Banner with a location of bottomRight paints in the bottom right', () {
     final BannerPainter bannerPainter = new BannerPainter(
-      message:"foo",
+      message: 'foo',
+      textDirection: TextDirection.ltr,
       location: BannerLocation.bottomRight
     );
 

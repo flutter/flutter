@@ -10,7 +10,7 @@ void main() {
   testWidgets('CircleAvatar with background color', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade400;
     await tester.pumpWidget(
-      new Center(
+      wrap(
         child: new CircleAvatar(
           backgroundColor: backgroundColor,
           radius: 50.0,
@@ -33,7 +33,7 @@ void main() {
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
-      new Center(
+      wrap(
         child: new CircleAvatar(
           foregroundColor: foregroundColor,
           child: const Text('Z'),
@@ -60,9 +60,9 @@ void main() {
       primaryColorBrightness: Brightness.light,
     );
     await tester.pumpWidget(
-      new Theme(
-        data: theme,
-        child: const Center(
+      wrap(
+        child: new Theme(
+          data: theme,
           child: const CircleAvatar(
             child: const Text('Z'),
           ),
@@ -78,4 +78,11 @@ void main() {
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(theme.primaryTextTheme.title.color));
   });
+}
+
+Widget wrap({ Widget child }) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Center(child: child),
+  );
 }

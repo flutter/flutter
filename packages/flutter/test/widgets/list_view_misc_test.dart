@@ -120,7 +120,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new ListView(
           controller: controller,
-          children: <Widget>[const Text("A"), const Text("B"), const Text("C")],
+          children: <Widget>[const Text('A'), const Text('B'), const Text('C')],
         ),
       );
     }

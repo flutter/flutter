@@ -8,13 +8,16 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Can set opacity for an Icon', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const IconTheme(
-        data: const IconThemeData(
-          color: const Color(0xFF666666),
-          opacity: 0.5
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const IconTheme(
+          data: const IconThemeData(
+            color: const Color(0xFF666666),
+            opacity: 0.5
+          ),
+          child: const Icon(const IconData(0xd0a0, fontFamily: 'Arial'))
         ),
-        child: const Icon(const IconData(0xd0a0, fontFamily: 'Arial'))
-      )
+      ),
     );
     final RichText text = tester.widget(find.byType(RichText));
     expect(text.text.style.color, const Color(0xFF666666).withOpacity(0.5));
@@ -22,8 +25,11 @@ void main() {
 
   testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: const Icon(null),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(null),
+        ),
       ),
     );
 
@@ -33,10 +39,13 @@ void main() {
 
   testWidgets('Icon sizing - no theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: const Icon(
-          null,
-          size: 96.0,
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(
+            null,
+            size: 96.0,
+          ),
         ),
       ),
     );
@@ -47,10 +56,13 @@ void main() {
 
   testWidgets('Icon sizing - sized theme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: const IconTheme(
-          data: const IconThemeData(size: 36.0),
-          child: const Icon(null),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const IconTheme(
+            data: const IconThemeData(size: 36.0),
+            child: const Icon(null),
+          ),
         ),
       ),
     );
@@ -61,12 +73,15 @@ void main() {
 
   testWidgets('Icon sizing - sized theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: const IconTheme(
-          data: const IconThemeData(size: 36.0),
-          child: const Icon(
-            null,
-            size: 48.0,
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const IconTheme(
+            data: const IconThemeData(size: 36.0),
+            child: const Icon(
+              null,
+              size: 48.0,
+            ),
           ),
         ),
       )
@@ -78,10 +93,13 @@ void main() {
 
   testWidgets('Icon sizing - sizeless theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: const IconTheme(
-          data: const IconThemeData(),
-          child: const Icon(null),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const IconTheme(
+            data: const IconThemeData(),
+            child: const Icon(null),
+          ),
         ),
       ),
     );
@@ -93,8 +111,11 @@ void main() {
 
   testWidgets('Icon with custom font', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: const Icon(const IconData(0x41, fontFamily: 'Roboto')),
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(const IconData(0x41, fontFamily: 'Roboto')),
+        ),
       ),
     );
 

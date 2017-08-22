@@ -92,16 +92,20 @@ class SemanticsData {
   /// Creates a semantics data object.
   ///
   /// The [flags], [actions], [label], and [Rect] arguments must not be null.
+  ///
+  /// If [label] is not empty, then [textDirection] must also not be null.
   const SemanticsData({
     @required this.flags,
     @required this.actions,
     @required this.label,
+    @required this.textDirection,
     @required this.rect,
     @required this.tags,
-    this.transform
+    this.transform,
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
+       assert(label == '' || textDirection != null, 'A SemanticsData object with label "$label" had a null textDirection.'),
        assert(rect != null),
        assert(tags != null);
 
@@ -112,7 +116,12 @@ class SemanticsData {
   final int actions;
 
   /// A textual description of this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
   final String label;
+
+  /// The reading direction for the text in [label].
+  final TextDirection textDirection;
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
@@ -149,6 +158,8 @@ class SemanticsData {
     }
     if (label.isNotEmpty)
       buffer.write('; "$label"');
+    if (textDirection != null)
+      buffer.write('; $textDirection');
     buffer.write(')');
     return buffer.toString();
   }
@@ -161,13 +172,14 @@ class SemanticsData {
     return typedOther.flags == flags
         && typedOther.actions == actions
         && typedOther.label == label
+        && typedOther.textDirection == textDirection
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
         && typedOther.transform == transform;
   }
 
   @override
-  int get hashCode => hashValues(flags, actions, label, rect, tags, transform);
+  int get hashCode => hashValues(flags, actions, label, textDirection, rect, tags, transform);
 }
 
 /// A node that represents some semantic data.
@@ -342,12 +354,25 @@ class SemanticsNode extends AbstractNode {
   set isSelected(bool value) => _setFlag(SemanticsFlags.isSelected, value);
 
   /// A textual description of this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
   String get label => _label;
   String _label = '';
   set label(String value) {
     assert(value != null);
     if (_label != value) {
       _label = value;
+      _markDirty();
+    }
+  }
+
+  /// The reading direction for the text in [label].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (_textDirection != value) {
+      _textDirection = value;
       _markDirty();
     }
   }
@@ -385,6 +410,7 @@ class SemanticsNode extends AbstractNode {
     if (hadInheritedMergeAllDescendantsIntoThisNode)
       _inheritedMergeAllDescendantsIntoThisNodeValue = true;
     _label = '';
+    _textDirection = null;
     _tags.clear();
     _markDirty();
   }
@@ -598,18 +624,31 @@ class SemanticsNode extends AbstractNode {
     int flags = _flags;
     int actions = _actions;
     String label = _label;
+    TextDirection textDirection = _textDirection;
     final Set<SemanticsTag> tags = new Set<SemanticsTag>.from(_tags);
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
         flags |= node._flags;
         actions |= node._actions;
+        textDirection ??= node._textDirection;
         tags.addAll(node._tags);
         if (node.label.isNotEmpty) {
+          String nestedLabel = node.label;
+          if (textDirection != node.textDirection && node.textDirection != null) {
+            switch (node.textDirection) {
+              case TextDirection.rtl:
+                nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
+                break;
+              case TextDirection.ltr:
+                nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
+                break;
+            }
+          }
           if (label.isEmpty)
-            label = node.label;
+            label = nestedLabel;
           else
-            label = '$label\n${node.label}';
+            label = '$label\n$nestedLabel';
         }
         return true;
       });
@@ -619,6 +658,7 @@ class SemanticsNode extends AbstractNode {
       flags: flags,
       actions: actions,
       label: label,
+      textDirection: textDirection,
       rect: rect,
       transform: transform,
       tags: tags,
@@ -650,6 +690,7 @@ class SemanticsNode extends AbstractNode {
       actions: data.actions,
       rect: data.rect,
       label: data.label,
+      textDirection: data.textDirection,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
     );
@@ -696,6 +737,8 @@ class SemanticsNode extends AbstractNode {
       buffer.write('; selected');
     if (label.isNotEmpty)
       buffer.write('; "$label"');
+    if (textDirection != null)
+      buffer.write('; $textDirection');
     buffer.write(')');
     return buffer.toString();
   }

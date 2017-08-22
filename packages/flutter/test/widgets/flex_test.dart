@@ -28,7 +28,7 @@ void main() {
                       width: 100.0,
                       height: 100.0,
                       child: const Center(
-                        child: const Text('X'),
+                        child: const Text('X', textDirection: TextDirection.ltr),
                       ),
                     ),
                   ),
@@ -63,8 +63,8 @@ void main() {
       new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          const Expanded(flex: null, child: const Text('one')),
-          const Flexible(flex: null, child: const Text('two')),
+          const Expanded(flex: null, child: const Text('one', textDirection: TextDirection.ltr)),
+          const Flexible(flex: null, child: const Text('two', textDirection: TextDirection.ltr)),
         ],
       ),
     );

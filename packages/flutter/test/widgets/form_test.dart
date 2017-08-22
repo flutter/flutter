@@ -11,12 +11,15 @@ void main() {
     String fieldValue;
 
     Widget builder() {
-      return new Center(
-        child: new Material(
-          child: new Form(
-            key: formKey,
-            child: new TextFormField(
-              onSaved: (String value) { fieldValue = value; },
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Material(
+            child: new Form(
+              key: formKey,
+              child: new TextFormField(
+                onSaved: (String value) { fieldValue = value; },
+              ),
             ),
           ),
         ),
@@ -42,11 +45,14 @@ void main() {
     String fieldValue;
 
     Widget builder() {
-      return new Center(
-        child: new Material(
-          child: new Form(
-            child: new TextField(
-              onChanged: (String value) { fieldValue = value; },
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Material(
+            child: new Form(
+              child: new TextField(
+                onChanged: (String value) { fieldValue = value; },
+              ),
             ),
           ),
         ),
@@ -72,13 +78,16 @@ void main() {
     String errorText(String value) => value + '/error';
 
     Widget builder(bool autovalidate) {
-      return new Center(
-        child: new Material(
-          child: new Form(
-            key: formKey,
-            autovalidate: autovalidate,
-            child: new TextFormField(
-              validator: errorText,
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Material(
+            child: new Form(
+              key: formKey,
+              autovalidate: autovalidate,
+              child: new TextFormField(
+                validator: errorText,
+              ),
             ),
           ),
         ),
@@ -162,12 +171,15 @@ void main() {
     final GlobalKey<FormFieldState<String>> inputKey = new GlobalKey<FormFieldState<String>>();
 
     Widget builder() {
-      return new Center(
-        child: new Material(
-          child: new Form(
-            child: new TextFormField(
-              key: inputKey,
-              controller: controller,
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Material(
+            child: new Form(
+              child: new TextFormField(
+                key: inputKey,
+                controller: controller,
+              ),
             ),
           ),
         ),
@@ -198,14 +210,17 @@ void main() {
     String fieldValue;
 
     Widget builder(bool remove) {
-      return new Center(
-        child: new Material(
-          child: new Form(
-            key: formKey,
-            child: remove ? new Container() : new TextFormField(
-              autofocus: true,
-              onSaved: (String value) { fieldValue = value; },
-              validator: (String value) { return value.isEmpty ? null : 'yes'; }
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Material(
+            child: new Form(
+              key: formKey,
+              child: remove ? new Container() : new TextFormField(
+                autofocus: true,
+                onSaved: (String value) { fieldValue = value; },
+                validator: (String value) { return value.isEmpty ? null : 'yes'; }
+              ),
             ),
           ),
         ),

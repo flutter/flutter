@@ -13,9 +13,9 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
-          const Text('a'),
-          const Text('b'),
-          const Text('c'),
+          const Text('a', textDirection: TextDirection.ltr),
+          const Text('b', textDirection: TextDirection.ltr),
+          const Text('c', textDirection: TextDirection.ltr),
         ],
       ),
     );
@@ -25,9 +25,9 @@ void main() {
         selectButtonBuilder: null,
         child: new Stack(
           children: <Widget>[
-            const Text('a'),
-            const Text('b'),
-            const Text('c'),
+            const Text('a', textDirection: TextDirection.ltr),
+            const Text('b', textDirection: TextDirection.ltr),
+            const Text('c', textDirection: TextDirection.ltr),
           ],
         ),
       ),
@@ -179,7 +179,7 @@ void main() {
             expect(didLongPress, isFalse);
             didLongPress = true;
           },
-          child: const Text('target'),
+          child: const Text('target', textDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -202,9 +202,9 @@ void main() {
             top: 0.0,
             width: width,
             height: 100.0,
-            child: new Text(width.toString()),
+            child: new Text(width.toString(), textDirection: TextDirection.ltr),
           ),
-        ]
+        ],
       );
     }
     await tester.pumpWidget(

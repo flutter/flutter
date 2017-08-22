@@ -104,8 +104,9 @@ void main() {
   final RenderParagraph paragraph = new RenderParagraph(
     const TextSpan(
       style: const TextStyle(color: Colors.black87),
-      text: "Touch me!"
-    )
+      text: "Touch me!",
+    ),
+    textDirection: TextDirection.ltr,
   );
   // A stack is a render object that layers its children on top of each other.
   // The bottom later is our RenderDots object, and on top of that we show the
@@ -114,7 +115,7 @@ void main() {
     children: <RenderBox>[
       new RenderDots(),
       paragraph,
-    ]
+    ],
   );
   // The "parentData" field of a render object is controlled by the render
   // object's parent render object. Now that we've added the paragraph as a

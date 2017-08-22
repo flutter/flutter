@@ -19,6 +19,7 @@ void main() {
       new Container(
         child: new Semantics(
           label: 'test',
+          textDirection: TextDirection.ltr,
           child: new Container(
             child: const Semantics(
               checked: true
@@ -57,7 +58,8 @@ void main() {
       new Container(
         child: new Container(
           child: const Semantics(
-            label: 'test'
+            label: 'test',
+            textDirection: TextDirection.ltr,
           )
         )
       )
@@ -76,7 +78,8 @@ void main() {
           checked: true,
           child: new Container(
             child: const Semantics(
-              label: 'test'
+              label: 'test',
+              textDirection: TextDirection.ltr,
             )
           )
         )
@@ -102,7 +105,8 @@ void main() {
           checked: true,
           child: new Container(
             child: const Semantics(
-              label: 'test'
+              label: 'test',
+              textDirection: TextDirection.ltr,
             )
           )
         )

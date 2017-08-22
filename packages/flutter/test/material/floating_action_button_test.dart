@@ -6,16 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Floating Action Button control test',
-      (WidgetTester tester) async {
+  testWidgets('Floating Action Button control test', (WidgetTester tester) async {
     bool didPressButton = false;
     await tester.pumpWidget(
-      new Center(
-        child: new FloatingActionButton(
-          onPressed: () {
-            didPressButton = true;
-          },
-          child: const Icon(Icons.add),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new FloatingActionButton(
+            onPressed: () {
+              didPressButton = true;
+            },
+            child: const Icon(Icons.add),
+          ),
         ),
       ),
     );

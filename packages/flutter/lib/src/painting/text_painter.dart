@@ -33,21 +33,26 @@ final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
-  /// The text argument is optional but [text] must be non-null before calling
-  /// [layout].
+  /// The `text` and `textDirection` arguments are optional but [text] and
+  /// [textDirection] must be non-null before calling [layout].
+  ///
+  /// The [textAlign] property must not be null.
   ///
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
     TextSpan text,
-    TextAlign textAlign,
+    TextAlign textAlign: TextAlign.start,
+    TextDirection textDirection,
     double textScaleFactor: 1.0,
     int maxLines,
     String ellipsis,
   }) : assert(text == null || text.debugAssertIsValid()),
+       assert(textAlign != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        _text = text,
        _textAlign = textAlign,
+       _textDirection = textDirection,
        _textScaleFactor = textScaleFactor,
        _maxLines = maxLines,
        _ellipsis = ellipsis;
@@ -58,6 +63,8 @@ class TextPainter {
   /// The (potentially styled) text to paint.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
+  ///
+  /// This and [textDirection] must be non-null before you call [layout].
   TextSpan get text => _text;
   TextSpan _text;
   set text(TextSpan value) {
@@ -74,13 +81,42 @@ class TextPainter {
   /// How the text should be aligned horizontally.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
+  ///
+  /// The [textAlign] property must not be null. It defaults to [TextAlign.start].
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
   set textAlign(TextAlign value) {
+    assert(value != null);
     if (_textAlign == value)
       return;
     _textAlign = value;
     _paragraph = null;
+    _needsLayout = true;
+  }
+
+  /// The default directionality of the text.
+  ///
+  /// This controls how the [TextAlign.start], [TextAlign.end], and
+  /// [TextAlign.justify] values of [textAlign] are resolved.
+  ///
+  /// This is also used to disambiguate how to render bidirectional text. For
+  /// example, if the [text] is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// its left.
+  ///
+  /// After this is set, you must call [layout] before the next call to [paint].
+  ///
+  /// This and [text] must be non-null before you call [layout].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    _paragraph = null;
+    _layoutTemplate = null; // Shouldn't really matter, but for strict correctness...
     _needsLayout = true;
   }
 
@@ -149,14 +185,20 @@ class TextPainter {
 
   ui.Paragraph _layoutTemplate;
 
-  ui.ParagraphStyle _createParagraphStyle() {
+  ui.ParagraphStyle _createParagraphStyle([TextDirection defaultTextDirection]) {
+    // The defaultTextDirection argument is used for preferredLineHeight in case
+    // textDirection hasn't yet been set.
+    assert(textAlign != null);
+    assert(textDirection != null || defaultTextDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     return _text.style?.getParagraphStyle(
       textAlign: textAlign,
+      textDirection: textDirection ?? defaultTextDirection,
       textScaleFactor: textScaleFactor,
       maxLines: _maxLines,
       ellipsis: _ellipsis,
     ) ?? new ui.ParagraphStyle(
       textAlign: textAlign,
+      textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
       ellipsis: ellipsis,
     );
@@ -169,11 +211,17 @@ class TextPainter {
   /// relative a typical line of text.
   ///
   /// Obtaining this value does not require calling [layout].
+  ///
+  /// The style of the [text] property is used to determine the font settings
+  /// that contribute to the [preferredLineHeight]. If [text] is null or if it
+  /// specifies no styles, the default [TextStyle] values are used (a 10 pixel
+  /// sans-serif font).
   double get preferredLineHeight {
-    assert(text != null);
     if (_layoutTemplate == null) {
-      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(_createParagraphStyle());
-      if (text.style != null)
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
+        _createParagraphStyle(TextDirection.rtl),
+      ); // direction doesn't matter, text is just a zero width space
+      if (text?.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(_kZeroWidthSpace);
       _layoutTemplate = builder.build()
@@ -272,10 +320,14 @@ class TextPainter {
   /// Computes the visual position of the glyphs for painting the text.
   ///
   /// The text will layout with a width that's as close to its max intrinsic
-  /// width as possible while still being greater than or equal to minWidth and
-  /// less than or equal to maxWidth.
+  /// width as possible while still being greater than or equal to `minWidth` and
+  /// less than or equal to `maxWidth`.
+  ///
+  /// The [text] and [textDirection] properties must be non-null before this is
+  /// called.
   void layout({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
-    assert(_text != null);
+    assert(text != null, 'TextPainter.text must be set to a non-null value before using the TextPainter.');
+    assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     if (!_needsLayout && minWidth == _lastMinWidth && maxWidth == _lastMaxWidth)
       return;
     _needsLayout = false;
@@ -352,15 +404,34 @@ class TextPainter {
   }
 
   Offset get _emptyOffset {
-    // TODO(abarth): Handle the directionality of the text painter itself.
-    switch (textAlign ?? TextAlign.left) {
+    assert(!_needsLayout); // implies textDirection is non-null
+    assert(textAlign != null);
+    switch (textAlign) {
       case TextAlign.left:
-      case TextAlign.justify:
         return Offset.zero;
       case TextAlign.right:
         return new Offset(width, 0.0);
       case TextAlign.center:
         return new Offset(width / 2.0, 0.0);
+      case TextAlign.justify:
+      case TextAlign.start:
+        assert(textDirection != null);
+        switch (textDirection) {
+          case TextDirection.rtl:
+            return new Offset(width, 0.0);
+          case TextDirection.ltr:
+            return Offset.zero;
+        }
+        return null;
+      case TextAlign.end:
+        assert(textDirection != null);
+        switch (textDirection) {
+          case TextDirection.rtl:
+            return Offset.zero;
+          case TextDirection.ltr:
+            return new Offset(width, 0.0);
+        }
+        return null;
     }
     return null;
   }

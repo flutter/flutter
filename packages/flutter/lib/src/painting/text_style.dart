@@ -369,6 +369,7 @@ class TextStyle extends Diagnosticable {
   /// specified and non-null, must be greater than zero.
   ui.ParagraphStyle getParagraphStyle({
       TextAlign textAlign,
+      TextDirection textDirection,
       double textScaleFactor: 1.0,
       String ellipsis,
       int maxLines,
@@ -377,6 +378,7 @@ class TextStyle extends Diagnosticable {
     assert(maxLines == null || maxLines > 0);
     return new ui.ParagraphStyle(
       textAlign: textAlign,
+      textDirection: textDirection,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
@@ -418,7 +420,7 @@ class TextStyle extends Diagnosticable {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextStyle)
+    if (other.runtimeType != runtimeType)
       return false;
     final TextStyle typedOther = other;
     return inherit == typedOther.inherit &&

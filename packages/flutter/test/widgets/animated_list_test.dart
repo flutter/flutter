@@ -121,7 +121,7 @@ void main() {
         child: new SizedBox(
           height: 100.0,
           child: new Center(
-            child: new Text('item $item'),
+            child: new Text('item $item', textDirection: TextDirection.ltr),
           ),
         ),
       );

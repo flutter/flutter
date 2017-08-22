@@ -14,7 +14,10 @@ const String _kText = 'I polished up that handle so carefullee\nThat now I am th
 
 void main() {
   test('getOffsetForCaret control test', () {
-    final RenderParagraph paragraph = new RenderParagraph(const TextSpan(text: _kText));
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
+    );
     layout(paragraph);
 
     final Rect caret = new Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
@@ -30,7 +33,10 @@ void main() {
   });
 
   test('getPositionForOffset control test', () {
-    final RenderParagraph paragraph = new RenderParagraph(const TextSpan(text: _kText));
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
+    );
     layout(paragraph);
 
     final TextPosition position20 = paragraph.getPositionForOffset(const Offset(20.0, 5.0));
@@ -44,7 +50,10 @@ void main() {
   });
 
   test('getBoxesForSelection control test', () {
-    final RenderParagraph paragraph = new RenderParagraph(const TextSpan(text: _kText));
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
+    );
     layout(paragraph);
 
     List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
@@ -61,7 +70,10 @@ void main() {
   });
 
   test('getWordBoundary control test', () {
-    final RenderParagraph paragraph = new RenderParagraph(const TextSpan(text: _kText));
+    final RenderParagraph paragraph = new RenderParagraph(
+      const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
+    );
     layout(paragraph);
 
     final TextRange range5 = paragraph.getWordBoundary(const TextPosition(offset: 5));
@@ -81,6 +93,7 @@ void main() {
               'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
         style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
       ),
+      textDirection: TextDirection.ltr,
       maxLines: 1,
       softWrap: true,
     );
@@ -157,6 +170,7 @@ void main() {
             // 0          1          2       3       4      5     6         7         8    9       10      11     12
         style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
       ),
+      textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
     void layoutAt(int maxLines) {
@@ -183,6 +197,7 @@ void main() {
         text: 'Hello',
         style: const TextStyle(color: const Color(0xFF000000)),
       ),
+      textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0), phase: EnginePhase.paint);
     expect(paragraph.debugNeedsLayout, isFalse);
@@ -210,15 +225,21 @@ void main() {
   test('toStringDeep', () {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(text: _kText),
+      textDirection: TextDirection.ltr,
     );
     expect(paragraph, hasAGoodToStringDeep);
     expect(
       paragraph.toStringDeep(),
       equalsIgnoringHashCodes(
         'RenderParagraph#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
-        ' │ parentData: null\n'
-        ' │ constraints: null\n'
+        ' │ parentData: MISSING\n'
+        ' │ constraints: MISSING\n'
         ' │ size: MISSING\n'
+        ' │ textAlign: start\n'
+        ' │ textDirection: ltr\n'
+        ' │ softWrap: wrapping at box width\n'
+        ' │ overflow: clip\n'
+        ' │ maxLines: unlimited\n'
         ' ╘═╦══ text ═══\n'
         '   ║ TextSpan:\n'
         '   ║   "I polished up that handle so carefullee\n'

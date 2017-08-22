@@ -41,19 +41,31 @@ enum BannerLocation {
 class BannerPainter extends CustomPainter {
   /// Creates a banner painter.
   ///
-  /// The [message] and [location] arguments must not be null.
+  /// The [message], [textDirection], and [location] arguments must not be null.
   BannerPainter({
     @required this.message,
+    @required this.textDirection,
     @required this.location,
     this.color: _kColor,
     this.textStyle: _kTextStyle,
   }) : assert(message != null),
+       assert(textDirection != null),
        assert(location != null),
        assert(color != null),
        assert(textStyle != null);
 
   /// The message to show in the banner.
   final String message;
+
+  /// The directionality of the text.
+  ///
+  /// This is used to disambiguate how to render bidirectional text. For
+  /// example, if the message is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// its left.
+  final TextDirection textDirection;
 
   /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
@@ -82,6 +94,7 @@ class BannerPainter extends CustomPainter {
     _textPainter = new TextPainter(
       text: new TextSpan(style: textStyle, text: message),
       textAlign: TextAlign.center,
+      textDirection: textDirection,
     );
     _prepared = true;
   }
@@ -169,6 +182,7 @@ class Banner extends StatelessWidget {
     Key key,
     this.child,
     @required this.message,
+    this.textDirection,
     @required this.location,
     this.color: _kColor,
     this.textStyle: _kTextStyle,
@@ -184,6 +198,18 @@ class Banner extends StatelessWidget {
   /// The message to show in the banner.
   final String message;
 
+  /// The directionality of the text.
+  ///
+  /// This is used to disambiguate how to render bidirectional text. For
+  /// example, if the message is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// its left.
+  ///
+  /// Defaults to the ambient [Directionality], if any.
+  final TextDirection textDirection;
+
   /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
 
@@ -198,6 +224,7 @@ class Banner extends StatelessWidget {
     return new CustomPaint(
       foregroundPainter: new BannerPainter(
         message: message,
+        textDirection: textDirection ?? Directionality.of(context),
         location: location,
         color: color,
         textStyle: textStyle,
@@ -210,6 +237,7 @@ class Banner extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new StringProperty('message', message, showName: false));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new EnumProperty<BannerLocation>('location', location));
     description.add(new DiagnosticsProperty<Color>('color', color, showName: false));
     textStyle?.debugFillProperties(description, prefix: 'text ');
@@ -236,7 +264,9 @@ class CheckedModeBanner extends StatelessWidget {
       result = new Banner(
         child: result,
         message: 'SLOW MODE',
-        location: BannerLocation.topRight);
+        textDirection: TextDirection.ltr,
+        location: BannerLocation.topRight,
+      );
       return true;
     });
     return result;

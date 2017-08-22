@@ -361,12 +361,14 @@ class _InspectorOverlayRenderState {
     @required this.selected,
     @required this.candidates,
     @required this.tooltip,
+    @required this.textDirection,
   });
 
   final Rect overlayRect;
   final _TransformedRect selected;
   final List<_TransformedRect> candidates;
   final String tooltip;
+  final TextDirection textDirection;
 
   @override
   bool operator ==(dynamic other) {
@@ -447,6 +449,7 @@ class _InspectorOverlayLayer extends Layer {
       overlayRect: overlayRect,
       selected: new _TransformedRect(selected),
       tooltip: selected.toString(),
+      textDirection: TextDirection.ltr,
       candidates: candidates,
     );
 
@@ -497,15 +500,22 @@ class _InspectorOverlayLayer extends Layer {
     final double offsetFromWidget = 9.0;
     final double verticalOffset = (targetRect.height) / 2 + offsetFromWidget;
 
-    _paintDescription(canvas, state.tooltip, target, verticalOffset, size, targetRect);
+    _paintDescription(canvas, state.tooltip, state.textDirection, target, verticalOffset, size, targetRect);
 
     // TODO(jacobr): provide an option to perform a debug paint of just the
     // selected widget.
     return recorder.endRecording();
   }
 
-  void _paintDescription(Canvas canvas, String message, Offset target,
-      double verticalOffset, Size size, Rect targetRect) {
+  void _paintDescription(
+    Canvas canvas,
+    String message,
+    TextDirection textDirection,
+    Offset target,
+    double verticalOffset,
+    Size size,
+    Rect targetRect,
+  ) {
     canvas.save();
     final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
     if (_textPainter == null || _textPainter.text.text != message || _textPainterMaxWidth != maxWidth) {
@@ -514,6 +524,7 @@ class _InspectorOverlayLayer extends Layer {
         ..maxLines = _kMaxTooltipLines
         ..ellipsis = '...'
         ..text = new TextSpan(style: _messageStyle, text: message)
+        ..textDirection = textDirection
         ..layout(maxWidth: maxWidth);
     }
 
