@@ -161,6 +161,11 @@ class FlutterDevice {
       await view.uiIsolate.flutterTogglePerformanceOverlayOverride();
   }
 
+  Future<Null> toggleWidgetInspector() async {
+    for (FlutterView view in views)
+      await view.uiIsolate.flutterToggleWidgetInspector();
+  }
+
   Future<String> togglePlatform({ String from }) async {
     String to;
     switch (from) {
@@ -454,6 +459,12 @@ abstract class ResidentRunner {
       await device.debugTogglePerformanceOverlayOverride();
   }
 
+  Future<Null> _debugToggleWidgetInspector() async {
+    await refreshViews();
+    for (FlutterDevice device in flutterDevices)
+      await device.toggleWidgetInspector();
+  }
+
   Future<Null> _screenshot(FlutterDevice device) async {
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...');
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
@@ -465,7 +476,7 @@ abstract class ResidentRunner {
             await view.uiIsolate.flutterDebugAllowBanner(false);
         } catch (error) {
           status.stop();
-          printError(error);
+          printError('Error communicating with Flutter on the device: $error');
         }
       }
       try {
@@ -477,7 +488,7 @@ abstract class ResidentRunner {
               await view.uiIsolate.flutterDebugAllowBanner(true);
           } catch (error) {
             status.stop();
-            printError(error);
+            printError('Error communicating with Flutter on the device: $error');
           }
         }
       }
@@ -617,6 +628,10 @@ abstract class ResidentRunner {
     } else if (character == 'P') {
       if (supportsServiceProtocol) {
         await _debugTogglePerformanceOverlayOverride();
+      }
+    } else if (lower == 'i') {
+      if (supportsServiceProtocol) {
+        await _debugToggleWidgetInspector();
         return true;
       }
     } else if (character == 's') {
@@ -739,6 +754,7 @@ abstract class ResidentRunner {
       printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
       if (isRunningDebug) {
         printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S".');
+        printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
       } else {
