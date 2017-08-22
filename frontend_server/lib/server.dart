@@ -152,6 +152,8 @@ class _FrontendCompiler implements CompilerInterface {
   }
 
   Uri _ensureFolderPath(String path) {
+    // This is a URI, not a file path, so the forward slash is correct even
+    // on Windows.
     if (!path.endsWith('/'))
       path = '$path/';
     return Uri.base.resolve(path);
