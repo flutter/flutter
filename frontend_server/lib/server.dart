@@ -11,7 +11,7 @@ import 'package:front_end/incremental_kernel_generator.dart';
 import 'package:front_end/compiler_options.dart';
 import 'package:front_end/kernel_generator.dart';
 import 'package:kernel/ast.dart';
-import 'package:kernel/kernel.dart';
+import 'package:kernel/kernel.dart' as kernel;
 import 'package:kernel/target/flutter.dart';
 import 'package:kernel/target/targets.dart';
 import 'package:usage/uuid/uuid.dart';
@@ -59,8 +59,12 @@ enum _State { READY_FOR_INSTRUCTION, RECOMPILE_LIST }
 /// Actions that every compiler should implement.
 abstract class CompilerInterface {
   /// Compile given Dart program identified by `filename` with given list of
-  /// `options`.
-  Future<Null> compile(String filename, ArgResults options);
+  /// `options`. When `generator` parameter is omitted, new instance of
+  /// `IncrementalKernelGenerator` is created by this method. Main use for this
+  /// parameter is for mocking in tests.
+  Future<Null> compile(String filename, ArgResults options, {
+    IncrementalKernelGenerator generator,
+  });
 
   /// Assuming some Dart program was previously compiled, recompile it again
   /// taking into account some changed(invalidated) sources.
@@ -78,17 +82,32 @@ abstract class CompilerInterface {
   void invalidate(Uri uri);
 }
 
-class _FrontendCompiler implements CompilerInterface {
-  _FrontendCompiler(this._outputStream) {
-    _outputStream ??= stdout;
+/// Class that for test mocking purposes encapsulates interaction with
+/// global kernel methods.
+class KernelSerializer {
+  /// Writes given kernel `program` to `path`.
+  Future<dynamic> writeProgramToBinary(Program program, String path) {
+    return kernel.writeProgramToBinary(program, path);
   }
+}
+
+class _FrontendCompiler implements CompilerInterface {
+  _FrontendCompiler(this._outputStream, { this.kernelSerializer }) {
+    _outputStream ??= stdout;
+    kernelSerializer ??= new KernelSerializer();
+  }
+
+  StringSink _outputStream;
+  KernelSerializer kernelSerializer;
 
   IncrementalKernelGenerator _generator;
   String _filename;
-  StringSink _outputStream;
 
   @override
-  Future<Null> compile(String filename, ArgResults options) async {
+  Future<Null> compile(String filename, ArgResults options, {
+    IncrementalKernelGenerator generator,
+  }) async {
+    _filename = filename;
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln("result $boundaryKey");
     final Uri sdkRoot = _ensureFolderPath(options['sdk-root']);
@@ -101,9 +120,11 @@ class _FrontendCompiler implements CompilerInterface {
       };
     Program program;
     if (options['incremental']) {
-      _generator = await IncrementalKernelGenerator.newInstance(
-          compilerOptions, Uri.base.resolve(filename)
-      );
+      _generator = generator != null
+        ? generator
+        : await IncrementalKernelGenerator.newInstance(
+            compilerOptions, Uri.base.resolve(_filename)
+        );
       final DeltaProgram deltaProgram = await _generator.computeDelta();
       program = deltaProgram.newProgram;
     } else {
@@ -112,11 +133,11 @@ class _FrontendCompiler implements CompilerInterface {
       compilerOptions.linkedDependencies = <Uri>[
         sdkRoot.resolve('platform.dill')
       ];
-      program = await kernelForProgram(Uri.base.resolve(filename), compilerOptions);
+      program = await kernelForProgram(Uri.base.resolve(_filename), compilerOptions);
     }
     if (program != null) {
-      final String kernelBinaryFilename = filename + ".dill";
-      await writeProgramToBinary(program, kernelBinaryFilename);
+      final String kernelBinaryFilename = _filename + ".dill";
+      await kernelSerializer.writeProgramToBinary(program, kernelBinaryFilename);
       _outputStream.writeln("$boundaryKey $kernelBinaryFilename");
     } else
       _outputStream.writeln(boundaryKey);
@@ -125,13 +146,12 @@ class _FrontendCompiler implements CompilerInterface {
 
   @override
   Future<Null> recompileDelta() async {
-    _generator.computeDelta();
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln("result $boundaryKey");
     final DeltaProgram deltaProgram = await _generator.computeDelta();
     final Program program = deltaProgram.newProgram;
     final String kernelBinaryFilename = _filename + ".dill";
-    await writeProgramToBinary(program, kernelBinaryFilename);
+    await kernelSerializer.writeProgramToBinary(program, kernelBinaryFilename);
     _outputStream.writeln("$boundaryKey");
     return null;
   }
@@ -164,17 +184,21 @@ class _FrontendCompiler implements CompilerInterface {
 /// processes user input.
 /// `compiler` is an optional parameter so it can be replaced with mocked
 /// version for testing.
-Future<int> starter(List<String> args, {CompilerInterface compiler,
-    Stream<List<int>> input, StringSink output}) async {
+Future<int> starter(List<String> args, {
+  CompilerInterface compiler,
+  Stream<List<int>> input, StringSink output,
+  IncrementalKernelGenerator generator,
+  KernelSerializer kernelSerializer
+}) async {
   final ArgResults options = _argParser.parse(args);
   if (options['train'])
     return 0;
 
-  compiler ??= new _FrontendCompiler(output);
+  compiler ??= new _FrontendCompiler(output, kernelSerializer: kernelSerializer);
   input ??= stdin;
 
   if (options.rest.isNotEmpty) {
-    await compiler.compile(options.rest[0], options);
+    await compiler.compile(options.rest[0], options, generator: generator);
     return 0;
   }
 
@@ -189,9 +213,8 @@ Future<int> starter(List<String> args, {CompilerInterface compiler,
         const String COMPILE_INSTRUCTION_SPACE = 'compile ';
         const String RECOMPILE_INSTRUCTION_SPACE = 'recompile ';
         if (string.startsWith(COMPILE_INSTRUCTION_SPACE)) {
-          final String filename =
-              string.substring(COMPILE_INSTRUCTION_SPACE.length);
-          await compiler.compile(filename, options);
+          final String filename = string.substring(COMPILE_INSTRUCTION_SPACE.length);
+          await compiler.compile(filename, options, generator: generator);
         } else if (string.startsWith(RECOMPILE_INSTRUCTION_SPACE)) {
           boundaryKey = string.substring(RECOMPILE_INSTRUCTION_SPACE.length);
           state = _State.RECOMPILE_LIST;

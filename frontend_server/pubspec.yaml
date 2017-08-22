@@ -36,6 +36,7 @@ dev_dependencies:
   isolate: any
   matcher: any
   mime: any
+  mockito: any
   package_resolver: any
   plugin: any
   pool: any
@@ -116,6 +117,8 @@ dependency_overrides:
     path: ../../dart/third_party/pkg/matcher
   mime:
     path: ../../dart/third_party/pkg/mime
+  mockito:
+    path: ../../dart/third_party/pkg/mockito
   package_resolver:
     path: ../../dart/third_party/pkg_tested/package_resolver
   plugin:
