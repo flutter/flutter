@@ -597,19 +597,24 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 class ExactAssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches the given image from an asset bundle.
   ///
-  /// The [name] and [scale] arguments must not be null. The [scale] arguments
+  /// The [assetName] and [scale] arguments must not be null. The [scale] arguments
   /// defaults to 1.0. The [bundle] argument may be null, in which case the
   /// bundle provided in the [ImageConfiguration] passed to the [resolve] call
-  /// will be used instead.
-  const ExactAssetImage(this.name, {
+  /// will be used instead. The [package] argument should only be non-null when
+  /// used in a package implementation. It is used to prefix the name in order
+  /// to disambiguate assets in an app.
+  const ExactAssetImage(this.assetName, {
     this.scale: 1.0,
-    this.bundle
-  }) : assert(name != null),
+    this.bundle,
+    this.package
+  }) : assert(assetName != null),
        assert(scale != null);
+
+  final String assetName;
 
   /// The key to use to obtain the resource from the [bundle]. This is the
   /// argument passed to [AssetBundle.load].
-  final String name;
+  String get name => package == null? assetName : 'packages/$package/$assetName';
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
@@ -623,6 +628,11 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// The image is obtained by calling [AssetBundle.load] on the given [bundle]
   /// using the key given by [name].
   final AssetBundle bundle;
+
+  /// The name of the package from which the image is included.
+  ///
+  /// This must be null when the image is included by the current app.
+  final String package;
 
   @override
   Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration) {

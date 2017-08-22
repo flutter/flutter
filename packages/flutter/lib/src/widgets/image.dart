@@ -157,7 +157,9 @@ class Image extends StatefulWidget {
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from an asset
-  /// bundle. The key for the image is given by the `name` argument.
+  /// bundle. The key for the image is given by the `name` argument. If used in
+  /// a package implementation, the `package` argument must be non-null
+  /// otherwise it should be omitted.
   ///
   /// If the `bundle` argument is omitted or null, then the
   /// [DefaultAssetBundle] will be used.
@@ -230,10 +232,12 @@ class Image extends StatefulWidget {
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
-    this.gaplessPlayback: false
-  }) : image = scale != null ? new ExactAssetImage(name, bundle: bundle, scale: scale)
-                             : new AssetImage(name, bundle: bundle),
-       super(key: key);
+    this.gaplessPlayback: false,
+    this.package
+  }) : image = scale != null
+      ? new ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
+      : new AssetImage(name, bundle: bundle, package: package),
+        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
@@ -309,6 +313,11 @@ class Image extends StatefulWidget {
   /// Whether to continue showing the old image (true), or briefly show nothing
   /// (false), when the image provider changes.
   final bool gaplessPlayback;
+
+  /// The name of the package from which the image is included.
+  ///
+  /// This must be null when the image is included by the current app.
+  final String package;
 
   @override
   _ImageState createState() => new _ImageState();

@@ -58,13 +58,17 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 class AssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches an image from an asset bundle.
   ///
-  /// The [name] argument must not be null. It should name the main asset from
-  /// the set of images to chose from.
-  const AssetImage(this.name, { this.bundle }) : assert(name != null);
+  /// The [assetName] argument must not be null. It should name the main asset from
+  /// the set of images to chose from. The [package] argument should only be
+  /// non-null when used in a package implementation. It is used to prefix the
+  /// name in order to disambiguate assets in an app.
+  const AssetImage(this.assetName, { this.bundle, this.package }) : assert(assetName != null);
+
+  final String assetName;
 
   /// The name of the main asset from the set of images to chose from. See the
   /// documentation for the [AssetImage] class itself for details.
-  final String name;
+  String get name => package == null? assetName : 'packages/$package/$assetName';
 
   /// The bundle from which the image will be obtained.
   ///
@@ -75,6 +79,13 @@ class AssetImage extends AssetBundleImageProvider {
   /// The image is obtained by calling [AssetBundle.load] on the given [bundle]
   /// using the key given by [name].
   final AssetBundle bundle;
+
+  /// The name of the package from which the image is included.
+  ///
+  /// This must be null when the image is included by the current app.
+  final String package;
+
+
 
   // We assume the main asset is designed for a device pixel ratio of 1.0
   static const double _naturalResolution = 1.0;

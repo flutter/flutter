@@ -86,11 +86,12 @@ class AssetBundle {
       return 0;
     }
     if (manifest != null) {
-     final int result = await _validateFlutterManifest(manifest);
-     if (result != 0)
-       return result;
+      final int result = await _validateFlutterManifest(manifest);
+      if (result != 0)
+        return result;
     }
     Map<String, dynamic> manifestDescriptor = manifest;
+    String appName = manifestDescriptor['name'];
     manifestDescriptor = manifestDescriptor['flutter'] ?? <String, dynamic>{};
     final String assetBasePath = fs.path.dirname(fs.path.absolute(manifestPath));
 
@@ -115,6 +116,32 @@ class AssetBundle {
     final bool usesMaterialDesign = (manifestDescriptor != null) &&
         manifestDescriptor.containsKey('uses-material-design') &&
         manifestDescriptor['uses-material-design'];
+
+    // Add assets from packages.
+    for (String packageName in packageMap.map.keys) {
+      final Uri package = packageMap.map[packageName];
+      if (package != null && package.scheme == 'file') {
+        String packageManifestPath = package.resolve('../pubspec.yaml').path;
+        Object packageManifest = _loadFlutterManifest(packageManifestPath);
+        if (packageManifest == null)
+          continue;
+        final int result = await _validateFlutterManifest(packageManifest);
+        if (result == 0) {
+          Map<String, dynamic> packageManifestDescriptor = packageManifest;
+          // Skip the app itself.
+          if (packageManifestDescriptor['name'] == appName) continue;
+          if (packageManifestDescriptor.containsKey('flutter')) {
+            packageManifestDescriptor = packageManifestDescriptor['flutter'];
+            final String packageBasePath = fs.path.dirname(packageManifestPath);
+            assetVariants.addAll(_parseAssets(
+                packageMap,
+                packageManifestDescriptor,
+                packageBasePath,
+                packageKey: packageName));
+          }
+        }
+      }
+    }
 
     // Save the contents of each image, image variant, and font
     // asset in entries.
@@ -203,6 +230,24 @@ class _Asset {
 
   @override
   String toString() => 'asset: $assetEntry';
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) return true;
+    if (other.runtimeType != runtimeType) return false;
+    final _Asset otherAsset = other;
+    return base == otherAsset.base &&
+        assetEntry == otherAsset.assetEntry &&
+        relativePath == otherAsset.relativePath &&
+        source == otherAsset.source;
+  }
+
+  @override
+  int get hashCode =>
+      base.hashCode +
+      assetEntry.hashCode +
+      relativePath.hashCode +
+      source.hashCode;
 }
 
 Map<String, dynamic> _readMaterialFontsManifest() {
@@ -384,7 +429,8 @@ Map<_Asset, List<_Asset>> _parseAssets(
   PackageMap packageMap,
   Map<String, dynamic> manifestDescriptor,
   String assetBase, {
-  List<String> excludeDirs: const <String>[]
+  List<String> excludeDirs: const <String>[],
+  String packageKey
 }) {
   final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
@@ -394,7 +440,9 @@ Map<_Asset, List<_Asset>> _parseAssets(
   if (manifestDescriptor.containsKey('assets')) {
     final _AssetDirectoryCache cache = new _AssetDirectoryCache(excludeDirs);
     for (String assetName in manifestDescriptor['assets']) {
-      final _Asset asset = _resolveAsset(packageMap, assetBase, assetName);
+      final _Asset asset = packageKey != null
+          ? _resolvePackageAsset(assetBase, packageKey, assetName)
+          : _resolveAsset(packageMap, assetBase, assetName);
       final List<_Asset> variants = <_Asset>[];
 
       for (String path in cache.variantsFor(asset.assetFile.path)) {
@@ -433,6 +481,14 @@ Map<_Asset, List<_Asset>> _parseAssets(
   }
 
   return result;
+}
+
+_Asset _resolvePackageAsset(
+    String assetBase, String packageName, String asset) {
+  return new _Asset(
+      base: assetBase,
+      assetEntry: 'packages/$packageName/$asset',
+      relativePath: asset);
 }
 
 _Asset _resolveAsset(
