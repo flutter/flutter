@@ -264,7 +264,11 @@ class InspectorSelection {
     index = 0;
   }
 
-  /// Selected render object.
+  /// Selected render object from the [candidates] list.
+  ///
+  /// Setting [candidates] or calling [clear] resets the selection.
+  ///
+  /// Returns null if the selection is invalid.
   RenderObject get current {
     return candidates != null && index < candidates.length ? candidates[index] : null;
   }
