@@ -7,9 +7,10 @@
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_wrappable.h"
 
-#if defined(OS_FUCHSIA)
-#include "lib/tonic/handle_table.h"
+#ifdef OS_FUCHSIA
+#include "lib/fidl/dart/sdk_ext/src/handle.h"
 #endif
 
 namespace blink {
@@ -29,16 +30,22 @@ void SceneHost::RegisterNatives(tonic::DartLibraryNatives* natives) {
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-ftl::RefPtr<SceneHost> SceneHost::create(int export_token_handle) {
+#if defined(OS_FUCHSIA)
+ftl::RefPtr<SceneHost> SceneHost::create(
+    ftl::RefPtr<fidl::dart::Handle> export_token_handle) {
   return ftl::MakeRefCounted<SceneHost>(export_token_handle);
 }
 
-SceneHost::SceneHost(int export_token_handle) {
-#if defined(OS_FUCHSIA)
-  export_node_ = ftl::MakeRefCounted<flow::ExportNode>(
-      tonic::HandleTable::Current().Unwrap(export_token_handle));
-#endif
+SceneHost::SceneHost(ftl::RefPtr<fidl::dart::Handle> export_token_handle) {
+  export_node_ = ftl::MakeRefCounted<flow::ExportNode>(export_token_handle);
 }
+#else
+ftl::RefPtr<SceneHost> SceneHost::create(Dart_Handle export_token_handle) {
+  return ftl::MakeRefCounted<SceneHost>(export_token_handle);
+}
+
+SceneHost::SceneHost(Dart_Handle export_token_handle) {}
+#endif
 
 SceneHost::~SceneHost() {}
 

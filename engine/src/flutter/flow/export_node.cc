@@ -6,8 +6,8 @@
 
 namespace flow {
 
-ExportNode::ExportNode(uint32_t export_token_handle)
-    : export_token_(export_token_handle) {}
+ExportNode::ExportNode(ftl::RefPtr<fidl::dart::Handle> export_token_handle)
+    : export_token_(export_token_handle->ReleaseHandle()) {}
 
 ExportNode::~ExportNode() {
   // TODO(MZ-190): Ensure the node is properly unregistered on the rasterizer
