@@ -1,5 +1,4 @@
 dart:fidl.internal,::,_environment
 dart:fidl.internal,::,_outgoingServices
-dart:fidl.internal,HandleWaiter,onWaitComplete
 dart:mozart.internal,::,_viewContainer
 dart:mozart.internal,::,_context

@@ -1193,7 +1193,6 @@ dart:fidl.internal,HandleWaiter,asyncWait
 dart:fidl.internal,HandleWaiter,cancelWait
 dart:fidl.internal,HandleWaiter,_asyncWait
 dart:fidl.internal,HandleWaiter,_cancelWait
-dart:fidl.internal,HandleWaiter,onWaitComplete
 dart:fidl.internal,HandleWaiter,get:_callback
 dart:fidl.internal,HandleWaiter,set:_callback
 dart:fidl.internal,MxStartupInfo,takeEnvironment

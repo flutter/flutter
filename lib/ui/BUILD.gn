@@ -87,4 +87,7 @@ source_set("ui") {
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
+  if (is_fuchsia) {
+    deps += [ "//lib/fidl/dart/sdk_ext" ]
+  }
 }

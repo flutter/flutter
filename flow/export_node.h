@@ -11,6 +11,7 @@
 
 #include "apps/mozart/lib/scene/client/resources.h"
 #include "flutter/flow/scene_update_context.h"
+#include "lib/fidl/dart/sdk_ext/src/handle.h"
 #include "lib/ftl/build_config.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_counted.h"
@@ -27,7 +28,7 @@ namespace flow {
 // Therefore this object is thread-safe.
 class ExportNode : public ftl::RefCountedThreadSafe<ExportNode> {
  public:
-  ExportNode(uint32_t export_token_handle);
+  ExportNode(ftl::RefPtr<fidl::dart::Handle> export_token_handle);
 
   // Binds the export token to the entity node and adds it as a child of
   // the specified container.

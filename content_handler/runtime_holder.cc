@@ -20,19 +20,18 @@
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
 #include "flutter/runtime/runtime_init.h"
+#include "lib/fidl/dart/sdk_ext/src/handle.h"
 #include "lib/fidl/dart/sdk_ext/src/natives.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
 #include "lib/mtl/vmo/vector.h"
-#include "lib/tonic/handle_table.h"
 #include "lib/zip/create_unzipper.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/rapidjson/writer.h"
 
 using tonic::DartConverter;
-using tonic::HandleTable;
 using tonic::ToDart;
 
 namespace flutter_runner {
@@ -196,7 +195,7 @@ void RuntimeHolder::CreateView(
                             std::move(view_listener),       // view listener
                             std::move(export_token),        // export token
                             script_uri                      // diagnostic label
-                            );
+  );
   app::ServiceProviderPtr view_services;
   view_->GetServiceProvider(view_services.NewRequest());
 
@@ -365,15 +364,16 @@ void RuntimeHolder::InitFidlInternal() {
   DART_CHECK_VALID(Dart_SetNativeResolver(
       fidl_internal, fidl::dart::NativeLookup, fidl::dart::NativeSymbol));
 
-  HandleTable& handle_table = HandleTable::Current();
+  fidl::dart::Initialize();
 
-  DART_CHECK_VALID(
-      Dart_SetField(fidl_internal, ToDart("_environment"),
-                    handle_table.AddAndWrap(environment.PassHandle())));
+  DART_CHECK_VALID(Dart_SetField(fidl_internal, ToDart("_environment"),
+                                 ToDart(fidl::dart::Handle::Create(
+                                     environment.PassHandle().release()))));
 
   DART_CHECK_VALID(
       Dart_SetField(fidl_internal, ToDart("_outgoingServices"),
-                    handle_table.AddAndWrap(outgoing_services_.PassChannel())));
+                    ToDart(fidl::dart::Handle::Create(
+                        outgoing_services_.PassChannel().release()))));
 }
 
 void RuntimeHolder::InitMozartInternal() {
@@ -391,10 +391,9 @@ void RuntimeHolder::InitMozartInternal() {
                     DartConverter<uint64_t>::ToDart(reinterpret_cast<intptr_t>(
                         static_cast<mozart::NativesDelegate*>(this)))));
 
-  HandleTable& handle_table = HandleTable::Current();
-  DART_CHECK_VALID(
-      Dart_SetField(mozart_internal, ToDart("_viewContainer"),
-                    handle_table.AddAndWrap(view_container.PassHandle())));
+  DART_CHECK_VALID(Dart_SetField(mozart_internal, ToDart("_viewContainer"),
+                                 ToDart(fidl::dart::Handle::Create(
+                                     view_container.PassHandle().release()))));
 }
 
 void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {

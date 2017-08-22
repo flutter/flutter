@@ -25,7 +25,12 @@ class SceneHost : public ftl::RefCountedThreadSafe<SceneHost>,
   FRIEND_MAKE_REF_COUNTED(SceneHost);
 
  public:
-  static ftl::RefPtr<SceneHost> create(int export_token_handle);
+#if defined(OS_FUCHSIA)
+  static ftl::RefPtr<SceneHost> create(
+      ftl::RefPtr<fidl::dart::Handle> export_token_handle);
+#else
+  static ftl::RefPtr<SceneHost> create(Dart_Handle export_token_handle);
+#endif
 
   ~SceneHost() override;
 
@@ -44,7 +49,11 @@ class SceneHost : public ftl::RefCountedThreadSafe<SceneHost>,
   ftl::RefPtr<flow::ExportNode> export_node_;
 #endif
 
-  explicit SceneHost(int export_token_handle);
+#if defined(OS_FUCHSIA)
+  explicit SceneHost(ftl::RefPtr<fidl::dart::Handle> export_token_handle);
+#else
+  explicit SceneHost(Dart_Handle export_token_handle);
+#endif
 };
 
 }  // namespace blink

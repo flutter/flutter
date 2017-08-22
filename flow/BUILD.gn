@@ -71,6 +71,7 @@ source_set("flow") {
     deps += [
       "//apps/mozart/lib/scene:client",
       "//apps/mozart/services/scene",
+      "//lib/fidl/dart/sdk_ext",
     ]
 
     public_deps = [
