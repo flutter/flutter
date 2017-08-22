@@ -23,6 +23,7 @@ abstract class RunCommandBase extends FlutterCommand {
   // Used by run and drive commands.
   RunCommandBase() {
     addBuildModeFlags(defaultToRelease: false);
+    usesFlavorOption();
     argParser.addFlag('trace-startup',
         negatable: true,
         defaultsTo: false,
@@ -208,7 +209,7 @@ class RunCommand extends RunCommandBase {
   bool shouldUseHotMode() {
     final bool hotArg = argResults['hot'] ?? false;
     final bool shouldUseHotMode = hotArg;
-    return (getBuildMode() == BuildMode.debug) && shouldUseHotMode;
+    return getBuildInfo().isDebug && shouldUseHotMode;
   }
 
   bool get runningWithPrebuiltApplication =>
@@ -228,11 +229,12 @@ class RunCommand extends RunCommandBase {
   }
 
   DebuggingOptions _createDebuggingOptions() {
-    if (getBuildMode() == BuildMode.release) {
-      return new DebuggingOptions.disabled(getBuildMode());
+    final BuildInfo buildInfo = getBuildInfo();
+    if (buildInfo.isRelease) {
+      return new DebuggingOptions.disabled(buildInfo);
     } else {
       return new DebuggingOptions.enabled(
-        getBuildMode(),
+        buildInfo,
         startPaused: argResults['start-paused'],
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],

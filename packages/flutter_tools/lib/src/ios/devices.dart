@@ -164,8 +164,7 @@ class IOSDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app,
-    BuildMode mode, {
+    ApplicationPackage app, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -182,7 +181,7 @@ class IOSDevice extends Device {
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
           app: app,
-          mode: mode,
+          buildInfo: debuggingOptions.buildInfo,
           target: mainPath,
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
@@ -267,7 +266,7 @@ class IOSDevice extends Device {
 
       final Future<Uri> forwardObservatoryUri = observatoryDiscovery.uri;
       Future<Uri> forwardDiagnosticUri;
-      if (debuggingOptions.buildMode == BuildMode.debug) {
+      if (debuggingOptions.buildInfo.isDebug) {
         forwardDiagnosticUri = diagnosticDiscovery.uri;
       } else {
         forwardDiagnosticUri = new Future<Uri>.value(null);

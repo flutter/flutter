@@ -8,10 +8,42 @@ import 'base/platform.dart';
 import 'base/utils.dart';
 import 'globals.dart';
 
-enum BuildType {
-  prebuilt,
-  release,
-  debug,
+/// Information about a build to be performed or used.
+class BuildInfo {
+  const BuildInfo(this.mode, this.flavor);
+
+  final BuildMode mode;
+  /// Represents a custom Android product flavor or an Xcode scheme, null for
+  /// using the default.
+  ///
+  /// If not null, the Gradle build task will be `assembleFlavorMode` (e.g.
+  /// `assemblePaidRelease`), and the Xcode build configuration will be
+  /// Mode-Flavor (e.g. Release-Paid).
+  final String flavor;
+
+  static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
+  static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);
+  static const BuildInfo release = const BuildInfo(BuildMode.release, null);
+
+  /// Returns whether a debug build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
+  bool get isDebug => mode == BuildMode.debug;
+
+  /// Returns whether a profile build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
+  bool get isProfile => mode == BuildMode.profile;
+
+  /// Returns whether a release build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
+  bool get isRelease => mode == BuildMode.release;
+
+  bool get usesAot => isAotBuildMode(mode);
+  bool get supportsEmulator => isEmulatorBuildMode(mode);
+  bool get supportsSimulator => isEmulatorBuildMode(mode);
+  String get modeName => getModeName(mode);
 }
 
 /// The type of build - `debug`, `profile`, or `release`.

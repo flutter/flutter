@@ -133,6 +133,19 @@ abstract class FlutterCommand extends Command<Null> {
     return _defaultBuildMode;
   }
 
+  void usesFlavorOption() {
+    argParser.addOption(
+      'flavor',
+      help: 'Build a custom app flavor as defined by platform-specific build setup.\n'
+        'Supports the use of product flavors in Android Gradle scripts.\n'
+        'Supports the use of custom Xcode schemes.'
+    );
+  }
+
+  BuildInfo getBuildInfo() {
+    return new BuildInfo(getBuildMode(), argResults['flavor']);
+  }
+
   void setupApplicationPackages() {
     applicationPackages ??= new ApplicationPackageStore();
   }
