@@ -18,8 +18,8 @@ import 'file_system.dart';
 /// build step. This assumes that build outputs are strictly a product of the
 /// input files and properties provided.
 class Fingerprint {
-  Fingerprint.fromInputs({Set<String> filePaths, Map<String, String> properties}) : _fingerprint = <String, String>{} {
-    filePaths ??= new Set<String>();
+  Fingerprint.fromInputs({Iterable<String> filePaths, Map<String, String> properties}) : _fingerprint = <String, String>{} {
+    filePaths ??= <String>[];
     properties ??= <String, String>{};
     if (properties.keys.any(filePaths.contains))
       throw new ArgumentError('File path and property key collision');

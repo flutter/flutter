@@ -20,18 +20,18 @@ void main() {
 
       testUsingContext('throws if any input file does not exist', () async {
         await fs.file('a.dart').create();
-        expect(() => new Fingerprint.fromInputs(filePaths: <String>['a.dart', 'b.dart'].toSet()), throwsA(anything));
+        expect(() => new Fingerprint.fromInputs(filePaths: <String>['a.dart', 'b.dart']), throwsArgumentError);
       }, overrides: <Type, Generator>{ FileSystem: () => fs});
 
       testUsingContext('throws on file path and property collision', () async {
         await fs.file('a.dart').create();
-        expect(() => new Fingerprint.fromInputs(filePaths: <String>['a.dart'].toSet(), properties: <String, String>{'a.dart': 'This is a'}), throwsA(anything));
+        expect(() => new Fingerprint.fromInputs(filePaths: <String>['a.dart'], properties: <String, String>{'a.dart': 'This is a'}), throwsArgumentError);
       }, overrides: <Type, Generator>{ FileSystem: () => fs});
 
       testUsingContext('populates fingerprint for valid files', () async {
         await fs.file('a.dart').writeAsString('This is a');
         await fs.file('b.dart').writeAsString('This is b');
-        final Fingerprint checksum = new Fingerprint.fromInputs(filePaths: <String>['a.dart', 'b.dart'].toSet());
+        final Fingerprint checksum = new Fingerprint.fromInputs(filePaths: <String>['a.dart', 'b.dart']);
         final String json = checksum.toJson();
         expect(json, '{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
       }, overrides: <Type, Generator>{ FileSystem: () => fs});
@@ -44,7 +44,7 @@ void main() {
 
       testUsingContext('populates fingerprint for valid files and properties', () async {
         await fs.file('a.dart').writeAsString('This is a');
-        final Fingerprint checksum = new Fingerprint.fromInputs(filePaths: <String>['a.dart'].toSet(), properties: <String, String>{'b': 'This is b'});
+        final Fingerprint checksum = new Fingerprint.fromInputs(filePaths: <String>['a.dart'], properties: <String, String>{'b': 'This is b'});
         final String json = checksum.toJson();
         expect(json, '{"a.dart":"8a21a15fad560b799f6731d436c1b698","b":"This is b"}');
       }, overrides: <Type, Generator>{ FileSystem: () => fs});
