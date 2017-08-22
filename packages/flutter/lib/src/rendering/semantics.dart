@@ -97,11 +97,13 @@ class SemanticsData {
     @required this.actions,
     @required this.label,
     @required this.rect,
+    @required this.tags,
     this.transform
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
-       assert(rect != null);
+       assert(rect != null),
+       assert(tags != null);
 
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;
@@ -114,6 +116,8 @@ class SemanticsData {
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
+
+  final Set<SemanticsTag> tags;
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
@@ -157,11 +161,12 @@ class SemanticsData {
         && typedOther.actions == actions
         && typedOther.label == label
         && typedOther.rect == rect
+        && setEquals(typedOther.tags, tags)
         && typedOther.transform == transform;
   }
 
   @override
-  int get hashCode => hashValues(flags, actions, label, rect, transform);
+  int get hashCode => hashValues(flags, actions, label, rect, tags, transform);
 }
 
 /// A node that represents some semantic data.
@@ -375,7 +380,6 @@ class SemanticsNode extends AbstractNode {
 
   /// Restore this node to its default state.
   void reset() {
-    print('reset $this');
     final bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
     _actions = 0;
     _flags = 0;
@@ -580,11 +584,13 @@ class SemanticsNode extends AbstractNode {
     int flags = _flags;
     int actions = _actions;
     String label = _label;
+    final Set<SemanticsTag> tags = new Set<SemanticsTag>.from(_tags);
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
         flags |= node._flags;
         actions |= node._actions;
+        tags.addAll(node._tags);
         if (node.label.isNotEmpty) {
           if (label.isEmpty)
             label = node.label;
@@ -600,7 +606,8 @@ class SemanticsNode extends AbstractNode {
       actions: actions,
       label: label,
       rect: rect,
-      transform: transform
+      transform: transform,
+      tags: tags,
     );
   }
 
