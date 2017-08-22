@@ -317,7 +317,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         paint = new Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
-          ..color = debugPaintBoxArrowColor;
+          ..color = const Color(0xFFFFFF00);
         path = new Path();
         final BoxParentData childParentData = child.parentData;
         if (childParentData.offset.dy > 0.0) {
@@ -358,7 +358,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         }
       } else {
         paint = new Paint()
-          ..color = debugPaintSpacingColor;
+          ..color = const Color(0x90909090);
         context.canvas.drawRect(offset & size, paint);
       }
       return true;

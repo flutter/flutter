@@ -65,13 +65,13 @@ void main() {
   test('debugPaintPadding', () {
     expect((Canvas canvas) {
       debugPaintPadding(canvas, new Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), null);
-    }, paints..rect(color: debugPaintSpacingColor));
+    }, paints..rect(color: const Color(0x90909090)));
     expect((Canvas canvas) {
       debugPaintPadding(canvas, new Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), new Rect.fromLTRB(11.0, 11.0, 19.0, 19.0));
-    }, paints..path(color: debugPaintPaddingColor)..path(color: debugPaintPaddingInnerEdgeColor));
+    }, paints..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
     expect((Canvas canvas) {
       debugPaintPadding(canvas, new Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), new Rect.fromLTRB(15.0, 15.0, 15.0, 15.0));
-    }, paints..rect(rect: new Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), color: debugPaintSpacingColor));
+    }, paints..rect(rect: new Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), color: const Color(0x90909090)));
   });
 
   test('debugPaintPadding from render objects', () {
@@ -92,10 +92,10 @@ void main() {
       ],
     );
     layout(root);
-    expect(b.debugPaint, paints..rect(color: debugPaintSizeColor)..rect(color: debugPaintSpacingColor));
+    expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..rect(color: const Color(0x90909090)));
     expect(b.debugPaint, isNot(paints..path()));
     expect(s.debugPaint, paints..circle(hasMaskFilter: true)..line(hasMaskFilter: true)..path(hasMaskFilter: true)..path(hasMaskFilter: true)
-                               ..path(color: debugPaintPaddingColor)..path(color: debugPaintPaddingInnerEdgeColor));
+                               ..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
     expect(s.debugPaint, isNot(paints..rect()));
     debugPaintSizeEnabled = false;
   });
@@ -115,11 +115,11 @@ void main() {
       ),
     );
     layout(b);
-    expect(s.debugPaint, paints..rect(color: debugPaintSpacingColor));
+    expect(s.debugPaint, paints..rect(color: const Color(0x90909090)));
     expect(s.debugPaint, isNot(paints..circle(hasMaskFilter: true)..line(hasMaskFilter: true)..path(hasMaskFilter: true)..path(hasMaskFilter: true)
-                                     ..path(color: debugPaintPaddingColor)..path(color: debugPaintPaddingInnerEdgeColor)));
-    expect(b.debugPaint, paints..rect(color: debugPaintSizeColor)..path(color: debugPaintPaddingColor)..path(color: debugPaintPaddingInnerEdgeColor));
-    expect(b.debugPaint, isNot(paints..rect(color: debugPaintSpacingColor)));
+                                     ..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF))));
+    expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
+    expect(b.debugPaint, isNot(paints..rect(color: const Color(0x90909090))));
     debugPaintSizeEnabled = false;
   });
 }
