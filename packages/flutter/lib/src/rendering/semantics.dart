@@ -347,18 +347,26 @@ class SemanticsNode extends AbstractNode {
 
   Set<SemanticsTag> _tags = new Set<SemanticsTag>();
 
-  /// Tag the [SemanticsNode] with [tag].
+  /// Ensures that the [SemanticsNode] is or is not tagged with [tag].
+  ///
+  /// If [isPresent] is `true` it will ensure that the tag is present. If
+  /// [isPresent] is `false` it will ensure that the node is not tagged with
+  /// [tag].
   ///
   /// See also:
   ///
   ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
-  void addTag(SemanticsTag tag) {
-    _tags.add(tag);
+  ///  * [hasTag] to check if the node has a certain tag.
+  void ensureTag(SemanticsTag tag, { bool isPresent: true}) {
+    if (isPresent)
+      _tags.add(tag);
+    else
+      _tags.remove(tag);
   }
 
   /// Check if the [SemanticsNode] is tagged with [tag].
   ///
-  /// Tags can be added with [addTag].
+  /// Tags can be added and removed with [ensureTag].
   ///
   /// See also:
   ///
@@ -367,6 +375,7 @@ class SemanticsNode extends AbstractNode {
 
   /// Restore this node to its default state.
   void reset() {
+    print('reset $this');
     final bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
     _actions = 0;
     _flags = 0;
