@@ -12,7 +12,6 @@ import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
-import 'proxy_box.dart';
 import 'viewport_offset.dart';
 
 // CORE TYPES FOR SLIVERS
