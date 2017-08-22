@@ -13,6 +13,8 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
+import 'proxy_box.dart';
+import 'semantics.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
@@ -201,6 +203,28 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
       }
       context.paintChild(child, offset);
     }
+  }
+
+  /// Whether the [SemanticsNode]s associated with this [RenderSliver] should
+  /// be excluded from the semantic scrolling area.
+  ///
+  /// [RenderSliver]s that stay on the screen even though the user has scrolled
+  /// past them (e.g. a pinned app bar) should set this to `true`.
+  @protected
+  bool get excludeFromSemanticsScrolling => _excludeFromSemanticsScrolling;
+  set excludeFromSemanticsScrolling(bool value) {
+    if (_excludeFromSemanticsScrolling == value)
+      return;
+    _excludeFromSemanticsScrolling = value;
+    markNeedsSemanticsUpdate();
+  }
+  bool _excludeFromSemanticsScrolling = false;
+
+  @override
+  SemanticsAnnotator get semanticsAnnotator => _excludeFromSemanticsScrolling ? _annotate : null;
+
+  void _annotate(SemanticsNode node) {
+    node.addTag(RenderSemanticsGestureHandler.excludeFromScrolling);
   }
 
   @override

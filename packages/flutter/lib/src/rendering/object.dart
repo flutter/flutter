@@ -2749,6 +2749,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [isSemanticBoundary] isn't true, then the associated call to
   /// [markNeedsSemanticsUpdate] must not have `onlyChanges` set, as it is
   /// possible that the node should be entirely removed.
+  ///
+  /// If the annotation should only happen under certain conditions, `null`
+  /// should be returned if those conditions are currently not met to avoid
+  /// the creation of empty [SemanticsNode].
   SemanticsAnnotator get semanticsAnnotator => null;
 
   /// Assemble the [SemanticsNode] for this [RenderObject].

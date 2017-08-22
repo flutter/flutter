@@ -14,7 +14,6 @@ import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 import 'proxy_box.dart';
-import 'semantics.dart';
 import 'viewport_offset.dart';
 
 // CORE TYPES FOR SLIVERS
@@ -1313,28 +1312,6 @@ abstract class RenderSliver extends RenderObject {
   // This override exists only to change the type of the second argument.
   @override
   void handleEvent(PointerEvent event, SliverHitTestEntry entry) { }
-
-  /// Whether the [SemanticsNode]s associated with this [RenderSliver] should
-  /// be excluded from the semantic scrolling area.
-  ///
-  /// [RenderSliver]s that stay on the screen even though the user has scrolled
-  /// past them (e.g. a pinned app bar) should set this to `true`.
-  @protected
-  bool get excludeFromSemanticsScrolling => _excludeFromSemanticsScrolling;
-  set excludeFromSemanticsScrolling(bool value) {
-    if (_excludeFromSemanticsScrolling == value)
-      return;
-    _excludeFromSemanticsScrolling = value;
-    markNeedsSemanticsUpdate();
-  }
-  bool _excludeFromSemanticsScrolling = false;
-
-  @override
-  SemanticsAnnotator get semanticsAnnotator => _excludeFromSemanticsScrolling ? _annotate : null;
-
-  void _annotate(SemanticsNode node) {
-    node.addTag(RenderSemanticsGestureHandler.excludeFromScrolling);
-  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
