@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:usage/uuid/uuid.dart';
 
-Future<String> compile({String sdkRoot, String packagesPath, String mainPath}) async {
+Future<String> compile({String sdkRoot, String mainPath}) async {
   final String engineDartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
   final String frontendServer = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
 
@@ -78,7 +78,7 @@ class ResidentCompiler {
         }
       } else {
         if (string.startsWith(boundaryKey)) {
-          outputFilename.complete(string.substring(boundaryKey.length + 1));
+          outputFilename.complete(string.substring(boundaryKey.length));
           boundaryKey = null;
         } else {
           print(string);
@@ -114,5 +114,9 @@ class ResidentCompiler {
 
   void accept() {
     server.stdin.writeln('accept');
+  }
+
+  void reject() {
+    server.stdin.writeln('reject');
   }
 }

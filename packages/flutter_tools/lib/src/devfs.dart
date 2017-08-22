@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
+import 'package:flutter_tools/src/compile.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'asset.dart';
@@ -435,12 +436,17 @@ class DevFS {
         final List<String> invalidatedFiles = <String>[];
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           if (content is DevFSFileContent) {
-            invalidatedFiles.add(content.file.uri.toFilePath());
+            invalidatedFiles.add(content.file.uri.toString());
           }
         });
-        final String kernelFile = await generator.recompile(invalidatedFiles);
-        dirtyEntries.putIfAbsent(Uri.parse(kernelFile),
-                () => new DevFSFileContent(fs.file(kernelFile)));
+        final String compiledBinary = await generator.recompile(invalidatedFiles);
+        if (compiledBinary != null) {
+          generator.accept();
+        } else {
+          generator.reject();
+        }
+        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
+                () => new DevFSFileContent(fs.file(compiledBinary)));
       }
 
       if (_httpWriter != null) {

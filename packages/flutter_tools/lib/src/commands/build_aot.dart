@@ -255,7 +255,6 @@ Future<String> _buildAotSnapshot(
   if (previewDart2) {
     mainPath = await compile(
         sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        packagesPath: packageMap.packagesPath,
         mainPath: mainPath);
   }
 

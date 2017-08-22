@@ -121,16 +121,12 @@ class HotRunner extends ResidentRunner {
       generator = new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
       final String outputFile = await generator.compile(mainPath);
-      print(outputFile);
-      generator.accept();
-//      final CompilerOptions options = new CompilerOptions()
-//        ..packagesFileUri = Uri.parse(packagesFilePath)
-//        ..sdkRoot = Uri.base.resolve(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath))
-//        ..linkedDependencies = <Uri>[new Uri.file(
-//            artifacts.getArtifactPath(Artifact.platformKernelDill))]
-//        ..target = new FlutterFastaTarget(new TargetFlags());
-//      generator = await IncrementalKernelGenerator.newInstance(
-//          options, new Uri.file(mainPath));
+      // If compilation was successful, no reason VM should reject it.
+      if (outputFile == null) {
+        generator.reject();
+      } else {
+        generator.accept();
+      }
     }
 
     try {
