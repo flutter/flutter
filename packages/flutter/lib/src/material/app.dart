@@ -311,8 +311,8 @@ class _MaterialAppState extends State<MaterialApp> {
     super.didUpdateWidget(old);
     final LocalizationsDelegate delegate = widget.localizationsDelegate;
     final LocalizationsDelegate oldDelegate = old.localizationsDelegate;
-    if (delegate == null && oldDelegate != null
-        || delegate != null && delegate.shouldReload(oldDelegate))
+    if ((delegate == null && oldDelegate != null)
+        || (delegate != null && delegate.shouldReload(oldDelegate)))
       _localizationsDelegate = _createLocalizationsDelegate();
   }
 
