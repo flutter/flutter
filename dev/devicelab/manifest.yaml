@@ -59,13 +59,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
-  flavors_test:
-    description: >
-      Checks that flavored builds work on Android.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-    flaky: true
-
   channels_integration_test:
     description: >
       Checks that platform channels work on Android.
@@ -168,13 +161,6 @@ tasks:
 
   # iOS on-device tests
 
-  flavors_test_ios:
-    description: >
-      Checks that flavored builds work on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["has-ios-device"]
-    flaky: true
-
   channels_integration_test_ios:
     description: >
       Checks that platform channels work on iOS.
@@ -255,13 +241,6 @@ tasks:
     required_agent_capabilities: ["has-ios-device"]
 
   # Tests running on Windows host
-
-  flavors_test_win:
-    description: >
-      Checks that flavored builds work on Windows.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows"]
-    flaky: true
 
   channels_integration_test_win:
     description: >

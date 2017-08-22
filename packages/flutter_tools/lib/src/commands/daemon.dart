@@ -302,7 +302,6 @@ class AppDomain extends Domain {
     final bool useTestFonts = _getBoolArg(args, 'useTestFonts') ?? false;
     final String route = _getStringArg(args, 'route');
     final String mode = _getStringArg(args, 'mode');
-    final String flavor = _getStringArg(args, 'flavor');
     final String target = _getStringArg(args, 'target');
     final bool enableHotReload = _getBoolArg(args, 'hot') ?? kHotReloadDefault;
 
@@ -313,13 +312,13 @@ class AppDomain extends Domain {
     if (!fs.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
-    final BuildInfo buildInfo = new BuildInfo(getBuildModeForName(mode) ?? BuildMode.debug, flavor);
+    final BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
     DebuggingOptions options;
-    if (buildInfo.isRelease) {
-      options = new DebuggingOptions.disabled(buildInfo);
+    if (buildMode == BuildMode.release) {
+      options = new DebuggingOptions.disabled(buildMode);
     } else {
       options = new DebuggingOptions.enabled(
-        buildInfo,
+        buildMode,
         startPaused: startPaused,
         useTestFonts: useTestFonts,
       );
@@ -350,8 +349,8 @@ class AppDomain extends Domain {
     String packagesFilePath,
     String projectAssets,
   }) async {
-    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator)
-      throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
+    if (await device.isLocalEmulator && !isEmulatorBuildMode(options.buildMode))
+      throw '${toTitleCase(getModeName(options.buildMode))} mode is not supported for emulators.';
 
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
