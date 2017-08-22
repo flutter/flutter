@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -117,15 +118,15 @@ class HotRunner extends ResidentRunner {
       device.initLogReader();
 
     if (previewDart2 && (generator == null)) {
-      generator = new ResidentCompiler();
-//      final CompilerOptions options = new CompilerOptions()
-//        ..packagesFileUri = Uri.parse(packagesFilePath)
-//        ..sdkRoot = Uri.base.resolve(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath))
-//        ..linkedDependencies = <Uri>[new Uri.file(
-//            artifacts.getArtifactPath(Artifact.platformKernelDill))]
-//        ..target = new FlutterFastaTarget(new TargetFlags());
-//      generator = await IncrementalKernelGenerator.newInstance(
-//          options, new Uri.file(mainPath));
+      generator = new ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+      final String outputFile = await generator.compile(mainPath);
+      // If compilation was successful, no reason VM should reject it.
+      if (outputFile == null) {
+        generator.reject();
+      } else {
+        generator.accept();
+      }
     }
 
     try {

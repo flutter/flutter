@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
+import 'package:flutter_tools/src/compile.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'asset.dart';
@@ -432,17 +433,20 @@ class DevFS {
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
       if (generator != null) {
+        final List<String> invalidatedFiles = <String>[];
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
           if (content is DevFSFileContent) {
-            generator.invalidate(content.file.uri);
+            invalidatedFiles.add(content.file.uri.toString());
           }
         });
-//        final DeltaProgram delta = await generator.computeDelta();
-//        final Program program = delta.newProgram;
-//        final List<int> bytes = serializeProgram(program, filter: (_) => true);
-//        await fs.file(mainPath + ".dill").writeAsBytes(bytes);
-//        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
-//                () => new DevFSFileContent(fs.file(mainPath + ".dill")));
+        final String compiledBinary = await generator.recompile(invalidatedFiles);
+        if (compiledBinary != null) {
+          generator.accept();
+        } else {
+          generator.reject();
+        }
+        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
+                () => new DevFSFileContent(fs.file(compiledBinary)));
       }
 
       if (_httpWriter != null) {
