@@ -63,6 +63,7 @@ vars = {
   'dart_markdown_tag': '0.11.3',
   'dart_matcher_tag': '0.12.0+2',
   'dart_mime_rev': '75890811d4af5af080351ba8a2853ad4c8df98dd',
+  'dart_mockito_tag': '2.0.2',
   'dart_mustache4dart_tag': 'v1.1.0',
   'dart_oauth2_tag': '1.0.2',
   'dart_observatory_pub_packages_rev': 'a4e392521c720d244cd63e067387195d78584b35',
@@ -253,6 +254,9 @@ deps = {
 
   'src/dart/third_party/pkg/mime':
    Var('chromium_git') + '/external/github.com/dart-lang/mime' + '@' + Var('dart_mime_rev'),
+
+  'src/dart/third_party/pkg/mockito':
+   Var('chromium_git') + '/external/github.com/dart-lang/mockito' + '@' + Var('dart_mockito_tag'),
 
   'src/dart/third_party/pkg/mustache4dart':
    Var('chromium_git') + '/external/github.com/valotas/mustache4dart' + '@' + Var('dart_mustache4dart_tag'),
