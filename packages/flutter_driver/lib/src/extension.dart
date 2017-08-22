@@ -324,7 +324,7 @@ class FlutterDriverExtension {
 
   Future<RequestDataResult> _requestData(Command command) async {
     final RequestData requestDataCommand = command;
-    return new RequestDataResult(_requestDataHandler == null ? '' : await _requestDataHandler(requestDataCommand.message));
+    return new RequestDataResult(_requestDataHandler == null ? 'No requestData Extension registered' : await _requestDataHandler(requestDataCommand.message));
   }
 
   Future<SetFrameSyncResult> _setFrameSync(Command command) async {
