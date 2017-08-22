@@ -440,13 +440,13 @@ class DevFS {
           }
         });
         final String compiledBinary = await generator.recompile(invalidatedFiles);
-        if (compiledBinary != null) {
+        if (compiledBinary != null && compiledBinary.isNotEmpty) {
+          dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
+                  () => new DevFSFileContent(fs.file(compiledBinary)));
           generator.accept();
         } else {
           generator.reject();
         }
-        dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
-                () => new DevFSFileContent(fs.file(compiledBinary)));
       }
 
       if (_httpWriter != null) {
