@@ -67,7 +67,7 @@ class ImageCache {
   /// if not, calls the given callback to obtain it first. In either case, the
   /// key is moved to the "most recently used" position.
   ///
-  /// The arguments cannot be null. The `loader` cannot return null.
+  /// The arguments must not be null. The `loader` cannot return null.
   ImageStreamCompleter putIfAbsent(Object key, ImageStreamCompleter loader()) {
     assert(key != null);
     assert(loader != null);

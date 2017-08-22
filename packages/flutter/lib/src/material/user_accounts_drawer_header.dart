@@ -183,6 +183,13 @@ class UserAccountsDrawerHeader extends StatefulWidget {
 class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
   bool _isOpen = false;
 
+  void _handleDetailsPressed() {
+    setState(() {
+      _isOpen = !_isOpen;
+    });
+    widget.onDetailsPressed();
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -204,12 +211,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
             accountName: widget.accountName,
             accountEmail: widget.accountEmail,
             isOpen: _isOpen,
-            onTap: widget.onDetailsPressed == null ? null : () {
-              setState(() {
-                _isOpen = !_isOpen;
-              });
-              widget.onDetailsPressed();
-            },
+            onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
           ),
         ],
       ),

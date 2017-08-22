@@ -147,7 +147,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final DriverOptions options = new DriverOptions();
     options.dartSdkPath = argResults['dart-sdk'];
     options.packageMap = packages;
-    options.analysisOptionsFile = fs.path.join(Cache.flutterRoot, '.analysis_options_repo');
+    options.analysisOptionsFile = fs.path.join(Cache.flutterRoot, 'analysis_options_repo.yaml');
     final AnalysisDriver analyzer = new AnalysisDriver(options);
 
     // TODO(pq): consider error handling

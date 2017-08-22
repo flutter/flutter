@@ -20,6 +20,7 @@ import 'performance_overlay.dart';
 import 'semantics_debugger.dart';
 import 'text.dart';
 import 'title.dart';
+import 'widget_inspector.dart';
 
 /// Signature for a function that is called when the operating system changes the current locale.
 ///
@@ -58,7 +59,9 @@ class WidgetsApp extends StatefulWidget {
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
-    this.debugShowCheckedModeBanner: true
+    this.debugShowWidgetInspector: false,
+    this.debugShowCheckedModeBanner: true,
+    this.inspectorSelectButtonBuilder,
   }) : assert(onGenerateRoute != null),
        assert(color != null),
        assert(navigatorObservers != null),
@@ -67,6 +70,7 @@ class WidgetsApp extends StatefulWidget {
        assert(checkerboardOffscreenLayers != null),
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
+       assert(debugShowWidgetInspector != null),
        super(key: key);
 
   /// A one-line description of this app for use in the window manager.
@@ -148,6 +152,21 @@ class WidgetsApp extends StatefulWidget {
   /// reported by the framework.
   final bool showSemanticsDebugger;
 
+  /// Turns on an overlay that enables inspecting the widget tree.
+  ///
+  /// The inspector is only available in checked mode as it depends on
+  /// [RenderObject.debugDescribeChildren] which should not be called outside of
+  /// checked mode.
+  final bool debugShowWidgetInspector;
+
+  /// Builds the widget the [WidgetInspector] uses to switch between view and
+  /// inspect modes.
+  ///
+  /// This lets [MaterialApp] to use a material button to toggle the inspector
+  /// select mode without requiring [WidgetInspector] to depend on the the
+  /// material package.
+  final InspectorSelectButtonBuilder inspectorSelectButtonBuilder;
+
   /// Turns on a "SLOW MODE" little banner in checked mode to indicate
   /// that the app is in checked mode. This is on by default (in
   /// checked mode), to turn it off, set the constructor argument to
@@ -168,12 +187,22 @@ class WidgetsApp extends StatefulWidget {
 
   /// If true, forces the performance overlay to be visible in all instances.
   ///
-  /// Used by `showPerformanceOverlay` observatory extension.
+  /// Used by the `showPerformanceOverlay` observatory extension.
   static bool showPerformanceOverlayOverride = false;
+
+  /// If true, forces the widget inspector to be visible.
+  ///
+  /// Used by the `debugShowWidgetInspector` debugging extension.
+  ///
+  /// The inspector allows you to select a location on your device or emulator
+  /// and view what widgets and render objects associated with it. An outline of
+  /// the selected widget and some summary information is shown on device and
+  /// more detailed information is shown in the IDE or Observatory.
+  static bool debugShowWidgetInspectorOverride = false;
 
   /// If false, prevents the debug banner from being visible.
   ///
-  /// Used by `debugAllowBanner` observatory extension.
+  /// Used by the `debugAllowBanner` observatory extension.
   ///
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".
@@ -303,17 +332,24 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     }
     if (widget.showSemanticsDebugger) {
       result = new SemanticsDebugger(
-        child: result
+        child: result,
       );
     }
     assert(() {
+      if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
+        result = new WidgetInspector(
+          child: result,
+          selectButtonBuilder: widget.inspectorSelectButtonBuilder,
+        );
+      }
       if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = new CheckedModeBanner(
-          child: result
+          child: result,
         );
       }
       return true;
     });
+
     return result;
   }
 

@@ -73,10 +73,10 @@ import 'constants.dart';
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
   ///
-  /// The [length] cannot be null or negative. Typically its a value greater than one, i.e.
+  /// The [length] must not be null or negative. Typically its a value greater than one, i.e.
   /// typically there are two or more tabs.
   ///
-  /// The `initialIndex` must be valid given [length] and cannot be null. If [length] is
+  /// The `initialIndex` must be valid given [length] and must not be null. If [length] is
   /// zero, then `initialIndex` must be 0 (the default).
   TabController({ int initialIndex: 0, @required this.length, @required TickerProvider vsync })
     : assert(length != null && length >= 0),

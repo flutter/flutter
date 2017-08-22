@@ -570,9 +570,10 @@ const _NoDefaultValue kNoDefaultValue = const _NoDefaultValue();
 /// Defines diagnostics data for a [value].
 ///
 /// [DiagnosticsNode] provides a high quality multi-line string dump via
-/// [toStringDeep]. The core members are the [name], [description], [getProperties],
-/// [value], and [getChildren]. All other members exist typically to provide
-/// hints for how [toStringDeep] and debugging tools should format output.
+/// [toStringDeep]. The core members are the [name], [toDescription],
+/// [getProperties], [value], and [getChildren]. All other members exist
+/// typically to provide hints for how [toStringDeep] and debugging tools should
+/// format output.
 abstract class DiagnosticsNode {
   /// Initializes the object.
   ///
@@ -627,7 +628,7 @@ abstract class DiagnosticsNode {
   /// description of a property should also be a single line if possible.
   String toDescription({ TextTreeConfiguration parentConfiguration });
 
-  /// Whether to show a separator between [name] and [description].
+  /// Whether to show a separator between [name] and description.
   ///
   /// If false, name and description should be shown with no separation.
   /// `:` is typically used as a separator when displaying as text.
@@ -911,7 +912,7 @@ class MessageProperty extends DiagnosticsProperty<Null> {
   /// Create a diagnostics property that displays a message.
   ///
   /// Messages have no concrete [value] (so [value] will return null). The
-  /// message is stored in the [description].
+  /// message is stored as the description.
   ///
   /// The [name] and `message` arguments must not be null.
   MessageProperty(String name, String message)
@@ -1382,7 +1383,7 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   /// Description to use if the property [value] is not null.
   ///
   /// If the property [value] is not null and [ifPresent] is null, the
-  /// [description] is the  empty string and the property is [hidden].
+  /// description returns the empty string and the property is [hidden].
   final String ifPresent;
 
   @override
@@ -1413,7 +1414,7 @@ typedef T ComputePropertyValueCallback<T>();
 /// Property with a [value] of type [T].
 ///
 /// If the default `value.toString()` does not provide an adequate description
-/// of the value, specify [description] defining a custom description.
+/// of the value, specify `description` defining a custom description.
 ///
 /// The [hidden] property specifies whether the property should be hidden from
 /// the default output (e.g. the output given by [toStringDeep]).
@@ -1496,9 +1497,9 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// customize how property values are converted to strings.
   ///
   /// Overriding this method ensures that behavior controlling how property
-  /// values are decorated to generate a nice description are consistent across
-  /// all implementations. Debugging tools may also choose to use
-  /// [valueToString] directly instead of [description].
+  /// values are decorated to generate a nice [toDescription] are consistent
+  /// across all implementations. Debugging tools may also choose to use
+  /// [valueToString] directly instead of [toDescription].
   ///
   /// `parentConfiguration` specifies how the parent is rendered as text art.
   /// For example, if the parent places all properties on one line, the value
@@ -1940,31 +1941,31 @@ abstract class Diagnosticable {
   ///   // ...various members and properties...
   ///
   ///   @override
-  ///   void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  ///   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   ///     // Always add properties from the base class first.
-  ///     super.debugFillProperties(description);
+  ///     super.debugFillProperties(properties);
   ///
   ///     // Omit the property name 'message' when displaying this String property
   ///     // as it would just add visual noise.
-  ///     description.add(new StringProperty('message', message, showName: false));
+  ///     properties.add(new StringProperty('message', message, showName: false));
   ///
-  ///     description.add(new DoubleProperty('stepWidth', stepWidth));
+  ///     properties.add(new DoubleProperty('stepWidth', stepWidth));
   ///
   ///     // A scale of 1.0 does nothing so should be hidden.
-  ///     description.add(new DoubleProperty('scale', scale, defaultValue: 1.0));
+  ///     properties.add(new DoubleProperty('scale', scale, defaultValue: 1.0));
   ///
   ///     // If the hitTestExtent matches the paintExtent, it is just set to its
   ///     // default value so is not relevant.
-  ///     description.add(new DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
+  ///     properties.add(new DoubleProperty('hitTestExtent', hitTestExtent, defaultValue: paintExtent));
   ///
   ///     // maxWidth of double.INFINITY indicates the width is unconstrained and
   ///     // so maxWidth has no impact.,
-  ///     description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
+  ///     properties.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
   ///
   ///     // Progress is a value between 0 and 1 or null. Showing it as a
   ///     // percentage makes the meaning clear enough that the name can be
   ///     // hidden.
-  ///     description.add(new PercentProperty(
+  ///     properties.add(new PercentProperty(
   ///       'progress',
   ///       progress,
   ///       showName: false,
@@ -1972,16 +1973,16 @@ abstract class Diagnosticable {
   ///     ));
   ///
   ///     // Most text fields have maxLines set to 1.
-  ///     description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+  ///     properties.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
   ///
   ///     // Specify the unit as otherwise it would be unclear that time is in
   ///     // milliseconds.
-  ///     description.add(new IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+  ///     properties.add(new IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
   ///
   ///     // Tooltip is used instead of unit for this case as a unit should be a
   ///     // terse description appropriate to display directly after a number
   ///     // without a space.
-  ///     description.add(new DoubleProperty(
+  ///     properties.add(new DoubleProperty(
   ///       'device pixel ratio',
   ///       ui.window.devicePixelRatio,
   ///       tooltip: 'physical pixels per logical pixel',
@@ -1989,12 +1990,12 @@ abstract class Diagnosticable {
   ///
   ///     // Displaying the depth value would be distracting. Instead only display
   ///     // if the depth value is missing.
-  ///     description.add(new ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
+  ///     properties.add(new ObjectFlagProperty<int>('depth', depth, ifNull: 'no depth'));
   ///
   ///     // bool flag that is only shown when the value is true.
-  ///     description.add(new FlagProperty('using primary controller', value: primary));
+  ///     properties.add(new FlagProperty('using primary controller', value: primary));
   ///
-  ///     description.add(new FlagProperty(
+  ///     properties.add(new FlagProperty(
   ///       'isCurrent',
   ///       value: isCurrent,
   ///       ifTrue: 'active',
@@ -2002,20 +2003,20 @@ abstract class Diagnosticable {
   ///       showName: false,
   ///     ));
   ///
-  ///     description.add(new DiagnosticsProperty<bool>('keepAlive', keepAlive));
+  ///     properties.add(new DiagnosticsProperty<bool>('keepAlive', keepAlive));
   ///
   ///     // FlagProperty could have also been used in this case.
   ///     // This option results in the text "obscureText: true" instead
   ///     // of "obscureText" which is a bit more verbose but a bit clearer.
-  ///     description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+  ///     properties.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
   ///
-  ///     description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-  ///     description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+  ///     properties.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+  ///     properties.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
   ///
   ///     // Warn users when the widget is missing but do not show the value.
-  ///     description.add(new ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
+  ///     properties.add(new ObjectFlagProperty<Widget>('widget', widget, ifNull: 'no widget'));
   ///
-  ///     description.add(new IterableProperty<BoxShadow>(
+  ///     properties.add(new IterableProperty<BoxShadow>(
   ///       'boxShadow',
   ///       boxShadow,
   ///       defaultValue: null,
@@ -2023,7 +2024,7 @@ abstract class Diagnosticable {
   ///     ));
   ///
   ///     // Getting the value of size throws an exception unless hasSize is true.
-  ///     description.add(new DiagnosticsProperty<Size>.lazy(
+  ///     properties.add(new DiagnosticsProperty<Size>.lazy(
   ///       'size',
   ///       () => size,
   ///       description: '${ hasSize ? size : "MISSING" }',
@@ -2033,7 +2034,7 @@ abstract class Diagnosticable {
   ///     // good terse description, write a DiagnosticsProperty subclass as in
   ///     // the case of TransformProperty which displays a nice debugging view
   ///     // of a Matrix4 that represents a transform.
-  ///     description.add(new TransformProperty('transform', transform));
+  ///     properties.add(new TransformProperty('transform', transform));
   ///
   ///     // If the value class has a good `toString` method, use
   ///     // DiagnosticsProperty<YourValueType>. Specifying the value type ensures
@@ -2041,11 +2042,11 @@ abstract class Diagnosticable {
   ///     // provide the right UI affordances. For example, in this case even
   ///     // if color is null, a debugging tool still knows the value is a Color
   ///     // and can display relevant color related UI.
-  ///     description.add(new DiagnosticsProperty<Color>('color', color));
+  ///     properties.add(new DiagnosticsProperty<Color>('color', color));
   ///
   ///     // Use a custom description to generate a more terse summary than the
   ///     // `toString` method on the map class.
-  ///     description.add(new DiagnosticsProperty<Map<Listenable, VoidCallback>>(
+  ///     properties.add(new DiagnosticsProperty<Map<Listenable, VoidCallback>>(
   ///       'handles',
   ///       handles,
   ///       description: handles != null ?

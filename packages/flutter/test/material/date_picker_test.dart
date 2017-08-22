@@ -13,11 +13,14 @@ void main() {
   DateTime lastDate;
   DateTime initialDate;
   SelectableDayPredicate selectableDayPredicate;
+  DatePickerMode initialDatePickerMode;
 
   setUp(() {
     firstDate = new DateTime(2001, DateTime.JANUARY, 1);
     lastDate = new DateTime(2031, DateTime.DECEMBER, 31);
     initialDate = new DateTime(2016, DateTime.JANUARY, 15);
+    selectableDayPredicate = null;
+    initialDatePickerMode = null;
   });
 
   testWidgets('tap-select a day', (WidgetTester tester) async {
@@ -138,13 +141,25 @@ void main() {
     await tester.tap(find.text('Go'));
     expect(buttonContext, isNotNull);
 
-    final Future<DateTime> date = showDatePicker(
-      context: buttonContext,
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
-      selectableDayPredicate: selectableDayPredicate
-    );
+    final Future<DateTime> date = initialDatePickerMode == null
+        // Exercise the argument default for initialDatePickerMode.
+        ?
+            showDatePicker(
+              context: buttonContext,
+              initialDate: initialDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              selectableDayPredicate: selectableDayPredicate,
+            )
+        :
+            showDatePicker(
+              context: buttonContext,
+              initialDate: initialDate,
+              firstDate: firstDate,
+              lastDate: lastDate,
+              selectableDayPredicate: selectableDayPredicate,
+              initialDatePickerMode: initialDatePickerMode,
+            );
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     await callback(date);
@@ -280,6 +295,19 @@ void main() {
       await tester.tap(find.text('17')); // Odd, doesn't work.
       await tester.tap(find.text('OK'));
       expect(await date, equals(new DateTime(2017, DateTime.JANUARY, 10)));
+    });
+  });
+
+  testWidgets('Can select initial date picker mode', (WidgetTester tester) async {
+    initialDate = new DateTime(2014, DateTime.JANUARY, 15);
+    initialDatePickerMode = DatePickerMode.year;
+    await preparePicker(tester, (Future<DateTime> date) async {
+      await tester.pump();
+      // 2018 wouldn't be available if the year picker wasn't showing.
+      // The initial current year is 2014.
+      await tester.tap(find.text('2018'));
+      await tester.tap(find.text('OK'));
+      expect(await date, equals(new DateTime(2018, DateTime.JANUARY, 15)));
     });
   });
 

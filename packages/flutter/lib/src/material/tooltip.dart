@@ -3,17 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const double _kScreenEdgeMargin = 10.0;
 const Duration _kFadeDuration = const Duration(milliseconds: 200);
 const Duration _kShowDuration = const Duration(milliseconds: 1500);
 
@@ -41,7 +40,7 @@ class Tooltip extends StatefulWidget {
   /// By default, tooltips prefer to appear below the [child] widget when the
   /// user long presses on the widget.
   ///
-  /// The [message] argument cannot be null.
+  /// The [message] argument must not be null.
   const Tooltip({
     Key key,
     @required this.message,
@@ -177,16 +176,18 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  void _handleLongPress() {
+    final bool tooltipCreated = ensureTooltipVisible();
+    if (tooltipCreated)
+      Feedback.forLongPress(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: () {
-        final bool tooltipCreated = ensureTooltipVisible();
-        if (tooltipCreated)
-          Feedback.forLongPress(context);
-      },
+      onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: new Semantics(
         label: widget.message,
@@ -196,15 +197,32 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 }
 
+/// A delegate for computing the layout of a tooltip to be displayed above or
+/// bellow a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
+  /// Creates a delegate for computing the layout of a tooltip.
+  ///
+  /// The arguments must not be null.
   _TooltipPositionDelegate({
-    this.target,
-    this.verticalOffset,
-    this.preferBelow
-  });
+    @required this.target,
+    @required this.verticalOffset,
+    @required this.preferBelow,
+  }) : assert(target != null),
+       assert(verticalOffset != null),
+       assert(preferBelow != null);
 
+  /// The offset of the target the tooltip is positioned near in the global
+  /// coordinate system.
   final Offset target;
+
+  /// The amount of vertical distance between the target and the displayed
+  /// tooltip.
   final double verticalOffset;
+
+  /// Whether the tooltip defaults to being displayed below the widget.
+  ///
+  /// If there is insufficient space to display the tooltip in the preferred
+  /// direction, the tooltip will be displayed in the opposite direction.
   final bool preferBelow;
 
   @override
@@ -212,26 +230,13 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    // VERTICAL DIRECTION
-    final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
-    final bool fitsAbove = target.dy - verticalOffset - childSize.height >= _kScreenEdgeMargin;
-    final bool tooltipBelow = preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
-    double y;
-    if (tooltipBelow)
-      y = math.min(target.dy + verticalOffset, size.height - _kScreenEdgeMargin);
-    else
-      y = math.max(target.dy - verticalOffset - childSize.height, _kScreenEdgeMargin);
-    // HORIZONTAL DIRECTION
-    final double normalizedTargetX = target.dx.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
-    double x;
-    if (normalizedTargetX < _kScreenEdgeMargin + childSize.width / 2.0) {
-      x = _kScreenEdgeMargin;
-    } else if (normalizedTargetX > size.width - _kScreenEdgeMargin - childSize.width / 2.0) {
-      x = size.width - _kScreenEdgeMargin - childSize.width;
-    } else {
-      x = normalizedTargetX - childSize.width / 2.0;
-    }
-    return new Offset(x, y);
+    return positionDependentBox(
+      size: size,
+      childSize: childSize,
+      target: target,
+      verticalOffset: verticalOffset,
+      preferBelow: preferBelow,
+    );
   }
 
   @override

@@ -62,7 +62,8 @@ abstract class MultiDragPointerState {
 
   void _move(PointerMoveEvent event) {
     assert(_arenaEntry != null);
-    _velocityTracker.addPosition(event.timeStamp, event.position);
+    if (!event.synthesized)
+      _velocityTracker.addPosition(event.timeStamp, event.position);
     if (_client != null) {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.
