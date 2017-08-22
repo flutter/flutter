@@ -8,78 +8,88 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/globals.dart';
+import 'package:path/path.dart';
 import 'package:usage/uuid/uuid.dart';
 
-Future<String> compile({String sdkRoot, String mainPath}) async {
-  final String engineDartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-  final String frontendServer = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+String _dartExecutable() {
+  final String engineDartSdkPath = artifacts.getArtifactPath(
+    Artifact.engineDartSdkPath
+  );
+  return join(engineDartSdkPath, 'bin', 'dart${Platform.isWindows ? ".exe" : ""}');
+}
 
-  final Process server = await Process.start('$engineDartSdkPath/bin/dart',
-      <String>[frontendServer, '--sdk-root', sdkRoot + '/', mainPath]);
+Future<String> compile({String sdkRoot, String mainPath}) async {
+  final String frontendServer = artifacts.getArtifactPath(
+    Artifact.frontendServerSnapshotForEngineDartSdk
+  );
+
+  if (!sdkRoot.endsWith('/'))
+    sdkRoot = "$sdkRoot/";
+  final Process server = await Process.start(_dartExecutable(),
+    <String>[frontendServer, '--sdk-root', sdkRoot, mainPath]
+  );
+
   String boundaryKey;
   String outputFilename;
-
   server.stderr
-      .transform(UTF8.decoder)
-      .listen((String s) { print(s); });
+    .transform(UTF8.decoder)
+    .listen((String s) { print(s); });
   server.stdout
-      .transform(UTF8.decoder)
-      .transform(new LineSplitter())
-      .listen((String string) async {
-        if (boundaryKey == null) {
-          if (string.startsWith('result ')) {
-            boundaryKey = string.substring('result '.length);
-          }
-        } else {
-          if (string.startsWith(boundaryKey)) {
-            outputFilename = string.substring(boundaryKey.length + 1);
-          } else {
-            print(string);
-          }
-        }
-      });
+    .transform(UTF8.decoder)
+    .transform(new LineSplitter())
+    .listen((String string) async {
+      const String RESULT_PREFIX = 'result ';
+      if (boundaryKey == null) {
+        if (string.startsWith(RESULT_PREFIX))
+          boundaryKey = string.substring(RESULT_PREFIX.length);
+      } else {
+        if (string.startsWith(boundaryKey))
+          outputFilename = string.substring(boundaryKey.length + 1);
+        else
+          print(string);
+      }
+    });
   await server.exitCode;
   return outputFilename;
 }
 
 class ResidentCompiler {
-  ResidentCompiler(this.sdkRoot) {
-    assert(sdkRoot != null);
+  ResidentCompiler(this._sdkRoot) {
+    assert(_sdkRoot != null);
   }
 
-  Process server;
-  String sdkRoot;
+  String _sdkRoot;
+  Process _server;
+  Completer<String> _outputFilename;
+  String _boundaryKey;
 
   Future<String> recompile(List<String> invalidatedFiles) async {
-    if (server == null) {
+    if (_server == null) {
       throw new Future<String>.error("Recompile should be preceded by compile");
     }
 
-    outputFilename = new Completer<String>();
+    _outputFilename = new Completer<String>();
 
     final String inputKey = new Uuid().generateV4();
-    server.stdin.writeln('recompile $inputKey');
+    _server.stdin.writeln('recompile $inputKey');
     for (String invalidatedFile in invalidatedFiles) {
-      server.stdin.writeln(invalidatedFile);
+      _server.stdin.writeln(invalidatedFile);
     }
-    server.stdin.writeln(inputKey);
+    _server.stdin.writeln(inputKey);
 
-    return outputFilename.future;
+    return _outputFilename.future;
   }
-
-  Completer<String> outputFilename;
-  String boundaryKey;
 
   Future<Null> handler(String string) async {
     const String RESULT_PREFIX = 'result ';
-      if (boundaryKey == null) {
+      if (_boundaryKey == null) {
         if (string.startsWith(RESULT_PREFIX)) {
-          boundaryKey = string.substring(RESULT_PREFIX.length);
+          _boundaryKey = string.substring(RESULT_PREFIX.length);
         }
       } else {
-        if (string.startsWith(boundaryKey)) {
-          outputFilename.complete(string.substring(boundaryKey.length));
-          boundaryKey = null;
+        if (string.startsWith(_boundaryKey)) {
+          _outputFilename.complete(string.substring(_boundaryKey.length));
+          _boundaryKey = null;
         } else {
           print(string);
         }
@@ -87,36 +97,34 @@ class ResidentCompiler {
   }
 
   Future<String> compile(String scriptFilename) async {
-    if (server == null) {
-      final String engineDartSdkPath = artifacts.getArtifactPath(
-          Artifact.engineDartSdkPath);
+    if (_server == null) {
       final String frontendServer = artifacts.getArtifactPath(
-          Artifact.frontendServerSnapshotForEngineDartSdk);
-
-      server = await Process.start('$engineDartSdkPath/bin/dart',
-          <String>[frontendServer, '--sdk-root', sdkRoot + '/',
-          '--incremental']);
+        Artifact.frontendServerSnapshotForEngineDartSdk
+      );
+      _server = await Process.start(_dartExecutable(),
+        <String>[frontendServer, '--sdk-root', _sdkRoot + '/', '--incremental']
+      );
     }
-    outputFilename = new Completer<String>();
-    server.stdout
-        .transform(UTF8.decoder)
-        .transform(new LineSplitter())
-        .listen(handler);
-    server.stderr
-        .transform(UTF8.decoder)
-        .transform(new LineSplitter())
-        .listen((String s) { print("stderr:>$s"); });
+    _outputFilename = new Completer<String>();
+    _server.stdout
+      .transform(UTF8.decoder)
+      .transform(new LineSplitter())
+      .listen(handler);
+    _server.stderr
+      .transform(UTF8.decoder)
+      .transform(new LineSplitter())
+      .listen((String s) { print("stderr:>$s"); });
 
-    server.stdin.writeln('compile $scriptFilename');
+    _server.stdin.writeln('compile $scriptFilename');
 
-    return outputFilename.future;
+    return _outputFilename.future;
   }
 
   void accept() {
-    server.stdin.writeln('accept');
+    _server.stdin.writeln('accept');
   }
 
   void reject() {
-    server.stdin.writeln('reject');
+    _server.stdin.writeln('reject');
   }
 }

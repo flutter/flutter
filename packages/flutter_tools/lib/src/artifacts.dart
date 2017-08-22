@@ -49,7 +49,8 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.platformLibrariesJson:
       return 'libraries.json';
     case Artifact.flutterPatchedSdkPath:
-      return '';
+      assert(false, 'No filename for sdk path, should not be invoked');
+      return null;
     case Artifact.engineDartSdkPath:
       return 'dart-sdk';
     case Artifact.frontendServerSnapshotForEngineDartSdk:

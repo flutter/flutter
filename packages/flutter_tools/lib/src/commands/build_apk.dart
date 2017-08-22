@@ -55,7 +55,8 @@ class BuildApkCommand extends BuildSubCommand {
     final BuildMode buildMode = getBuildMode();
     await buildApk(buildMode: buildMode,
       previewDart2: argResults['preview-dart-2'],
-      target: targetFile);
+      target: targetFile
+    );
   }
 }
 

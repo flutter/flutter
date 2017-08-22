@@ -142,9 +142,9 @@ Future<String> _buildAotSnapshot(
   final String dependencies = fs.path.join(outputDir.path, 'snapshot.d');
 
   final String vmEntryPoints = artifacts.getArtifactPath(
-      Artifact.dartVmEntryPointsTxt,
-      platform,
-      buildMode);
+    Artifact.dartVmEntryPointsTxt,
+    platform,
+    buildMode);
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
@@ -254,8 +254,9 @@ Future<String> _buildAotSnapshot(
 
   if (previewDart2) {
     mainPath = await compile(
-        sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-        mainPath: mainPath);
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      mainPath: mainPath,
+    );
   }
 
   genSnapshotCmd.add(mainPath);
