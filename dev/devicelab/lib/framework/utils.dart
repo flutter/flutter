@@ -473,13 +473,3 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
   }
   return token;
 }
-
-// "An Observatory debugger and profiler on ... is available at: http://127.0.0.1:8100/"
-final RegExp _kObservatoryRegExp = new RegExp(r'An Observatory debugger .* is available at: (\S+:(\d+))');
-
-bool lineContainsServicePort(String line) => line.contains(_kObservatoryRegExp);
-
-int parseServicePort(String line) {
-  final Match match = _kObservatoryRegExp.firstMatch(line);
-  return match == null ? null : int.parse(match.group(2));
-}

@@ -557,8 +557,7 @@ abstract class SchedulerBinding extends BindingBase {
   }
   Duration _currentFrameTimeStamp;
 
-  int _profileFrameNumber = 0;
-  final Stopwatch _profileFrameStopwatch = new Stopwatch();
+  int _debugFrameNumber = 0;
   String _debugBanner;
 
   /// Called by the engine to prepare the framework to produce a new frame.
@@ -591,13 +590,8 @@ abstract class SchedulerBinding extends BindingBase {
     if (rawTimeStamp != null)
       _lastRawTimeStamp = rawTimeStamp;
 
-    profile(() {
-      _profileFrameNumber += 1;
-      _profileFrameStopwatch.reset();
-      _profileFrameStopwatch.start();
-    });
-
     assert(() {
+      _debugFrameNumber += 1;
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
         final StringBuffer frameTimeStampDescription = new StringBuffer();
         if (rawTimeStamp != null) {
@@ -605,7 +599,7 @@ abstract class SchedulerBinding extends BindingBase {
         } else {
           frameTimeStampDescription.write('(warm-up frame)');
         }
-        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_profileFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
+        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
         if (debugPrintBeginFrameBanner)
           debugPrint(_debugBanner);
       }
@@ -657,22 +651,14 @@ abstract class SchedulerBinding extends BindingBase {
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
-      Timeline.finishSync(); // end the Frame
-      profile(() {
-        _profileFrameStopwatch.stop();
-        postEvent('Flutter.Frame', <String, dynamic>{
-          'number': _profileFrameNumber,
-          'startTime': _currentFrameTimeStamp.inMicroseconds,
-          'elapsed': _profileFrameStopwatch.elapsedMicroseconds
-        });
-      });
+      _currentFrameTimeStamp = null;
+      Timeline.finishSync();
       assert(() {
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner.length);
         _debugBanner = null;
         return true;
       });
-      _currentFrameTimeStamp = null;
     }
 
     // All frame-related callbacks have been executed. Run lower-priority tasks.
