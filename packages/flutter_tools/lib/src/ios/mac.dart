@@ -357,7 +357,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   } else {
     // Look for 'clean build/<configuration>-<sdk>/Runner.app'.
-    final RegExp regexp = new RegExp(r' clean ([^.]*\.app)$', multiLine: true);
+    final RegExp regexp = new RegExp(r' clean (.*\.app)$', multiLine: true);
     final Match match = regexp.firstMatch(result.stdout);
     String outputDir;
     if (match != null) {
