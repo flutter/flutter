@@ -247,28 +247,30 @@ class _WidgetInspectorState extends State<WidgetInspector>
 class InspectorSelection {
   /// Render objects that are candidates to be selected.
   ///
-  /// Tools may wish to iterate through the list of candidates
+  /// Tools may wish to iterate through the list of candidates.
   List<RenderObject> get candidates => _candidates;
-
+  List<RenderObject> _candidates = <RenderObject>[];
   set candidates(List<RenderObject> value) {
     _candidates = value;
     index = 0;
   }
 
-  List<RenderObject> _candidates = <RenderObject>[];
-
   /// Index within the list of candidates that is currently selected.
   int index = 0;
 
+  /// Set the selection to empty.
   void clear() {
     _candidates = <RenderObject>[];
     index = 0;
   }
 
+  /// Selected render object.
   RenderObject get current {
     return candidates != null && index < candidates.length ? candidates[index] : null;
   }
 
+  /// Whether the selected render object is attached to the tree or has gone
+  /// out of scope.
   bool get active => current != null && current.attached;
 }
 
