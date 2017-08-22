@@ -58,23 +58,26 @@ Future<int> _createSnapshot({
   // Write the depfile path to disk.
   fs.file(depfilePath).parent.childFile('gen_snapshot.d').writeAsString('$depfilePath: $snapshotterPath\n');
 
-  final File checksumFile = fs.file('$depfilePath.checksums');
+  final File fingerprintFile = fs.file('$depfilePath.fingerprint');
   final File snapshotFile = fs.file(snapshotPath);
   final File depfile = fs.file(depfilePath);
-  if (snapshotFile.existsSync() && depfile.existsSync() && checksumFile.existsSync()) {
+  if (snapshotFile.existsSync() && depfile.existsSync() && fingerprintFile.existsSync()) {
     try {
-        final String json = await checksumFile.readAsString();
-        final Checksum oldChecksum = new Checksum.fromJson(json);
+        final String json = await fingerprintFile.readAsString();
+        final Fingerprint oldFingerprint = new Fingerprint.fromJson(json);
         final Set<String> inputPaths = await _readDepfile(depfilePath);
         inputPaths.add(snapshotPath);
-        final Checksum newChecksum = new Checksum.fromFiles(inputPaths);
-        if (oldChecksum == newChecksum) {
-          printTrace('Skipping snapshot build. Checksums match.');
+        final Fingerprint newFingerprint = new Fingerprint.fromInputs(
+          filePaths: inputPaths,
+          properties: <String, String>{'mainPath': mainPath},
+        );
+        if (oldFingerprint == newFingerprint) {
+          printTrace('Skipping snapshot build. Fingerprint match.');
           return 0;
         }
     } catch (e, s) {
       // Log exception and continue, this step is a performance improvement only.
-      printTrace('Error during snapshot checksum check: $e\n$s');
+      printTrace('Error during snapshot fingerprint check: $e\n$s');
     }
   }
 
@@ -83,15 +86,18 @@ Future<int> _createSnapshot({
   if (exitCode != 0)
     return exitCode;
 
-  // Compute and record input file checksums.
+  // Compute and record input fingerprint.
   try {
     final Set<String> inputPaths = await _readDepfile(depfilePath);
     inputPaths.add(snapshotPath);
-    final Checksum checksum = new Checksum.fromFiles(inputPaths);
-    await checksumFile.writeAsString(checksum.toJson());
+    final Fingerprint fingerprint = new Fingerprint.fromInputs(
+      filePaths: inputPaths,
+      properties: <String, String>{'mainPath': mainPath},
+    );
+    await fingerprintFile.writeAsString(fingerprint.toJson());
   } catch (e, s) {
     // Log exception and continue, this step is a performance improvement only.
-    printTrace('Error during snapshot checksum output: $e\n$s');
+    printTrace('Error during snapshot fingerprint output: $e\n$s');
   }
   return 0;
 }
