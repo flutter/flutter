@@ -63,8 +63,13 @@ std::string VulkanResultToString(VkResult result) {
     case VK_RESULT_MAX_ENUM:
       return "VK_RESULT_MAX_ENUM";
 #if OS_FUCHSIA
+#if VK_KHR_external_memory
+    case VK_ERROR_INVALID_EXTERNAL_HANDLE_KHR:
+      return "VK_ERROR_INVALID_EXTERNAL_HANDLE_KHR";
+#elif VK_KHX_external_memory
     case VK_ERROR_INVALID_EXTERNAL_HANDLE_KHX:
       return "VK_ERROR_INVALID_EXTERNAL_HANDLE_KHX";
+#endif
     case VK_ERROR_OUT_OF_POOL_MEMORY_KHR:
       return "VK_ERROR_OUT_OF_POOL_MEMORY_KHR";
 #endif
