@@ -55,6 +55,56 @@ export 'package:flutter/rendering.dart' show
   WrapAlignment,
   WrapCrossAlignment;
 
+// BIDIRECTIONAL TEXT SUPPORT
+
+/// A widget that determines the ambient directionality of text and
+/// text-direction-sensitive render objects.
+///
+/// For example, [Padding] depends on the [Directionality] to resolve
+/// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
+class Directionality extends InheritedWidget {
+  /// Creates a widget that determines the directionality of text and
+  /// text-direction-sensitive render objects.
+  ///
+  /// The [textDirection] and [child] arguments must not be null.
+  const Directionality({
+    Key key,
+    @required this.textDirection,
+    @required Widget child
+  }) : assert(textDirection != null),
+       assert(child != null),
+       super(key: key, child: child);
+
+  /// The text direction for this subtree.
+  final TextDirection textDirection;
+
+  /// The text direction from the closest instance of this class that encloses
+  /// the given context.
+  ///
+  /// If there is no [Directionality] ancestor widget in the tree at the given
+  /// context, then this will return null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TextDirection textDirection = Directionality.of(context);
+  /// ```
+  static TextDirection of(BuildContext context) {
+    final Directionality widget = context.inheritFromWidgetOfExactType(Directionality);
+    return widget?.textDirection;
+  }
+
+  @override
+  bool updateShouldNotify(Directionality old) => textDirection != old.textDirection;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection));
+  }
+}
+
+
 // PAINTING NODES
 
 /// A widget that makes its child partially transparent.
