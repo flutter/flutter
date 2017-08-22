@@ -8,7 +8,10 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'keys.dart' as keys;
 
 void main() {
-  enableFlutterDriverExtension();
+  enableFlutterDriverExtension(handler: (String message) async {
+    // TODO(cbernaschina) remove when test flakiness is resolved
+    return 'keyboard_resize';
+  });
   runApp(new MyApp());
 }
 
