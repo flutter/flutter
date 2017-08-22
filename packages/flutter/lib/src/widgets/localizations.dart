@@ -24,12 +24,12 @@ import 'framework.dart';
 ///
 /// See also:
 ///
-///  * [DefaultLocalizationsDelegate], a simple concrete version of
-///    this class.
+///  * [DefaultLocalizationsDelegate], TBD
+///
 abstract class LocalizationsDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  LocalizationsDelegate();
+  const LocalizationsDelegate();
 
   /// Create single [LocalizationsDelegate] from a list of them.
   ///
@@ -43,7 +43,6 @@ abstract class LocalizationsDelegate {
     assert(delegates != null && delegates.isNotEmpty);
     return new _MergedLocalizationsDelegate(delegates);
   }
-
 
   /// Start loading the resources for `locale`. The returned future completes
   /// when the resources have been loaded and cached.
@@ -68,10 +67,6 @@ abstract class LocalizationsDelegate {
   /// after [load] has completed.
   bool shouldReload(LocalizationsDelegate old);
 }
-
-/// Signature for the async localized resource loading callback used
-/// by [DefaultLocalizationsLoader].
-typedef Future<dynamic> LocalizationsLoader(Locale locale);
 
 // The returned Future<Map> will resolve when all of the input map's
 // values have resolved. If all of the input map's values are
@@ -110,6 +105,7 @@ Future<Map<K, V>> _loadMap<K, V>(Map<K, Future<V>> input) {
   });
 }
 
+// TBD
 /// Defines all of an application's resources in terms of `allLoaders`:
 /// a map from a [Type] to a _load_ function that creates an instance of
 /// that type for a specific locale.
@@ -127,41 +123,25 @@ Future<Map<K, V>> _loadMap<K, V>(Map<K, Future<V>> input) {
 /// See also:
 ///
 ///  * [WidgetsApp.localizationsDelegate] and [MaterialApp.localizationsDelegate],
-///    which enable configuring the app's LocalizationsLoader.
-class DefaultLocalizationsDelegate extends LocalizationsDelegate {
-  DefaultLocalizationsDelegate(this.allLoaders) {
-    assert(allLoaders != null);
-  }
-
-  /// The [LocalizationsLoader]s in this map define all of the collections
-  /// of resources for a [Localizations] widget.
-  ///
-  /// The [load] method's Future completes when all of the loaders' load functions
-  /// have completed.
-  final Map<Type, LocalizationsLoader> allLoaders;
-
-  final Map<Locale, Map<Type, dynamic>> _localeToResources = <Locale, Map<Type, dynamic>>{};
+///    which enable configuring the app's [Localizations] widget.
+abstract class DefaultLocalizationsDelegate<T> extends LocalizationsDelegate {
   final Set<Locale> _loading = new Set<Locale>();
+  final Map<Locale, dynamic> _localeToResources = <Locale, T>{};
+
+  Future<T> loadResources(Locale locale);
 
   @override
   Future<Iterable<Type>> load(Locale locale) {
     assert(locale != null);
     assert(!_loading.contains(locale));
 
-    Iterable<Type> types;
-
     _loading.add(locale);
-    final Future<Iterable<Type>> typesFuture = _loadMap<Type, dynamic>(
-      new Map<Type, Future<dynamic>>.fromIterables(
-        allLoaders.keys,
-        allLoaders.values.map<Future<dynamic>>((LocalizationsLoader loader) => loader(locale)),
-      ),
-    ).then<Iterable<Type>>((Map<Type, dynamic> resources) {
+    Iterable<Type> types;
+    final Future<Iterable<Type>> typesFuture = loadResources(locale).then<Iterable<Type>>((T value) {
       _loading.remove(locale);
-      _localeToResources[locale] = resources;
-      return types = resources.keys;
+      _localeToResources[locale] = value;
+      return types = <Type>[value.runtimeType];
     });
-
     return types == null ? typesFuture : new SynchronousFuture<Iterable<Type>>(types);
   }
 
@@ -169,16 +149,15 @@ class DefaultLocalizationsDelegate extends LocalizationsDelegate {
   T resourcesFor<T>(Locale locale, Type type) {
     assert(locale != null);
     assert(type != null);
-    final Map<Type, dynamic> resources = _localeToResources[locale];
-    if (resources == null)
-      return null;
-    // TODO(hansmuller): assert(resources[type] is type) when
-    // https://github.com/dart-lang/sdk/issues/27680 has been resolved.
-    return resources[type];
+    final T resources = _localeToResources[locale];
+    assert(type == resources.runtimeType);
+    return resources;
   }
 
   @override
-  bool shouldReload(LocalizationsDelegate old) => false;
+  bool shouldReload(LocalizationsDelegate old) {
+    return old == null || runtimeType != old.runtimeType;
+  }
 }
 
 class _MergedLocalizationsDelegate extends LocalizationsDelegate {

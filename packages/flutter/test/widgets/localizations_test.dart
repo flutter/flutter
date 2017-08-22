@@ -28,6 +28,16 @@ class TestLocalizations {
   String get message => '$locale';
 }
 
+class SyncTestLocalizationsDelegate extends DefaultLocalizationsDelegate<TestLocalizations> {
+  @override
+  Future<TestLocalizations> loadResources(Locale locale) => TestLocalizations.loadSync(locale);
+}
+
+class AsyncTestLocalizationsDelegate extends DefaultLocalizationsDelegate<TestLocalizations> {
+  @override
+  Future<TestLocalizations> loadResources(Locale locale) => TestLocalizations.loadAsync(locale);
+}
+
 class MoreLocalizations {
   MoreLocalizations(this.locale);
 
@@ -47,6 +57,16 @@ class MoreLocalizations {
   }
 
   String get message => '$locale';
+}
+
+class SyncMoreLocalizationsDelegate extends DefaultLocalizationsDelegate<MoreLocalizations> {
+  @override
+  Future<MoreLocalizations> loadResources(Locale locale) => MoreLocalizations.loadSync(locale);
+}
+
+class AsyncMoreLocalizationsDelegate extends DefaultLocalizationsDelegate<MoreLocalizations> {
+  @override
+  Future<MoreLocalizations> loadResources(Locale locale) => MoreLocalizations.loadAsync(locale);
 }
 
 Widget buildFrame({
@@ -114,16 +134,10 @@ void main() {
   });
 
   testWidgets('Synchronously loaded localizations in a WidgetsApp', (WidgetTester tester) async {
-    final LocalizationsDelegate delegate = new DefaultLocalizationsDelegate(
-      <Type, LocalizationsLoader>{
-        TestLocalizations: TestLocalizations.loadSync,
-      }
-    );
-
     BuildContext pageContext;
     await tester.pumpWidget(
       buildFrame(
-        delegate: delegate,
+        delegate: new SyncTestLocalizationsDelegate(),
         buildContent: (BuildContext context) {
           pageContext = context;
           return new Text(TestLocalizations.of(context).message);
@@ -144,15 +158,9 @@ void main() {
   });
 
   testWidgets('Asynchronously loaded localizations in a WidgetsApp', (WidgetTester tester) async {
-    final LocalizationsDelegate delegate = new DefaultLocalizationsDelegate(
-      <Type, LocalizationsLoader>{
-        TestLocalizations: TestLocalizations.loadAsync,
-      }
-    );
-
     await tester.pumpWidget(
       buildFrame(
-        delegate: delegate,
+        delegate: new AsyncTestLocalizationsDelegate(),
         buildContent: (BuildContext context) {
           return new Text(TestLocalizations.of(context).message);
         }
@@ -180,17 +188,45 @@ void main() {
     expect(find.text('en_GB'), findsOneWidget);
   });
 
-  testWidgets('DefaultLocalizationsDelegate factory', (WidgetTester tester) async {
-    final LocalizationsDelegate delegate = new DefaultLocalizationsDelegate(
-      <Type, LocalizationsLoader>{
-        TestLocalizations: TestLocalizations.loadSync,
-        MoreLocalizations: MoreLocalizations.loadAsync, // No resources until this completes
-      }
+  testWidgets('Localizations.merged() factory, only sync resources', (WidgetTester tester) async {
+    final LocalizationsDelegate mergedAB = new LocalizationsDelegate.merge(
+      <LocalizationsDelegate>[
+        new SyncTestLocalizationsDelegate(),
+        new SyncMoreLocalizationsDelegate(),
+      ]
     );
 
     await tester.pumpWidget(
       buildFrame(
-        delegate: delegate,
+        delegate: mergedAB,
+        locale: const Locale('en', 'US'),
+        buildContent: (BuildContext context) {
+          return new Column(
+            children: <Widget>[
+              new Text('A: ${TestLocalizations.of(context).message}'),
+              new Text('B: ${MoreLocalizations.of(context).message}'),
+            ],
+          );
+        }
+      )
+    );
+
+    // All localizations were loaded synchonously
+    expect(find.text('A: en_US'), findsOneWidget);
+    expect(find.text('B: en_US'), findsOneWidget);
+  });
+
+  testWidgets('Localizations.merged factory', (WidgetTester tester) async {
+    final LocalizationsDelegate mergedAB = new LocalizationsDelegate.merge(
+      <LocalizationsDelegate>[
+        new SyncTestLocalizationsDelegate(),
+        new AsyncMoreLocalizationsDelegate(), // No resources until this completes
+      ]
+    );
+
+    await tester.pumpWidget(
+      buildFrame(
+        delegate: mergedAB,
         locale: const Locale('en', 'US'),
         buildContent: (BuildContext context) {
           return new Column(
@@ -214,43 +250,5 @@ void main() {
     expect(find.text('B: en_US'), findsOneWidget);
   });
 
-  testWidgets('Localizations.merged() factory', (WidgetTester tester) async {
-    final LocalizationsDelegate delegateA = new DefaultLocalizationsDelegate(
-      <Type, LocalizationsLoader>{
-        TestLocalizations: TestLocalizations.loadSync,
-      }
-    );
 
-    final LocalizationsDelegate delegateB = new DefaultLocalizationsDelegate(
-      <Type, LocalizationsLoader>{
-        MoreLocalizations: MoreLocalizations.loadSync,
-      }
-    );
-
-    final LocalizationsDelegate mergedAB = new LocalizationsDelegate.merge(
-      <LocalizationsDelegate>[
-        delegateA,
-        delegateB,
-      ]
-    );
-
-    await tester.pumpWidget(
-      buildFrame(
-        delegate: mergedAB,
-        locale: const Locale('en', 'US'),
-        buildContent: (BuildContext context) {
-          return new Column(
-            children: <Widget>[
-              new Text('A: ${TestLocalizations.of(context).message}'),
-              new Text('B: ${MoreLocalizations.of(context).message}'),
-            ],
-          );
-        }
-      )
-    );
-
-    // All localizations were loaded synchonously
-    expect(find.text('A: en_US'), findsOneWidget);
-    expect(find.text('B: en_US'), findsOneWidget);
-  });
 }

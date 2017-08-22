@@ -20,7 +20,7 @@ class MaterialLocalizations {
   /// Creates an object that provides default localized resource values for the
   /// for the widgets of the material library.
   ///
-  /// This method is typically used to create a [LocalizationsDelegate].
+  /// This method is typically used to create a [DefaultLocalizationsDelegate].
   /// The [MaterialApp] does so by default.
   static Future<MaterialLocalizations> load(Locale locale) {
     return new SynchronousFuture<MaterialLocalizations>(new MaterialLocalizations._(locale));

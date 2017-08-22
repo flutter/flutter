@@ -4,6 +4,8 @@
 
 library stocks;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show
   debugPaintSizeEnabled,
@@ -19,18 +21,17 @@ import 'stock_strings.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
+class _StocksLocalizationsDelegate extends DefaultLocalizationsDelegate<StockStrings> {
+  @override
+  Future<StockStrings> loadResources(Locale locale) => StockStrings.load(locale);
+}
+
 class StocksApp extends StatefulWidget {
   @override
   StocksAppState createState() => new StocksAppState();
 }
 
 class StocksAppState extends State<StocksApp> {
-  static final LocalizationsDelegate delegate = new DefaultLocalizationsDelegate(
-    <Type, LocalizationsLoader>{
-      StockStrings: StockStrings.load,
-    }
-  );
-
   StockData stocks;
 
   StockConfiguration _configuration = new StockConfiguration(
@@ -114,7 +115,7 @@ class StocksAppState extends State<StocksApp> {
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,
-      localizationsDelegate: delegate,
+      localizationsDelegate: new _StocksLocalizationsDelegate(),
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,

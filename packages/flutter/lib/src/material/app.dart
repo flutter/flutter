@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -24,6 +26,11 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationColor: const Color(0xFFFFFF00),
   decorationStyle: TextDecorationStyle.double
 );
+
+class _MaterialLocalizationsDelegate extends DefaultLocalizationsDelegate<MaterialLocalizations> {
+  @override
+  Future<MaterialLocalizations> loadResources(Locale locale) => MaterialLocalizations.load(locale);
+}
 
 /// An application that uses material design.
 ///
@@ -319,12 +326,7 @@ class _MaterialAppState extends State<MaterialApp> {
   // Combine the Localizations for Material with the ones contributed
   // by the localizationsDelegate parameter, if any.
   LocalizationsDelegate _createLocalizationsDelegate() {
-    LocalizationsDelegate delegate = new DefaultLocalizationsDelegate(
-      <Type, LocalizationsLoader>{
-        MaterialLocalizations: MaterialLocalizations.load,
-      }
-    );
-
+    LocalizationsDelegate delegate = new _MaterialLocalizationsDelegate();
     if (widget.localizationsDelegate != null) {
       delegate = new LocalizationsDelegate.merge(<LocalizationsDelegate>[
         delegate,
