@@ -1,4 +1,4 @@
-Signature: d4bdc7ffb0097caf9a722e8697a21850
+Signature: 872673c84783803f34679906f1bc969e
 
 UNUSED LICENSES:
 
@@ -26892,8 +26892,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrSemaphoreOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrTextureOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrTextureOp.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBufferView.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkBufferView.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkSemaphore.cpp
