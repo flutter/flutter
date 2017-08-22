@@ -4,18 +4,18 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:path/path.dart';
 import 'package:usage/uuid/uuid.dart';
 
 String _dartExecutable() {
   final String engineDartSdkPath = artifacts.getArtifactPath(
     Artifact.engineDartSdkPath
   );
-  return join(engineDartSdkPath, 'bin', 'dart${Platform.isWindows ? ".exe" : ""}');
+  return fs.path.join(engineDartSdkPath, 'bin', 'dart');
 }
 
 Future<String> compile({String sdkRoot, String mainPath}) async {
