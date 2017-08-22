@@ -15,7 +15,6 @@ import 'build.dart';
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     usesTargetOption();
-    usesFlavorOption();
     usesPubOption();
     argParser.addFlag('debug',
       negatable: false,
@@ -57,17 +56,17 @@ class BuildIOSCommand extends BuildSubCommand {
       printStatus('Warning: Building for device with codesigning disabled. You will '
         'have to manually codesign before deploying to device.');
     }
-    final BuildInfo buildInfo = getBuildInfo();
-    if (forSimulator && !buildInfo.supportsSimulator)
-      throwToolExit('${toTitleCase(buildInfo.modeName)} mode is not supported for simulators.');
+
+    if (forSimulator && !isEmulatorBuildMode(getBuildMode()))
+      throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
 
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
-    final String typeName = artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    final String typeName = artifacts.getEngineType(TargetPlatform.ios, getBuildMode());
     printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
-      buildInfo: buildInfo,
+      mode: getBuildMode(),
       target: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign

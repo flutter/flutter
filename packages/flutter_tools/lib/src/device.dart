@@ -235,7 +235,8 @@ abstract class Device {
   /// for iOS device deployment. Set to false if stdin cannot be read from while
   /// attempting to start the app.
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    ApplicationPackage package,
+    BuildMode mode, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -315,7 +316,7 @@ abstract class Device {
 }
 
 class DebuggingOptions {
-  DebuggingOptions.enabled(this.buildInfo, {
+  DebuggingOptions.enabled(this.buildMode, {
     this.startPaused: false,
     this.enableSoftwareRendering: false,
     this.useTestFonts: false,
@@ -323,7 +324,7 @@ class DebuggingOptions {
     this.diagnosticPort
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo) :
+  DebuggingOptions.disabled(this.buildMode) :
     debuggingEnabled = false,
     useTestFonts = false,
     startPaused = false,
@@ -333,7 +334,7 @@ class DebuggingOptions {
 
   final bool debuggingEnabled;
 
-  final BuildInfo buildInfo;
+  final BuildMode buildMode;
   final bool startPaused;
   final bool enableSoftwareRendering;
   final bool useTestFonts;
