@@ -31,8 +31,8 @@ Future<Null> parseServiceConfigs(
   Map<String, Uri> packageMap;
   try {
     packageMap = new PackageMap(PackageMap.globalPackagesPath).map;
-  } on FormatException catch(e) {
-    printTrace('Invalid ".packages" file while parsing service configs:\n$e');
+  } on FormatException catch (error) {
+    printTrace('Invalid ".packages" file while parsing service configs:\n$error');
     return;
   }
 
@@ -40,9 +40,9 @@ Future<Null> parseServiceConfigs(
   try {
     manifest = _loadYamlFile(_kFlutterManifestPath);
     manifest = manifest['flutter'];
-  } catch (e) {
+  } catch (error) {
     printStatus('Error detected in pubspec.yaml:', emphasis: true);
-    printError(e);
+    printError('$error');
     return;
   }
   if (manifest == null || manifest['services'] == null) {

@@ -88,7 +88,7 @@ class ColdRunner extends ResidentRunner {
         try {
           await downloadStartupTrace(device.vmServices.first);
         } catch (error) {
-          printError(error);
+          printError('Error downloading startup trace: $error');
           return 2;
         }
       }
