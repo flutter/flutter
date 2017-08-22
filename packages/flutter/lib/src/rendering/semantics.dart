@@ -117,6 +117,7 @@ class SemanticsData {
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
 
+  /// The set of [SemanticsTag]s associated with this node.
   final Set<SemanticsTag> tags;
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
