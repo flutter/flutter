@@ -34,6 +34,7 @@ void main() {
       fs.file(blue).copySync(red);
       fs.file(red).writeAsStringSync(fs.file(red).readAsStringSync().replaceFirst('Colors.blue', 'Colors.red'));
       runSync(<String>[flutterPath, 'build', 'flx', '--target', 'lib/blue.dart'], workingDirectory: projectDir.path, allowReentrantFlutter: true);
+      expect(fs.file(snapshot).existsSync(), isTrue);
       final DateTime timestampBlue = fs.file(snapshot).statSync().changed;
       runSync(<String>[flutterPath, 'build', 'flx', '--target', 'lib/red.dart'], workingDirectory: projectDir.path, allowReentrantFlutter: true);
       final DateTime timestampRed = fs.file(snapshot).statSync().changed;
