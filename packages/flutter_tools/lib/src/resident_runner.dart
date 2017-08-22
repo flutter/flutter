@@ -468,7 +468,7 @@ abstract class ResidentRunner {
             await view.uiIsolate.flutterDebugAllowBanner(false);
         } catch (error) {
           status.stop();
-          printError(error);
+          printError('Error communicating with Flutter on the device: $error');
         }
       }
       try {
@@ -480,7 +480,7 @@ abstract class ResidentRunner {
               await view.uiIsolate.flutterDebugAllowBanner(true);
           } catch (error) {
             status.stop();
-            printError(error);
+            printError('Error communicating with Flutter on the device: $error');
           }
         }
       }

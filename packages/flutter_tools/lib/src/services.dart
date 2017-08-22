@@ -42,7 +42,7 @@ Future<Null> parseServiceConfigs(
     manifest = manifest['flutter'];
   } catch (e) {
     printStatus('Error detected in pubspec.yaml:', emphasis: true);
-    printError(e);
+    printError('$e');
     return;
   }
   if (manifest == null || manifest['services'] == null) {
