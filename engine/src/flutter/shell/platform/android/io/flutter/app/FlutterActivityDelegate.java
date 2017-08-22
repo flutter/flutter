@@ -316,6 +316,7 @@ public final class FlutterActivityDelegate
      *
      * Returns null if no {@code windowBackground} is set for the activity.
      */
+    @SuppressWarnings("deprecation")
     private Drawable getLaunchScreenDrawableFromActivityTheme() {
         TypedValue typedValue = new TypedValue();
         if (!activity.getTheme().resolveAttribute(
@@ -328,7 +329,7 @@ public final class FlutterActivityDelegate
             return null;
         }
         try {
-            return activity.getDrawable(typedValue.resourceId);
+            return activity.getResources().getDrawable(typedValue.resourceId);
         } catch (NotFoundException e) {
             Log.e(TAG, "Referenced launch screen windowBackground resource does not exist");
             return null;
