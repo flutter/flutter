@@ -51,15 +51,17 @@ const int tsHeightMask = 1 << tsHeightIndex;
 // ParagraphStyle
 
 const int psTextAlignIndex = 1;
-const int psFontWeightIndex = 2;
-const int psFontStyleIndex = 3;
-const int psMaxLinesIndex = 4;
-const int psFontFamilyIndex = 5;
-const int psFontSizeIndex = 6;
-const int psLineHeightIndex = 7;
-const int psEllipsisIndex = 8;
+const int psTextDirectionIndex = 2;
+const int psFontWeightIndex = 3;
+const int psFontStyleIndex = 4;
+const int psMaxLinesIndex = 5;
+const int psFontFamilyIndex = 6;
+const int psFontSizeIndex = 7;
+const int psLineHeightIndex = 8;
+const int psEllipsisIndex = 9;
 
 const int psTextAlignMask = 1 << psTextAlignIndex;
+const int psTextDirectionMask = 1 << psTextDirectionIndex;
 const int psFontWeightMask = 1 << psFontWeightIndex;
 const int psFontStyleMask = 1 << psFontStyleIndex;
 const int psMaxLinesMask = 1 << psMaxLinesIndex;
@@ -112,6 +114,9 @@ PassRefPtr<RenderStyle> decodeParagraphStyle(
 
   if (mask & psTextAlignMask)
     style->setTextAlign(static_cast<ETextAlign>(encoded[psTextAlignIndex]));
+
+  if (mask & psTextDirectionMask)
+    style->setDirection(static_cast<TextDirection>(encoded[psTextDirectionIndex]));
 
   if (mask & (psFontWeightMask | psFontStyleMask | psFontFamilyMask |
               psFontSizeMask)) {
