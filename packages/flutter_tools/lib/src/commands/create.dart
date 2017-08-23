@@ -182,7 +182,7 @@ class CreateCommand extends FlutterCommand {
 
     updateXcodeGeneratedProperties(
       projectPath: appPath,
-      mode: BuildMode.debug,
+      buildInfo: BuildInfo.debug,
       target: flx.defaultMainPath,
       hasPlugins: generatePlugin,
     );

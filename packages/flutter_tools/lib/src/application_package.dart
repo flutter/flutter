@@ -228,7 +228,7 @@ class BuildableIOSApp extends IOSApp {
   bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
 
   String _buildAppPath(String type) {
-    return fs.path.join(getIosBuildDirectory(), 'Release-$type', kBundleName);
+    return fs.path.join(getIosBuildDirectory(), type, kBundleName);
   }
 }
 

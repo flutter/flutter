@@ -122,7 +122,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     flutterDevice.observatoryUris = observatoryUris;
     final HotRunner hotRunner = new HotRunner(
       <FlutterDevice>[flutterDevice],
-      debuggingOptions: new DebuggingOptions.enabled(getBuildMode()),
+      debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
       target: _target,
       projectRootPath: _fuchsiaProjectPath,
       packagesFilePath: _dotPackagesPath

@@ -35,6 +35,7 @@ class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand() {
     usesTargetOption();
     addBuildModeFlags();
+    usesFlavorOption();
     usesPubOption();
   }
 
@@ -51,14 +52,14 @@ class BuildApkCommand extends BuildSubCommand {
   Future<Null> runCommand() async {
     await super.runCommand();
 
-    final BuildMode buildMode = getBuildMode();
-    await buildApk(buildMode: buildMode, target: targetFile);
+    final BuildInfo buildInfo = getBuildInfo();
+    await buildApk(buildInfo: buildInfo, target: targetFile);
   }
 }
 
 Future<Null> buildApk({
   String target,
-  BuildMode buildMode: BuildMode.debug,
+  BuildInfo buildInfo: BuildInfo.debug,
   String kernelPath,
 }) async {
   if (!isProjectUsingGradle()) {
@@ -80,5 +81,5 @@ Future<Null> buildApk({
     throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
-  return buildGradleProject(buildMode, target, kernelPath);
+  return buildGradleProject(buildInfo, target, kernelPath);
 }
