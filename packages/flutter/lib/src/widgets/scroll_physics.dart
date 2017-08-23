@@ -150,7 +150,7 @@ class ScrollPhysics {
 
   static final SpringDescription _kDefaultSpring = new SpringDescription.withDampingRatio(
     mass: 0.5,
-    springConstant: 100.0,
+    stiffness: 100.0,
     ratio: 1.1,
   );
 

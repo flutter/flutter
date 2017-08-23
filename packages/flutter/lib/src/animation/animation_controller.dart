@@ -29,7 +29,7 @@ enum _AnimationDirection {
 
 final SpringDescription _kFlingSpringDescription = new SpringDescription.withDampingRatio(
   mass: 1.0,
-  springConstant: 500.0,
+  stiffness: 500.0,
   ratio: 1.0,
 );
 

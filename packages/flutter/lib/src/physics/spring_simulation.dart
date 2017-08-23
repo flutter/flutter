@@ -12,36 +12,36 @@ import 'utils.dart';
 ///
 /// Used to configure a [SpringSimulation].
 class SpringDescription {
-  /// Creates a spring given the mass, spring constant and the damping coefficient.
+  /// Creates a spring given the mass, stiffness, and the damping coefficient.
   ///
-  /// See [mass], [springConstant], and [damping] for the units of the arguments.
+  /// See [mass], [stiffness], and [damping] for the units of the arguments.
   const SpringDescription({
     this.mass,
-    this.springConstant,
+    this.stiffness,
     this.damping
   });
 
-  /// Creates a spring given the mass (m), spring constant (k), and damping
-  /// ratio (ζ). The damping ratio is especially useful trying to determing the
-  /// type of spring to create. A ratio of 1.0 creates a critically damped
-  /// spring, > 1.0 creates an overdamped spring and < 1.0 an underdamped one.
+  /// Creates a spring given the mass (m), stiffness (k), and damping ratio (ζ).
+  /// The damping ratio is especially useful trying to determing the type of
+  /// spring to create. A ratio of 1.0 creates a critically damped spring, > 1.0
+  /// creates an overdamped spring and < 1.0 an underdamped one.
   ///
-  /// See [mass] and [springConstant] for the units for those arguments. The
-  /// damping ratio is unitless.
+  /// See [mass] and [stiffness] for the units for those arguments. The damping
+  /// ratio is unitless.
   SpringDescription.withDampingRatio({
     this.mass,
-    this.springConstant,
+    this.stiffness,
     double ratio: 1.0
-  }) : damping = ratio * 2.0 * math.sqrt(mass * springConstant);
+  }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 
   /// The mass of the spring (m). The units are arbitrary, but all springs
   /// within a system should use the same mass units.
   final double mass;
 
-  /// The spring constant (k). The units of the spring constant are M/T², where
-  /// M is the mass unit used for the value of the [mass] property, and T is the
-  /// time unit used for driving the [SpringSimulation].
-  final double springConstant;
+  /// The spring constant (k). The units of stiffness are M/T², where M is the
+  /// mass unit used for the value of the [mass] property, and T is the time
+  /// unit used for driving the [SpringSimulation].
+  final double stiffness;
 
   /// The damping coefficient (c).
   ///
@@ -55,7 +55,7 @@ class SpringDescription {
   final double damping;
 
   @override
-  String toString() => '$runtimeType(mass: ${mass.toStringAsFixed(1)}, springConstant: ${springConstant.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})';
+  String toString() => '$runtimeType(mass: ${mass.toStringAsFixed(1)}, stiffness: ${stiffness.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})';
 }
 
 /// The kind of spring solution that the [SpringSimulation] is using to simulate the spring.
@@ -153,11 +153,11 @@ abstract class _SpringSolution {
   ) {
     assert(spring != null);
     assert(spring.mass != null);
-    assert(spring.springConstant != null);
+    assert(spring.stiffness != null);
     assert(spring.damping != null);
     assert(initialPosition != null);
     assert(initialVelocity != null);
-    final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.springConstant;
+    final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
     if (cmk == 0.0)
       return new _CriticalSolution(spring, initialPosition, initialVelocity);
     if (cmk > 0.0)
@@ -210,7 +210,7 @@ class _OverdampedSolution implements _SpringSolution {
     double distance,
     double velocity
   ) {
-    final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.springConstant;
+    final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
     final double r1 = (-spring.damping - math.sqrt(cmk)) / (2.0 * spring.mass);
     final double r2 = (-spring.damping + math.sqrt(cmk)) / (2.0 * spring.mass);
     final double c2 = (velocity - r1 * distance) / (r2 - r1);
@@ -248,7 +248,7 @@ class _UnderdampedSolution implements _SpringSolution {
     double distance,
     double velocity
   ) {
-    final double w = math.sqrt(4.0 * spring.mass * spring.springConstant -
+    final double w = math.sqrt(4.0 * spring.mass * spring.stiffness -
                      spring.damping * spring.damping) / (2.0 * spring.mass);
     final double r = -(spring.damping / 2.0 * spring.mass);
     final double c1 = distance;
