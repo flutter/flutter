@@ -50,7 +50,7 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 ///
 /// Tags can be interpreted by the parent of a [SemanticsNode]
 /// and depending on the presence of a tag the parent can for example decide
-/// how to add the tagged note as a child.
+/// how to add the tagged note as a child. Tags are not sent to the engine.
 ///
 /// As an example, the [RenderSemanticsGestureHandler] uses tags to determine
 /// if a child node should be excluded from the scrollable area for semantic
@@ -61,7 +61,6 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 /// two tags created with the same [name] and the `const` operator are always
 /// identical.
 class SemanticsTag {
-
   /// Creates a [SemanticsTag].
   ///
   /// The provided [name] is only used for debugging. Two tags created with the
@@ -359,11 +358,14 @@ class SemanticsNode extends AbstractNode {
   /// [isPresent] is `false` it will ensure that the node is not tagged with
   /// [tag].
   ///
+  /// Tags are not sent to the engine. They can be used by a parent
+  /// [SemanticsNode] to figure out how to add the node as a child.
+  ///
   /// See also:
   ///
   ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
   ///  * [hasTag] to check if the node has a certain tag.
-  void ensureTag(SemanticsTag tag, { bool isPresent: true}) {
+  void ensureTag(SemanticsTag tag, { bool isPresent: true }) {
     if (isPresent)
       _tags.add(tag);
     else

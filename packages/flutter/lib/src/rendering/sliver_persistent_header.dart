@@ -212,13 +212,13 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// past them (e.g. a pinned app bar) should set this to `true`.
   @protected
   bool get excludeFromSemanticsScrolling => _excludeFromSemanticsScrolling;
+  bool _excludeFromSemanticsScrolling = false;
   set excludeFromSemanticsScrolling(bool value) {
     if (_excludeFromSemanticsScrolling == value)
       return;
     _excludeFromSemanticsScrolling = value;
     markNeedsSemanticsUpdate();
   }
-  bool _excludeFromSemanticsScrolling = false;
 
   @override
   SemanticsAnnotator get semanticsAnnotator => _excludeFromSemanticsScrolling ? _annotate : null;

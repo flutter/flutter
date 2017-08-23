@@ -2752,7 +2752,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If the annotation should only happen under certain conditions, `null`
   /// should be returned if those conditions are currently not met to avoid
-  /// the creation of empty [SemanticsNode].
+  /// the creation of an empty [SemanticsNode].
   SemanticsAnnotator get semanticsAnnotator => null;
 
   /// Assemble the [SemanticsNode] for this [RenderObject].
