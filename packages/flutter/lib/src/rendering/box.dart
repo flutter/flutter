@@ -2030,7 +2030,7 @@ abstract class RenderBox extends RenderObject {
       final Paint paint = new Paint()
        ..style = PaintingStyle.stroke
        ..strokeWidth = 1.0
-       ..color = debugPaintSizeColor;
+       ..color = const Color(0xFF00FFFF);
       context.canvas.drawRect((offset & size).deflate(0.5), paint);
       return true;
     });
@@ -2049,7 +2049,7 @@ abstract class RenderBox extends RenderObject {
       // ideographic baseline
       final double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
       if (baselineI != null) {
-        paint.color = debugPaintIdeographicBaselineColor;
+        paint.color = const Color(0xFFFFD000);
         path = new Path();
         path.moveTo(offset.dx, offset.dy + baselineI);
         path.lineTo(offset.dx + size.width, offset.dy + baselineI);
@@ -2058,7 +2058,7 @@ abstract class RenderBox extends RenderObject {
       // alphabetic baseline
       final double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
       if (baselineA != null) {
-        paint.color = debugPaintAlphabeticBaselineColor;
+        paint.color = const Color(0xFF00FF00);
         path = new Path();
         path.moveTo(offset.dx, offset.dy + baselineA);
         path.lineTo(offset.dx + size.width, offset.dy + baselineA);
@@ -2080,7 +2080,7 @@ abstract class RenderBox extends RenderObject {
     assert(() {
       if (_debugActivePointers > 0) {
         final Paint paint = new Paint()
-         ..color = new Color(debugPaintPointersColorValue | ((0x04000000 * depth) & 0xFF000000));
+         ..color = new Color(0x00BBBB | ((0x04000000 * depth) & 0xFF000000));
         context.canvas.drawRect(offset & size, paint);
       }
       return true;

@@ -267,7 +267,7 @@ class RenderConstrainedBox extends RenderProxyBox {
       Paint paint;
       if (child == null || child.size.isEmpty) {
         paint = new Paint()
-          ..color = debugPaintSpacingColor;
+          ..color = const Color(0x90909090);
         context.canvas.drawRect(offset & size, paint);
       }
       return true;

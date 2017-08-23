@@ -232,7 +232,7 @@ class PaintingContext {
         final Paint paint = new Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
-          ..color = debugPaintLayerBordersColor;
+          ..color = const Color(0xFFFF9800);
         canvas.drawRect(canvasBounds, paint);
       }
       return true;
