@@ -28,7 +28,6 @@
 
 namespace blink {
 
-// The order of this enum must match the order of the values in dart:ui's TextDirection.
 enum TextDirection { RTL, LTR };
 
 inline bool isLeftToRightDirection(TextDirection direction) { return direction == LTR; }

@@ -149,7 +149,7 @@ enum EWhiteSpace {
     NORMAL, PRE, PRE_WRAP, PRE_LINE, NOWRAP, KHTML_NOWRAP
 };
 
-// The order of this enum must match the order of the values in dart:ui's TextAlign.
+// The order of this enum must match the order of the text align values in CSSValueKeywords.in.
 enum ETextAlign {
     LEFT, RIGHT, CENTER, JUSTIFY, TASTART, TAEND,
 };
