@@ -60,6 +60,9 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
 
   const char* extensions[] = {
       VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+#if OS_FUCHSIA
+      VK_GOOGLE_EXTERNAL_MEMORY_MAGMA_EXTENSION_NAME,
+#endif
   };
 
   auto enabled_layers = DeviceLayersToEnable(vk, physical_device_);
