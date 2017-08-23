@@ -184,7 +184,7 @@ void updateLocalProperties({String projectPath, String buildMode}) {
     changed = true;
   }
   if (buildMode != null && settings.values['flutter.buildMode'] != buildMode) {
-    settings.values['flutter.buildMode']  = buildMode;
+    settings.values['flutter.buildMode'] = buildMode;
     changed = true;
   }
 
