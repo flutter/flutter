@@ -21,9 +21,9 @@ import 'stock_strings.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
-class _StocksLocalizationsDelegate extends DefaultLocalizationsDelegate<StockStrings> {
+class _StocksLocalizationsDelegate extends LocalizationsDelegate<StockStrings> {
   @override
-  Future<StockStrings> loadResources(Locale locale) => StockStrings.load(locale);
+  Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
 }
 
 class StocksApp extends StatefulWidget {
@@ -115,7 +115,9 @@ class StocksAppState extends State<StocksApp> {
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,
-      localizationsDelegate: new _StocksLocalizationsDelegate(),
+      localizationsDelegates: <_StocksLocalizationsDelegate>[
+        new _StocksLocalizationsDelegate()
+      ],
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,

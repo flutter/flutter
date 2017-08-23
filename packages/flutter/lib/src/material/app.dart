@@ -27,9 +27,11 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationStyle: TextDecorationStyle.double
 );
 
-class _MaterialLocalizationsDelegate extends DefaultLocalizationsDelegate<MaterialLocalizations> {
+class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  const _MaterialLocalizationsDelegate();
+
   @override
-  Future<MaterialLocalizations> loadResources(Locale locale) => MaterialLocalizations.load(locale);
+  Future<MaterialLocalizations> load(Locale locale) => MaterialLocalizations.load(locale);
 }
 
 /// An application that uses material design.
@@ -88,7 +90,7 @@ class MaterialApp extends StatefulWidget {
     this.onGenerateRoute,
     this.onUnknownRoute,
     this.locale,
-    this.localizationsDelegate,
+    this.localizationsDelegates,
     this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
@@ -222,11 +224,11 @@ class MaterialApp extends StatefulWidget {
   /// If the `locale` is null the system's locale value is used.
   final Locale locale;
 
-  /// The delegate for this app's [Localizations] widget.
+  /// The delegates for this app's [Localizations] widget.
   ///
-  /// This delegate defines all of the localized resources for this
-  /// application. It is typically an instance of [DefaultLocalizationsDelegate].
-  final LocalizationsDelegate localizationsDelegate;
+  /// The delegates collectively define all of the localized resources
+  /// for this application's [Localizations] widget.
+  final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
   /// Turns on a performance overlay.
   ///
@@ -303,38 +305,35 @@ class _MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
-  LocalizationsDelegate _localizationsDelegate;
   HeroController _heroController;
 
   @override
   void initState() {
     super.initState();
     _heroController = new HeroController(createRectTween: _createRectTween);
-    _localizationsDelegate = _createLocalizationsDelegate();
   }
 
   @override
   void didUpdateWidget(MaterialApp old) {
     super.didUpdateWidget(old);
+    /* TBD
     final LocalizationsDelegate delegate = widget.localizationsDelegate;
     final LocalizationsDelegate oldDelegate = old.localizationsDelegate;
     if ((delegate == null && oldDelegate != null)
         || (delegate != null && delegate.shouldReload(oldDelegate)))
       _localizationsDelegate = _createLocalizationsDelegate();
+    */
   }
 
   // Combine the Localizations for Material with the ones contributed
-  // by the localizationsDelegate parameter, if any.
-  LocalizationsDelegate _createLocalizationsDelegate() {
-    LocalizationsDelegate delegate = new _MaterialLocalizationsDelegate();
-    if (widget.localizationsDelegate != null) {
-      delegate = new LocalizationsDelegate.merge(<LocalizationsDelegate>[
-        delegate,
-        widget.localizationsDelegate,
-      ]);
-    }
-
-    return delegate;
+  // by the localizationsDelegates parameter, if any.
+  Iterable<LocalizationsDelegate<dynamic>> _createLocalizationsDelegates() {
+    final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
+      const _MaterialLocalizationsDelegate(),
+    ];
+    if (widget.localizationsDelegates != null)
+      delegates.addAll(widget.localizationsDelegates);
+    return delegates;
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {
@@ -411,7 +410,7 @@ class _MaterialAppState extends State<MaterialApp> {
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
-        localizationsDelegate: _localizationsDelegate,
+        localizationsDelegates: _createLocalizationsDelegates(),
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,

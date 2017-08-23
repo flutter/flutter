@@ -51,7 +51,7 @@ class WidgetsApp extends StatefulWidget {
     this.navigatorObservers: const <NavigatorObserver>[],
     this.initialRoute,
     this.locale,
-    this.localizationsDelegate,
+    this.localizationsDelegates,
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
@@ -132,11 +132,11 @@ class WidgetsApp extends StatefulWidget {
   /// If the 'locale' is null the system's locale value is used.
   final Locale locale;
 
-  /// The delegate for this app's [Localizations] widget.
+  /// The delegates for this app's [Localizations] widget.
   ///
-  /// This delegate defines all of the localized resources for this
-  /// application. It is typically an instance of [DefaultLocalizationsDelegate].
-  final LocalizationsDelegate localizationsDelegate;
+  /// The delegates collectively define all of the localized resources
+  /// for this application's [Localizations] widget.
+  final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
   /// Turns on a performance overlay.
   /// https://flutter.io/debugging/#performanceoverlay
@@ -281,7 +281,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       data: new MediaQueryData.fromWindow(ui.window),
       child: new Localizations(
         locale: widget.locale ?? _locale,
-        delegate: widget.localizationsDelegate,
+        delegates: widget.localizationsDelegates,
         child: new Title(
           title: widget.title,
           color: widget.color,

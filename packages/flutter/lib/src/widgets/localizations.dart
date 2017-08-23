@@ -15,49 +15,73 @@ import 'framework.dart';
 // class Intl { static String message(String s, { String name, String locale }) => ''; }
 // Future<Null> initializeMessages(String locale) => null;
 
-/// An encapsulation of all of the resources to be loaded by a
+// A utility function used by Localizations to generate one future
+// that completes when all of the LocalizationsDelegate.load() futures
+// complete. The returned map is indexed by the type of each input
+// future's value.
+//
+// The input future values must have distinct types.
+//
+// The returned Future<Map> will resolve when all of the input map's
+// future values have resolved. If all of the input map's values are
+// SynchronousFutures then a SynchronousFuture will be returned
+// immediately.
+//
+// This is more complicated than just applying Future.wait to input
+// because some of the input.values may be SynchronousFutures. We don't want
+// to Future.wait for the synchronous futures.
+Future<Map<Type, dynamic>> _loadAll(Iterable<Future<dynamic>> inputValues) {
+  final Map<Type, dynamic> output = <Type, dynamic>{};
+  List<Future<dynamic>> outputFutures;
+
+  for (Future<dynamic> inputValue in inputValues) {
+    dynamic completedValue;
+    final Future<dynamic> futureValue = inputValue.then<dynamic>((dynamic value) {
+      return completedValue = value;
+    });
+    if (completedValue != null) { // inputValue was a SynchronousFuture
+      final Type type = completedValue.runtimeType;
+      assert(!output.containsKey(type));
+      output[type] = completedValue;
+    } else {
+      outputFutures ??= <Future<dynamic>>[];
+      outputFutures.add(futureValue);
+    }
+  }
+
+  // All of the input.values were synchronous futures, we're done.
+  if (outputFutures == null)
+    return new SynchronousFuture<Map<Type, dynamic>>(output);
+
+  // Some of input.values were asynchronous futures. Wait for them.
+  return Future.wait<dynamic>(outputFutures).then<Map<Type, dynamic>>((List<dynamic> values) {
+    for (dynamic value in values) {
+      final Type type = value.runtimeType;
+      assert(!output.containsKey(type));
+      output[type] = value;
+     }
+    return output;
+  });
+}
+
+/// A factory for a set of localized resources of type `T`, to be loaded by a
 /// [Localizations] widget.
 ///
 /// Typical applications have one [Localizations] widget which is
 /// created by the [WidgetsApp] and configured with the app's
-/// `localizationsDelegate` parameter.
-///
-/// See also:
-///
-///  * [DefaultLocalizationsDelegate], TBD
-///
-abstract class LocalizationsDelegate {
+/// `localizationsDelegates` parameter.
+abstract class LocalizationsDelegate<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const LocalizationsDelegate();
 
-  /// Create single [LocalizationsDelegate] from a list of them.
-  ///
-  /// All of the delegates' load methods must return disjoint lists of types, i.e.
-  /// only one delegate's [resourcesFor] method can be responsible for a set of
-  /// localizations of a particular [Type].
-  ///
-  /// When possible, using DefaultLocalizationsDelegate should be preferred to
-  /// using this factory constructor, since it's one less level of indirection.
-  factory LocalizationsDelegate.merge(Iterable<LocalizationsDelegate> delegates) {
-    assert(delegates != null && delegates.isNotEmpty);
-    return new _MergedLocalizationsDelegate(delegates);
-  }
-
   /// Start loading the resources for `locale`. The returned future completes
-  /// when the resources have been loaded and cached.
+  /// when the resources have finished loading.
   ///
-  /// It's assumed that the this method will create one or more objects
-  /// each of which contains a collection or related resources (typically
-  /// defined with one method per resource). The objects will be retrieved
-  /// by [Type] with [resourcesFor].
-  Future<Iterable<Type>> load(Locale locale);
-
-  /// Returns an instance with the specified type that contains all of
-  /// the resources for `locale`.
-  ///
-  /// This method's type parameter `T` must match the `type` parameter.
-  T resourcesFor<T>(Locale locale, Type type);
+  /// It's assumed that the this method will return an object that contains
+  /// a collection of related resources (typically defined with one method per
+  /// resource). The object will be retrieved with [Localizations.of].
+  Future<T> load(Locale locale);
 
   /// Returns true if the resources for this delegate should be loaded
   /// again by calling the [load] method.
@@ -65,172 +89,8 @@ abstract class LocalizationsDelegate {
   /// This method is called whenever its [Localizations] widget is
   /// rebuilt. If it returns true then dependent widgets will be rebuilt
   /// after [load] has completed.
-  bool shouldReload(LocalizationsDelegate old);
-}
-
-// The returned Future<Map> will resolve when all of the input map's
-// values have resolved. If all of the input map's values are
-// SynchronousFutures then a SynchronousFuture will be returned.
-//
-// This is more complicated than just applying Future.wait to input.values
-// because some of the input.values may be SynchronousFutures. We don't want
-// to Future.wait for the synchronous futures.
-Future<Map<K, V>> _loadMap<K, V>(Map<K, Future<V>> input) {
-  final Map<K, V> output = <K, V>{};
-  Map<K, Future<V>> outputFutures;
-
-  for (K key in input.keys) {
-    V completedValue;
-    final Future<V> futureValue = input[key].then<V>((V value) {
-      return completedValue = value;
-    });
-    if (completedValue != null) { // input[key] was a SynchronousFuture
-      output[key] = completedValue;
-    } else {
-      outputFutures ??= <K, Future<V>>{};
-      outputFutures[key] = futureValue;
-    }
-  }
-
-  // All of the input.values were synchronous futures, we're done.
-  if (outputFutures == null)
-    return new SynchronousFuture<Map<K, V>>(output);
-
-  // Some of input.values were asynchronous futures. Wait for them.
-  return Future.wait<V>(outputFutures.values).then<Map<K, V>>((List<V> values) {
-    final List<K> keys = outputFutures.keys.toList();
-    for (int i = 0; i < keys.length; i++)
-      output[keys[i]] = values[i];
-    return output;
-  });
-}
-
-// TBD
-/// Defines all of an application's resources in terms of `allLoaders`:
-/// a map from a [Type] to a _load_ function that creates an instance of
-/// that type for a specific locale.
-///
-/// It's assumed that the that each loader will create an object that
-/// contains a collection or related resources (typically
-/// defined by one method per resource). The objects will be retrieved
-/// by [Type] with [resourcesFor].
-///
-/// Each loader returns a Future because it may need to do work
-/// asynchronously. For example localized resources might be loaded from
-/// the nextwork. The [load] method returns a Future that completes
-/// when all of the loaders have completed.
-///
-/// See also:
-///
-///  * [WidgetsApp.localizationsDelegate] and [MaterialApp.localizationsDelegate],
-///    which enable configuring the app's [Localizations] widget.
-abstract class DefaultLocalizationsDelegate<T> extends LocalizationsDelegate {
-  final Set<Locale> _loading = new Set<Locale>();
-  final Map<Locale, dynamic> _localeToResources = <Locale, T>{};
-
-  Future<T> loadResources(Locale locale);
-
-  @override
-  Future<Iterable<Type>> load(Locale locale) {
-    assert(locale != null);
-    assert(!_loading.contains(locale));
-
-    _loading.add(locale);
-    Iterable<Type> types;
-    final Future<Iterable<Type>> typesFuture = loadResources(locale).then<Iterable<Type>>((T value) {
-      _loading.remove(locale);
-      _localeToResources[locale] = value;
-      return types = <Type>[value.runtimeType];
-    });
-    return types == null ? typesFuture : new SynchronousFuture<Iterable<Type>>(types);
-  }
-
-  @override
-  T resourcesFor<T>(Locale locale, Type type) {
-    assert(locale != null);
-    assert(type != null);
-    final T resources = _localeToResources[locale];
-    assert(type == resources.runtimeType);
-    return resources;
-  }
-
-  @override
-  bool shouldReload(LocalizationsDelegate old) {
+  bool shouldReload(covariant LocalizationsDelegate<T> old) {
     return old == null || runtimeType != old.runtimeType;
-  }
-}
-
-class _MergedLocalizationsDelegate extends LocalizationsDelegate {
-  // Creates a single [LocalizationsDelegate] whose methods delegate to the
-  // elements of `allDelegates`.
-  _MergedLocalizationsDelegate(this.allDelegates) {
-    assert(allDelegates != null);
-    assert(allDelegates.every((LocalizationsDelegate delegate) => delegate != null));
-  }
-
-  // This class's [load] and [resourcesFor] methods delegate
-  // to the members of this list.
-  final Iterable<LocalizationsDelegate> allDelegates;
-
-  final Map<Locale, Map<Type, LocalizationsDelegate>> _localeToDelegate = <Locale, Map<Type, LocalizationsDelegate>>{};
-  final Set<Locale> _loading = new Set<Locale>();
-
-  @override
-  Future<Iterable<Type>> load(Locale locale) {
-    assert(locale != null);
-    assert(!_loading.contains(locale));
-
-    List<Type> types;
-
-    _loading.add(locale);
-    final Future<Iterable<Type>> typesFuture = _loadMap<LocalizationsDelegate, Iterable<Type>>(
-      new Map<LocalizationsDelegate, Future<Iterable<Type>>>.fromIterables(
-        allDelegates,
-        allDelegates.map<Future<Iterable<Type>>>((LocalizationsDelegate delegate) => delegate.load(locale)),
-      ),
-    ).then<Iterable<Type>>((Map<LocalizationsDelegate, Iterable<Type>> resources) {
-      _loading.remove(locale);
-      final Map<Type, LocalizationsDelegate> typeToDelegate = <Type, LocalizationsDelegate>{};
-      for (LocalizationsDelegate delegate in resources.keys) {
-        for (Type type in resources[delegate]) {
-          assert(type != null && !typeToDelegate.containsKey(type));
-          typeToDelegate[type] = delegate;
-          types ??= <Type>[];
-          types.add(type);
-        }
-      }
-      _localeToDelegate[locale] = typeToDelegate;
-      return types;
-    });
-
-    return types == null ? typesFuture : new SynchronousFuture<Iterable<Type>>(types);
-  }
-
-  @override
-  T resourcesFor<T>(Locale locale, Type type) {
-    assert(locale != null);
-    assert(type != null);
-    final Map<Type, LocalizationsDelegate> resources = _localeToDelegate[locale];
-    return resources[type]?.resourcesFor<T>(locale, type);
-  }
-
-  bool _anyDelegatesShouldReload(_MergedLocalizationsDelegate old) {
-    if (allDelegates.length != old.allDelegates.length)
-      return true;
-    final List<LocalizationsDelegate> allDelegatesList = allDelegates.toList();
-    final List<LocalizationsDelegate> oldAllDelegatesList = old.allDelegates.toList();
-    for (int i = 0; i < allDelegates.length; i++) {
-      if (allDelegatesList[i].shouldReload(oldAllDelegatesList[i]))
-        return true;
-    }
-    return false;
-  }
-
-  @override
-  bool shouldReload(LocalizationsDelegate old) {
-    return old == null
-      || runtimeType != old.runtimeType
-      || _anyDelegatesShouldReload(old);
   }
 }
 
@@ -257,15 +117,30 @@ class _LocalizationsScope extends InheritedWidget {
 /// Defines the [Locale] for its `child` and the localized resources that the
 /// child depends on.
 ///
-/// Localized resources are loaded by the [LocalizationsDelegate] `delegate`.
-/// Most apps should be able to use the [DefaultLocalizationsDelegate] to
-/// specify a class that contains the app's localized resources and a function
-/// that creates an instance of that class.
+/// Localized resources are loaded by the list of [LocalizationsDelegate]
+/// `delegates`. Each delegate is essentially a factory for a collection
+/// of localized resources. There are multiple delegates because there are
+/// multiple sources for localizations within an app.
+///
+/// Delegates are typically simple subclasses of [LocalizationsDelegate] that
+/// override [LocalizationsDelegate.load]. For example a delegate for the
+/// `MyLocalizations` class defined below would be:
+///
+/// ```dart
+/// class _MyDelegate extends LocalizationsDelegate<MyLocalizations> {
+///   @override
+///   Future<MyLocalizations> load(Locale locale) => MyLocalizations.load(locale);
+///}
+/// ```
+///
+/// Each delegate can be viewed as a factory for objects that encapsulate a
+/// a set of localized resources. These objects are retrieved with
+/// by runtime type with [Localizations.of].
 ///
 /// The [WidgetsApp] class creates a `Localizations` widget so most apps
-/// will not need to create one. The widget app's `Localizations` delegate can
-/// be initialized with [WidgetsApp.localizationsDelegate]. The [MaterialApp]
-/// class also provides a `localizationsDelegate` parameter that's just
+/// will not need to create one. The widget app's `Localizations` delegates can
+/// be initialized with [WidgetsApp.localizationsDelegates]. The [MaterialApp]
+/// class also provides a `localizationsDelegates` parameter that's just
 /// passed along to the [WidgetsApp].
 ///
 /// Apps should retrieve collections of localized resources with
@@ -284,8 +159,9 @@ class _LocalizationsScope extends InheritedWidget {
 /// be rebuilt after the corresponding resources had been loaded.
 ///
 /// This class is effectively an [InheritedWidget]. If it's rebuilt with
-/// a new `locale` a new delegate, or if its `delegate.shouldReload()`
-/// method returns true, then widgets that have created a dependency by calling
+/// a new `locale` or a different list of delegates or any of its
+/// delegates' [LocalizationDelegate.shouldReload()] methods returns true,
+/// then widgets that have created a dependency by calling
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
 ///
@@ -328,7 +204,7 @@ class Localizations extends StatefulWidget {
   Localizations({
     Key key,
     @required this.locale,
-    this.delegate,
+    this.delegates,
     this.child
   }) : super(key: key) {
     assert(locale != null);
@@ -337,10 +213,9 @@ class Localizations extends StatefulWidget {
   /// The resources returned by [Localizations.of] will be specific to this locale.
   final Locale locale;
 
-  /// This delegate is responsible for loading and caching resources for `locale`.
-  ///
-  /// Typically defined with [DefaultLocalizationsDelegate].
-  final LocalizationsDelegate delegate;
+  /// This list collectively defines the localized resources objects that can
+  /// be retrieved with [ Localizations.of].
+  final Iterable<LocalizationsDelegate<dynamic>> delegates;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -378,6 +253,7 @@ class Localizations extends StatefulWidget {
 
 class _LocalizationsState extends State<Localizations> {
   final GlobalKey _localizedResourcesScopeKey = new GlobalKey();
+  Map<Type, dynamic> _typeToResources = <Type, dynamic>{};
 
   Locale get locale => _locale;
   Locale _locale;
@@ -388,30 +264,48 @@ class _LocalizationsState extends State<Localizations> {
     load(widget.locale);
   }
 
+  bool _anyDelegatesShouldReload(Localizations old) {
+    if (widget.delegates.length != old.delegates.length)
+      return true;
+    final List<LocalizationsDelegate<dynamic>> delegates = widget.delegates.toList();
+    final List<LocalizationsDelegate<dynamic>> oldDelegates = old.delegates.toList();
+    for (int i = 0; i < delegates.length; i++) {
+      if (delegates[i].shouldReload(oldDelegates[i]))
+        return true;
+    }
+    return false;
+  }
+
   @override
   void didUpdateWidget(Localizations old) {
     super.didUpdateWidget(old);
     if (widget.locale != old.locale
-        || widget.delegate.runtimeType != old.delegate.runtimeType
-        || widget.delegate != null && widget.delegate.shouldReload(old.delegate))
+        || (widget.delegates == null && old.delegates != null)
+        || (widget.delegates != null && old.delegates == null)
+        || (widget.delegates != null && _anyDelegatesShouldReload(old)))
       load(widget.locale);
   }
 
   void load(Locale locale) {
-    final LocalizationsDelegate delegate = widget.delegate;
-    if (delegate == null) {
+    final Iterable<LocalizationsDelegate<dynamic>> delegates = widget.delegates;
+    if (delegates == null || delegates.isEmpty) {
       _locale = locale;
       return;
     }
 
-    Iterable<Type> types;
-    final Future<Iterable<Type>> futureTypes = delegate.load(locale)
-      .then<Iterable<Type>>((Iterable<Type> value) {
-        return types = value;
+    final Iterable<Future<dynamic>> allResources = delegates.map((LocalizationsDelegate<dynamic> delegate) {
+      return delegate.load(locale);
+    });
+
+    Map<Type, dynamic> typeToResources;
+    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(allResources)
+      .then((Map<Type, dynamic> value) {
+        return typeToResources = value;
       });
 
-    if (types != null) {
-      // The delegate loaded its resources synchronously, do not rebuild
+    if (typeToResources != null) {
+      // All of the delegates' resources loaded synchronously.
+      _typeToResources = typeToResources;
       _locale = locale;
     } else {
       // - Don't rebuild the dependent widgets until the resources for the new locale
@@ -419,11 +313,12 @@ class _LocalizationsState extends State<Localizations> {
       // - If we're running at app startup time then defer reporting the first
       // "useful" frame until after the async load has completed.
       WidgetsBinding.instance.deferFirstFrameReport();
-      futureTypes.then((Iterable<Type> value) {
+      typeToResourcesFuture.then((Map<Type, dynamic> value) {
         WidgetsBinding.instance.allowFirstFrameReport();
         if (!mounted)
           return;
         setState(() {
+          _typeToResources = value;
           _locale = locale;
         });
         final InheritedElement scopeElement = _localizedResourcesScopeKey.currentContext;
@@ -432,7 +327,12 @@ class _LocalizationsState extends State<Localizations> {
     }
   }
 
-  T resourcesFor<T>(Type type) => widget.delegate?.resourcesFor<T>(_locale, type);
+  T resourcesFor<T>(Type type) {
+    assert(type != null);
+    final dynamic resources = _typeToResources[type];
+    assert(resources.runtimeType == type);
+    return resources;
+  }
 
   @override
   Widget build(BuildContext context) {
