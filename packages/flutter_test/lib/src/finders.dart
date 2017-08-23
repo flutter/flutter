@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
@@ -284,6 +285,8 @@ abstract class Finder {
   /// matched by this finder.
   Finder get last => new _LastFinder(this);
 
+  Finder hitTestable(HitOffsetCallback hitOffsetCallback) => new _HitTestableFinder(this, hitOffsetCallback);
+
   @override
   String toString() {
     final String additional = skipOffstage ? ' (ignoring offstage widgets)' : '';
@@ -325,6 +328,43 @@ class _LastFinder extends Finder {
   Iterable<Element> apply(Iterable<Element> candidates) sync* {
     yield parent.apply(candidates).last;
   }
+}
+
+typedef Offset HitOffsetCallback(Finder finder);
+
+class _HitTestableFinder extends Finder {
+  _HitTestableFinder(this.parent, this.hitOffsetCallback);
+
+  final Finder parent;
+  final HitOffsetCallback hitOffsetCallback;
+
+  @override
+  String get description => '${parent.description} (considering only hit-testable ones)';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) sync* {
+    for (final Element candidate in parent.apply(candidates)) {
+      final HitTestResult hitResult = new HitTestResult();
+      WidgetsBinding.instance.hitTest(hitResult, hitOffsetCallback(new _ExactElementFinder(candidate)));
+      for (final HitTestEntry entry in hitResult.path) {
+        if (entry.target == candidate.renderObject) {
+          yield candidate;
+        }
+      }
+    }
+  }
+}
+
+class _ExactElementFinder extends Finder {
+  _ExactElementFinder(Element target) : _result = <Element>[target];
+
+  final List<Element> _result;
+
+  @override
+  String get description => 'the specified element';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) => _result;
 }
 
 /// Searches a widget tree and returns nodes that match a particular

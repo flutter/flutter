@@ -262,7 +262,8 @@ class FlutterDriverExtension {
 
   Future<TapResult> _tap(Command command) async {
     final Tap tapCommand = command;
-    await _prober.tap(await _waitForElement(_createFinder(tapCommand.finder)));
+    final Finder computedFinder = await _waitForElement(_createFinder(tapCommand.finder).hitTestable(_prober.getCenter));
+    await _prober.tap(computedFinder);
     return new TapResult();
   }
 
