@@ -2944,7 +2944,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
   void _ensureAction(SemanticsAction action, SemanticsNode node, Function handler) {
     node.ensureAction(action,
-      isPresent: handler != null && validActions?.contains(action) ?? true
+      isPresent: handler != null && (validActions?.contains(action) ?? true)
     );
   }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
@@ -68,5 +69,42 @@ void main() {
     expect(root.needsCompositing, isFalse);
 
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
+    SemanticsNode node = new SemanticsNode();
+    final RenderSemanticsGestureHandler renderObj = new RenderSemanticsGestureHandler(
+      onTap: () {},
+      onHorizontalDragUpdate: (DragUpdateDetails details) {},
+    );
+
+    // Annotate fresh node
+    renderObj.semanticsAnnotator(node);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollLeft), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isTrue);
+
+    // Annotate cached node
+    renderObj.semanticsAnnotator(node);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollLeft), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isTrue);
+
+    node = new SemanticsNode();
+    renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
+
+    // Annotate fresh node after action removed
+    renderObj.semanticsAnnotator(node);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollLeft), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isFalse);
+
+    renderObj.validActions = <SemanticsAction>[SemanticsAction.scrollLeft].toSet();
+
+    // Annotate cached node after action removed
+    renderObj.semanticsAnnotator(node);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isFalse);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollLeft), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isFalse);
   });
 }
