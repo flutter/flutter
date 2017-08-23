@@ -8,37 +8,52 @@ import 'package:crypto/crypto.dart' show md5;
 
 import 'file_system.dart';
 
-/// A collection of checksums for a set of input files.
+/// Fingerprint of build inputs.
 ///
-/// This class can be used during build actions to compute a checksum of the
-/// build action inputs, and if unchanged from the previous build, skip the
+/// Consists of checksums for a set of input files and the values of a set of
+/// property keys.
+///
+/// This class can be used during build actions to compute the fingerprint of
+/// the build action inputs, and if unchanged from the previous build, skip the
 /// build step. This assumes that build outputs are strictly a product of the
-/// input files.
-class Checksum {
-  Checksum.fromFiles(Set<String> inputPaths) : _checksums = <String, String>{} {
-    final Iterable<File> files = inputPaths.map(fs.file);
+/// input files and properties provided.
+class Fingerprint {
+  Fingerprint.fromInputs({Iterable<String> filePaths, Map<String, String> properties}) : _fingerprint = <String, String>{} {
+    filePaths ??= <String>[];
+    properties ??= <String, String>{};
+    if (properties.keys.any(filePaths.contains))
+      throw new ArgumentError('File path and property key collision');
+    final Iterable<File> files = filePaths.map(fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty)
       throw new ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
     for (File file in files) {
       final List<int> bytes = file.readAsBytesSync();
-      _checksums[file.path] = md5.convert(bytes).toString();
+      _fingerprint[file.path] = md5.convert(bytes).toString();
     }
+    _fingerprint.addAll(properties);
   }
 
-  Checksum.fromJson(String json) : _checksums = JSON.decode(json);
+  Fingerprint.fromJson(String json) : _fingerprint = JSON.decode(json);
 
-  final Map<String, String> _checksums;
+  final Map<String, String> _fingerprint;
 
-  String toJson() => JSON.encode(_checksums);
+  String toJson() => JSON.encode(_fingerprint);
 
   @override
   bool operator==(dynamic other) {
-    return other is Checksum &&
-        _checksums.length == other._checksums.length &&
-        _checksums.keys.every((String key) => _checksums[key] == other._checksums[key]);
+    return other is Fingerprint &&
+        _fingerprint.length == other._fingerprint.length &&
+        _fingerprint.keys.every((String key) => _fingerprint[key] == other._fingerprint[key]);
   }
 
   @override
-  int get hashCode => _checksums.hashCode;
+  int get hashCode {
+    int accumulator = 0;
+    for (String key in new List<String>.from(_fingerprint.keys)..sort()) {
+      accumulator ^= key.hashCode;
+      accumulator ^= _fingerprint[key].hashCode;
+    }
+    return accumulator;
+  }
 }

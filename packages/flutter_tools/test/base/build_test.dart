@@ -10,8 +10,8 @@ import 'package:test/test.dart';
 import '../src/context.dart';
 
 void main() {
-  group('Checksum', () {
-    group('fromFiles', () {
+  group('Fingerprint', () {
+    group('fromInputs', () {
       MemoryFileSystem fs;
 
       setUp(() {
@@ -20,47 +20,74 @@ void main() {
 
       testUsingContext('throws if any input file does not exist', () async {
         await fs.file('a.dart').create();
-        expect(() => new Checksum.fromFiles(<String>['a.dart', 'b.dart'].toSet()), throwsA(anything));
+        expect(() => new Fingerprint.fromInputs(filePaths: <String>['a.dart', 'b.dart']), throwsArgumentError);
       }, overrides: <Type, Generator>{ FileSystem: () => fs});
 
-      testUsingContext('populates checksums for valid files', () async {
+      testUsingContext('throws on file path and property collision', () async {
+        await fs.file('a.dart').create();
+        expect(() => new Fingerprint.fromInputs(filePaths: <String>['a.dart'], properties: <String, String>{'a.dart': 'This is a'}), throwsArgumentError);
+      }, overrides: <Type, Generator>{ FileSystem: () => fs});
+
+      testUsingContext('populates fingerprint for valid files', () async {
         await fs.file('a.dart').writeAsString('This is a');
         await fs.file('b.dart').writeAsString('This is b');
-        final Checksum checksum = new Checksum.fromFiles(<String>['a.dart', 'b.dart'].toSet());
+        final Fingerprint checksum = new Fingerprint.fromInputs(filePaths: <String>['a.dart', 'b.dart']);
         final String json = checksum.toJson();
         expect(json, '{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
       }, overrides: <Type, Generator>{ FileSystem: () => fs});
+
+      test('populates fingerprint for properties', () {
+        final Fingerprint checksum = new Fingerprint.fromInputs(properties: <String, String>{'a': 'This is a', 'b': 'This is b'});
+        final String json = checksum.toJson();
+        expect(json, '{"a":"This is a","b":"This is b"}');
+      });
+
+      testUsingContext('populates fingerprint for valid files and properties', () async {
+        await fs.file('a.dart').writeAsString('This is a');
+        final Fingerprint checksum = new Fingerprint.fromInputs(filePaths: <String>['a.dart'], properties: <String, String>{'b': 'This is b'});
+        final String json = checksum.toJson();
+        expect(json, '{"a.dart":"8a21a15fad560b799f6731d436c1b698","b":"This is b"}');
+      }, overrides: <Type, Generator>{ FileSystem: () => fs});
+
     });
 
     group('fromJson', () {
       test('throws if JSON is invalid', () async {
-        expect(() => new Checksum.fromJson('<xml></xml>'), throwsA(anything));
+        expect(() => new Fingerprint.fromJson('<xml></xml>'), throwsA(anything));
       });
 
-      test('populates checksums for valid JSON', () async {
+      test('populates fingerprint for valid JSON', () async {
         final String json = '{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}';
-        final Checksum checksum = new Checksum.fromJson(json);
+        final Fingerprint checksum = new Fingerprint.fromJson(json);
         expect(checksum.toJson(), '{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
       });
     });
 
     group('operator ==', () {
-      test('reports not equal if checksums do not match', () async {
-        final Checksum a = new Checksum.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
-        final Checksum b = new Checksum.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07d"}');
+      test('reports not equal if values do not match', () async {
+        final Fingerprint a = new Fingerprint.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
+        final Fingerprint b = new Fingerprint.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07d"}');
         expect(a == b, isFalse);
       });
 
       test('reports not equal if keys do not match', () async {
-        final Checksum a = new Checksum.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
-        final Checksum b = new Checksum.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","c.dart":"6f144e08b58cd0925328610fad7ac07c"}');
+        final Fingerprint a = new Fingerprint.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
+        final Fingerprint b = new Fingerprint.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","c.dart":"6f144e08b58cd0925328610fad7ac07c"}');
         expect(a == b, isFalse);
       });
 
-      test('reports equal if all checksums match', () async {
-        final Checksum a = new Checksum.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
-        final Checksum b = new Checksum.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
+      test('reports equal if all fingerprints match', () async {
+        final Fingerprint a = new Fingerprint.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
+        final Fingerprint b = new Fingerprint.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
         expect(a == b, isTrue);
+      });
+    });
+
+    group('hashcode', () {
+      test('equal instances have equal hashcode', () {
+        final Fingerprint a = new Fingerprint.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
+        final Fingerprint b = new Fingerprint.fromJson('{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}');
+        expect(a.hashCode == b.hashCode, isTrue);
       });
     });
   });
