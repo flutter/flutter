@@ -43,10 +43,13 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
         if (string.startsWith(RESULT_PREFIX))
           boundaryKey = string.substring(RESULT_PREFIX.length);
       } else {
-        if (string.startsWith(boundaryKey))
-          outputFilename = string.substring(boundaryKey.length + 1);
-        else
-          print(string);
+        if (string.startsWith(boundaryKey)) {
+          if (string.length > boundaryKey.length)
+            outputFilename = string.substring(boundaryKey.length + 1);
+        }
+        else {
+          print('compile debug message: $string');
+        }
       }
     });
   await server.exitCode;
@@ -56,6 +59,8 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot) {
     assert(_sdkRoot != null);
+    if (!_sdkRoot.endsWith('/'))
+      _sdkRoot = "$_sdkRoot/";
   }
 
   String _sdkRoot;
@@ -88,10 +93,13 @@ class ResidentCompiler {
         }
       } else {
         if (string.startsWith(_boundaryKey)) {
-          _outputFilename.complete(string.substring(_boundaryKey.length));
+          _outputFilename.complete(string.length > _boundaryKey.length
+            ? string.substring(_boundaryKey.length + 1)
+            : null
+          );
           _boundaryKey = null;
         } else {
-          print(string);
+          print('compile debug message: $string');
         }
     }
   }
@@ -102,7 +110,7 @@ class ResidentCompiler {
         Artifact.frontendServerSnapshotForEngineDartSdk
       );
       _server = await Process.start(_dartExecutable(),
-        <String>[frontendServer, '--sdk-root', _sdkRoot + '/', '--incremental']
+        <String>[frontendServer, '--sdk-root', _sdkRoot, '--incremental']
       );
     }
     _outputFilename = new Completer<String>();
