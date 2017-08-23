@@ -2570,8 +2570,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// in the following cases:
   /// a. [isSemanticBoundary] changed its value (potential removal/addition of a
   ///    node, see #1 above).
-  /// b. [semanticsAnnotator] changed from or to returning `null` (potential
-  ///    removal/addition of a node, see #1 above).
+  /// b. [semanticsAnnotator] changed from or to returning `null` and
+  ///    [isSemanticBoundary] isn't `true`. (potential removal/addition of a
+  ///    node, see #1 above).
   /// c. In a previous invocation of the [semanticsAnnotator] a flag, action, or
   ///    tag has been set and the [RenderObject] no longer cares about the
   ///    presence of that flag, action, or tag (the set of values that the
@@ -2768,12 +2769,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// annotator, but there is no guarantee for that. It is important that an
   /// annotator always updates a given [SemanticsNode] to reflect the current
   /// state of this [RenderObject]. In practise, this means that a
-  /// [SemanticsAnnotator] should in each call explicitly set all applicable
-  /// fields to true even if they were already true during the previous
-  /// invocation as there is no guarantee for persistence. Furthermore, fields
-  /// that have been true before, but are no longer, should always be set to
-  /// false explicitly in the next invocation as the previous setting might
-  /// have been persisted. The same applies to actions and tags.
+  /// [SemanticsAnnotator] should during each invocation set all flags,
+  /// labels, actions, and tags it cares about to their current value. For
+  /// example, if the [SemanticsAnnotator] cares about a flag being `true` it
+  /// should set it to `true` in each invocation even if the value has not
+  /// changed from one invocation to another. Furthermore, if the
+  /// [SemanticsAnnotator] wants to remove an action it needs to explicitly do
+  /// so as that action might otherwise still be set from a previous invocation.
   ///
   /// If the return value will change from null to non-null (or vice versa), and
   /// [isSemanticBoundary] isn't true, then the associated call to
