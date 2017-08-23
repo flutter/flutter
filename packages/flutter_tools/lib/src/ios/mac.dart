@@ -294,7 +294,6 @@ Future<XcodeBuildResult> buildXcodeProject({
     'clean',
     'build',
     '-configuration', configuration,
-    '-scheme', scheme,
     'ONLY_ACTIVE_ARCH=YES',
   ];
 
@@ -306,6 +305,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     if (fs.path.extension(entity.path) == '.xcworkspace') {
       commands.addAll(<String>[
         '-workspace', fs.path.basename(entity.path),
+        '-scheme', scheme,
         "BUILD_DIR=${fs.path.absolute(getIosBuildDirectory())}",
       ]);
       break;
