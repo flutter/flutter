@@ -37,20 +37,6 @@ abstract class SemanticsActionHandler { // ignore: one_member_abstracts
 ///
 /// See [RenderObject.semanticsAnnotator] for details on the
 /// contract that semantic annotators must follow.
-///
-/// The [semantics] object handed to a [SemanticsAnnotator] can be in one of two
-/// states:
-/// 1. The provided [semantics] object is completely blank (it's either new or
-///    has been reset).
-/// 2. The provided [semantics] object has some settings persisted from a
-///    previous call to the same [SemanticsAnnotator].
-/// Regardless of the state, it's the [SemanticsAnnotator]'s job to bring the
-/// [semantics] object into sync with the current state of the corresponding
-/// [RenderObject]. For that, the [SemanticsAnnotator] should allways add all
-/// current settings (e.g. actions, flags, tags) to [semantics] regardless of
-/// whether they changed between the current and the previous invocation.
-/// Furthermore, it needs to remove all no longer applicable settings from
-/// [semantics], that might have been added during a previous invocation.
 typedef void SemanticsAnnotator(SemanticsNode semantics);
 
 /// Signature for a function that is called for each [SemanticsNode].
