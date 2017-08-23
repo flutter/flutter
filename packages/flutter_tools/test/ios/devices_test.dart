@@ -5,7 +5,10 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
@@ -15,9 +18,11 @@ import 'package:test/test.dart';
 
 import '../src/context.dart';
 
+class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
+class MockProcess extends Mock implements Process {}
 
 void main() {
   final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
@@ -69,4 +74,37 @@ iPhone SE (11.0) [667E8DCD-5DCD-4C80-93A9-60D1D995206F] (Simulator)
     });
   });
 
+  group('logging', () {
+    MockIMobileDevice mockIMobileDevice;
+
+    setUp(() {
+      mockIMobileDevice = new MockIMobileDevice();
+    });
+
+    testUsingContext('suppresses blacklisted lines from output', () async {
+      when(mockIMobileDevice.startLogger()).thenAnswer((_) {
+        final Process mockProcess = new MockProcess();
+        when(mockProcess.stdout).thenReturn(new Stream<List<int>>.fromIterable(<List<int>>['''
+  Runner(libsystem_asl.dylib)[297] <Notice>: A is for ari
+  Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
+  Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
+  Runner(libsystem_asl.dylib)[297] <Notice>: I is for ichigo
+  '''.codeUnits]));
+        when(mockProcess.stderr).thenReturn(new Stream<List<int>>.empty());
+        // Delay return of exitCode until after stdout stream data, since it terminates the logger.
+        when(mockProcess.exitCode).thenReturn(new Future<int>.delayed(Duration.ZERO, () => 0));
+        return new Future<Process>.value(mockProcess);
+      });
+
+      final IOSDevice device = new IOSDevice('123456');
+      final DeviceLogReader logReader = device.getLogReader(
+        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+      );
+
+      final List<String> lines = await logReader.logLines.toList();
+      expect(lines, <String>['A is for ari', 'I is for ichigo']);
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => mockIMobileDevice,
+    });
+  });
 }
