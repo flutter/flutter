@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:meta/meta.dart' show required;
 
 import 'artifacts.dart';
@@ -218,8 +217,7 @@ Future<List<String>> assemble({
   if (kernelContent != null) {
     final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
     zipBuilder.entries[_kKernelKey] = kernelContent;
-    zipBuilder.entries[_kPlatformKernelKey] =
-        new DevFSFileContent(fs.file(platformKernelDill));
+    zipBuilder.entries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
   }
   if (snapshotFile != null)
     zipBuilder.entries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);

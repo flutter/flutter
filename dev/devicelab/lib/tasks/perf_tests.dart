@@ -201,9 +201,8 @@ class BuildTest {
       '--no-pub',
       '--target-platform', 'android-arm',  // Generate blobs instead of assembly.
     ];
-    if (previewDart2) {
+    if (previewDart2)
       options.add('--preview-dart-2');
-    }
     print("_buildAot options: $options");
     final String buildLog = await evalFlutter('build', options: options);
     watch.stop();
@@ -231,9 +230,8 @@ class BuildTest {
     } else {
       watch.start();
       final List<String> options = <String>['apk', '--debug'];
-      if (previewDart2) {
+      if (previewDart2)
         options.add('--preview-dart-2');
-      }
       await flutter('build', options: options);
       watch.stop();
     }

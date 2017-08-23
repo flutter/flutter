@@ -5,11 +5,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:usage/uuid/uuid.dart';
+
+import 'artifacts.dart';
+import 'base/file_system.dart';
+import 'base/io.dart';
+import 'globals.dart';
 
 String _dartExecutable() {
   final String engineDartSdkPath = artifacts.getArtifactPath(
@@ -24,7 +25,7 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
   );
 
   if (!sdkRoot.endsWith('/'))
-    sdkRoot = "$sdkRoot/";
+    sdkRoot = '$sdkRoot/';
   final Process server = await Process.start(_dartExecutable(),
     <String>[frontendServer, '--sdk-root', sdkRoot, mainPath]
   );
@@ -46,8 +47,7 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
         if (string.startsWith(boundaryKey)) {
           if (string.length > boundaryKey.length)
             outputFilename = string.substring(boundaryKey.length + 1);
-        }
-        else {
+        } else {
           print('compile debug message: $string');
         }
       }
@@ -60,7 +60,7 @@ class ResidentCompiler {
   ResidentCompiler(this._sdkRoot) {
     assert(_sdkRoot != null);
     if (!_sdkRoot.endsWith('/'))
-      _sdkRoot = "$_sdkRoot/";
+      _sdkRoot = '$_sdkRoot/';
   }
 
   String _sdkRoot;
@@ -69,9 +69,8 @@ class ResidentCompiler {
   String _boundaryKey;
 
   Future<String> recompile(List<String> invalidatedFiles) async {
-    if (_server == null) {
-      throw new Future<String>.error("Recompile should be preceded by compile");
-    }
+    if (_server == null)
+      return new Future<String>.error('Recompile should be preceded by compile');
 
     _outputFilename = new Completer<String>();
 
@@ -99,7 +98,7 @@ class ResidentCompiler {
           );
           _boundaryKey = null;
         } else {
-          print('compile debug message: $string');
+          printTrace('compile debug message: $string');
         }
     }
   }
@@ -121,7 +120,7 @@ class ResidentCompiler {
     _server.stderr
       .transform(UTF8.decoder)
       .transform(new LineSplitter())
-      .listen((String s) { print("stderr:>$s"); });
+      .listen((String s) { printTrace('stderr:>$s'); });
 
     _server.stdin.writeln('compile $scriptFilename');
 

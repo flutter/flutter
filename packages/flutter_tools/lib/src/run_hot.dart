@@ -4,17 +4,17 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/compile.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
+import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -484,8 +484,9 @@ class HotRunner extends ResidentRunner {
     String reloadMessage;
     try {
       final String entryPath = fs.path.relative(
-          previewDart2 ? mainPath + ".dill" : mainPath,
-          from: projectRootPath);
+        previewDart2 ? mainPath + '.dill' : mainPath,
+        from: projectRootPath
+      );
       if (benchmarkMode)
         vmReloadTimer.start();
       final List<Future<Map<String, dynamic>>> reloadReportFutures = <Future<Map<String, dynamic>>>[];

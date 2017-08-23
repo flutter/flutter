@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
 
 import 'android/gradle.dart';
@@ -17,6 +16,7 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
 import 'dependency_checker.dart';

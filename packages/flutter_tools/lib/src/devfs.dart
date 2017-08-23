@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
-import 'package:flutter_tools/src/compile.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'asset.dart';
@@ -441,7 +440,7 @@ class DevFS {
         });
         final String compiledBinary = await generator.recompile(invalidatedFiles);
         if (compiledBinary != null && compiledBinary.isNotEmpty) {
-          dirtyEntries.putIfAbsent(Uri.parse(target + ".dill"),
+          dirtyEntries.putIfAbsent(Uri.parse(target + '.dill'),
                   () => new DevFSFileContent(fs.file(compiledBinary)));
           generator.accept();
         } else {

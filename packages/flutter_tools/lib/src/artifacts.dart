@@ -61,11 +61,12 @@ String _artifactToFileName(Artifact artifact) {
 }
 
 class EngineBuildPaths {
-  String targetEngine;
-  String hostEngine;
-  EngineBuildPaths({@required this.targetEngine, @required this.hostEngine}) {
-    assert(targetEngine != null && hostEngine != null);
-  }
+  EngineBuildPaths({ @required this.targetEngine, @required this.hostEngine }):
+      assert(targetEngine != null),
+      assert(hostEngine != null);
+
+  final String targetEngine;
+  final String hostEngine;
 }
 
 // Manages the engine artifacts of Flutter.
