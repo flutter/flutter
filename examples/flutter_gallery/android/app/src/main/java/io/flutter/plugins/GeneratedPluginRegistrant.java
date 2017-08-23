@@ -1,7 +1,7 @@
 package io.flutter.plugins;
 
 import io.flutter.plugin.common.PluginRegistry;
-import io.flutter.plugins.urllauncher.UrlLauncherPlugin;
+import io.flutter.plugins.url_launcher.UrlLauncherPlugin;
 
 /**
  * Generated file. Do not edit.
