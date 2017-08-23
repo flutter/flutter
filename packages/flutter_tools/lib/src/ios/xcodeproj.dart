@@ -119,6 +119,8 @@ class XcodeProjectInfo {
       }
       collector?.add(line.trim());
     }
+    if (schemes.isEmpty)
+      schemes.add('Runner');
     return new XcodeProjectInfo(targets, buildConfigurations, schemes);
   }
 
