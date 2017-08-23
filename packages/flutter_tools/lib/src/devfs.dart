@@ -434,9 +434,8 @@ class DevFS {
       if (generator != null) {
         final List<String> invalidatedFiles = <String>[];
         dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
-          if (content is DevFSFileContent) {
+          if (content is DevFSFileContent)
             invalidatedFiles.add(content.file.uri.toString());
-          }
         });
         final String compiledBinary = await generator.recompile(invalidatedFiles);
         if (compiledBinary != null && compiledBinary.isNotEmpty) {
