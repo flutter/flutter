@@ -156,10 +156,10 @@ Future<Null> build({
 
   DevFSContent kernelContent;
   if (!precompiledSnapshot && previewDart2) {
-    final String kernelBinaryFilename =
-        await compile(
-            sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-            mainPath: fs.file(mainPath).absolute.path);
+    final String kernelBinaryFilename = await compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      mainPath: fs.file(mainPath).absolute.path
+    );
     kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
   }
 
