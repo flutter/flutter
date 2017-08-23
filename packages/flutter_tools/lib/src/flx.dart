@@ -67,6 +67,7 @@ Future<int> _createSnapshot({
         final Checksum oldChecksum = new Checksum.fromJson(json);
         final Set<String> inputPaths = await _readDepfile(depfilePath);
         inputPaths.add(snapshotPath);
+        inputPaths.add(mainPath);
         final Checksum newChecksum = new Checksum.fromFiles(inputPaths);
         if (oldChecksum == newChecksum) {
           printTrace('Skipping snapshot build. Checksums match.');
@@ -87,6 +88,7 @@ Future<int> _createSnapshot({
   try {
     final Set<String> inputPaths = await _readDepfile(depfilePath);
     inputPaths.add(snapshotPath);
+    inputPaths.add(mainPath);
     final Checksum checksum = new Checksum.fromFiles(inputPaths);
     await checksumFile.writeAsString(checksum.toJson());
   } catch (e, s) {
