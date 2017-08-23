@@ -660,11 +660,7 @@ abstract class SchedulerBinding extends BindingBase {
       Timeline.finishSync(); // end the Frame
       profile(() {
         _profileFrameStopwatch.stop();
-        postEvent('Flutter.Frame', <String, dynamic>{
-          'number': _profileFrameNumber,
-          'startTime': _currentFrameTimeStamp.inMicroseconds,
-          'elapsed': _profileFrameStopwatch.elapsedMicroseconds
-        });
+        _profileFramePostEvent();
       });
       assert(() {
         if (debugPrintEndFrameBanner)
@@ -677,6 +673,14 @@ abstract class SchedulerBinding extends BindingBase {
 
     // All frame-related callbacks have been executed. Run lower-priority tasks.
     _runTasks();
+  }
+
+  void _profileFramePostEvent() {
+    postEvent('Flutter.Frame', <String, dynamic>{
+      'number': _profileFrameNumber,
+      'startTime': _currentFrameTimeStamp.inMicroseconds,
+      'elapsed': _profileFrameStopwatch.elapsedMicroseconds
+    });
   }
 
   static void _debugDescribeTimeStamp(Duration timeStamp, StringBuffer buffer) {
