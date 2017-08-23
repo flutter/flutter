@@ -122,7 +122,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     if (value == _value)
       return;
     _value = value;
-    markNeedsSemanticsUpdate(onlyChanges: true, noGeometry: true);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: true, noGeometry: true);
     _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;

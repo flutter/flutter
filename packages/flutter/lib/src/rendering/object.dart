@@ -2551,36 +2551,61 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     _semantics?.reset();
   }
 
-  /// Mark this node as needing an update to its semantics
-  /// description.
+  /// Mark this node as needing an update to its semantics description.
   ///
-  /// If the change did not involve a removal or addition of semantics, only the
-  /// change of semantics (e.g. isChecked changing from true to false, as
-  /// opposed to isChecked changing from being true to not being changed at
-  /// all), then you can pass the onlyChanges argument with the value true to
-  /// reduce the cost. If semantics are being added or removed, more work needs
-  /// to be done to update the semantics tree. If you pass 'onlyChanges: true'
-  /// but this node, which previously had a SemanticsNode, no longer has one, or
-  /// previously did not set any semantics, but now does, or previously had a
-  /// child that returned annotators, but no longer does, or other such
-  /// combinations, then you will either assert during the subsequent call to
-  /// [PipelineOwner.flushSemantics()] or you will have out-of-date information
-  /// in the semantics tree.
+  /// The parameters [onlyLocalUpdates] and [noGeometry] tell the framework
+  /// how much of the semantics have changed. Bigger changes (indicated by
+  /// setting one or both parameters to `false`) are more expansive to compute.
   ///
-  /// If the geometry might have changed in any way, then again, more work needs
-  /// to be done to update the semantics tree (to deal with clips). You can pass
-  /// the noGeometry argument to avoid this work in the case where only the
-  /// labels or flags changed. If you pass 'noGeometry: true' when the geometry
-  /// did change, the semantic tree will be out of date.
-  void markNeedsSemanticsUpdate({ bool onlyChanges: false, bool noGeometry: false }) {
+  /// [onlyLocalUpdates] should be set to `true` to reduce cost if both of the
+  /// following conditions are true:
+  /// 1. The semantics update does not in any way change the shape of the
+  ///    semantics tree (e.g. [SemanticsNode]s will neither be added/removed
+  ///    from the tree nor be moved within the tree).
+  /// 2. The set of annotations (i.e the set of flags, actions, labels, etc.)
+  ///    that the [semanticsAnnotator] is going to apply to the [SemanticsNode]
+  ///    is unchanged (only their values are allowed to change).
+  ///
+  /// In practice, this means that [onlyLocalUpdates] has to be set to `false`
+  /// in the following cases:
+  /// a. [isSemanticBoundary] changed its value (potential removal/addition of a
+  ///    node, see #1 above).
+  /// b. [semanticsAnnotator] changed from or to returning `null` (potential
+  ///    removal/addition of a node, see #1 above).
+  /// c. In a previous invocation of the [semanticsAnnotator] a flag, action, or
+  ///    tag has been set and the [RenderObject] no longer cares about the
+  ///    presence of that flag, action, or tag (the set of values that the
+  ///    [semanticsAnnotator] is going to annotate on the [SemanticsNode]
+  ///    changed, see #2 above). As an example, if [SemanticsNode.isChecked]
+  ///    changes from true to false, [onlyLocalChanges] should be set to `true`
+  ///    as the [semanticsAnnotator] is still having an opinion about that flag.
+  ///    However, if the [semanticsAnnotator] is no longer going to set a value
+  ///    for [SemanticsNode.isChecked], [onlyLocalChanges] needs to be set to
+  ///    `false` to ensure that the flag goes back to its default value.
+  ///
+  /// A more technical way to think about [onlyLocalUpdates] is that setting
+  /// it to `false` will completely erase all annotations on the [SemanticsNode]
+  /// that corresponds to this [RenderObject] as well as all annotations on the
+  /// parent node of that [SemanticsNode] and both nodes will be re-annotated
+  /// from scratch.
+  ///
+  /// [noGeometry] should be set to `true` to reduce cost if the geometry (e.g.
+  /// size and position) of the corresponding [SemanticsNode] has not
+  /// changed. Examples for such semantic updates that don't require a geometry
+  /// update are changes to flags, labels, or actions.
+  ///
+  /// If [onlyLocalUpdates] or [noGeometry] are incorrectly set to true, asserts
+  /// might throw or the computed semantics tree might be out-of-date without
+  /// warning.
+  void markNeedsSemanticsUpdate({ bool onlyLocalUpdates: false, bool noGeometry: false }) {
     assert(!attached || !owner._debugDoingSemantics);
-    if ((attached && owner._semanticsOwner == null) || (_needsSemanticsUpdate && onlyChanges && (_needsSemanticsGeometryUpdate || noGeometry)))
+    if ((attached && owner._semanticsOwner == null) || (_needsSemanticsUpdate && onlyLocalUpdates && (_needsSemanticsGeometryUpdate || noGeometry)))
       return;
     if (!noGeometry && (_semantics == null || (_semantics.hasChildren && _semantics.wasAffectedByClip))) {
       // Since the geometry might have changed, we need to make sure to reapply any clips.
       _needsSemanticsGeometryUpdate = true;
     }
-    if (onlyChanges) {
+    if (onlyLocalUpdates) {
       // The shape of the tree didn't change, but the details did.
       // If we have our own SemanticsNode (our _semantics isn't null)
       // then mark ourselves dirty. If we don't then we are using an
