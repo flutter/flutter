@@ -81,8 +81,7 @@ class FontWeight {
   }
 }
 
-/// Whether and how to align text horizontally.
-// The order of this enum must match the order of the values in RenderStyleConstants.h's ETextAlign.
+/// Whether to align text horizontally.
 enum TextAlign {
   /// Align the text on the left edge of the container.
   left,
@@ -96,22 +95,9 @@ enum TextAlign {
   /// Stretch lines of text that end with a soft line break to fill the width of
   /// the container.
   ///
-  /// Lines that end with hard line breaks are aligned towards the [start] edge.
+  /// Lines that end with hard line breaks are left-aligned.
+  // TODO(ianh): for rtl, this should presumably change to start-aligned.
   justify,
-
-  /// Align the text on the leading edge of the container.
-  ///
-  /// For left-to-right text ([TextDirection.ltr]), this is the left edge.
-  ///
-  /// For right-to-left text ([TextDirection.rtr]), this is the right edge.
-  start,
-
-  /// Align the text on the trailing edge of the container.
-  ///
-  /// For left-to-right text ([TextDirection.ltr]), this is the right edge.
-  ///
-  /// For right-to-left text ([TextDirection.rtr]), this is the left edge.
-  end,
 }
 
 /// A horizontal line used for aligning text.
@@ -120,7 +106,7 @@ enum TextBaseline {
   alphabetic,
 
   // The horizontal line used to align ideographic characters.
-  ideographic,
+  ideographic
 }
 
 /// A linear decoration to draw near the text.
@@ -399,7 +385,6 @@ class TextStyle {
 //  - Element 4: The value of |maxLines|.
 //
 Int32List _encodeParagraphStyle(TextAlign textAlign,
-                                TextDirection textDirection,
                                 FontWeight fontWeight,
                                 FontStyle fontStyle,
                                 int maxLines,
@@ -412,36 +397,32 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
     result[0] |= 1 << 1;
     result[1] = textAlign.index;
   }
-  if (textDirection != null) {
-    result[0] |= 1 << 2;
-    result[2] = textDirection.index;
-  }
   if (fontWeight != null) {
-    result[0] |= 1 << 3;
-    result[3] = fontWeight.index;
+    result[0] |= 1 << 2;
+    result[2] = fontWeight.index;
   }
   if (fontStyle != null) {
-    result[0] |= 1 << 4;
-    result[4] = fontStyle.index;
+    result[0] |= 1 << 3;
+    result[3] = fontStyle.index;
   }
   if (maxLines != null) {
-    result[0] |= 1 << 5;
-    result[5] = maxLines;
+    result[0] |= 1 << 4;
+    result[4] = maxLines;
   }
   if (fontFamily != null) {
-    result[0] |= 1 << 6;
+    result[0] |= 1 << 5;
     // Passed separately to native.
   }
   if (fontSize != null) {
-    result[0] |= 1 << 7;
+    result[0] |= 1 << 6;
     // Passed separately to native.
   }
   if (lineHeight != null) {
-    result[0] |= 1 << 8;
+    result[0] |= 1 << 7;
     // Passed separately to native.
   }
   if (ellipsis != null) {
-    result[0] |= 1 << 9;
+    result[0] |= 1 << 8;
     // Passed separately to native.
   }
   return result;
@@ -457,11 +438,6 @@ class ParagraphStyle {
   ///   alignment is applied to that line after it has been truncated but before
   ///   the ellipsis has been added.
    //   See: https://github.com/flutter/flutter/issues/9819
-  ///
-  /// * `textDirection`: The directionality of the text, left-to-right (e.g.
-  ///   Norwegian) or right-to-left (e.g. Hebrew). This controls the overall
-  ///   directionality of the paragraph, as well as the meaning of
-  ///   [TextAlign.start] and [TextAlign.end] in the `textAlign` field.
   ///
   /// * `fontWeight`: The typeface thickness to use when painting the text
   ///   (e.g., bold).
@@ -495,7 +471,6 @@ class ParagraphStyle {
   ///   considered equivalent and turn off this behavior.
   ParagraphStyle({
     TextAlign textAlign,
-    TextDirection textDirection,
     FontWeight fontWeight,
     FontStyle fontStyle,
     int maxLines,
@@ -504,7 +479,6 @@ class ParagraphStyle {
     double lineHeight,
     String ellipsis,
   }) : _encoded = _encodeParagraphStyle(textAlign,
-                                        textDirection,
                                         fontWeight,
                                         fontStyle,
                                         maxLines,
@@ -526,10 +500,10 @@ class ParagraphStyle {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (other is! ParagraphStyle)
       return false;
     final ParagraphStyle typedOther = other;
-    if (_fontFamily != typedOther._fontFamily ||
+    if ( _fontFamily != typedOther._fontFamily ||
         _fontSize != typedOther._fontSize ||
         _lineHeight != typedOther._lineHeight ||
         _ellipsis != typedOther._ellipsis)
@@ -541,25 +515,23 @@ class ParagraphStyle {
     return true;
   }
 
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontSize, _lineHeight, _ellipsis);
+  int get hashCode => hashValues(hashList(_encoded), _lineHeight, _ellipsis);
 
   String toString() {
-    return '$runtimeType('
-             'textAlign: ${     _encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]]     : "unspecified"}, '
-             'textDirection: ${ _encoded[0] & 0x004 == 0x004 ? TextDirection.values[_encoded[2]] : "unspecified"}, '
-             'fontWeight: ${    _encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[3]]    : "unspecified"}, '
-             'fontStyle: ${     _encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[4]]     : "unspecified"}, '
-             'maxLines: ${      _encoded[0] & 0x020 == 0x020 ? _encoded[5]                       : "unspecified"}, '
-             'fontFamily: ${    _encoded[0] & 0x040 == 0x040 ? _fontFamily                       : "unspecified"}, '
-             'fontSize: ${      _encoded[0] & 0x080 == 0x080 ? _fontSize                         : "unspecified"}, '
-             'lineHeight: ${    _encoded[0] & 0x100 == 0x100 ? "${_lineHeight}x"                 : "unspecified"}, '
-             'ellipsis: ${      _encoded[0] & 0x200 == 0x200 ? "\"$_ellipsis\""                  : "unspecified"}'
+    return 'ParagraphStyle('
+             'textAlign: ${   _encoded[0] & 0x02 == 0x02 ? TextAlign.values[_encoded[1]]    : "unspecified"}, '
+             'fontWeight: ${  _encoded[0] & 0x04 == 0x04 ? FontWeight.values[_encoded[2]]   : "unspecified"}, '
+             'fontStyle: ${   _encoded[0] & 0x08 == 0x08 ? FontStyle.values[_encoded[3]]    : "unspecified"}, '
+             'maxLines: ${    _encoded[0] & 0x10 == 0x10 ? _encoded[4]                      : "unspecified"}, '
+             'fontFamily: ${  _encoded[0] & 0x20 == 0x20 ? _fontFamily                      : "unspecified"}, '
+             'fontSize: ${    _encoded[0] & 0x40 == 0x40 ? _fontSize                        : "unspecified"}, '
+             'lineHeight: ${  _encoded[0] & 0x80 == 0x80 ? "${_lineHeight}x"                : "unspecified"}, '
+             'ellipsis: ${    _encoded[0] & 0x100 == 0x100 ? "\"$_ellipsis\""               : "unspecified"}'
            ')';
   }
 }
 
 /// A direction in which text flows.
-// The order of this enum must match the order of the values in TextDirection.h's TextDirection.
 enum TextDirection {
   /// The text flows from right to left (e.g. Arabic, Hebrew).
   rtl,
@@ -575,7 +547,7 @@ class TextBox {
     this.top,
     this.right,
     this.bottom,
-    this.direction,
+    this.direction
   );
 
   TextBox._(
@@ -583,7 +555,7 @@ class TextBox {
     this.top,
     this.right,
     this.bottom,
-    int directionIndex,
+    int directionIndex
   ) : direction = TextDirection.values[directionIndex];
 
   /// The left edge of the text box, irrespective of direction.
@@ -617,7 +589,7 @@ class TextBox {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other.runtimeType != runtimeType)
+    if (other is! TextBox)
       return false;
     final TextBox typedOther = other;
     return typedOther.left == left
@@ -650,7 +622,7 @@ enum TextAffinity {
   ///
   /// For example, if the offset of the text position is a line break, the
   /// position represents the start of the second line.
-  downstream,
+  downstream
 }
 
 /// A visual position in a string of text.
@@ -703,7 +675,7 @@ class ParagraphConstraints {
   final double width;
 
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
+    if (other is! ParagraphConstraints)
       return false;
     final ParagraphConstraints typedOther = other;
     return typedOther.width == width;
@@ -711,7 +683,7 @@ class ParagraphConstraints {
 
   int get hashCode => width.hashCode;
 
-  String toString() => '$runtimeType(width: $width)';
+  String toString() => 'ParagraphConstraints(width: $width)';
 }
 
 /// A paragraph of text.
