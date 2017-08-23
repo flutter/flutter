@@ -6,8 +6,8 @@ group("flutter") {
   testonly = true
 
   deps = [
-    "//flutter/lib/snapshot:generate_snapshot_bin",
     "//flutter/lib/snapshot:flutter_patched_sdk",
+    "//flutter/lib/snapshot:generate_snapshot_bin",
     "//flutter/sky",
   ]
 
@@ -33,6 +33,9 @@ group("flutter") {
   if (current_toolchain == host_toolchain) {
     if (is_mac) {
       deps += [ "//flutter/shell/platform/darwin:flutter_channels_unittests" ]
+    }
+    if (!is_win) {
+      deps += [ "//flutter/shell/platform/embedder:flutter_engine" ]
     }
     deps += [
       "//flutter/flow:flow_unittests",
