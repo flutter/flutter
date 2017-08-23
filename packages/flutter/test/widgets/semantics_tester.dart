@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
@@ -32,14 +33,15 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
-    @required this.rect,
+    this.rect,
     this.transform,
     this.children: const <TestSemantics>[],
+    Iterable<SemanticsTag> tags,
   }) : assert(id != null),
        assert(flags != null),
        assert(label != null),
-       assert(rect != null),
-       assert(children != null);
+       assert(children != null),
+       tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
@@ -49,11 +51,13 @@ class TestSemantics {
     this.label: '',
     this.transform,
     this.children: const <TestSemantics>[],
+    Iterable<SemanticsTag> tags,
   }) : id = 0,
        assert(flags != null),
        assert(label != null),
        rect = TestSemantics.rootRect,
-       assert(children != null);
+       assert(children != null),
+       tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for direct children of the root node.
@@ -69,13 +73,15 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
-    @required this.rect,
+    this.rect,
     Matrix4 transform,
     this.children: const <TestSemantics>[],
+    Iterable<SemanticsTag> tags,
   }) : assert(flags != null),
        assert(label != null),
        transform = _applyRootChildScale(transform),
-       assert(children != null);
+       assert(children != null),
+       tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
   /// The unique identifier for this node.
   ///
@@ -131,19 +137,18 @@ class TestSemantics {
   /// The children of this node.
   final List<TestSemantics> children;
 
-  SemanticsData _getSemanticsData() {
-    return new SemanticsData(
-      flags: flags,
-      actions: actions,
-      label: label,
-      rect: rect,
-      transform: transform,
-    );
-  }
+  /// The tags of this node.
+  final Set<SemanticsTag> tags;
 
-  bool _matches(SemanticsNode node, Map<dynamic, dynamic> matchState) {
+  bool _matches(SemanticsNode node, Map<dynamic, dynamic> matchState, { bool ignoreRect: false, bool ignoreTransform: false }) {
+    final SemanticsData nodeData = node.getSemanticsData();
     if (node == null || id != node.id
-        || _getSemanticsData() != node.getSemanticsData()
+        || flags != nodeData.flags
+        || actions != nodeData.actions
+        || label != nodeData.label
+        || !setEquals(tags, nodeData.tags)
+        || (!ignoreRect && rect != nodeData.rect)
+        || (!ignoreTransform && transform != nodeData.transform)
         || children.length != (node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount)) {
       matchState[TestSemantics] = this;
       matchState[SemanticsNode] = node;
@@ -155,7 +160,7 @@ class TestSemantics {
     final Iterator<TestSemantics> it = children.iterator;
     node.visitChildren((SemanticsNode node) {
       it.moveNext();
-      if (!it.current._matches(node, matchState)) {
+      if (!it.current._matches(node, matchState, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform)) {
         result = false;
         return false;
       }
@@ -197,13 +202,15 @@ class SemanticsTester {
 const String _matcherHelp = 'Try dumping the semantics with debugDumpSemanticsTree() from the rendering library to see what the semantics tree looks like.';
 
 class _HasSemantics extends Matcher {
-  const _HasSemantics(this._semantics) : assert(_semantics != null);
+  const _HasSemantics(this._semantics, { this.ignoreRect: false, this.ignoreTransform: false }) : assert(_semantics != null), assert(ignoreRect != null), assert(ignoreTransform != null);
 
   final TestSemantics _semantics;
+  final bool ignoreRect;
+  final bool ignoreTransform;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
-    return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState);
+    return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect);
   }
 
   @override
@@ -226,9 +233,9 @@ class _HasSemantics extends Matcher {
       return mismatchDescription.add('expected node id ${testNode.id} to have actions ${testNode.actions} but found actions ${data.actions}.\n$_matcherHelp');
     if (testNode.label != data.label)
       return mismatchDescription.add('expected node id ${testNode.id} to have label "${testNode.label}" but found label "${data.label}".\n$_matcherHelp');
-    if (testNode.rect != data.rect)
+    if (!ignoreRect && testNode.rect != data.rect)
       return mismatchDescription.add('expected node id ${testNode.id} to have rect ${testNode.rect} but found rect ${data.rect}.\n$_matcherHelp');
-    if (testNode.transform != data.transform)
+    if (!ignoreTransform && testNode.transform != data.transform)
       return mismatchDescription.add('expected node id ${testNode.id} to have transform ${testNode.transform} but found transform:.\n${data.transform}.\n$_matcherHelp');
     final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
     if (testNode.children.length != childrenCount)
@@ -238,7 +245,10 @@ class _HasSemantics extends Matcher {
 }
 
 /// Asserts that a [SemanticsTester] has a semantics tree that exactly matches the given semantics.
-Matcher hasSemantics(TestSemantics semantics) => new _HasSemantics(semantics);
+Matcher hasSemantics(TestSemantics semantics, {
+  bool ignoreRect: false,
+  bool ignoreTransform: false,
+}) => new _HasSemantics(semantics, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform);
 
 class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({

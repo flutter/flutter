@@ -2773,6 +2773,37 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
        _onVerticalDragUpdate = onVerticalDragUpdate,
        super(child);
 
+  /// When a [SemanticsNode] that is a direct child of this object's
+  /// [SemanticsNode] is tagged with [excludeFromScrolling] it will not be
+  /// part of the scrolling area for semantic purposes.
+  ///
+  /// This behavior is only active if the [SemanticsNode] of this
+  /// [RenderSemanticsGestureHandler] is tagged with [useTwoPaneSemantics].
+  /// Otherwise, the [excludeFromScrolling] tag is ignored.
+  ///
+  /// As an example, a [RenderSliver] that stays on the screen within a
+  /// [Scrollable] even though the user has scrolled past it (e.g. a pinned app
+  /// bar) can tag its [SemanticNode] with [excludeFromScrolling] to indicate
+  /// that it should no longer be considered for semantic actions related to
+  /// scrolling.
+  static const SemanticsTag excludeFromScrolling = const SemanticsTag('RenderSemanticsGestureHandler.excludeFromScrolling');
+
+  /// If the [SemanticsNode] of this [RenderSemanticsGestureHandler] is tagged
+  /// with [useTwoPaneSemantics], two semantics nodes will be used to represent
+  /// this render object in the semantics tree.
+  ///
+  /// Two semantics nodes are necessary to exclude certain child nodes (via the
+  /// [excludeFromScrolling] tag) from the scrollable area for semantic
+  /// purposes.
+  ///
+  /// If this tag is used, the first "outer" semantics node is the regular node
+  /// of this object. The second "inner" node is introduces as a child to that
+  /// node. All scrollable children are now a child of the inner node, which has
+  /// the semantic scrolling logic enabled. All children that have been
+  /// excluded from scrolling with [excludeFromScrolling] are turned into
+  /// children of the outer node.
+  static const SemanticsTag useTwoPaneSemantics = const SemanticsTag('RenderSemanticsGestureHandler.twoPane');
+
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
   ///
@@ -2864,6 +2895,43 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
   @override
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
+
+  SemanticsNode _innerNode;
+
+  @override
+  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
+    if (!node.hasTag(useTwoPaneSemantics)) {
+      super.assembleSemanticsNode(node, children);
+      return;
+    }
+    
+    _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
+    _innerNode
+      ..wasAffectedByClip = node.wasAffectedByClip
+      ..rect = Offset.zero & node.rect.size;
+
+    semanticsAnnotator(_innerNode);
+
+    final List<SemanticsNode> excluded = <SemanticsNode>[];
+    final List<SemanticsNode> included = <SemanticsNode>[];
+    for (SemanticsNode child in children) {
+      if (child.hasTag(excludeFromScrolling))
+        excluded.add(child);
+      else
+        included.add(child);
+    }
+    excluded.add(_innerNode);
+    node.addChildren(excluded);
+    _innerNode.addChildren(included);
+    _innerNode.finalizeChildren();
+    node.finalizeChildren();
+  }
+
+  @override
+  void resetSemantics() {
+    _innerNode?.reset();
+    super.resetSemantics();
+  }
 
   void _annotate(SemanticsNode node) {
     List<SemanticsAction> actions = <SemanticsAction>[];

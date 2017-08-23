@@ -46,6 +46,38 @@ typedef void SemanticsAnnotator(SemanticsNode semantics);
 /// Used by [SemanticsNode.visitChildren].
 typedef bool SemanticsNodeVisitor(SemanticsNode node);
 
+/// A tag for a [SemanticsNode].
+///
+/// Tags can be interpreted by the parent of a [SemanticsNode]
+/// and depending on the presence of a tag the parent can for example decide
+/// how to add the tagged note as a child. Tags are not sent to the engine.
+///
+/// As an example, the [RenderSemanticsGestureHandler] uses tags to determine
+/// if a child node should be excluded from the scrollable area for semantic
+/// purposes.
+///
+/// The provided [name] is only used for debugging. Two tags created with the
+/// same [name] and the `new` operator are not considered identical. However,
+/// two tags created with the same [name] and the `const` operator are always
+/// identical.
+class SemanticsTag {
+  /// Creates a [SemanticsTag].
+  ///
+  /// The provided [name] is only used for debugging. Two tags created with the
+  /// same [name] and the `new` operator are not considered identical. However,
+  /// two tags created with the same [name] and the `const` operator are always
+  /// identical.
+  const SemanticsTag(this.name);
+
+  /// A human-readable name for this tag used for debugging.
+  ///
+  /// This string is not used to determine if two tags are identical.
+  final String name;
+
+  @override
+  String toString() => '$runtimeType($name)';
+}
+
 /// Summary information about a [SemanticsNode] object.
 ///
 /// A semantics node might [SemanticsNode.mergeAllDescendantsIntoThisNode],
@@ -64,11 +96,13 @@ class SemanticsData {
     @required this.actions,
     @required this.label,
     @required this.rect,
+    @required this.tags,
     this.transform
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
-       assert(rect != null);
+       assert(rect != null),
+       assert(tags != null);
 
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;
@@ -81,6 +115,9 @@ class SemanticsData {
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
+
+  /// The set of [SemanticsTag]s associated with this node.
+  final Set<SemanticsTag> tags;
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
@@ -124,11 +161,12 @@ class SemanticsData {
         && typedOther.actions == actions
         && typedOther.label == label
         && typedOther.rect == rect
+        && setEquals(typedOther.tags, tags)
         && typedOther.transform == transform;
   }
 
   @override
-  int get hashCode => hashValues(flags, actions, label, rect, transform);
+  int get hashCode => hashValues(flags, actions, label, rect, tags, transform);
 }
 
 /// A node that represents some semantic data.
@@ -312,6 +350,37 @@ class SemanticsNode extends AbstractNode {
     }
   }
 
+  Set<SemanticsTag> _tags = new Set<SemanticsTag>();
+
+  /// Ensures that the [SemanticsNode] is or is not tagged with [tag].
+  ///
+  /// If [isPresent] is `true` it will ensure that the tag is present. If
+  /// [isPresent] is `false` it will ensure that the node is not tagged with
+  /// [tag].
+  ///
+  /// Tags are not sent to the engine. They can be used by a parent
+  /// [SemanticsNode] to figure out how to add the node as a child.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
+  ///  * [hasTag] to check if the node has a certain tag.
+  void ensureTag(SemanticsTag tag, { bool isPresent: true }) {
+    if (isPresent)
+      _tags.add(tag);
+    else
+      _tags.remove(tag);
+  }
+
+  /// Check if the [SemanticsNode] is tagged with [tag].
+  ///
+  /// Tags can be added and removed with [ensureTag].
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
+  bool hasTag(SemanticsTag tag) => _tags.contains(tag);
+
   /// Restore this node to its default state.
   void reset() {
     final bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
@@ -326,6 +395,9 @@ class SemanticsNode extends AbstractNode {
   List<SemanticsNode> _newChildren;
 
   /// Append the given children as children of this node.
+  ///
+  /// The [finalizeChildren] method must be called after all children have been
+  /// added.
   void addChildren(Iterable<SemanticsNode> children) {
     _newChildren ??= <SemanticsNode>[];
     _newChildren.addAll(children);
@@ -515,11 +587,13 @@ class SemanticsNode extends AbstractNode {
     int flags = _flags;
     int actions = _actions;
     String label = _label;
+    final Set<SemanticsTag> tags = new Set<SemanticsTag>.from(_tags);
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
         flags |= node._flags;
         actions |= node._actions;
+        tags.addAll(node._tags);
         if (node.label.isNotEmpty) {
           if (label.isEmpty)
             label = node.label;
@@ -535,7 +609,8 @@ class SemanticsNode extends AbstractNode {
       actions: actions,
       label: label,
       rect: rect,
-      transform: transform
+      transform: transform,
+      tags: tags,
     );
   }
 
@@ -598,6 +673,8 @@ class SemanticsNode extends AbstractNode {
       if ((_actions & action.index) != 0)
         buffer.write('; $action');
     }
+    for (SemanticsTag tag in _tags)
+      buffer.write('; $tag');
     if (hasCheckedState) {
       if (isChecked)
         buffer.write('; checked');
