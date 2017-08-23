@@ -4,6 +4,8 @@
 
 package io.flutter.app;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +21,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -154,8 +157,11 @@ public final class FlutterActivityDelegate
         if (flutterView == null) {
             flutterView = new FlutterView(activity);
             flutterView.setLayoutParams(matchParent);
+            activity.setContentView(flutterView);
             launchView = createLaunchView();
-            setContentView();
+            if (launchView != null) {
+                addLaunchView();
+            }
         }
 
         if (loadIntent(activity.getIntent())) {
@@ -310,7 +316,7 @@ public final class FlutterActivityDelegate
     /**
      * Extracts a {@link Drawable} from the parent activity's {@code windowBackground}.
      *
-     * {@code android:windowBackground} is specifically reused instead of a custom defined meta-data
+     * {@code android:windowBackground} is specifically reused instead of a other attributes
      * because the Android framework can display it fast enough when launching the app as opposed
      * to anything defined in the Activity subclass.
      *
@@ -336,6 +342,10 @@ public final class FlutterActivityDelegate
         }
     }
 
+    /**
+     * Let the user specify whether the activity's {@code windowBackground} is a launch screen
+     * and should be shown until the first frame via a <meta-data> tag in the activity.
+     */
     private Boolean showSplashScreenUntilFirstFrame() {
         try {
             ActivityInfo activityInfo = activity.getPackageManager().getActivityInfo(
@@ -349,41 +359,41 @@ public final class FlutterActivityDelegate
     }
 
     /**
-     * Sets the root content view of the activity.
+     * Show and then automatically animate out the launch view.
      *
-     * If no launch screens are defined in the user application's AndroidManifest.xml as the
-     * activity's {@code windowBackground}, then set the {@link FlutterView} as the root.
+     * If a launch screen is defined in the user application's AndroidManifest.xml as the
+     * activity's {@code windowBackground}, display it on top of the {@link FlutterView} and
+     * remove the activity's {@code windowBackground}.
      *
-     * Otherwise, extract the {@code windowBackground}'s {@link Drawable} onto a new launch View to
-     * put in front of the {@link FlutterView}, remove the activity's {@code windowBackground},
-     * and finally remove the launch view when the {@link FlutterView} renders its first frame.
+     * Fade it out and remove it when the {@link FlutterView} renders its first frame.
      */
-    private void setContentView() {
-        // No transient launch screen. Set the FlutterView as root.
+    private void addLaunchView() {
         if (launchView == null) {
-            activity.setContentView(flutterView);
             return;
         }
 
-        final FrameLayout layout = new FrameLayout(activity);
-        layout.setLayoutParams(matchParent);
-
-        layout.addView(flutterView);
-        layout.addView(launchView);
-
+        activity.addContentView(launchView, matchParent);
         flutterView.addFirstFrameListener(new FlutterView.FirstFrameListener() {
             @Override
             public void onFirstFrame() {
-                // Views need to be unparented before adding directly to activity.
-                layout.removeAllViews();
-                FlutterActivityDelegate.this.activity.setContentView(
-                    FlutterActivityDelegate.this.flutterView);
-                FlutterActivityDelegate.this.launchView = null;
+                FlutterActivityDelegate.this.launchView.animate()
+                    .alpha(0f)
+                    // Use Android's default animation duration.
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            // Views added to an Activity's addContentView is always added to its
+                            // root FrameLayout.
+                            ((ViewGroup) FlutterActivityDelegate.this.launchView.getParent())
+                                .removeView(FlutterActivityDelegate.this.launchView);
+                            FlutterActivityDelegate.this.launchView = null;
+                        }
+                    });
+
                 FlutterActivityDelegate.this.flutterView.removeFirstFrameListener(this);
             }
         });
 
-        activity.setContentView(layout);
         // Resets the activity theme from the one containing the launch screen in the window
         // background to a blank one since the launch screen is now in a view in front of the
         // FlutterView.
