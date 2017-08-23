@@ -13,19 +13,19 @@ import '../widgets/semantics_tester.dart';
 const List<String> menuItems = const <String>['one', 'two', 'three', 'four'];
 
 final Type dropdownButtonType = new DropdownButton<String>(
-  onChanged: (_){ },
-  items: const <DropdownMenuItem<String>>[]
+    onChanged: (_){ },
+    items: const <DropdownMenuItem<String>>[]
 ).runtimeType;
 
 Widget buildFrame({
-    Key buttonKey,
-    String value: 'two',
-    ValueChanged<String> onChanged,
-    bool isDense: false,
-    Widget hint,
-    List<String> items: menuItems,
-    FractionalOffset alignment: FractionalOffset.center,
-  }) {
+  Key buttonKey,
+  String value: 'two',
+  ValueChanged<String> onChanged,
+  bool isDense: false,
+  Widget hint,
+  List<String> items: menuItems,
+  FractionalOffset alignment: FractionalOffset.center,
+}) {
   return new MaterialApp(
     home: new Material(
       child: new Align(
@@ -54,7 +54,7 @@ Widget buildFrame({
 // The RenderParagraphs should be aligned, i.e. they should have the same
 // size and location.
 void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
-  final List<RenderBox> boxes = tester.renderObjectList(find.byKey(new ValueKey<String>(value + 'Text'))).toList();
+  final List<RenderBox> boxes = tester.renderObjectList(find.byKey(new ValueKey<String>(value + 'Text'), skipOffstage: false)).toList();
   expect(boxes.length, equals(2));
   final RenderBox box0 = boxes[0];
   final RenderBox box1 = boxes[1];
@@ -85,7 +85,7 @@ void main() {
 
     expect(value, equals('one'));
 
-    await tester.tap(find.text('three').last);
+    await tester.tap(find.text('three'));
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
@@ -100,7 +100,7 @@ void main() {
 
     await tester.pumpWidget(build());
 
-    await tester.tap(find.text('two').last);
+    await tester.tap(find.text('two'));
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
@@ -116,17 +116,17 @@ void main() {
 
     Widget build() {
       return new Navigator(
-        initialRoute: '/',
-        onGenerateRoute: (RouteSettings settings) {
-          return new MaterialPageRoute<Null>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new Material(
-                child: buildFrame(value: 'one', onChanged: didChangeValue),
-              );
-            },
-          );
-        }
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            return new MaterialPageRoute<Null>(
+              settings: settings,
+              builder: (BuildContext context) {
+                return new Material(
+                  child: buildFrame(value: 'one', onChanged: didChangeValue),
+                );
+              },
+            );
+          }
       );
     }
 
@@ -138,7 +138,7 @@ void main() {
 
     expect(value, equals('one'));
 
-    await tester.tap(find.text('three').last);
+    await tester.tap(find.text('three'));
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
@@ -153,7 +153,7 @@ void main() {
 
     await tester.pumpWidget(build());
 
-    await tester.tap(find.text('two').last);
+    await tester.tap(find.text('two'));
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
@@ -194,11 +194,11 @@ void main() {
 
     // We should have two copies of item 5, one in the menu and one in the
     // button itself.
-    expect(tester.elementList(find.text('5')), hasLength(2));
+    expect(tester.elementList(find.text('5', skipOffstage: false)), hasLength(2));
 
     // We should only have one copy of item 19, which is in the button itself.
     // The copy in the menu shouldn't be in the tree because it's off-screen.
-    expect(tester.elementList(find.text('19')), hasLength(1));
+    expect(tester.elementList(find.text('19', skipOffstage: false)), hasLength(1));
 
     expect(value, 4);
     await tester.tap(find.byWidget(button));
@@ -234,7 +234,7 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same origin and height as the dropdown button.
-    final List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
+    final List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'), skipOffstage: false)).toList();
     expect(itemBoxes.length, equals(2));
     for(RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
@@ -264,7 +264,7 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same vertical center as the button.
-    final List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
+    final List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'), skipOffstage: false)).toList();
     expect(itemBoxes.length, equals(2));
 
     // When isDense is true, the button's height is reduced. The menu items'
@@ -405,19 +405,19 @@ void main() {
     // so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.topLeft, value: menuItems.last)
+        buildFrame(alignment: FractionalOffset.topLeft, value: menuItems.last)
     );
     expect(menuRect.topLeft, Offset.zero);
     expect(menuRect.topRight, new Offset(menuRect.width, 0.0));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.topCenter, value: menuItems.last)
+        buildFrame(alignment: FractionalOffset.topCenter, value: menuItems.last)
     );
     expect(menuRect.topLeft, new Offset(buttonRect.left, 0.0));
     expect(menuRect.topRight, new Offset(buttonRect.right, 0.0));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.topRight, value: menuItems.last)
+        buildFrame(alignment: FractionalOffset.topRight, value: menuItems.last)
     );
     expect(menuRect.topLeft, new Offset(800.0 - menuRect.width, 0.0));
     expect(menuRect.topRight, const Offset(800.0, 0.0));
@@ -427,19 +427,19 @@ void main() {
     // is selected) and shifted horizontally so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.centerLeft, value: menuItems.first)
+        buildFrame(alignment: FractionalOffset.centerLeft, value: menuItems.first)
     );
     expect(menuRect.topLeft, new Offset(0.0, buttonRect.top));
     expect(menuRect.topRight, new Offset(menuRect.width, buttonRect.top));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.center, value: menuItems.first)
+        buildFrame(alignment: FractionalOffset.center, value: menuItems.first)
     );
     expect(menuRect.topLeft, buttonRect.topLeft);
     expect(menuRect.topRight, buttonRect.topRight);
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.centerRight, value: menuItems.first)
+        buildFrame(alignment: FractionalOffset.centerRight, value: menuItems.first)
     );
     expect(menuRect.topLeft, new Offset(800.0 - menuRect.width, buttonRect.top));
     expect(menuRect.topRight, new Offset(800.0, buttonRect.top));
@@ -449,19 +449,19 @@ void main() {
     // so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.bottomLeft, value: menuItems.first)
+        buildFrame(alignment: FractionalOffset.bottomLeft, value: menuItems.first)
     );
     expect(menuRect.bottomLeft, const Offset(0.0, 600.0));
     expect(menuRect.bottomRight, new Offset(menuRect.width, 600.0));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.bottomCenter, value: menuItems.first)
+        buildFrame(alignment: FractionalOffset.bottomCenter, value: menuItems.first)
     );
     expect(menuRect.bottomLeft, new Offset(buttonRect.left, 600.0));
     expect(menuRect.bottomRight, new Offset(buttonRect.right, 600.0));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.bottomRight, value: menuItems.first)
+        buildFrame(alignment: FractionalOffset.bottomRight, value: menuItems.first)
     );
     expect(menuRect.bottomLeft, new Offset(800.0 - menuRect.width, 600.0));
     expect(menuRect.bottomRight, const Offset(800.0, 600.0));
@@ -489,5 +489,29 @@ void main() {
     expect(semantics, isNot(includesNodeWith(label: menuItems[3])));
 
     semantics.dispose();
+  });
+
+  testWidgets('Semantics Tree contains only overlay element', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    final Finder onstageOne = find.byKey(const ValueKey<String>('oneText'));
+    final Finder allOnes = find.byKey(const ValueKey<String>('oneText'), skipOffstage: false);
+
+    await tester.pumpWidget(buildFrame(value: 'one', items: const <String>['one', 'two']));
+
+    expect(semantics, includesNodeWith(label: 'one', allowDuplicates: false));
+    expect(semantics, isNot(includesNodeWith(label: 'two', allowDuplicates: false)));
+    expect(tester.elementList(onstageOne), hasLength(1));
+    expect(tester.elementList(allOnes), hasLength(1));
+
+    // Expand dropdown
+    await tester.tap(find.text('one'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    // Expect all options, and no duplicates
+    expect(semantics, includesNodeWith(label: 'one', allowDuplicates: false));
+    expect(semantics, includesNodeWith(label: 'two', allowDuplicates: false));
+    expect(tester.elementList(onstageOne), hasLength(1));
+    expect(tester.elementList(allOnes), hasLength(2));
   });
 }

@@ -3964,6 +3964,9 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
   final bool excluding;
 
   @override
+  SingleChildRenderObjectElement createElement() => new _ExcludeSemanticsElement(this);
+
+  @override
   RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics(excluding: excluding);
 
   @override
@@ -3975,6 +3978,20 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<bool>('excluding', excluding));
+  }
+}
+
+class _ExcludeSemanticsElement extends SingleChildRenderObjectElement {
+  _ExcludeSemanticsElement(ExcludeSemantics widget) : super(widget);
+
+  @override
+  ExcludeSemantics get widget => super.widget;
+
+  @override
+  void visitChildrenForSemantics(ElementVisitor visitor) {
+    if (widget.excluding)
+      return;
+    super.visitChildrenForSemantics(visitor);
   }
 }
 

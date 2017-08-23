@@ -241,7 +241,8 @@ void main() {
       )
     );
 
-    RenderParagraph glyphText = tester.renderObject(find.byType(RichText));
+    final Finder richText = find.byType(RichText, skipOffstage: false);
+    RenderParagraph glyphText = tester.renderObject(richText);
 
     expect(glyphText.text.style.color, Colors.green);
     expect(glyphText.text.style.fontSize, 10.0);
@@ -254,13 +255,13 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 100)); // Halfway through the theme transition
 
-    glyphText = tester.renderObject(find.byType(RichText));
+    glyphText = tester.renderObject(find.byType(RichText, skipOffstage: false));
 
     expect(glyphText.text.style.color, Color.lerp(Colors.green, Colors.orange, 0.5));
     expect(glyphText.text.style.fontSize, 15.0);
 
     await tester.pump(const Duration(milliseconds: 100)); // Finish the transition
-    glyphText = tester.renderObject(find.byType(RichText));
+    glyphText = tester.renderObject(richText);
 
     expect(glyphText.text.style.color, Colors.orange);
     expect(glyphText.text.style.fontSize, 20.0);

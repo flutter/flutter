@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+Finder get findFadeTransition => find.all.byType(FadeTransition);
+
 void main() {
   testWidgets('AnimatedCrossFade test', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -26,7 +28,7 @@ void main() {
       )
     );
 
-    expect(find.byType(FadeTransition), findsNWidgets(2));
+    expect(findFadeTransition, findsNWidgets(2));
     RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
     expect(box.size.width, equals(100.0));
     expect(box.size.height, equals(100.0));
@@ -50,7 +52,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.byType(FadeTransition), findsNWidgets(2));
+    expect(findFadeTransition, findsNWidgets(2));
     box = tester.renderObject(find.byType(AnimatedCrossFade));
     expect(box.size.width, equals(150.0));
     expect(box.size.height, equals(150.0));
@@ -74,7 +76,7 @@ void main() {
       )
     );
 
-    expect(find.byType(FadeTransition), findsNWidgets(2));
+    expect(findFadeTransition, findsNWidgets(2));
     final RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
     expect(box.size.width, equals(200.0));
     expect(box.size.height, equals(200.0));
@@ -126,8 +128,8 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
 
-    final RenderBox box1 = tester.renderObject(find.byKey(firstKey));
-    final RenderBox box2 = tester.renderObject(find.byKey(secondKey));
+    final RenderBox box1 = tester.renderObject(find.byKey(firstKey, skipOffstage: false));
+    final RenderBox box2 = tester.renderObject(find.byKey(secondKey, skipOffstage: false));
     expect(box1.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
     expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
   });
@@ -144,7 +146,7 @@ void main() {
   testWidgets('AnimatedCrossFade preserves widget state', (WidgetTester tester) async {
     await tester.pumpWidget(crossFadeWithWatcher());
 
-    _TickerWatchingWidgetState findState() => tester.state(find.byType(_TickerWatchingWidget));
+    _TickerWatchingWidgetState findState() => tester.state(find.byType(_TickerWatchingWidget, skipOffstage: false));
     final _TickerWatchingWidgetState state = findState();
 
     await tester.pumpWidget(crossFadeWithWatcher(towardsSecond: true));
@@ -191,8 +193,8 @@ void main() {
       crossFadeState: CrossFadeState.showFirst,
       duration: const Duration(milliseconds: 50),
     ));
-    expect(find.text('AAA'), findsOneWidget);
-    expect(find.text('BBB'), findsOneWidget);
+    expect(find.all.text('AAA'), findsOneWidget);
+    expect(find.all.text('BBB'), findsOneWidget);
     await tester.pumpWidget(new AnimatedCrossFade(
       firstChild: const Text('AAA'),
       secondChild: const Text('BBB'),

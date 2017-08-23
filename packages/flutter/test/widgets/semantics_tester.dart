@@ -36,10 +36,10 @@ class TestSemantics {
     this.transform,
     this.children: const <TestSemantics>[],
   }) : assert(id != null),
-       assert(flags != null),
-       assert(label != null),
-       assert(rect != null),
-       assert(children != null);
+        assert(flags != null),
+        assert(label != null),
+        assert(rect != null),
+        assert(children != null);
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
@@ -50,10 +50,10 @@ class TestSemantics {
     this.transform,
     this.children: const <TestSemantics>[],
   }) : id = 0,
-       assert(flags != null),
-       assert(label != null),
-       rect = TestSemantics.rootRect,
-       assert(children != null);
+        assert(flags != null),
+        assert(label != null),
+        rect = TestSemantics.rootRect,
+        assert(children != null);
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for direct children of the root node.
@@ -73,9 +73,9 @@ class TestSemantics {
     Matrix4 transform,
     this.children: const <TestSemantics>[],
   }) : assert(flags != null),
-       assert(label != null),
-       transform = _applyRootChildScale(transform),
-       assert(children != null);
+        assert(label != null),
+        transform = _applyRootChildScale(transform),
+        assert(children != null);
 
   /// The unique identifier for this node.
   ///
@@ -244,17 +244,22 @@ class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({
     this.label,
     this.actions,
-}) : assert(label != null || actions != null);
+    this.allowDuplicates: true,
+  }) : assert(label != null || actions != null),
+        assert(allowDuplicates != null);
 
   final String label;
   final List<SemanticsAction> actions;
+  final bool allowDuplicates;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
     bool result = false;
+    int count = 0;
     SemanticsNodeVisitor visitor;
     visitor = (SemanticsNode node) {
       if (checkNode(node)) {
+        count += 1;
         result = true;
       } else {
         node.visitChildren(visitor);
@@ -263,7 +268,7 @@ class _IncludesNodeWith extends Matcher {
     };
     final SemanticsNode root = item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     visitor(root);
-    return result;
+    return result && (allowDuplicates || count <= 1);
   }
 
   bool checkNode(SemanticsNode node) {
@@ -280,12 +285,15 @@ class _IncludesNodeWith extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description.add('includes node with $_configAsString');
+    final String expectedCount = allowDuplicates
+        ? 'at least one'
+        : 'exactly one';
+    return description.add('includes $expectedCount node with $_configAsString');
   }
 
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    return mismatchDescription.add('could not find node with $_configAsString.\n$_matcherHelp');
+    return mismatchDescription.add('incorrect number of nodes with $_configAsString.\n$_matcherHelp');
   }
 
   String get _configAsString {
@@ -305,4 +313,4 @@ class _IncludesNodeWith extends Matcher {
 /// Asserts that a node in the semantics tree of [SemanticsTester] has [label] and [actions].
 ///
 /// If `null` is provided for either argument it will match against any value.
-Matcher includesNodeWith({ String label, List<SemanticsAction> actions }) => new _IncludesNodeWith(label: label, actions: actions);
+Matcher includesNodeWith({ String label, bool allowDuplicates: true, List<SemanticsAction> actions }) => new _IncludesNodeWith(label: label, allowDuplicates: allowDuplicates, actions: actions);

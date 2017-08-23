@@ -16,7 +16,7 @@ void main() {
         child: const Icon(const IconData(0xd0a0, fontFamily: 'Arial'))
       )
     );
-    final RichText text = tester.widget(find.byType(RichText));
+    final RichText text = tester.widget(find.all.byType(RichText));
     expect(text.text.style.color, const Color(0xFF666666).withOpacity(0.5));
   });
 
@@ -98,7 +98,7 @@ void main() {
       ),
     );
 
-    final RichText richText = tester.firstWidget(find.byType(RichText));
+    final RichText richText = tester.firstWidget(find.all.byType(RichText));
     expect(richText.text.style.fontFamily, equals('Roboto'));
   });
 }

@@ -500,7 +500,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Defined by WidgetsBindingObserver
   @override
   void didChangeMetrics() {
-    _removeDropdownRoute();
+    setState(() {
+      _removeDropdownRoute();
+    });
   }
 
   void _removeDropdownRoute() {
@@ -532,18 +534,22 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final RenderBox itemBox = context.findRenderObject();
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
 
-    assert(_dropdownRoute == null);
-    _dropdownRoute = new _DropdownRoute<T>(
-      items: widget.items,
-      buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
-      selectedIndex: _selectedIndex ?? 0,
-      elevation: widget.elevation,
-      theme: Theme.of(context, shadowThemeOnly: true),
-      style: _textStyle,
-    );
+    setState(() {
+      assert(_dropdownRoute == null);
+      _dropdownRoute = new _DropdownRoute<T>(
+        items: widget.items,
+        buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
+        selectedIndex: _selectedIndex ?? 0,
+        elevation: widget.elevation,
+        theme: Theme.of(context, shadowThemeOnly: true),
+        style: _textStyle,
+      );
+    });
 
     Navigator.push(context, _dropdownRoute).then<Null>((_DropdownRouteResult<T> newValue) {
-      _dropdownRoute = null;
+      setState(() {
+        _dropdownRoute = null;
+      });
       if (!mounted || newValue == null)
         return null;
       if (widget.onChanged != null)
@@ -581,23 +587,26 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       style: _textStyle,
       child: new SizedBox(
         height: widget.isDense ? _denseButtonHeight : null,
-        child: new Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // If value is null (then _selectedIndex is null) then we display
-            // the hint or nothing at all.
-            new IndexedStack(
-              index: _selectedIndex ?? hintIndex,
-              alignment: FractionalOffset.centerLeft,
-              children: items,
-            ),
-            new Icon(Icons.arrow_drop_down,
-              size: widget.iconSize,
-              // These colors are not defined in the Material Design spec.
-              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
-            ),
-          ],
+        child: new ExcludeSemantics(
+          excluding: _dropdownRoute != null,
+          child: new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // If value is null (then _selectedIndex is null) then we display
+              // the hint or nothing at all.
+              new IndexedStack(
+                index: _selectedIndex ?? hintIndex,
+                alignment: FractionalOffset.centerLeft,
+                children: items,
+              ),
+              new Icon(Icons.arrow_drop_down,
+                  size: widget.iconSize,
+                  // These colors are not defined in the Material Design spec.
+                  color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
+              ),
+            ],
+          ),
         ),
       ),
     );
