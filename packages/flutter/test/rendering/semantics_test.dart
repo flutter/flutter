@@ -98,6 +98,26 @@ void main() {
       expect(node, isNot(hasAction(actionTap)));
       expect(node, isNot(hasAction(actionLongPress)));
     });
+
+    test('scrolling and adjustment actions', () {
+      final SemanticsNode node = new SemanticsNode();
+
+      node.ensureHorizontalScrollingActions();
+      expect(node, hasAction(SemanticsAction.scrollUp));
+      expect(node, hasAction(SemanticsAction.scrollDown));
+
+      node.ensureHorizontalScrollingActions(arePresent: false);
+      expect(node, isNot(hasAction(SemanticsAction.scrollUp)));
+      expect(node, isNot(hasAction(SemanticsAction.scrollDown)));
+
+      node.ensureVerticalScrollingActions();
+      expect(node, hasAction(SemanticsAction.scrollLeft));
+      expect(node, hasAction(SemanticsAction.scrollRight));
+
+      node.ensureVerticalScrollingActions(arePresent: false);
+      expect(node, isNot(hasAction(SemanticsAction.scrollLeft)));
+      expect(node, isNot(hasAction(SemanticsAction.scrollRight)));
+    });
   });
 }
 
