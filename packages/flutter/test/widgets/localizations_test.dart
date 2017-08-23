@@ -39,9 +39,8 @@ class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizati
 
   @override
   bool shouldReload(SyncTestLocalizationsDelegate old) {
-    shouldReloadValues.add(super.shouldReload(old));
     shouldReloadValues.add(prefix != old.prefix);
-    return super.shouldReload(old) || prefix != old.prefix;
+    return prefix != old.prefix;
   }
 }
 
@@ -56,9 +55,8 @@ class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizat
 
   @override
   bool shouldReload(AsyncTestLocalizationsDelegate old) {
-    shouldReloadValues.add(super.shouldReload(old));
     shouldReloadValues.add(prefix != old.prefix);
-    return super.shouldReload(old) || prefix != old.prefix;
+    return prefix != old.prefix;
   }
 }
 
@@ -86,11 +84,17 @@ class MoreLocalizations {
 class SyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizations> {
   @override
   Future<MoreLocalizations> load(Locale locale) => MoreLocalizations.loadSync(locale);
+
+  @override
+  bool shouldReload(SyncMoreLocalizationsDelegate old) => false;
 }
 
 class AsyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizations> {
   @override
   Future<MoreLocalizations> load(Locale locale) => MoreLocalizations.loadAsync(locale);
+
+  @override
+  bool shouldReload(AsyncMoreLocalizationsDelegate old) => false;
 }
 
 Widget buildFrame({
@@ -354,7 +358,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('A: ---en_US'), findsOneWidget);
     expect(find.text('B: en_US'), findsOneWidget);
-    expect(modifiedDelegate.shouldReloadValues, <bool>[false, true]);
+    expect(modifiedDelegate.shouldReloadValues, <bool>[true]);
   });
 
   testWidgets('Localizations async delegate shouldReload returns true', (WidgetTester tester) async {
@@ -402,7 +406,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('A: ---en_US'), findsOneWidget);
     expect(find.text('B: en_US'), findsOneWidget);
-    expect(modifiedDelegate.shouldReloadValues, <bool>[false, true]);
+    expect(modifiedDelegate.shouldReloadValues, <bool>[true]);
   });
 
 }

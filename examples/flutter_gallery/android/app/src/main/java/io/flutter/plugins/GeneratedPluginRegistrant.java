@@ -8,6 +8,6 @@ import io.flutter.plugins.urllauncher.UrlLauncherPlugin;
  */
 public final class GeneratedPluginRegistrant {
   public static void registerWith(PluginRegistry registry) {
-    UrlLauncherPlugin.registerWith(registry.registrarFor("io.flutter.plugins.urllauncher.UrlLauncherPlugin"));
+    UrlLauncherPlugin.registerWith(registry.registrarFor("io.flutter.plugins.url_launcher.UrlLauncherPlugin"));
   }
 }

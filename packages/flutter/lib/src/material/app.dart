@@ -31,6 +31,9 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 
   @override
   Future<MaterialLocalizations> load(Locale locale) => MaterialLocalizations.load(locale);
+
+  @override
+  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
 }
 
 /// An application that uses material design.
@@ -312,27 +315,12 @@ class _MaterialAppState extends State<MaterialApp> {
     _heroController = new HeroController(createRectTween: _createRectTween);
   }
 
-  @override
-  void didUpdateWidget(MaterialApp old) {
-    super.didUpdateWidget(old);
-    /* TBD
-    final LocalizationsDelegate delegate = widget.localizationsDelegate;
-    final LocalizationsDelegate oldDelegate = old.localizationsDelegate;
-    if ((delegate == null && oldDelegate != null)
-        || (delegate != null && delegate.shouldReload(oldDelegate)))
-      _localizationsDelegate = _createLocalizationsDelegate();
-    */
-  }
-
   // Combine the Localizations for Material with the ones contributed
   // by the localizationsDelegates parameter, if any.
-  Iterable<LocalizationsDelegate<dynamic>> _createLocalizationsDelegates() {
-    final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
-      const _MaterialLocalizationsDelegate(),
-    ];
+  Iterable<LocalizationsDelegate<dynamic>> _createLocalizationsDelegates() sync* {
+    yield const _MaterialLocalizationsDelegate();
     if (widget.localizationsDelegates != null)
-      delegates.addAll(widget.localizationsDelegates);
-    return delegates;
+      yield* widget.localizationsDelegates;
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {

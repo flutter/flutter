@@ -89,9 +89,7 @@ abstract class LocalizationsDelegate<T> {
   /// This method is called whenever its [Localizations] widget is
   /// rebuilt. If it returns true then dependent widgets will be rebuilt
   /// after [load] has completed.
-  bool shouldReload(covariant LocalizationsDelegate<T> old) {
-    return old == null || runtimeType != old.runtimeType;
-  }
+  bool shouldReload(covariant LocalizationsDelegate<T> old);
 }
 
 class _LocalizationsScope extends InheritedWidget {
@@ -269,8 +267,10 @@ class _LocalizationsState extends State<Localizations> {
       return true;
     final List<LocalizationsDelegate<dynamic>> delegates = widget.delegates.toList();
     final List<LocalizationsDelegate<dynamic>> oldDelegates = old.delegates.toList();
-    for (int i = 0; i < delegates.length; i++) {
-      if (delegates[i].shouldReload(oldDelegates[i]))
+    for (int i = 0; i < delegates.length; i += 1) {
+      final LocalizationsDelegate<dynamic> delegate = delegates[i];
+      final LocalizationsDelegate<dynamic> oldDelegate = oldDelegates[i];
+      if (delegate.runtimeType != oldDelegate.runtimeType || delegate.shouldReload(oldDelegate))
         return true;
     }
     return false;

@@ -24,6 +24,9 @@ import 'stock_types.dart';
 class _StocksLocalizationsDelegate extends LocalizationsDelegate<StockStrings> {
   @override
   Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
+
+  @override
+  bool shouldReload(_StocksLocalizationsDelegate old) => false;
 }
 
 class StocksApp extends StatefulWidget {
@@ -116,7 +119,7 @@ class StocksAppState extends State<StocksApp> {
       title: 'Stocks',
       theme: theme,
       localizationsDelegates: <_StocksLocalizationsDelegate>[
-        new _StocksLocalizationsDelegate()
+        new _StocksLocalizationsDelegate(),
       ],
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
