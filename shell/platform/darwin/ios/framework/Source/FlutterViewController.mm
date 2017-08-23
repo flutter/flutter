@@ -313,6 +313,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 - (void)surfaceUpdated:(BOOL)appeared {
   FTL_CHECK(_platformView != nullptr);
 
+  // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and GPU thread.
   if (appeared) {
     _platformView->NotifyCreated();
   } else {
@@ -377,11 +378,14 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 
 - (void)applicationDidEnterBackground:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationDidEnterBackground");
+  [self surfaceUpdated:NO];
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.paused"];
 }
 
 - (void)applicationWillEnterForeground:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationWillEnterForeground");
+  if (_viewportMetrics.physical_width)
+    [self surfaceUpdated:YES];
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.inactive"];
 }
 
