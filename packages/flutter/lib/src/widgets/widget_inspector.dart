@@ -198,7 +198,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
       if (selection != null) {
         // Notify debuggers to open an inspector on the object.
         developer.inspect(selection.current);
-        print(selection.current.toStringDeep());
       }
     }
     setState(() {

@@ -1246,7 +1246,7 @@ abstract class RenderSliver extends RenderObject {
       if (debugPaintSizeEnabled) {
         final double strokeWidth = math.min(4.0, geometry.paintExtent / 30.0);
         final Paint paint = new Paint()
-          ..color = debugPaintSliverArrowColor
+          ..color = const Color(0xFF33CC33)
           ..strokeWidth = strokeWidth
           ..style = PaintingStyle.stroke
           ..maskFilter = new MaskFilter.blur(BlurStyle.solid, strokeWidth);
