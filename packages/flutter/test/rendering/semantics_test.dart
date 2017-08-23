@@ -103,20 +103,30 @@ void main() {
       final SemanticsNode node = new SemanticsNode();
 
       node.ensureHorizontalScrollingActions();
-      expect(node, hasAction(SemanticsAction.scrollUp));
-      expect(node, hasAction(SemanticsAction.scrollDown));
-
-      node.ensureHorizontalScrollingActions(arePresent: false);
-      expect(node, isNot(hasAction(SemanticsAction.scrollUp)));
-      expect(node, isNot(hasAction(SemanticsAction.scrollDown)));
-
-      node.ensureVerticalScrollingActions();
       expect(node, hasAction(SemanticsAction.scrollLeft));
       expect(node, hasAction(SemanticsAction.scrollRight));
 
-      node.ensureVerticalScrollingActions(arePresent: false);
+      node.ensureHorizontalScrollingActions(arePresent: false);
       expect(node, isNot(hasAction(SemanticsAction.scrollLeft)));
       expect(node, isNot(hasAction(SemanticsAction.scrollRight)));
+
+
+      node.ensureVerticalScrollingActions();
+      expect(node, hasAction(SemanticsAction.scrollUp));
+      expect(node, hasAction(SemanticsAction.scrollDown));
+
+      node.ensureVerticalScrollingActions(arePresent: false);
+      expect(node, isNot(hasAction(SemanticsAction.scrollUp)));
+      expect(node, isNot(hasAction(SemanticsAction.scrollDown)));
+
+
+      node.ensureAdjustmentActions();
+      expect(node, hasAction(SemanticsAction.decrease));
+      expect(node, hasAction(SemanticsAction.increase));
+
+      node.ensureAdjustmentActions(arePresent: false);
+      expect(node, isNot(hasAction(SemanticsAction.decrease)));
+      expect(node, isNot(hasAction(SemanticsAction.increase)));
     });
   });
 }
