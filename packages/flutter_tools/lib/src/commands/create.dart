@@ -36,11 +36,26 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: false,
       help: 'Also add a flutter_driver dependency and generate a sample \'flutter drive\' test.'
     );
+    argParser.addOption(
+      'template',
+      abbr: 't',
+      allowed: <String>['app', 'package', 'plugin'],
+      help: 'Specify the type of project to create.',
+      valueHelp: 'type',
+      allowedHelp: <String, String>{
+        'app': '(default) Generate a Flutter application.',
+        'package': 'Generate a shareable Flutter project containing modular Dart code.',
+        'plugin': 'Generate a shareable Flutter project containing an API in Dart '
+            'code with a platform-specific implementation for Android, for '
+            'iOS code, or for both.',
+      },
+      defaultsTo: 'app',
+    );
     argParser.addFlag(
-      'plugin',
-      negatable: true,
-      defaultsTo: false,
-      help: 'Generate a Flutter plugin project.'
+        'plugin',
+        negatable: false,
+        defaultsTo: false,
+        hide: true,
     );
     argParser.addOption(
       'description',
@@ -110,7 +125,11 @@ class CreateCommand extends FlutterCommand {
     if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
-    final bool generatePlugin = argResults['plugin'];
+    String template = argResults['template'];
+    if (argResults['plugin'])
+      template = 'plugin';
+    final bool generatePlugin = template == 'plugin';
+    final bool generatePackage = template == 'package';
 
     final Directory projectDir = fs.directory(argResults.rest.first);
     String dirPath = fs.path.normalize(projectDir.absolute.path);
@@ -142,6 +161,23 @@ class CreateCommand extends FlutterCommand {
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
     int generatedCount = 0;
+    if (generatePackage) {
+      final String description = argResults.wasParsed('description')
+          ? argResults['description']
+          : 'A new flutter package project.';
+      templateContext['description'] = description;
+      generatedCount += _renderTemplate('package', dirPath, templateContext);
+
+      if (argResults['pub'])
+        await pubGet(directory: dirPath);
+
+      final String relativePath = fs.path.relative(dirPath);
+      printStatus('Wrote $generatedCount files.');
+      printStatus('');
+      printStatus('Your plugin code is in lib/$projectName.dart in the $relativePath directory.');
+      return;
+    }
+
     String appPath = dirPath;
     if (generatePlugin) {
       final String description = argResults.wasParsed('description')
@@ -182,7 +218,7 @@ class CreateCommand extends FlutterCommand {
 
     updateXcodeGeneratedProperties(
       projectPath: appPath,
-      mode: BuildMode.debug,
+      buildInfo: BuildInfo.debug,
       target: flx.defaultMainPath,
       hasPlugins: generatePlugin,
     );

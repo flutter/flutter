@@ -23,6 +23,14 @@ TaskFunction createPlatformInteractionTest() {
   );
 }
 
+TaskFunction createFlavorsTest() {
+  return new DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/flavors',
+    'lib/main.dart',
+    extraOptions: <String>['--flavor', 'paid']
+  );
+}
+
 TaskFunction createPlatformChannelSampleTest() {
   return new DriverTest(
     '${flutterDirectory.path}/examples/platform_channel',
@@ -32,10 +40,16 @@ TaskFunction createPlatformChannelSampleTest() {
 
 class DriverTest {
 
-  DriverTest(this.testDirectory, this.testTarget);
+  DriverTest(
+    this.testDirectory,
+    this.testTarget, {
+      this.extraOptions = const <String>[],
+    }
+  );
 
   final String testDirectory;
   final String testTarget;
+  final List<String> extraOptions;
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
@@ -46,14 +60,15 @@ class DriverTest {
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
-
-      await flutter('drive', options: <String>[
+      final List<String> options = <String>[
         '-v',
         '-t',
         testTarget,
         '-d',
         deviceId,
-      ]);
+      ];
+      options.addAll(extraOptions);
+      await flutter('drive', options: options);
 
       return new TaskResult.success(null);
     });

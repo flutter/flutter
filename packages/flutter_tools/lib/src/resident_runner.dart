@@ -209,7 +209,7 @@ class FlutterDevice {
     bool shouldBuild,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName = getModeName(hotRunner.debuggingOptions.buildMode);
+    final String modeName = hotRunner.debuggingOptions.buildInfo.modeName;
     printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
@@ -235,7 +235,6 @@ class FlutterDevice {
     final bool hasDirtyDependencies = hotRunner.hasDirtyDependencies(this);
     final Future<LaunchResult> futureResult = device.startApp(
       package,
-      hotRunner.debuggingOptions.buildMode,
       mainPath: hotRunner.mainPath,
       debuggingOptions: hotRunner.debuggingOptions,
       platformArgs: platformArgs,
@@ -269,7 +268,7 @@ class FlutterDevice {
       applicationBinary: coldRunner.applicationBinary
     );
 
-    final String modeName = getModeName(coldRunner.debuggingOptions.buildMode);
+    final String modeName = coldRunner.debuggingOptions.buildInfo.modeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     if (coldRunner.mainPath == null) {
       assert(prebuiltMode);
@@ -296,7 +295,6 @@ class FlutterDevice {
     final bool hasDirtyDependencies = coldRunner.hasDirtyDependencies(this);
     final LaunchResult result = await device.startApp(
       package,
-      coldRunner.debuggingOptions.buildMode,
       mainPath: coldRunner.mainPath,
       debuggingOptions: coldRunner.debuggingOptions,
       platformArgs: platformArgs,
@@ -386,9 +384,9 @@ abstract class ResidentRunner {
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
 
-  bool get isRunningDebug => debuggingOptions.buildMode == BuildMode.debug;
-  bool get isRunningProfile => debuggingOptions.buildMode == BuildMode.profile;
-  bool get isRunningRelease => debuggingOptions.buildMode == BuildMode.release;
+  bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
+  bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
+  bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
 
   /// Start the app and keep the process running during its lifetime.
