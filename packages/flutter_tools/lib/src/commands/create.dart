@@ -45,9 +45,8 @@ class CreateCommand extends FlutterCommand {
       allowedHelp: <String, String>{
         'app': '(default) Generate a Flutter application.',
         'package': 'Generate a shareable Flutter project containing modular Dart code.',
-        'plugin': 'Generate a shareable Flutter project containing an API in Dart '
-            'code with a platform-specific implementation for Android, for '
-            'iOS code, or for both.',
+        'plugin': 'Generate a shareable Flutter project containing an API in Dart code\n'
+            'with a platform-specific implementation for Android, for iOS code, or for both.',
       },
       defaultsTo: 'app',
     );
