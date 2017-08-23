@@ -12,7 +12,6 @@ import 'arc.dart';
 import 'colors.dart';
 import 'floating_action_button.dart';
 import 'icons.dart';
-import 'localized_material_resources.dart';
 import 'material_localizations.dart';
 import 'page.dart';
 import 'theme.dart';
