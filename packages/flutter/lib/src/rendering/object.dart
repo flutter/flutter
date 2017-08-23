@@ -2739,11 +2739,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// this object. The function returned by this function will be used to
   /// annotate the [SemanticsNode] for this object.
   ///
-  /// Semantic annotations are persistent. Values set in one pass will still be
-  /// set in the next pass. Therefore it is important to explicitly set fields
-  /// to false once they are no longer true; setting them to true when they are
-  /// to be enabled, and not setting them at all when they are not, will mean
-  /// they remain set once enabled once and will never get unset.
+  /// Semantic annotations *may* be persistent between subsequent calls to an
+  /// annotator, but there is no guarantee for that. It is important that an
+  /// annotator always updates a given [SemanticsNode] to reflect the current
+  /// state of this [RenderObject]. In practise, this means that a
+  /// [SemanticsAnnotator] should in each call explicitly set all applicable
+  /// fields to true even if they were already true during the previous
+  /// invocation as there is no guarantee for persistence. Furthermore, fields
+  /// that have been true before, but are no longer, should always be set to
+  /// false explicitly in the next invocation as the previous setting might
+  /// have been persisted. The same applies to actions and tags.
   ///
   /// If the return value will change from null to non-null (or vice versa), and
   /// [isSemanticBoundary] isn't true, then the associated call to

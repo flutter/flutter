@@ -603,8 +603,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
   SemanticsAnnotator get semanticsAnnotator => _annotate;
 
   void _annotate(SemanticsNode semantics) {
-    if (isInteractive)
-      semantics.addAdjustmentActions();
+    semantics.ensureAdjustmentActions(arePresent: isInteractive);
   }
 
   @override

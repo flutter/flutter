@@ -328,8 +328,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
   SemanticsAnnotator get semanticsAnnotator => _annotate;
 
   void _annotate(SemanticsNode semantics) {
-    if (isInteractive)
-      semantics.addAdjustmentActions();
+    semantics.ensureAdjustmentActions(arePresent: isInteractive);
   }
 
   @override

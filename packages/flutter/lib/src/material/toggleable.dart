@@ -292,8 +292,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
     semantics
       ..hasCheckedState = true
       ..isChecked = _value;
-    if (isInteractive)
-      semantics.addAction(SemanticsAction.tap);
+    semantics.ensureAction(SemanticsAction.tap, isPresent: isInteractive);
   }
 
   @override

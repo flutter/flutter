@@ -19,7 +19,7 @@ export 'dart:ui' show SemanticsAction;
 ///
 /// The handler will only be called for a particular flag if that flag is set
 /// (e.g. [performAction] will only be called with [SemanticsAction.tap] if
-/// [SemanticsNode.addAction] was called for [SemanticsAction.tap].)
+/// [SemanticsNode.ensureAction] was called for [SemanticsAction.tap].)
 abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   /// Called when the object implementing this interface receives a
   /// [SemanticsAction]. For example, if the user of an accessibility tool
@@ -37,6 +37,20 @@ abstract class SemanticsActionHandler { // ignore: one_member_abstracts
 ///
 /// See [RenderObject.semanticsAnnotator] for details on the
 /// contract that semantic annotators must follow.
+///
+/// The [semantics] object handed to a [SemanticsAnnotator] can be in one of two
+/// states:
+/// 1. The provided [semantics] object is completely blank (it's either new or
+///    has been reset).
+/// 2. The provided [semantics] object has some settings persisted from a
+///    previous call to the same [SemanticsAnnotator].
+/// Regardless of the state, it's the [SemanticsAnnotator]'s job to bring the
+/// [semantics] object into sync with the current state of the corresponding
+/// [RenderObject]. For that, the [SemanticsAnnotator] should allways add all
+/// current settings (e.g. actions, flags, tags) to [semantics] regardless of
+/// whether they changed between the current and the previous invocation.
+/// Furthermore, it needs to remove all no longer applicable settings from
+/// [semantics], that might have been added during a previous invocation.
 typedef void SemanticsAnnotator(SemanticsNode semantics);
 
 /// Signature for a function that is called for each [SemanticsNode].
@@ -252,35 +266,76 @@ class SemanticsNode extends AbstractNode {
 
   int _actions = 0;
 
-  /// Adds the given action to the set of semantic actions.
+  /// Ensures that the given [action] is or is not part of the set of semantic
+  /// actions.
+  ///
+  /// If [isPresent] is `true` it will ensure that the action is present. If
+  /// [isPresent] is `false` it will ensure that the action is not part of the
+  /// set of semantic actions that can be performed by this node.
   ///
   /// If the user chooses to perform an action,
   /// [SemanticsActionHandler.performAction] will be called with the chosen
   /// action.
-  void addAction(SemanticsAction action) {
+  ///
+  /// [SemanticsAction] added by [ensureAction] *might* be persisted between
+  /// subsequent calls to a given [SemanticsAnnotator]. However, there is no
+  /// grantee for that. A [SemanticsAnnotator] needs to ensure that the
+  /// [SemanticsNode] it is annotating is in the correct state whether it was
+  /// given a fresh, never annotated node or whether it was given a node that
+  /// has some actions persisted from a previous call to the same
+  /// [SemanticsAnnotator]. In other words: The call to [ensureAction] should
+  /// usually not be guarded by a condition in a [SemanticsAnnotator]. Instead,
+  /// the condition should be used to determine the value of the [isPresent]
+  /// parameter.
+  ///
+  /// ## Sample code
+  ///
+  /// A button, that is only tap-able in the active state, should call
+  /// [ensureAction] in its [SemanticsAnnotator] returned by
+  /// [RenderObject.semanticsAnnotator] as follows:
+  ///
+  /// ```dart
+  /// bool get _active => true;
+  ///
+  /// void _annotate(SemanticsNode node) {
+  ///   node.ensureAction(SemanticsAction.tap, isPresent: _active);
+  /// }
+  /// ```
+  ///
+  /// It would be incorrect to guard the call to [ensureAction] with an
+  /// `if (active)` clause, if `active` could ever change from `true` to
+  /// `false` as that wouldn't remove the action reliably from the annotated
+  /// [SemanticsNode].
+  void ensureAction(SemanticsAction action, { bool isPresent: true }) {
+    assert(action != null);
+    assert(isPresent != null);
+
     final int index = action.index;
-    if ((_actions & index) == 0) {
+    if (isPresent && (_actions & index) == 0) {
       _actions |= index;
+      _markDirty();
+    } else if (!isPresent && (_actions & index) != 0) {
+      _actions &= ~index;
       _markDirty();
     }
   }
 
   /// Adds the [SemanticsAction.scrollLeft] and [SemanticsAction.scrollRight] actions.
-  void addHorizontalScrollingActions() {
-    addAction(SemanticsAction.scrollLeft);
-    addAction(SemanticsAction.scrollRight);
+  void ensureHorizontalScrollingActions({ bool arePresent: true }) {
+    ensureAction(SemanticsAction.scrollLeft, isPresent: arePresent);
+    ensureAction(SemanticsAction.scrollRight, isPresent: arePresent);
   }
 
   /// Adds the [SemanticsAction.scrollUp] and [SemanticsAction.scrollDown] actions.
-  void addVerticalScrollingActions() {
-    addAction(SemanticsAction.scrollUp);
-    addAction(SemanticsAction.scrollDown);
+  void ensureVerticalScrollingActions({ bool arePresent: true }) {
+    ensureAction(SemanticsAction.scrollUp, isPresent: arePresent);
+    ensureAction(SemanticsAction.scrollDown, isPresent: arePresent);
   }
 
   /// Adds the [SemanticsAction.increase] and [SemanticsAction.decrease] actions.
-  void addAdjustmentActions() {
-    addAction(SemanticsAction.increase);
-    addAction(SemanticsAction.decrease);
+  void ensureAdjustmentActions({ bool arePresent: true }) {
+    ensureAction(SemanticsAction.increase, isPresent: arePresent);
+    ensureAction(SemanticsAction.decrease, isPresent: arePresent);
   }
 
   bool _canPerformAction(SemanticsAction action) {
@@ -366,6 +421,8 @@ class SemanticsNode extends AbstractNode {
   ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
   ///  * [hasTag] to check if the node has a certain tag.
   void ensureTag(SemanticsTag tag, { bool isPresent: true }) {
+    assert(tag != null);
+    assert(isPresent != null);
     if (isPresent)
       _tags.add(tag);
     else

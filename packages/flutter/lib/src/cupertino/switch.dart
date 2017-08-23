@@ -362,8 +362,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     semantics
       ..hasCheckedState = true
       ..isChecked = _value;
-    if (isInteractive)
-      semantics.addAction(SemanticsAction.tap);
+    semantics.ensureAction(SemanticsAction.tap, isPresent: isInteractive);
   }
 
   @override

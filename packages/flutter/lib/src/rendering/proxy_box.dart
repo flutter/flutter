@@ -2934,25 +2934,18 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   void _annotate(SemanticsNode node) {
-    List<SemanticsAction> actions = <SemanticsAction>[];
-    if (onTap != null)
-      actions.add(SemanticsAction.tap);
-    if (onLongPress != null)
-      actions.add(SemanticsAction.longPress);
-    if (onHorizontalDragUpdate != null) {
-      actions.add(SemanticsAction.scrollRight);
-      actions.add(SemanticsAction.scrollLeft);
-    }
-    if (onVerticalDragUpdate != null) {
-      actions.add(SemanticsAction.scrollUp);
-      actions.add(SemanticsAction.scrollDown);
-    }
+    _ensureAction(SemanticsAction.tap, node, onTap);
+    _ensureAction(SemanticsAction.longPress, node, onLongPress);
+    _ensureAction(SemanticsAction.scrollRight, node, onHorizontalDragUpdate);
+    _ensureAction(SemanticsAction.scrollLeft, node, onHorizontalDragUpdate);
+    _ensureAction(SemanticsAction.scrollUp, node, onVerticalDragUpdate);
+    _ensureAction(SemanticsAction.scrollDown, node, onVerticalDragUpdate);
+  }
 
-    // If a set of validActions has been provided only expose those.
-    if (validActions != null)
-      actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
-
-    actions.forEach(node.addAction);
+  void _ensureAction(SemanticsAction action, SemanticsNode node, Function handler) {
+    node.ensureAction(action,
+      isPresent: handler != null && validActions?.contains(action) ?? true
+    );
   }
 
   @override
