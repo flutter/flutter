@@ -65,6 +65,61 @@ void main() {
 
       expect(node.getSemanticsData().tags, expected);
     });
-  });
 
+    test('actions', () {
+      final SemanticsNode node = new SemanticsNode();
+      const SemanticsAction actionTap = SemanticsAction.tap;
+      const SemanticsAction actionLongPress = SemanticsAction.longPress;
+
+      expect(node, isNot(hasAction(actionTap)));
+      expect(node, isNot(hasAction(actionLongPress)));
+
+      node.ensureAction(actionTap);
+      expect(node, hasAction(actionTap));
+      expect(node, isNot(hasAction(actionLongPress)));
+
+      node.ensureAction(actionLongPress, isPresent: false);
+      expect(node, hasAction(actionTap));
+      expect(node, isNot(hasAction(actionLongPress)));
+
+      node.ensureAction(actionLongPress, isPresent: true);
+      expect(node, hasAction(actionTap));
+      expect(node, hasAction(actionLongPress));
+
+      node.ensureAction(actionLongPress, isPresent: true);
+      expect(node, hasAction(actionTap));
+      expect(node, hasAction(actionLongPress));
+
+      node.ensureAction(actionTap, isPresent: false);
+      expect(node, isNot(hasAction(actionTap)));
+      expect(node, hasAction(actionLongPress));
+
+      node.ensureAction(actionLongPress, isPresent: false);
+      expect(node, isNot(hasAction(actionTap)));
+      expect(node, isNot(hasAction(actionLongPress)));
+    });
+  });
+}
+
+Matcher hasAction(SemanticsAction action) => new _HasAction(action);
+
+class _HasAction extends Matcher {
+  const _HasAction(this.action,) : assert(action != null);
+
+  final SemanticsAction action;
+
+  @override
+  bool matches(covariant SemanticsNode node, Map<dynamic, dynamic> matchState) {
+    return node.getSemanticsData().hasAction(action);
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('has $action');
+  }
+
+  @override
+  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    return mismatchDescription.add('node does not have $action');
+  }
 }
