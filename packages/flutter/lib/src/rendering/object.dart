@@ -2565,10 +2565,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// local [SemanticsNode] (e.g. changing a label or flag) without affecting
   /// other nodes in the tree.
   ///
-  /// In practice,[onlyLocalUpdates] has to be set to `false` in the following
-  /// cases as they will change the shape of the tree:
-  /// a. [isSemanticBoundary] changed its value.
-  /// b. [semanticsAnnotator] changed from or to returning `null` and
+  /// [onlyLocalUpdates] has to be set to `false` in the following cases as they
+  /// will change the shape of the tree:
+  /// 1. [isSemanticBoundary] changed its value.
+  /// 2. [semanticsAnnotator] changed from or to returning `null` and
   ///    [isSemanticBoundary] isn't `true`.
   ///
   /// [noGeometry] should be set to `true` to reduce cost if the geometry (e.g.
