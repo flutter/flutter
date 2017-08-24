@@ -255,6 +255,8 @@ class Poller {
     _timer?.cancel();
     _timer = null;
   }
+}
+
 /// Returns a [Future] that completes when all given [Future]s complete.
 ///
 /// Uses [Future.wait] but removes null elements from the provided
