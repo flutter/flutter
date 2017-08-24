@@ -91,7 +91,7 @@ class AssetBundle {
         return result;
     }
     Map<String, dynamic> manifestDescriptor = manifest;
-    String appName = manifestDescriptor['name'];
+    final String appName = manifestDescriptor['name'];
     manifestDescriptor = manifestDescriptor['flutter'] ?? <String, dynamic>{};
     final String assetBasePath = fs.path.dirname(fs.path.absolute(manifestPath));
 
@@ -121,23 +121,24 @@ class AssetBundle {
     for (String packageName in packageMap.map.keys) {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
-        String packageManifestPath = package.resolve('../pubspec.yaml').path;
-        Object packageManifest = _loadFlutterManifest(packageManifestPath);
+        final String packageManifestPath = package.resolve('../pubspec.yaml').path;
+        final Object packageManifest = _loadFlutterManifest(packageManifestPath);
         if (packageManifest == null)
           continue;
         final int result = await _validateFlutterManifest(packageManifest);
         if (result == 0) {
-          Map<String, dynamic> packageManifestDescriptor = packageManifest;
+          final Map<String, dynamic> packageManifestDescriptor = packageManifest;
           // Skip the app itself.
-          if (packageManifestDescriptor['name'] == appName) continue;
+          if (packageManifestDescriptor['name'] == appName)
+            continue;
           if (packageManifestDescriptor.containsKey('flutter')) {
-            packageManifestDescriptor = packageManifestDescriptor['flutter'];
             final String packageBasePath = fs.path.dirname(packageManifestPath);
             assetVariants.addAll(_parseAssets(
                 packageMap,
-                packageManifestDescriptor,
+                packageManifestDescriptor['flutter'],
                 packageBasePath,
-                packageKey: packageName));
+                packageKey: packageName,
+            ));
           }
         }
       }
@@ -233,20 +234,21 @@ class _Asset {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    final _Asset otherAsset = other;
-    return base == otherAsset.base &&
-        assetEntry == otherAsset.assetEntry &&
-        relativePath == otherAsset.relativePath &&
-        source == otherAsset.source;
+    if (identical(other, this))
+      return true;
+    if (other is! _Asset)
+      return false;
+    return base == other.base &&
+        assetEntry == other.assetEntry &&
+        relativePath == other.relativePath &&
+        source == other.source;
   }
 
   @override
   int get hashCode =>
-      base.hashCode +
-      assetEntry.hashCode +
-      relativePath.hashCode +
+      base.hashCode ^
+      assetEntry.hashCode ^
+      relativePath.hashCode ^
       source.hashCode;
 }
 

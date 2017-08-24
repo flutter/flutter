@@ -600,7 +600,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// The [assetName] and [scale] arguments must not be null. The [scale] arguments
   /// defaults to 1.0. The [bundle] argument may be null, in which case the
   /// bundle provided in the [ImageConfiguration] passed to the [resolve] call
-  /// will be used instead. The [package] argument should only be non-null when
+  /// will be used instead. The [package] argument should be non-null when
   /// used in a package implementation. It is used to prefix the name in order
   /// to disambiguate assets in an app.
   const ExactAssetImage(this.assetName, {
