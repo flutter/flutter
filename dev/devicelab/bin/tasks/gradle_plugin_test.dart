@@ -85,16 +85,20 @@ bool _hasMultipleOccurrences(String text, Pattern pattern) {
 }
 
 class FlutterProject {
-  FlutterProject(this.parent, this.name);
+  FlutterProject(this.parent, this.name, this.javaPath);
 
-  Directory parent;
-  String name;
+  final Directory parent;
+  final String name;
+  final String javaPath;
 
   static Future<FlutterProject> create(Directory directory, String name) async {
     await inDirectory(directory, () async {
       await flutter('create', options: <String>[name]);
     });
-    return new FlutterProject(directory, name);
+    final String flutterDoctor = await evalFlutter('doctor');
+    final RegExp javaPathExtractor = new RegExp(r'Android Studio at (.*)');
+    final String javaPath = javaPathExtractor.firstMatch(flutterDoctor).group(1) + '/jre';
+    return new FlutterProject(directory, name, javaPath);
   }
 
   String get rootPath => path.join(parent.path, name);
@@ -157,6 +161,7 @@ android {
       './gradlew',
       <String>['app:$task'],
       workingDirectory: androidPath,
+      environment: <String, String>{ 'JAVA_HOME': javaPath }
     );
   }
 
