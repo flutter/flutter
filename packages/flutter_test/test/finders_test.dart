@@ -13,24 +13,24 @@ void main() {
             sizing: StackFit.expand,
             children: <Widget>[
               new GestureDetector(
+                key: const ValueKey<int>(0),
                 behavior: HitTestBehavior.opaque,
                 onTap: () {},
-                child: new SizedBox.expand(
-                  key: const ValueKey<String>('top'),
-                ),
+                child: new SizedBox.expand(),
               ),
               new GestureDetector(
+                key: const ValueKey<int>(1),
                 behavior: HitTestBehavior.opaque,
                 onTap: () {},
-                child: new SizedBox.expand(
-                  key: const ValueKey<String>('top'),
-                ),
+                child: new SizedBox.expand(),
               ),
             ],
           )
       );
       expect(find.byType(GestureDetector), findsNWidgets(2));
-      expect(find.byType(GestureDetector).hitTestable(at: const FractionalOffset(0.5, 0.5)), findsOneWidget);
+      final Finder hitTestable = find.byType(GestureDetector).hitTestable(at: const FractionalOffset(0.5, 0.5));
+      expect(hitTestable, findsOneWidget);
+      expect(hitTestable.evaluate().single.widget.key, const ValueKey<int>(0));
     });
   });
 }
