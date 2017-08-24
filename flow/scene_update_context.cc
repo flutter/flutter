@@ -4,6 +4,7 @@
 
 #include "flutter/flow/scene_update_context.h"
 
+#include "flutter/common/threads.h"
 #include "flutter/flow/export_node.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/matrix_decomposition.h"
@@ -17,14 +18,34 @@ SceneUpdateContext::SceneUpdateContext(mozart::client::Session* session,
   FTL_DCHECK(surface_producer_ != nullptr);
 }
 
-SceneUpdateContext::~SceneUpdateContext() = default;
+SceneUpdateContext::~SceneUpdateContext() {
+  ASSERT_IS_GPU_THREAD;
+
+  // Release Mozart session resources for all ExportNodes.
+  for (auto export_node : export_nodes_) {
+    export_node->Dispose(false);
+  }
+};
 
 void SceneUpdateContext::AddChildScene(ExportNode* export_node,
                                        SkPoint offset,
                                        bool hit_testable) {
+  ASSERT_IS_GPU_THREAD;
   FTL_DCHECK(top_entity_);
 
   export_node->Bind(*this, top_entity_->entity_node(), offset, hit_testable);
+}
+
+void SceneUpdateContext::AddExportNode(ExportNode* export_node) {
+  ASSERT_IS_GPU_THREAD;
+
+  export_nodes_.insert(export_node);  // Might already have been added.
+}
+
+void SceneUpdateContext::RemoveExportNode(ExportNode* export_node) {
+  ASSERT_IS_GPU_THREAD;
+
+  export_nodes_.erase(export_node);
 }
 
 void SceneUpdateContext::CreateFrame(mozart::client::EntityNode& entity_node,

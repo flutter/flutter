@@ -26,8 +26,9 @@ void ChildSceneLayer::UpdateScene(SceneUpdateContext& context) {
   // or whether we should leave this up to the Flutter application to decide.
   // In some situations, it might be useful to allow children to draw
   // outside of their layout bounds.
-  if (export_node_) {
-    context.AddChildScene(export_node_.get(), offset_, hit_testable_);
+  if (export_node_holder_) {
+    context.AddChildScene(export_node_holder_->export_node(), offset_,
+                          hit_testable_);
   }
 }
 

@@ -21,31 +21,59 @@
 
 namespace flow {
 
+// Wrapper class for ExportNode to use on UI Thread. When ExportNodeHolder is
+// destroyed, a task is posted on the Rasterizer thread to dispose the resources
+// held by the ExportNode.
+class ExportNodeHolder : public ftl::RefCountedThreadSafe<ExportNodeHolder> {
+ public:
+  ExportNodeHolder(ftl::RefPtr<fidl::dart::Handle> export_token_handle);
+  ~ExportNodeHolder();
+
+  // Calls Bind() on the wrapped ExportNode.
+  void Bind(SceneUpdateContext& context,
+            mozart::client::ContainerNode& container,
+            const SkPoint& offset,
+            bool hit_testable);
+
+  ExportNode* export_node() { return export_node_.get(); }
+
+ private:
+  std::unique_ptr<ExportNode> export_node_;
+
+  FRIEND_MAKE_REF_COUNTED(ExportNodeHolder);
+  FRIEND_REF_COUNTED_THREAD_SAFE(ExportNodeHolder);
+  FTL_DISALLOW_COPY_AND_ASSIGN(ExportNodeHolder);
+};
+
 // Represents a node which is being exported from the session.
 // This object is created on the UI thread but the entity node it contains
 // must be created and destroyed by the rasterizer thread.
-//
-// Therefore this object is thread-safe.
-class ExportNode : public ftl::RefCountedThreadSafe<ExportNode> {
+class ExportNode {
  public:
   ExportNode(ftl::RefPtr<fidl::dart::Handle> export_token_handle);
 
+  ~ExportNode();
+
   // Binds the export token to the entity node and adds it as a child of
-  // the specified container.
+  // the specified container. Must be called on the Rasterizer thread.
   void Bind(SceneUpdateContext& context,
             mozart::client::ContainerNode& container,
             const SkPoint& offset,
             bool hit_testable);
 
  private:
-  ~ExportNode();
+  friend class SceneUpdateContext;
+  friend class ExportNodeHolder;
 
-  ftl::Mutex mutex_;
-  mx::eventpair export_token_ FTL_GUARDED_BY(mutex_);
-  std::unique_ptr<mozart::client::EntityNode> node_ FTL_GUARDED_BY(mutex_);
+  // Cleans up resources held and removes this ExportNode from
+  // SceneUpdateContext. Must be called on the Rasterizer thread.
+  void Dispose(bool remove_from_scene_update_context);
 
-  FRIEND_MAKE_REF_COUNTED(ExportNode);
-  FRIEND_REF_COUNTED_THREAD_SAFE(ExportNode);
+  // Member variables can only be read or modified on Rasterizer thread.
+  SceneUpdateContext* scene_update_context_ = nullptr;
+  mx::eventpair export_token_;
+  std::unique_ptr<mozart::client::EntityNode> node_;
+
   FTL_DISALLOW_COPY_AND_ASSIGN(ExportNode);
 };
 
