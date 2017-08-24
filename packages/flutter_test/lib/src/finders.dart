@@ -285,7 +285,12 @@ abstract class Finder {
   /// matched by this finder.
   Finder get last => new _LastFinder(this);
 
-  Finder hitTestable(HitOffsetCallback hitOffsetCallback) => new _HitTestableFinder(this, hitOffsetCallback);
+  /// Returns a variant of this finder that only matches elements reachable by
+  /// a hit test.
+  ///
+  /// The [at] parameter specifies the location relative to the size of the
+  /// target element where the hit test is performed.
+  Finder hitTestable({@required FractionalOffset at}) => new _HitTestableFinder(this, at);
 
   @override
   String toString() {
@@ -330,13 +335,11 @@ class _LastFinder extends Finder {
   }
 }
 
-typedef Offset HitOffsetCallback(Finder finder);
-
 class _HitTestableFinder extends Finder {
-  _HitTestableFinder(this.parent, this.hitOffsetCallback);
+  _HitTestableFinder(this.parent, this.offset);
 
   final Finder parent;
-  final HitOffsetCallback hitOffsetCallback;
+  final FractionalOffset offset;
 
   @override
   String get description => '${parent.description} (considering only hit-testable ones)';
@@ -344,8 +347,11 @@ class _HitTestableFinder extends Finder {
   @override
   Iterable<Element> apply(Iterable<Element> candidates) sync* {
     for (final Element candidate in parent.apply(candidates)) {
+      final RenderBox box = candidate.renderObject;
+      assert(box != null);
+      final Offset absoluteOffset = box.localToGlobal(offset.alongSize(box.size));
       final HitTestResult hitResult = new HitTestResult();
-      WidgetsBinding.instance.hitTest(hitResult, hitOffsetCallback(new _ExactElementFinder(candidate)));
+      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;
@@ -353,18 +359,6 @@ class _HitTestableFinder extends Finder {
       }
     }
   }
-}
-
-class _ExactElementFinder extends Finder {
-  _ExactElementFinder(Element target) : _result = <Element>[target];
-
-  final List<Element> _result;
-
-  @override
-  String get description => 'the specified element';
-
-  @override
-  Iterable<Element> apply(Iterable<Element> candidates) => _result;
 }
 
 /// Searches a widget tree and returns nodes that match a particular
