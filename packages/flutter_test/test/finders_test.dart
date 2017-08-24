@@ -9,23 +9,23 @@ void main() {
   group('hitTestable', () {
     testWidgets('excludes non-hit-testable widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
-          new IndexedStack(
-            sizing: StackFit.expand,
-            children: <Widget>[
-              new GestureDetector(
-                key: const ValueKey<int>(0),
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: new SizedBox.expand(),
-              ),
-              new GestureDetector(
-                key: const ValueKey<int>(1),
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: new SizedBox.expand(),
-              ),
-            ],
-          )
+        new IndexedStack(
+          sizing: StackFit.expand,
+          children: <Widget>[
+            new GestureDetector(
+              key: const ValueKey<int>(0),
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: new SizedBox.expand(),
+            ),
+            new GestureDetector(
+              key: const ValueKey<int>(1),
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: new SizedBox.expand(),
+            ),
+          ],
+        )
       );
       expect(find.byType(GestureDetector), findsNWidgets(2));
       final Finder hitTestable = find.byType(GestureDetector).hitTestable(at: const FractionalOffset(0.5, 0.5));
