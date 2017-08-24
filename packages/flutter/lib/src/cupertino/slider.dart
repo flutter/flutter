@@ -247,9 +247,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
       return;
     final bool wasInteractive = isInteractive;
     _onChanged = value;
-    if (wasInteractive != isInteractive) {
+    if (wasInteractive != isInteractive)
       markNeedsSemanticsUpdate(noGeometry: true);
-    }
   }
 
   AnimationController _position;
