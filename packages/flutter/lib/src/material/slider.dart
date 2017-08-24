@@ -288,7 +288,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     Color inactiveColor,
     bool thumbOpenAtMin,
     TextTheme textTheme,
-    this.onChanged,
+    ValueChanged<double> onChanged,
     TickerProvider vsync,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        _value = value,
@@ -296,7 +296,8 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
        _activeColor = activeColor,
        _inactiveColor = inactiveColor,
        _thumbOpenAtMin = thumbOpenAtMin,
-       _textTheme = textTheme {
+       _textTheme = textTheme,
+       _onChanged = onChanged {
     this.label = label;
     final GestureArenaTeam team = new GestureArenaTeam();
     _drag = new HorizontalDragGestureRecognizer()
@@ -401,7 +402,18 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     markNeedsPaint();
   }
 
-  ValueChanged<double> onChanged;
+  ValueChanged<double> get onChanged => _onChanged;
+  ValueChanged<double> _onChanged;
+  set onChanged(ValueChanged<double> value) {
+    if (value == _onChanged)
+      return;
+    final bool wasInteractive = isInteractive;
+    _onChanged = value;
+    if (wasInteractive != isInteractive) {
+      markNeedsPaint();
+      markNeedsSemanticsUpdate(noGeometry: true);
+    }
+  }
 
   double get _trackLength => size.width - 2.0 * _kReactionRadius;
 

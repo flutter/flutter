@@ -4,8 +4,11 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Slider does not move when tapped', (WidgetTester tester) async {
@@ -76,5 +79,45 @@ void main() {
     // Check the transientCallbackCount before tearing down the widget to ensure
     // that no animation is running.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
+  });
+
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new CupertinoSlider(
+        value: 0.5,
+        onChanged: (double v) {},
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+          ),
+        ]
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    // Disable slider
+    await tester.pumpWidget(
+      new CupertinoSlider(
+        value: 0.5,
+        onChanged: null,
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    semantics.dispose();
   });
 }
