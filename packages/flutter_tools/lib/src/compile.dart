@@ -68,9 +68,11 @@ class ResidentCompiler {
   Completer<String> _outputFilename;
   String _boundaryKey;
 
-  Future<String> recompile(List<String> invalidatedFiles) async {
+  Future<String> recompile(String mainPath, List<String> invalidatedFiles) async {
+    // First time recompile is called we actually have to compile the app from
+    // scratch ignoring list of invalidated files.
     if (_server == null)
-      return new Future<String>.error('Recompile should be preceded by compile');
+      return _compile(mainPath);
 
     _outputFilename = new Completer<String>();
 
@@ -103,7 +105,7 @@ class ResidentCompiler {
     }
   }
 
-  Future<String> compile(String scriptFilename) async {
+  Future<String> _compile(String scriptFilename) async {
     if (_server == null) {
       final String frontendServer = artifacts.getArtifactPath(
         Artifact.frontendServerSnapshotForEngineDartSdk

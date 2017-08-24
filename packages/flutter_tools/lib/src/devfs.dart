@@ -437,14 +437,10 @@ class DevFS {
           if (content is DevFSFileContent)
             invalidatedFiles.add(content.file.uri.toString());
         });
-        final String compiledBinary = await generator.recompile(invalidatedFiles);
-        if (compiledBinary != null && compiledBinary.isNotEmpty) {
+        final String compiledBinary = await generator.recompile(mainPath, invalidatedFiles);
+        if (compiledBinary != null && compiledBinary.isNotEmpty)
           dirtyEntries.putIfAbsent(Uri.parse(target + '.dill'),
                   () => new DevFSFileContent(fs.file(compiledBinary)));
-          generator.accept();
-        } else {
-          generator.reject();
-        }
       }
 
       if (_httpWriter != null) {

@@ -299,7 +299,7 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(device);
+      return new FlutterDevice(device, previewDart2: argResults['preview-dart-2']);
     }).toList();
 
     ResidentRunner runner;

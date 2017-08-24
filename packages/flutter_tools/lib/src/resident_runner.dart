@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'android/gradle.dart';
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
@@ -33,10 +34,16 @@ class FlutterDevice {
   List<VMService> vmServices;
   DevFS devFS;
   ApplicationPackage package;
+  ResidentCompiler generator;
 
   StreamSubscription<String> _loggingSubscription;
 
-  FlutterDevice(this.device);
+  FlutterDevice(this.device, { bool previewDart2 : false }) {
+    if (previewDart2) {
+      generator = new ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+    }
+  }
 
   String viewFilter;
 
@@ -320,8 +327,7 @@ class FlutterDevice {
     String target,
     AssetBundle bundle,
     bool bundleDirty: false,
-    Set<String> fileFilter,
-    ResidentCompiler generator
+    Set<String> fileFilter
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -344,6 +350,13 @@ class FlutterDevice {
     devFSStatus.stop();
     printTrace('Synced ${getSizeAsMB(bytes)}.');
     return true;
+  }
+
+  void updateReloadStatus(bool wasReloadSuccessful) {
+    if (wasReloadSuccessful)
+      generator?.accept();
+    else
+      generator?.reject();
   }
 }
 
