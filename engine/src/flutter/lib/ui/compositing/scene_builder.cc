@@ -239,7 +239,7 @@ void SceneBuilder::addChildScene(double dx,
   std::unique_ptr<flow::ChildSceneLayer> layer(new flow::ChildSceneLayer());
   layer->set_offset(SkPoint::Make(dx, dy));
   layer->set_size(SkSize::Make(width, height));
-  layer->set_export_node(sceneHost->exportNode());
+  layer->set_export_node_holder(sceneHost->export_node_holder());
   layer->set_hit_testable(hitTestable);
   m_currentLayer->Add(std::move(layer));
 #endif

@@ -37,7 +37,8 @@ ftl::RefPtr<SceneHost> SceneHost::create(
 }
 
 SceneHost::SceneHost(ftl::RefPtr<fidl::dart::Handle> export_token_handle) {
-  export_node_ = ftl::MakeRefCounted<flow::ExportNode>(export_token_handle);
+  export_node_holder_ =
+      ftl::MakeRefCounted<flow::ExportNodeHolder>(export_token_handle);
 }
 #else
 ftl::RefPtr<SceneHost> SceneHost::create(Dart_Handle export_token_handle) {

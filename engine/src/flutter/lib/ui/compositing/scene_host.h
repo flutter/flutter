@@ -35,8 +35,8 @@ class SceneHost : public ftl::RefCountedThreadSafe<SceneHost>,
   ~SceneHost() override;
 
 #if defined(OS_FUCHSIA)
-  const ftl::RefPtr<flow::ExportNode>& exportNode() const {
-    return export_node_;
+  const ftl::RefPtr<flow::ExportNodeHolder>& export_node_holder() const {
+    return export_node_holder_;
   }
 #endif
 
@@ -46,7 +46,7 @@ class SceneHost : public ftl::RefCountedThreadSafe<SceneHost>,
 
  private:
 #if defined(OS_FUCHSIA)
-  ftl::RefPtr<flow::ExportNode> export_node_;
+  ftl::RefPtr<flow::ExportNodeHolder> export_node_holder_;
 #endif
 
 #if defined(OS_FUCHSIA)

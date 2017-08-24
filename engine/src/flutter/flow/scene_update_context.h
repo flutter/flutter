@@ -19,6 +19,7 @@
 namespace flow {
 
 class Layer;
+class ExportNodeHolder;
 class ExportNode;
 
 class SceneUpdateContext {
@@ -123,6 +124,14 @@ class SceneUpdateContext {
                      SkPoint offset,
                      bool hit_testable);
 
+  // Adds reference to |export_node| so we can call export_node->Dispose() in
+  // our destructor. Caller is responsible for calling RemoveExportNode() before
+  // |export_node| is destroyed.
+  void AddExportNode(ExportNode* export_node);
+
+  // Removes reference to |export_node|.
+  void RemoveExportNode(ExportNode* export_node);
+
   // TODO(chinmaygarde): This method must submit the surfaces as soon as paint
   // tasks are done. However, given that there is no support currently for
   // Vulkan semaphores, we need to submit all the surfaces after an explicit
@@ -173,6 +182,9 @@ class SceneUpdateContext {
   mozart2::MetricsPtr metrics_;
 
   std::vector<PaintTask> paint_tasks_;
+
+  // Save ExportNodes so we can dispose them in our destructor.
+  std::set<ExportNode*> export_nodes_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(SceneUpdateContext);
 };

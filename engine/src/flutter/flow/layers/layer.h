@@ -35,6 +35,8 @@ namespace flow {
 
 class ContainerLayer;
 
+// Represents a single composited layer. Created on the UI thread but then
+// subquently used on the Rasterizer thread.
 class Layer {
  public:
   Layer();

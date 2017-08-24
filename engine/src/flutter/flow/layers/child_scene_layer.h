@@ -10,6 +10,7 @@
 
 namespace flow {
 
+// Layer that represents an embedded child.
 class ChildSceneLayer : public Layer {
  public:
   ChildSceneLayer();
@@ -19,8 +20,9 @@ class ChildSceneLayer : public Layer {
 
   void set_size(const SkSize& size) { size_ = size; }
 
-  void set_export_node(ftl::RefPtr<ExportNode> export_node) {
-    export_node_ = std::move(export_node);
+  void set_export_node_holder(
+      ftl::RefPtr<ExportNodeHolder> export_node_holder) {
+    export_node_holder_ = std::move(export_node_holder);
   }
 
   void set_hit_testable(bool hit_testable) { hit_testable_ = hit_testable; }
@@ -34,7 +36,7 @@ class ChildSceneLayer : public Layer {
  private:
   SkPoint offset_;
   SkSize size_;
-  ftl::RefPtr<ExportNode> export_node_;
+  ftl::RefPtr<ExportNodeHolder> export_node_holder_;
   bool hit_testable_ = true;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
