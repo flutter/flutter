@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Slider can move when tapped', (WidgetTester tester) async {
@@ -294,5 +298,49 @@ void main() {
       ),
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 32.0));
+  });
+
+  testWidgets('Slider Semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Slider(
+          value: 0.5,
+          onChanged: (double v) {},
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+          children: <TestSemantics>[
+            new TestSemantics.rootChild(
+              id: 1,
+              actions: SemanticsAction.decrease.index | SemanticsAction.increase.index,
+            ),
+          ]
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    // Disable slider
+    await tester.pumpWidget(
+      new Material(
+        child: new Slider(
+          value: 0.5,
+          onChanged: null,
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    semantics.dispose();
   });
 }
