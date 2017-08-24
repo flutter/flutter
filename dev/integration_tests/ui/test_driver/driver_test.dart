@@ -77,5 +77,21 @@ void main() {
     test('waitForAbsent resolves immediately when the element does not exist', () async {
       await driver.waitForAbsent(find.text('that does not exist'));
     });
+
+    test('uses hit test to determine tappable elements', () async {
+      final SerializableFinder a = find.byValueKey('a');
+      final SerializableFinder menu = find.byType('_DropdownMenu<Letter>');
+
+      // Dropdown is closed
+      await driver.waitForAbsent(menu);
+
+      // Open dropdown
+      await driver.tap(a);
+      await driver.waitFor(menu);
+
+      // Close it again
+      await driver.tap(a);
+      await driver.waitForAbsent(menu);
+    });
   });
 }
