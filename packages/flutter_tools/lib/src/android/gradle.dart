@@ -97,7 +97,12 @@ Future<GradleProject> _readGradleProject() async {
     status.stop();
     return project;
   } catch (e) {
-    printError('Error running gradle: $e');
+    if (flutterPluginVersion == FlutterPluginVersion.managed) {
+      printError('Error running Gradle:\n$e\n');
+      throwToolExit(
+        'Please review your Gradle project setup in the android/ folder.',
+      );
+    }
   }
   // Fall back to the default
   return new GradleProject(<String>['debug', 'profile', 'release'], <String>[], gradleAppOutDirV1);

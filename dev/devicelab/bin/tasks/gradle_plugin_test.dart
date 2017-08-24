@@ -15,30 +15,73 @@ void main() {
     final Directory tmp = await Directory.systemTemp.createTemp('gradle');
     final FlutterProject project = await FlutterProject.create(tmp, 'hello');
 
-    section('gradlew assembleDebug');
-    await project.runGradleTask('assembleDebug');
+    try {
+      section('gradlew assembleDebug');
+      await project.runGradleTask('assembleDebug');
 
-    section('gradlew assembleProfile');
-    await project.runGradleTask('assembleProfile');
+      section('gradlew assembleProfile');
+      await project.runGradleTask('assembleProfile');
 
-    section('gradlew assembleRelease');
-    await project.runGradleTask('assembleRelease');
+      section('gradlew assembleRelease');
+      await project.runGradleTask('assembleRelease');
 
-    section('gradlew assembleLocal (custom debug build)');
-    await project.addCustomBuildType('local', initWith: 'debug');
-    await project.runGradleTask('assembleLocal');
+      section('gradlew assembleLocal (custom debug build)');
+      await project.addCustomBuildType('local', initWith: 'debug');
+      await project.runGradleTask('assembleLocal');
 
-    section('gradlew assembleBeta (custom release build)');
-    await project.addCustomBuildType('beta', initWith: 'release');
-    await project.runGradleTask('assembleBeta');
+      section('gradlew assembleBeta (custom release build)');
+      await project.addCustomBuildType('beta', initWith: 'release');
+      await project.runGradleTask('assembleBeta');
 
-    section('gradlew assembleFreeDebug (product flavor)');
-    await project.addProductFlavor('free');
-    await project.runGradleTask('assembleFreeDebug');
+      section('gradlew assembleFreeDebug (product flavor)');
+      await project.addProductFlavor('free');
+      await project.runGradleTask('assembleFreeDebug');
 
-    await project.parent.delete(recursive: true);
-    return new TaskResult.success(null);
+      await project.introduceError();
+
+      section('gradlew on build script with error');
+      {
+        final ProcessResult result = await project.resultOfGradleTask('assembleRelease');
+        if (result.exitCode == 0)
+          return _failure('Gradle did not exit with error as expected', result);
+        final String output = result.stdout + '\n' + result.stderr;
+        if (output.contains('GradleException') || output.contains('Failed to notify') || output.contains('at org.gradle'))
+          return _failure('Gradle output should not contain stacktrace', result);
+        if (!output.contains('Build failed') || !output.contains('builTypes'))
+          return _failure('Gradle output should contain a readable error message', result);
+      }
+
+      section('flutter build apk on build script with error');
+      {
+        final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
+        if (result.exitCode == 0)
+          return _failure('flutter build apk should fail when Gradle does', result);
+        final String output = result.stdout + '\n' + result.stderr;
+        if (!output.contains('Build failed') || !output.contains('builTypes'))
+          return _failure('flutter build apk output should contain a readable Gradle error message', result);
+        if (_hasMultipleOccurrences(output, 'builTypes'))
+          return _failure('flutter build apk should not invoke Gradle repeatedly on error', result);
+      }
+
+      return new TaskResult.success(null);
+    } catch(e) {
+      return new TaskResult.failure(e.toString());
+    } finally {
+      project.parent.deleteSync(recursive: true);
+    }
   });
+}
+
+TaskResult _failure(String message, ProcessResult result) {
+  print('Unexpected process result:');
+  print('Exit code: ${result.exitCode}');
+  print('Std out  :\n${result.stdout}');
+  print('Std err  :\n${result.stderr}');
+  return new TaskResult.failure(message);
+}
+
+bool _hasMultipleOccurrences(String text, Pattern pattern) {
+  return text.indexOf(pattern) != text.lastIndexOf(pattern);
 }
 
 class FlutterProject {
@@ -90,18 +133,38 @@ android {
     ''');
   }
 
-  Future<Null> runGradleTask(String task) async {
-    final ProcessResult result = await Process.run(
-      './gradlew',
-      <String>['-q', 'app:$task'],
-      workingDirectory: androidPath,
+  Future<Null> introduceError() async {
+    final File buildScript = new File(
+      path.join(androidPath, 'app', 'build.gradle'),
     );
+    await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
+  }
+
+  Future<Null> runGradleTask(String task) async {
+    final ProcessResult result = await resultOfGradleTask(task);
     if (result.exitCode != 0) {
       print('stdout:');
       print(result.stdout);
       print('stderr:');
       print(result.stderr);
     }
-    assert(result.exitCode == 0);
+    if (result.exitCode != 0)
+      throw 'Gradle exited with error';
+  }
+
+  Future<ProcessResult> resultOfGradleTask(String task) {
+    return Process.run(
+      './gradlew',
+      <String>['app:$task'],
+      workingDirectory: androidPath,
+    );
+  }
+
+  Future<ProcessResult> resultOfFlutterCommand(String command, List<String> options) {
+    return Process.run(
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      <String>[command]..addAll(options),
+      workingDirectory: rootPath,
+    );
   }
 }
