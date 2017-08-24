@@ -765,7 +765,7 @@ PassRefPtr<StringImpl> StringImpl::upper(const AtomicString& localeIdentifier)
     icu::UnicodeString target(false, source16, length);
     translit->transliterate(target);
 
-    return create(target.getBuffer(), target.length());
+    return create(reinterpret_cast<const UChar*>(target.getBuffer()), target.length());
 }
 
 PassRefPtr<StringImpl> StringImpl::fill(UChar character)

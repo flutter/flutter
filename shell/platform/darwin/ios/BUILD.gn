@@ -178,7 +178,7 @@ copy("framework_icu") {
   visibility = [ ":*" ]
   set_sources_assignment_filter([])
   sources = [
-    "//third_party/icu/android/icudtl.dat",
+    "//third_party/icu/ios/icudtl.dat",
   ]
   set_sources_assignment_filter(sources_assignment_filter)
   outputs = [
