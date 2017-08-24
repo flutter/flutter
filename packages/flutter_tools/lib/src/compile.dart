@@ -78,9 +78,8 @@ class ResidentCompiler {
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile $inputKey');
-    for (String invalidatedFile in invalidatedFiles) {
+    for (String invalidatedFile in invalidatedFiles)
       _server.stdin.writeln(invalidatedFile);
-    }
     _server.stdin.writeln(inputKey);
 
     return _outputFilename.future;
@@ -89,9 +88,8 @@ class ResidentCompiler {
   Future<Null> handler(String string) async {
     const String RESULT_PREFIX = 'result ';
       if (_boundaryKey == null) {
-        if (string.startsWith(RESULT_PREFIX)) {
+        if (string.startsWith(RESULT_PREFIX))
           _boundaryKey = string.substring(RESULT_PREFIX.length);
-        }
       } else {
         if (string.startsWith(_boundaryKey)) {
           _outputFilename.complete(string.length > _boundaryKey.length

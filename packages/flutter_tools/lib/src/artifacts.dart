@@ -23,7 +23,7 @@ enum Artifact {
   platformLibrariesJson,
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
-  engineDartSdkPath
+  engineDartSdkPath,
 }
 
 String _artifactToFileName(Artifact artifact) {

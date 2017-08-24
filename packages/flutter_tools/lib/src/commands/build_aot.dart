@@ -93,7 +93,7 @@ Future<String> buildAotSnapshot(
   BuildMode buildMode, {
   String outputPath,
   bool interpreter: false,
-  bool previewDart2: false
+  bool previewDart2: false,
 }) async {
   outputPath ??= getAotBuildDirectory();
   try {
@@ -118,7 +118,7 @@ Future<String> _buildAotSnapshot(
   BuildMode buildMode, {
   String outputPath,
   bool interpreter: false,
-  bool previewDart2: false
+  bool previewDart2: false,
 }) async {
   outputPath ??= getAotBuildDirectory();
   if (!isAotBuildMode(buildMode) && !interpreter) {
@@ -144,7 +144,8 @@ Future<String> _buildAotSnapshot(
   final String vmEntryPoints = artifacts.getArtifactPath(
     Artifact.dartVmEntryPointsTxt,
     platform,
-    buildMode);
+    buildMode,
+  );
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);

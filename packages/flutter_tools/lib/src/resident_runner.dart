@@ -39,10 +39,9 @@ class FlutterDevice {
   StreamSubscription<String> _loggingSubscription;
 
   FlutterDevice(this.device, { bool previewDart2 : false }) {
-    if (previewDart2) {
+    if (previewDart2)
       generator = new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
-    }
   }
 
   String viewFilter;
