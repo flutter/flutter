@@ -130,7 +130,7 @@ copy("flutter_shell_assets") {
   visibility = [ ":*" ]
 
   sources = [
-    "$root_build_dir/icudtl.dat",
+    "//third_party/icu/android/icudtl.dat",
   ]
 
   outputs = [
