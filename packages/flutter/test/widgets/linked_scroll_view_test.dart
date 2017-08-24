@@ -229,7 +229,7 @@ class LinkedScrollActivity extends ScrollActivity {
   @override
   bool get isScrolling => true;
 
-  // LinkedScrollActivity is not self driven but moved by calls to the [moveBy]
+  // LinkedScrollActivity is not self-driven but moved by calls to the [moveBy]
   // method.
   @override
   double get velocity => 0.0;

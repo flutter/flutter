@@ -218,6 +218,10 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 ///  * [DragScrollActivity], which is the activity the scroll view performs
 ///    while a drag is underway.
 class ScrollDragController implements Drag {
+  /// Maximum amount of time the drag can remain stationary before losing
+  /// the momentum carried from a previous scroll activity.
+  static const int momentumRetainStationaryThresholdMs = 20;
+
   /// Creates an object that scrolls a scroll view as the user drags their
   /// finger across the screen.
   ///
@@ -244,6 +248,7 @@ class ScrollDragController implements Drag {
   /// drag began.
   final double carriedVelocity;
 
+  Stopwatch _stationaryStartWatch;
   bool _retainMomentum;
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
@@ -260,15 +265,23 @@ class ScrollDragController implements Drag {
   @override
   void update(DragUpdateDetails details) {
     assert(details.primaryDelta != null);
-    final bool lastEventWasStationary =
-        _lastDetails is DragUpdateDetails && _lastDetails.primaryDelta == 0.0;
     _lastDetails = details;
     double offset = details.primaryDelta;
     if (offset == 0.0) {
-      // No axis motion over 2 consecutive frames breaks previous momentum.
-      if (lastEventWasStationary)
-        _retainMomentum = false;
+      if (_retainMomentum) {
+        _stationaryStartWatch ??= new Stopwatch();
+        if (_stationaryStartWatch.isRunning) {
+          // If the drag motion is stationary for too long, previous momentum is lost.
+          if (_stationaryStartWatch.elapsedMilliseconds > momentumRetainStationaryThresholdMs)
+            _retainMomentum = false;
+        } else {
+          _stationaryStartWatch.start();
+        }
+      }
       return;
+    } else {
+      _stationaryStartWatch?.stop();
+      _stationaryStartWatch?.reset();
     }
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
@@ -278,14 +291,13 @@ class ScrollDragController implements Drag {
   @override
   void end(DragEndDetails details) {
     assert(details.primaryVelocity != null);
-    double velocity = details.primaryVelocity;
-    if (_reversed) // e.g. an AxisDirection.up scrollable
-      velocity = -velocity;
-    _lastDetails = details;
     // We negate the velocity here because if the touch is moving downwards,
     // the scroll has to move upwards. It's the same reason that update()
     // above negates the delta before applying it to the scroll offset.
-    velocity = -velocity;
+    double velocity = -details.primaryVelocity;
+    if (_reversed) // e.g. an AxisDirection.up scrollable
+      velocity = -velocity;
+    _lastDetails = details;
 
     // Build momentum only if dragging in the same direction.
     if (_retainMomentum && velocity.sign == carriedVelocity.sign)

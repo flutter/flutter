@@ -324,7 +324,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   @override
   double carriedMomentum(double existingVelocity) {
     return existingVelocity.sign *
-        math.min(0.000287 * math.pow(existingVelocity.abs(), 2.13).toDouble(), 40000.0);
+        math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 40000.0);
   }
 }
 
