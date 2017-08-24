@@ -23,6 +23,7 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -548,7 +549,7 @@ class _MonthPickerState extends State<MonthPicker> {
             left: 8.0,
             child: new IconButton(
               icon: const Icon(Icons.chevron_left),
-              tooltip: 'Previous month',
+              tooltip: MaterialLocalizations.of(context).previousMonthTooltip,
               onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
             ),
           ),
@@ -557,7 +558,7 @@ class _MonthPickerState extends State<MonthPicker> {
             right: 8.0,
             child: new IconButton(
               icon: const Icon(Icons.chevron_right),
-              tooltip: 'Next month',
+              tooltip: MaterialLocalizations.of(context).nextMonthTooltip,
               onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
             ),
           ),

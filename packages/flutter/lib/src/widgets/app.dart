@@ -11,9 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
-import 'container.dart';
 import 'framework.dart';
-import 'locale_query.dart';
+import 'localizations.dart';
 import 'media_query.dart';
 import 'navigator.dart';
 import 'performance_overlay.dart';
@@ -22,10 +21,7 @@ import 'text.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
 
-/// Signature for a function that is called when the operating system changes the current locale.
-///
-/// Used by [WidgetsApp.onLocaleChanged].
-typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
+export 'dart:ui' show Locale;
 
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
@@ -34,7 +30,7 @@ typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 /// back button to popping the [Navigator] or quitting the application.
 ///
 /// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
-/// [LocaleQuery], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
+/// [Localizations], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
 /// widgets wrapped by this one).
 ///
 /// The [onGenerateRoute] argument is required, and corresponds to
@@ -54,7 +50,8 @@ class WidgetsApp extends StatefulWidget {
     @required this.color,
     this.navigatorObservers: const <NavigatorObserver>[],
     this.initialRoute,
-    this.onLocaleChanged,
+    this.locale,
+    this.localizationsDelegates,
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
@@ -130,9 +127,16 @@ class WidgetsApp extends StatefulWidget {
   ///  * [Navigator.pop], for removing a route from the stack.
   final String initialRoute;
 
-  /// Callback that is called when the operating system changes the
-  /// current locale.
-  final LocaleChangedCallback onLocaleChanged;
+  /// The initial locale for this app's [Localizations] widget.
+  ///
+  /// If the 'locale' is null the system's locale value is used.
+  final Locale locale;
+
+  /// The delegates for this app's [Localizations] widget.
+  ///
+  /// The delegates collectively define all of the localized resources
+  /// for this application's [Localizations] widget.
+  final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
   /// Turns on a performance overlay.
   /// https://flutter.io/debugging/#performanceoverlay
@@ -214,13 +218,13 @@ class WidgetsApp extends StatefulWidget {
 
 class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
   GlobalObjectKey<NavigatorState> _navigator;
-  LocaleQueryData _localeData;
+  Locale _locale;
 
   @override
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey<NavigatorState>(this);
-    didChangeLocale(ui.window.locale);
+    _locale = ui.window.locale;
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -258,10 +262,9 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   void didChangeLocale(Locale locale) {
-    if (widget.onLocaleChanged != null) {
-      widget.onLocaleChanged(locale).then<Null>((LocaleQueryData data) {
-        if (mounted)
-          setState(() { _localeData = data; });
+    if (locale != _locale) {
+      setState(() {
+        _locale = locale;
       });
     }
   }
@@ -274,19 +277,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
-    if (widget.onLocaleChanged != null && _localeData == null) {
-      // If the app expects a locale but we don't yet know the locale, then
-      // don't build the widgets now.
-      // TODO(ianh): Make this unnecessary. See https://github.com/flutter/flutter/issues/1865
-      // TODO(ianh): The following line should not be included in release mode, only in profile and debug modes.
-      WidgetsBinding.instance.preventThisFrameFromBeingReportedAsFirstFrame();
-      return new Container();
-    }
-
     Widget result = new MediaQuery(
       data: new MediaQueryData.fromWindow(ui.window),
-      child: new LocaleQuery(
-        data: _localeData,
+      child: new Localizations(
+        locale: widget.locale ?? _locale,
+        delegates: widget.localizationsDelegates,
         child: new Title(
           title: widget.title,
           color: widget.color,

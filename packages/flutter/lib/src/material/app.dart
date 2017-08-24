@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -10,10 +12,9 @@ import 'arc.dart';
 import 'colors.dart';
 import 'floating_action_button.dart';
 import 'icons.dart';
+import 'material_localizations.dart';
 import 'page.dart';
 import 'theme.dart';
-
-export 'dart:ui' show Locale;
 
 const TextStyle _errorTextStyle = const TextStyle(
   color: const Color(0xD0FF0000),
@@ -24,6 +25,16 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationColor: const Color(0xFFFFFF00),
   decorationStyle: TextDecorationStyle.double
 );
+
+class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  const _MaterialLocalizationsDelegate();
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) => MaterialLocalizations.load(locale);
+
+  @override
+  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+}
 
 /// An application that uses material design.
 ///
@@ -80,7 +91,8 @@ class MaterialApp extends StatefulWidget {
     this.initialRoute,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.onLocaleChanged,
+    this.locale,
+    this.localizationsDelegates,
     this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
@@ -129,10 +141,9 @@ class MaterialApp extends StatefulWidget {
   /// normally, unless [initialRoute] is specified. It's also the route that's
   /// displayed if the [initialRoute] can't be displayed.
   ///
-  /// To be able to directly call [Theme.of], [MediaQuery.of],
-  /// [LocaleQuery.of], etc, in the code sets the [home] argument in
-  /// the constructor, you can use a [Builder] widget to get a
-  /// [BuildContext].
+  /// To be able to directly call [Theme.of], [MediaQuery.of], etc, in the code
+  /// that sets the [home] argument in the constructor, you can use a [Builder]
+  /// widget to get a [BuildContext].
   ///
   /// If [home] is specified, then [routes] must not include an entry for `/`,
   /// as [home] takes its place.
@@ -210,9 +221,16 @@ class MaterialApp extends StatefulWidget {
   /// message.
   final RouteFactory onUnknownRoute;
 
-  /// Callback that is called when the operating system changes the
-  /// current locale.
-  final LocaleChangedCallback onLocaleChanged;
+  /// The initial locale for this app's [Localizations] widget.
+  ///
+  /// If the `locale` is null the system's locale value is used.
+  final Locale locale;
+
+  /// The delegates for this app's [Localizations] widget.
+  ///
+  /// The delegates collectively define all of the localized resources
+  /// for this application's [Localizations] widget.
+  final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
   /// Turns on a performance overlay.
   ///
@@ -297,6 +315,14 @@ class _MaterialAppState extends State<MaterialApp> {
     _heroController = new HeroController(createRectTween: _createRectTween);
   }
 
+  // Combine the Localizations for Material with the ones contributed
+  // by the localizationsDelegates parameter, if any.
+  Iterable<LocalizationsDelegate<dynamic>> _createLocalizationsDelegates() sync* {
+    yield const _MaterialLocalizationsDelegate();
+    if (widget.localizationsDelegates != null)
+      yield* widget.localizationsDelegates;
+  }
+
   RectTween _createRectTween(Rect begin, Rect end) {
     return new MaterialRectArcTween(begin: begin, end: end);
   }
@@ -318,6 +344,7 @@ class _MaterialAppState extends State<MaterialApp> {
       return widget.onGenerateRoute(settings);
     return null;
   }
+
 
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
     assert(() {
@@ -369,7 +396,8 @@ class _MaterialAppState extends State<MaterialApp> {
         initialRoute: widget.initialRoute,
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
-        onLocaleChanged: widget.onLocaleChanged,
+        locale: widget.locale,
+        localizationsDelegates: _createLocalizationsDelegates(),
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,

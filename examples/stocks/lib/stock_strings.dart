@@ -2,39 +2,52 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:intl/intl.dart';
 import 'package:flutter/widgets.dart';
 
-// Wrappers for strings that are shown in the UI.  The strings can be
-// translated for different locales using the Dart intl package.
-//
-// Locale-specific values for the strings live in the i18n/*.arb files.
-//
-// To generate the stock_messages_*.dart files from the ARB files, run:
-//   pub run intl:generate_from_arb --output-dir=lib/i18n --generated-file-prefix=stock_ --no-use-deferred-loading lib/stock_strings.dart lib/i18n/stocks_*.arb
+import 'i18n/stock_messages_all.dart';
 
-class StockStrings extends LocaleQueryData {
-  static StockStrings of(BuildContext context) {
-    return LocaleQuery.of(context);
+// Information about how this file relates to i18n/stock_messages_all.dart and how the i18n files
+// were generated can be found in i18n/regenerate.md.
+
+class StockStrings {
+  StockStrings(Locale locale) : _localeName = locale.toString();
+
+  final String _localeName;
+
+  static Future<StockStrings> load(Locale locale) {
+    return initializeMessages(locale.toString())
+      .then((Null _) {
+        return new StockStrings(locale);
+      });
   }
 
-  static final StockStrings instance = new StockStrings();
+  static StockStrings of(BuildContext context) {
+    return Localizations.of<StockStrings>(context, StockStrings);
+  }
 
-  String title() => Intl.message(
-    'Stocks',
-    name: 'title',
-    desc: 'Title for the Stocks application'
-  );
+  String title() {
+    return Intl.message(
+      '<Stocks>',
+      name: 'title',
+      desc: 'Title for the Stocks application',
+      locale: _localeName,
+    );
+  }
 
   String market() => Intl.message(
     'MARKET',
     name: 'market',
-    desc: 'Label for the Market tab'
+    desc: 'Label for the Market tab',
+    locale: _localeName,
   );
 
   String portfolio() => Intl.message(
     'PORTFOLIO',
     name: 'portfolio',
-    desc: 'Label for the Portfolio tab'
+    desc: 'Label for the Portfolio tab',
+    locale: _localeName,
   );
 }
