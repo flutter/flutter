@@ -29,6 +29,12 @@ FLUTTER_EXPORT
 
 @property(strong, nonatomic) UIWindow* window;
 
+// Can be overriden by subclasses to provide a custom FlutterBinaryMessenger,
+// typically a FlutterViewController, for plugin interop.
+//
+// Defaults to window's rootViewController.
+- (NSObject<FlutterBinaryMessenger>*) binaryMessenger;
+
 @end
 
 #endif  // FLUTTER_FLUTTERDARTPROJECT_H_

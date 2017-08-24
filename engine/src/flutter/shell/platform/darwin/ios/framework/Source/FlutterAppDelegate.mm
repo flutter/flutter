@@ -212,6 +212,11 @@
   }
 }
 
+// TODO(xster): move when doing https://github.com/flutter/flutter/issues/3671.
+- (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
+  return self.rootFlutterViewController;
+}
+
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   NSAssert(self.pluginPublications[pluginKey] == nil, @"Duplicate plugin key: %@", pluginKey);
   self.pluginPublications[pluginKey] = [NSNull null];
@@ -248,7 +253,7 @@
 }
 
 - (NSObject<FlutterBinaryMessenger>*)messenger {
-  return (FlutterViewController*)_appDelegate.window.rootViewController;
+  return [_appDelegate binaryMessenger];
 }
 
 - (void)publish:(NSObject*)value {
