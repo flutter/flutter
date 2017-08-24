@@ -28,94 +28,88 @@ void main() {
     DateTime _selectedDate = new DateTime(2016, DateTime.JULY, 26);
 
     await tester.pumpWidget(
-      new Overlay(
-        initialEntries: <OverlayEntry>[
-          new OverlayEntry(
-            builder: (BuildContext context) => new StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return new Positioned(
-                  width: 400.0,
-                  child: new SingleChildScrollView(
-                    child: new Material(
-                      child: new MonthPicker(
-                        firstDate: new DateTime(0),
-                        lastDate: new DateTime(9999),
-                        key: _datePickerKey,
-                        selectedDate: _selectedDate,
-                        onChanged: (DateTime value) {
-                          setState(() {
-                            _selectedDate = value;
-                          });
-                        },
-                      ),
-                    ),
+      new MaterialApp(
+        home: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Container(
+              width: 400.0,
+              child: new SingleChildScrollView(
+                child: new Material(
+                  child: new MonthPicker(
+                    firstDate: new DateTime(0),
+                    lastDate: new DateTime(9999),
+                    key: _datePickerKey,
+                    selectedDate: _selectedDate,
+                    onChanged: (DateTime value) {
+                      setState(() {
+                        _selectedDate = value;
+                      });
+                    },
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                ),
+              ),
+            );
+          },
+        ),
+      )
     );
+
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));
 
     await tester.tapAt(const Offset(50.0, 100.0));
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.tapAt(const Offset(300.0, 100.0));
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
-    await tester.pump(const Duration(seconds: 2));
-
-    await tester.tapAt(const Offset(380.0, 20.0));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
 
-    await tester.tapAt(const Offset(300.0, 100.0));
+    await tester.tap(find.byTooltip('Next month'));
+    await tester.pumpAndSettle();
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
+
+    await tester.tap(find.text('5'));
+    await tester.pumpAndSettle();
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
-    await tester.pump(const Duration(seconds: 2));
 
-    await tester.drag(find.byKey(_datePickerKey), const Offset(-300.0, 0.0));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.drag(find.byKey(_datePickerKey), const Offset(-400.0, 0.0));
+    await tester.pumpAndSettle();
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
 
-    await tester.tapAt(const Offset(45.0, 270.0));
-    expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
-    await tester.pump(const Duration(seconds: 2));
-
-    await tester.drag(find.byKey(_datePickerKey), const Offset(300.0, 0.0));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    await tester.tap(find.text('25'));
+    await tester.pumpAndSettle();
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
 
-    await tester.tapAt(const Offset(210.0, 180.0));
+    await tester.drag(find.byKey(_datePickerKey), const Offset(800.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
+
+    await tester.tap(find.text('17'));
+    await tester.pumpAndSettle();
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 17)));
   });
 
   testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Overlay(
-        initialEntries: <OverlayEntry>[
-          new OverlayEntry(
-            builder: (BuildContext context) => new StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return new IntrinsicWidth(
-                  child: new IntrinsicHeight(
-                    child: new Material(
-                      child: new SingleChildScrollView(
-                        child: new MonthPicker(
-                          firstDate: new DateTime(0),
-                          lastDate: new DateTime(9999),
-                          onChanged: (DateTime value) { },
-                          selectedDate: new DateTime(2000, DateTime.JANUARY, 1),
-                        ),
-                      ),
+      new MaterialApp(
+        home: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new IntrinsicWidth(
+              child: new IntrinsicHeight(
+                child: new Material(
+                  child: new SingleChildScrollView(
+                    child: new MonthPicker(
+                      firstDate: new DateTime(0),
+                      lastDate: new DateTime(9999),
+                      onChanged: (DateTime value) { },
+                      selectedDate: new DateTime(2000, DateTime.JANUARY, 1),
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
     await tester.pump(const Duration(seconds: 5));

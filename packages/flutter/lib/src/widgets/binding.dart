@@ -389,19 +389,35 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   }
 
   bool _needToReportFirstFrame = true;
-  bool _thisFrameWasUseful = true;
+  int _deferFirstFrameReportCount = 0;
+  bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
 
-  /// Tell the framework that the frame we are currently building
-  /// should not be considered to be a useful first frame.
+  /// Tell the framework not to report the frame it is building as a "useful"
+  /// first frame until there is a corresponding call to [allowFirstFrameReport].
   ///
   /// This is used by [WidgetsApp] to report the first frame.
   //
   // TODO(ianh): This method should only be available in debug and profile modes.
-  void preventThisFrameFromBeingReportedAsFirstFrame() {
-    _thisFrameWasUseful = false;
+  void deferFirstFrameReport() {
+    assert(_deferFirstFrameReportCount >= 0);
+    _deferFirstFrameReportCount += 1;
   }
 
-  void _handleBuildScheduled() {
+  /// When called after [deferFirstFrameReport]: tell the framework to report
+  /// the frame it is building as a "useful" first frame.
+  ///
+  /// This method may only be called once for each corresponding call
+  /// to [deferFirstFrameReport].
+  ///
+  /// This is used by [WidgetsApp] to report the first frame.
+  //
+  // TODO(ianh): This method should only be available in debug and profile modes.
+  void allowFirstFrameReport() {
+    assert(_deferFirstFrameReportCount >= 1);
+    _deferFirstFrameReportCount -= 1;
+  }
+
+    void _handleBuildScheduled() {
     // If we're in the process of building dirty elements, then changes
     // should not trigger a new frame.
     assert(() {
@@ -522,14 +538,10 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     }
     // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
     // See https://github.com/dart-lang/sdk/issues/27192
-    if (_needToReportFirstFrame) {
-      if (_thisFrameWasUseful) {
-        developer.Timeline.instantSync('Widgets completed first useful frame');
-        developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
-        _needToReportFirstFrame = false;
-      } else {
-        _thisFrameWasUseful = true;
-      }
+    if (_needToReportFirstFrame && _reportFirstFrame) {
+      developer.Timeline.instantSync('Widgets completed first useful frame');
+      developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
+      _needToReportFirstFrame = false;
     }
   }
 
@@ -556,11 +568,15 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
 
   @override
   Future<Null> performReassemble() {
-    _needToReportFirstFrame = true;
-    preventThisFrameFromBeingReportedAsFirstFrame();
+    deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.performReassemble();
+    // TODO(hansmuller): eliminate the value variable after analyzer bug
+    // https://github.com/flutter/flutter/issues/11646 is fixed.
+    final Future<Null> value = super.performReassemble();
+    return value.then((Null _) {
+      allowFirstFrameReport();
+    });
   }
 }
 

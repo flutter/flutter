@@ -13,6 +13,8 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
+import 'proxy_box.dart';
+import 'semantics.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
@@ -203,6 +205,28 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     }
   }
 
+  /// Whether the [SemanticsNode]s associated with this [RenderSliver] should
+  /// be excluded from the semantic scrolling area.
+  ///
+  /// [RenderSliver]s that stay on the screen even though the user has scrolled
+  /// past them (e.g. a pinned app bar) should set this to `true`.
+  @protected
+  bool get excludeFromSemanticsScrolling => _excludeFromSemanticsScrolling;
+  bool _excludeFromSemanticsScrolling = false;
+  set excludeFromSemanticsScrolling(bool value) {
+    if (_excludeFromSemanticsScrolling == value)
+      return;
+    _excludeFromSemanticsScrolling = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  SemanticsAnnotator get semanticsAnnotator => _excludeFromSemanticsScrolling ? _annotate : null;
+
+  void _annotate(SemanticsNode node) {
+    node.ensureTag(RenderSemanticsGestureHandler.excludeFromScrolling);
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
@@ -264,7 +288,9 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   @override
   void performLayout() {
     final double maxExtent = this.maxExtent;
-    layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: constraints.overlap > 0.0);
+    final bool overlapsContent = constraints.overlap > 0.0;
+    excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
+    layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
@@ -445,7 +471,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
     }
-    layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: _effectiveScrollOffset < constraints.scrollOffset);
+    final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset;
+    excludeFromSemanticsScrolling = overlapsContent;
+    layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: overlapsContent);
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
   }

@@ -15,6 +15,7 @@ import 'flexible_space_bar.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'page.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
@@ -352,7 +353,7 @@ class _AppBarState extends State<AppBar> {
         leading = new IconButton(
           icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButton,
-          tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
+          tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
         if (canPop)

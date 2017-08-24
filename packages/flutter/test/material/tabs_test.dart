@@ -132,18 +132,18 @@ class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
 
 class TestScrollPhysics extends ScrollPhysics {
   const TestScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
-  
+
   @override
   TestScrollPhysics applyTo(ScrollPhysics ancestor) {
     return new TestScrollPhysics(parent: buildParent(ancestor));
   }
-  
+
   static final SpringDescription _kDefaultSpring = new SpringDescription.withDampingRatio(
     mass: 0.5,
-    springConstant: 500.0,
+    stiffness: 500.0,
     ratio: 1.1,
   );
-  
+
   @override
   SpringDescription get spring => _kDefaultSpring;
 }
@@ -970,7 +970,7 @@ void main() {
       rect: new Rect.fromLTRB(tabLeft + padLeft, height, tabRight - padRight, height + weight)
     ));
   });
-  
+
   testWidgets('correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
