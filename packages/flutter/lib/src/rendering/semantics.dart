@@ -19,7 +19,7 @@ export 'dart:ui' show SemanticsAction;
 ///
 /// The handler will only be called for a particular flag if that flag is set
 /// (e.g. [performAction] will only be called with [SemanticsAction.tap] if
-/// [SemanticsNode.ensureAction] was called for [SemanticsAction.tap].)
+/// [SemanticsNode.addAction] was called for [SemanticsAction.tap].)
 abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   /// Called when the object implementing this interface receives a
   /// [SemanticsAction]. For example, if the user of an accessibility tool

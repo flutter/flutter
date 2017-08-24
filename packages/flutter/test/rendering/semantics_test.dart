@@ -52,25 +52,3 @@ void main() {
   });
 }
 
-Matcher hasAction(SemanticsAction action) => new _HasAction(action);
-
-class _HasAction extends Matcher {
-  const _HasAction(this.action,) : assert(action != null);
-
-  final SemanticsAction action;
-
-  @override
-  bool matches(covariant SemanticsNode node, Map<dynamic, dynamic> matchState) {
-    return node.getSemanticsData().hasAction(action);
-  }
-
-  @override
-  Description describe(Description description) {
-    return description.add('has $action');
-  }
-
-  @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    return mismatchDescription.add('node does not have $action');
-  }
-}
