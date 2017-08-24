@@ -2557,38 +2557,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// how much of the semantics have changed. Bigger changes (indicated by
   /// setting one or both parameters to `false`) are more expansive to compute.
   ///
-  /// [onlyLocalUpdates] should be set to `true` to reduce cost if both of the
-  /// following conditions are true:
-  /// 1. The semantics update does not in any way change the shape of the
-  ///    semantics tree (e.g. [SemanticsNode]s will neither be added/removed
-  ///    from the tree nor be moved within the tree).
-  /// 2. The set of annotations (i.e the set of flags, actions, labels, etc.)
-  ///    that the [semanticsAnnotator] is going to apply to the [SemanticsNode]
-  ///    is unchanged (only their values are allowed to change).
+  /// [onlyLocalUpdates] should be set to `true` to reduce cost if the semantics
+  /// update does not in any way change the shape of the semantics tree (e.g.
+  /// [SemanticsNode]s will neither be added/removed from the tree nor be moved
+  /// within the tree). In other words, with [onlyLocalChanges] the
+  /// [RenderObject] can indicate that it only wants to perform updates on the
+  /// local [SemanticsNode] (e.g. changing a label or flag) without affecting
+  /// other nodes in the tree.
   ///
-  /// In practice, this means that [onlyLocalUpdates] has to be set to `false`
-  /// in the following cases:
-  /// a. [isSemanticBoundary] changed its value (potential removal/addition of a
-  ///    node, see #1 above).
+  /// In practice,[onlyLocalUpdates] has to be set to `false` in the following
+  /// cases as they will change the shape of the tree:
+  /// a. [isSemanticBoundary] changed its value.
   /// b. [semanticsAnnotator] changed from or to returning `null` and
-  ///    [isSemanticBoundary] isn't `true`. (potential removal/addition of a
-  ///    node, see #1 above).
-  /// c. In a previous invocation of the [semanticsAnnotator] a flag, action, or
-  ///    tag has been set and the [RenderObject] no longer cares about the
-  ///    presence of that flag, action, or tag (the set of values that the
-  ///    [semanticsAnnotator] is going to annotate on the [SemanticsNode]
-  ///    changed, see #2 above). As an example, if [SemanticsNode.isChecked]
-  ///    changes from true to false, [onlyLocalChanges] should be set to `true`
-  ///    as the [semanticsAnnotator] is still having an opinion about that flag.
-  ///    However, if the [semanticsAnnotator] is no longer going to set a value
-  ///    for [SemanticsNode.isChecked], [onlyLocalChanges] needs to be set to
-  ///    `false` to ensure that the flag goes back to its default value.
-  ///
-  /// A more technical way to think about [onlyLocalUpdates] is that setting
-  /// it to `false` will completely erase all annotations on the [SemanticsNode]
-  /// that corresponds to this [RenderObject] as well as all annotations on the
-  /// parent node of that [SemanticsNode] and both nodes will be re-annotated
-  /// from scratch.
+  ///    [isSemanticBoundary] isn't `true`.
   ///
   /// [noGeometry] should be set to `true` to reduce cost if the geometry (e.g.
   /// size and position) of the corresponding [SemanticsNode] has not
@@ -2616,8 +2597,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         if (node._needsSemanticsUpdate)
           return;
         node._needsSemanticsUpdate = true;
+        node.resetSemantics();
         node = node.parent;
       }
+      node.resetSemantics();
       if (!node._needsSemanticsUpdate) {
         node._needsSemanticsUpdate = true;
         if (owner != null) {
@@ -2765,21 +2748,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// this object. The function returned by this function will be used to
   /// annotate the [SemanticsNode] for this object.
   ///
-  /// Semantic annotations *may* be persistent between subsequent calls to an
-  /// annotator, but there is no guarantee for that. It is important that an
-  /// annotator always updates a given [SemanticsNode] to reflect the current
-  /// state of this [RenderObject]. In practise, this means that a
-  /// [SemanticsAnnotator] should during each invocation set all flags,
-  /// labels, actions, and tags it cares about to their current value. For
-  /// example, if the [SemanticsAnnotator] cares about a flag being `true` it
-  /// should set it to `true` in each invocation even if the value has not
-  /// changed from one invocation to another. Furthermore, if the
-  /// [SemanticsAnnotator] wants to remove an action it needs to explicitly do
-  /// so as that action might otherwise still be set from a previous invocation.
+  /// Semantic annotations are not persisted between subsequent calls to an
+  /// annotator. The [SemanticsAnnotator] should always set all options
+  /// (e.g. flags, labels, actions, etc.) to the values it cares about given
+  /// the current state of the [RenderObject].
   ///
   /// If the return value will change from null to non-null (or vice versa), and
   /// [isSemanticBoundary] isn't true, then the associated call to
-  /// [markNeedsSemanticsUpdate] must not have `onlyChanges` set, as it is
+  /// [markNeedsSemanticsUpdate] must not have `onlyLocalUpdates` set, as it is
   /// possible that the node should be entirely removed.
   ///
   /// If the annotation should only happen under certain conditions, `null`

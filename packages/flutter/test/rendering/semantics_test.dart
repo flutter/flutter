@@ -19,35 +19,19 @@ void main() {
       expect(node.hasTag(tag1), isFalse);
       expect(node.hasTag(tag2), isFalse);
 
-      node.ensureTag(tag1);
+      node.addTag(tag1);
       expect(node.hasTag(tag1), isTrue);
       expect(node.hasTag(tag2), isFalse);
 
-      node.ensureTag(tag2, isPresent: false);
-      expect(node.hasTag(tag1), isTrue);
-      expect(node.hasTag(tag2), isFalse);
-
-      node.ensureTag(tag2, isPresent: true);
+      node.addTag(tag2);
       expect(node.hasTag(tag1), isTrue);
       expect(node.hasTag(tag2), isTrue);
-
-      node.ensureTag(tag2, isPresent: true);
-      expect(node.hasTag(tag1), isTrue);
-      expect(node.hasTag(tag2), isTrue);
-
-      node.ensureTag(tag1, isPresent: false);
-      expect(node.hasTag(tag1), isFalse);
-      expect(node.hasTag(tag2), isTrue);
-
-      node.ensureTag(tag2, isPresent: false);
-      expect(node.hasTag(tag1), isFalse);
-      expect(node.hasTag(tag2), isFalse);
     });
 
     test('getSemanticsData includes tags', () {
       final SemanticsNode node = new SemanticsNode()
-        ..ensureTag(tag1)
-        ..ensureTag(tag2);
+        ..addTag(tag1)
+        ..addTag(tag2);
 
       final Set<SemanticsTag> expected = new Set<SemanticsTag>()
         ..add(tag1)
@@ -57,76 +41,13 @@ void main() {
 
       node.mergeAllDescendantsIntoThisNode = true;
       node.addChildren(<SemanticsNode>[
-        new SemanticsNode()..ensureTag(tag3)
+        new SemanticsNode()..addTag(tag3)
       ]);
       node.finalizeChildren();
 
       expected.add(tag3);
 
       expect(node.getSemanticsData().tags, expected);
-    });
-
-    test('actions', () {
-      final SemanticsNode node = new SemanticsNode();
-      const SemanticsAction actionTap = SemanticsAction.tap;
-      const SemanticsAction actionLongPress = SemanticsAction.longPress;
-
-      expect(node, isNot(hasAction(actionTap)));
-      expect(node, isNot(hasAction(actionLongPress)));
-
-      node.ensureAction(actionTap);
-      expect(node, hasAction(actionTap));
-      expect(node, isNot(hasAction(actionLongPress)));
-
-      node.ensureAction(actionLongPress, isPresent: false);
-      expect(node, hasAction(actionTap));
-      expect(node, isNot(hasAction(actionLongPress)));
-
-      node.ensureAction(actionLongPress, isPresent: true);
-      expect(node, hasAction(actionTap));
-      expect(node, hasAction(actionLongPress));
-
-      node.ensureAction(actionLongPress, isPresent: true);
-      expect(node, hasAction(actionTap));
-      expect(node, hasAction(actionLongPress));
-
-      node.ensureAction(actionTap, isPresent: false);
-      expect(node, isNot(hasAction(actionTap)));
-      expect(node, hasAction(actionLongPress));
-
-      node.ensureAction(actionLongPress, isPresent: false);
-      expect(node, isNot(hasAction(actionTap)));
-      expect(node, isNot(hasAction(actionLongPress)));
-    });
-
-    test('scrolling and adjustment actions', () {
-      final SemanticsNode node = new SemanticsNode();
-
-      node.ensureHorizontalScrollingActions();
-      expect(node, hasAction(SemanticsAction.scrollLeft));
-      expect(node, hasAction(SemanticsAction.scrollRight));
-
-      node.ensureHorizontalScrollingActions(arePresent: false);
-      expect(node, isNot(hasAction(SemanticsAction.scrollLeft)));
-      expect(node, isNot(hasAction(SemanticsAction.scrollRight)));
-
-
-      node.ensureVerticalScrollingActions();
-      expect(node, hasAction(SemanticsAction.scrollUp));
-      expect(node, hasAction(SemanticsAction.scrollDown));
-
-      node.ensureVerticalScrollingActions(arePresent: false);
-      expect(node, isNot(hasAction(SemanticsAction.scrollUp)));
-      expect(node, isNot(hasAction(SemanticsAction.scrollDown)));
-
-
-      node.ensureAdjustmentActions();
-      expect(node, hasAction(SemanticsAction.decrease));
-      expect(node, hasAction(SemanticsAction.increase));
-
-      node.ensureAdjustmentActions(arePresent: false);
-      expect(node, isNot(hasAction(SemanticsAction.decrease)));
-      expect(node, isNot(hasAction(SemanticsAction.increase)));
     });
   });
 }

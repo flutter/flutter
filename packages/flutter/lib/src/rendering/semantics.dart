@@ -252,76 +252,36 @@ class SemanticsNode extends AbstractNode {
 
   int _actions = 0;
 
-  /// Ensures that the given [action] is or is not part of the set of semantic
-  /// actions.
-  ///
-  /// If [isPresent] is `true` it will ensure that the action is present. If
-  /// [isPresent] is `false` it will ensure that the action is not part of the
-  /// set of semantic actions that can be performed by this node.
+  /// Adds the given action to the set of semantic actions.
   ///
   /// If the user chooses to perform an action,
   /// [SemanticsActionHandler.performAction] will be called with the chosen
   /// action.
-  ///
-  /// [SemanticsAction] added by [ensureAction] *might* be persisted between
-  /// subsequent calls to a given [SemanticsAnnotator]. However, there is no
-  /// grantee for that. A [SemanticsAnnotator] needs to ensure that the
-  /// [SemanticsNode] it is annotating is in the correct state whether it was
-  /// given a fresh, never annotated node or whether it was given a node that
-  /// has some actions persisted from a previous call to the same
-  /// [SemanticsAnnotator]. In other words: The call to [ensureAction] should
-  /// usually not be guarded by a condition in a [SemanticsAnnotator]. Instead,
-  /// the condition should be used to determine the value of the [isPresent]
-  /// parameter.
-  ///
-  /// ## Sample code
-  ///
-  /// A button, that is only tap-able in the active state, should call
-  /// [ensureAction] in its [SemanticsAnnotator] returned by
-  /// [RenderObject.semanticsAnnotator] as follows:
-  ///
-  /// ```dart
-  /// bool get _active => true;
-  ///
-  /// void _annotate(SemanticsNode node) {
-  ///   node.ensureAction(SemanticsAction.tap, isPresent: _active);
-  /// }
-  /// ```
-  ///
-  /// It would be incorrect to guard the call to [ensureAction] with an
-  /// `if (active)` clause, if `active` could ever change from `true` to
-  /// `false` as that wouldn't remove the action reliably from the annotated
-  /// [SemanticsNode].
-  void ensureAction(SemanticsAction action, { bool isPresent: true }) {
+  void addAction(SemanticsAction action) {
     assert(action != null);
-    assert(isPresent != null);
-
     final int index = action.index;
-    if (isPresent && (_actions & index) == 0) {
+    if ((_actions & index) == 0) {
       _actions |= index;
-      _markDirty();
-    } else if (!isPresent && (_actions & index) != 0) {
-      _actions &= ~index;
       _markDirty();
     }
   }
 
   /// Adds the [SemanticsAction.scrollLeft] and [SemanticsAction.scrollRight] actions.
-  void ensureHorizontalScrollingActions({ bool arePresent: true }) {
-    ensureAction(SemanticsAction.scrollLeft, isPresent: arePresent);
-    ensureAction(SemanticsAction.scrollRight, isPresent: arePresent);
+  void addHorizontalScrollingActions() {
+    addAction(SemanticsAction.scrollLeft);
+    addAction(SemanticsAction.scrollRight);
   }
 
   /// Adds the [SemanticsAction.scrollUp] and [SemanticsAction.scrollDown] actions.
-  void ensureVerticalScrollingActions({ bool arePresent: true }) {
-    ensureAction(SemanticsAction.scrollUp, isPresent: arePresent);
-    ensureAction(SemanticsAction.scrollDown, isPresent: arePresent);
+  void addVerticalScrollingActions() {
+    addAction(SemanticsAction.scrollUp);
+    addAction(SemanticsAction.scrollDown);
   }
 
   /// Adds the [SemanticsAction.increase] and [SemanticsAction.decrease] actions.
-  void ensureAdjustmentActions({ bool arePresent: true }) {
-    ensureAction(SemanticsAction.increase, isPresent: arePresent);
-    ensureAction(SemanticsAction.decrease, isPresent: arePresent);
+  void addAdjustmentActions() {
+    addAction(SemanticsAction.increase);
+    addAction(SemanticsAction.decrease);
   }
 
   bool _canPerformAction(SemanticsAction action) {
@@ -393,11 +353,7 @@ class SemanticsNode extends AbstractNode {
 
   Set<SemanticsTag> _tags = new Set<SemanticsTag>();
 
-  /// Ensures that the [SemanticsNode] is or is not tagged with [tag].
-  ///
-  /// If [isPresent] is `true` it will ensure that the tag is present. If
-  /// [isPresent] is `false` it will ensure that the node is not tagged with
-  /// [tag].
+  /// Tags the [SemanticsNode] with [tag].
   ///
   /// Tags are not sent to the engine. They can be used by a parent
   /// [SemanticsNode] to figure out how to add the node as a child.
@@ -406,13 +362,9 @@ class SemanticsNode extends AbstractNode {
   ///
   ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
   ///  * [hasTag] to check if the node has a certain tag.
-  void ensureTag(SemanticsTag tag, { bool isPresent: true }) {
+  void addTag(SemanticsTag tag) {
     assert(tag != null);
-    assert(isPresent != null);
-    if (isPresent)
-      _tags.add(tag);
-    else
-      _tags.remove(tag);
+    _tags.add(tag);
   }
 
   /// Check if the [SemanticsNode] is tagged with [tag].
