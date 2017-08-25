@@ -391,11 +391,13 @@ class SemanticsNode extends AbstractNode {
 
   /// Append the given children as children of this node.
   ///
+  /// Children must be added in paint order (i.e. inverse hit test order).
+  ///
   /// The [finalizeChildren] method must be called after all children have been
   /// added.
-  void addChildren(Iterable<SemanticsNode> children) {
+  void addChildren(Iterable<SemanticsNode> childrenInPaintOrder) {
     _newChildren ??= <SemanticsNode>[];
-    _newChildren.addAll(children);
+    _newChildren.addAll(childrenInPaintOrder);
     // we do the asserts afterwards because children is an Iterable
     // and doing the asserts before would mean the behavior is
     // different in checked mode vs release mode (if you walk an
@@ -685,19 +687,45 @@ class SemanticsNode extends AbstractNode {
   }
 
   /// Returns a string representation of this node and its descendants.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+  ///
+  /// By default, children are printed in traversal order. This can be changed
+  /// to inverse hit test order by setting [childrenInInverseHitTestOrder] to
+  /// `true`.
+  String toStringDeep({
+    bool childrenInInverseHitTestOrder: false,
+    String prefixLineOne: '',
+    String prefixOtherLines: ''
+  }) {
     final StringBuffer result = new StringBuffer()
       ..write(prefixLineOne)
       ..write(this)
       ..write('\n');
     if (_children != null && _children.isNotEmpty) {
-      for (int index = 0; index < _children.length - 1; index += 1) {
-        final SemanticsNode child = _children[index];
-        result.write(child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502"));
+      final List<SemanticsNode> childrenInOrder = childrenInInverseHitTestOrder
+          ? _children
+          : (new List<SemanticsNode>.from(_children)..sort(_nodeComparator));
+      for (int index = 0; index < childrenInOrder.length - 1; index += 1) {
+        final SemanticsNode child = childrenInOrder[index];
+        result.write(child.toStringDeep(
+          childrenInInverseHitTestOrder: childrenInInverseHitTestOrder,
+          prefixLineOne: "$prefixOtherLines \u251C",
+          prefixOtherLines: "$prefixOtherLines \u2502",
+        ));
       }
-      result.write(_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  "));
+      result.write(childrenInOrder.last.toStringDeep(
+        childrenInInverseHitTestOrder: childrenInInverseHitTestOrder,
+        prefixLineOne: "$prefixOtherLines \u2514",
+        prefixOtherLines: "$prefixOtherLines  ",
+      ));
     }
     return result.toString();
+  }
+
+  static int _nodeComparator(SemanticsNode a, SemanticsNode b) {
+    final Rect rectA = MatrixUtils.transformRect(a.transform, a.rect);
+    final Rect rectB = MatrixUtils.transformRect(b.transform, b.rect);
+    final int top = rectA.top.compareTo(rectB.top);
+    return top == 0 ? rectA.left.compareTo(rectB.left) : top;
   }
 }
 

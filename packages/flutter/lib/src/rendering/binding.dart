@@ -319,9 +319,13 @@ void debugDumpLayerTree() {
 
 /// Prints a textual representation of the entire semantics tree.
 /// This will only work if there is a semantics client attached.
-/// Otherwise, the tree is empty and this will print "null".
-void debugDumpSemanticsTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep() ?? 'Semantics not collected.');
+/// Otherwise, a notice that no semantics are available will be printed.
+///
+/// By default, children of a [SemanticsNode] are printed in traversal order.
+/// This can be changed to inverse hit test order by setting
+/// [childrenInInverseHitTestOrder] to `true`.
+void debugDumpSemanticsTree({ bool childrenInInverseHitTestOrder: false }) {
+  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childrenInInverseHitTestOrder: childrenInInverseHitTestOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework
