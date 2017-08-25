@@ -678,4 +678,46 @@ void main() {
       ),
     );
   });
+
+  test('Sliver paintBounds and semanticBounds - vertical', () {
+    const double height = 150.0;
+
+    final RenderSliver sliver = new RenderSliverToBoxAdapter(
+        child: new RenderSizedBox(const Size(400.0, height)),
+    );
+    final RenderViewport root = new RenderViewport(
+      axisDirection: AxisDirection.down,
+      offset: new ViewportOffset.zero(),
+      children: <RenderSliver>[
+        sliver,
+      ],
+    );
+    layout(root);
+
+    final Rect expectedRect = new Rect.fromLTWH(0.0, 0.0, root.size.width, height);
+
+    expect(sliver.paintBounds, expectedRect);
+    expect(sliver.semanticBounds, expectedRect);
+  });
+
+  test('Sliver paintBounds and semanticBounds - horizontal', () {
+    const double width = 150.0;
+
+    final RenderSliver sliver = new RenderSliverToBoxAdapter(
+      child: new RenderSizedBox(const Size(width, 400.0)),
+    );
+    final RenderViewport root = new RenderViewport(
+      axisDirection: AxisDirection.right,
+      offset: new ViewportOffset.zero(),
+      children: <RenderSliver>[
+        sliver,
+      ],
+    );
+    layout(root);
+
+    final Rect expectedRect = new Rect.fromLTWH(0.0, 0.0, width, root.size.height);
+
+    expect(sliver.paintBounds, expectedRect);
+    expect(sliver.semanticBounds, expectedRect);
+  });
 }
