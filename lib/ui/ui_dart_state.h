@@ -39,6 +39,7 @@ class UIDartState : public tonic::DartState {
   const std::string& debug_name() const { return debug_name_; }
   Window* window() const { return window_.get(); }
 
+  void set_debug_name_prefix(const std::string& debug_name_prefix);
   void set_font_selector(PassRefPtr<FontSelector> selector);
   PassRefPtr<FontSelector> font_selector();
 
@@ -47,6 +48,7 @@ class UIDartState : public tonic::DartState {
 
   IsolateClient* isolate_client_;
   Dart_Port main_port_;
+  std::string debug_name_prefix_;
   std::string debug_name_;
   std::unique_ptr<Window> window_;
   RefPtr<FontSelector> font_selector_;
