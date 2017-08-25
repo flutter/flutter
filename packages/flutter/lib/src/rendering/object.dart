@@ -2567,6 +2567,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// [onlyLocalUpdates] has to be set to `false` in the following cases as they
   /// will change the shape of the tree:
+  ///
   /// 1. [isSemanticBoundary] changed its value.
   /// 2. [semanticsAnnotator] changed from or to returning `null` and
   ///    [isSemanticBoundary] isn't `true`.
@@ -2600,8 +2601,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         node.resetSemantics();
         node = node.parent;
       }
-      node.resetSemantics();
       if (!node._needsSemanticsUpdate) {
+        node.resetSemantics();
         node._needsSemanticsUpdate = true;
         if (owner != null) {
           owner._nodesNeedingSemantics.add(node);
