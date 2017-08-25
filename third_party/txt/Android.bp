@@ -1,0 +1,11 @@
+cc_library_headers {
+    name: "libminikin_headers",
+    host_supported: true,
+    export_include_dirs: ["include"],
+}
+
+subdirs = [
+    "app",
+    "libs/minikin",
+    "tests",
+]
