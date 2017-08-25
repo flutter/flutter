@@ -111,18 +111,24 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
             result.setLongClickable(true);
         }
         if ((object.actions & SEMANTICS_ACTION_SCROLLABLE) != 0) {
-            // TODO(ianh): Once we're on SDK v23+, call addAction to
-            // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
-            // _UP, and _DOWN when appropriate.
-            // TODO(ianh): Only include the actions if you can actually scroll that way.
-            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-            result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             result.setScrollable(true);
             // This tells Android's a11y to send scroll events when reaching the end of
             // the visible viewport of a scrollable.
             result.setClassName("android.widget.ScrollView");
+            // TODO(ianh): Once we're on SDK v23+, call addAction to
+            // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
+            // _UP, and _DOWN when appropriate.
+            if ((object.actions & SEMANTICS_ACTION_SCROLL_RIGHT) != 0
+                    || (object.actions & SEMANTICS_ACTION_SCROLL_UP) != 0) {
+                result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+            }
+            if ((object.actions & SEMANTICS_ACTION_SCROLL_LEFT) != 0
+                    || (object.actions & SEMANTICS_ACTION_SCROLL_DOWN) != 0) {
+                result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
+            }
         }
-        if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0 || (object.actions & SEMANTICS_ACTION_DECREASE) != 0 ) {
+        if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0
+                || (object.actions & SEMANTICS_ACTION_DECREASE) != 0 ) {
             result.setFocusable(true);
             result.setClassName("android.widget.SeekBar");
             if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0) {
