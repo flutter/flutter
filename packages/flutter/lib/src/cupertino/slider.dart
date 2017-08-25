@@ -190,12 +190,13 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
     @required double value,
     int divisions,
     Color activeColor,
-    this.onChanged,
+    ValueChanged<double> onChanged,
     TickerProvider vsync,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
+       _onChanged = onChanged,
        super(additionalConstraints: const BoxConstraints.tightFor(width: _kSliderWidth, height: _kSliderHeight)) {
     _drag = new HorizontalDragGestureRecognizer()
       ..onStart = _handleDragStart
@@ -239,7 +240,16 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
     markNeedsPaint();
   }
 
-  ValueChanged<double> onChanged;
+  ValueChanged<double> get onChanged => _onChanged;
+  ValueChanged<double> _onChanged;
+  set onChanged(ValueChanged<double> value) {
+    if (value == _onChanged)
+      return;
+    final bool wasInteractive = isInteractive;
+    _onChanged = value;
+    if (wasInteractive != isInteractive)
+      markNeedsSemanticsUpdate(noGeometry: true);
+  }
 
   AnimationController _position;
 

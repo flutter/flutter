@@ -127,11 +127,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
-    if (event is PointerMoveEvent) {
+    if (!event.synthesized
+        && (event is PointerDownEvent || event is PointerMoveEvent)) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
-      if (!event.synthesized)
-        tracker.addPosition(event.timeStamp, event.position);
+      tracker.addPosition(event.timeStamp, event.position);
+    }
+
+    if (event is PointerMoveEvent) {
       final Offset delta = event.delta;
       if (_state == _DragState.accepted) {
         if (onUpdate != null) {

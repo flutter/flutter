@@ -261,7 +261,32 @@ void main() {
       timeStamp: const Duration(milliseconds: 60),
       synthesized: true,
     ));
-    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 20)));
+    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 70)));
+    expect(velocity.pixelsPerSecond.dx, moreOrLessEquals(1000.0));
+    expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
+
+    drag.dispose();
+  });
+
+  /// Checks that quick flick gestures with 1 down, 2 move and 1 up pointer
+  /// events still have a velocity
+  testGesture('Quick flicks have velocity', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    Velocity velocity;
+    drag.onEnd = (DragEndDetails details) {
+      velocity = details.velocity;
+    };
+
+    final TestPointer pointer = new TestPointer(1);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
+    drag.addPointer(down);
+    tester.closeArena(1);
+    tester.route(down);
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 20)));
+    tester.route(pointer.move(const Offset(30.0, 25.0), timeStamp: const Duration(milliseconds: 30)));
+    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 40)));
+    // 3 events moving by 10px every 10ms = 1000px/s.
     expect(velocity.pixelsPerSecond.dx, moreOrLessEquals(1000.0));
     expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
 

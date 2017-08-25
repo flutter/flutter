@@ -157,6 +157,9 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private void addFlutterJarProvidedDependency(Project project) {
+        if (project.state.failure) {
+            return
+        }
         project.dependencies {
             if (flutterJar != null) {
                 provided project.files(flutterJar)
@@ -204,6 +207,9 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private void addFlutterTask(Project project) {
+        if (project.state.failure) {
+            return
+        }
         if (project.flutter.source == null) {
             throw new GradleException("Must provide Flutter source directory")
         }
