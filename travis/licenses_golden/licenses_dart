@@ -1,4 +1,4 @@
-Signature: 89df00ef3a428d6cdb878aef784b89cf
+Signature: 9866e4f2ff8387eca89f212d647cb481
 
 UNUSED LICENSES:
 
@@ -189,7 +189,6 @@ FILE: ../../../dart/runtime/bin/file_system_watcher_win.cc
 FILE: ../../../dart/runtime/bin/filter.cc
 FILE: ../../../dart/runtime/bin/filter.h
 FILE: ../../../dart/runtime/bin/filter_patch.dart
-FILE: ../../../dart/runtime/bin/filter_unsupported.cc
 FILE: ../../../dart/runtime/bin/gen_snapshot.cc
 FILE: ../../../dart/runtime/bin/io_natives.cc
 FILE: ../../../dart/runtime/bin/io_service.cc
@@ -197,7 +196,6 @@ FILE: ../../../dart/runtime/bin/io_service.h
 FILE: ../../../dart/runtime/bin/io_service_no_ssl.cc
 FILE: ../../../dart/runtime/bin/io_service_no_ssl.h
 FILE: ../../../dart/runtime/bin/io_service_patch.dart
-FILE: ../../../dart/runtime/bin/io_service_unsupported.cc
 FILE: ../../../dart/runtime/bin/process.cc
 FILE: ../../../dart/runtime/bin/process_patch.dart
 FILE: ../../../dart/runtime/bin/socket.cc
@@ -1235,31 +1233,23 @@ FILE: ../../../dart/runtime/bin/crypto_fuchsia.cc
 FILE: ../../../dart/runtime/bin/crypto_test.cc
 FILE: ../../../dart/runtime/bin/directory_fuchsia.cc
 FILE: ../../../dart/runtime/bin/directory_test.cc
-FILE: ../../../dart/runtime/bin/directory_unsupported.cc
 FILE: ../../../dart/runtime/bin/eventhandler_fuchsia.cc
 FILE: ../../../dart/runtime/bin/eventhandler_fuchsia.h
-FILE: ../../../dart/runtime/bin/eventhandler_unsupported.cc
 FILE: ../../../dart/runtime/bin/extensions_fuchsia.cc
 FILE: ../../../dart/runtime/bin/file_fuchsia.cc
 FILE: ../../../dart/runtime/bin/file_support.cc
 FILE: ../../../dart/runtime/bin/file_system_watcher_fuchsia.cc
-FILE: ../../../dart/runtime/bin/file_system_watcher_unsupported.cc
-FILE: ../../../dart/runtime/bin/file_unsupported.cc
 FILE: ../../../dart/runtime/bin/loader.cc
 FILE: ../../../dart/runtime/bin/loader.h
 FILE: ../../../dart/runtime/bin/log_fuchsia.cc
 FILE: ../../../dart/runtime/bin/platform_fuchsia.cc
-FILE: ../../../dart/runtime/bin/platform_unsupported.cc
 FILE: ../../../dart/runtime/bin/process_fuchsia.cc
-FILE: ../../../dart/runtime/bin/process_unsupported.cc
 FILE: ../../../dart/runtime/bin/reference_counting.h
 FILE: ../../../dart/runtime/bin/root_certificates_unsupported.cc
 FILE: ../../../dart/runtime/bin/socket_base_fuchsia.cc
 FILE: ../../../dart/runtime/bin/socket_base_fuchsia.h
 FILE: ../../../dart/runtime/bin/socket_fuchsia.cc
-FILE: ../../../dart/runtime/bin/socket_unsupported.cc
 FILE: ../../../dart/runtime/bin/stdio_fuchsia.cc
-FILE: ../../../dart/runtime/bin/stdio_unsupported.cc
 FILE: ../../../dart/runtime/bin/thread_fuchsia.cc
 FILE: ../../../dart/runtime/bin/thread_fuchsia.h
 FILE: ../../../dart/runtime/bin/utils_fuchsia.cc
@@ -1541,7 +1531,6 @@ FILE: ../../../dart/runtime/bin/snapshot_utils.cc
 FILE: ../../../dart/runtime/bin/snapshot_utils.h
 FILE: ../../../dart/runtime/bin/socket_base.cc
 FILE: ../../../dart/runtime/bin/socket_base.h
-FILE: ../../../dart/runtime/bin/socket_base_unsupported.cc
 FILE: ../../../dart/runtime/bin/sync_socket.cc
 FILE: ../../../dart/runtime/bin/sync_socket.h
 FILE: ../../../dart/runtime/bin/sync_socket_android.cc
@@ -1549,7 +1538,6 @@ FILE: ../../../dart/runtime/bin/sync_socket_fuchsia.cc
 FILE: ../../../dart/runtime/bin/sync_socket_linux.cc
 FILE: ../../../dart/runtime/bin/sync_socket_macos.cc
 FILE: ../../../dart/runtime/bin/sync_socket_patch.dart
-FILE: ../../../dart/runtime/bin/sync_socket_unsupported.cc
 FILE: ../../../dart/runtime/bin/sync_socket_win.cc
 FILE: ../../../dart/runtime/lib/async.cc
 FILE: ../../../dart/runtime/observatory/lib/src/elements/memory/allocations.dart

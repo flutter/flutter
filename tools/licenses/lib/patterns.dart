@@ -158,6 +158,7 @@ final List<RegExp> licenseFragments = <RegExp>[
   new RegExp(r'SUCH DAMAGE\.'),
   new RegExp(r'found in the LICENSE file'),
   new RegExp(r'<http://www\.gnu\.org/licenses/>'),
+  new RegExp(r'License & terms of use'),
 ];
 
 final String _linebreak      = r' *(?:(?:\*/ *|[*#])?(?:\n\1 *(?:\*/ *)?)*\n\1\2 *)?';
@@ -1053,6 +1054,51 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
     )
   ),
 
+  // ICU (Unicode)
+  new MultipleVersionedLicenseReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    licenseIndices: const <int>[3],
+    checkLocalFirst: false,
+    pattern: new RegExp(
+      kIndent +
+      r'(?:©|Copyright \(C\)) 20.. and later: Unicode, Inc. and others.[ *]*\n'
+      r'^\1\2License & terms of use: (http://www.unicode.org/copyright.html)',
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
+  // ICU (Unicode)
+  new MultipleVersionedLicenseReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    licenseIndices: const <int>[3],
+    checkLocalFirst: false,
+    pattern: new RegExp(
+      kIndent +
+      r'Copyright \(C\) 2016 and later: Unicode, Inc. and others. License & terms of use: (http://www.unicode.org/copyright.html) *\n',
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
+  // ICU (Unicode)
+  new MultipleVersionedLicenseReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    licenseIndices: const <int>[3],
+    checkLocalFirst: false,
+    pattern: new RegExp(
+      kIndent +
+      r'© 2016 and later: Unicode, Inc. and others. *\n'
+      r'^ *License & terms of use: (http://www.unicode.org/copyright.html)#License *\n'
+      r'^ *\n'
+      r'^ *Copyright \(c\) 2000 IBM, Inc. and Others. *\n',
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
 ];
 
 
@@ -1656,19 +1702,19 @@ final List<RegExp> csLicenses = <RegExp>[
   // ICU
   new RegExp(
     kIndent +
-    r'This file is provided as-is by Unicode, Inc\. \(The Unicode Consortium\)\. *\n'
-    r'^\1\2No claims are made as to fitness for any particular purpose\. +No *\n'
-    r'^\1\2warranties of any kind are expressed or implied\. +The recipient *\n'
-    r'^\1\2agrees to determine applicability of information provided\. +If this *\n'
-    r'^\1\2file has been provided on optical media by Unicode, Inc\., the sole *\n'
-    r'^\1\2remedy for any claim will be exchange of defective media within 90 *\n'
-    r'^\1\2days of receipt\. *\n'
-    r'^(?:(?:\1\2? *)? *\n)*'
-    r'^\1\2Unicode, Inc\. +hereby grants the right to freely use the information *\n'
-    r'^\1\2supplied in this file in the creation of products supporting the *\n'
-    r'^\1\2Unicode Standard, and to make copies of this file in any form for *\n'
-    r'^\1\2internal or external distribution as long as this notice remains *\n'
-    r'^\1\2attached\.',
+    r'This file is provided as-is by Unicode, Inc\. \(The Unicode Consortium\)\. '
+    r'No claims are made as to fitness for any particular purpose\. No '
+    r'warranties of any kind are expressed or implied\. The recipient '
+    r'agrees to determine applicability of information provided\. If this '
+    r'file has been provided on optical media by Unicode, Inc\., the sole '
+    r'remedy for any claim will be exchange of defective media within 90 '
+    r'days of receipt\. '
+    r'Unicode, Inc\. hereby grants the right to freely use the information '
+    r'supplied in this file in the creation of products supporting the '
+    r'Unicode Standard, and to make copies of this file in any form for '
+    r'internal or external distribution as long as this notice remains '
+    r'attached\.'
+    .replaceAll(' ', _linebreak),
     multiLine: true,
     caseSensitive: false
   ),
