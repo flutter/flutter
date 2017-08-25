@@ -40,7 +40,8 @@ Future<int> _createSnapshot({
   assert(snapshotPath != null);
   assert(depfilePath != null);
   assert(packages != null);
-  final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, null, BuildMode.debug);
+  final BuildMode buildMode = BuildMode.debug;
+  final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, null, buildMode);
   final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
   final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
 
@@ -68,7 +69,7 @@ Future<int> _createSnapshot({
         final Set<String> inputPaths = await _readDepfile(depfilePath);
         inputPaths.add(snapshotPath);
         inputPaths.add(mainPath);
-        final Checksum newChecksum = new Checksum.fromFiles(inputPaths);
+        final Checksum newChecksum = new Checksum.fromFiles(buildMode, inputPaths);
         if (oldChecksum == newChecksum) {
           printTrace('Skipping snapshot build. Checksums match.');
           return 0;
@@ -89,7 +90,7 @@ Future<int> _createSnapshot({
     final Set<String> inputPaths = await _readDepfile(depfilePath);
     inputPaths.add(snapshotPath);
     inputPaths.add(mainPath);
-    final Checksum checksum = new Checksum.fromFiles(inputPaths);
+    final Checksum checksum = new Checksum.fromFiles(buildMode, inputPaths);
     await checksumFile.writeAsString(checksum.toJson());
   } catch (e, s) {
     // Log exception and continue, this step is a performance improvement only.
