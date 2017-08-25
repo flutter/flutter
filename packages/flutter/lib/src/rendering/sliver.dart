@@ -951,14 +951,14 @@ abstract class RenderSliver extends RenderObject {
       case Axis.horizontal:
         return new Rect.fromLTWH(
           0.0, 0.0,
+          geometry.paintExtent,
           constraints.crossAxisExtent,
-          geometry.paintExtent
         );
       case Axis.vertical:
         return new Rect.fromLTWH(
           0.0, 0.0,
+          constraints.crossAxisExtent,
           geometry.paintExtent,
-          constraints.crossAxisExtent
         );
     }
     return null;
