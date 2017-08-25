@@ -2079,33 +2079,6 @@ class RepositoryRootLibDirectory extends RepositoryDirectory {
 
   @override
   bool get subdirectoriesAreLicenseRoots => true;
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'txt')
-      return new RepositoryLibTxtDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryLibTxtDirectory extends RepositoryDirectory {
-  RepositoryLibTxtDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'third_party')
-      return new RepositoryLibTxtThirdPartyDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryLibTxtThirdPartyDirectory extends RepositoryDirectory {
-  RepositoryLibTxtThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'fonts';
-  }
 }
 
 class RepositoryFlutterDirectory extends RepositoryDirectory {
@@ -2131,7 +2104,43 @@ class RepositoryFlutterDirectory extends RepositoryDirectory {
   RepositoryDirectory createSubdirectory(fs.Directory entry) {
     if (entry.name == 'sky')
       return new RepositoryExcludeSubpathDirectory(this, entry, const <String>['packages', 'sky_engine', 'LICENSE']); // that's the output of this script!
+    if (entry.name == 'third_party')
+      return new RepositoryFlutterThirdPartyDirectory(this, entry);
     return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryFlutterThirdPartyDirectory extends RepositoryDirectory {
+  RepositoryFlutterThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool get subdirectoriesAreLicenseRoots => true;
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'txt')
+      return new RepositoryFlutterTxtDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryFlutterTxtDirectory extends RepositoryDirectory {
+  RepositoryFlutterTxtDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'third_party')
+      return new RepositoryFlutterTxtThirdPartyDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryFlutterTxtThirdPartyDirectory extends RepositoryDirectory {
+  RepositoryFlutterTxtThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'fonts';
   }
 }
 
