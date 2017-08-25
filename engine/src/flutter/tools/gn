@@ -83,7 +83,6 @@ def to_gn_args(args):
         if not args.simulator:
           aot = True
     else:
-      gn_args['use_system_harfbuzz'] = False
       aot = False
 
     if args.runtime_mode == 'debug':
