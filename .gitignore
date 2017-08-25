@@ -49,6 +49,7 @@ Thumbs.db
 /third_party/go/tool/
 /third_party/gtest/
 /third_party/gyp/
+/third_party/harfbuzz/
 /third_party/icu/
 /third_party/jsr-305/src/
 /third_party/junit/src/
@@ -57,6 +58,7 @@ Thumbs.db
 /third_party/libjpeg-turbo/
 /third_party/mockito/src/
 /third_party/pdfium/
+/third_party/pkg/
 /third_party/pywebsocket/src/
 /third_party/rapidjson/
 /third_party/requests/src/
