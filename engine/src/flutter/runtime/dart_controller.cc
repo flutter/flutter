@@ -196,6 +196,7 @@ void DartController::CreateIsolateFor(const std::string& script_uri,
 
   Dart_SetShouldPauseOnStart(Settings::Get().start_paused);
 
+  ui_dart_state_->set_debug_name_prefix(script_uri);
   ui_dart_state_->SetIsolate(isolate);
   FTL_CHECK(!LogIfError(
       Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag)));
