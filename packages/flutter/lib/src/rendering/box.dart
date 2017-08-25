@@ -2009,14 +2009,14 @@ abstract class RenderBox extends RenderObject {
   }
 
   @override
-  void debugPaint(PaintingContext context, Offset offset) {
+  void debugPaint(Canvas canvas, Offset offset) {
     assert(() {
       if (debugPaintSizeEnabled)
-        debugPaintSize(context, offset);
+        debugPaintSize(canvas, offset);
       if (debugPaintBaselinesEnabled)
-        debugPaintBaselines(context, offset);
+        debugPaintBaselines(canvas, offset);
       if (debugPaintPointersEnabled)
-        debugPaintPointers(context, offset);
+        debugPaintPointers(canvas, offset);
       return true;
     });
   }
@@ -2025,13 +2025,13 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Called for every [RenderBox] when [debugPaintSizeEnabled] is true.
   @protected
-  void debugPaintSize(PaintingContext context, Offset offset) {
+  void debugPaintSize(Canvas canvas, Offset offset) {
     assert(() {
       final Paint paint = new Paint()
        ..style = PaintingStyle.stroke
        ..strokeWidth = 1.0
        ..color = const Color(0xFF00FFFF);
-      context.canvas.drawRect((offset & size).deflate(0.5), paint);
+      canvas.drawRect((offset & size).deflate(0.5), paint);
       return true;
     });
   }
@@ -2040,7 +2040,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// Called for every [RenderBox] when [debugPaintBaselinesEnabled] is true.
   @protected
-  void debugPaintBaselines(PaintingContext context, Offset offset) {
+  void debugPaintBaselines(Canvas canvas, Offset offset) {
     assert(() {
       final Paint paint = new Paint()
        ..style = PaintingStyle.stroke
@@ -2053,7 +2053,7 @@ abstract class RenderBox extends RenderObject {
         path = new Path();
         path.moveTo(offset.dx, offset.dy + baselineI);
         path.lineTo(offset.dx + size.width, offset.dy + baselineI);
-        context.canvas.drawPath(path, paint);
+        canvas.drawPath(path, paint);
       }
       // alphabetic baseline
       final double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
@@ -2062,7 +2062,7 @@ abstract class RenderBox extends RenderObject {
         path = new Path();
         path.moveTo(offset.dx, offset.dy + baselineA);
         path.lineTo(offset.dx + size.width, offset.dy + baselineA);
-        context.canvas.drawPath(path, paint);
+        canvas.drawPath(path, paint);
       }
       return true;
     });
@@ -2076,12 +2076,12 @@ abstract class RenderBox extends RenderObject {
   /// By default, events are not counted. For details on how to ensure that
   /// events are counted for your class, see [debugHandleEvent].
   @protected
-  void debugPaintPointers(PaintingContext context, Offset offset) {
+  void debugPaintPointers(Canvas canvas, Offset offset) {
     assert(() {
       if (_debugActivePointers > 0) {
         final Paint paint = new Paint()
          ..color = new Color(0x00BBBB | ((0x04000000 * depth) & 0xFF000000));
-        context.canvas.drawRect(offset & size, paint);
+        canvas.drawRect(offset & size, paint);
       }
       return true;
     });

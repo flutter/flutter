@@ -312,14 +312,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  void debugPaintSize(PaintingContext context, Offset offset) {
+  void debugPaintSize(Canvas canvas, Offset offset) {
     assert(() {
-      super.debugPaintSize(context, offset);
+      super.debugPaintSize(canvas, offset);
       final Paint paint = new Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0
         ..color = const Color(0xFF00FF00);
-      final Canvas canvas = context.canvas;
       RenderSliver child = firstChild;
       while (child != null) {
         Size size;

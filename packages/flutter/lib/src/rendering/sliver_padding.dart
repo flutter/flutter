@@ -257,8 +257,8 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   }
 
   @override
-  void debugPaint(PaintingContext context, Offset offset) {
-    super.debugPaint(context, offset);
+  void debugPaint(Canvas canvas, Offset offset) {
+    super.debugPaint(canvas, offset);
     assert(() {
       if (debugPaintSizeEnabled) {
         final Size parentSize = getAbsoluteSizeRelativeToOrigin();
@@ -274,7 +274,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
           assert(innerRect.right <= outerRect.right);
           assert(innerRect.bottom <= outerRect.bottom);
         }
-        debugPaintPadding(context.canvas, outerRect, innerRect);
+        debugPaintPadding(canvas, outerRect, innerRect);
       }
       return true;
     });
