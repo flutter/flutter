@@ -253,6 +253,10 @@ abstract class License implements Comparable<License> {
         body = new system.File('data/mit').readAsStringSync();
         type = LicenseType.mit;
         break;
+      case 'http://www.unicode.org/copyright.html':
+        body = new system.File('data/unicode').readAsStringSync();
+        type = LicenseType.icu;
+        break;
       default: throw 'unknown url $url';
     }
     return _registry.putIfAbsent(body, () => new License.fromBodyAndType(body, type, origin: origin));
