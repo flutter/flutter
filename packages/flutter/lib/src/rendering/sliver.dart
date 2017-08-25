@@ -1241,7 +1241,7 @@ abstract class RenderSliver extends RenderObject {
   }
 
   @override
-  void debugPaint(PaintingContext context, Offset offset) {
+  void debugPaint(Canvas canvas, Offset offset) {
     assert(() {
       if (debugPaintSizeEnabled) {
         final double strokeWidth = math.min(4.0, geometry.paintExtent / 30.0);
@@ -1252,7 +1252,6 @@ abstract class RenderSliver extends RenderObject {
           ..maskFilter = new MaskFilter.blur(BlurStyle.solid, strokeWidth);
         final double arrowExtent = geometry.paintExtent;
         final double padding = math.max(2.0, strokeWidth);
-        final Canvas canvas = context.canvas;
         canvas.drawCircle(
           offset.translate(padding, padding),
           padding * 0.5,

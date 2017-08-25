@@ -2368,7 +2368,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugReportException('paint', e, stack);
     }
     assert(() {
-      debugPaint(context, offset);
+      debugPaint(context.canvas, offset);
       _debugActivePaint = debugLastActivePaint;
       _debugDoingThisPaint = false;
       return true;
@@ -2390,7 +2390,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Override this method to paint debugging information.
   @protected
-  void debugPaint(PaintingContext context, Offset offset) { }
+  void debugPaint(Canvas canvas, Offset offset) { }
 
   /// Paint this render object into the given context at the given offset.
   ///
