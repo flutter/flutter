@@ -7,6 +7,8 @@
       <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/asci_casing/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/asci_casing/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/bad_import/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/bad_import/build" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/bad_package/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/bad_package/build" />
       <excludeFolder url="file://$MODULE_DIR$/test/data/dart_dependencies_test/bad_path/.pub" />
