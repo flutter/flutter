@@ -258,6 +258,7 @@ class SemanticsNode extends AbstractNode {
   /// [SemanticsActionHandler.performAction] will be called with the chosen
   /// action.
   void addAction(SemanticsAction action) {
+    assert(action != null);
     final int index = action.index;
     if ((_actions & index) == 0) {
       _actions |= index;
@@ -352,11 +353,7 @@ class SemanticsNode extends AbstractNode {
 
   Set<SemanticsTag> _tags = new Set<SemanticsTag>();
 
-  /// Ensures that the [SemanticsNode] is or is not tagged with [tag].
-  ///
-  /// If [isPresent] is `true` it will ensure that the tag is present. If
-  /// [isPresent] is `false` it will ensure that the node is not tagged with
-  /// [tag].
+  /// Tags the [SemanticsNode] with [tag].
   ///
   /// Tags are not sent to the engine. They can be used by a parent
   /// [SemanticsNode] to figure out how to add the node as a child.
@@ -365,11 +362,9 @@ class SemanticsNode extends AbstractNode {
   ///
   ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
   ///  * [hasTag] to check if the node has a certain tag.
-  void ensureTag(SemanticsTag tag, { bool isPresent: true }) {
-    if (isPresent)
-      _tags.add(tag);
-    else
-      _tags.remove(tag);
+  void addTag(SemanticsTag tag) {
+    assert(tag != null);
+    _tags.add(tag);
   }
 
   /// Check if the [SemanticsNode] is tagged with [tag].

@@ -33,7 +33,7 @@ void main() {
     owner.flushSemantics();
 
     expect(onNeedVisualUpdateCallCount, 1);
-    renderObject.markNeedsSemanticsUpdate(onlyChanges: true);
+    renderObject.markNeedsSemanticsUpdate(onlyLocalUpdates: true);
     expect(onNeedVisualUpdateCallCount, 2);
   });
 }

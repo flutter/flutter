@@ -992,7 +992,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   void _markNeedsClip() {
     _clip = null;
     markNeedsPaint();
-    markNeedsSemanticsUpdate(onlyChanges: true);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
   }
 
   T get _defaultClip;
@@ -2823,7 +2823,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     if (setEquals<SemanticsAction>(value, _validActions))
       return;
     _validActions = value;
-    markNeedsSemanticsUpdate(onlyChanges: true);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
   }
 
    /// Called when the user taps on the render object.
@@ -2836,7 +2836,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     final bool hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
   }
 
   /// Called when the user presses on the render object for a long period of time.
@@ -2849,7 +2849,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     final bool hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
   }
 
   /// Called when the user scrolls to the left or to the right.
@@ -2862,7 +2862,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     final bool hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
   }
 
   /// Called when the user scrolls up or down.
@@ -2875,7 +2875,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     final bool hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
   }
 
   /// The fraction of the dimension of this render box to use when
@@ -3074,7 +3074,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = checked != null;
     _checked = value;
-    markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
   /// If non-null, sets the [SemanticsNode.isSelected] semantic to the given
@@ -3086,7 +3086,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = selected != null;
     _selected = value;
-    markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
@@ -3097,7 +3097,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = label != null;
     _label = value;
-    markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
   @override
