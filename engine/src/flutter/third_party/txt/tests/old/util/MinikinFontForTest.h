@@ -24,37 +24,44 @@ class SkTypeface;
 namespace minikin {
 
 class MinikinFontForTest : public MinikinFont {
-public:
-    MinikinFontForTest(const std::string& font_path, int index,
-            const std::vector<FontVariation>& variations);
-    MinikinFontForTest(const std::string& font_path, int index)
-            : MinikinFontForTest(font_path, index, std::vector<FontVariation>()) {}
-    MinikinFontForTest(const std::string& font_path) : MinikinFontForTest(font_path, 0) {}
-    virtual ~MinikinFontForTest();
+ public:
+  MinikinFontForTest(const std::string& font_path,
+                     int index,
+                     const std::vector<FontVariation>& variations);
+  MinikinFontForTest(const std::string& font_path, int index)
+      : MinikinFontForTest(font_path, index, std::vector<FontVariation>()) {}
+  MinikinFontForTest(const std::string& font_path)
+      : MinikinFontForTest(font_path, 0) {}
+  virtual ~MinikinFontForTest();
 
-    // MinikinFont overrides.
-    float GetHorizontalAdvance(uint32_t glyph_id, const MinikinPaint &paint) const;
-    void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
-            const MinikinPaint& paint) const;
+  // MinikinFont overrides.
+  float GetHorizontalAdvance(uint32_t glyph_id,
+                             const MinikinPaint& paint) const;
+  void GetBounds(MinikinRect* bounds,
+                 uint32_t glyph_id,
+                 const MinikinPaint& paint) const;
 
-    const std::string& fontPath() const { return mFontPath; }
+  const std::string& fontPath() const { return mFontPath; }
 
-    const void* GetFontData() const { return mFontData; }
-    size_t GetFontSize() const { return mFontSize; }
-    int GetFontIndex() const { return mFontIndex; }
-    const std::vector<minikin::FontVariation>& GetAxes() const { return mVariations; }
-    std::shared_ptr<MinikinFont> createFontWithVariation(
-            const std::vector<FontVariation>& variations) const;
-private:
-    MinikinFontForTest() = delete;
-    MinikinFontForTest(const MinikinFontForTest&) = delete;
-    MinikinFontForTest& operator=(MinikinFontForTest&) = delete;
+  const void* GetFontData() const { return mFontData; }
+  size_t GetFontSize() const { return mFontSize; }
+  int GetFontIndex() const { return mFontIndex; }
+  const std::vector<minikin::FontVariation>& GetAxes() const {
+    return mVariations;
+  }
+  std::shared_ptr<MinikinFont> createFontWithVariation(
+      const std::vector<FontVariation>& variations) const;
 
-    const std::string mFontPath;
-    const std::vector<FontVariation> mVariations;
-    const int mFontIndex;
-    void* mFontData;
-    size_t mFontSize;
+ private:
+  MinikinFontForTest() = delete;
+  MinikinFontForTest(const MinikinFontForTest&) = delete;
+  MinikinFontForTest& operator=(MinikinFontForTest&) = delete;
+
+  const std::string mFontPath;
+  const std::vector<FontVariation> mVariations;
+  const int mFontIndex;
+  void* mFontData;
+  size_t mFontSize;
 };
 
 }  // namespace minikin

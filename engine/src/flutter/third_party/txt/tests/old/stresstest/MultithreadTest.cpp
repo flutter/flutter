@@ -23,10 +23,10 @@
 
 #include <cutils/log.h>
 
+#include "../util/FontTestUtils.h"
 #include "MinikinInternal.h"
 #include "minikin/FontCollection.h"
 #include "minikin/Layout.h"
-#include "../util/FontTestUtils.h"
 
 namespace minikin {
 
@@ -41,69 +41,72 @@ std::mutex gMutex;
 std::condition_variable gCv;
 bool gReady = false;
 
-static std::vector<uint16_t> generateTestText(
-        std::mt19937* mt, int lettersInWord, int wordsInText) {
-    std::uniform_int_distribution<uint16_t> dist('A', 'Z');
+static std::vector<uint16_t> generateTestText(std::mt19937* mt,
+                                              int lettersInWord,
+                                              int wordsInText) {
+  std::uniform_int_distribution<uint16_t> dist('A', 'Z');
 
-    std::vector<uint16_t> text;
-    text.reserve((lettersInWord + 1) * wordsInText - 1);
-    for (int i = 0; i < wordsInText; ++i) {
-        if (i != 0) {
-            text.emplace_back(' ');
-        }
-        for (int j = 0; j < lettersInWord; ++j) {
-            text.emplace_back(dist(*mt));
-        }
+  std::vector<uint16_t> text;
+  text.reserve((lettersInWord + 1) * wordsInText - 1);
+  for (int i = 0; i < wordsInText; ++i) {
+    if (i != 0) {
+      text.emplace_back(' ');
     }
-    return text;
+    for (int j = 0; j < lettersInWord; ++j) {
+      text.emplace_back(dist(*mt));
+    }
+  }
+  return text;
 }
 
 static void thread_main(int tid) {
-    {
-        // Wait until all threads are created.
-        std::unique_lock<std::mutex> lock(gMutex);
-        gCv.wait(lock, [] { return gReady; });
+  {
+    // Wait until all threads are created.
+    std::unique_lock<std::mutex> lock(gMutex);
+    gCv.wait(lock, [] { return gReady; });
+  }
+
+  std::mt19937 mt(tid);
+  MinikinPaint paint;
+
+  for (int i = 0; i < COLLECTION_COUNT_PER_THREAD; ++i) {
+    std::shared_ptr<FontCollection> collection(
+        getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML));
+
+    for (int j = 0; j < LAYOUT_COUNT_PER_COLLECTION; ++j) {
+      // Generates 10 of 3-letter words so that the word sometimes hit the
+      // cache.
+      Layout layout;
+      std::vector<uint16_t> text = generateTestText(&mt, 3, 10);
+      layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR,
+                      FontStyle(), paint, collection);
+      std::vector<float> advances(text.size());
+      layout.getAdvances(advances.data());
+      for (size_t k = 0; k < advances.size(); ++k) {
+        // MinikinFontForTest always returns 10.0f for horizontal advance.
+        LOG_ALWAYS_FATAL_IF(advances[k] != 10.0f,
+                            "Memory corruption detected.");
+      }
     }
-
-    std::mt19937 mt(tid);
-    MinikinPaint paint;
-
-    for (int i = 0; i < COLLECTION_COUNT_PER_THREAD; ++i) {
-        std::shared_ptr<FontCollection> collection(
-                getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML));
-
-        for (int j = 0; j < LAYOUT_COUNT_PER_COLLECTION; ++j) {
-            // Generates 10 of 3-letter words so that the word sometimes hit the cache.
-            Layout layout;
-            std::vector<uint16_t> text = generateTestText(&mt, 3, 10);
-            layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(),
-                    paint, collection);
-            std::vector<float> advances(text.size());
-            layout.getAdvances(advances.data());
-            for (size_t k = 0; k < advances.size(); ++k) {
-                // MinikinFontForTest always returns 10.0f for horizontal advance.
-                LOG_ALWAYS_FATAL_IF(advances[k] != 10.0f, "Memory corruption detected.");
-            }
-        }
-    }
+  }
 }
 
 TEST(MultithreadTest, ThreadSafeStressTest) {
-    std::vector<std::thread> threads;
+  std::vector<std::thread> threads;
 
-    {
-        std::unique_lock<std::mutex> lock(gMutex);
-        threads.reserve(NUM_THREADS);
-        for (int i = 0; i < NUM_THREADS; ++i) {
-            threads.emplace_back(&thread_main, i);
-        }
-        gReady = true;
+  {
+    std::unique_lock<std::mutex> lock(gMutex);
+    threads.reserve(NUM_THREADS);
+    for (int i = 0; i < NUM_THREADS; ++i) {
+      threads.emplace_back(&thread_main, i);
     }
-    gCv.notify_all();
+    gReady = true;
+  }
+  gCv.notify_all();
 
-    for (auto& thread : threads) {
-        thread.join();
-    }
+  for (auto& thread : threads) {
+    thread.join();
+  }
 }
 
 }  // namespace minikin

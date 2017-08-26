@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-#include <gtest/gtest.h>
 #include <UnicodeUtils.h>
+#include <gtest/gtest.h>
 #include <minikin/Measurement.h>
 
 namespace minikin {
 
 float getAdvance(const float* advances, const char* src) {
-    const size_t BUF_SIZE = 256;
-    uint16_t buf[BUF_SIZE];
-    size_t offset;
-    size_t size;
-    ParseUnicode(buf, BUF_SIZE, src, &size, &offset);
-    return getRunAdvance(advances, buf, 0, size, offset);
+  const size_t BUF_SIZE = 256;
+  uint16_t buf[BUF_SIZE];
+  size_t offset;
+  size_t size;
+  ParseUnicode(buf, BUF_SIZE, src, &size, &offset);
+  return getRunAdvance(advances, buf, 0, size, offset);
 }
 
 // Latin fi
 TEST(Measurement, getRunAdvance_fi) {
-    const float unligated[] = {30.0, 20.0};
-    EXPECT_EQ(0.0, getAdvance(unligated, "| 'f' 'i'"));
-    EXPECT_EQ(30.0, getAdvance(unligated, "'f' | 'i'"));
-    EXPECT_EQ(50.0, getAdvance(unligated, "'f' 'i' |"));
+  const float unligated[] = {30.0, 20.0};
+  EXPECT_EQ(0.0, getAdvance(unligated, "| 'f' 'i'"));
+  EXPECT_EQ(30.0, getAdvance(unligated, "'f' | 'i'"));
+  EXPECT_EQ(50.0, getAdvance(unligated, "'f' 'i' |"));
 
-    const float ligated[] = {40.0, 0.0};
-    EXPECT_EQ(0.0, getAdvance(ligated, "| 'f' 'i'"));
-    EXPECT_EQ(20.0, getAdvance(ligated, "'f' | 'i'"));
-    EXPECT_EQ(40.0, getAdvance(ligated, "'f' 'i' |"));
+  const float ligated[] = {40.0, 0.0};
+  EXPECT_EQ(0.0, getAdvance(ligated, "| 'f' 'i'"));
+  EXPECT_EQ(20.0, getAdvance(ligated, "'f' | 'i'"));
+  EXPECT_EQ(40.0, getAdvance(ligated, "'f' 'i' |"));
 }
 
 // Devanagari ka+virama+ka
 TEST(Measurement, getRunAdvance_kka) {
-    const float unligated[] = {30.0, 0.0, 30.0};
-    EXPECT_EQ(0.0, getAdvance(unligated, "| U+0915 U+094D U+0915"));
-    EXPECT_EQ(30.0, getAdvance(unligated, "U+0915 | U+094D U+0915"));
-    EXPECT_EQ(30.0, getAdvance(unligated, "U+0915 U+094D | U+0915"));
-    EXPECT_EQ(60.0, getAdvance(unligated, "U+0915 U+094D U+0915 |"));
+  const float unligated[] = {30.0, 0.0, 30.0};
+  EXPECT_EQ(0.0, getAdvance(unligated, "| U+0915 U+094D U+0915"));
+  EXPECT_EQ(30.0, getAdvance(unligated, "U+0915 | U+094D U+0915"));
+  EXPECT_EQ(30.0, getAdvance(unligated, "U+0915 U+094D | U+0915"));
+  EXPECT_EQ(60.0, getAdvance(unligated, "U+0915 U+094D U+0915 |"));
 
-    const float ligated[] = {30.0, 0.0, 0.0};
-    EXPECT_EQ(0.0, getAdvance(ligated, "| U+0915 U+094D U+0915"));
-    EXPECT_EQ(30.0, getAdvance(ligated, "U+0915 | U+094D U+0915"));
-    EXPECT_EQ(30.0, getAdvance(ligated, "U+0915 U+094D | U+0915"));
-    EXPECT_EQ(30.0, getAdvance(ligated, "U+0915 U+094D U+0915 |"));
+  const float ligated[] = {30.0, 0.0, 0.0};
+  EXPECT_EQ(0.0, getAdvance(ligated, "| U+0915 U+094D U+0915"));
+  EXPECT_EQ(30.0, getAdvance(ligated, "U+0915 | U+094D U+0915"));
+  EXPECT_EQ(30.0, getAdvance(ligated, "U+0915 U+094D | U+0915"));
+  EXPECT_EQ(30.0, getAdvance(ligated, "U+0915 U+094D U+0915 |"));
 }
 
 }  // namespace minikin

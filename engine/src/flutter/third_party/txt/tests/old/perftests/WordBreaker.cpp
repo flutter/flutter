@@ -15,22 +15,24 @@
  */
 #include <benchmark/benchmark.h>
 
-#include "minikin/WordBreaker.h"
 #include "UnicodeUtils.h"
+#include "minikin/WordBreaker.h"
 
 namespace minikin {
 
 static void BM_WordBreaker_English(benchmark::State& state) {
-    const char* kLoremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
-        "eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+  const char* kLoremIpsum =
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do "
+      "eiusmod tempor incididunt ut labore et dolore magna aliqua.";
 
-    WordBreaker wb;
-    wb.setLocale(icu::Locale::getEnglish());
-    std::vector<uint16_t> text = utf8ToUtf16(kLoremIpsum);
-    while (state.KeepRunning()) {
-        wb.setText(text.data(), text.size());
-        while (wb.next() != -1) {}
+  WordBreaker wb;
+  wb.setLocale(icu::Locale::getEnglish());
+  std::vector<uint16_t> text = utf8ToUtf16(kLoremIpsum);
+  while (state.KeepRunning()) {
+    wb.setText(text.data(), text.size());
+    while (wb.next() != -1) {
     }
+  }
 }
 BENCHMARK(BM_WordBreaker_English);
 

@@ -30,17 +30,19 @@ namespace minikin {
  *
  * Caller must unref the returned pointer.
  */
-std::vector<std::shared_ptr<FontFamily>> getFontFamilies(const char* fontDir, const char* fontXml);
+std::vector<std::shared_ptr<FontFamily>> getFontFamilies(const char* fontDir,
+                                                         const char* fontXml);
 
 /**
  * Returns FontCollection from installed fonts.
  *
- * This function reads an XML file and makes font families and collections of them.
- * MinikinFontForTest is used for FontFamily creation.
+ * This function reads an XML file and makes font families and collections of
+ * them. MinikinFontForTest is used for FontFamily creation.
  *
  * Caller must unref the returned pointer.
  */
-std::shared_ptr<FontCollection> getFontCollection(const char* fontDir, const char* fontXml);
+std::shared_ptr<FontCollection> getFontCollection(const char* fontDir,
+                                                  const char* fontXml);
 
 }  // namespace minikin
 #endif  // MINIKIN_FONT_TEST_UTILS_H

@@ -20,26 +20,33 @@
 namespace minikin {
 
 class GraphemeBreak {
-public:
-    // These values must be kept in sync with CURSOR_AFTER etc in Paint.java
-    enum MoveOpt {
-        AFTER = 0,
-        AT_OR_AFTER = 1,
-        BEFORE = 2,
-        AT_OR_BEFORE = 3,
-        AT = 4
-    };
+ public:
+  // These values must be kept in sync with CURSOR_AFTER etc in Paint.java
+  enum MoveOpt {
+    AFTER = 0,
+    AT_OR_AFTER = 1,
+    BEFORE = 2,
+    AT_OR_BEFORE = 3,
+    AT = 4
+  };
 
-    // Determine whether the given offset is a grapheme break.
-    // This implementation generally follows Unicode's UTR #29 extended
-    // grapheme break, with various tweaks.
-    static bool isGraphemeBreak(const float* advances, const uint16_t* buf, size_t start,
-            size_t count, size_t offset);
+  // Determine whether the given offset is a grapheme break.
+  // This implementation generally follows Unicode's UTR #29 extended
+  // grapheme break, with various tweaks.
+  static bool isGraphemeBreak(const float* advances,
+                              const uint16_t* buf,
+                              size_t start,
+                              size_t count,
+                              size_t offset);
 
-    // Matches Android's Java API. Note, return (size_t)-1 for AT to
-    // signal non-break because unsigned return type.
-    static size_t getTextRunCursor(const float* advances, const uint16_t* buf, size_t start,
-            size_t count, size_t offset, MoveOpt opt);
+  // Matches Android's Java API. Note, return (size_t)-1 for AT to
+  // signal non-break because unsigned return type.
+  static size_t getTextRunCursor(const float* advances,
+                                 const uint16_t* buf,
+                                 size_t start,
+                                 size_t count,
+                                 size_t offset,
+                                 MoveOpt opt);
 };
 
 }  // namespace minikin

@@ -23,53 +23,52 @@
 #ifndef MINIKIN_WORD_BREAKER_H
 #define MINIKIN_WORD_BREAKER_H
 
-#include "unicode/brkiter.h"
 #include <memory>
+#include "unicode/brkiter.h"
 
 namespace minikin {
 
 class WordBreaker {
-public:
-    ~WordBreaker() {
-        finish();
-    }
+ public:
+  ~WordBreaker() { finish(); }
 
-    void setLocale(const icu::Locale& locale);
+  void setLocale(const icu::Locale& locale);
 
-    void setText(const uint16_t* data, size_t size);
+  void setText(const uint16_t* data, size_t size);
 
-    // Advance iterator to next word break. Return offset, or -1 if EOT
-    ssize_t next();
+  // Advance iterator to next word break. Return offset, or -1 if EOT
+  ssize_t next();
 
-    // Current offset of iterator, equal to 0 at BOT or last return from next()
-    ssize_t current() const;
+  // Current offset of iterator, equal to 0 at BOT or last return from next()
+  ssize_t current() const;
 
-    // After calling next(), wordStart() and wordEnd() are offsets defining the previous
-    // word. If wordEnd <= wordStart, it's not a word for the purpose of hyphenation.
-    ssize_t wordStart() const;
+  // After calling next(), wordStart() and wordEnd() are offsets defining the
+  // previous word. If wordEnd <= wordStart, it's not a word for the purpose of
+  // hyphenation.
+  ssize_t wordStart() const;
 
-    ssize_t wordEnd() const;
+  ssize_t wordEnd() const;
 
-    int breakBadness() const;
+  int breakBadness() const;
 
-    void finish();
+  void finish();
 
-private:
-    int32_t iteratorNext();
-    void detectEmailOrUrl();
-    ssize_t findNextBreakInEmailOrUrl();
+ private:
+  int32_t iteratorNext();
+  void detectEmailOrUrl();
+  ssize_t findNextBreakInEmailOrUrl();
 
-    std::unique_ptr<icu::BreakIterator> mBreakIterator;
-    UText mUText = UTEXT_INITIALIZER;
-    const uint16_t* mText = nullptr;
-    size_t mTextSize;
-    ssize_t mLast;
-    ssize_t mCurrent;
-    bool mIteratorWasReset;
+  std::unique_ptr<icu::BreakIterator> mBreakIterator;
+  UText mUText = UTEXT_INITIALIZER;
+  const uint16_t* mText = nullptr;
+  size_t mTextSize;
+  ssize_t mLast;
+  ssize_t mCurrent;
+  bool mIteratorWasReset;
 
-    // state for the email address / url detector
-    ssize_t mScanOffset;
-    bool mInEmailOrUrl;
+  // state for the email address / url detector
+  ssize_t mScanOffset;
+  bool mInEmailOrUrl;
 };
 
 }  // namespace minikin

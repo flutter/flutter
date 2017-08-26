@@ -23,31 +23,29 @@
 
 // low level file access for mapping ICU data
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 namespace minikin {
 
 class ICUTestBase : public testing::Test {
-protected:
-    virtual void SetUp() override {
-        const char* fn = "/system/usr/icu/" U_ICUDATA_NAME ".dat";
-        int fd = open(fn, O_RDONLY);
-        ASSERT_NE(-1, fd);
-        struct stat sb;
-        ASSERT_EQ(0, fstat(fd, &sb));
-        void* data = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0);
+ protected:
+  virtual void SetUp() override {
+    const char* fn = "/system/usr/icu/" U_ICUDATA_NAME ".dat";
+    int fd = open(fn, O_RDONLY);
+    ASSERT_NE(-1, fd);
+    struct stat sb;
+    ASSERT_EQ(0, fstat(fd, &sb));
+    void* data = mmap(NULL, sb.st_size, PROT_READ, MAP_SHARED, fd, 0);
 
-        UErrorCode errorCode = U_ZERO_ERROR;
-        udata_setCommonData(data, &errorCode);
-        ASSERT_TRUE(U_SUCCESS(errorCode));
-        u_init(&errorCode);
-        ASSERT_TRUE(U_SUCCESS(errorCode));
-    }
+    UErrorCode errorCode = U_ZERO_ERROR;
+    udata_setCommonData(data, &errorCode);
+    ASSERT_TRUE(U_SUCCESS(errorCode));
+    u_init(&errorCode);
+    ASSERT_TRUE(U_SUCCESS(errorCode));
+  }
 
-    virtual void TearDown() override {
-        u_cleanup();
-    }
+  virtual void TearDown() override { u_cleanup(); }
 };
 
 }  // namespace minikin

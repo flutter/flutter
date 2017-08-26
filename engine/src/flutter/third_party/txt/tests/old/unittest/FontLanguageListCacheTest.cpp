@@ -18,8 +18,8 @@
 
 #include <minikin/FontFamily.h>
 
-#include "lib/txt/libs/minikin/FontLanguageListCache.h"
 #include "ICUTestBase.h"
+#include "lib/txt/libs/minikin/FontLanguageListCache.h"
 #include "lib/txt/libs/minikin/MinikinInternal.h"
 
 namespace minikin {
@@ -27,47 +27,50 @@ namespace minikin {
 typedef ICUTestBase FontLanguageListCacheTest;
 
 TEST_F(FontLanguageListCacheTest, getId) {
-    EXPECT_NE(0UL, FontStyle::registerLanguageList("en"));
-    EXPECT_NE(0UL, FontStyle::registerLanguageList("jp"));
-    EXPECT_NE(0UL, FontStyle::registerLanguageList("en,zh-Hans"));
+  EXPECT_NE(0UL, FontStyle::registerLanguageList("en"));
+  EXPECT_NE(0UL, FontStyle::registerLanguageList("jp"));
+  EXPECT_NE(0UL, FontStyle::registerLanguageList("en,zh-Hans"));
 
-    std::lock_guard<std::mutex> _l(gMinikinLock);
-    EXPECT_EQ(0UL, FontLanguageListCache::getId(""));
+  std::lock_guard<std::mutex> _l(gMinikinLock);
+  EXPECT_EQ(0UL, FontLanguageListCache::getId(""));
 
-    EXPECT_EQ(FontLanguageListCache::getId("en"), FontLanguageListCache::getId("en"));
-    EXPECT_NE(FontLanguageListCache::getId("en"), FontLanguageListCache::getId("jp"));
+  EXPECT_EQ(FontLanguageListCache::getId("en"),
+            FontLanguageListCache::getId("en"));
+  EXPECT_NE(FontLanguageListCache::getId("en"),
+            FontLanguageListCache::getId("jp"));
 
-    EXPECT_EQ(FontLanguageListCache::getId("en,zh-Hans"),
-              FontLanguageListCache::getId("en,zh-Hans"));
-    EXPECT_NE(FontLanguageListCache::getId("en,zh-Hans"),
-              FontLanguageListCache::getId("zh-Hans,en"));
-    EXPECT_NE(FontLanguageListCache::getId("en,zh-Hans"),
-              FontLanguageListCache::getId("jp"));
-    EXPECT_NE(FontLanguageListCache::getId("en,zh-Hans"),
-              FontLanguageListCache::getId("en"));
-    EXPECT_NE(FontLanguageListCache::getId("en,zh-Hans"),
-              FontLanguageListCache::getId("en,zh-Hant"));
+  EXPECT_EQ(FontLanguageListCache::getId("en,zh-Hans"),
+            FontLanguageListCache::getId("en,zh-Hans"));
+  EXPECT_NE(FontLanguageListCache::getId("en,zh-Hans"),
+            FontLanguageListCache::getId("zh-Hans,en"));
+  EXPECT_NE(FontLanguageListCache::getId("en,zh-Hans"),
+            FontLanguageListCache::getId("jp"));
+  EXPECT_NE(FontLanguageListCache::getId("en,zh-Hans"),
+            FontLanguageListCache::getId("en"));
+  EXPECT_NE(FontLanguageListCache::getId("en,zh-Hans"),
+            FontLanguageListCache::getId("en,zh-Hant"));
 }
 
 TEST_F(FontLanguageListCacheTest, getById) {
-    std::lock_guard<std::mutex> _l(gMinikinLock);
-    uint32_t enLangId = FontLanguageListCache::getId("en");
-    uint32_t jpLangId = FontLanguageListCache::getId("jp");
-    FontLanguage english = FontLanguageListCache::getById(enLangId)[0];
-    FontLanguage japanese = FontLanguageListCache::getById(jpLangId)[0];
+  std::lock_guard<std::mutex> _l(gMinikinLock);
+  uint32_t enLangId = FontLanguageListCache::getId("en");
+  uint32_t jpLangId = FontLanguageListCache::getId("jp");
+  FontLanguage english = FontLanguageListCache::getById(enLangId)[0];
+  FontLanguage japanese = FontLanguageListCache::getById(jpLangId)[0];
 
-    const FontLanguages& defLangs = FontLanguageListCache::getById(0);
-    EXPECT_TRUE(defLangs.empty());
+  const FontLanguages& defLangs = FontLanguageListCache::getById(0);
+  EXPECT_TRUE(defLangs.empty());
 
-    const FontLanguages& langs = FontLanguageListCache::getById(FontLanguageListCache::getId("en"));
-    ASSERT_EQ(1UL, langs.size());
-    EXPECT_EQ(english, langs[0]);
+  const FontLanguages& langs =
+      FontLanguageListCache::getById(FontLanguageListCache::getId("en"));
+  ASSERT_EQ(1UL, langs.size());
+  EXPECT_EQ(english, langs[0]);
 
-    const FontLanguages& langs2 =
-            FontLanguageListCache::getById(FontLanguageListCache::getId("en,jp"));
-    ASSERT_EQ(2UL, langs2.size());
-    EXPECT_EQ(english, langs2[0]);
-    EXPECT_EQ(japanese, langs2[1]);
+  const FontLanguages& langs2 =
+      FontLanguageListCache::getById(FontLanguageListCache::getId("en,jp"));
+  ASSERT_EQ(2UL, langs2.size());
+  EXPECT_EQ(english, langs2[0]);
+  EXPECT_EQ(japanese, langs2[1]);
 }
 
 }  // namespace minikin

@@ -23,10 +23,11 @@ namespace minikin {
 const uint16_t CHAR_NBSP = 0x00A0;
 
 /*
- * Determine whether the code unit is a word space for the purposes of justification.
+ * Determine whether the code unit is a word space for the purposes of
+ * justification.
  */
 bool isWordSpace(uint16_t code_unit) {
-    return code_unit == ' ' || code_unit == CHAR_NBSP;
+  return code_unit == ' ' || code_unit == CHAR_NBSP;
 }
 
 /**
@@ -35,55 +36,60 @@ bool isWordSpace(uint16_t code_unit) {
  * heuristic, but should be accurate most of the time.
  */
 static bool isWordBreakAfter(uint16_t c) {
-    if (isWordSpace(c) || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
-        // spaces
-        return true;
-    }
-    // Note: kana is not included, as sophisticated fonts may kern kana
-    return false;
+  if (isWordSpace(c) || (c >= 0x2000 && c <= 0x200a) || c == 0x3000) {
+    // spaces
+    return true;
+  }
+  // Note: kana is not included, as sophisticated fonts may kern kana
+  return false;
 }
 
 static bool isWordBreakBefore(uint16_t c) {
-    // CJK ideographs (and yijing hexagram symbols)
-    return isWordBreakAfter(c) || (c >= 0x3400 && c <= 0x9fff);
+  // CJK ideographs (and yijing hexagram symbols)
+  return isWordBreakAfter(c) || (c >= 0x3400 && c <= 0x9fff);
 }
 
 /**
  * Return offset of previous word break. It is either < offset or == 0.
  */
-size_t getPrevWordBreakForCache(
-        const uint16_t* chars, size_t offset, size_t len) {
-    if (offset == 0) return 0;
-    if (offset > len) offset = len;
-    if (isWordBreakBefore(chars[offset - 1])) {
-        return offset - 1;
-    }
-    for (size_t i = offset - 1; i > 0; i--) {
-        if (isWordBreakBefore(chars[i]) || isWordBreakAfter(chars[i - 1])) {
-            return i;
-        }
-    }
+size_t getPrevWordBreakForCache(const uint16_t* chars,
+                                size_t offset,
+                                size_t len) {
+  if (offset == 0)
     return 0;
+  if (offset > len)
+    offset = len;
+  if (isWordBreakBefore(chars[offset - 1])) {
+    return offset - 1;
+  }
+  for (size_t i = offset - 1; i > 0; i--) {
+    if (isWordBreakBefore(chars[i]) || isWordBreakAfter(chars[i - 1])) {
+      return i;
+    }
+  }
+  return 0;
 }
 
 /**
  * Return offset of next word break. It is either > offset or == len.
  */
-size_t getNextWordBreakForCache(
-        const uint16_t* chars, size_t offset, size_t len) {
-    if (offset >= len) return len;
-    if (isWordBreakAfter(chars[offset])) {
-        return offset + 1;
-    }
-    for (size_t i = offset + 1; i < len; i++) {
-        // No need to check isWordBreakAfter(chars[i - 1]) since it is checked
-        // in previous iteration.  Note that isWordBreakBefore returns true
-        // whenever isWordBreakAfter returns true.
-        if (isWordBreakBefore(chars[i])) {
-            return i;
-        }
-    }
+size_t getNextWordBreakForCache(const uint16_t* chars,
+                                size_t offset,
+                                size_t len) {
+  if (offset >= len)
     return len;
+  if (isWordBreakAfter(chars[offset])) {
+    return offset + 1;
+  }
+  for (size_t i = offset + 1; i < len; i++) {
+    // No need to check isWordBreakAfter(chars[i - 1]) since it is checked
+    // in previous iteration.  Note that isWordBreakBefore returns true
+    // whenever isWordBreakAfter returns true.
+    if (isWordBreakBefore(chars[i])) {
+      return i;
+    }
+  }
+  return len;
 }
 
 }  // namespace minikin

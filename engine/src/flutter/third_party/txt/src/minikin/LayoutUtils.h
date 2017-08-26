@@ -23,7 +23,8 @@
 namespace minikin {
 
 /*
- * Determine whether the code unit is a word space for the purposes of justification.
+ * Determine whether the code unit is a word space for the purposes of
+ * justification.
  */
 bool isWordSpace(uint16_t code_unit);
 
@@ -34,8 +35,9 @@ bool isWordSpace(uint16_t code_unit);
  * kerning or complex script processing. This is necessarily a
  * heuristic, but should be accurate most of the time.
  */
-size_t getPrevWordBreakForCache(
-        const uint16_t* chars, size_t offset, size_t len);
+size_t getPrevWordBreakForCache(const uint16_t* chars,
+                                size_t offset,
+                                size_t len);
 
 /**
  * Return offset of next word break. It is either > offset or == len.
@@ -44,8 +46,9 @@ size_t getPrevWordBreakForCache(
  * kerning or complex script processing. This is necessarily a
  * heuristic, but should be accurate most of the time.
  */
-size_t getNextWordBreakForCache(
-        const uint16_t* chars, size_t offset, size_t len);
+size_t getNextWordBreakForCache(const uint16_t* chars,
+                                size_t offset,
+                                size_t len);
 
 }  // namespace minikin
 #endif  // MINIKIN_LAYOUT_UTILS_H

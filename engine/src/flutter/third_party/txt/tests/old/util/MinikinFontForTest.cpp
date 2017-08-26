@@ -34,44 +34,49 @@ namespace minikin {
 
 static int uniqueId = 0;  // TODO: make thread safe if necessary.
 
-MinikinFontForTest::MinikinFontForTest(const std::string& font_path, int index,
-        const std::vector<FontVariation>& variations) :
-        MinikinFont(uniqueId++),
-        mFontPath(font_path),
-        mVariations(variations),
-        mFontIndex(index) {
-    int fd = open(font_path.c_str(), O_RDONLY);
-    LOG_ALWAYS_FATAL_IF(fd == -1);
-    struct stat st = {};
-    LOG_ALWAYS_FATAL_IF(fstat(fd, &st) != 0);
-    mFontSize = st.st_size;
-    mFontData = mmap(NULL, mFontSize, PROT_READ, MAP_SHARED, fd, 0);
-    LOG_ALWAYS_FATAL_IF(mFontData == nullptr);
-    close(fd);
+MinikinFontForTest::MinikinFontForTest(
+    const std::string& font_path,
+    int index,
+    const std::vector<FontVariation>& variations)
+    : MinikinFont(uniqueId++),
+      mFontPath(font_path),
+      mVariations(variations),
+      mFontIndex(index) {
+  int fd = open(font_path.c_str(), O_RDONLY);
+  LOG_ALWAYS_FATAL_IF(fd == -1);
+  struct stat st = {};
+  LOG_ALWAYS_FATAL_IF(fstat(fd, &st) != 0);
+  mFontSize = st.st_size;
+  mFontData = mmap(NULL, mFontSize, PROT_READ, MAP_SHARED, fd, 0);
+  LOG_ALWAYS_FATAL_IF(mFontData == nullptr);
+  close(fd);
 }
 
 MinikinFontForTest::~MinikinFontForTest() {
-    munmap(mFontData, mFontSize);
+  munmap(mFontData, mFontSize);
 }
 
-float MinikinFontForTest::GetHorizontalAdvance(uint32_t /* glyph_id */,
-        const MinikinPaint& /* paint */) const {
-    // TODO: Make mock value configurable if necessary.
-    return 10.0f;
+float MinikinFontForTest::GetHorizontalAdvance(
+    uint32_t /* glyph_id */,
+    const MinikinPaint& /* paint */) const {
+  // TODO: Make mock value configurable if necessary.
+  return 10.0f;
 }
 
-void MinikinFontForTest::GetBounds(MinikinRect* bounds, uint32_t /* glyph_id */,
-        const MinikinPaint& /* paint */) const {
-    // TODO: Make mock values configurable if necessary.
-    bounds->mLeft = 0.0f;
-    bounds->mTop = 0.0f;
-    bounds->mRight = 10.0f;
-    bounds->mBottom = 10.0f;
+void MinikinFontForTest::GetBounds(MinikinRect* bounds,
+                                   uint32_t /* glyph_id */,
+                                   const MinikinPaint& /* paint */) const {
+  // TODO: Make mock values configurable if necessary.
+  bounds->mLeft = 0.0f;
+  bounds->mTop = 0.0f;
+  bounds->mRight = 10.0f;
+  bounds->mBottom = 10.0f;
 }
 
 std::shared_ptr<MinikinFont> MinikinFontForTest::createFontWithVariation(
-        const std::vector<FontVariation>& variations) const {
-    return std::shared_ptr<MinikinFont>(new MinikinFontForTest(mFontPath, mFontIndex, variations));
+    const std::vector<FontVariation>& variations) const {
+  return std::shared_ptr<MinikinFont>(
+      new MinikinFontForTest(mFontPath, mFontIndex, variations));
 }
 
 }  // namespace minikin

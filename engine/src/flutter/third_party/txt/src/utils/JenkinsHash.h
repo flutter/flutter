@@ -32,11 +32,12 @@ namespace android {
 #ifdef __clang__
 __attribute__((no_sanitize("integer")))
 #endif
-inline uint32_t JenkinsHashMix(uint32_t hash, uint32_t data) {
-    hash += data;
-    hash += (hash << 10);
-    hash ^= (hash >> 6);
-    return hash;
+inline uint32_t
+JenkinsHashMix(uint32_t hash, uint32_t data) {
+  hash += data;
+  hash += (hash << 10);
+  hash ^= (hash >> 6);
+  return hash;
 }
 
 hash_t JenkinsHashWhiten(uint32_t hash);
@@ -44,8 +45,10 @@ hash_t JenkinsHashWhiten(uint32_t hash);
 /* Helpful utility functions for hashing data in 32 bit chunks */
 uint32_t JenkinsHashMixBytes(uint32_t hash, const uint8_t* bytes, size_t size);
 
-uint32_t JenkinsHashMixShorts(uint32_t hash, const uint16_t* shorts, size_t size);
+uint32_t JenkinsHashMixShorts(uint32_t hash,
+                              const uint16_t* shorts,
+                              size_t size);
 
-}
+}  // namespace android
 
-#endif // ANDROID_JENKINS_HASH_H
+#endif  // ANDROID_JENKINS_HASH_H

@@ -15,9 +15,9 @@
  */
 #include <benchmark/benchmark.h>
 
-#include <minikin/Hyphenator.h>
 #include <FileUtils.h>
 #include <UnicodeUtils.h>
+#include <minikin/Hyphenator.h>
 
 namespace minikin {
 
@@ -27,29 +27,29 @@ const int enUsMinSuffix = 3;
 const icu::Locale& usLocale = icu::Locale::getUS();
 
 static void BM_Hyphenator_short_word(benchmark::State& state) {
-    Hyphenator* hyphenator = Hyphenator::loadBinary(
-            readWholeFile(enUsHyph).data(), enUsMinPrefix, enUsMinSuffix);
-    std::vector<uint16_t> word = utf8ToUtf16("hyphen");
-    std::vector<HyphenationType> result;
-    while (state.KeepRunning()) {
-        hyphenator->hyphenate(&result, word.data(), word.size(), usLocale);
-    }
-    Hyphenator::loadBinary(nullptr, 2, 2);
+  Hyphenator* hyphenator = Hyphenator::loadBinary(
+      readWholeFile(enUsHyph).data(), enUsMinPrefix, enUsMinSuffix);
+  std::vector<uint16_t> word = utf8ToUtf16("hyphen");
+  std::vector<HyphenationType> result;
+  while (state.KeepRunning()) {
+    hyphenator->hyphenate(&result, word.data(), word.size(), usLocale);
+  }
+  Hyphenator::loadBinary(nullptr, 2, 2);
 }
 
 // TODO: Use BENCHMARK_CAPTURE for parametrise.
 BENCHMARK(BM_Hyphenator_short_word);
 
 static void BM_Hyphenator_long_word(benchmark::State& state) {
-    Hyphenator* hyphenator = Hyphenator::loadBinary(
-            readWholeFile(enUsHyph).data(), enUsMinPrefix, enUsMinSuffix);
-    std::vector<uint16_t> word = utf8ToUtf16(
-            "Pneumonoultramicroscopicsilicovolcanoconiosis");
-    std::vector<HyphenationType> result;
-    while (state.KeepRunning()) {
-        hyphenator->hyphenate(&result, word.data(), word.size(), usLocale);
-    }
-    Hyphenator::loadBinary(nullptr, 2, 2);
+  Hyphenator* hyphenator = Hyphenator::loadBinary(
+      readWholeFile(enUsHyph).data(), enUsMinPrefix, enUsMinSuffix);
+  std::vector<uint16_t> word =
+      utf8ToUtf16("Pneumonoultramicroscopicsilicovolcanoconiosis");
+  std::vector<HyphenationType> result;
+  while (state.KeepRunning()) {
+    hyphenator->hyphenate(&result, word.data(), word.size(), usLocale);
+  }
+  Hyphenator::loadBinary(nullptr, 2, 2);
 }
 
 // TODO: Use BENCHMARK_CAPTURE for parametrise.
