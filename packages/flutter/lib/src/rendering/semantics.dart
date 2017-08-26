@@ -391,13 +391,13 @@ class SemanticsNode extends AbstractNode {
 
   /// Append the given children as children of this node.
   ///
-  /// Children must be added in paint order (i.e. inverse hit test order).
+  /// Children must be added in inverse hit test order (i.e. paint order).
   ///
   /// The [finalizeChildren] method must be called after all children have been
   /// added.
-  void addChildren(Iterable<SemanticsNode> childrenInPaintOrder) {
+  void addChildren(Iterable<SemanticsNode> childrenInInverseHitTestOrder) {
     _newChildren ??= <SemanticsNode>[];
-    _newChildren.addAll(childrenInPaintOrder);
+    _newChildren.addAll(childrenInInverseHitTestOrder);
     // we do the asserts afterwards because children is an Iterable
     // and doing the asserts before would mean the behavior is
     // different in checked mode vs release mode (if you walk an
@@ -419,6 +419,7 @@ class SemanticsNode extends AbstractNode {
     });
   }
 
+  /// Contains the children in  inverse hit test order (i.e. paint order).
   List<SemanticsNode> _children;
 
   /// Whether this node has a non-zero number of children.
@@ -484,6 +485,17 @@ class SemanticsNode extends AbstractNode {
           assert(!child.attached);
           adoptChild(child);
           sawChange = true;
+        }
+      }
+    }
+    if (!sawChange && _children != null) {
+      assert(_newChildren != null);
+      assert(_newChildren.length == _children.length);
+      // Did the order change?
+      for (int i = 0; i < _children.length; i++) {
+        if (_children[i].id != _newChildren[i].id) {
+          sawChange = true;
+          break;
         }
       }
     }
