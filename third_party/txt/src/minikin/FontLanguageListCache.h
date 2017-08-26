@@ -25,30 +25,30 @@
 namespace minikin {
 
 class FontLanguageListCache {
-public:
-    // A special ID for the empty language list.
-    // This value must be 0 since the empty language list is inserted into mLanguageLists by
-    // default.
-    const static uint32_t kEmptyListId = 0;
+ public:
+  // A special ID for the empty language list.
+  // This value must be 0 since the empty language list is inserted into
+  // mLanguageLists by default.
+  const static uint32_t kEmptyListId = 0;
 
-    // Returns language list ID for the given string representation of FontLanguages.
-    // Caller should acquire a lock before calling the method.
-    static uint32_t getId(const std::string& languages);
+  // Returns language list ID for the given string representation of
+  // FontLanguages. Caller should acquire a lock before calling the method.
+  static uint32_t getId(const std::string& languages);
 
-    // Caller should acquire a lock before calling the method.
-    static const FontLanguages& getById(uint32_t id);
+  // Caller should acquire a lock before calling the method.
+  static const FontLanguages& getById(uint32_t id);
 
-private:
-    FontLanguageListCache() {}  // Singleton
-    ~FontLanguageListCache() {}
+ private:
+  FontLanguageListCache() {}  // Singleton
+  ~FontLanguageListCache() {}
 
-    // Caller should acquire a lock before calling the method.
-    static FontLanguageListCache* getInstance();
+  // Caller should acquire a lock before calling the method.
+  static FontLanguageListCache* getInstance();
 
-    std::vector<FontLanguages> mLanguageLists;
+  std::vector<FontLanguages> mLanguageLists;
 
-    // A map from string representation of the font language list to the ID.
-    std::unordered_map<std::string, uint32_t> mLanguageListLookupTable;
+  // A map from string representation of the font language list to the ID.
+  std::unordered_map<std::string, uint32_t> mLanguageListLookupTable;
 };
 
 }  // namespace minikin

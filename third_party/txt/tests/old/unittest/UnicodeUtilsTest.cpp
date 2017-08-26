@@ -21,17 +21,17 @@
 namespace minikin {
 
 TEST(UnicodeUtils, parse) {
-    const size_t BUF_SIZE = 256;
-    uint16_t buf[BUF_SIZE];
-    size_t offset;
-    size_t size;
-    ParseUnicode(buf, BUF_SIZE, "U+000D U+1F431 | 'a'", &size, &offset);
-    EXPECT_EQ(size, 4u);
-    EXPECT_EQ(offset, 3u);
-    EXPECT_EQ(buf[0], 0x000D);
-    EXPECT_EQ(buf[1], 0xD83D);
-    EXPECT_EQ(buf[2], 0xDC31);
-    EXPECT_EQ(buf[3], 'a');
+  const size_t BUF_SIZE = 256;
+  uint16_t buf[BUF_SIZE];
+  size_t offset;
+  size_t size;
+  ParseUnicode(buf, BUF_SIZE, "U+000D U+1F431 | 'a'", &size, &offset);
+  EXPECT_EQ(size, 4u);
+  EXPECT_EQ(offset, 3u);
+  EXPECT_EQ(buf[0], 0x000D);
+  EXPECT_EQ(buf[1], 0xD83D);
+  EXPECT_EQ(buf[2], 0xDC31);
+  EXPECT_EQ(buf[3], 'a');
 }
 
-} // namespace minikin
+}  // namespace minikin

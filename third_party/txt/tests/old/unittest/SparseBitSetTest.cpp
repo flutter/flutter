@@ -22,33 +22,33 @@
 namespace minikin {
 
 TEST(SparseBitSetTest, randomTest) {
-    const uint32_t kTestRangeNum = 4096;
+  const uint32_t kTestRangeNum = 4096;
 
-    std::mt19937 mt;  // Fix seeds to be able to reproduce the result.
-    std::uniform_int_distribution<uint16_t> distribution(1, 512);
+  std::mt19937 mt;  // Fix seeds to be able to reproduce the result.
+  std::uniform_int_distribution<uint16_t> distribution(1, 512);
 
-    std::vector<uint32_t> range { distribution(mt) };
-    for (size_t i = 1; i < kTestRangeNum * 2; ++i) {
-        range.push_back((range.back() - 1) + distribution(mt));
+  std::vector<uint32_t> range{distribution(mt)};
+  for (size_t i = 1; i < kTestRangeNum * 2; ++i) {
+    range.push_back((range.back() - 1) + distribution(mt));
+  }
+
+  SparseBitSet bitset(range.data(), range.size() / 2);
+
+  uint32_t ch = 0;
+  for (size_t i = 0; i < range.size() / 2; ++i) {
+    uint32_t start = range[i * 2];
+    uint32_t end = range[i * 2 + 1];
+
+    for (; ch < start; ch++) {
+      ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
     }
-
-    SparseBitSet bitset(range.data(), range.size() / 2);
-
-    uint32_t ch = 0;
-    for (size_t i = 0; i < range.size() / 2; ++i) {
-        uint32_t start = range[i * 2];
-        uint32_t end = range[i * 2 + 1];
-
-        for (; ch < start; ch++) {
-            ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
-        }
-        for (; ch < end; ch++) {
-            ASSERT_TRUE(bitset.get(ch)) << std::hex << ch;
-        }
+    for (; ch < end; ch++) {
+      ASSERT_TRUE(bitset.get(ch)) << std::hex << ch;
     }
-    for (; ch < 0x1FFFFFF; ++ch) {
-        ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
-    }
+  }
+  for (; ch < 0x1FFFFFF; ++ch) {
+    ASSERT_FALSE(bitset.get(ch)) << std::hex << ch;
+  }
 }
 
 }  // namespace minikin

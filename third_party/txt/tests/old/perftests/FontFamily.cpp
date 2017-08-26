@@ -21,13 +21,14 @@
 namespace minikin {
 
 static void BM_FontFamily_create(benchmark::State& state) {
-    std::shared_ptr<MinikinFontForTest> minikinFont =
-            std::make_shared<MinikinFontForTest>("/system/fonts/NotoSansCJK-Regular.ttc", 0);
+  std::shared_ptr<MinikinFontForTest> minikinFont =
+      std::make_shared<MinikinFontForTest>(
+          "/system/fonts/NotoSansCJK-Regular.ttc", 0);
 
-    while (state.KeepRunning()) {
-        std::shared_ptr<FontFamily> family = std::make_shared<FontFamily>(
-                std::vector<Font>({Font(minikinFont, FontStyle())}));
-    }
+  while (state.KeepRunning()) {
+    std::shared_ptr<FontFamily> family = std::make_shared<FontFamily>(
+        std::vector<Font>({Font(minikinFont, FontStyle())}));
+  }
 }
 
 BENCHMARK(BM_FontFamily_create);

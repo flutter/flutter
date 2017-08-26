@@ -42,27 +42,22 @@ constexpr uint32_t MAX_UNICODE_CODE_POINT = 0x10FFFF;
 
 // An RAII wrapper for hb_blob_t
 class HbBlob {
-public:
-    // Takes ownership of hb_blob_t object, caller is no longer
-    // responsible for calling hb_blob_destroy().
-    explicit HbBlob(hb_blob_t* blob) : mBlob(blob) {
-    }
+ public:
+  // Takes ownership of hb_blob_t object, caller is no longer
+  // responsible for calling hb_blob_destroy().
+  explicit HbBlob(hb_blob_t* blob) : mBlob(blob) {}
 
-    ~HbBlob() {
-        hb_blob_destroy(mBlob);
-    }
+  ~HbBlob() { hb_blob_destroy(mBlob); }
 
-    const uint8_t* get() const {
-        const char* data = hb_blob_get_data(mBlob, nullptr);
-        return reinterpret_cast<const uint8_t*>(data);
-    }
+  const uint8_t* get() const {
+    const char* data = hb_blob_get_data(mBlob, nullptr);
+    return reinterpret_cast<const uint8_t*>(data);
+  }
 
-    size_t size() const {
-        return (size_t)hb_blob_get_length(mBlob);
-    }
+  size_t size() const { return (size_t)hb_blob_get_length(mBlob); }
 
-private:
-    hb_blob_t* mBlob;
+ private:
+  hb_blob_t* mBlob;
 };
 
 }  // namespace minikin

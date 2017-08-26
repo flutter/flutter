@@ -18,8 +18,8 @@
 #include "gtest/gtest.h"
 #include "lib/ftl/command_line.h"
 #include "lib/ftl/logging.h"
-#include "utils.h"
 #include "third_party/skia/include/core/SkGraphics.h"
+#include "utils.h"
 
 #include <cassert>
 

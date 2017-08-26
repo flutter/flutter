@@ -31,4 +31,3 @@ bool isEmojiModifier(uint32_t c);
 UCharDirection emojiBidiOverride(const void* context, UChar32 c);
 
 }  // namespace minikin
-

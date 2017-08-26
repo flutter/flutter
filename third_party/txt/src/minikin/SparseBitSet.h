@@ -32,68 +32,68 @@ namespace minikin {
 // large gaps. The motivating example is Unicode coverage of a font, but
 // the abstraction itself is fully general.
 class SparseBitSet {
-public:
-    // Create an empty bit set.
-    SparseBitSet() : mMaxVal(0) {}
+ public:
+  // Create an empty bit set.
+  SparseBitSet() : mMaxVal(0) {}
 
-    // Initialize the set to a new value, represented by ranges. For
-    // simplicity, these ranges are arranged as pairs of values,
-    // inclusive of start, exclusive of end, laid out in a uint32 array.
-    SparseBitSet(const uint32_t* ranges, size_t nRanges) : SparseBitSet() {
-        initFromRanges(ranges, nRanges);
-    }
+  // Initialize the set to a new value, represented by ranges. For
+  // simplicity, these ranges are arranged as pairs of values,
+  // inclusive of start, exclusive of end, laid out in a uint32 array.
+  SparseBitSet(const uint32_t* ranges, size_t nRanges) : SparseBitSet() {
+    initFromRanges(ranges, nRanges);
+  }
 
-    SparseBitSet(SparseBitSet&&) = default;
-    SparseBitSet& operator=(SparseBitSet&&) = default;
+  SparseBitSet(SparseBitSet&&) = default;
+  SparseBitSet& operator=(SparseBitSet&&) = default;
 
-    // Determine whether the value is included in the set
-    bool get(uint32_t ch) const {
-        if (ch >= mMaxVal) return false;
-        const uint32_t *bitmap = &mBitmaps[mIndices[ch >> kLogValuesPerPage]];
-        uint32_t index = ch & kPageMask;
-        return (bitmap[index >> kLogBitsPerEl] & (kElFirst >> (index & kElMask))) != 0;
-    }
+  // Determine whether the value is included in the set
+  bool get(uint32_t ch) const {
+    if (ch >= mMaxVal)
+      return false;
+    const uint32_t* bitmap = &mBitmaps[mIndices[ch >> kLogValuesPerPage]];
+    uint32_t index = ch & kPageMask;
+    return (bitmap[index >> kLogBitsPerEl] & (kElFirst >> (index & kElMask))) !=
+           0;
+  }
 
-    // One more than the maximum value in the set, or zero if empty
-    uint32_t length() const {
-        return mMaxVal;
-    }
+  // One more than the maximum value in the set, or zero if empty
+  uint32_t length() const { return mMaxVal; }
 
-    // The next set bit starting at fromIndex, inclusive, or kNotFound
-    // if none exists.
-    uint32_t nextSetBit(uint32_t fromIndex) const;
+  // The next set bit starting at fromIndex, inclusive, or kNotFound
+  // if none exists.
+  uint32_t nextSetBit(uint32_t fromIndex) const;
 
-    static const uint32_t kNotFound = ~0u;
+  static const uint32_t kNotFound = ~0u;
 
-private:
-    void initFromRanges(const uint32_t* ranges, size_t nRanges);
+ private:
+  void initFromRanges(const uint32_t* ranges, size_t nRanges);
 
-    static const uint32_t kMaximumCapacity = 0xFFFFFF;
-    static const int kLogValuesPerPage = 8;
-    static const int kPageMask = (1 << kLogValuesPerPage) - 1;
-    static const int kLogBytesPerEl = 2;
-    static const int kLogBitsPerEl = kLogBytesPerEl + 3;
-    static const int kElMask = (1 << kLogBitsPerEl) - 1;
-    // invariant: sizeof(element) == (1 << kLogBytesPerEl)
-    typedef uint32_t element;
-    static const element kElAllOnes = ~((element)0);
-    static const element kElFirst = ((element)1) << kElMask;
-    static const uint16_t noZeroPage = 0xFFFF;
+  static const uint32_t kMaximumCapacity = 0xFFFFFF;
+  static const int kLogValuesPerPage = 8;
+  static const int kPageMask = (1 << kLogValuesPerPage) - 1;
+  static const int kLogBytesPerEl = 2;
+  static const int kLogBitsPerEl = kLogBytesPerEl + 3;
+  static const int kElMask = (1 << kLogBitsPerEl) - 1;
+  // invariant: sizeof(element) == (1 << kLogBytesPerEl)
+  typedef uint32_t element;
+  static const element kElAllOnes = ~((element)0);
+  static const element kElFirst = ((element)1) << kElMask;
+  static const uint16_t noZeroPage = 0xFFFF;
 
-    static uint32_t calcNumPages(const uint32_t* ranges, size_t nRanges);
-    static int CountLeadingZeros(element x);
+  static uint32_t calcNumPages(const uint32_t* ranges, size_t nRanges);
+  static int CountLeadingZeros(element x);
 
-    uint32_t mMaxVal;
+  uint32_t mMaxVal;
 
-    std::unique_ptr<uint16_t[]> mIndices;
-    std::unique_ptr<element[]> mBitmaps;
-    uint16_t mZeroPageIndex;
+  std::unique_ptr<uint16_t[]> mIndices;
+  std::unique_ptr<element[]> mBitmaps;
+  uint16_t mZeroPageIndex;
 
-    // Forbid copy and assign.
-    SparseBitSet(const SparseBitSet&) = delete;
-    void operator=(const SparseBitSet&) = delete;
+  // Forbid copy and assign.
+  SparseBitSet(const SparseBitSet&) = delete;
+  void operator=(const SparseBitSet&) = delete;
 };
 
 }  // namespace minikin
 
-#endif // MINIKIN_SPARSE_BIT_SET_H
+#endif  // MINIKIN_SPARSE_BIT_SET_H
