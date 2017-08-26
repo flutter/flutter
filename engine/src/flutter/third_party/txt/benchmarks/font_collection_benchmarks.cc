@@ -18,9 +18,9 @@
 
 #include "lib/ftl/command_line.h"
 #include "lib/ftl/logging.h"
-#include "lib/txt/src/font_collection.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
 #include "third_party/skia/include/ports/SkFontMgr_directory.h"
+#include "txt/font_collection.h"
 #include "utils.h"
 
 namespace txt {

@@ -17,14 +17,14 @@
 #include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
 #include "lib/ftl/logging.h"
-#include "lib/txt/src/font_collection.h"
-#include "lib/txt/src/font_style.h"
-#include "lib/txt/src/font_weight.h"
-#include "lib/txt/src/paragraph.h"
-#include "lib/txt/src/paragraph_builder.h"
-#include "lib/txt/src/text_align.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "txt/font_collection.h"
+#include "txt/font_style.h"
+#include "txt/font_weight.h"
+#include "txt/paragraph.h"
+#include "txt/paragraph_builder.h"
+#include "txt/text_align.h"
 #include "utils.h"
 
 namespace txt {
