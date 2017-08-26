@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-#include "third_party/benchmark/include/benchmark/benchmark_api.h"
+#include <algorithm>
+#include <vector>
 
-#include "lib/ftl/command_line.h"
-#include "lib/ftl/logging.h"
-#include "txt/styled_runs.h"
-#include "txt/text_style.h"
-#include "utils.h"
+#include "text_decoration.h"
 
 namespace txt {
 
-static void BM_StyledRunsGetRun(benchmark::State& state) {
-  StyledRuns runs;
-  TextStyle style;
-  runs.AddStyle(style);
-  runs.StartRun(0, 0);
-  runs.EndRunIfNeeded(11);
-  while (state.KeepRunning()) {
-    runs.GetRun(0);
-  }
-}
-BENCHMARK(BM_StyledRunsGetRun);
+//
 
 }  // namespace txt

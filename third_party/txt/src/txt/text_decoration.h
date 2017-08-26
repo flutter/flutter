@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-#include "third_party/benchmark/include/benchmark/benchmark_api.h"
-
-#include "lib/ftl/command_line.h"
-#include "lib/ftl/logging.h"
-#include "txt/styled_runs.h"
-#include "txt/text_style.h"
-#include "utils.h"
+#ifndef LIB_TXT_SRC_TEXT_DECORATION_H_
+#define LIB_TXT_SRC_TEXT_DECORATION_H_
 
 namespace txt {
 
-static void BM_StyledRunsGetRun(benchmark::State& state) {
-  StyledRuns runs;
-  TextStyle style;
-  runs.AddStyle(style);
-  runs.StartRun(0, 0);
-  runs.EndRunIfNeeded(11);
-  while (state.KeepRunning()) {
-    runs.GetRun(0);
-  }
-}
-BENCHMARK(BM_StyledRunsGetRun);
+// Multiple decorations can be applied at once. Ex: Underline and overline is
+// (0x1 | 0x2)
+enum TextDecoration {
+  kNone = 0x0,
+  kUnderline = 0x1,
+  kOverline = 0x2,
+  kLineThrough = 0x4,
+};
+
+enum TextDecorationStyle { kSolid, kDouble, kDotted, kDashed, kWavy };
 
 }  // namespace txt
+
+#endif  // LIB_TXT_SRC_TEXT_DECORATION_H_

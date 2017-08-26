@@ -14,8 +14,8 @@ group("flutter") {
   if (!is_fuchsia) {
     if (current_toolchain == host_toolchain) {
       deps += [
-          "//dart:create_sdk",
-          "//flutter/frontend_server",
+        "//dart:create_sdk",
+        "//flutter/frontend_server",
       ]
     }
   }
@@ -42,8 +42,12 @@ group("flutter") {
       "//flutter/fml:fml_unittests",
       "//flutter/sky/engine/wtf:wtf_unittests",
       "//flutter/synchronization:synchronization_unittests",
+      "//flutter/third_party/txt:txt_unittests",
       "//lib/ftl:ftl_unittests",
     ]
+    if (is_linux) {
+      deps += [ "//flutter/third_party/txt:txt_benchmarks" ]
+    }
   }
 }
 

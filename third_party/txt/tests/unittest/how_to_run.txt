@@ -1,3 +1,0 @@
-mmm -j8 frameworks/minikin/tests/unittest &&
-adb sync data &&
-adb shell /data/nativetest/minikin_tests/minikin_tests
