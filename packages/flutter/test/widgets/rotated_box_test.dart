@@ -16,6 +16,7 @@ void main() {
           key: rotatedBoxKey,
           quarterTurns: 1,
           child: new Row(
+            textDirection: TextDirection.ltr,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new GestureDetector(

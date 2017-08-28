@@ -100,9 +100,21 @@ enum MainAxisSize {
 ///  * [RenderFlex], the flex render object.
 enum MainAxisAlignment {
   /// Place the children as close to the start of the main axis as possible.
+  ///
+  /// If this value is used in a horizontal direction, a [TextDirection] must be
+  /// available to determine if the start is the left or the right.
+  ///
+  /// If this value is used in a vertical direction, a [VerticalDirection] must be
+  /// available to determine if the start is the top or the bottom.
   start,
 
   /// Place the children as close to the end of the main axis as possible.
+  ///
+  /// If this value is used in a horizontal direction, a [TextDirection] must be
+  /// available to determine if the end is the left or the right.
+  ///
+  /// If this value is used in a vertical direction, a [VerticalDirection] must be
+  /// available to determine if the end is the top or the bottom.
   end,
 
   /// Place the children as close to the middle of the main axis as possible.
@@ -130,14 +142,28 @@ enum CrossAxisAlignment {
   /// Place the children with their start edge aligned with the start side of
   /// the cross axis.
   ///
-  /// For example, in a column (a flex with a vertical axis), this aligns the
-  /// left edge of the children along the left edge of the column.
+  /// For example, in a column (a flex with a vertical axis) whose
+  /// [TextDirection] is [TextDirection.ltr], this aligns the left edge of the
+  /// children along the left edge of the column.
+  ///
+  /// If this value is used in a horizontal direction, a [TextDirection] must be
+  /// available to determine if the start is the left or the right.
+  ///
+  /// If this value is used in a vertical direction, a [VerticalDirection] must be
+  /// available to determine if the start is the top or the bottom.
   start,
 
   /// Place the children as close to the end of the cross axis as possible.
   ///
-  /// For example, in a column (a flex with a vertical axis), this aligns the
-  /// right edge of the children along the right edge of the column.
+  /// For example, in a column (a flex with a vertical axis) whose
+  /// [TextDirection] is [TextDirection.ltr], this aligns the right edge of the
+  /// children along the right edge of the column.
+  ///
+  /// If this value is used in a horizontal direction, a [TextDirection] must be
+  /// available to determine if the end is the left or the right.
+  ///
+  /// If this value is used in a vertical direction, a [VerticalDirection] must be
+  /// available to determine if the end is the top or the bottom.
   end,
 
   /// Place the children so that their centers align with the middle of the
@@ -159,9 +185,39 @@ enum CrossAxisAlignment {
   baseline,
 }
 
+bool _startIsTopLeft(Axis direction, TextDirection textDirection, VerticalDirection verticalDirection) {
+  assert(direction != null);
+  // If the relevant value of textDirection or verticalDirection is null, this returns null too.
+  switch (direction) {
+    case Axis.horizontal:
+      switch (textDirection) {
+        case TextDirection.ltr:
+          return true;
+        case TextDirection.rtl:
+          return false;
+      }
+      break;
+    case Axis.vertical:
+      switch (verticalDirection) {
+        case VerticalDirection.down:
+          return true;
+        case VerticalDirection.up:
+          return false;
+      }
+      break;
+  }
+  return null;
+}
+
 typedef double _ChildSizingFunction(RenderBox child, double extent);
 
 /// Displays its children in a one-dimensional array.
+///
+/// ## Layout algorithm
+///
+/// _This section describes how the framework causes [RenderFlex] to position
+/// its children._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [RenderFlex] proceeds in six steps:
 ///
@@ -197,6 +253,11 @@ typedef double _ChildSizingFunction(RenderBox child, double extent);
 ///    [mainAxisAlignment] is [MainAxisAlignment.spaceBetween], any main axis
 ///    space that has not been allocated to children is divided evenly and
 ///    placed between the children.
+///
+/// See also:
+///
+///  * [Flex], the widget equivalent.
+///  * [Row] and [Column], direction-specific variants of [Flex].
 class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, FlexParentData>,
                                         RenderBoxContainerDefaultsMixin<RenderBox, FlexParentData> {
   /// Creates a flex render object.
@@ -209,7 +270,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     MainAxisSize mainAxisSize: MainAxisSize.max,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
-    TextBaseline textBaseline
+    TextDirection textDirection,
+    VerticalDirection verticalDirection: VerticalDirection.down,
+    TextBaseline textBaseline,
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
        assert(mainAxisSize != null),
@@ -218,6 +281,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
        _mainAxisAlignment = mainAxisAlignment,
        _mainAxisSize = mainAxisSize,
        _crossAxisAlignment = crossAxisAlignment,
+       _textDirection = textDirection,
+       _verticalDirection = verticalDirection,
        _textBaseline = textBaseline {
     addAll(children);
   }
@@ -234,6 +299,14 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   /// How the children should be placed along the main axis.
+  ///
+  /// If the [direction] is [Axis.horizontal], and the [mainAxisAlignment] is
+  /// either [MainAxisAlignment.start] or [MainAxisAlignment.end], then the
+  /// [textDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.vertical], and the [mainAxisAlignment] is
+  /// either [MainAxisAlignment.start] or [MainAxisAlignment.end], then the
+  /// [verticalDirection] must not be null.
   MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
   MainAxisAlignment _mainAxisAlignment;
   set mainAxisAlignment(MainAxisAlignment value) {
@@ -265,12 +338,76 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   /// How the children should be placed along the cross axis.
+  ///
+  /// If the [direction] is [Axis.horizontal], and the [crossAxisAlignment] is
+  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
+  /// [verticalDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.vertical], and the [crossAxisAlignment] is
+  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
+  /// [textDirection] must not be null.
   CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
   CrossAxisAlignment _crossAxisAlignment;
   set crossAxisAlignment(CrossAxisAlignment value) {
     assert(value != null);
     if (_crossAxisAlignment != value) {
       _crossAxisAlignment = value;
+      markNeedsLayout();
+    }
+  }
+
+  /// Determines the order to lay children out horizontally and how to interpret
+  /// `start` and `end` in the horizontal direction.
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls which order
+  /// children are painted in (left-to-right or right-to-left), and the meaning
+  /// of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
+  /// [MainAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and either the
+  /// [mainAxisAlignment] is either [MainAxisAlignment.start] or
+  /// [MainAxisAlignment.end], or there's more than one child, then the
+  /// [textDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls the meaning of the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and the [crossAxisAlignment] is
+  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
+  /// [textDirection] must not be null.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection != value) {
+      _textDirection = value;
+      markNeedsLayout();
+    }
+  }
+
+  /// Determines the order to lay children out vertically and how to interpret
+  /// `start` and `end` in the vertical direction.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls which order children
+  /// are painted in (down or up), the meaning of the [mainAxisAlignment]
+  /// property's [MainAxisAlignment.start] and [MainAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and either the [mainAxisAlignment]
+  /// is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or there's
+  /// more than one child, then the [verticalDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls the meaning of the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and the [crossAxisAlignment] is
+  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
+  /// [verticalDirection] must not be null.
+  VerticalDirection get verticalDirection => _verticalDirection;
+  VerticalDirection _verticalDirection;
+  set verticalDirection(VerticalDirection value) {
+    if (_verticalDirection != value) {
+      _verticalDirection = value;
       markNeedsLayout();
     }
   }
@@ -286,6 +423,45 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       _textBaseline = value;
       markNeedsLayout();
     }
+  }
+
+  bool get _debugHasNecessaryDirections {
+    assert(direction != null);
+    assert(crossAxisAlignment != null);
+    if (firstChild != null && lastChild != firstChild) {
+      // i.e. there's more than one child
+      switch (direction) {
+        case Axis.horizontal:
+          assert(textDirection != null, 'Horizontal $runtimeType with multiple children has a null textDirection, so the layout order is undefined.');
+          break;
+        case Axis.vertical:
+          assert(verticalDirection != null, 'Vertical $runtimeType with multiple children has a null verticalDirection, so the layout order is undefined.');
+          break;
+      }
+    }
+    if (mainAxisAlignment == MainAxisAlignment.start ||
+        mainAxisAlignment == MainAxisAlignment.end) {
+      switch (direction) {
+        case Axis.horizontal:
+          assert(textDirection != null, 'Horizontal $runtimeType with $mainAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
+          break;
+        case Axis.vertical:
+          assert(verticalDirection != null, 'Vertical $runtimeType with $mainAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
+          break;
+      }
+   }
+   if (crossAxisAlignment == CrossAxisAlignment.start ||
+        crossAxisAlignment == CrossAxisAlignment.end) {
+      switch (direction) {
+        case Axis.horizontal:
+          assert(verticalDirection != null, 'Horizontal $runtimeType with $crossAxisAlignment has a null verticalDirection, so the alignment cannot be resolved.');
+          break;
+        case Axis.vertical:
+          assert(textDirection != null, 'Vertical $runtimeType with $crossAxisAlignment has a null textDirection, so the alignment cannot be resolved.');
+          break;
+      }
+    }
+    return true;
   }
 
   /// Set during layout if overflow occurred on the main axis.
@@ -453,6 +629,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   @override
   void performLayout() {
+    assert(_debugHasNecessaryDirections);
     // Determine used flex factor, size inflexible items, calculate free space.
     int totalFlex = 0;
     int totalChildren = 0;
@@ -632,9 +809,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
     // Align items along the main axis.
     double actualSizeDelta;
+    double preferredSize;
     if (canFlex) {
       final bool isMainAxisSizeMax = mainAxisSize == MainAxisSize.max;
-      final double preferredSize = isMainAxisSizeMax ? maxMainSize : allocatedSize;
+      preferredSize = isMainAxisSizeMax ? maxMainSize : allocatedSize;
       switch (_direction) {
         case Axis.horizontal:
           size = constraints.constrain(new Size(preferredSize, crossSize));
@@ -653,21 +831,27 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       switch (_direction) {
         case Axis.horizontal:
           size = constraints.constrain(new Size(allocatedSize, crossSize));
+          preferredSize = size.width;
           crossSize = size.height;
-          actualSizeDelta = size.width - allocatedSize;
           break;
         case Axis.vertical:
           size = constraints.constrain(new Size(crossSize, allocatedSize));
+          preferredSize = size.height;
           crossSize = size.width;
-          actualSizeDelta = size.height - allocatedSize;
           break;
       }
+      actualSizeDelta = preferredSize - allocatedSize;
     }
     _overflow = math.max(0.0, -actualSizeDelta);
 
     final double remainingSpace = math.max(0.0, actualSizeDelta);
     double leadingSpace;
     double betweenSpace;
+    // flipMainAxis is used to decide whether to lay out left-to-right/top-to-bottom (false), or
+    // right-to-left/bottom-to-top (true). The _startIsTopLeft will return null if there's only
+    // one child and the relevant direction is null, in which case we arbitrarily decide not to
+    // flip, but that doesn't have any detectable effect.
+    final bool flipMainAxis = !(_startIsTopLeft(direction, textDirection, verticalDirection) ?? true);
     switch (_mainAxisAlignment) {
       case MainAxisAlignment.start:
         leadingSpace = 0.0;
@@ -696,21 +880,24 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Position elements
-    double childMainPosition = leadingSpace;
+    double childMainPosition = flipMainAxis ? preferredSize - leadingSpace : leadingSpace;
     child = firstChild;
     while (child != null) {
       final FlexParentData childParentData = child.parentData;
       double childCrossPosition;
       switch (_crossAxisAlignment) {
-        case CrossAxisAlignment.stretch:
         case CrossAxisAlignment.start:
-          childCrossPosition = 0.0;
-          break;
         case CrossAxisAlignment.end:
-          childCrossPosition = crossSize - _getCrossSize(child);
+          childCrossPosition = _startIsTopLeft(flipAxis(direction), textDirection, verticalDirection)
+                               == (_crossAxisAlignment == CrossAxisAlignment.start)
+                             ? 0.0
+                             : crossSize - _getCrossSize(child);
           break;
         case CrossAxisAlignment.center:
           childCrossPosition = crossSize / 2.0 - _getCrossSize(child) / 2.0;
+          break;
+        case CrossAxisAlignment.stretch:
+          childCrossPosition = 0.0;
           break;
         case CrossAxisAlignment.baseline:
           childCrossPosition = 0.0;
@@ -722,6 +909,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           }
           break;
       }
+      if (flipMainAxis)
+        childMainPosition -= _getMainSize(child);
       switch (_direction) {
         case Axis.horizontal:
           childParentData.offset = new Offset(childMainPosition, childCrossPosition);
@@ -730,7 +919,11 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           childParentData.offset = new Offset(childCrossPosition, childMainPosition);
           break;
       }
-      childMainPosition += _getMainSize(child) + betweenSpace;
+      if (flipMainAxis) {
+        childMainPosition -= betweenSpace;
+      } else {
+        childMainPosition += _getMainSize(child) + betweenSpace;
+      }
       child = childParentData.nextSibling;
     }
   }
@@ -797,11 +990,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new EnumProperty<Axis>('direction', _direction));
-    description.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', _mainAxisAlignment));
-    description.add(new EnumProperty<MainAxisSize>('mainAxisSize', _mainAxisSize));
-    description.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', _crossAxisAlignment));
-    description.add(new EnumProperty<TextBaseline>('textBaseline', _textBaseline));
+    description.add(new EnumProperty<Axis>('direction', direction));
+    description.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
+    description.add(new EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
+    description.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
+    description.add(new EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
   }
 
 }

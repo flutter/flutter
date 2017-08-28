@@ -235,6 +235,7 @@ void main() {
     // of the Image changes and the MediaQuery widgets do not.
     await tester.pumpWidget(
       new Row(
+        textDirection: TextDirection.ltr,
         children: <Widget> [
           new MediaQuery(
             key: mediaQueryKey2,
@@ -263,6 +264,7 @@ void main() {
 
     await tester.pumpWidget(
       new Row(
+        textDirection: TextDirection.ltr,
         children: <Widget> [
           new MediaQuery(
             key: mediaQueryKey2,

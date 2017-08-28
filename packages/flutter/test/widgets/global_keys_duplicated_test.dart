@@ -24,10 +24,13 @@ void main() {
   });
 
   testWidgets('GlobalKey children of two nodes', (WidgetTester tester) async {
-    await tester.pumpWidget(new Row(children: <Widget>[
-      new Container(child: new Container(key: const GlobalObjectKey(0))),
-      new Container(child: new Container(key: const GlobalObjectKey(0))),
-    ]));
+    await tester.pumpWidget(new Row(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        new Container(child: new Container(key: const GlobalObjectKey(0))),
+        new Container(child: new Container(key: const GlobalObjectKey(0))),
+      ],
+    ));
     final dynamic error = tester.takeException();
     expect(error, isFlutterError);
     expect(error.toString(), startsWith('Multiple widgets used the same GlobalKey.\n'));
@@ -38,10 +41,13 @@ void main() {
   });
 
   testWidgets('GlobalKey children of two different nodes', (WidgetTester tester) async {
-    await tester.pumpWidget(new Row(children: <Widget>[
-      new Container(child: new Container(key: const GlobalObjectKey(0))),
-      new Container(key: const Key('x'), child: new Container(key: const GlobalObjectKey(0))),
-    ]));
+    await tester.pumpWidget(new Row(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        new Container(child: new Container(key: const GlobalObjectKey(0))),
+        new Container(key: const Key('x'), child: new Container(key: const GlobalObjectKey(0))),
+      ],
+    ));
     final dynamic error = tester.takeException();
     expect(error, isFlutterError);
     expect(error.toString(), startsWith('Multiple widgets used the same GlobalKey.\n'));
@@ -55,17 +61,20 @@ void main() {
   testWidgets('GlobalKey children of two nodes', (WidgetTester tester) async {
     StateSetter nestedSetState;
     bool flag = false;
-    await tester.pumpWidget(new Row(children: <Widget>[
-      new Container(child: new Container(key: const GlobalObjectKey(0))),
-      new Container(child: new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          nestedSetState = setState;
-          if (flag)
-            return new Container(key: const GlobalObjectKey(0));
-          return new Container();
-        },
-      )),
-    ]));
+    await tester.pumpWidget(new Row(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        new Container(child: new Container(key: const GlobalObjectKey(0))),
+        new Container(child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            nestedSetState = setState;
+            if (flag)
+              return new Container(key: const GlobalObjectKey(0));
+            return new Container();
+          },
+        )),
+      ],
+    ));
     nestedSetState(() { flag = true; });
     await tester.pump();
     final dynamic error = tester.takeException();

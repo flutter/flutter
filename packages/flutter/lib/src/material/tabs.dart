@@ -150,6 +150,8 @@ class _TabLabelBarRenderer extends RenderFlex {
     MainAxisSize mainAxisSize,
     MainAxisAlignment mainAxisAlignment,
     CrossAxisAlignment crossAxisAlignment,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection,
     TextBaseline textBaseline,
     @required this.onPerformLayout,
   }) : assert(onPerformLayout != null),
@@ -159,6 +161,8 @@ class _TabLabelBarRenderer extends RenderFlex {
          mainAxisSize: mainAxisSize,
          mainAxisAlignment: mainAxisAlignment,
          crossAxisAlignment: crossAxisAlignment,
+         textDirection: textDirection,
+         verticalDirection: verticalDirection,
          textBaseline: textBaseline,
        );
 
@@ -188,6 +192,8 @@ class _TabLabelBar extends Flex {
     Key key,
     MainAxisAlignment mainAxisAlignment,
     CrossAxisAlignment crossAxisAlignment,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection: VerticalDirection.down,
     List<Widget> children: const <Widget>[],
     this.onPerformLayout,
   }) : super(
@@ -197,6 +203,8 @@ class _TabLabelBar extends Flex {
     mainAxisSize: MainAxisSize.max,
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
+    textDirection: textDirection,
+    verticalDirection: verticalDirection,
   );
 
   final ValueChanged<List<double>> onPerformLayout;
@@ -208,6 +216,8 @@ class _TabLabelBar extends Flex {
       mainAxisAlignment: mainAxisAlignment,
       mainAxisSize: mainAxisSize,
       crossAxisAlignment: crossAxisAlignment,
+      textDirection: getEffectiveTextDirection(context),
+      verticalDirection: verticalDirection,
       textBaseline: textBaseline,
       onPerformLayout: onPerformLayout,
     );

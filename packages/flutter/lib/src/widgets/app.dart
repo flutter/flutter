@@ -23,6 +23,19 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
 
+// Delegate that fetches the default (English) strings.
+class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const _WidgetsLocalizationsDelegate();
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) {
+    return new SynchronousFuture<WidgetsLocalizations>(const WidgetsLocalizations());
+  }
+
+  @override
+  bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
+}
+
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
 ///
@@ -269,6 +282,14 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     }
   }
 
+  // Combine the Localizations for Widgets with the ones contributed
+  // by the localizationsDelegates parameter, if any.
+  Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
+    yield const _WidgetsLocalizationsDelegate(); // TODO(ianh): make this configurable
+    if (widget.localizationsDelegates != null)
+      yield* widget.localizationsDelegates;
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
@@ -281,7 +302,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       data: new MediaQueryData.fromWindow(ui.window),
       child: new Localizations(
         locale: widget.locale ?? _locale,
-        delegates: widget.localizationsDelegates,
+        delegates: _localizationsDelegates.toList(),
         child: new Title(
           title: widget.title,
           color: widget.color,

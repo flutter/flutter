@@ -42,7 +42,7 @@ void main() {
         .where((DiagnosticsNode n) => !n.hidden)
         .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
-      'alignment: FractionalOffset(0.5, 0.5)',
+      'alignment: FractionalOffset.center',
       'minWidth: 1.0',
       'maxWidth: 2.0',
       'minHeight: 3.0',

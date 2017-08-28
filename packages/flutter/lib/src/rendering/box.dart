@@ -2149,6 +2149,11 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   ///
   /// Stops walking once after the first child reports that it contains the
   /// given point. Returns whether any children contain the given point.
+  ///
+  /// See also:
+  ///
+  ///  * [defaultPaint], which paints the children appropriate for this
+  ///    hit-testing strategy.
   bool defaultHitTestChildren(HitTestResult result, { Offset position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
@@ -2162,6 +2167,11 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   }
 
   /// Paints each child by walking the child list forwards.
+  ///
+  /// See also:
+  ///
+  ///  * [defaultHitTestChildren], which implements hit-testing of the children
+  ///    in a manner appropriate for this painting strategy.
   void defaultPaint(PaintingContext context, Offset offset) {
     ChildType child = firstChild;
     while (child != null) {

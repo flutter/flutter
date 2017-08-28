@@ -11,22 +11,24 @@ void main() {
     bool isExpanded;
 
     await tester.pumpWidget(
-      new SingleChildScrollView(
-        child: new ExpansionPanelList(
-          expansionCallback: (int _index, bool _isExpanded) {
-            index = _index;
-            isExpanded = _isExpanded;
-          },
-          children: <ExpansionPanel>[
-            new ExpansionPanel(
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return new Text(isExpanded ? 'B' : 'A');
-              },
-              body: const SizedBox(height: 100.0)
-            )
-          ]
-        )
-      )
+      new MaterialApp(
+        home: new SingleChildScrollView(
+          child: new ExpansionPanelList(
+            expansionCallback: (int _index, bool _isExpanded) {
+              index = _index;
+              isExpanded = _isExpanded;
+            },
+            children: <ExpansionPanel>[
+              new ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return new Text(isExpanded ? 'B' : 'A');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
 
     expect(find.text('A'), findsOneWidget);
@@ -42,27 +44,27 @@ void main() {
 
     // now expand the child panel
     await tester.pumpWidget(
-      new SingleChildScrollView(
-        child: new ExpansionPanelList(
-          expansionCallback: (int _index, bool _isExpanded) {
-            index = _index;
-            isExpanded = _isExpanded;
-          },
-          children: <ExpansionPanel>[
-            new ExpansionPanel(
-              headerBuilder: (BuildContext context, bool isExpanded) {
-                return new Text(isExpanded ? 'B' : 'A');
-              },
-              body: const SizedBox(height: 100.0),
-              isExpanded: true // this is the addition
-            )
-          ]
-        )
-      )
+      new MaterialApp(
+        home: new SingleChildScrollView(
+          child: new ExpansionPanelList(
+            expansionCallback: (int _index, bool _isExpanded) {
+              index = _index;
+              isExpanded = _isExpanded;
+            },
+            children: <ExpansionPanel>[
+              new ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return new Text(isExpanded ? 'B' : 'A');
+                },
+                body: const SizedBox(height: 100.0),
+                isExpanded: true, // this is the addition
+              ),
+            ],
+          ),
+        ),
+      ),
     );
-
     await tester.pump(const Duration(milliseconds: 200));
-
 
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);

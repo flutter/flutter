@@ -145,6 +145,7 @@ void main() {
         node: parentFocusScope,
         autofocus: true,
         child: new Row(
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const TestFocusable(
               no: 'a',
@@ -193,6 +194,7 @@ void main() {
       new FocusScope(
         node: parentFocusScope,
         child: new Row(
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const TestFocusable(
               no: 'a',
@@ -218,6 +220,7 @@ void main() {
       new FocusScope(
         node: parentFocusScope,
         child: new Row(
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const TestFocusable(
               no: 'a',
