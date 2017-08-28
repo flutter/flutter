@@ -114,7 +114,7 @@ class Image extends StatefulWidget {
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.gaplessPlayback: false,
-    this.package
+    this.package,
   }) : assert(image != null),
        super(key: key);
 
@@ -133,7 +133,7 @@ class Image extends StatefulWidget {
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.gaplessPlayback: false,
-    this.package
+    this.package,
   }) : image = new NetworkImage(src, scale: scale),
        super(key: key);
 
@@ -155,14 +155,16 @@ class Image extends StatefulWidget {
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.gaplessPlayback: false,
-    this.package
+    this.package,
   }) : image = new FileImage(file, scale: scale),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from an asset
-  /// bundle. The key for the image is given by the `name` argument. If used in
-  /// a package implementation, the `package` argument must be non-null
-  /// otherwise it should be omitted.
+  /// bundle. The key for the image is given by the `name` argument.
+  ///
+  /// The `package` argument must be non-null when displaying an image from a
+  /// package and null otherwise. See the `Assets in packages` section for
+  /// details.
   ///
   /// If the `bundle` argument is omitted or null, then the
   /// [DefaultAssetBundle] will be used.
@@ -215,6 +217,49 @@ class Image extends StatefulWidget {
   /// be present in the manifest). If it is omitted, then on a device with a 1.0
   /// device pixel ratio, the `images/2x/cat.png` image would be used instead.
   ///
+  ///
+  /// ## Assets in packages
+  ///
+  /// To create the widget with an asset from a package, the [package] argument
+  /// must be provided. For instance, suppose a package called `my_icons` has
+  /// `icons/heart.png` .
+  ///
+  /// Then to display the image, use:
+  ///
+  /// ```dart
+  /// new Image.asset('icons/heart.png', package: 'my_icons')
+  /// ```
+  ///
+  /// Assets used by the package itself should also be displayed using the
+  /// [package] argument as above.
+  ///
+  /// If the desired asset is specified in the [pubspec.yaml] of the package, it
+  /// is bundled automatically with the app. In particular, assets used by the
+  /// package itself must be specified in its [pubspec.yaml].
+  ///
+  /// A package can also choose to have images in its 'lib/' folder that are not
+  /// specified in its [pubspec.yaml]. In this case for those images to be
+  /// bundled, the app has to specify which ones to include. For instance a
+  /// package named `fancy_backgrounds` could have:
+  ///
+  /// ```
+  /// lib/backgrounds/background1.png
+  /// lib/backgrounds/background2.png
+  /// lib/backgrounds/background3.png
+  ///```
+  ///
+  /// To include, say the first image, the [pubspec.yaml] of the app should
+  /// specify it in the assets section:
+  ///
+  /// ```yaml
+  ///  assets:
+  ///    - packages/fancy_backgrounds/backgrounds/background1.png
+  /// ```
+  ///
+  /// Note that the `lib/` is implied, so it should not be included in the asset
+  /// path.
+  ///
+  ///
   /// See also:
   ///
   ///  * [AssetImage], which is used to implement the behavior when the scale is
@@ -236,7 +281,7 @@ class Image extends StatefulWidget {
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.gaplessPlayback: false,
-    this.package
+    this.package,
   }) : image = scale != null
       ? new ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
       : new AssetImage(name, bundle: bundle, package: package),
@@ -256,7 +301,8 @@ class Image extends StatefulWidget {
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
-    this.gaplessPlayback: false
+    this.gaplessPlayback: false,
+    this.package,
   }) : image = new MemoryImage(bytes, scale: scale),
        super(key: key);
 
@@ -317,9 +363,8 @@ class Image extends StatefulWidget {
   /// (false), when the image provider changes.
   final bool gaplessPlayback;
 
-  /// The name of the package from which the image is included.
-  ///
-  /// This must be null when the image is included by the current app.
+  /// The name of the package from which the image is included. See the
+  /// documentation for the [Image.asset] constructor for details.
   final String package;
 
   @override

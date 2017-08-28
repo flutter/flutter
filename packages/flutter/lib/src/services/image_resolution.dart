@@ -55,20 +55,85 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// icons/1.5x/heart.png
 /// icons/2.0x/heart.png
 /// ```
+///
+/// ## Fetching assets
+///
+/// When fetching an image provided by the app itself, use the [assetName]
+/// argument to name the asset to choose. For instance, consider the structure
+/// above. First, the [pubspec.yaml] of the project should specify its assets in
+/// the `flutter` section:
+///
+/// ```yaml
+/// flutter:
+///   assets:
+///     - icons/heart.png
+///
+/// ```
+///
+/// Then, to fetch the image, use
+/// ```dart
+/// new AssetImage('icons/heart.png')
+/// ```
+///
+/// ## Assets in packages
+///
+/// To fetch an asset from a package, the [package] argument must be provided.
+/// For instance, suppose the structure above is inside a package called
+/// `my_icons`. Then to fetch the image, use:
+///
+/// ```dart
+/// new AssetImage('icons/heart.png', package: 'my_icons')
+/// ```
+///
+/// Assets used by the package itself should also be fetched using the [package]
+/// argument as above.
+///
+/// If the desired asset is specified in the [pubspec.yaml] of the package, it
+/// is bundled automatically with the app. In particular, assets used by the
+/// package itself must be specified in its [pubspec.yaml].
+///
+/// A package can also choose to have images in its 'lib/' folder that are not
+/// specified in its [pubspec.yaml]. In this case for those images to be
+/// bundled, the app has to specify which ones to include. For instance a
+/// package named `fancy_backgrounds` could have:
+///
+/// ```
+/// lib/backgrounds/background1.png
+/// lib/backgrounds/background2.png
+/// lib/backgrounds/background3.png
+///```
+///
+/// To include, say the first image, the [pubspec.yaml] of the app should specify
+/// it in the `assets` section:
+///
+/// ```yaml
+///  assets:
+///    - packages/fancy_backgrounds/backgrounds/background1.png
+/// ```
+///
+/// Note that the `lib/` is implied, so it should not be included in the asset
+/// path.
+///
 class AssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches an image from an asset bundle.
   ///
-  /// The [assetName] argument must not be null. It should name the main asset from
-  /// the set of images to chose from. The [package] argument should only be
-  /// non-null when used in a package implementation. It is used to prefix the
-  /// name in order to disambiguate assets in an app.
-  const AssetImage(this.assetName, { this.bundle, this.package }) : assert(assetName != null);
+  /// The [assetName] argument must not be null. It should name the main asset
+  /// from the set of images to choose from. The [package] argument must be
+  /// non-null when fetching an asset that is included in package. See the
+  /// documentation for the [AssetImage] class itself for details.
+  const AssetImage(this.assetName, {
+    this.bundle,
+    this.package,
+  }) : assert(assetName != null);
 
+  /// The name of the main asset from the set of images to choose from. See the
+  /// documentation for the [AssetImage] class itself for details.
   final String assetName;
 
-  /// The name of the main asset from the set of images to chose from. See the
-  /// documentation for the [AssetImage] class itself for details.
-  String get name => package == null? assetName : 'packages/$package/$assetName';
+  /// The name used to generate the key to obtain the asset. For local assets
+  /// this is [assetName], and for assets from packages the [assetName] is
+  /// prefixed 'packages/<package_name>'.
+  String get keyName => package == null ? assetName : 'packages/$package/$assetName';
 
   /// The bundle from which the image will be obtained.
   ///
@@ -77,12 +142,11 @@ class AssetImage extends AssetBundleImageProvider {
   /// that is also null, the [rootBundle] is used.
   ///
   /// The image is obtained by calling [AssetBundle.load] on the given [bundle]
-  /// using the key given by [name].
+  /// using the key given by [keyName].
   final AssetBundle bundle;
 
-  /// The name of the package from which the image is included.
-  ///
-  /// This must be null when the image is included by the current app.
+  /// The name of the package from which the image is included. See the
+  /// documentation for the [AssetImage] class itself for details.
   final String package;
 
 
@@ -104,9 +168,9 @@ class AssetImage extends AssetBundleImageProvider {
     chosenBundle.loadStructuredData<Map<String, List<String>>>(_kAssetManifestFileName, _manifestParser).then<Null>(
       (Map<String, List<String>> manifest) {
         final String chosenName = _chooseVariant(
-          name,
+          keyName,
           configuration,
-          manifest == null ? null : manifest[name]
+          manifest == null ? null : manifest[keyName]
         );
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = new AssetBundleImageKey(

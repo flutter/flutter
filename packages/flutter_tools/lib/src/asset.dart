@@ -134,10 +134,10 @@ class AssetBundle {
           if (packageManifestDescriptor.containsKey('flutter')) {
             final String packageBasePath = fs.path.dirname(packageManifestPath);
             assetVariants.addAll(_parseAssets(
-                packageMap,
-                packageManifestDescriptor['flutter'],
-                packageBasePath,
-                packageKey: packageName,
+              packageMap,
+              packageManifestDescriptor['flutter'],
+              packageBasePath,
+              packageKey: packageName,
             ));
           }
         }
@@ -236,17 +236,17 @@ class _Asset {
   bool operator ==(dynamic other) {
     if (identical(other, this))
       return true;
-    if (other is! _Asset)
+    if (other.runtimeType != runtimeType)
       return false;
-    return base == other.base &&
-        assetEntry == other.assetEntry &&
-        relativePath == other.relativePath &&
-        source == other.source;
+    final _Asset otherAsset = other;
+    return base == otherAsset.base
+        && assetEntry == otherAsset.assetEntry
+        && relativePath == otherAsset.relativePath
+        && source == otherAsset.source;
   }
 
   @override
-  int get hashCode =>
-      base.hashCode ^
+  int get hashCode => base.hashCode ^
       assetEntry.hashCode ^
       relativePath.hashCode ^
       source.hashCode;
@@ -486,17 +486,21 @@ Map<_Asset, List<_Asset>> _parseAssets(
 }
 
 _Asset _resolvePackageAsset(
-    String assetBase, String packageName, String asset) {
+    String assetBase,
+    String packageName,
+    String asset,
+) {
   return new _Asset(
       base: assetBase,
       assetEntry: 'packages/$packageName/$asset',
-      relativePath: asset);
+      relativePath: asset,
+  );
 }
 
 _Asset _resolveAsset(
   PackageMap packageMap,
   String assetBase,
-  String asset
+  String asset,
 ) {
   if (asset.startsWith('packages/') && !fs.isFileSync(fs.path.join(assetBase, asset))) {
     // Convert packages/flutter_gallery_assets/clouds-0.png to clouds-0.png.
