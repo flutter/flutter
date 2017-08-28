@@ -39,7 +39,7 @@ void main() {
           () => new Checksum.fromFiles(BuildMode.debug, TargetPlatform.ios, <String>['a.dart', 'b.dart'].toSet()),
           throwsA(anything),
         );
-      }, overrides: <Type, Generator>{ FileSystem: () => fs});
+      }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
       testUsingContext('throws if any build mode is null', () async {
         await fs.file('a.dart').create();
@@ -47,7 +47,7 @@ void main() {
           () => new Checksum.fromFiles(null, TargetPlatform.ios, <String>['a.dart', 'b.dart'].toSet()),
           throwsA(anything),
         );
-      }, overrides: <Type, Generator>{ FileSystem: () => fs});
+      }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
       testUsingContext('does not throw if any target platform is null', () async {
         await fs.file('a.dart').create();
@@ -55,7 +55,7 @@ void main() {
           new Checksum.fromFiles(BuildMode.debug, null, <String>['a.dart'].toSet()),
           isNotNull,
         );
-      }, overrides: <Type, Generator>{ FileSystem: () => fs});
+      }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
       testUsingContext('populates checksums for valid files', () async {
         await fs.file('a.dart').writeAsString('This is a');
@@ -159,7 +159,7 @@ void main() {
     testUsingContext('returns one file if only one is listed', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart');
       expect(await readDepfile('a.d'), unorderedEquals(<String>['/foo/a.dart']));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
     testUsingContext('returns multiple files', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart /foo/b.dart');
@@ -167,7 +167,7 @@ void main() {
         '/foo/a.dart',
         '/foo/b.dart',
       ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
     testUsingContext('trims extra spaces between files', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart    /foo/b.dart  /foo/c.dart');
@@ -176,7 +176,7 @@ void main() {
         '/foo/b.dart',
         '/foo/c.dart',
       ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
     testUsingContext('returns files with spaces and backslashes', () async {
       await fs.file('a.d').writeAsString(r'snapshot.d: /foo/a\ a.dart /foo/b\\b.dart /foo/c\\ c.dart');
@@ -185,6 +185,6 @@ void main() {
         r'/foo/b\b.dart',
         r'/foo/c\ c.dart',
       ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs});
+    }, overrides: <Type, Generator>{ FileSystem: () => fs });
   });
 }
