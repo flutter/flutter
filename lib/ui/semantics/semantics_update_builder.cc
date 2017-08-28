@@ -42,6 +42,7 @@ void SemanticsUpdateBuilder::updateNode(int id,
                                         double right,
                                         double bottom,
                                         std::string label,
+                                        int textDirection,
                                         const tonic::Float64List& transform,
                                         const tonic::Int32List& children) {
   SemanticsNode node;
@@ -50,6 +51,7 @@ void SemanticsUpdateBuilder::updateNode(int id,
   node.actions = actions;
   node.rect = SkRect::MakeLTRB(left, top, right, bottom);
   node.label = label;
+  node.textDirection = textDirection;
   node.transform.setColMajord(transform.data());
   node.children = std::vector<int32_t>(
       children.data(), children.data() + children.num_elements());

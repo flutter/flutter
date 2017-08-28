@@ -421,7 +421,7 @@ bool PlatformViewAndroid::ResourceContextMakeCurrent() {
 
 void PlatformViewAndroid::UpdateSemantics(
     std::vector<blink::SemanticsNode> update) {
-  constexpr size_t kBytesPerNode = 25 * sizeof(int32_t);
+  constexpr size_t kBytesPerNode = 26 * sizeof(int32_t);
   constexpr size_t kBytesPerChild = sizeof(int32_t);
 
   JNIEnv* env = fml::jni::AttachCurrentThread();
@@ -443,6 +443,8 @@ void PlatformViewAndroid::UpdateSemantics(
     std::vector<std::string> strings;
     size_t position = 0;
     for (const blink::SemanticsNode& node : update) {
+      // If you edit this code, make sure you update kBytesPerNode
+      // above to match the number of values you are sending.
       buffer_int32[position++] = node.id;
       buffer_int32[position++] = node.flags;
       buffer_int32[position++] = node.actions;
@@ -452,6 +454,7 @@ void PlatformViewAndroid::UpdateSemantics(
         buffer_int32[position++] = strings.size();
         strings.push_back(node.label);
       }
+      buffer_int32[position++] = node.textDirection;
       buffer_float32[position++] = node.rect.left();
       buffer_float32[position++] = node.rect.top();
       buffer_float32[position++] = node.rect.right();

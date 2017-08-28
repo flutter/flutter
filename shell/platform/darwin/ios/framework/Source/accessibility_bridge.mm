@@ -23,10 +23,10 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   // directions, which is why the following maps left to right and vice versa.
   switch (direction) {
     case UIAccessibilityScrollDirectionRight:
-    case UIAccessibilityScrollDirectionPrevious:  // TODO(abarth): Support RTL.
+    case UIAccessibilityScrollDirectionPrevious:  // TODO(abarth): Support RTL using _node.textDirection.
       return blink::SemanticsAction::kScrollLeft;
     case UIAccessibilityScrollDirectionLeft:
-    case UIAccessibilityScrollDirectionNext:  // TODO(abarth): Support RTL.
+    case UIAccessibilityScrollDirectionNext:  // TODO(abarth): Support RTL using _node.textDirection.
       return blink::SemanticsAction::kScrollRight;
     case UIAccessibilityScrollDirectionUp:
       return blink::SemanticsAction::kScrollDown;

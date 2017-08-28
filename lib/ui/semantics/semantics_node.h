@@ -45,6 +45,8 @@ struct SemanticsNode {
   int32_t flags = 0;
   int32_t actions = 0;
   std::string label;
+  int32_t textDirection = 0; // 0=unknown, 1=rtl, 2=ltr
+
   SkRect rect = SkRect::MakeEmpty();
   SkMatrix44 transform = SkMatrix44(SkMatrix44::kIdentity_Constructor);
   std::vector<int32_t> children;
