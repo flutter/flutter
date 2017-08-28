@@ -1069,8 +1069,12 @@ class Isolate extends ServiceObjectOwner {
     return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpLayerTree', timeout: kLongRequestTimeout);
   }
 
-  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTree() {
-    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTree', timeout: kLongRequestTimeout);
+  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInTraversalOrder() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTreeInTraversalOrder', timeout: kLongRequestTimeout);
+  }
+
+  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInInverseHitTestOrder() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder', timeout: kLongRequestTimeout);
   }
 
   Future<Map<String, dynamic>> _flutterToggle(String name) async {

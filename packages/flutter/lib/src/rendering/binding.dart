@@ -99,8 +99,13 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
     );
 
     registerSignalServiceExtension(
-      name: 'debugDumpSemanticsTree',
-      callback: () { debugDumpSemanticsTree(); return debugPrintDone; }
+      name: 'debugDumpSemanticsTreeInTraversalOrder',
+      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversal); return debugPrintDone; }
+    );
+
+    registerSignalServiceExtension(
+        name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
+        callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest); return debugPrintDone; }
     );
   }
 
@@ -324,8 +329,8 @@ void debugDumpLayerTree() {
 /// By default, children of a [SemanticsNode] are printed in traversal order.
 /// This can be changed to inverse hit test order by setting
 /// [childrenInInverseHitTestOrder] to `true`.
-void debugDumpSemanticsTree({ bool childrenInInverseHitTestOrder: false }) {
-  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childrenInInverseHitTestOrder: childrenInInverseHitTestOrder) ?? 'Semantics not collected.');
+void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
+  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework

@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'debug.dart';
 import 'node.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -703,34 +704,36 @@ class SemanticsNode extends AbstractNode {
   /// By default, children are printed in traversal order. This can be changed
   /// to inverse hit test order by setting [childrenInInverseHitTestOrder] to
   /// `true`.
-  String toStringDeep({
-    bool childrenInInverseHitTestOrder: false,
-    String prefixLineOne: '',
-    String prefixOtherLines: ''
-  }) {
+  String toStringDeep(DebugSemanticsDumpOrder childOrder, [
+    String prefixLineOne = '',
+    String prefixOtherLines = ''
+  ]) {
+    assert(childOrder != null);
     final StringBuffer result = new StringBuffer()
       ..write(prefixLineOne)
       ..write(this)
       ..write('\n');
     if (_children != null && _children.isNotEmpty) {
-      final List<SemanticsNode> childrenInOrder = childrenInInverseHitTestOrder
-          ? _children
-          : (new List<SemanticsNode>.from(_children)..sort(_nodeComparator));
+      final List<SemanticsNode> childrenInOrder = _getChildrenInOrder(childOrder);
       for (int index = 0; index < childrenInOrder.length - 1; index += 1) {
         final SemanticsNode child = childrenInOrder[index];
-        result.write(child.toStringDeep(
-          childrenInInverseHitTestOrder: childrenInInverseHitTestOrder,
-          prefixLineOne: "$prefixOtherLines \u251C",
-          prefixOtherLines: "$prefixOtherLines \u2502",
-        ));
+        result.write(child.toStringDeep(childOrder, "$prefixOtherLines \u251C", "$prefixOtherLines \u2502"));
       }
-      result.write(childrenInOrder.last.toStringDeep(
-        childrenInInverseHitTestOrder: childrenInInverseHitTestOrder,
-        prefixLineOne: "$prefixOtherLines \u2514",
-        prefixOtherLines: "$prefixOtherLines  ",
-      ));
+      result.write(childrenInOrder.last.toStringDeep(childOrder, "$prefixOtherLines \u2514", "$prefixOtherLines  "));
     }
     return result.toString();
+  }
+
+  Iterable<SemanticsNode> _getChildrenInOrder(DebugSemanticsDumpOrder childOrder) {
+    assert(childOrder != null);
+    switch(childOrder) {
+      case DebugSemanticsDumpOrder.traversal:
+        return new List<SemanticsNode>.from(_children)..sort(_nodeComparator);
+      case DebugSemanticsDumpOrder.inverseHitTest:
+        return _children;
+    }
+    assert(false);
+    return null;
   }
 
   static int _nodeComparator(SemanticsNode a, SemanticsNode b) {

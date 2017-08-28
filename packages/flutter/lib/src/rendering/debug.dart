@@ -11,6 +11,16 @@ export 'package:flutter/foundation.dart' show debugPrint;
 // Any changes to this file should be reflected in the debugAssertAllRenderVarsUnset()
 // function below.
 
+/// Used by [debugDumpSemanticsTree] to specify the order in which child nodes
+/// are printed.
+enum DebugSemanticsDumpOrder {
+  /// Print nodes in inverse hit test order.
+  inverseHitTest,
+
+  /// Print nodes in traversal order.
+  traversal,
+}
+
 const HSVColor _kDebugDefaultRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
 
 /// Causes each RenderBox to paint a box around its bounds, and some extra
