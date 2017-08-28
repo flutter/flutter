@@ -199,7 +199,7 @@ class SemanticsTester {
   String toString() => 'SemanticsTester';
 }
 
-const String _matcherHelp = 'Try dumping the semantics with debugDumpSemanticsTree() from the rendering library to see what the semantics tree looks like.';
+const String _matcherHelp = 'Try dumping the semantics with debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest) from the package:flutter/rendering.dart library to see what the semantics tree looks like.';
 
 class _HasSemantics extends Matcher {
   const _HasSemantics(this._semantics, { this.ignoreRect: false, this.ignoreTransform: false }) : assert(_semantics != null), assert(ignoreRect != null), assert(ignoreTransform != null);

@@ -11,6 +11,23 @@ export 'package:flutter/foundation.dart' show debugPrint;
 // Any changes to this file should be reflected in the debugAssertAllRenderVarsUnset()
 // function below.
 
+/// Used by [debugDumpSemanticsTree] to specify the order in which child nodes
+/// are printed.
+enum DebugSemanticsDumpOrder {
+  /// Print nodes in inverse hit test order.
+  ///
+  /// In inverse hit test order, the last child of a [SemanticsNode] will be
+  /// asked first if it wants to respond to a user's interaction, followed by
+  /// the second last, etc. until a taker is found.
+  inverseHitTest,
+
+  /// Print nodes in traversal order.
+  ///
+  /// Traversal order defines how the user can move the accessibility focus from
+  /// one node to another.
+  traversal,
+}
+
 const HSVColor _kDebugDefaultRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
 
 /// Causes each RenderBox to paint a box around its bounds, and some extra

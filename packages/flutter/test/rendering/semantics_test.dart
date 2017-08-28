@@ -90,8 +90,6 @@ void main() {
 
       expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollDown.index | SemanticsAction.scrollRight.index;
       expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
-
-      debugDumpSemanticsTree();
     });
   });
 }

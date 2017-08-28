@@ -178,11 +178,21 @@ void main() {
     console.clear();
   });
 
-  test('Service extensions - debugDumpSemanticsTree', () async {
+  test('Service extensions - debugDumpSemanticsTreeInTraversalOrder', () async {
     Map<String, String> result;
 
     await binding.doFrame();
-    result = await binding.testExtension('debugDumpSemanticsTree', <String, String>{});
+    result = await binding.testExtension('debugDumpSemanticsTreeInTraversalOrder', <String, String>{});
+    expect(result, <String, String>{});
+    expect(console, <String>['Semantics not collected.']);
+    console.clear();
+  });
+
+  test('Service extensions - debugDumpSemanticsTreeInInverseHitTestOrder', () async {
+    Map<String, String> result;
+
+    await binding.doFrame();
+    result = await binding.testExtension('debugDumpSemanticsTreeInInverseHitTestOrder', <String, String>{});
     expect(result, <String, String>{});
     expect(console, <String>['Semantics not collected.']);
     console.clear();
@@ -482,7 +492,7 @@ void main() {
   test('Service extensions - posttest', () async {
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 16);
+    expect(binding.extensions.length, 17);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
