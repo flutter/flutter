@@ -19,8 +19,8 @@
 #include <minikin/FontFamily.h>
 
 #include "ICUTestBase.h"
-#include "lib/txt/libs/minikin/FontLanguageListCache.h"
-#include "lib/txt/libs/minikin/MinikinInternal.h"
+#include "minikin/FontLanguageListCache.h"
+#include "minikin/MinikinInternal.h"
 
 namespace minikin {
 

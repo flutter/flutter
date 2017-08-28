@@ -16,8 +16,8 @@
 
 #include <gtest/gtest.h>
 
-#include <FileUtils.h>
 #include <minikin/Hyphenator.h>
+#include "FileUtils.h"
 #include "ICUTestBase.h"
 
 #ifndef NELEM
