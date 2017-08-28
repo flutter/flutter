@@ -204,24 +204,17 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
       .fLevelCount = image_create_info.mipLevels,
   };
 
-  GrBackendRenderTargetDesc sk_render_target_desc;
-  sk_render_target_desc.fWidth = size.width();
-  sk_render_target_desc.fHeight = size.height();
-  sk_render_target_desc.fConfig = kSBGRA_8888_GrPixelConfig;
-  sk_render_target_desc.fOrigin = kTopLeft_GrSurfaceOrigin;
-  sk_render_target_desc.fSampleCnt = 0;
-  sk_render_target_desc.fStencilBits = 0;
-  sk_render_target_desc.fRenderTargetHandle =
-      reinterpret_cast<GrBackendObject>(&image_info);
+  GrBackendRenderTarget sk_render_target(size.width(), size.height(), 0, 0, image_info);
 
   SkSurfaceProps sk_surface_props(
       SkSurfaceProps::InitType::kLegacyFontHost_InitType);
 
   auto sk_surface =
-      SkSurface::MakeFromBackendRenderTarget(context.get(),          //
-                                             sk_render_target_desc,  //
-                                             nullptr,                //
-                                             &sk_surface_props       //
+      SkSurface::MakeFromBackendRenderTarget(context.get(),            //
+                                             sk_render_target,         //
+                                             kTopLeft_GrSurfaceOrigin  //
+                                             nullptr,                  //
+                                             &sk_surface_props         //
                                              );
 
   if (!sk_surface || sk_surface->getCanvas() == nullptr) {
