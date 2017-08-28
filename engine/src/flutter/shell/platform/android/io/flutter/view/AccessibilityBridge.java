@@ -190,7 +190,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
                 if ((object.actions & SEMANTICS_ACTION_SCROLL_UP) != 0) {
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_UP);
                 } else if ((object.actions & SEMANTICS_ACTION_SCROLL_LEFT) != 0) {
-                    // TODO(ianh): bidi support
+                    // TODO(ianh): bidi support using textDirection
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_LEFT);
                 } else if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0) {
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_INCREASE);
@@ -203,7 +203,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
                 if ((object.actions & SEMANTICS_ACTION_SCROLL_DOWN) != 0) {
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_DOWN);
                 } else if ((object.actions & SEMANTICS_ACTION_SCROLL_RIGHT) != 0) {
-                    // TODO(ianh): bidi support
+                    // TODO(ianh): bidi support using textDirection
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_RIGHT);
                 } else if ((object.actions & SEMANTICS_ACTION_DECREASE) != 0) {
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_DECREASE);
@@ -347,6 +347,20 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         sendAccessibilityEvent(0, AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
     }
 
+    private enum TextDirection {
+        UNKNOWN, LTR, RTL;
+
+        public static TextDirection fromInt(int value) {
+            switch (value) {
+                case 1:
+                    return RTL;
+                case 2:
+                    return LTR;
+            }
+            return UNKNOWN;
+        }
+    }
+
     private class SemanticsObject {
         SemanticsObject() { }
 
@@ -355,6 +369,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         int flags;
         int actions;
         String label;
+        TextDirection textDirection;
 
         private float left;
         private float top;
@@ -393,6 +408,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
                 label = null;
             else
                 label = strings[stringIndex];
+
+            textDirection = TextDirection.fromInt(buffer.getInt());
 
             left = buffer.getFloat();
             top = buffer.getFloat();

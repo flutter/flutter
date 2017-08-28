@@ -203,7 +203,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// asynchronously, the [Window.onSemanticsAction] callback might be called
   /// with an action that is no longer possible.
   ///
-  /// The `label` is a string that describes this node.
+  /// The `label` is a string that describes this node. Its reading direction is
+  /// given by `textDirection`.
   ///
   /// The `rect` is the region occupied by this node in its own coordinate
   /// system.
@@ -216,6 +217,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     int actions,
     Rect rect,
     String label,
+    TextDirection textDirection,
     Float64List transform,
     Int32List children
   }) {
@@ -229,6 +231,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
                 rect.right,
                 rect.bottom,
                 label,
+                textDirection != null ? textDirection.index + 1 : 0,
                 transform,
                 children);
   }
@@ -241,6 +244,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     double right,
     double bottom,
     String label,
+    int textDirection,
     Float64List transform,
     Int32List children
   ) native "SemanticsUpdateBuilder_updateNode";
