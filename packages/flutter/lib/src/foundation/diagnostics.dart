@@ -845,14 +845,10 @@ abstract class DiagnosticsNode {
 
       for (int i = 0; i < children.length; i++) {
         final DiagnosticsNode child = children[i];
-
+        assert(child != null);
         final TextTreeConfiguration childConfig = _childTextConfiguration(child, config);
         if (i == children.length - 1) {
           final String lastChildPrefixLineOne = '$prefixChildren${childConfig.prefixLastChildLineOne}';
-          if (child == null) {
-            builder.writeRawLine('$lastChildPrefixLineOne<null>');
-            continue;
-          }
           builder.writeRawLine(child.toStringDeep(
             lastChildPrefixLineOne,
             '$prefixChildren${childConfig.childLinkSpace}${childConfig.prefixOtherLines}',
@@ -862,14 +858,8 @@ abstract class DiagnosticsNode {
             builder.writeRaw('$prefixChildren${childConfig.childLinkSpace}${childConfig.footer}');
         } else {
           final TextTreeConfiguration nextChildStyle = _childTextConfiguration(children[i + 1], config);
-
           final String childPrefixLineOne = '$prefixChildren${childConfig.prefixLineOne}';
           final String childPrefixOtherLines ='$prefixChildren${nextChildStyle.linkCharacter}${childConfig.prefixOtherLines}';
-
-          if (child == null) {
-            builder.writeRawLine('$childPrefixLineOne<null>');
-            continue;
-          }
           builder.writeRawLine(child.toStringDeep(childPrefixLineOne, childPrefixOtherLines));
           if (childConfig.footer.isNotEmpty)
             builder.writeRaw('$prefixChildren${nextChildStyle.linkCharacter}${childConfig.footer}');
@@ -2139,13 +2129,18 @@ abstract class DiagnosticableTree extends Diagnosticable {
   /// Returns a list of [DiagnosticsNode] objects describing this node's
   /// children.
   ///
-  /// Children that are offstage should added with `style`
+  /// Children that are offstage should be added with `style` set to
   /// [DiagnosticsTreeStyle.offstage] to indicate that they are offstage.
+  ///
+  /// The list must not contain any null entries. If there are explicit null
+  /// children to report, consider [new DiagnosticsNode.message] or
+  /// [DiagnosticsProperty<Object>] as possible [DiagnosticsNode] objects to
+  /// provide.
   ///
   /// See also:
   ///
   ///  * [RenderTable.debugDescribeChildren], which provides high quality custom
-  ///    descriptions for child nodes.
+  ///    descriptions for its child nodes.
   ///
   /// Used by [toStringDeep], [toDiagnosticsNode] and [toStringShallow].
   @protected
