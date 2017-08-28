@@ -16,6 +16,8 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -144,12 +146,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         result.setSelected((object.flags & SEMANTICS_FLAG_IS_SELECTED) != 0);
         result.setText(object.label);
 
-        // TODO(ianh): use setTraversalBefore/setTraversalAfter to set
-        // the relative order of the views. For each set of siblings,
-        // the views should be ordered top-to-bottom, tie-breaking
-        // left-to-right (right-to-left in rtl environments), height,
-        // width, and finally by list order.
-
         // Accessibility Focus
         if (mFocusedObject != null && mFocusedObject.id == virtualViewId) {
             result.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
@@ -158,7 +154,16 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         }
 
         if (object.children != null) {
-            for (SemanticsObject child : object.children) {
+            List<SemanticsObject> childrenInTraversalOrder =
+                new ArrayList<SemanticsObject>(object.children);
+            Collections.sort(childrenInTraversalOrder, new Comparator<SemanticsObject>() {
+                public int compare(SemanticsObject a, SemanticsObject b) {
+                    final int top = Integer.compare(a.globalRect.top, b.globalRect.top);
+                    // TODO(goderbauer): sort right-to-left in rtl environments.
+                    return top == 0 ? Integer.compare(a.globalRect.left, b.globalRect.left) : top;
+                }
+            });
+            for (SemanticsObject child : childrenInTraversalOrder) {
                 result.addChild(mOwner, child.id);
             }
         }
@@ -358,7 +363,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         private float[] transform;
 
         SemanticsObject parent;
-        List<SemanticsObject> children;
+        List<SemanticsObject> children;  // In inverse hit test order (i.e. paint order).
 
         private boolean inverseTransformDirty = true;
         private float[] inverseTransform;
