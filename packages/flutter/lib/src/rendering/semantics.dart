@@ -701,8 +701,8 @@ class SemanticsNode extends AbstractNode {
 
   /// Returns a string representation of this node and its descendants.
   ///
-  /// The order in which the children of the [SemanticsNode] will be printed can
-  /// be controlled with the [childOrder] parameter.
+  /// The order in which the children of the [SemanticsNode] will be printed is
+  /// controlled by the [childOrder] parameter.
   String toStringDeep(DebugSemanticsDumpOrder childOrder, [
     String prefixLineOne = '',
     String prefixOtherLines = ''
@@ -727,7 +727,7 @@ class SemanticsNode extends AbstractNode {
     assert(childOrder != null);
     switch(childOrder) {
       case DebugSemanticsDumpOrder.traversal:
-        return new List<SemanticsNode>.from(_children)..sort(_nodeComparator);
+        return new List<SemanticsNode>.from(_children)..sort(_geometryComparator);
       case DebugSemanticsDumpOrder.inverseHitTest:
         return _children;
     }
@@ -735,7 +735,7 @@ class SemanticsNode extends AbstractNode {
     return null;
   }
 
-  static int _nodeComparator(SemanticsNode a, SemanticsNode b) {
+  static int _geometryComparator(SemanticsNode a, SemanticsNode b) {
     final Rect rectA = MatrixUtils.transformRect(a.transform, a.rect);
     final Rect rectB = MatrixUtils.transformRect(b.transform, b.rect);
     final int top = rectA.top.compareTo(rectB.top);

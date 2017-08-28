@@ -15,9 +15,16 @@ export 'package:flutter/foundation.dart' show debugPrint;
 /// are printed.
 enum DebugSemanticsDumpOrder {
   /// Print nodes in inverse hit test order.
+  ///
+  /// In inverse hit test order, the last child of a [SemanticsNode] will be
+  /// asked first if it wants to respond to a user's interaction, followed by
+  /// the second last, etc. until a taker is found.
   inverseHitTest,
 
   /// Print nodes in traversal order.
+  ///
+  /// Traversal order defines how the user can move the accessibility focus from
+  /// one node to another.
   traversal,
 }
 

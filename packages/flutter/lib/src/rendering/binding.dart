@@ -326,8 +326,8 @@ void debugDumpLayerTree() {
 /// This will only work if there is a semantics client attached.
 /// Otherwise, a notice that no semantics are available will be printed.
 ///
-/// The order in which the children of a [SemanticsNode] will be printed can be
-/// controlled with the [childOrder] parameter.
+/// The order in which the children of a [SemanticsNode] will be printed is
+/// controlled by the [childOrder] parameter.
 void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
   debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder) ?? 'Semantics not collected.');
 }
