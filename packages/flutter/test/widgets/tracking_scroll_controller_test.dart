@@ -42,8 +42,7 @@ void main() {
     expect(find.text('Page2-Item0'), findsNothing);
     expect(find.text('Page2-Item1'), findsNothing);
 
-    await tester.fling(
-        find.text('Page1-Item1'), const Offset(-100.0, 0.0), 10000.0);
+    await tester.fling(find.text('Page1-Item1'), const Offset(-100.0, 0.0), 10000.0);
     await (tester.pumpAndSettle());
 
     expect(find.text('Page0-Item1'), findsNothing);
