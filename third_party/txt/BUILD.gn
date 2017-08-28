@@ -115,6 +115,21 @@ executable("txt_unittests") {
   testonly = true
 
   sources = [
+    "tests/CmapCoverageTest.cpp",
+    "tests/EmojiTest.cpp",
+    "tests/FileUtils.cpp",
+    "tests/FileUtils.h",
+    "tests/FontTestUtils.h",
+    "tests/GraphemeBreakTests.cpp",
+    "tests/ICUTestBase.h",
+    "tests/LayoutUtilsTest.cpp",
+    "tests/MeasurementTests.cpp",
+    "tests/MinikinFontForTest.cpp",
+    "tests/MinikinFontForTest.h",
+    "tests/SparseBitSetTest.cpp",
+    "tests/UnicodeUtils.cpp",
+    "tests/UnicodeUtils.h",
+    "tests/UnicodeUtilsTest.cpp",
     "tests/font_collection_unittests.cc",
     "tests/paragraph_unittests.cc",
     "tests/render_test.cc",
@@ -122,6 +137,16 @@ executable("txt_unittests") {
     "tests/txt_run_all_unittests.cc",
     "tests/utils.cc",
     "tests/utils.h",
+
+    # These tests require static fixtures.
+    # "tests/FontCollectionItemizeTest.cpp",
+    # "tests/FontCollectionTest.cpp",
+    # "tests/FontFamilyTest.cpp",
+    # "tests/FontLanguageListCacheTest.cpp",
+    # "tests/FontTestUtils.cpp",
+    # "tests/HbFontCacheTest.cpp",
+    # "tests/HyphenatorTest.cpp",
+    # "tests/LayoutTest.cpp",
   ]
 
   deps = [

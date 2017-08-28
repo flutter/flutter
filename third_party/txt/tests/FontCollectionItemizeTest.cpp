@@ -22,10 +22,10 @@
 #include "ICUTestBase.h"
 #include "MinikinFontForTest.h"
 #include "UnicodeUtils.h"
-#include "lib/txt/libs/minikin/FontLanguage.h"
-#include "lib/txt/libs/minikin/FontLanguageListCache.h"
-#include "lib/txt/libs/minikin/MinikinInternal.h"
 #include "minikin/FontFamily.h"
+#include "minikin/FontLanguage.h"
+#include "minikin/FontLanguageListCache.h"
+#include "minikin/MinikinInternal.h"
 
 namespace minikin {
 

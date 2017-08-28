@@ -24,7 +24,7 @@
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
 #include "MinikinFontForTest.h"
-#include "lib/txt/libs/minikin/FontLanguage.h"
+#include "minikin/FontLanguage.h"
 
 namespace minikin {
 

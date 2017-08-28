@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-#include <UnicodeUtils.h>
 #include <gtest/gtest.h>
 #include <minikin/Measurement.h>
+#include "UnicodeUtils.h"
 
 namespace minikin {
 
