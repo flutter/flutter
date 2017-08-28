@@ -66,10 +66,10 @@ Future<int> _createSnapshot({
     try {
         final String json = await checksumFile.readAsString();
         final Checksum oldChecksum = new Checksum.fromJson(json);
-        final Set<String> inputPaths = await _readDepfile(depfilePath);
+        final Set<String> inputPaths = await readDepfile(depfilePath);
         inputPaths.add(snapshotPath);
         inputPaths.add(mainPath);
-        final Checksum newChecksum = new Checksum.fromFiles(buildMode, inputPaths);
+        final Checksum newChecksum = new Checksum.fromFiles(buildMode, null, inputPaths);
         if (oldChecksum == newChecksum) {
           printTrace('Skipping snapshot build. Checksums match.');
           return 0;
@@ -87,34 +87,16 @@ Future<int> _createSnapshot({
 
   // Compute and record input file checksums.
   try {
-    final Set<String> inputPaths = await _readDepfile(depfilePath);
+    final Set<String> inputPaths = await readDepfile(depfilePath);
     inputPaths.add(snapshotPath);
     inputPaths.add(mainPath);
-    final Checksum checksum = new Checksum.fromFiles(buildMode, inputPaths);
+    final Checksum checksum = new Checksum.fromFiles(buildMode, null, inputPaths);
     await checksumFile.writeAsString(checksum.toJson());
   } catch (e, s) {
     // Log exception and continue, this step is a performance improvement only.
     printTrace('Error during snapshot checksum output: $e\n$s');
   }
   return 0;
-}
-
-/// Parses a VM snapshot dependency file.
-///
-/// Snapshot dependency files are a single line mapping the output snapshot to a
-/// space-separated list of input files used to generate that output. e.g,
-///
-/// outfile : file1.dart file2.dart file3.dart
-Future<Set<String>> _readDepfile(String depfilePath) async {
-  // Depfile format:
-  // outfile : file1.dart file2.dart file3.dart
-  final String contents = await fs.file(depfilePath).readAsString();
-  final String dependencies = contents.split(': ')[1];
-  return dependencies
-      .split(' ')
-      .map((String path) => path.trim())
-      .where((String path) => path.isNotEmpty)
-      .toSet();
 }
 
 Future<Null> build({
