@@ -486,7 +486,7 @@ void main() {
     expect(
       element.toStringDeep(),
       equalsIgnoringHashCodes(
-        'Column-[GlobalKey#00000](renderObject: RenderFlex#00000)\n'
+        'Column-[GlobalKey#00000](direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#00000)\n'
         '├Container\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'

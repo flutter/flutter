@@ -8,6 +8,212 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
+/// Base class for [FractionalOffset] that allows for text-direction aware
+/// resolution.
+///
+/// A property or argument of this type accepts classes created either with [new
+/// FractionalOffset] and its variants, or [new FractionalOffsetDirectional].
+///
+/// To convert a [FractionalOffsetGeometry] object of indeterminate type into a
+/// [FractionalOffset] object, call the [resolve] method.
+abstract class FractionalOffsetGeometry {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const FractionalOffsetGeometry();
+
+  double get _dx;
+  double get _start;
+  double get _dy;
+
+  /// Returns the difference between two [FractionalOffsetGeometry] objects.
+  ///
+  /// If you know you are applying this to two [FractionalOffset]s or two
+  /// [FractionalOffsetDirectional] objects, consider using the binary infix `-`
+  /// operator instead, which always returns an object of the same type as the
+  /// operands, and is typed accordingly.
+  ///
+  /// If [subtract] is applied to two objects of the same type ([FractionalOffset] or
+  /// [FractionalOffsetDirectional]), an object of that type will be returned (though
+  /// this is not reflected in the type system). Otherwise, an object
+  /// representing a combination of both is returned. That object can be turned
+  /// into a concrete [FractionalOffset] using [resolve].
+  ///
+  /// This method returns the same result as [add] applied to the result of
+  /// negating the argument (using the prefix unary `-` operator or multiplying
+  /// the argument by -1.0 using the `*` operator).
+  FractionalOffsetGeometry subtract(FractionalOffsetGeometry other) {
+    return new _MixedFractionalOffset(
+      _dx - other._dx,
+      _start - other._start,
+      _dy - other._dy,
+    );
+  }
+
+  /// Returns the sum of two [FractionalOffsetGeometry] objects.
+  ///
+  /// If you know you are adding two [FractionalOffset] or two [FractionalOffsetDirectional]
+  /// objects, consider using the `+` operator instead, which always returns an
+  /// object of the same type as the operands, and is typed accordingly.
+  ///
+  /// If [add] is applied to two objects of the same type ([FractionalOffset] or
+  /// [FractionalOffsetDirectional]), an object of that type will be returned (though
+  /// this is not reflected in the type system). Otherwise, an object
+  /// representing a combination of both is returned. That object can be turned
+  /// into a concrete [FractionalOffset] using [resolve].
+  FractionalOffsetGeometry add(FractionalOffsetGeometry other) {
+    return new _MixedFractionalOffset(
+      _dx + other._dx,
+      _start + other._start,
+      _dy + other._dy,
+    );
+  }
+
+  /// Returns the negation of the given [FractionalOffsetGeometry] object.
+  ///
+  /// This is the same as multiplying the object by -1.0.
+  ///
+  /// This operator returns an object of the same type as the operand.
+  FractionalOffsetGeometry operator -();
+
+  /// Scales the [FractionalOffsetGeometry] object in each dimension by the given factor.
+  ///
+  /// This operator returns an object of the same type as the operand.
+  FractionalOffsetGeometry operator *(double other);
+
+  /// Divides the [FractionalOffsetGeometry] object in each dimension by the given factor.
+  ///
+  /// This operator returns an object of the same type as the operand.
+  FractionalOffsetGeometry operator /(double other);
+
+  /// Integer divides the [FractionalOffsetGeometry] object in each dimension by the given factor.
+  ///
+  /// This operator returns an object of the same type as the operand.
+  FractionalOffsetGeometry operator ~/(double other);
+
+  /// Computes the remainder in each dimension by the given factor.
+  ///
+  /// This operator returns an object of the same type as the operand.
+  FractionalOffsetGeometry operator %(double other);
+
+  /// Linearly interpolate between two [FractionalOffsetGeometry] objects.
+  ///
+  /// If either is null, this function interpolates from [FractionalOffset.center], and
+  /// the result is an object of the same type as the non-null argument.
+  ///
+  /// If [lerp] is applied to two objects of the same type ([FractionalOffset] or
+  /// [FractionalOffsetDirectional]), an object of that type will be returned (though
+  /// this is not reflected in the type system). Otherwise, an object
+  /// representing a combination of both is returned. That object can be turned
+  /// into a concrete [FractionalOffset] using [resolve].
+  static FractionalOffsetGeometry lerp(FractionalOffsetGeometry a, FractionalOffsetGeometry b, double t) {
+    if (a == null && b == null)
+      return null;
+    if ((a == null || a is FractionalOffset) && (b == null || b is FractionalOffset))
+      return FractionalOffset.lerp(a, b, t);
+    if ((a == null || a is FractionalOffsetDirectional) && (b == null || b is FractionalOffsetDirectional))
+      return FractionalOffsetDirectional.lerp(a, b, t);
+    if (a == null) {
+      return new _MixedFractionalOffset(
+        ui.lerpDouble(0.5, b._dx, t),
+        ui.lerpDouble(0.0, b._start, t),
+        ui.lerpDouble(0.5, b._dy, t),
+      );
+    }
+    if (b == null) {
+      return new _MixedFractionalOffset(
+        ui.lerpDouble(a._dx, 0.5, t),
+        ui.lerpDouble(a._start, 0.0, t),
+        ui.lerpDouble(a._dy, 0.5, t),
+      );
+    }
+    return new _MixedFractionalOffset(
+      ui.lerpDouble(a._dx, b._dx, t),
+      ui.lerpDouble(a._start, b._start, t),
+      ui.lerpDouble(a._dy, b._dy, t),
+    );
+  }
+
+  /// Convert this instance into a [FractionalOffset], which uses literal
+  /// coordinates (the `x` coordinate being explicitly a distance from the
+  /// left).
+  ///
+  /// See also:
+  ///
+  ///  * [FractionalOffset], for which this is a no-op (returns itself).
+  ///  * [FractionalOffsetDirectional], which flips the horizontal direction
+  ///    based on the `direction` argument.
+  FractionalOffset resolve(TextDirection direction);
+
+  @override
+  String toString() {
+    double x = _dx;
+    double start = _start;
+    if (this is FractionalOffset) {
+      assert(start == 0.0);
+      start = null;
+    } else if (start == 0.5) {
+      x += 0.5;
+      start = null;
+    }
+    if (start == null) {
+      if (x == 0.0 && _dy == 0.0)
+        return 'FractionalOffset.topLeft';
+      if (x == 0.5 && _dy == 0.0)
+        return 'FractionalOffset.topCenter';
+      if (x == 1.0 && _dy == 0.0)
+        return 'FractionalOffset.topRight';
+      if (x == 0.0 && _dy == 0.5)
+        return 'FractionalOffset.centerLeft';
+      if (x == 0.5 && _dy == 0.5)
+        return 'FractionalOffset.center';
+      if (x == 1.0 && _dy == 0.5)
+        return 'FractionalOffset.centerRight';
+      if (x == 0.0 && _dy == 1.0)
+        return 'FractionalOffset.bottomLeft';
+      if (x == 0.5 && _dy == 1.0)
+        return 'FractionalOffset.bottomCenter';
+      if (x == 1.0 && _dy == 1.0)
+        return 'FractionalOffset.bottomRight';
+      return 'FractionalOffset(${x.toStringAsFixed(1)}, '
+                              '${_dy.toStringAsFixed(1)})';
+    } else if (x == 0.0) {
+      assert(start != 0.5);
+      if (start == 0.0 && _dy == 0.0)
+        return 'FractionalOffsetDirectional.topStart';
+      if (start == 1.0 && _dy == 0.0)
+        return 'FractionalOffsetDirectional.topEnd';
+      if (start == 0.0 && _dy == 0.5)
+        return 'FractionalOffsetDirectional.centerStart';
+      if (start == 1.0 && _dy == 0.5)
+        return 'FractionalOffsetDirectional.centerEnd';
+      if (start == 0.0 && _dy == 1.0)
+        return 'FractionalOffsetDirectional.bottomStart';
+      if (start == 1.0 && _dy == 1.0)
+        return 'FractionalOffsetDirectional.bottomEnd';
+      return 'FractionalOffsetDirectional(${start.toStringAsFixed(1)}, '
+                                         '${_dy.toStringAsFixed(1)})';
+    }
+    return 'FractionalOffset(${_dx.toStringAsFixed(1)}, '
+                            '${_dy.toStringAsFixed(1)})'
+           ' + '
+           'FractionalOffsetDirectional(${_start.toStringAsFixed(1)}, '
+                                       '0.0)';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! FractionalOffsetGeometry)
+      return false;
+    final FractionalOffsetGeometry typedOther = other;
+    return _dx == typedOther._dx &&
+           _start == typedOther._start &&
+           _dy == typedOther._dy;
+  }
+
+  @override
+  int get hashCode => hashValues(_dx, _start, _dy);
+}
+
 /// An offset that's expressed as a fraction of a [Size].
 ///
 /// `FractionalOffset(1.0, 0.0)` represents the top right of the [Size].
@@ -22,8 +228,14 @@ import 'basic_types.dart';
 ///
 ///  * [Align] positions a child according to a [FractionalOffset].
 ///  * [FractionalTranslation] moves a child according to a [FractionalOffset].
+///
+/// See also:
+///
+///  * [FractionalOffsetDirectional], which (for properties and arguments that
+///    accept the type [FractionalOffsetGeometry]) allows the horizontal
+///    coordinate to be specified in a [TextDirection]-aware manner.
 @immutable
-class FractionalOffset {
+class FractionalOffset extends FractionalOffsetGeometry {
   /// Creates a fractional offset.
   ///
   /// The [dx] and [dy] arguments must not be null.
@@ -66,13 +278,22 @@ class FractionalOffset {
   /// edge.
   final double dx;
 
+  @override
+  double get _dx => dx;
+
   /// The distance fraction in the vertical direction.
   ///
   /// A value of 0.0 corresponds to the topmost edge. A value of 1.0 corresponds
   /// to the bottommost edge. Values are not limited to that range; negative
-  /// values represent positions above the top, and values greated than 1.0
+  /// values represent positions above the top, and values greater than 1.0
   /// represent positions below the bottom.
   final double dy;
+
+  @override
+  double get _dy => dy;
+
+  @override
+  double get _start => 0.0;
 
   /// The top left corner.
   static const FractionalOffset topLeft = const FractionalOffset(0.0, 0.0);
@@ -83,6 +304,15 @@ class FractionalOffset {
   /// The top right corner.
   static const FractionalOffset topRight = const FractionalOffset(1.0, 0.0);
 
+  /// The center point along the left edge.
+  static const FractionalOffset centerLeft = const FractionalOffset(0.0, 0.5);
+
+  /// The center point, both horizontally and vertically.
+  static const FractionalOffset center = const FractionalOffset(0.5, 0.5);
+
+  /// The center point along the right edge.
+  static const FractionalOffset centerRight = const FractionalOffset(1.0, 0.5);
+
   /// The bottom left corner.
   static const FractionalOffset bottomLeft = const FractionalOffset(0.0, 1.0);
 
@@ -92,46 +322,56 @@ class FractionalOffset {
   /// The bottom right corner.
   static const FractionalOffset bottomRight = const FractionalOffset(1.0, 1.0);
 
-  /// The center point along the left edge.
-  static const FractionalOffset centerLeft = const FractionalOffset(0.0, 0.5);
-
-  /// The center point along the right edge.
-  static const FractionalOffset centerRight = const FractionalOffset(1.0, 0.5);
-
-  /// The center point, both horizontally and vertically.
-  static const FractionalOffset center = const FractionalOffset(0.5, 0.5);
-
-  /// Returns the negation of the given fractional offset.
-  FractionalOffset operator -() {
-    return new FractionalOffset(-dx, -dy);
+  @override
+  FractionalOffsetGeometry subtract(FractionalOffsetGeometry other) {
+    if (other is FractionalOffset)
+      return this - other;
+    return super.subtract(other);
   }
 
-  /// Returns the difference between two fractional offsets.
+  @override
+  FractionalOffsetGeometry add(FractionalOffsetGeometry other) {
+    if (other is FractionalOffset)
+      return this + other;
+    return super.add(other);
+  }
+
+  /// Returns the difference between two [FractionalOffset]s.
   FractionalOffset operator -(FractionalOffset other) {
     return new FractionalOffset(dx - other.dx, dy - other.dy);
   }
 
-  /// Returns the sum of two fractional offsets.
+  /// Returns the sum of two [FractionalOffset]s.
   FractionalOffset operator +(FractionalOffset other) {
     return new FractionalOffset(dx + other.dx, dy + other.dy);
   }
 
-  /// Scales the fractional offset in each dimension by the given factor.
+  /// Returns the negation of the given [FractionalOffset].
+  @override
+  FractionalOffset operator -() {
+    return new FractionalOffset(-dx, -dy);
+  }
+
+  /// Scales the [FractionalOffset] in each dimension by the given factor.
+  @override
   FractionalOffset operator *(double other) {
     return new FractionalOffset(dx * other, dy * other);
   }
 
-  /// Divides the fractional offset in each dimension by the given factor.
+  /// Divides the [FractionalOffset] in each dimension by the given factor.
+  @override
   FractionalOffset operator /(double other) {
     return new FractionalOffset(dx / other, dy / other);
   }
 
-  /// Integer divides the fractional offset in each dimension by the given factor.
+  /// Integer divides the [FractionalOffset] in each dimension by the given factor.
+  @override
   FractionalOffset operator ~/(double other) {
     return new FractionalOffset((dx ~/ other).toDouble(), (dy ~/ other).toDouble());
   }
 
   /// Computes the remainder in each dimension by the given factor.
+  @override
   FractionalOffset operator %(double other) {
     return new FractionalOffset(dx % other, dy % other);
   }
@@ -161,37 +401,261 @@ class FractionalOffset {
       rect.left + (rect.width - size.width) * dx,
       rect.top + (rect.height - size.height) * dy,
       size.width,
-      size.height
+      size.height,
     );
   }
 
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! FractionalOffset)
-      return false;
-    final FractionalOffset typedOther = other;
-    return dx == typedOther.dx &&
-           dy == typedOther.dy;
-  }
-
-  @override
-  int get hashCode => hashValues(dx, dy);
-
-  /// Linearly interpolate between two EdgeInsets.
+  /// Linearly interpolate between two [FractionalOffset]s.
   ///
-  /// If either is null, this function interpolates from [FractionalOffset.topLeft].
-  // TODO(abarth): Consider interpolating from [FractionalOffset.center] instead
-  // to remove upper-left bias.
+  /// If either is null, this function interpolates from [FractionalOffset.center].
   static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
     if (a == null && b == null)
       return null;
     if (a == null)
-      return new FractionalOffset(b.dx * t, b.dy * t);
+      return new FractionalOffset(ui.lerpDouble(0.5, b.dx, t), ui.lerpDouble(0.5, b.dy, t));
     if (b == null)
-      return new FractionalOffset(a.dx * (1.0 - t), a.dy * (1.0 - t));
+      return new FractionalOffset(ui.lerpDouble(a.dx, 0.5, t), ui.lerpDouble(a.dy, 0.5, t));
     return new FractionalOffset(ui.lerpDouble(a.dx, b.dx, t), ui.lerpDouble(a.dy, b.dy, t));
   }
 
   @override
-  String toString() => '$runtimeType($dx, $dy)';
+  FractionalOffset resolve(TextDirection direction) => this;
+}
+
+/// An offset that's expressed as a fraction of a [Size], but whose horizontal
+/// component is dependent on the writing direction.
+///
+/// This can be used to indicate an offset from the left in [TextDirection.ltr]
+/// text and an offset from the right in [TextDirection.rtl] text without having
+/// to be aware of the current text direction.
+///
+/// See also:
+///
+///  * [FractionalOffset], a variant that is defined in physical terms (i.e.
+///    whose horizontal component does not depend on the text direction).
+class FractionalOffsetDirectional extends FractionalOffsetGeometry {
+  /// Creates a directional fractional offset.
+  ///
+  /// The [start] and [dy] arguments must not be null.
+  const FractionalOffsetDirectional(this.start, this.dy)
+    : assert(start != null),
+      assert(dy != null);
+
+  /// The distance fraction in the horizontal direction.
+  ///
+  /// A value of 0.0 corresponds to the edge on the "start" side, which is the
+  /// left side in [TextDirection.ltr] contexts and the right side in
+  /// [TextDirection.rtl] contexts. A value of 1.0 corresponds to the opposite
+  /// edge, the "end" side. Values are not limited to that range; negative
+  /// values represent positions beyond the start edge, and values greater than
+  /// 1.0 represent positions beyond the end edge.
+  ///
+  /// This value is normalized into a [FractionalOffset.dx] value by the
+  /// [resolve] method.
+  final double start;
+
+  @override
+  double get _start => start;
+
+  /// The distance fraction in the vertical direction.
+  ///
+  /// A value of 0.0 corresponds to the topmost edge. A value of 1.0 corresponds
+  /// to the bottommost edge. Values are not limited to that range; negative
+  /// values represent positions above the top, and values greater than 1.0
+  /// represent positions below the bottom.
+  ///
+  /// This value is passed through to [FractionalOffset.dy] unmodified by the
+  /// [resolve] method.
+  final double dy;
+
+  @override
+  double get _dy => dy;
+
+  @override
+  double get _dx => 0.0;
+
+  /// The top corner on the "start" side.
+  static const FractionalOffsetDirectional topStart = const FractionalOffsetDirectional(0.0, 0.0);
+
+  /// The center point along the top edge.
+  ///
+  /// Consider using [FractionalOffset.topCenter] instead, as it does not need
+  /// to be [resolve]d to be used.
+  static const FractionalOffsetDirectional topCenter = const FractionalOffsetDirectional(0.5, 0.0);
+
+  /// The top corner on the "end" side.
+  static const FractionalOffsetDirectional topEnd = const FractionalOffsetDirectional(1.0, 0.0);
+
+  /// The center point along the "start" edge.
+  static const FractionalOffsetDirectional centerStart = const FractionalOffsetDirectional(0.0, 0.5);
+
+  /// The center point, both horizontally and vertically.
+  ///
+  /// Consider using [FractionalOffset.center] instead, as it does not need to
+  /// be [resolve]d to be used.
+  static const FractionalOffsetDirectional center = const FractionalOffsetDirectional(0.5, 0.5);
+
+  /// The center point along the "end" edge.
+  static const FractionalOffsetDirectional centerEnd = const FractionalOffsetDirectional(1.0, 0.5);
+
+  /// The bottom corner on the "start" side.
+  static const FractionalOffsetDirectional bottomStart = const FractionalOffsetDirectional(0.0, 1.0);
+
+  /// The center point along the bottom edge.
+  ///
+  /// Consider using [FractionalOffset.bottomCenter] instead, as it does not
+  /// need to be [resolve]d to be used.
+  static const FractionalOffsetDirectional bottomCenter = const FractionalOffsetDirectional(0.5, 1.0);
+
+  /// The bottom corner on the "end" side.
+  static const FractionalOffsetDirectional bottomEnd = const FractionalOffsetDirectional(1.0, 1.0);
+
+  @override
+  FractionalOffsetGeometry subtract(FractionalOffsetGeometry other) {
+    if (other is FractionalOffsetDirectional)
+      return this - other;
+    return super.subtract(other);
+  }
+
+  @override
+  FractionalOffsetGeometry add(FractionalOffsetGeometry other) {
+    if (other is FractionalOffsetDirectional)
+      return this + other;
+    return super.add(other);
+  }
+
+  /// Returns the difference between two [FractionalOffsetDirectional]s.
+  FractionalOffsetDirectional operator -(FractionalOffsetDirectional other) {
+    return new FractionalOffsetDirectional(start - other.start, dy - other.dy);
+  }
+
+  /// Returns the sum of two [FractionalOffsetDirectional]s.
+  FractionalOffsetDirectional operator +(FractionalOffsetDirectional other) {
+    return new FractionalOffsetDirectional(start + other.start, dy + other.dy);
+  }
+
+  /// Returns the negation of the given [FractionalOffsetDirectional].
+  @override
+  FractionalOffsetDirectional operator -() {
+    return new FractionalOffsetDirectional(-start, -dy);
+  }
+
+  /// Scales the [FractionalOffsetDirectional] in each dimension by the given factor.
+  @override
+  FractionalOffsetDirectional operator *(double other) {
+    return new FractionalOffsetDirectional(start * other, dy * other);
+  }
+
+  /// Divides the [FractionalOffsetDirectional] in each dimension by the given factor.
+  @override
+  FractionalOffsetDirectional operator /(double other) {
+    return new FractionalOffsetDirectional(start / other, dy / other);
+  }
+
+  /// Integer divides the [FractionalOffsetDirectional] in each dimension by the given factor.
+  @override
+  FractionalOffsetDirectional operator ~/(double other) {
+    return new FractionalOffsetDirectional((start ~/ other).toDouble(), (dy ~/ other).toDouble());
+  }
+
+  /// Computes the remainder in each dimension by the given factor.
+  @override
+  FractionalOffsetDirectional operator %(double other) {
+    return new FractionalOffsetDirectional(start % other, dy % other);
+  }
+
+  /// Linearly interpolate between two [FractionalOffsetDirectional]s.
+  ///
+  /// If either is null, this function interpolates from [FractionalOffset.center].
+  static FractionalOffsetDirectional lerp(FractionalOffsetDirectional a, FractionalOffsetDirectional b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return new FractionalOffsetDirectional(ui.lerpDouble(0.5, b.start, t), ui.lerpDouble(0.5, b.dy, t));
+    if (b == null)
+      return new FractionalOffsetDirectional(ui.lerpDouble(a.start, 0.5, t), ui.lerpDouble(a.dy, 0.5, t));
+    return new FractionalOffsetDirectional(ui.lerpDouble(a.start, b.start, t), ui.lerpDouble(a.dy, b.dy, t));
+  }
+
+  @override
+  FractionalOffset resolve(TextDirection direction) {
+    assert(direction != null);
+    switch (direction) {
+      case TextDirection.ltr:
+        return new FractionalOffset(start, dy);
+      case TextDirection.rtl:
+        return new FractionalOffset(1.0 - start, dy);
+    }
+    return null;
+  }
+}
+
+class _MixedFractionalOffset extends FractionalOffsetGeometry {
+  const _MixedFractionalOffset(this._dx, this._start, this._dy);
+
+  @override
+  final double _dx;
+
+  @override
+  final double _start;
+
+  @override
+  final double _dy;
+
+  @override
+  _MixedFractionalOffset operator -() {
+    return new _MixedFractionalOffset(
+      -_dx,
+      -_start,
+      -_dy,
+    );
+  }
+
+  @override
+  _MixedFractionalOffset operator *(double other) {
+    return new _MixedFractionalOffset(
+      _dx * other,
+      _start * other,
+      _dy * other,
+    );
+  }
+
+  @override
+  _MixedFractionalOffset operator /(double other) {
+    return new _MixedFractionalOffset(
+      _dx / other,
+      _start / other,
+      _dy / other,
+    );
+  }
+
+  @override
+  _MixedFractionalOffset operator ~/(double other) {
+    return new _MixedFractionalOffset(
+      (_dx ~/ other).toDouble(),
+      (_start ~/ other).toDouble(),
+      (_dy ~/ other).toDouble(),
+    );
+  }
+
+  @override
+  _MixedFractionalOffset operator %(double other) {
+    return new _MixedFractionalOffset(
+      _dx % other,
+      _start % other,
+      _dy % other,
+    );
+  }
+
+  @override
+  FractionalOffset resolve(TextDirection direction) {
+    assert(direction != null);
+    switch (direction) {
+      case TextDirection.ltr:
+        return new FractionalOffset(_start + _dx, _dy);
+      case TextDirection.rtl:
+        return new FractionalOffset((1.0 - _start) + _dx, _dy);
+    }
+    return null;
+  }
 }

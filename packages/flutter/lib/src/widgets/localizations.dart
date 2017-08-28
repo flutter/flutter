@@ -7,6 +7,7 @@ import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
 
+import 'basic.dart';
 import 'binding.dart';
 import 'container.dart';
 import 'framework.dart';
@@ -90,6 +91,47 @@ abstract class LocalizationsDelegate<T> {
   /// rebuilt. If it returns true then dependent widgets will be rebuilt
   /// after [load] has completed.
   bool shouldReload(covariant LocalizationsDelegate<T> old);
+
+  @override
+  String toString() => '$runtimeType';
+}
+
+/// Interface for localized resource values for the lowest levels of the Flutter
+/// framework.
+///
+/// In particular, this maps locales to a specific [Directionality] using the
+/// [textDirection] property.
+///
+/// This class provides a default placeholder implementation that returns
+/// hard-coded American English values.
+class WidgetsLocalizations {
+  /// Create a placeholder object for the localized resources of the lowest
+  /// levels of the Flutter framework which only provides values for American
+  /// English.
+  const WidgetsLocalizations();
+
+  /// The locale for which the values of this class's localized resources
+  /// have been translated.
+  Locale get locale => const Locale('en', 'US');
+
+  /// The reading direction for text in this locale.
+  TextDirection get textDirection => TextDirection.ltr;
+
+  /// The `WidgetsLocalizations` from the closest [Localizations] instance
+  /// that encloses the given context.
+  ///
+  /// This method is just a convenient shorthand for:
+  /// `Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations)`.
+  ///
+  /// References to the localized resources defined by this class are typically
+  /// written in terms of this method. For example:
+  ///
+  /// ```dart
+  /// textDirection: WidgetsLocalizations.of(context).textDirection,
+  /// ```
+  static WidgetsLocalizations of(BuildContext context) {
+    return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations);
+  }
 }
 
 class _LocalizationsScope extends InheritedWidget {
@@ -158,7 +200,7 @@ class _LocalizationsScope extends InheritedWidget {
 ///
 /// This class is effectively an [InheritedWidget]. If it's rebuilt with
 /// a new `locale` or a different list of delegates or any of its
-/// delegates' [LocalizationDelegate.shouldReload()] methods returns true,
+/// delegates' [LocalizationsDelegate.shouldReload()] methods returns true,
 /// then widgets that have created a dependency by calling
 /// `Localizations.of(context)` will be rebuilt after the resources
 /// for the new locale have been loaded.
@@ -199,21 +241,25 @@ class _LocalizationsScope extends InheritedWidget {
 /// One could choose another approach for loading localized resources and looking them up while
 /// still conforming to the structure of this example.
 class Localizations extends StatefulWidget {
+  /// Create a widget from which ambient localizations (translated strings)
+  /// can be obtained.
   Localizations({
     Key key,
     @required this.locale,
-    this.delegates,
-    this.child
-  }) : super(key: key) {
-    assert(locale != null);
+    @required this.delegates,
+    this.child,
+  }) : assert(locale != null),
+       assert(delegates != null),
+       super(key: key) {
+    assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
   }
 
   /// The resources returned by [Localizations.of] will be specific to this locale.
   final Locale locale;
 
   /// This list collectively defines the localized resources objects that can
-  /// be retrieved with [ Localizations.of].
-  final Iterable<LocalizationsDelegate<dynamic>> delegates;
+  /// be retrieved with [Localizations.of].
+  final List<LocalizationsDelegate<dynamic>> delegates;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -247,6 +293,13 @@ class Localizations extends StatefulWidget {
 
   @override
   _LocalizationsState createState() => new _LocalizationsState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Locale>('locale', locale));
+    description.add(new IterableProperty<LocalizationsDelegate<dynamic>>('delegates', delegates));
+  }
 }
 
 class _LocalizationsState extends State<Localizations> {
@@ -329,18 +382,29 @@ class _LocalizationsState extends State<Localizations> {
 
   T resourcesFor<T>(Type type) {
     assert(type != null);
-    final dynamic resources = _typeToResources[type];
+    final T resources = _typeToResources[type];
     assert(resources.runtimeType == type);
     return resources;
   }
 
+  TextDirection get _textDirection {
+    final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations];
+    assert(resources != null);
+    return resources.textDirection;
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_locale == null)
+      return new Container();
     return new _LocalizationsScope(
       key: _localizedResourcesScopeKey,
-      locale: widget.locale,
+      locale: _locale,
       localizationsState: this,
-      child: _locale != null ? widget.child : new Container(),
+      child: new Directionality(
+        textDirection: _textDirection,
+        child: widget.child,
+      ),
     );
   }
 }

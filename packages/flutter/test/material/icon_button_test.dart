@@ -98,15 +98,18 @@ void main() {
     'test default icon buttons can be stretched if specified',
     (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget> [
-            new IconButton(
-              onPressed: mockOnPressedFunction,
-              icon: const Icon(Icons.ac_unit),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget> [
+              new IconButton(
+                onPressed: mockOnPressedFunction,
+                icon: const Icon(Icons.ac_unit),
+              ),
+            ],
+          ),
         ),
       ),
     );

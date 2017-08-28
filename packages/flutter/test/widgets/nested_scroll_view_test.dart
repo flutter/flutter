@@ -23,71 +23,74 @@ class _CustomPhysics extends ClampingScrollPhysics {
 Widget buildTest({ ScrollController controller, String title:'TTTTTTTT' }) {
   return new MediaQuery(
     data: const MediaQueryData(),
-    child: new Scaffold(
-      body: new DefaultTabController(
-        length: 4,
-        child: new NestedScrollView(
-          controller: controller,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              new SliverAppBar(
-                title: new Text(title),
-                pinned: true,
-                expandedHeight: 200.0,
-                forceElevated: innerBoxIsScrolled,
-                bottom: new TabBar(
-                  tabs: const <Tab>[
-                    const Tab(text: 'AA'),
-                    const Tab(text: 'BB'),
-                    const Tab(text: 'CC'),
-                    const Tab(text: 'DD'),
+    child: new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Scaffold(
+        body: new DefaultTabController(
+          length: 4,
+          child: new NestedScrollView(
+            controller: controller,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                new SliverAppBar(
+                  title: new Text(title),
+                  pinned: true,
+                  expandedHeight: 200.0,
+                  forceElevated: innerBoxIsScrolled,
+                  bottom: new TabBar(
+                    tabs: const <Tab>[
+                      const Tab(text: 'AA'),
+                      const Tab(text: 'BB'),
+                      const Tab(text: 'CC'),
+                      const Tab(text: 'DD'),
+                    ],
+                  ),
+                ),
+              ];
+            },
+            body: new TabBarView(
+              children: <Widget>[
+                new ListView(
+                  children: <Widget>[
+                    new Container(
+                      height: 300.0,
+                      child: const Text('aaa1'),
+                    ),
+                    new Container(
+                      height: 200.0,
+                      child: const Text('aaa2'),
+                    ),
+                    new Container(
+                      height: 100.0,
+                      child: const Text('aaa3'),
+                    ),
+                    new Container(
+                      height: 50.0,
+                      child: const Text('aaa4'),
+                    ),
                   ],
                 ),
-              ),
-            ];
-          },
-          body: new TabBarView(
-            children: <Widget>[
-              new ListView(
-                children: <Widget>[
-                  new Container(
-                    height: 300.0,
-                    child: const Text('aaa1'),
-                  ),
-                  new Container(
-                    height: 200.0,
-                    child: const Text('aaa2'),
-                  ),
-                  new Container(
-                    height: 100.0,
-                    child: const Text('aaa3'),
-                  ),
-                  new Container(
-                    height: 50.0,
-                    child: const Text('aaa4'),
-                  ),
-                ],
-              ),
-              new ListView(
-                children: <Widget>[
-                  new Container(
-                    height: 100.0,
-                    child: const Text('bbb1'),
-                  ),
-                ],
-              ),
-              new Container(
-                child: const Center(child: const Text('ccc1')),
-              ),
-              new ListView(
-                children: <Widget>[
-                  new Container(
-                    height: 10000.0,
-                    child: const Text('ddd1'),
-                  ),
-                ],
-              ),
-            ],
+                new ListView(
+                  children: <Widget>[
+                    new Container(
+                      height: 100.0,
+                      child: const Text('bbb1'),
+                    ),
+                  ],
+                ),
+                new Container(
+                  child: const Center(child: const Text('ccc1')),
+                ),
+                new ListView(
+                  children: <Widget>[
+                    new Container(
+                      height: 10000.0,
+                      child: const Text('ddd1'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

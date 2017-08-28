@@ -8,31 +8,34 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
-  return new MediaQuery(
-    data: const MediaQueryData(),
-    child: new Scaffold(
-      body: new DefaultTabController(
-        length: 3,
-        child: new CustomScrollView(
-          primary: true,
-          slivers: <Widget>[
-            new SliverAppBar(
-              title: const Text('AppBar Title'),
-              floating: floating,
-              pinned: pinned,
-              expandedHeight: expandedHeight,
-              snap: snap,
-              bottom: new TabBar(
-                tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new MediaQuery(
+      data: const MediaQueryData(),
+      child: new Scaffold(
+        body: new DefaultTabController(
+          length: 3,
+          child: new CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              new SliverAppBar(
+                title: const Text('AppBar Title'),
+                floating: floating,
+                pinned: pinned,
+                expandedHeight: expandedHeight,
+                snap: snap,
+                bottom: new TabBar(
+                  tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+                ),
               ),
-            ),
-            new SliverToBoxAdapter(
-              child: new Container(
-                height: 1200.0,
-                color: Colors.orange[400],
+              new SliverToBoxAdapter(
+                child: new Container(
+                  height: 1200.0,
+                  color: Colors.orange[400],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ),
@@ -699,11 +702,14 @@ void main() {
     const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new Scaffold(
-          primary: false,
-          appBar: new AppBar(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: false,
+            appBar: new AppBar(),
+          ),
         ),
       ),
     );
@@ -711,11 +717,14 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight);
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new Scaffold(
-          primary: true,
-          appBar: new AppBar(title: const Text('title'))
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: true,
+            appBar: new AppBar(title: const Text('title'))
+          ),
         ),
       ),
     );
@@ -724,14 +733,17 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 100.0);
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new Scaffold(
-          primary: false,
-          appBar: new AppBar(
-            bottom: new PreferredSize(
-              preferredSize: const Size.fromHeight(200.0),
-              child: new Container(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: false,
+            appBar: new AppBar(
+              bottom: new PreferredSize(
+                preferredSize: const Size.fromHeight(200.0),
+                child: new Container(),
+              ),
             ),
           ),
         ),
@@ -741,14 +753,17 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 200.0);
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new Scaffold(
-          primary: true,
-          appBar: new AppBar(
-            bottom: new PreferredSize(
-              preferredSize: const Size.fromHeight(200.0),
-              child: new Container(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: true,
+            appBar: new AppBar(
+              bottom: new PreferredSize(
+                preferredSize: const Size.fromHeight(200.0),
+                child: new Container(),
+              ),
             ),
           ),
         ),
@@ -758,11 +773,14 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 100.0 + 200.0);
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new AppBar(
-          primary: false,
-          title: const Text('title'),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new AppBar(
+            primary: false,
+            title: const Text('title'),
+          ),
         ),
       ),
     );

@@ -25,38 +25,44 @@ void main() {
   testWidgets('Moving a global key from another LayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey = new GlobalKey();
 
-    await tester.pumpWidget(new Row(children: <Widget>[
-      new Wrapper(
-        child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-          return const SizedBox();
-        }),
-      ),
-      new Wrapper(
-        child: new Wrapper(
+    await tester.pumpWidget(new Row(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        new Wrapper(
+          child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            return const SizedBox();
+          }),
+        ),
+        new Wrapper(
+          child: new Wrapper(
+            child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              return new Wrapper(
+                child: new SizedBox(key: victimKey)
+              );
+            })
+          )
+        ),
+      ],
+    ));
+
+    await tester.pumpWidget(new Row(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        new Wrapper(
           child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
             return new Wrapper(
               child: new SizedBox(key: victimKey)
             );
           })
-        )
-      ),
-    ]));
-
-    await tester.pumpWidget(new Row(children: <Widget>[
-      new Wrapper(
-        child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-          return new Wrapper(
-            child: new SizedBox(key: victimKey)
-          );
-        })
-      ),
-      new Wrapper(
-        child: new Wrapper(
-          child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-            return const SizedBox();
-          })
-        )
-      ),
-    ]));
+        ),
+        new Wrapper(
+          child: new Wrapper(
+            child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              return const SizedBox();
+            })
+          )
+        ),
+      ],
+    ));
   });
 }

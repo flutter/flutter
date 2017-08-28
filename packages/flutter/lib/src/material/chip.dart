@@ -106,16 +106,16 @@ class Chip extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final bool deletable = onDeleted != null;
-    double leftPadding = 12.0;
-    double rightPadding = 12.0;
+    double startPadding = 12.0;
+    double endPadding = 12.0;
 
     final List<Widget> children = <Widget>[];
 
     if (avatar != null) {
-      leftPadding = 0.0;
+      startPadding = 0.0;
       children.add(new ExcludeSemantics(
         child: new Container(
-          margin: const EdgeInsets.only(right: 8.0),
+          margin: const EdgeInsetsDirectional.only(end: 8.0),
           width: _kAvatarDiamater,
           height: _kAvatarDiamater,
           child: avatar,
@@ -131,7 +131,7 @@ class Chip extends StatelessWidget {
     ));
 
     if (deletable) {
-      rightPadding = 0.0;
+      endPadding = 0.0;
       children.add(new GestureDetector(
         onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
@@ -152,7 +152,7 @@ class Chip extends StatelessWidget {
       container: true,
       child: new Container(
         height: _kChipHeight,
-        padding: new EdgeInsets.only(left: leftPadding, right: rightPadding),
+        padding: new EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
         decoration: new BoxDecoration(
           color: backgroundColor ?? Colors.grey.shade300,
           borderRadius: new BorderRadius.circular(16.0),
