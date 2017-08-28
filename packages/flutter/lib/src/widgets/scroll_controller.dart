@@ -323,6 +323,7 @@ class TrackingScrollController extends ScrollController {
 
   final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
   ScrollPosition _lastUpdated;
+  double _lastUpdatedOffset;
 
   /// The last [ScrollPosition] to change. Returns null if there aren't any
   /// attached scroll positions, or there hasn't been any scrolling yet, or the
@@ -336,13 +337,16 @@ class TrackingScrollController extends ScrollController {
   ///
   ///  * [ScrollController.initialScrollOffset], which this overrides.
   @override
-  double get initialScrollOffset => _lastUpdated?.pixels ?? super.initialScrollOffset;
+  double get initialScrollOffset => _lastUpdatedOffset ?? super.initialScrollOffset;
 
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
     assert(!_positionToListener.containsKey(position));
-    _positionToListener[position] = () { _lastUpdated = position; };
+    _positionToListener[position] = () {
+      _lastUpdated = position;
+      _lastUpdatedOffset = position.pixels;
+    };
     position.addListener(_positionToListener[position]);
   }
 
@@ -354,6 +358,8 @@ class TrackingScrollController extends ScrollController {
     _positionToListener.remove(position);
     if (_lastUpdated == position)
       _lastUpdated = null;
+    if (_positionToListener.isEmpty)
+      _lastUpdatedOffset = null;
   }
 
   @override
