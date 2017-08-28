@@ -326,9 +326,8 @@ void debugDumpLayerTree() {
 /// This will only work if there is a semantics client attached.
 /// Otherwise, a notice that no semantics are available will be printed.
 ///
-/// By default, children of a [SemanticsNode] are printed in traversal order.
-/// This can be changed to inverse hit test order by setting
-/// [childrenInInverseHitTestOrder] to `true`.
+/// The order in which the children of a [SemanticsNode] will be printed can be
+/// controlled with the [childOrder] parameter.
 void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
   debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder) ?? 'Semantics not collected.');
 }

@@ -701,9 +701,8 @@ class SemanticsNode extends AbstractNode {
 
   /// Returns a string representation of this node and its descendants.
   ///
-  /// By default, children are printed in traversal order. This can be changed
-  /// to inverse hit test order by setting [childrenInInverseHitTestOrder] to
-  /// `true`.
+  /// The order in which the children of the [SemanticsNode] will be printed can
+  /// be controlled with the [childOrder] parameter.
   String toStringDeep(DebugSemanticsDumpOrder childOrder, [
     String prefixLineOne = '',
     String prefixOtherLines = ''
