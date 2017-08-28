@@ -6,8 +6,13 @@
 #define FLUTTER_LIB_UI_TEXT_PARAGRAPH_H_
 
 #include "flutter/lib/ui/painting/canvas.h"
+#include "flutter/lib/ui/text/paragraph_impl.h"
+#include "flutter/lib/ui/text/paragraph_impl_blink.h"
+#include "flutter/lib/ui/text/paragraph_impl_txt.h"
 #include "flutter/lib/ui/text/text_box.h"
 #include "flutter/sky/engine/core/rendering/RenderView.h"
+#include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/third_party/txt/src/txt/paragraph.h"
 #include "lib/tonic/dart_wrappable.h"
 
 namespace tonic {
@@ -22,8 +27,13 @@ class Paragraph : public ftl::RefCountedThreadSafe<Paragraph>,
   FRIEND_MAKE_REF_COUNTED(Paragraph);
 
  public:
-  static ftl::RefPtr<Paragraph> create(PassOwnPtr<RenderView> renderView) {
+  static ftl::RefPtr<Paragraph> Create(PassOwnPtr<RenderView> renderView) {
     return ftl::MakeRefCounted<Paragraph>(renderView);
+  }
+
+  static ftl::RefPtr<Paragraph> Create(
+      std::unique_ptr<txt::Paragraph> paragraph) {
+    return ftl::MakeRefCounted<Paragraph>(std::move(paragraph));
   }
 
   ~Paragraph() override;
@@ -50,11 +60,11 @@ class Paragraph : public ftl::RefCountedThreadSafe<Paragraph>,
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  RenderBox* firstChildBox() const { return m_renderView->firstChildBox(); }
-
-  int absoluteOffsetForPosition(const PositionWithAffinity& position);
+  std::unique_ptr<ParagraphImpl> m_paragraphImpl;
 
   explicit Paragraph(PassOwnPtr<RenderView> renderView);
+
+  explicit Paragraph(std::unique_ptr<txt::Paragraph> paragraph);
 
   OwnPtr<RenderView> m_renderView;
 };

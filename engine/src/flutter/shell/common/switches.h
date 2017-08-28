@@ -65,6 +65,9 @@ DEF_SWITCH(EnableSoftwareRendering,
            "Enable rendering using the Skia software backend. This is useful"
            "when testing Flutter on emulators. By default, Flutter will"
            "attempt to either use OpenGL or Vulkan.")
+DEF_SWITCH(EnableTxt,
+           "enable-txt",
+           "Enable libtxt as the text shaping library instead of Blink.")
 DEF_SWITCH(FLX, "flx", "Specify the the FLX path.")
 DEF_SWITCH(Help, "help", "Display this help text.")
 DEF_SWITCH(LogTag, "log-tag", "Tag associated with log messages.")

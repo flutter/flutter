@@ -5,6 +5,7 @@
 #include "flutter/runtime/asset_font_selector.h"
 
 #include "flutter/assets/zip_asset_store.h"
+#include "flutter/lib/ui/text/font_collection_mgr.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/sky/engine/platform/fonts/FontData.h"
 #include "flutter/sky/engine/platform/fonts/FontFaceCreationParams.h"
@@ -35,6 +36,7 @@ struct AssetFontSelector::TypefaceAsset {
 };
 
 namespace {
+
 const char kFontManifestAssetPath[] = "FontManifest.json";
 
 // Weight values corresponding to the members of the FontWeight enum.
@@ -76,7 +78,8 @@ struct FontMatcher {
   const FontDescription& description_;
   int target_weight_;
 };
-}
+
+}  // namespace
 
 void AssetFontSelector::Install(ftl::RefPtr<ZipAssetStore> asset_store) {
   RefPtr<AssetFontSelector> font_selector =
