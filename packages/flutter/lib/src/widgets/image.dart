@@ -237,7 +237,7 @@ class Image extends StatefulWidget {
   /// is bundled automatically with the app. In particular, assets used by the
   /// package itself must be specified in its [pubspec.yaml].
   ///
-  /// A package can also choose to have images in its 'lib/' folder that are not
+  /// A package can also choose to have assets in its 'lib/' folder that are not
   /// specified in its [pubspec.yaml]. In this case for those images to be
   /// bundled, the app has to specify which ones to include. For instance a
   /// package named `fancy_backgrounds` could have:

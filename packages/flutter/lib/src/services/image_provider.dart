@@ -595,18 +595,17 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// uses the configuration to pick an appropriate image based on the device
 /// pixel ratio and size, see [AssetImage].
 ///
-///  ## Fetching assets
+/// ## Fetching assets
 ///
 /// When fetching an image provided by the app itself, use the [assetName]
-/// argument to name the asset to choose. For instance, consider the structure
-/// above. First, the [pubspec.yaml] of the project should specify its assets in
-/// the `flutter` section:
+/// argument to name the asset to choose. For instance, consider a directory
+/// `icons` with an image `heart.png`. First, the [pubspec.yaml] of the project
+/// should specify its assets in the `flutter` section:
 ///
 /// ```yaml
 /// flutter:
 ///   assets:
 ///     - icons/heart.png
-///
 /// ```
 ///
 /// Then, to fetch the image and associate it with scale `1.5`, use
@@ -632,7 +631,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// is bundled automatically with the app. In particular, assets used by the
 /// package itself must be specified in its [pubspec.yaml].
 ///
-/// A package can also choose to have images in its 'lib/' folder that are not
+/// A package can also choose to have assets in its 'lib/' folder that are not
 /// specified in its [pubspec.yaml]. In this case for those images to be
 /// bundled, the app has to specify which ones to include. For instance a
 /// package named `fancy_backgrounds` could have:

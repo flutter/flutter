@@ -239,17 +239,19 @@ class _Asset {
     if (other.runtimeType != runtimeType)
       return false;
     final _Asset otherAsset = other;
-    return base == otherAsset.base
-        && assetEntry == otherAsset.assetEntry
-        && relativePath == otherAsset.relativePath
-        && source == otherAsset.source;
+    return otherAsset.base == base
+        && otherAsset.assetEntry == assetEntry
+        && otherAsset.relativePath == relativePath
+        && otherAsset.source == source;
   }
 
   @override
-  int get hashCode => base.hashCode ^
-      assetEntry.hashCode ^
-      relativePath.hashCode ^
-      source.hashCode;
+  int get hashCode {
+    return base.hashCode
+        ^assetEntry.hashCode
+        ^relativePath.hashCode
+        ^ source.hashCode;
+  }
 }
 
 Map<String, dynamic> _readMaterialFontsManifest() {
@@ -491,9 +493,9 @@ _Asset _resolvePackageAsset(
     String asset,
 ) {
   return new _Asset(
-      base: assetBase,
-      assetEntry: 'packages/$packageName/$asset',
-      relativePath: asset,
+    base: assetBase,
+    assetEntry: 'packages/$packageName/$asset',
+    relativePath: asset,
   );
 }
 

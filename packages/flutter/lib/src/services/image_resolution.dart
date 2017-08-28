@@ -67,7 +67,6 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// flutter:
 ///   assets:
 ///     - icons/heart.png
-///
 /// ```
 ///
 /// Then, to fetch the image, use
@@ -92,7 +91,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// is bundled automatically with the app. In particular, assets used by the
 /// package itself must be specified in its [pubspec.yaml].
 ///
-/// A package can also choose to have images in its 'lib/' folder that are not
+/// A package can also choose to have assets in its 'lib/' folder that are not
 /// specified in its [pubspec.yaml]. In this case for those images to be
 /// bundled, the app has to specify which ones to include. For instance a
 /// package named `fancy_backgrounds` could have:
@@ -132,7 +131,7 @@ class AssetImage extends AssetBundleImageProvider {
 
   /// The name used to generate the key to obtain the asset. For local assets
   /// this is [assetName], and for assets from packages the [assetName] is
-  /// prefixed 'packages/<package_name>'.
+  /// prefixed 'packages/<package_name>/'.
   String get keyName => package == null ? assetName : 'packages/$package/$assetName';
 
   /// The bundle from which the image will be obtained.
