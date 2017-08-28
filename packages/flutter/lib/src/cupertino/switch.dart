@@ -210,7 +210,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     if (value == _value)
       return;
     _value = value;
-    markNeedsSemanticsUpdate(onlyChanges: true, noGeometry: true);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: true, noGeometry: true);
     _position
       ..curve = Curves.ease
       ..reverseCurve = Curves.ease.flipped;

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
@@ -68,5 +69,26 @@ void main() {
     expect(root.needsCompositing, isFalse);
 
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
+    SemanticsNode node = new SemanticsNode();
+    final RenderSemanticsGestureHandler renderObj = new RenderSemanticsGestureHandler(
+      onTap: () {},
+      onHorizontalDragUpdate: (DragUpdateDetails details) {},
+    );
+
+    renderObj.semanticsAnnotator(node);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollLeft), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isTrue);
+
+    node = new SemanticsNode();
+    renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
+
+    renderObj.semanticsAnnotator(node);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollLeft), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isFalse);
   });
 }

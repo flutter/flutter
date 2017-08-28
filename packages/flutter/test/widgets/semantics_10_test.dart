@@ -103,7 +103,7 @@ class RenderTest extends RenderProxyBox {
     if (value == _label)
       return;
     _label = value;
-    markNeedsSemanticsUpdate(onlyChanges: true);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
     callLog.add('markNeedsSemanticsUpdate(onlyChanges: true)');
   }
 
@@ -114,7 +114,7 @@ class RenderTest extends RenderProxyBox {
     if (_isSemanticBoundary == value)
       return;
     _isSemanticBoundary = value;
-    markNeedsSemanticsUpdate(onlyChanges: false);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: false);
     callLog.add('markNeedsSemanticsUpdate(onlyChanges: false)');
   }
 }

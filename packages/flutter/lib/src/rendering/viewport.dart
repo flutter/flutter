@@ -91,7 +91,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   SemanticsAnnotator get semanticsAnnotator => _annotate;
 
   void _annotate(SemanticsNode node) {
-    node.ensureTag(RenderSemanticsGestureHandler.useTwoPaneSemantics);
+    node.addTag(RenderSemanticsGestureHandler.useTwoPaneSemantics);
   }
 
   /// The direction in which the [SliverConstraints.scrollOffset] increases.
