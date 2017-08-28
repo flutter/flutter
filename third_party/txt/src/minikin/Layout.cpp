@@ -787,10 +787,6 @@ static const hb_codepoint_t CHAR_HYPHEN = 0x2010; /* HYPHEN */
 
 static inline hb_codepoint_t determineHyphenChar(hb_codepoint_t preferredHyphen,
                                                  hb_font_t* font) {
-#if WIP_NEEDS_ICU_UPDATE
-  (void)CHAR_HYPHEN;
-  return 0x002D;  // HYPHEN-MINUS
-#else             // WIP_NEEDS_ICU_UPDATE
   hb_codepoint_t glyph;
   if (preferredHyphen == 0x058A    /* ARMENIAN_HYPHEN */
       || preferredHyphen == 0x05BE /* HEBREW PUNCTUATION MAQAF */
@@ -813,7 +809,6 @@ static inline hb_codepoint_t determineHyphenChar(hb_codepoint_t preferredHyphen,
     }
   }
   return preferredHyphen;
-#endif            // WIP_NEEDS_ICU_UPDATE
 }
 
 static inline void addHyphenToHbBuffer(hb_buffer_t* buffer,

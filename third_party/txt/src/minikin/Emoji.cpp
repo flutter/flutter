@@ -33,27 +33,16 @@ bool isNewEmoji(uint32_t c) {
 }
 
 bool isEmoji(uint32_t c) {
-#if WIP_NEEDS_ICU_UPDATE
-  return false;
-#else   // WIP_NEEDS_ICU_UPDATE
   return isNewEmoji(c) || u_hasBinaryProperty(c, UCHAR_EMOJI);
-#endif  // WIP_NEEDS_ICU_UPDATE
 }
 
 bool isEmojiModifier(uint32_t c) {
-#if WIP_NEEDS_ICU_UPDATE
-  return false;
-#else   // WIP_NEEDS_ICU_UPDATE
   // Emoji modifier are not expected to change, so there's a small change we
   // need to customize this.
   return u_hasBinaryProperty(c, UCHAR_EMOJI_MODIFIER);
-#endif  // WIP_NEEDS_ICU_UPDATE
 }
 
 bool isEmojiBase(uint32_t c) {
-#if WIP_NEEDS_ICU_UPDATE
-  return false;
-#else   // WIP_NEEDS_ICU_UPDATE
   // These two characters were removed from Emoji_Modifier_Base in Emoji 4.0,
   // but we need to keep them as emoji modifier bases since there are fonts and
   // user-generated text out there that treats these as potential emoji bases.
@@ -68,7 +57,6 @@ bool isEmojiBase(uint32_t c) {
     return true;
   }
   return u_hasBinaryProperty(c, UCHAR_EMOJI_MODIFIER_BASE);
-#endif  // WIP_NEEDS_ICU_UPDATE
 }
 
 UCharDirection emojiBidiOverride(const void* /* context */, UChar32 c) {
