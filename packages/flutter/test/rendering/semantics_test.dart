@@ -92,6 +92,24 @@ void main() {
       expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
     });
   });
+
+  test('toStringDeep() does not throw with transform == null', () {
+    final SemanticsNode child2 = new SemanticsNode();
+    final SemanticsNode child1 = new SemanticsNode();
+    final SemanticsNode root = new SemanticsNode();
+    root.addChildren(<SemanticsNode>[child1, child2]);
+    root.finalizeChildren();
+
+    expect(root.transform, isNull);
+    expect(child1.transform, isNull);
+    expect(child2.transform, isNull);
+
+    expect(root.toStringDeep(DebugSemanticsDumpOrder.traversal),
+        'SemanticsNode(8 (STALE; owner=null); Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+        ' ├SemanticsNode(7; Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+        ' └SemanticsNode(6; Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+    );
+  });
 }
 
 class TestRender extends RenderProxyBox {
