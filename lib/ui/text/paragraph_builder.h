@@ -6,6 +6,9 @@
 #define FLUTTER_LIB_UI_TEXT_PARAGRAPH_BUILDER_H_
 
 #include "flutter/lib/ui/text/paragraph.h"
+#include "flutter/sky/engine/core/rendering/RenderObject.h"
+#include "flutter/sky/engine/wtf/OwnPtr.h"
+#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/int32_list.h"
 
@@ -14,6 +17,8 @@ class DartLibraryNatives;
 }  // namespace tonic
 
 namespace blink {
+
+class Paragraph;
 
 class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
                          public tonic::DartWrappable {
@@ -35,6 +40,7 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
                  double letterSpacing,
                  double wordSpacing,
                  double height);
+
   void pop();
 
   void addText(const std::string& text);
@@ -55,6 +61,7 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
   OwnPtr<RenderView> m_renderView;
   RenderObject* m_renderParagraph;
   RenderObject* m_currentRenderObject;
+  txt::ParagraphBuilder m_paragraphBuilder;
 };
 
 }  // namespace blink
