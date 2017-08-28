@@ -419,7 +419,7 @@ class SemanticsNode extends AbstractNode {
     });
   }
 
-  /// Contains the children in  inverse hit test order (i.e. paint order).
+  /// Contains the children in inverse hit test order (i.e. paint order).
   List<SemanticsNode> _children;
 
   /// Whether this node has a non-zero number of children.
