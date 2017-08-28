@@ -43,11 +43,11 @@
 
 #if defined(OS_FUCHSIA)
 
-#include "lib/mtl/tasks/message_loop.h"
+#include "lib/mtl/tasks/message_loop.h"  // nogncheck
 
 #else  // defined(OS_FUCHSIA)
 
-#include "flutter/fml/message_loop.h"
+#include "flutter/fml/message_loop.h"  // nogncheck
 
 #endif  // defined(OS_FUCHSIA)
 
