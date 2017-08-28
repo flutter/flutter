@@ -688,7 +688,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// that is also null, the [rootBundle] is used.
   ///
   /// The image is obtained by calling [AssetBundle.load] on the given [bundle]
-  /// using the key given by [name].
+  /// using the key given by [keyName].
   final AssetBundle bundle;
 
   /// The name of the package from which the image is included. See the

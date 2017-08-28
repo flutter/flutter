@@ -259,13 +259,13 @@ class AssetImage extends AssetBundleImageProvider {
     if (other.runtimeType != runtimeType)
       return false;
     final AssetImage typedOther = other;
-    return name == typedOther.name
+    return keyName == typedOther.keyName
         && bundle == typedOther.bundle;
   }
 
   @override
-  int get hashCode => hashValues(name, bundle);
+  int get hashCode => hashValues(keyName, bundle);
 
   @override
-  String toString() => '$runtimeType(bundle: $bundle, name: "$name")';
+  String toString() => '$runtimeType(bundle: $bundle, name: "$keyName")';
 }
