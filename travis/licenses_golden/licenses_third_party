@@ -1,4 +1,4 @@
-Signature: 03b92f146c01527c1fc02f15403f8491
+Signature: 103c293e19f43dfead2e1afb179ce5d1
 
 UNUSED LICENSES:
 
@@ -14137,7 +14137,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-PixelXL-GPU-Adreno530-arm64-Debug-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-ChromeOS-Clang-Chromebook_C100p-GPU-MaliT764-arm-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-ChromeOS-Clang-Chromebook_CB5_312T-GPU-PowerVRGX6250-arm-Debug.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini7.1-CPU-AVX-x86_64-Debug.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini7.1-CPU-AVX-x86_64-Release.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini7.1-GPU-IntelIris5100-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu-Clang-GCE-CPU-AVX2-x86_64-Debug-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu-Clang-GCE-CPU-AVX2-x86_64-Debug-MSAN.json
@@ -16034,6 +16034,8 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRCoverageProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRCoverageProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRCubicProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRCubicProcessor.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRGeometry.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRGeometry.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRPathProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRPathProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRQuadraticProcessor.cpp
