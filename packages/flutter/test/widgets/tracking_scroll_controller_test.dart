@@ -6,7 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
+  testWidgets('TrackingScrollController saves offset',
+      (WidgetTester tester) async {
     final TrackingScrollController controller = new TrackingScrollController();
 
     await tester.pumpWidget(
@@ -16,11 +17,8 @@ void main() {
               controller: controller,
               children: new List<Widget>.generate(
                 10,
-                    (int i) =>
-                new Container(
-                  height: 100.0,
-                  child: new Text("Page$index-Item$i"),
-                ),
+                (int i) => new Container(
+                    height: 100.0, child: new Text("Page$index-Item$i")),
               ).toList());
         },
       ),
@@ -34,7 +32,8 @@ void main() {
     controller.jumpTo(110.0);
     await (tester.pumpAndSettle());
 
-    await tester.fling(find.text('Page0-Item1'), const Offset(-100.0, 0.0), 10000.0);
+    await tester.fling(
+        find.text('Page0-Item1'), const Offset(-100.0, 0.0), 10000.0);
     await (tester.pumpAndSettle());
 
     expect(find.text('Page0-Item1'), findsNothing);
@@ -42,7 +41,8 @@ void main() {
     expect(find.text('Page2-Item0'), findsNothing);
     expect(find.text('Page2-Item1'), findsNothing);
 
-    await tester.fling(find.text('Page1-Item1'), const Offset(-100.0, 0.0), 10000.0);
+    await tester.fling(
+        find.text('Page1-Item1'), const Offset(-100.0, 0.0), 10000.0);
     await (tester.pumpAndSettle());
 
     expect(find.text('Page0-Item1'), findsNothing);
