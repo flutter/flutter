@@ -108,6 +108,7 @@ Future<String> buildAotSnapshot(
   }
 }
 
+// TODO(cbracken): split AOT and Assembly AOT snapshotting logic and migrate to Snapshotter class.
 Future<String> _buildAotSnapshot(
   String mainPath,
   TargetPlatform platform,
@@ -267,6 +268,7 @@ Future<String> _buildAotSnapshot(
 
   genSnapshotCmd.add(mainPath);
 
+  final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
   final File checksumFile = fs.file('$dependencies.checksum');
   final List<File> checksumFiles = <File>[checksumFile, fs.file(dependencies)]
       ..addAll(inputPaths.map(fs.file))
@@ -278,7 +280,7 @@ Future<String> _buildAotSnapshot(
       final Set<String> snapshotInputPaths = await readDepfile(dependencies)
         ..add(mainPath)
         ..addAll(outputPaths);
-      final Checksum newChecksum = new Checksum.fromFiles(buildMode, platform, snapshotInputPaths);
+      final Checksum newChecksum = new Checksum.fromFiles(snapshotType, snapshotInputPaths);
       if (oldChecksum == newChecksum) {
         printStatus('Skipping AOT snapshot build. Checksums match.');
         return outputPath;
@@ -356,7 +358,7 @@ Future<String> _buildAotSnapshot(
     final Set<String> snapshotInputPaths = await readDepfile(dependencies)
       ..add(mainPath)
       ..addAll(outputPaths);
-    final Checksum checksum = new Checksum.fromFiles(buildMode, platform, snapshotInputPaths);
+    final Checksum checksum = new Checksum.fromFiles(snapshotType, snapshotInputPaths);
     await checksumFile.writeAsString(checksum.toJson());
   } catch (e, s) {
     // Log exception and continue, this step is a performance improvement only.
