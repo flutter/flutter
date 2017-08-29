@@ -1,0 +1,27 @@
+{
+  "openAppDrawerTooltip": "افتح قائمة التنقل",
+  "@openAppDrawerTooltip": {
+    "description": "The tooltip for the leading AppBar menu (aka 'hamburger') button",
+    "type": "text"
+  },
+  "backButtonTooltip": "الى الخلف",
+  "@backButtonTooltip": {
+    "description": "The BackButton's tooltip",
+    "type": "text"
+  },
+  "closeButtonTooltip": "إغلا",
+  "@closeButtonTooltip": {
+    "description": "The CloseButton's tooltip",
+    "type": "text"
+  },
+  "nextMonthTooltip": "الشهر القادم",
+  "@nextMonthTooltip": {
+    "description": "The tooltip for the MonthPicker's 'next month' button.",
+    "type": "text"
+  },
+  "previousMonthTooltip": "الشهر الماضى",
+  "@previousMonthTooltip": {
+    "description": "The tooltip for the MonthPicker's 'previous month' button.",
+    "type": "text"
+  }
+}
