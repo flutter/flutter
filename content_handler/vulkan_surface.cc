@@ -5,6 +5,7 @@
 #include "flutter/content_handler/vulkan_surface.h"
 #include "flutter/common/threads.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/src/gpu/vk/GrVkImage.h"
 
@@ -212,7 +213,7 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
   auto sk_surface =
       SkSurface::MakeFromBackendRenderTarget(context.get(),            //
                                              sk_render_target,         //
-                                             kTopLeft_GrSurfaceOrigin  //
+                                             kTopLeft_GrSurfaceOrigin, //
                                              nullptr,                  //
                                              &sk_surface_props         //
                                              );
