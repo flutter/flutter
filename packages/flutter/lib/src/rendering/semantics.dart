@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'debug.dart';
 import 'node.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -392,13 +391,11 @@ class SemanticsNode extends AbstractNode {
 
   /// Append the given children as children of this node.
   ///
-  /// Children must be added in inverse hit test order (i.e. paint order).
-  ///
   /// The [finalizeChildren] method must be called after all children have been
   /// added.
-  void addChildren(Iterable<SemanticsNode> childrenInInverseHitTestOrder) {
+  void addChildren(Iterable<SemanticsNode> children) {
     _newChildren ??= <SemanticsNode>[];
-    _newChildren.addAll(childrenInInverseHitTestOrder);
+    _newChildren.addAll(children);
     // we do the asserts afterwards because children is an Iterable
     // and doing the asserts before would mean the behavior is
     // different in checked mode vs release mode (if you walk an
@@ -420,7 +417,6 @@ class SemanticsNode extends AbstractNode {
     });
   }
 
-  /// Contains the children in inverse hit test order (i.e. paint order).
   List<SemanticsNode> _children;
 
   /// Whether this node has a non-zero number of children.
@@ -486,17 +482,6 @@ class SemanticsNode extends AbstractNode {
           assert(!child.attached);
           adoptChild(child);
           sawChange = true;
-        }
-      }
-    }
-    if (!sawChange && _children != null) {
-      assert(_newChildren != null);
-      assert(_newChildren.length == _children.length);
-      // Did the order change?
-      for (int i = 0; i < _children.length; i++) {
-        if (_children[i].id != _newChildren[i].id) {
-          sawChange = true;
-          break;
         }
       }
     }
@@ -700,46 +685,19 @@ class SemanticsNode extends AbstractNode {
   }
 
   /// Returns a string representation of this node and its descendants.
-  ///
-  /// The order in which the children of the [SemanticsNode] will be printed is
-  /// controlled by the [childOrder] parameter.
-  String toStringDeep(DebugSemanticsDumpOrder childOrder, [
-    String prefixLineOne = '',
-    String prefixOtherLines = ''
-  ]) {
-    assert(childOrder != null);
+  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
     final StringBuffer result = new StringBuffer()
       ..write(prefixLineOne)
       ..write(this)
       ..write('\n');
     if (_children != null && _children.isNotEmpty) {
-      final List<SemanticsNode> childrenInOrder = _getChildrenInOrder(childOrder);
-      for (int index = 0; index < childrenInOrder.length - 1; index += 1) {
-        final SemanticsNode child = childrenInOrder[index];
-        result.write(child.toStringDeep(childOrder, "$prefixOtherLines \u251C", "$prefixOtherLines \u2502"));
+      for (int index = 0; index < _children.length - 1; index += 1) {
+        final SemanticsNode child = _children[index];
+        result.write(child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502"));
       }
-      result.write(childrenInOrder.last.toStringDeep(childOrder, "$prefixOtherLines \u2514", "$prefixOtherLines  "));
+      result.write(_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  "));
     }
     return result.toString();
-  }
-
-  Iterable<SemanticsNode> _getChildrenInOrder(DebugSemanticsDumpOrder childOrder) {
-    assert(childOrder != null);
-    switch(childOrder) {
-      case DebugSemanticsDumpOrder.traversal:
-        return new List<SemanticsNode>.from(_children)..sort(_geometryComparator);
-      case DebugSemanticsDumpOrder.inverseHitTest:
-        return _children;
-    }
-    assert(false);
-    return null;
-  }
-
-  static int _geometryComparator(SemanticsNode a, SemanticsNode b) {
-    final Rect rectA = MatrixUtils.transformRect(a.transform, a.rect);
-    final Rect rectB = MatrixUtils.transformRect(b.transform, b.rect);
-    final int top = rectA.top.compareTo(rectB.top);
-    return top == 0 ? rectA.left.compareTo(rectB.left) : top;
   }
 }
 

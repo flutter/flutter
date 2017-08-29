@@ -145,14 +145,9 @@ class FlutterDevice {
       await view.uiIsolate.flutterDebugDumpLayerTree();
   }
 
-  Future<Null> debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<Null> debugDumpSemanticsTree() async {
     for (FlutterView view in views)
-      await view.uiIsolate.flutterDebugDumpSemanticsTreeInTraversalOrder();
-  }
-
-  Future<Null> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterDebugDumpSemanticsTreeInInverseHitTestOrder();
+      await view.uiIsolate.flutterDebugDumpSemanticsTree();
   }
 
   Future<Null> toggleDebugPaintSizeEnabled() async {
@@ -436,16 +431,10 @@ abstract class ResidentRunner {
       await device.debugDumpLayerTree();
   }
 
-  Future<Null> _debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<Null> _debugDumpSemanticsTree() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
-      await device.debugDumpSemanticsTreeInTraversalOrder();
-  }
-
-  Future<Null> _debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.debugDumpSemanticsTreeInInverseHitTestOrder();
+      await device.debugDumpSemanticsTree();
   }
 
   Future<Null> _debugToggleDebugPaintSizeEnabled() async {
@@ -618,12 +607,7 @@ abstract class ResidentRunner {
       }
     } else if (character == 'S') {
       if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInTraversalOrder();
-        return true;
-      }
-    } else if (character == 'P') {
-      if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInInverseHitTestOrder();
+        await _debugDumpSemanticsTree();
         return true;
       }
     } else if (character == 'p') {
@@ -759,12 +743,12 @@ abstract class ResidentRunner {
       printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
       printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
       if (isRunningDebug) {
-        printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S" (traversal order) or "P" (inverse hit test order).');
+        printStatus('For layers (debugDumpLayerTree), use "L"; accessibility (debugDumpSemantics), "S".');
         printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
         printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
       } else {
-        printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "P" (for inverse hit test order).');
+        printStatus('To dump the accessibility tree (debugDumpSemantics), press "S".');
       }
       printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
     }
