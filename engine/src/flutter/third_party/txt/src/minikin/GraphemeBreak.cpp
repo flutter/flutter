@@ -112,7 +112,8 @@ bool GraphemeBreak::isGraphemeBreak(const float* advances,
     return false;
   }
   // Rule GB9, x (Extend | ZWJ); Rule GB9a, x SpacingMark; Rule GB9b, Prepend x
-  if (p2 == U_GCB_EXTEND || p2 == U_GCB_ZWJ || p2 == U_GCB_SPACING_MARK ||
+  // TODO(abarth): Add U_GCB_ZWJ once we update ICU.
+  if (p2 == U_GCB_EXTEND || /* p2 == U_GCB_ZWJ || */ p2 == U_GCB_SPACING_MARK ||
       p1 == U_GCB_PREPEND) {
     return false;
   }
@@ -156,26 +157,25 @@ bool GraphemeBreak::isGraphemeBreak(const float* advances,
     }
   }
 
+  // TODO(abarth): Enablet his code once we update ICU.
   // Tailored version of Rule GB11, ZWJ × (Glue_After_Zwj | EBG)
   // We try to make emoji sequences with ZWJ a single grapheme cluster, but only
   // if they actually merge to one cluster. So we are more relaxed than the UAX
   // #29 rules in accepting any emoji character after the ZWJ, but are tighter
   // in that we only treat it as one cluster if a ligature is actually formed
-  // and we also require the character before the ZWJ to also be an emoji.
-  if (p1 == U_GCB_ZWJ && isEmoji(c2) && offset_back > start) {
-    // look at character before ZWJ to see that both can participate in an
-    // emoji zwj sequence
-    uint32_t c0 = 0;
-    size_t offset_backback = offset_back;
-    U16_PREV(buf, start, offset_backback, c0);
-    if (c0 == 0xFE0F && offset_backback > start) {
-      // skip over emoji variation selector
-      U16_PREV(buf, start, offset_backback, c0);
-    }
-    if (isEmoji(c0)) {
-      return false;
-    }
-  }
+  // and we also require the character before the ZWJ to also be an emoji. if
+  // (p1 == U_GCB_ZWJ && isEmoji(c2) && offset_back > start) {
+  //     // look at character before ZWJ to see that both can participate in an
+  //     emoji zwj sequence uint32_t c0 = 0; size_t offset_backback =
+  //     offset_back; U16_PREV(buf, start, offset_backback, c0); if (c0 ==
+  //     0xFE0F && offset_backback > start) {
+  //         // skip over emoji variation selector
+  //         U16_PREV(buf, start, offset_backback, c0);
+  //     }
+  //     if (isEmoji(c0)) {
+  //         return false;
+  //     }
+  // }
 
   // Tailored version of Rule GB12 and Rule GB13 that look at even-odd cases.
   // sot   (RI RI)*  RI x RI
