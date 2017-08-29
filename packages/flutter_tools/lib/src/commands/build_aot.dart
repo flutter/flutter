@@ -108,6 +108,7 @@ Future<String> buildAotSnapshot(
   }
 }
 
+// TODO(cbracken): split AOT and Assembly AOT snapshotting logic and migrate to Snapshotter class.
 Future<String> _buildAotSnapshot(
   String mainPath,
   TargetPlatform platform,
