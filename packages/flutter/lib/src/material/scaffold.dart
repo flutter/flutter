@@ -612,7 +612,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    _snackBarController.reverse().then((_) {
+    _snackBarController.reverse().then((Null _) {
       assert(mounted);
       if (!completer.isCompleted)
         completer.complete(reason);
