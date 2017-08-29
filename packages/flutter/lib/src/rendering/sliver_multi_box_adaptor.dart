@@ -287,12 +287,13 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    switch(constraints.normalizedGrowthDirection) {
+    switch (constraints.normalizedGrowthDirection) {
       case GrowthDirection.forward:
         super.visitChildrenForSemantics((RenderObject child) {
-          // The sliver is overlapped at the top.
-          final Offset bottomLeftInViewport =
-              MatrixUtils.transformPoint(child.getTransformTo(parent), child.semanticBounds.bottomLeft);
+          // The sliver is overlapped at the leading edge.
+          final Offset bottomLeftInViewport = MatrixUtils.transformPoint(
+              child.getTransformTo(parent), child.semanticBounds.bottomLeft
+          );
           final double endOverlap = constraints.overlap;
           if ((constraints.axis == Axis.vertical && bottomLeftInViewport.dy > endOverlap) ||
               (constraints.axis == Axis.horizontal && bottomLeftInViewport.dx > endOverlap))
@@ -301,9 +302,10 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         break;
       case GrowthDirection.reverse:
         super.visitChildrenForSemantics((RenderObject child) {
-          // The sliver is overlapped at the bottom.
-          final Offset topRightInViewport =
-              MatrixUtils.transformPoint(child.getTransformTo(parent), child.semanticBounds.topRight);
+          // The sliver is overlapped at the trailing edge.
+          final Offset topRightInViewport = MatrixUtils.transformPoint(
+              child.getTransformTo(parent), child.semanticBounds.topRight
+          );
           final double startOverlap = constraints.remainingPaintExtent - constraints.overlap;
           if ((constraints.axis == Axis.vertical && topRightInViewport.dy < startOverlap) ||
               (constraints.axis == Axis.horizontal && topRightInViewport.dx < startOverlap))
