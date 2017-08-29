@@ -54,15 +54,15 @@ void main() {
                   children: <TestSemantics>[
                     new TestSemantics(
                       id: 2,
-                      label: 'Semantics Test with Slivers',
-                    ),
-                    new TestSemantics(
-                      id: 3,
                       label: 'Item 0',
                     ),
                     new TestSemantics(
-                      id: 4,
+                      id: 3,
                       label: 'Item 1',
+                    ),
+                    new TestSemantics(
+                      id: 4,
+                      label: 'Semantics Test with Slivers',
                     ),
                   ],
                 ),
@@ -87,27 +87,27 @@ void main() {
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 6,
-                label: 'Semantics Test with Slivers',
-                tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
-              ),
-              new TestSemantics(
                 id: 5,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 3,
+                    id: 2,
                     label: 'Item 0',
                   ),
                   new TestSemantics(
-                    id: 4,
+                    id: 3,
                     label: 'Item 1',
                   ),
                   new TestSemantics(
-                    id: 7,
+                    id: 6,
                     label: 'Item 2',
                   ),
                 ],
+              ),
+              new TestSemantics(
+                id: 7,
+                label: 'Semantics Test with Slivers',
+                tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
               ),
             ],
           )
@@ -134,20 +134,20 @@ void main() {
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 8,
-                    label: 'Semantics Test with Slivers',
-                  ),
-                  new TestSemantics(
-                    id: 3,
+                    id: 2,
                     label: 'Item 0',
                   ),
                   new TestSemantics(
-                    id: 4,
+                    id: 3,
                     label: 'Item 1',
                   ),
                   new TestSemantics(
-                    id: 7,
+                    id: 6,
                     label: 'Item 2',
+                  ),
+                  new TestSemantics(
+                    id: 8,
+                    label: 'Semantics Test with Slivers',
                   ),
                 ],
               ),
@@ -158,5 +158,127 @@ void main() {
       ignoreRect: true,
       ignoreTransform: true,
     ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Offscreen sliver are not included in semantics tree', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    const double containerHeight = 200.0;
+
+    final ScrollController scrollController = new ScrollController(
+      initialScrollOffset: containerHeight * 1.5,
+    );
+    final List<Widget> slivers = new List<Widget>.generate(30, (int i) {
+      return new SliverToBoxAdapter(
+        child: new Container(
+          height: containerHeight,
+          child: new Text('Item $i'),
+        ),
+      );
+    });
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          height: containerHeight,
+          child: new CustomScrollView(
+            controller: scrollController,
+            slivers: slivers,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 9,
+            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 12,
+                actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    id: 10,
+                    label: 'Item 2',
+                  ),
+                  new TestSemantics(
+                    id: 11,
+                    label: 'Item 1',
+                  ),
+                ],
+              ),
+            ],
+          )
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('SemanticsNodes of Slivers are in paint order', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Widget> slivers = new List<Widget>.generate(5, (int i) {
+      return new SliverToBoxAdapter(
+        child: new Container(
+          height: 20.0,
+          child: new Text('Item $i'),
+        ),
+      );
+    });
+    await tester.pumpWidget(
+      new CustomScrollView(
+        slivers: slivers,
+      ),
+    );
+    
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 13,
+            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 19,
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    id: 14,
+                    label: 'Item 4',
+                  ),
+                  new TestSemantics(
+                    id: 15,
+                    label: 'Item 3',
+                  ),
+                  new TestSemantics(
+                    id: 16,
+                    label: 'Item 2',
+                  ),
+                  new TestSemantics(
+                    id: 17,
+                    label: 'Item 1',
+                  ),
+                  new TestSemantics(
+                    id: 18,
+                    label: 'Item 0',
+                  ),
+                ],
+              ),
+            ],
+          )
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    semantics.dispose();
   });
 }

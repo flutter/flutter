@@ -94,6 +94,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     node.addTag(RenderSemanticsGestureHandler.useTwoPaneSemantics);
   }
 
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    for (RenderSliver sliver in childrenInPaintOrder) {
+      if (sliver.geometry.paintExtent != 0)
+        visitor(sliver);
+    }
+  }
+
   /// The direction in which the [SliverConstraints.scrollOffset] increases.
   ///
   /// For example, if the [axisDirection] is [AxisDirection.down], a scroll

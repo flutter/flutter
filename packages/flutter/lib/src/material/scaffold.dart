@@ -605,14 +605,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   /// Removes the current [SnackBar] by running its normal exit animation.
+  ///
+  /// The closed completer is called after the animation is complete.
   void hideCurrentSnackBar({ SnackBarClosedReason reason: SnackBarClosedReason.hide }) {
     assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    if (!completer.isCompleted)
-      completer.complete(reason);
-    _snackBarController.reverse();
+    _snackBarController.reverse().then<Null>((Null _) {
+      assert(mounted);
+      if (!completer.isCompleted)
+        completer.complete(reason);
+    });
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
   }

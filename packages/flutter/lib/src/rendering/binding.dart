@@ -99,8 +99,13 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
     );
 
     registerSignalServiceExtension(
-      name: 'debugDumpSemanticsTree',
-      callback: () { debugDumpSemanticsTree(); return debugPrintDone; }
+      name: 'debugDumpSemanticsTreeInTraversalOrder',
+      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversal); return debugPrintDone; }
+    );
+
+    registerSignalServiceExtension(
+        name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
+        callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest); return debugPrintDone; }
     );
   }
 
@@ -319,9 +324,12 @@ void debugDumpLayerTree() {
 
 /// Prints a textual representation of the entire semantics tree.
 /// This will only work if there is a semantics client attached.
-/// Otherwise, the tree is empty and this will print "null".
-void debugDumpSemanticsTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep() ?? 'Semantics not collected.');
+/// Otherwise, a notice that no semantics are available will be printed.
+///
+/// The order in which the children of a [SemanticsNode] will be printed is
+/// controlled by the [childOrder] parameter.
+void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
+  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework
