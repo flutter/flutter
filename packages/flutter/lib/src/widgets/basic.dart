@@ -2278,6 +2278,10 @@ class IndexedStack extends Stack {
 /// force the child to have a particular width. Alternatively the [width] and
 /// [height] properties can be used to give the dimensions, with one
 /// corresponding position property (e.g. [top] and [height]).
+///
+/// See also:
+///
+///  * [PositionedDirectional], which adapts to the ambient [Directionality].
 class Positioned extends ParentDataWidget<Stack> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
@@ -2285,6 +2289,11 @@ class Positioned extends ParentDataWidget<Stack> {
   /// [width]), and only two out of the three vertical values ([top],
   /// [bottom], [height]), can be set. In each case, at least one of
   /// the three must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Positioned.directional], which specifies the widget's horizontal
+  ///    position using [start] and [end] rather than [left] and [right].
   const Positioned({
     Key key,
     this.left,
@@ -2293,7 +2302,7 @@ class Positioned extends ParentDataWidget<Stack> {
     this.bottom,
     this.width,
     this.height,
-    @required Widget child
+    @required Widget child,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
        super(key: key, child: child);
@@ -2343,6 +2352,60 @@ class Positioned extends ParentDataWidget<Stack> {
   }) : width = null,
        height = null,
        super(key: key, child: child);
+
+  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  ///
+  /// Only two out of the three horizontal values (`start`, `end`,
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
+  ///
+  /// If `textDirection` is [TextDirection.rtl], then the `start` argument is
+  /// used for the [right] property and the `end` argument is used for the
+  /// [left] property. Otherwise, if `textDirection` is [TextDirection.ltr],
+  /// then the `start` argument is used for the [left] property and the `end`
+  /// argument is used for the [right] property.
+  ///
+  /// The `textDirection` argument must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
+  factory Positioned.directional({
+    Key key,
+    @required TextDirection textDirection,
+    double start,
+    double top,
+    double end,
+    double bottom,
+    double width,
+    double height,
+    @required Widget child,
+  }) {
+    assert(textDirection != null);
+    double left;
+    double right;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        left = end;
+        right = start;
+        break;
+      case TextDirection.ltr:
+        left = start;
+        right = end;
+        break;
+    }
+    return new Positioned(
+      key: key,
+      left: left,
+      top: top,
+      right: right,
+      bottom: bottom,
+      width: width,
+      height: height,
+      child: child,
+    );
+  }
 
   /// The distance that the child's left edge is inset from the left of the stack.
   ///
@@ -2432,6 +2495,114 @@ class Positioned extends ParentDataWidget<Stack> {
     description.add(new DoubleProperty('bottom', bottom, defaultValue: null));
     description.add(new DoubleProperty('width', width, defaultValue: null));
     description.add(new DoubleProperty('height', height, defaultValue: null));
+  }
+}
+
+/// A widget that controls where a child of a [Stack] is positioned without
+/// committing to a specific [TextDirection].
+///
+/// The ambient [Directionality] is used to determine whether [start] is to the
+/// left or to the right.
+///
+/// A [PositionedDirectional] widget must be a descendant of a [Stack], and the
+/// path from the [PositionedDirectional] widget to its enclosing [Stack] must
+/// contain only [StatelessWidget]s or [StatefulWidget]s (not other kinds of
+/// widgets, like [RenderObjectWidget]s).
+///
+/// If a widget is wrapped in a [PositionedDirectional], then it is a
+/// _positioned_ widget in its [Stack]. If the [top] property is non-null, the
+/// top edge of this child/ will be positioned [top] layout units from the top
+/// of the stack widget. The [start], [bottom], and [end] properties work
+/// analogously.
+///
+/// If both the [top] and [bottom] properties are non-null, then the child will
+/// be forced to have exactly the height required to satisfy both constraints.
+/// Similarly, setting the [start] and [end] properties to non-null values will
+/// force the child to have a particular width. Alternatively the [width] and
+/// [height] properties can be used to give the dimensions, with one
+/// corresponding position property (e.g. [top] and [height]).
+///
+/// See also:
+///
+///  * [Positioned], which specifies the widget's position visually.
+///  * [Positioned.directional], which also specifies the widget's horizontal
+///    position using [start] and [end] but has an explicit [TextDirection].
+class PositionedDirectional extends StatelessWidget {
+  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  ///
+  /// Only two out of the three horizontal values (`start`, `end`,
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Positioned.directional], which also specifies the widget's horizontal
+  ///    position using [start] and [end] but has an explicit [TextDirection].
+  const PositionedDirectional({
+    Key key,
+    this.start,
+    this.top,
+    this.end,
+    this.bottom,
+    this.width,
+    this.height,
+    @required this.child,
+  }) : super(key: key);
+
+  /// The distance that the child's leading edge is inset from the leading edge
+  /// of the stack.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double start;
+
+  /// The distance that the child's top edge is inset from the top of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double top;
+
+  /// The distance that the child's trailing edge is inset from the trailing
+  /// edge of the stack.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double end;
+
+  /// The distance that the child's bottom edge is inset from the bottom of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double bottom;
+
+  /// The child's width.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double width;
+
+  /// The child's height.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double height;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Positioned.directional(
+      textDirection: Directionality.of(context),
+      start: start,
+      top: top,
+      end: end,
+      bottom: bottom,
+      width: width,
+      height: height,
+      child: child,
+    );
   }
 }
 
