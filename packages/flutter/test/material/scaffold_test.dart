@@ -11,9 +11,12 @@ import '../widgets/semantics_tester.dart';
 void main() {
   testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
-    await tester.pumpWidget(new Scaffold(
-      appBar: new AppBar(title: const Text('Title')),
-      body: new Container(key: bodyKey),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Scaffold(
+        appBar: new AppBar(title: const Text('Title')),
+        body: new Container(key: bodyKey),
+      ),
     ));
     expect(tester.takeException(), isFlutterError);
 
@@ -26,24 +29,30 @@ void main() {
     RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
-      child: new Scaffold(
-        appBar: new AppBar(title: const Text('Title')),
-        body: new Container(key: bodyKey)
-      )
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
+        child: new Scaffold(
+          appBar: new AppBar(title: const Text('Title')),
+          body: new Container(key: bodyKey),
+        ),
+      ),
     ));
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 444.0)));
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
-      child: new Scaffold(
-        appBar: new AppBar(title: const Text('Title')),
-        body: new Container(key: bodyKey),
-        resizeToAvoidBottomPadding: false
-      )
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
+        child: new Scaffold(
+          appBar: new AppBar(title: const Text('Title')),
+          body: new Container(key: bodyKey),
+          resizeToAvoidBottomPadding: false,
+        ),
+      ),
     ));
 
     bodyBox = tester.renderObject(find.byKey(bodyKey));
@@ -52,38 +61,47 @@ void main() {
 
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(
-        padding: const EdgeInsets.only(bottom: 700.0),
-      ),
-      child: new Scaffold(
-        body: new Container(key: bodyKey),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.only(bottom: 700.0),
+        ),
+        child: new Scaffold(
+          body: new Container(key: bodyKey),
+        ),
       ),
     ));
 
     final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(
-        padding: const EdgeInsets.only(bottom: 500.0),
-      ),
-      child: new Scaffold(
-        body: new Container(key: bodyKey),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.only(bottom: 500.0),
+        ),
+        child: new Scaffold(
+          body: new Container(key: bodyKey),
+        ),
       ),
     ));
 
     expect(bodyBox.size, equals(const Size(800.0, 100.0)));
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(
-        padding: const EdgeInsets.only(bottom: 580.0),
-      ),
-      child: new Scaffold(
-        appBar: new AppBar(
-          title: const Text('Title'),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.only(bottom: 580.0),
         ),
-        body: new Container(key: bodyKey),
+        child: new Scaffold(
+          appBar: new AppBar(
+            title: const Text('Title'),
+          ),
+          body: new Container(key: bodyKey),
+        ),
       ),
     ));
 
@@ -95,8 +113,8 @@ void main() {
       floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
-        child: const Text("1")
-      )
+        child: const Text('1'),
+      ),
     )));
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -105,8 +123,8 @@ void main() {
       floatingActionButton: const FloatingActionButton(
         key: const Key('two'),
         onPressed: null,
-        child: const Text("2")
-      )
+        child: const Text('2'),
+      ),
     )));
 
     expect(tester.binding.transientCallbackCount, greaterThan(0));
@@ -119,11 +137,38 @@ void main() {
       floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
-        child: const Text("1")
-      )
+        child: const Text('1'),
+      ),
     )));
 
     expect(tester.binding.transientCallbackCount, greaterThan(0));
+  });
+
+  testWidgets('Floating action button position', (WidgetTester tester) async {
+    Widget build(TextDirection textDirection) {
+      return new Directionality(
+        textDirection: textDirection,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.only(bottom: 200.0),
+          ),
+          child: new Scaffold(
+            floatingActionButton: const FloatingActionButton(
+              onPressed: null,
+              child: const Text('1'),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(TextDirection.ltr));
+
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(756.0, 356.0));
+
+    await tester.pumpWidget(build(TextDirection.rtl));
+
+    expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 356.0));
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
@@ -375,8 +420,9 @@ void main() {
   group('body size', () {
     testWidgets('body size with container', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
-      await tester.pumpWidget(
-        new MediaQuery(
+      await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
           data: const MediaQueryData(),
           child: new Scaffold(
             body: new Container(
@@ -384,15 +430,16 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with sized container', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
-      await tester.pumpWidget(
-        new MediaQuery(
+      await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
           data: const MediaQueryData(),
           child: new Scaffold(
             body: new Container(
@@ -401,15 +448,16 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 100.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with centered container', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
-      await tester.pumpWidget(
-        new MediaQuery(
+      await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
           data: const MediaQueryData(),
           child: new Scaffold(
             body: new Center(
@@ -419,15 +467,16 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with button', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
-      await tester.pumpWidget(
-        new MediaQuery(
+      await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
           data: const MediaQueryData(),
           child: new Scaffold(
             body: new FlatButton(
@@ -437,7 +486,7 @@ void main() {
             ),
           ),
         ),
-      );
+      ));
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 36.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
