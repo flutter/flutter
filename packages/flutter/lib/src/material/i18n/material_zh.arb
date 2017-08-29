@@ -1,4 +1,5 @@
 {
+  "scriptCategory": "dense",
   "timeOfDayFormat": "ah:mm",
   "openAppDrawerTooltip": "打开导航菜单",
   "backButtonTooltip": "返回",

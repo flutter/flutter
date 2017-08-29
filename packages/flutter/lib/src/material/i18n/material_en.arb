@@ -1,4 +1,10 @@
 {
+  "scriptCategory": "English-like",
+  "@scriptCategory": {
+    "description": "The name of the language's script category (see https://material.io/guidelines/style/typography.html#typography-language-categories-reference)",
+    "type": "text"
+  },
+
   "timeOfDayFormat": "h:mm a",
   "@timeOfDayFormat": {
     "description": "The ICU 'Short Time' pattern, such as 'HH:mm', 'h:mm a', 'H:mm'. See: http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US",
