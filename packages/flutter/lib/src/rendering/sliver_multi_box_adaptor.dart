@@ -285,6 +285,30 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       visitor(child);
   }
 
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if ((constraints.growthDirection == GrowthDirection.forward && (constraints.axisDirection == AxisDirection.down || constraints.axisDirection == AxisDirection.right)) ||
+        (constraints.growthDirection == GrowthDirection.reverse && (constraints.axisDirection == AxisDirection.up || constraints.axisDirection == AxisDirection.left))) {
+      super.visitChildrenForSemantics((RenderObject child) {
+        // The sliver is overlapped at the top.
+        final Offset bottomLeft = MatrixUtils.transformPoint(child.getTransformTo(parent), child.semanticBounds.bottomLeft);
+        final double endOverlap = constraints.overlap;
+        if ((constraints.axis == Axis.vertical && bottomLeft.dy > endOverlap) ||
+            (constraints.axis == Axis.horizontal && bottomLeft.dx > endOverlap))
+          visitor(child);
+      });
+    } else {
+      super.visitChildrenForSemantics((RenderObject child) {
+        // The sliver is overlapped at the bottom.
+        final Offset topRight = MatrixUtils.transformPoint(child.getTransformTo(parent), child.semanticBounds.topRight);
+        final double startOverlap = constraints.remainingPaintExtent - constraints.overlap;
+        if ((constraints.axis == Axis.vertical && topRight.dy < startOverlap) ||
+            (constraints.axis == Axis.horizontal && topRight.dx < startOverlap))
+          visitor(child);
+      });
+    }
+  }
+
   /// Called during layout to create and add the child with the given index and
   /// scroll offset.
   ///
