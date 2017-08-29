@@ -214,7 +214,11 @@
 
 // TODO(xster): move when doing https://github.com/flutter/flutter/issues/3671.
 - (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
-  return self.rootFlutterViewController;
+  UIViewController* rootViewController = _window.rootViewController;
+  if ([rootViewController conformsToProtocol:@protocol(FlutterBinaryMessenger)]) {
+    return (NSObject<FlutterBinaryMessenger>*)rootViewController;
+  }
+  return nil;
 }
 
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
