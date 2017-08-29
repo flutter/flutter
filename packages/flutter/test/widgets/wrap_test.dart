@@ -16,10 +16,11 @@ void verify(WidgetTester tester, List<Offset> answerKey) {
 }
 
 void main() {
-  testWidgets('Basic Wrap test', (WidgetTester tester) async {
+  testWidgets('Basic Wrap test (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Wrap(
         alignment: WrapAlignment.start,
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -38,6 +39,7 @@ void main() {
     await tester.pumpWidget(
       new Wrap(
         alignment: WrapAlignment.center,
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -56,6 +58,7 @@ void main() {
     await tester.pumpWidget(
       new Wrap(
         alignment: WrapAlignment.end,
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           const SizedBox(width: 300.0, height: 100.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -75,6 +78,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.start,
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -94,6 +98,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.center,
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -113,6 +118,7 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.end,
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           const SizedBox(width: 300.0, height: 50.0),
           const SizedBox(width: 300.0, height: 100.0),
@@ -130,15 +136,139 @@ void main() {
 
   });
 
+  testWidgets('Basic Wrap test (RTL)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Wrap(
+        alignment: WrapAlignment.start,
+        textDirection: TextDirection.rtl,
+        children: <Widget>[
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+        ],
+      ),
+    );
+    verify(tester, <Offset>[
+      const Offset(500.0, 0.0),
+      const Offset(200.0, 0.0),
+      const Offset(500.0, 100.0),
+      const Offset(200.0, 100.0),
+    ]);
+
+    await tester.pumpWidget(
+      new Wrap(
+        alignment: WrapAlignment.center,
+        textDirection: TextDirection.rtl,
+        children: <Widget>[
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+        ],
+      ),
+    );
+    verify(tester, <Offset>[
+      const Offset(400.0, 0.0),
+      const Offset(100.0, 0.0),
+      const Offset(400.0, 100.0),
+      const Offset(100.0, 100.0),
+    ]);
+
+    await tester.pumpWidget(
+      new Wrap(
+        alignment: WrapAlignment.end,
+        textDirection: TextDirection.rtl,
+        children: <Widget>[
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+        ],
+      ),
+    );
+    verify(tester, <Offset>[
+      const Offset(300.0, 0.0),
+      const Offset(0.0, 0.0),
+      const Offset(300.0, 100.0),
+      const Offset(0.0, 100.0),
+    ]);
+
+    await tester.pumpWidget(
+      new Wrap(
+        alignment: WrapAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.start,
+        textDirection: TextDirection.ltr,
+        verticalDirection: VerticalDirection.up,
+        children: <Widget>[
+          const SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 50.0),
+        ],
+      ),
+    );
+    verify(tester, <Offset>[
+      const Offset(0.0, 550.0),
+      const Offset(300.0, 500.0),
+      const Offset(0.0, 400.0),
+      const Offset(300.0, 450.0),
+    ]);
+
+    await tester.pumpWidget(
+      new Wrap(
+        alignment: WrapAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        textDirection: TextDirection.ltr,
+        verticalDirection: VerticalDirection.up,
+        children: <Widget>[
+          const SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 50.0),
+        ],
+      ),
+    );
+    verify(tester, <Offset>[
+      const Offset(0.0, 525.0),
+      const Offset(300.0, 500.0),
+      const Offset(0.0, 400.0),
+      const Offset(300.0, 425.0),
+    ]);
+
+    await tester.pumpWidget(
+      new Wrap(
+        alignment: WrapAlignment.start,
+        crossAxisAlignment: WrapCrossAlignment.end,
+        textDirection: TextDirection.ltr,
+        verticalDirection: VerticalDirection.up,
+        children: <Widget>[
+          const SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 50.0),
+        ],
+      ),
+    );
+    verify(tester, <Offset>[
+      const Offset(0.0, 500.0),
+      const Offset(300.0, 500.0),
+      const Offset(0.0, 400.0),
+      const Offset(300.0, 400.0),
+    ]);
+
+  });
+
   testWidgets('Empty wrap', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new Wrap()));
+    await tester.pumpWidget(new Center(child: new Wrap(alignment: WrapAlignment.center)));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(Size.zero));
   });
 
-  testWidgets('Wrap alignment', (WidgetTester tester) async {
+  testWidgets('Wrap alignment (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(new Wrap(
       alignment: WrapAlignment.center,
       spacing: 5.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
@@ -155,6 +285,7 @@ void main() {
     await tester.pumpWidget(new Wrap(
       alignment: WrapAlignment.spaceBetween,
       spacing: 5.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
@@ -171,6 +302,7 @@ void main() {
     await tester.pumpWidget(new Wrap(
       alignment: WrapAlignment.spaceAround,
       spacing: 5.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
@@ -187,6 +319,7 @@ void main() {
     await tester.pumpWidget(new Wrap(
       alignment: WrapAlignment.spaceEvenly,
       spacing: 5.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
@@ -201,10 +334,81 @@ void main() {
     ]);
   });
 
-  testWidgets('Wrap runAlignment', (WidgetTester tester) async {
+  testWidgets('Wrap alignment (RTL)', (WidgetTester tester) async {
+    await tester.pumpWidget(new Wrap(
+      alignment: WrapAlignment.center,
+      spacing: 5.0,
+      textDirection: TextDirection.rtl,
+      children: <Widget>[
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+      ],
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(605.0, 0.0),
+      const Offset(400.0, 0.0),
+      const Offset(95.0, 0.0),
+    ]);
+
+    await tester.pumpWidget(new Wrap(
+      alignment: WrapAlignment.spaceBetween,
+      spacing: 5.0,
+      textDirection: TextDirection.rtl,
+      children: <Widget>[
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+      ],
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(700.0, 0.0),
+      const Offset(400.0, 0.0),
+      const Offset(0.0, 0.0),
+    ]);
+
+    await tester.pumpWidget(new Wrap(
+      alignment: WrapAlignment.spaceAround,
+      spacing: 5.0,
+      textDirection: TextDirection.rtl,
+      children: <Widget>[
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 310.0, height: 30.0),
+      ],
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(670.0, 0.0),
+      const Offset(405.0, 0.0),
+      const Offset(30.0, 0.0),
+    ]);
+
+    await tester.pumpWidget(new Wrap(
+      alignment: WrapAlignment.spaceEvenly,
+      spacing: 5.0,
+      textDirection: TextDirection.rtl,
+      children: <Widget>[
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 310.0, height: 30.0),
+      ],
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(655.0, 0.0),
+      const Offset(405.0, 0.0),
+      const Offset(45.0, 0.0),
+    ]);
+  });
+
+  testWidgets('Wrap runAlignment (DOWN)', (WidgetTester tester) async {
     await tester.pumpWidget(new Wrap(
       runAlignment: WrapAlignment.center,
       runSpacing: 5.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
@@ -225,6 +429,7 @@ void main() {
     await tester.pumpWidget(new Wrap(
       runAlignment: WrapAlignment.spaceBetween,
       runSpacing: 5.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
@@ -245,6 +450,7 @@ void main() {
     await tester.pumpWidget(new Wrap(
       runAlignment: WrapAlignment.spaceAround,
       runSpacing: 5.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
@@ -265,6 +471,7 @@ void main() {
     await tester.pumpWidget(new Wrap(
       runAlignment: WrapAlignment.spaceEvenly,
       runSpacing: 5.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 100.0, height: 10.0),
         const SizedBox(width: 200.0, height: 20.0),
@@ -284,6 +491,97 @@ void main() {
 
   });
 
+  testWidgets('Wrap runAlignment (UP)', (WidgetTester tester) async {
+    await tester.pumpWidget(new Wrap(
+      runAlignment: WrapAlignment.center,
+      runSpacing: 5.0,
+      textDirection: TextDirection.ltr,
+      verticalDirection: VerticalDirection.up,
+      children: <Widget>[
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 400.0, height: 40.0),
+        const SizedBox(width: 500.0, height: 60.0),
+      ],
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(0.0, 360.0),
+      const Offset(100.0, 350.0),
+      const Offset(300.0, 340.0),
+      const Offset(0.0, 295.0),
+      const Offset(0.0, 230.0),
+    ]);
+
+    await tester.pumpWidget(new Wrap(
+      runAlignment: WrapAlignment.spaceBetween,
+      runSpacing: 5.0,
+      textDirection: TextDirection.ltr,
+      verticalDirection: VerticalDirection.up,
+      children: <Widget>[
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 400.0, height: 40.0),
+        const SizedBox(width: 500.0, height: 60.0),
+      ],
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(0.0, 590.0),
+      const Offset(100.0, 580.0),
+      const Offset(300.0, 570.0),
+      const Offset(0.0, 295.0),
+      const Offset(0.0, 0.0),
+    ]);
+
+    await tester.pumpWidget(new Wrap(
+      runAlignment: WrapAlignment.spaceAround,
+      runSpacing: 5.0,
+      textDirection: TextDirection.ltr,
+      verticalDirection: VerticalDirection.up,
+      children: <Widget>[
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 400.0, height: 40.0),
+        const SizedBox(width: 500.0, height: 70.0),
+      ],
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(0.0, 515.0),
+      const Offset(100.0, 505.0),
+      const Offset(300.0, 495.0),
+      const Offset(0.0, 300.0),
+      const Offset(0.0, 75.0),
+    ]);
+
+    await tester.pumpWidget(new Wrap(
+      runAlignment: WrapAlignment.spaceEvenly,
+      runSpacing: 5.0,
+      textDirection: TextDirection.ltr,
+      verticalDirection: VerticalDirection.up,
+      children: <Widget>[
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 400.0, height: 40.0),
+        const SizedBox(width: 500.0, height: 60.0),
+      ],
+    ));
+    expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
+    verify(tester, <Offset>[
+      const Offset(0.0, 475.0),
+      const Offset(100.0, 465.0),
+      const Offset(300.0, 455.0),
+      const Offset(0.0, 295.0),
+      const Offset(0.0, 115.0),
+    ]);
+
+  });
+
   testWidgets('Shrink-wrapping Wrap test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Align(
@@ -291,6 +589,7 @@ void main() {
         child: new Wrap(
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const SizedBox(width: 100.0, height: 10.0),
             const SizedBox(width: 200.0, height: 20.0),
@@ -314,6 +613,7 @@ void main() {
         child: new Wrap(
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const SizedBox(width: 400.0, height: 40.0),
             const SizedBox(width: 300.0, height: 30.0),
@@ -340,6 +640,7 @@ void main() {
           runSpacing: 10.0,
           alignment: WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.start,
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const SizedBox(width: 500.0, height: 10.0),
             const SizedBox(width: 500.0, height: 20.0),
@@ -368,6 +669,7 @@ void main() {
           runSpacing: 15.0,
           alignment: WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.start,
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const SizedBox(width: 10.0, height: 250.0),
             const SizedBox(width: 20.0, height: 250.0),
@@ -396,6 +698,7 @@ void main() {
           direction: Axis.horizontal,
           spacing: 12.0,
           runSpacing: 8.0,
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const SizedBox(width: 10.0, height: 250.0),
             const SizedBox(width: 20.0, height: 250.0),
@@ -420,6 +723,7 @@ void main() {
 
   testWidgets('Visual overflow generates a clip', (WidgetTester tester) async {
     await tester.pumpWidget(new Wrap(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 500.0, height: 500.0),
       ],
@@ -428,6 +732,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)), isNot(paints..clipRect()));
 
     await tester.pumpWidget(new Wrap(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 500.0, height: 500.0),
         const SizedBox(width: 500.0, height: 500.0),
@@ -443,6 +748,7 @@ void main() {
     await tester.pumpWidget(new Wrap(
       spacing: 10.0,
       runSpacing: 15.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 200.0, height: 300.0),
         const SizedBox(width: 200.0, height: 300.0),
@@ -473,7 +779,7 @@ void main() {
   });
 
   testWidgets('RenderWrap toStringShallow control test', (WidgetTester tester) async {
-    await tester.pumpWidget(new Wrap());
+    await tester.pumpWidget(new Wrap(alignment: WrapAlignment.center));
 
     final RenderBox wrap = tester.renderObject(find.byType(Wrap));
     expect(wrap.toStringShallow(), hasOneLineDescription);
@@ -483,6 +789,7 @@ void main() {
     await tester.pumpWidget(new Wrap(
       direction: Axis.vertical,
       runSpacing: 7.0,
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         const SizedBox(width: 500.0, height: 400.0),
         const SizedBox(width: 500.0, height: 400.0),
@@ -508,6 +815,7 @@ void main() {
               fontSize: 100.0,
             ),
             child: new Wrap(
+              textDirection: TextDirection.ltr,
               children: <Widget>[
                 const Text('X'),
               ],
