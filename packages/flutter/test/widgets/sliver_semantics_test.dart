@@ -604,4 +604,72 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Slivers fully covered by another overlapping sliver are excluded (with center sliver)', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
+    final GlobalKey forwardAppBarKey = new GlobalKey(debugLabel: 'forward app bar');
+    final List<Widget> forwardChildren = new List<Widget>.generate(10, (int i) {
+      return new Container(
+        height: 200.0,
+        child: new Text('Forward Item $i'),
+      );
+    });
+    final List<Widget> backwardChildren = new List<Widget>.generate(10, (int i) {
+      return new Container(
+        height: 200.0,
+        child: new Text('Backward Item $i'),
+      );
+    });
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: new MediaQueryData(),
+        child: new Scrollable(
+          controller: controller,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return new Viewport(
+              offset: offset,
+              center: forwardAppBarKey,
+              slivers: <Widget>[
+                new SliverList(
+                  delegate: new SliverChildListDelegate(backwardChildren),
+                ),
+                new SliverAppBar(
+                  pinned: true,
+                  expandedHeight: 100.0,
+                  flexibleSpace: const FlexibleSpaceBar(
+                    title: const Text('Backward app bar'),
+                  ),
+                ),
+                new SliverAppBar(
+                  pinned: true,
+                  key: forwardAppBarKey,
+                  expandedHeight: 100.0,
+                  flexibleSpace: const FlexibleSpaceBar(
+                    title: const Text('Forward app bar'),
+                  ),
+                ),
+                new SliverList(
+                  delegate: new SliverChildListDelegate(forwardChildren),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+
+    // 'Forward Item 0' is covered by app bar.
+    expect(semantics, isNot(includesNodeWith(label: 'Forward Item 0')));
+    expect(semantics, includesNodeWith(label: 'Forward Item 1'));
+
+    controller.jumpTo(-880.0);
+    await tester.pumpAndSettle();
+    expect(semantics, isNot(includesNodeWith(label: 'Backward Item 0')));
+    expect(semantics, includesNodeWith(label: 'Backward Item 1'));
+
+    semantics.dispose();
+  });
+
 }
