@@ -1,4 +1,11 @@
 dart:fidl.internal,::,_environment
 dart:fidl.internal,::,_outgoingServices
-dart:mozart.internal,::,_viewContainer
+dart:fidl.internal,GetSizeResult,GetSizeResult.
+dart:fidl.internal,Handle,Handle._
+dart:fidl.internal,HandlePairResult,HandlePairResult.
+dart:fidl.internal,HandleResult,HandleResult.
+dart:fidl.internal,HandleWaiter,HandleWaiter._
+dart:fidl.internal,ReadResult,ReadResult.
+dart:fidl.internal,WriteResult,WriteResult.
 dart:mozart.internal,::,_context
+dart:mozart.internal,::,_viewContainer
