@@ -736,8 +736,8 @@ class SemanticsNode extends AbstractNode {
   }
 
   static int _geometryComparator(SemanticsNode a, SemanticsNode b) {
-    final Rect rectA = MatrixUtils.transformRect(a.transform, a.rect);
-    final Rect rectB = MatrixUtils.transformRect(b.transform, b.rect);
+    final Rect rectA = a.transform == null ? a.rect : MatrixUtils.transformRect(a.transform, a.rect);
+    final Rect rectB = b.transform == null ? b.rect : MatrixUtils.transformRect(b.transform, b.rect);
     final int top = rectA.top.compareTo(rectB.top);
     return top == 0 ? rectA.left.compareTo(rectB.left) : top;
   }
