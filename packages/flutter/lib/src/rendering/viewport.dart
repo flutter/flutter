@@ -97,7 +97,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     for (RenderSliver sliver in childrenInPaintOrder) {
-      if (sliver.geometry.paintExtent != 0)
+      if (sliver.geometry.paintExtent != 0 &&
+          sliver.constraints.overlap < sliver.geometry.paintOrigin + sliver.geometry.paintExtent)
         visitor(sliver);
     }
   }
