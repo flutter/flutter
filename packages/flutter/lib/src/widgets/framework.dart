@@ -3326,7 +3326,11 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
     visitChildren((Element child) {
-      children.add(child.toDiagnosticsNode());
+      if (child != null) {
+        children.add(child.toDiagnosticsNode());
+      } else {
+        children.add(new DiagnosticsNode.message('<null child>'));
+      }
     });
     return children;
   }

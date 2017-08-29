@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree;
+import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'stock_data.dart';
 import 'stock_list.dart';
@@ -130,7 +130,7 @@ class StockHomeState extends State<StockHome> {
                 debugDumpApp();
                 debugDumpRenderTree();
                 debugDumpLayerTree();
-                debugDumpSemanticsTree();
+                debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversal);
               } catch (e, stack) {
                 debugPrint('Exception while dumping app:\n$e\n$stack');
               }

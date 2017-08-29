@@ -2981,7 +2981,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
       super.assembleSemanticsNode(node, children);
       return;
     }
-    
+
     _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
     _innerNode
       ..wasAffectedByClip = node.wasAffectedByClip
@@ -2989,7 +2989,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
     semanticsAnnotator(_innerNode);
 
-    final List<SemanticsNode> excluded = <SemanticsNode>[];
+    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
       if (child.hasTag(excludeFromScrolling))
@@ -2997,7 +2997,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
       else
         included.add(child);
     }
-    excluded.add(_innerNode);
     node.addChildren(excluded);
     _innerNode.addChildren(included);
     _innerNode.finalizeChildren();
