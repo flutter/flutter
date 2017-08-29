@@ -156,8 +156,8 @@ Future<Set<String>> readDepfile(String depfilePath) async {
 /// Dart snapshot builder.
 ///
 /// Builds Dart snapshots in one of three modes:
-///   * Script snapshot: architecture-independent snapshot of a Dart script core
-///     libraries.
+///   * Script snapshot: architecture-independent snapshot of a Dart script
+///     and core libraries.
 ///   * AOT snapshot: architecture-specific ahead-of-time compiled snapshot
 ///     suitable for loading with `mmap`.
 ///   * Assembly AOT snapshot: architecture-specific ahead-of-time compile to
