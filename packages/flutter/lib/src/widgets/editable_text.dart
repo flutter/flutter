@@ -27,6 +27,10 @@ typedef void SelectionChangedCallback(TextSelection selection, bool longPress);
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
+// Number of cursor ticks during which the most recently entered character
+// is shown in an obscured text field.
+const int _kObscureShowLatestCharCursorTicks = 3;
+
 /// A controller for an editable text field.
 ///
 /// Whenever the user modifies a text field with an associated
@@ -337,8 +341,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    if (value.text != _value.text)
+    if (value.text != _value.text) {
       _hideSelectionOverlayIfNeeded();
+      if (widget.obscureText && value.text.length == _value.text.length + 1) {
+        _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
+        _obscureLatestCharIndex = _value.selection.baseOffset;
+      }
+    }
     _lastKnownRemoteTextEditingValue = value;
     _formatAndSetValue(value);
     if (widget.onChanged != null)
@@ -516,8 +525,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @visibleForTesting
   Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
 
+  int _obscureShowCharTicksPending = 0;
+  int _obscureLatestCharIndex;
+
   void _cursorTick(Timer timer) {
     _showCursor.value = !_showCursor.value;
+    if (_obscureShowCharTicksPending > 0) {
+      setState(() { _obscureShowCharTicksPending--; });
+    }
   }
 
   void _startCursorTimer() {
@@ -529,6 +544,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _showCursor.value = false;
+    _obscureShowCharTicksPending = 0;
   }
 
   void _startOrStopCursorTimerIfNeeded() {
@@ -580,6 +596,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
             textAlign: widget.textAlign,
             obscureText: widget.obscureText,
+            obscureShowCharacterAtIndex: _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null,
             autocorrect: widget.autocorrect,
             offset: offset,
             onSelectionChanged: _handleSelectionChanged,
@@ -603,6 +620,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textScaleFactor,
     this.textAlign,
     this.obscureText,
+    this.obscureShowCharacterAtIndex,
     this.autocorrect,
     this.offset,
     this.onSelectionChanged,
@@ -618,6 +636,7 @@ class _Editable extends LeafRenderObjectWidget {
   final double textScaleFactor;
   final TextAlign textAlign;
   final bool obscureText;
+  final int obscureShowCharacterAtIndex;
   final bool autocorrect;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
@@ -675,8 +694,12 @@ class _Editable extends LeafRenderObjectWidget {
     }
 
     String text = value.text;
-    if (obscureText)
+    if (obscureText) {
       text = new String.fromCharCodes(new List<int>.filled(text.length, 0x2022));
+      final int o = obscureShowCharacterAtIndex;
+      if (o != null && o >= 0 && o < text.length)
+        text = text.replaceRange(o, o + 1, value.text.substring(o, o + 1));
+    }
     return new TextSpan(style: style, text: text);
   }
 }
