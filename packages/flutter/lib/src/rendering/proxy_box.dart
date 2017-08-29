@@ -1860,6 +1860,8 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
+    if (size.isEmpty)
+      return false;
     _updatePaintData();
     Matrix4 inverse;
     try {
@@ -1875,8 +1877,12 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    _updatePaintData();
-    transform.multiply(_transform);
+    if (size.isEmpty) {
+      transform.setZero();
+    } else {
+      _updatePaintData();
+      transform.multiply(_transform);
+    }
   }
 
   @override

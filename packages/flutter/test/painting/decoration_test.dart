@@ -213,14 +213,14 @@ void main() {
     final BoxDecoration boxDecoration = new BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
     final TestCanvas canvas = new TestCanvas(<Invocation>[]);
-    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: const Size(10.0, 10.0)));
+    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: const Size(100.0, 100.0)));
 
     final Invocation call = canvas.invocations.singleWhere((Invocation call) => call.memberName == #drawImageNine);
     expect(call.isMethod, isTrue);
     expect(call.positionalArguments, hasLength(4));
     expect(call.positionalArguments[0], const isInstanceOf<TestImage>());
     expect(call.positionalArguments[1], new Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
-    expect(call.positionalArguments[2], new Rect.fromLTRB(0.0, 0.0, 32.5, 10.0));
+    expect(call.positionalArguments[2], new Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
     expect(call.positionalArguments[3], const isInstanceOf<Paint>());
     expect(call.positionalArguments[3].isAntiAlias, false);
     expect(call.positionalArguments[3].colorFilter, colorFilter);
