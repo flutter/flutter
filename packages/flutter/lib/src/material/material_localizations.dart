@@ -9,8 +9,10 @@ import 'package:flutter/widgets.dart';
 
 import 'i18n/localizations.dart';
 
-/// Localized resource values for the material widgets.
+/// Localized strings for the material widgets.
 class MaterialLocalizations {
+  /// Construct an object that defines the material widgets' localized strings
+  /// for the given `locale`.
   const MaterialLocalizations(this.locale) : assert(locale != null);
 
   /// The locale for which the values of this class's localized resources
@@ -18,9 +20,9 @@ class MaterialLocalizations {
   final Locale locale;
 
   String _lookup(String name) {
-    final Map<String, String> nameToValue = MaterialLocalizationValues[locale.toString()]
-      ?? MaterialLocalizationValues[locale.languageCode]
-      ?? MaterialLocalizationValues['en'];
+    final Map<String, String> nameToValue = localizations[locale.toString()]
+      ?? localizations[locale.languageCode]
+      ?? localizations['en'];
     return nameToValue != null ? nameToValue[name] : null;
   }
 

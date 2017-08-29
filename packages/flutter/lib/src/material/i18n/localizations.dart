@@ -4,10 +4,9 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// dart gen_localizations /builds/dev/flutter/packages/flutter/lib/src/material/i18n material.
+// dart gen_localizations packages/flutter/lib/src/material/i18n material
 
-
-const Map<String, Map<String, String>> MaterialLocalizationValues = const <String, Map<String, String>> {
+const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {
   "ar": const <String, String>{
     "openAppDrawerTooltip": r"افتح قائمة التنقل",
     "backButtonTooltip": r"الى الخلف",
@@ -54,8 +53,8 @@ const Map<String, Map<String, String>> MaterialLocalizationValues = const <Strin
     "openAppDrawerTooltip": r"Open navigation menu",
     "backButtonTooltip": r"Back",
     "closeButtonTooltip": r"Close",
-    "nextMonthTooltip": r"Next Month",
-    "previousMonthTooltip": r"Previous Month"
+    "nextMonthTooltip": r"Next month",
+    "previousMonthTooltip": r"Previous month"
   },
   "de": const <String, String>{
     "openAppDrawerTooltip": r"Navigationsmenü öffnen",

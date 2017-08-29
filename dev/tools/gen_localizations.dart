@@ -3,16 +3,18 @@
 // found in the LICENSE file.
 
 // Given a directory that contains localized ".arb" (application resource
-// bundle) files, generates a class that contains a localized string getter
-// for each resource identifier.
+// bundle) files, generates a Dart "localizations" Map definition that combines
+// the contents of the arb files. The map can be used to lookup a localized
+// string: localizations[localeString][resourceId].
 //
-// The arb (JSON) format files must contain a single map indexed by locale
-// whose values are maps whose keys are resource identifiers and whose
-// values are localized resource strings. Resource identifiers must be legal
-// Dart method names.
+// See *.arb and localizations.dart in packages/flutter/lib/src/material/i18n/.
+//
+// The arb (JSON) format files must contain a single map indexed by locale.
+// Each map value is itself a map with resource identifier keys and localized
+// resource string values.
 //
 // The arb filenames are assumed to end in "prefix_lc.arb" or "prefix_lc_cc.arb",
-// where prefix the 2nd command line argument, lc is a language code and cc
+// where prefix is the 2nd command line argument, lc is a language code and cc
 // is the country code. In most cases both codes are just two characters. A typical
 // filename would be "material_en.arb".
 //
@@ -31,19 +33,7 @@ const String outputHeader = '''
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// @(regenerate).
-
-''';
-
-const String outputClass = '''
-class LocalizationValues {
-  const LocalizationValues(this.locale) : assert(locale != null);
-  final Locale locale;
-
-  String _lookup(String name) => _localizations[locale.toString()] ?? _localizations[locale.languageCode];
-
-@(methods)
-}
+// @(regenerate)
 ''';
 
 final Map<String, Map<String, String>> localeToResources = <String, Map<String, String>>{};
@@ -78,7 +68,7 @@ String generateString(String s) {
 String generateLocalizationsMap() {
   final StringBuffer output = new StringBuffer();
 
-  output.writeln('const Map<String, Map<String, String>> _localizations = const <String, Map<String, String>> {');
+  output.writeln('const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {');
 
   final String lastLocale = localeToResources.keys.last;
   for (String locale in localeToResources.keys) {
@@ -97,18 +87,6 @@ String generateLocalizationsMap() {
 
   output.writeln('};');
   return output.toString();
-}
-
-String generateLocalizationsClass() {
-  final Set<String> methodNames = new Set<String>();
-  for (String locale in localeToResources.keys)
-    methodNames.addAll(localeToResources[locale].keys);
-
-  final StringBuffer methods = new StringBuffer();
-  for (String methodName in methodNames)
-    methods.writeln('  String get $methodName => _lookup("$methodName");');
-
-  return outputClass.replaceFirst('@(methods)', methods.toString());
 }
 
 void processBundle(File file, String locale) {
@@ -143,8 +121,7 @@ void main(List<String> args) {
     }
   }
 
-  final String regenerate = 'dart gen_localizations ${directory.absolute.path} ${args[1]}';
+  final String regenerate = 'dart gen_localizations ${directory.path} ${args[1]}';
   print(outputHeader.replaceFirst('@(regenerate)', regenerate));
   print(generateLocalizationsMap());
-  print(generateLocalizationsClass());
 }
