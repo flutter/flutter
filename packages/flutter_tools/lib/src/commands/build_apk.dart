@@ -52,19 +52,13 @@ class BuildApkCommand extends BuildSubCommand {
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
-
-    final BuildInfo buildInfo = getBuildInfo();
-    await buildApk(buildInfo: buildInfo,
-      previewDart2: argResults['preview-dart-2'],
-      target: targetFile
-    );
+    await buildApk(buildInfo: getBuildInfo(), target: targetFile);
   }
 }
 
 Future<Null> buildApk({
   String target,
-  BuildInfo buildInfo: BuildInfo.debug,
-  bool previewDart2,
+  BuildInfo buildInfo: BuildInfo.debug
 }) async {
   if (!isProjectUsingGradle()) {
     throwToolExit(
@@ -85,5 +79,5 @@ Future<Null> buildApk({
     throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
-  return buildGradleProject(buildInfo, target, previewDart2);
+  return buildGradleProject(buildInfo, target);
 }

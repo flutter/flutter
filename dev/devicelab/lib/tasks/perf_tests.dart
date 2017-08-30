@@ -203,7 +203,6 @@ class BuildTest {
     ];
     if (previewDart2)
       options.add('--preview-dart-2');
-    print("_buildAot options: $options");
     final String buildLog = await evalFlutter('build', options: options);
     watch.stop();
 

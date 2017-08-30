@@ -192,7 +192,7 @@ void updateLocalProperties({String projectPath, BuildInfo buildInfo}) {
     settings.writeContents(localProperties);
 }
 
-Future<Null> buildGradleProject(BuildInfo buildInfo, String target, bool previewDart2) async {
+Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
   // Update the local.properties file with the build mode.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
   // uses the standard Android way to determine what to build, but we still
@@ -211,7 +211,7 @@ Future<Null> buildGradleProject(BuildInfo buildInfo, String target, bool preview
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(gradle, buildInfo, target, previewDart2);
+      return _buildGradleProjectV2(gradle, buildInfo, target);
   }
 }
 
@@ -233,7 +233,7 @@ Future<Null> _buildGradleProjectV1(String gradle) async {
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
-Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String target, bool previewDart2) async {
+Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String target) async {
   final GradleProject project = await _gradleProject();
   final String assembleTask = project.assembleTaskFor(buildInfo);
   if (assembleTask == null) {
@@ -266,7 +266,7 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  if (previewDart2)
+  if (buildInfo.previewDart2)
     command.add('-Ppreview-dart-2=true');
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(

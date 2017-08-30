@@ -19,54 +19,64 @@ String _dartExecutable() {
   return fs.path.join(engineDartSdkPath, 'bin', 'dart');
 }
 
+class _StdoutHandler {
+  String boundaryKey;
+  Completer<String> outputFilename = new Completer<String>();
+
+  void handler(String string) {
+    const String kResultPrefix = 'result ';
+    if (boundaryKey == null) {
+      if (string.startsWith(kResultPrefix))
+        boundaryKey = string.substring(kResultPrefix.length);
+    } else if (string.startsWith(boundaryKey))
+      outputFilename.complete(string.length > boundaryKey.length
+        ? string.substring(boundaryKey.length + 1)
+        : null);
+    else
+      printTrace('compile debug message: $string');
+  }
+}
+
 Future<String> compile({String sdkRoot, String mainPath}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
   );
 
+  // This is a URI, not a file path, so the forward slash is correct even on Windows.
   if (!sdkRoot.endsWith('/'))
     sdkRoot = '$sdkRoot/';
   final Process server = await Process.start(_dartExecutable(),
     <String>[frontendServer, '--sdk-root', sdkRoot, mainPath]
   );
 
-  String boundaryKey;
-  String outputFilename;
+  final _StdoutHandler stdoutHandler = new _StdoutHandler();
   server.stderr
     .transform(UTF8.decoder)
-    .listen((String s) { print(s); });
+    .listen(printTrace);
   server.stdout
     .transform(UTF8.decoder)
     .transform(new LineSplitter())
-    .listen((String string) async {
-      const String RESULT_PREFIX = 'result ';
-      if (boundaryKey == null) {
-        if (string.startsWith(RESULT_PREFIX))
-          boundaryKey = string.substring(RESULT_PREFIX.length);
-      } else {
-        if (string.startsWith(boundaryKey)) {
-          if (string.length > boundaryKey.length)
-            outputFilename = string.substring(boundaryKey.length + 1);
-        } else {
-          print('compile debug message: $string');
-        }
-      }
-    });
+    .listen(stdoutHandler.handler);
   await server.exitCode;
-  return outputFilename;
+  return stdoutHandler.outputFilename.future;
 }
 
+/// Wrapper around incremental frontend server compiler, that communicates with
+/// server via stdin/stdout.
+///
+/// The wrapper is intended to stay resident in memory as user changes, reloads,
+/// restarts the Flutter app.
 class ResidentCompiler {
   ResidentCompiler(this._sdkRoot) {
     assert(_sdkRoot != null);
+    // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
   }
 
   String _sdkRoot;
   Process _server;
-  Completer<String> _outputFilename;
-  String _boundaryKey;
+  final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
   Future<String> recompile(String mainPath, List<String> invalidatedFiles) async {
     // First time recompile is called we actually have to compile the app from
@@ -74,33 +84,13 @@ class ResidentCompiler {
     if (_server == null)
       return _compile(mainPath);
 
-    _outputFilename = new Completer<String>();
-
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile $inputKey');
     for (String invalidatedFile in invalidatedFiles)
       _server.stdin.writeln(invalidatedFile);
     _server.stdin.writeln(inputKey);
 
-    return _outputFilename.future;
-  }
-
-  Future<Null> handler(String string) async {
-    const String RESULT_PREFIX = 'result ';
-      if (_boundaryKey == null) {
-        if (string.startsWith(RESULT_PREFIX))
-          _boundaryKey = string.substring(RESULT_PREFIX.length);
-      } else {
-        if (string.startsWith(_boundaryKey)) {
-          _outputFilename.complete(string.length > _boundaryKey.length
-            ? string.substring(_boundaryKey.length + 1)
-            : null
-          );
-          _boundaryKey = null;
-        } else {
-          printTrace('compile debug message: $string');
-        }
-    }
+    return stdoutHandler.outputFilename.future;
   }
 
   Future<String> _compile(String scriptFilename) async {
@@ -112,11 +102,10 @@ class ResidentCompiler {
         <String>[frontendServer, '--sdk-root', _sdkRoot, '--incremental']
       );
     }
-    _outputFilename = new Completer<String>();
     _server.stdout
       .transform(UTF8.decoder)
       .transform(new LineSplitter())
-      .listen(handler);
+      .listen(stdoutHandler.handler);
     _server.stderr
       .transform(UTF8.decoder)
       .transform(new LineSplitter())
@@ -124,7 +113,7 @@ class ResidentCompiler {
 
     _server.stdin.writeln('compile $scriptFilename');
 
-    return _outputFilename.future;
+    return stdoutHandler.outputFilename.future;
   }
 
   void accept() {

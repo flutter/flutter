@@ -61,7 +61,7 @@ String _artifactToFileName(Artifact artifact) {
 }
 
 class EngineBuildPaths {
-  EngineBuildPaths({ @required this.targetEngine, @required this.hostEngine }):
+  const EngineBuildPaths({ @required this.targetEngine, @required this.hostEngine }):
       assert(targetEngine != null),
       assert(hostEngine != null);
 
