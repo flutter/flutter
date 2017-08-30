@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'artifacts.dart';
 import 'asset.dart';
 import 'base/build.dart';
 import 'base/common.dart';
