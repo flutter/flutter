@@ -612,4 +612,92 @@ void main() {
       expect(tester.getBottomRight(findKey(3)).dx, equals(700.0));
     });
   });
+
+  group('Scrollable with center', () {
+    testWidgets('ensureVisible', (WidgetTester tester) async {
+      BuildContext findContext(int i) => tester.element(findKey(i));
+      Future<Null> prepare(double offset) async {
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
+        await tester.pump();
+      }
+
+      await tester.pumpWidget(new Center(
+        child: new SizedBox(
+          width: 600.0,
+          height: 400.0,
+          child: new Scrollable(
+            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              return new Viewport(
+                offset: offset,
+                center: const ValueKey<String>('center'),
+                slivers: <Widget>[
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-6), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-5), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-4), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-3), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-2), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-1), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0), key: const ValueKey<String>('center')),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0)),
+                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0)),
+                ],
+              );
+            },
+          ),
+        ),
+      ));
+
+      await prepare(480.0);
+      Scrollable.ensureVisible(findContext(3));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey(3)).dy, equals(100.0));
+
+      await prepare(1083.0);
+      Scrollable.ensureVisible(findContext(6));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey(6)).dy, equals(300.0));
+
+      await prepare(735.0);
+      Scrollable.ensureVisible(findContext(4), alignment: 1.0);
+      await tester.pump();
+      expect(tester.getBottomRight(findKey(4)).dy, equals(500.0));
+
+      await prepare(123.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
+      await tester.pump();
+      expect(tester.getBottomRight(findKey(0)).dy, equals(500.0));
+
+      await prepare(523.0);
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1020));
+      expect(tester.getTopLeft(findKey(3)).dy, equals(100.0));
+
+
+      await prepare(-480.0);
+      Scrollable.ensureVisible(findContext(-3));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey(-3)).dy, equals(100.0));
+
+      await prepare(-1083.0);
+      Scrollable.ensureVisible(findContext(-6));
+      await tester.pump();
+      expect(tester.getTopLeft(findKey(-6)).dy, equals(100.0));
+
+      await prepare(-735.0);
+      Scrollable.ensureVisible(findContext(-4), alignment: 1.0);
+      await tester.pump();
+      expect(tester.getBottomRight(findKey(-4)).dy, equals(500.0));
+
+      await prepare(-523.0);
+      Scrollable.ensureVisible(findContext(-3), duration: const Duration(seconds: 1));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1020));
+      expect(tester.getTopLeft(findKey(-3)).dy, equals(100.0));
+    });
+  });
 }
