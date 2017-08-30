@@ -359,8 +359,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// Determines the order to lay children out horizontally and how to interpret
   /// `start` and `end` in the horizontal direction.
   ///
-  /// If the [direction] is [Axis.horizontal], this controls which order
-  /// children are painted in (left-to-right or right-to-left), and the meaning
+  /// If the [direction] is [Axis.horizontal], this controls the order in which
+  /// children are positioned (left-to-right or right-to-left), and the meaning
   /// of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
   /// [MainAxisAlignment.end] values.
   ///
