@@ -30,7 +30,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   const _MaterialLocalizationsDelegate();
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) => MaterialLocalizations.load(locale);
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;

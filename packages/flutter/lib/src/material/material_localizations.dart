@@ -9,46 +9,27 @@ import 'package:flutter/widgets.dart';
 
 import 'i18n/localizations.dart';
 
-/// Localized strings for the material widgets.
-class MaterialLocalizations {
-  /// Construct an object that defines the material widgets' localized strings
-  /// for the given `locale`.
-  const MaterialLocalizations(this.locale) : assert(locale != null);
-
-  /// The locale for which the values of this class's localized resources
-  /// have been translated.
-  final Locale locale;
-
-  String _lookup(String name) {
-    final Map<String, String> nameToValue = localizations[locale.toString()]
-      ?? localizations[locale.languageCode]
-      ?? localizations['en'];
-    return nameToValue != null ? nameToValue[name] : null;
-  }
-
+/// Defines the localized resource values used by the Material widgts.
+///
+/// See also:
+///
+///  * [DefaultMaterialLocalizations], which implements this interface and
+///    and supports a variety of locales.
+abstract class MaterialLocalizations {
   /// The tooltip for the leading [AppBar] menu (aka 'hamburger') button
-  String get openAppDrawerTooltip => _lookup("openAppDrawerTooltip");
+  String get openAppDrawerTooltip;
 
   /// The [BackButton]'s tooltip.
-  String get backButtonTooltip => _lookup("backButtonTooltip");
+  String get backButtonTooltip;
 
   /// The [CloseButton]'s tooltip.
-  String get closeButtonTooltip => _lookup("closeButtonTooltip");
+  String get closeButtonTooltip;
 
   /// The tooltip for the [MonthPicker]'s "next month" button.
-  String get nextMonthTooltip => _lookup("nextMonthTooltip");
+  String get nextMonthTooltip;
 
   /// The tooltip for the [MonthPicker]'s "previous month" button.
-  String get previousMonthTooltip => _lookup("previousMonthTooltip");
-
-  /// Creates an object that provides localized resource values for the
-  /// for the widgets of the material library.
-  ///
-  /// This method is typically used to create a [DefaultLocalizationsDelegate].
-  /// The [MaterialApp] does so by default.
-  static Future<MaterialLocalizations> load(Locale locale) {
-    return new SynchronousFuture<MaterialLocalizations>(new MaterialLocalizations(locale));
-  }
+  String get previousMonthTooltip;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -64,5 +45,47 @@ class MaterialLocalizations {
   /// ```
   static MaterialLocalizations of(BuildContext context) {
     return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
+  }
+}
+
+/// Localized strings for the material widgets.
+class DefaultMaterialLocalizations implements MaterialLocalizations {
+  /// Construct an object that defines the material widgets' localized strings
+  /// for the given `locale`.
+  const DefaultMaterialLocalizations(this.locale) : assert(locale != null);
+
+  /// The locale for which the values of this class's localized resources
+  /// have been translated.
+  final Locale locale;
+
+  String _lookup(String name) {
+    final Map<String, String> nameToValue = localizations[locale.toString()]
+      ?? localizations[locale.languageCode]
+      ?? localizations['en'];
+    return nameToValue != null ? nameToValue[name] : null;
+  }
+
+  @override
+  String get openAppDrawerTooltip => _lookup("openAppDrawerTooltip");
+
+  @override
+  String get backButtonTooltip => _lookup("backButtonTooltip");
+
+  @override
+  String get closeButtonTooltip => _lookup("closeButtonTooltip");
+
+  @override
+  String get nextMonthTooltip => _lookup("nextMonthTooltip");
+
+  @override
+  String get previousMonthTooltip => _lookup("previousMonthTooltip");
+
+  /// Creates an object that provides localized resource values for the
+  /// for the widgets of the material library.
+  ///
+  /// This method is typically used to create a [LocalizationsDelegate].
+  /// The [MaterialApp] does so by default.
+  static Future<MaterialLocalizations> load(Locale locale) {
+    return new SynchronousFuture<MaterialLocalizations>(new DefaultMaterialLocalizations(locale));
   }
 }
