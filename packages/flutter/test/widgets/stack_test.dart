@@ -409,4 +409,66 @@ void main() {
       'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)'
     ]);
   });
+
+  testWidgets('Positioned.directional control test', (WidgetTester tester) async {
+    final Key key = new UniqueKey();
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Positioned.directional(
+          textDirection: TextDirection.rtl,
+          start: 50.0,
+          child: new Container(key: key, width: 75.0, height: 175.0),
+        ),
+      ],
+    ));
+
+    expect(tester.getTopLeft(find.byKey(key)), const Offset(675.0, 0.0));
+
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Positioned.directional(
+          textDirection: TextDirection.ltr,
+          start: 50.0,
+          child: new Container(key: key, width: 75.0, height: 175.0),
+        ),
+      ],
+    ));
+
+    expect(tester.getTopLeft(find.byKey(key)), const Offset(50.0, 0.0));
+  });
+
+  testWidgets('PositionedDirectional control test', (WidgetTester tester) async {
+    final Key key = new UniqueKey();
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child:  new Stack(
+          children: <Widget>[
+            new PositionedDirectional(
+              start: 50.0,
+              child: new Container(key: key, width: 75.0, height: 175.0),
+            ),
+          ],
+        ),
+      )
+    );
+
+    expect(tester.getTopLeft(find.byKey(key)), const Offset(675.0, 0.0));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child:  new Stack(
+          children: <Widget>[
+            new PositionedDirectional(
+              start: 50.0,
+              child: new Container(key: key, width: 75.0, height: 175.0),
+            ),
+          ],
+        ),
+      )
+    );
+
+    expect(tester.getTopLeft(find.byKey(key)), const Offset(50.0, 0.0));
+  });
 }

@@ -2278,6 +2278,10 @@ class IndexedStack extends Stack {
 /// force the child to have a particular width. Alternatively the [width] and
 /// [height] properties can be used to give the dimensions, with one
 /// corresponding position property (e.g. [top] and [height]).
+///
+/// See also:
+///
+///  * [PositionedDirectional], which adapts to the ambient [Directionality].
 class Positioned extends ParentDataWidget<Stack> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
@@ -2285,6 +2289,11 @@ class Positioned extends ParentDataWidget<Stack> {
   /// [width]), and only two out of the three vertical values ([top],
   /// [bottom], [height]), can be set. In each case, at least one of
   /// the three must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Positioned.directional], which specifies the widget's horizontal
+  ///    position using [start] and [end] rather than [left] and [right].
   const Positioned({
     Key key,
     this.left,
@@ -2293,7 +2302,7 @@ class Positioned extends ParentDataWidget<Stack> {
     this.bottom,
     this.width,
     this.height,
-    @required Widget child
+    @required Widget child,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
        super(key: key, child: child);
@@ -2343,6 +2352,60 @@ class Positioned extends ParentDataWidget<Stack> {
   }) : width = null,
        height = null,
        super(key: key, child: child);
+
+  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  ///
+  /// Only two out of the three horizontal values (`start`, `end`,
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
+  ///
+  /// If `textDirection` is [TextDirection.rtl], then the `start` argument is
+  /// used for the [right] property and the `end` argument is used for the
+  /// [left] property. Otherwise, if `textDirection` is [TextDirection.ltr],
+  /// then the `start` argument is used for the [left] property and the `end`
+  /// argument is used for the [right] property.
+  ///
+  /// The `textDirection` argument must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
+  factory Positioned.directional({
+    Key key,
+    @required TextDirection textDirection,
+    double start,
+    double top,
+    double end,
+    double bottom,
+    double width,
+    double height,
+    @required Widget child,
+  }) {
+    assert(textDirection != null);
+    double left;
+    double right;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        left = end;
+        right = start;
+        break;
+      case TextDirection.ltr:
+        left = start;
+        right = end;
+        break;
+    }
+    return new Positioned(
+      key: key,
+      left: left,
+      top: top,
+      right: right,
+      bottom: bottom,
+      width: width,
+      height: height,
+      child: child,
+    );
+  }
 
   /// The distance that the child's left edge is inset from the left of the stack.
   ///
@@ -2432,6 +2495,114 @@ class Positioned extends ParentDataWidget<Stack> {
     description.add(new DoubleProperty('bottom', bottom, defaultValue: null));
     description.add(new DoubleProperty('width', width, defaultValue: null));
     description.add(new DoubleProperty('height', height, defaultValue: null));
+  }
+}
+
+/// A widget that controls where a child of a [Stack] is positioned without
+/// committing to a specific [TextDirection].
+///
+/// The ambient [Directionality] is used to determine whether [start] is to the
+/// left or to the right.
+///
+/// A [PositionedDirectional] widget must be a descendant of a [Stack], and the
+/// path from the [PositionedDirectional] widget to its enclosing [Stack] must
+/// contain only [StatelessWidget]s or [StatefulWidget]s (not other kinds of
+/// widgets, like [RenderObjectWidget]s).
+///
+/// If a widget is wrapped in a [PositionedDirectional], then it is a
+/// _positioned_ widget in its [Stack]. If the [top] property is non-null, the
+/// top edge of this child/ will be positioned [top] layout units from the top
+/// of the stack widget. The [start], [bottom], and [end] properties work
+/// analogously.
+///
+/// If both the [top] and [bottom] properties are non-null, then the child will
+/// be forced to have exactly the height required to satisfy both constraints.
+/// Similarly, setting the [start] and [end] properties to non-null values will
+/// force the child to have a particular width. Alternatively the [width] and
+/// [height] properties can be used to give the dimensions, with one
+/// corresponding position property (e.g. [top] and [height]).
+///
+/// See also:
+///
+///  * [Positioned], which specifies the widget's position visually.
+///  * [Positioned.directional], which also specifies the widget's horizontal
+///    position using [start] and [end] but has an explicit [TextDirection].
+class PositionedDirectional extends StatelessWidget {
+  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  ///
+  /// Only two out of the three horizontal values (`start`, `end`,
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Positioned.directional], which also specifies the widget's horizontal
+  ///    position using [start] and [end] but has an explicit [TextDirection].
+  const PositionedDirectional({
+    Key key,
+    this.start,
+    this.top,
+    this.end,
+    this.bottom,
+    this.width,
+    this.height,
+    @required this.child,
+  }) : super(key: key);
+
+  /// The distance that the child's leading edge is inset from the leading edge
+  /// of the stack.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double start;
+
+  /// The distance that the child's top edge is inset from the top of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double top;
+
+  /// The distance that the child's trailing edge is inset from the trailing
+  /// edge of the stack.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double end;
+
+  /// The distance that the child's bottom edge is inset from the bottom of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double bottom;
+
+  /// The child's width.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double width;
+
+  /// The child's height.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double height;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Positioned.directional(
+      textDirection: Directionality.of(context),
+      start: start,
+      top: top,
+      end: end,
+      bottom: bottom,
+      width: width,
+      height: height,
+      child: child,
+    );
   }
 }
 
@@ -2569,9 +2740,9 @@ class Flex extends MultiChildRenderObjectWidget {
   ///
   /// Defaults to the ambient [Directionality].
   ///
-  /// If the [direction] is [Axis.horizontal], this controls which order
-  /// children are painted in (left-to-right or right-to-left), and the meaning
-  /// of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
+  /// If the [direction] is [Axis.horizontal], this controls the order in which
+  /// the children are positioned (left-to-right or right-to-left), and the
+  /// meaning of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
   /// [MainAxisAlignment.end] values.
   ///
   /// If the [direction] is [Axis.horizontal], and either the
@@ -3150,6 +3321,12 @@ class Wrap extends MultiChildRenderObjectWidget {
   ///
   /// By default, the wrap layout is horizontal and both the children and the
   /// runs are aligned to the start.
+  ///
+  /// The [textDirection] argument defaults to the ambient [Directionality], if
+  /// any. If there is no ambient directionality, and a text direction is going
+  /// to be necessary to decide which direction to lay the children in or to
+  /// disambiguate `start` or `end` values for the main or cross axis
+  /// directions, the [textDirection] must not be null.
   Wrap({
     Key key,
     this.direction: Axis.horizontal,
@@ -3158,6 +3335,8 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.runAlignment: WrapAlignment.start,
     this.runSpacing: 0.0,
     this.crossAxisAlignment: WrapCrossAlignment.start,
+    this.textDirection,
+    this.verticalDirection: VerticalDirection.down,
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
 
@@ -3241,6 +3420,58 @@ class Wrap extends MultiChildRenderObjectWidget {
   ///    other in the cross axis.
   final WrapCrossAlignment crossAxisAlignment;
 
+  /// Determines the order to lay children out horizontally and how to interpret
+  /// `start` and `end` in the horizontal direction.
+  ///
+  /// Defaults to the ambient [Directionality].
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls order in which the
+  /// children are positioned (left-to-right or right-to-left), and the meaning
+  /// of the [alignment] property's [WrapAlignment.start] and
+  /// [WrapAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and either the
+  /// [alignment] is either [WrapAlignment.start] or [WrapAlignment.end], or
+  /// there's more than one child, then the [textDirection] (or the ambient
+  /// [Directionality]) must not be null.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls the order in which
+  /// runs are positioned, the meaning of the [runAlignment] property's
+  /// [WrapAlignment.start] and [WrapAlignment.end] values, as well as the
+  /// [crossAxisAlignment] property's [WrapCrossAlignment.start] and
+  /// [WrapCrossAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and either the
+  /// [runAlignment] is either [WrapAlignment.start] or [WrapAlignment.end], the
+  /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
+  /// [WrapCrossAlignment.end], or there's more than one child, then the
+  /// [textDirection] (or the ambient [Directionality]) must not be null.
+  final TextDirection textDirection;
+
+  /// Determines the order to lay children out vertically and how to interpret
+  /// `start` and `end` in the vertical direction.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls which order children
+  /// are painted in (down or up), the meaning of the [alignment] property's
+  /// [WrapAlignment.start] and [WrapAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and either the [alignment]
+  /// is either [WrapAlignment.start] or [WrapAlignment.end], or there's
+  /// more than one child, then the [verticalDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls the order in which
+  /// runs are positioned, the meaning of the [runAlignment] property's
+  /// [WrapAlignment.start] and [WrapAlignment.end] values, as well as the
+  /// [crossAxisAlignment] property's [WrapCrossAlignment.start] and
+  /// [WrapCrossAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and either the
+  /// [runAlignment] is either [WrapAlignment.start] or [WrapAlignment.end], the
+  /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
+  /// [WrapCrossAlignment.end], or there's more than one child, then the
+  /// [verticalDirection] must not be null.
+  final VerticalDirection verticalDirection;
+
   @override
   RenderWrap createRenderObject(BuildContext context) {
     return new RenderWrap(
@@ -3250,6 +3481,8 @@ class Wrap extends MultiChildRenderObjectWidget {
       runAlignment: runAlignment,
       runSpacing: runSpacing,
       crossAxisAlignment: crossAxisAlignment,
+      textDirection: textDirection ?? Directionality.of(context),
+      verticalDirection: verticalDirection,
     );
   }
 
@@ -3261,7 +3494,22 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..spacing = spacing
       ..runAlignment = runAlignment
       ..runSpacing = runSpacing
-      ..crossAxisAlignment = crossAxisAlignment;
+      ..crossAxisAlignment = crossAxisAlignment
+      ..textDirection = textDirection ?? Directionality.of(context)
+      ..verticalDirection = verticalDirection;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('direction', direction));
+    description.add(new EnumProperty<WrapAlignment>('alignment', alignment));
+    description.add(new DoubleProperty('spacing', spacing));
+    description.add(new EnumProperty<WrapAlignment>('runAlignment', runAlignment));
+    description.add(new DoubleProperty('runSpacing', runSpacing));
+    description.add(new DoubleProperty('crossAxisAlignment', runSpacing));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
   }
 }
 

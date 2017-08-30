@@ -219,6 +219,24 @@ void main() {
     ));
 
     await tester.pump();
+
+    // Enter a character into the obscured field and verify that the character
+    // is temporarily shown to the user and then changed to a bullet.
+    const String newChar = 'X';
+    tester.testTextInput.updateEditingValue(const TextEditingValue(
+      text: testValue + newChar,
+      selection: const TextSelection.collapsed(offset: testValue.length + 1),
+    ));
+
+    await tester.pump();
+
+    String editText = findRenderEditable(tester).text.text;
+    expect(editText.substring(editText.length - 1), newChar);
+
+    await tester.pump(const Duration(seconds: 2));
+
+    editText = findRenderEditable(tester).text.text;
+    expect(editText.substring(editText.length - 1), '\u2022');
   });
 
   testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
