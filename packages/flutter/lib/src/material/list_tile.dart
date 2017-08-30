@@ -424,10 +424,14 @@ class ListTile extends StatelessWidget {
     ));
 
     if (trailing != null) {
-      children.add(new Container(
-        margin: const EdgeInsets.only(left: 16.0),
-        alignment: FractionalOffset.centerRight,
-        child: trailing,
+      children.add(IconTheme.merge(
+        data: new IconThemeData(color: _iconColor(theme, tileTheme)),
+        child: new Container(
+          margin: const EdgeInsets.only(left: 16.0),
+          width: 40.0,
+          alignment: FractionalOffset.centerRight,
+          child: trailing,
+        ),
       ));
     }
 
