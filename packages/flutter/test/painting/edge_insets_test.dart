@@ -62,9 +62,8 @@ void main() {
     expect(const EdgeInsetsDirectional.only(top: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(0.0, 963.25, 0.0, 0.0));
     expect(const EdgeInsetsDirectional.only(end: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(963.25, 0.0, 0.0, 0.0));
     expect(const EdgeInsetsDirectional.only(bottom: 963.25).resolve(TextDirection.rtl), const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 963.25));
-    // ignore:prefer_const_constructors
-    expect(new EdgeInsetsDirectional.only(), new EdgeInsetsDirectional.only());
-    expect(const EdgeInsetsDirectional.only(top: 1.0).hashCode, isNot(const EdgeInsetsDirectional.only(bottom: 1.0)));
+    expect(new EdgeInsetsDirectional.only(), new EdgeInsetsDirectional.only()); // ignore: prefer_const_constructors
+    expect(const EdgeInsetsDirectional.only(top: 1.0), isNot(const EdgeInsetsDirectional.only(bottom: 1.0)));
     expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),
            const EdgeInsetsDirectional.fromSTEB(30.0, 20.0, 10.0, 40.0).resolve(TextDirection.rtl));
     expect(const EdgeInsetsDirectional.fromSTEB(10.0, 20.0, 30.0, 40.0).resolve(TextDirection.ltr),

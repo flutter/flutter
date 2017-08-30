@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('NetworkImage non-null url test', () {
     expect(() {
-      final String url = null; // we want these instances to be separate instances so that we're not just checking with a single object
+      final String url = null; // we don't want this instance to be const because otherwise it would throw at compile time.
       new NetworkImage(url);
     }, throwsAssertionError);
   });
