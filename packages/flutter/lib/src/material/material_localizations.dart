@@ -52,33 +52,34 @@ abstract class MaterialLocalizations {
 class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Construct an object that defines the material widgets' localized strings
   /// for the given `locale`.
-  const DefaultMaterialLocalizations(this.locale) : assert(locale != null);
+  DefaultMaterialLocalizations(this.locale) {
+    assert(locale != null);
+    _nameToValue = localizations[locale.toString()]
+      ?? localizations[locale.languageCode]
+      ?? localizations['en']
+      ?? <String, String>{};
+  }
+
+  Map<String, String> _nameToValue;
 
   /// The locale for which the values of this class's localized resources
   /// have been translated.
   final Locale locale;
 
-  String _lookup(String name) {
-    final Map<String, String> nameToValue = localizations[locale.toString()]
-      ?? localizations[locale.languageCode]
-      ?? localizations['en'];
-    return nameToValue != null ? nameToValue[name] : null;
-  }
+  @override
+  String get openAppDrawerTooltip => _nameToValue["openAppDrawerTooltip"];
 
   @override
-  String get openAppDrawerTooltip => _lookup("openAppDrawerTooltip");
+  String get backButtonTooltip => _nameToValue["backButtonTooltip"];
 
   @override
-  String get backButtonTooltip => _lookup("backButtonTooltip");
+  String get closeButtonTooltip => _nameToValue["closeButtonTooltip"];
 
   @override
-  String get closeButtonTooltip => _lookup("closeButtonTooltip");
+  String get nextMonthTooltip => _nameToValue["nextMonthTooltip"];
 
   @override
-  String get nextMonthTooltip => _lookup("nextMonthTooltip");
-
-  @override
-  String get previousMonthTooltip => _lookup("previousMonthTooltip");
+  String get previousMonthTooltip => _nameToValue["previousMonthTooltip"];
 
   /// Creates an object that provides localized resource values for the
   /// for the widgets of the material library.
