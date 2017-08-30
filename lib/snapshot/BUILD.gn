@@ -36,7 +36,7 @@ copy("generate_dart_ui") {
 if (is_fuchsia) {
   action("generate_package_map") {
     dart_deps = [
-      "//lib/fidl/dart:dart",
+      "//garnet/public/lib/fidl/dart",
       "//lib/flutter/packages/flutter:flutter",
       "//lib/widgets/packages/widgets:lib.widgets",
       "//application/lib/app/dart:dart",
