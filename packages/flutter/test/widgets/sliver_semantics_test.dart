@@ -29,7 +29,7 @@ void main() {
         child: new CustomScrollView(
           controller: scrollController,
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: appBarExpandedHeight,
               title: const Text('Semantics Test with Slivers'),
@@ -239,7 +239,7 @@ void main() {
         slivers: slivers,
       ),
     );
-    
+
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
@@ -295,10 +295,10 @@ void main() {
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
     await tester.pumpWidget(
       new MediaQuery(
-        data: new MediaQueryData(),
+        data: const MediaQueryData(),
         child: new CustomScrollView(
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
             ),
@@ -377,11 +377,11 @@ void main() {
     });
     await tester.pumpWidget(
       new MediaQuery(
-        data: new MediaQueryData(),
+        data: const MediaQueryData(),
         child: new CustomScrollView(
           controller: controller,
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
             ),
@@ -454,11 +454,11 @@ void main() {
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
     await tester.pumpWidget(
       new MediaQuery(
-        data: new MediaQueryData(),
+        data: const MediaQueryData(),
         child: new CustomScrollView(
           reverse: true,  // This is the important setting for this test.
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
             ),
@@ -538,12 +538,12 @@ void main() {
     });
     await tester.pumpWidget(
       new MediaQuery(
-        data: new MediaQueryData(),
+        data: const MediaQueryData(),
         child: new CustomScrollView(
           reverse: true,  // This is the important setting for this test.
           controller: controller,
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
             ),
@@ -624,7 +624,7 @@ void main() {
     });
     await tester.pumpWidget(
       new MediaQuery(
-        data: new MediaQueryData(),
+        data: const MediaQueryData(),
         child: new Scrollable(
           controller: controller,
           viewportBuilder: (BuildContext context, ViewportOffset offset) {
@@ -635,7 +635,7 @@ void main() {
                 new SliverList(
                   delegate: new SliverChildListDelegate(backwardChildren),
                 ),
-                new SliverAppBar(
+                const SliverAppBar(
                   pinned: true,
                   expandedHeight: 100.0,
                   flexibleSpace: const FlexibleSpaceBar(

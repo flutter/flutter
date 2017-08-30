@@ -25,8 +25,8 @@ void main() {
     expect(FractionalOffset.lerp(a, b, 0.25), equals(const FractionalOffset(0.125, 0.0)));
 
     expect(FractionalOffset.lerp(null, null, 0.25), isNull);
-    expect(FractionalOffset.lerp(null, b, 0.25), equals(new FractionalOffset(0.5, 0.5 - 0.125)));
-    expect(FractionalOffset.lerp(a, null, 0.25), equals(new FractionalOffset(0.125, 0.125)));
+    expect(FractionalOffset.lerp(null, b, 0.25), equals(const FractionalOffset(0.5, 0.5 - 0.125)));
+    expect(FractionalOffset.lerp(a, null, 0.25), equals(const FractionalOffset(0.125, 0.125)));
   });
 
   test('FractionalOffset.fromOffsetAndSize()', () {
@@ -40,26 +40,27 @@ void main() {
   });
 
   test('FractionalOffsetGeometry.resolve()', () {
-    expect(new FractionalOffsetDirectional(0.25, 0.3).resolve(TextDirection.ltr), const FractionalOffset(0.25, 0.3));
-    expect(new FractionalOffsetDirectional(0.25, 0.3).resolve(TextDirection.rtl), const FractionalOffset(0.75, 0.3));
-    expect(new FractionalOffsetDirectional(-0.25, 0.3).resolve(TextDirection.ltr), const FractionalOffset(-0.25, 0.3));
-    expect(new FractionalOffsetDirectional(-0.25, 0.3).resolve(TextDirection.rtl), const FractionalOffset(1.25, 0.3));
-    expect(new FractionalOffsetDirectional(1.25, 0.3).resolve(TextDirection.ltr), const FractionalOffset(1.25, 0.3));
-    expect(new FractionalOffsetDirectional(1.25, 0.3).resolve(TextDirection.rtl), const FractionalOffset(-0.25, 0.3));
-    expect(new FractionalOffsetDirectional(0.5, -0.3).resolve(TextDirection.ltr), const FractionalOffset(0.5, -0.3));
-    expect(new FractionalOffsetDirectional(0.5, -0.3).resolve(TextDirection.rtl), const FractionalOffset(0.5, -0.3));
-    expect(new FractionalOffsetDirectional(0.0, 0.0).resolve(TextDirection.ltr), const FractionalOffset(0.0, 0.0));
-    expect(new FractionalOffsetDirectional(0.0, 0.0).resolve(TextDirection.rtl), const FractionalOffset(1.0, 0.0));
-    expect(new FractionalOffsetDirectional(1.0, 1.0).resolve(TextDirection.ltr), const FractionalOffset(1.0, 1.0));
-    expect(new FractionalOffsetDirectional(1.0, 1.0).resolve(TextDirection.rtl), const FractionalOffset(0.0, 1.0));
-    expect(new FractionalOffsetDirectional(1.0, 2.0), new FractionalOffsetDirectional(1.0, 2.0));
-    expect(new FractionalOffsetDirectional(1.0, 2.0).hashCode, isNot(new FractionalOffsetDirectional(2.0, 1.0)));
-    expect(new FractionalOffsetDirectional(0.0, 0.0).resolve(TextDirection.ltr),
-           new FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.rtl));
-    expect(new FractionalOffsetDirectional(0.0, 0.0).resolve(TextDirection.ltr),
-     isNot(new FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.ltr)));
-    expect(new FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.ltr),
-     isNot(new FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.rtl)));
+    expect(const FractionalOffsetDirectional(0.25, 0.3).resolve(TextDirection.ltr), const FractionalOffset(0.25, 0.3));
+    expect(const FractionalOffsetDirectional(0.25, 0.3).resolve(TextDirection.rtl), const FractionalOffset(0.75, 0.3));
+    expect(const FractionalOffsetDirectional(-0.25, 0.3).resolve(TextDirection.ltr), const FractionalOffset(-0.25, 0.3));
+    expect(const FractionalOffsetDirectional(-0.25, 0.3).resolve(TextDirection.rtl), const FractionalOffset(1.25, 0.3));
+    expect(const FractionalOffsetDirectional(1.25, 0.3).resolve(TextDirection.ltr), const FractionalOffset(1.25, 0.3));
+    expect(const FractionalOffsetDirectional(1.25, 0.3).resolve(TextDirection.rtl), const FractionalOffset(-0.25, 0.3));
+    expect(const FractionalOffsetDirectional(0.5, -0.3).resolve(TextDirection.ltr), const FractionalOffset(0.5, -0.3));
+    expect(const FractionalOffsetDirectional(0.5, -0.3).resolve(TextDirection.rtl), const FractionalOffset(0.5, -0.3));
+    expect(const FractionalOffsetDirectional(0.0, 0.0).resolve(TextDirection.ltr), const FractionalOffset(0.0, 0.0));
+    expect(const FractionalOffsetDirectional(0.0, 0.0).resolve(TextDirection.rtl), const FractionalOffset(1.0, 0.0));
+    expect(const FractionalOffsetDirectional(1.0, 1.0).resolve(TextDirection.ltr), const FractionalOffset(1.0, 1.0));
+    expect(const FractionalOffsetDirectional(1.0, 1.0).resolve(TextDirection.rtl), const FractionalOffset(0.0, 1.0));
+    final double $1 = 1.0; // we want these instances to be separate instances so that we're not just checking with a single object
+    expect(new FractionalOffsetDirectional($1, 2.0), new FractionalOffsetDirectional($1, 2.0));
+    expect(const FractionalOffsetDirectional(1.0, 2.0), isNot(const FractionalOffsetDirectional(2.0, 1.0)));
+    expect(const FractionalOffsetDirectional(0.0, 0.0).resolve(TextDirection.ltr),
+           const FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.rtl));
+    expect(const FractionalOffsetDirectional(0.0, 0.0).resolve(TextDirection.ltr),
+     isNot(const FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.ltr)));
+    expect(const FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.ltr),
+     isNot(const FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.rtl)));
   });
 
   test('FractionalOffsetGeometry.lerp', () {
@@ -111,34 +112,34 @@ void main() {
   });
 
   test('FractionalOffsetGeometry operators', () {
-    expect(new FractionalOffsetDirectional(1.0, 2.0) * 2.0, new FractionalOffsetDirectional(2.0, 4.0));
-    expect(new FractionalOffsetDirectional(1.0, 2.0) / 2.0, new FractionalOffsetDirectional(0.5, 1.0));
-    expect(new FractionalOffsetDirectional(1.0, 2.0) % 2.0, new FractionalOffsetDirectional(1.0, 0.0));
-    expect(new FractionalOffsetDirectional(1.0, 2.0) ~/ 2.0, new FractionalOffsetDirectional(0.0, 1.0));
-    expect(FractionalOffset.topLeft.add(new FractionalOffsetDirectional(1.0, 2.0) * 2.0), new FractionalOffsetDirectional(2.0, 4.0));
-    expect(FractionalOffset.topLeft.add(new FractionalOffsetDirectional(1.0, 2.0) / 2.0), new FractionalOffsetDirectional(0.5, 1.0));
-    expect(FractionalOffset.topLeft.add(new FractionalOffsetDirectional(1.0, 2.0) % 2.0), new FractionalOffsetDirectional(1.0, 0.0));
-    expect(FractionalOffset.topLeft.add(new FractionalOffsetDirectional(1.0, 2.0) ~/ 2.0), new FractionalOffsetDirectional(0.0, 1.0));
-    expect(new FractionalOffset(1.0, 2.0) * 2.0, new FractionalOffset(2.0, 4.0));
-    expect(new FractionalOffset(1.0, 2.0) / 2.0, new FractionalOffset(0.5, 1.0));
-    expect(new FractionalOffset(1.0, 2.0) % 2.0, new FractionalOffset(1.0, 0.0));
-    expect(new FractionalOffset(1.0, 2.0) ~/ 2.0, new FractionalOffset(0.0, 1.0));
+    expect(const FractionalOffsetDirectional(1.0, 2.0) * 2.0, const FractionalOffsetDirectional(2.0, 4.0));
+    expect(const FractionalOffsetDirectional(1.0, 2.0) / 2.0, const FractionalOffsetDirectional(0.5, 1.0));
+    expect(const FractionalOffsetDirectional(1.0, 2.0) % 2.0, const FractionalOffsetDirectional(1.0, 0.0));
+    expect(const FractionalOffsetDirectional(1.0, 2.0) ~/ 2.0, const FractionalOffsetDirectional(0.0, 1.0));
+    expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) * 2.0), const FractionalOffsetDirectional(2.0, 4.0));
+    expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) / 2.0), const FractionalOffsetDirectional(0.5, 1.0));
+    expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) % 2.0), const FractionalOffsetDirectional(1.0, 0.0));
+    expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) ~/ 2.0), const FractionalOffsetDirectional(0.0, 1.0));
+    expect(const FractionalOffset(1.0, 2.0) * 2.0, const FractionalOffset(2.0, 4.0));
+    expect(const FractionalOffset(1.0, 2.0) / 2.0, const FractionalOffset(0.5, 1.0));
+    expect(const FractionalOffset(1.0, 2.0) % 2.0, const FractionalOffset(1.0, 0.0));
+    expect(const FractionalOffset(1.0, 2.0) ~/ 2.0, const FractionalOffset(0.0, 1.0));
   });
 
   test('FractionalOffsetGeometry operators', () {
-    expect(new FractionalOffset(1.0, 2.0) + new FractionalOffset(3.0, 5.0), new FractionalOffset(4.0, 7.0));
-    expect(new FractionalOffset(1.0, 2.0) - new FractionalOffset(3.0, 5.0), new FractionalOffset(-2.0, -3.0));
-    expect(new FractionalOffsetDirectional(1.0, 2.0) + new FractionalOffsetDirectional(3.0, 5.0), new FractionalOffsetDirectional(4.0, 7.0));
-    expect(new FractionalOffsetDirectional(1.0, 2.0) - new FractionalOffsetDirectional(3.0, 5.0), new FractionalOffsetDirectional(-2.0, -3.0));
+    expect(const FractionalOffset(1.0, 2.0) + const FractionalOffset(3.0, 5.0), const FractionalOffset(4.0, 7.0));
+    expect(const FractionalOffset(1.0, 2.0) - const FractionalOffset(3.0, 5.0), const FractionalOffset(-2.0, -3.0));
+    expect(const FractionalOffsetDirectional(1.0, 2.0) + const FractionalOffsetDirectional(3.0, 5.0), const FractionalOffsetDirectional(4.0, 7.0));
+    expect(const FractionalOffsetDirectional(1.0, 2.0) - const FractionalOffsetDirectional(3.0, 5.0), const FractionalOffsetDirectional(-2.0, -3.0));
   });
 
   test('FractionalOffsetGeometry toString', () {
-    expect(new FractionalOffset(1.0001, 2.0001).toString(), 'FractionalOffset(1.0, 2.0)');
-    expect(new FractionalOffset(0.0, 0.0).toString(), 'FractionalOffset.topLeft');
-    expect(new FractionalOffset(0.0, 1.0).add(new FractionalOffsetDirectional(1.0, 0.0)).toString(), 'FractionalOffsetDirectional.bottomEnd');
-    expect(new FractionalOffset(0.0001, 0.0001).toString(), 'FractionalOffset(0.0, 0.0)');
-    expect(new FractionalOffset(0.0, 0.0).toString(), 'FractionalOffset.topLeft');
-    expect(new FractionalOffsetDirectional(0.0, 0.0).toString(), 'FractionalOffsetDirectional.topStart');
-    expect(new FractionalOffset(1.0, 1.0).add(new FractionalOffsetDirectional(1.0, 1.0)).toString(), 'FractionalOffset(1.0, 2.0) + FractionalOffsetDirectional(1.0, 0.0)');
+    expect(const FractionalOffset(1.0001, 2.0001).toString(), 'FractionalOffset(1.0, 2.0)');
+    expect(const FractionalOffset(0.0, 0.0).toString(), 'FractionalOffset.topLeft');
+    expect(const FractionalOffset(0.0, 1.0).add(const FractionalOffsetDirectional(1.0, 0.0)).toString(), 'FractionalOffsetDirectional.bottomEnd');
+    expect(const FractionalOffset(0.0001, 0.0001).toString(), 'FractionalOffset(0.0, 0.0)');
+    expect(const FractionalOffset(0.0, 0.0).toString(), 'FractionalOffset.topLeft');
+    expect(const FractionalOffsetDirectional(0.0, 0.0).toString(), 'FractionalOffsetDirectional.topStart');
+    expect(const FractionalOffset(1.0, 1.0).add(const FractionalOffsetDirectional(1.0, 1.0)).toString(), 'FractionalOffset(1.0, 2.0) + FractionalOffsetDirectional(1.0, 0.0)');
   });
 }

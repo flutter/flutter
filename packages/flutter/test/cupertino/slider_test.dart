@@ -181,9 +181,9 @@ void main() {
     ));
 
     // Disable slider
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: new CupertinoSlider(
+      child: const CupertinoSlider(
         value: 0.5,
         onChanged: null,
       ),
