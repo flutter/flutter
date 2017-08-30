@@ -387,7 +387,7 @@ class _AppBarState extends State<AppBar> {
     }
 
     final Widget toolbar = new Padding(
-      padding: const EdgeInsets.only(right: 4.0),
+      padding: const EdgeInsetsDirectional.only(end: 4.0),
       child: new NavigationToolbar(
         leading: leading,
         middle: title,

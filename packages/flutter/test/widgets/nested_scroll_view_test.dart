@@ -21,10 +21,10 @@ class _CustomPhysics extends ClampingScrollPhysics {
 }
 
 Widget buildTest({ ScrollController controller, String title:'TTTTTTTT' }) {
-  return new MediaQuery(
-    data: const MediaQueryData(),
-    child: new Directionality(
-      textDirection: TextDirection.ltr,
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new MediaQuery(
+      data: const MediaQueryData(),
       child: new Scaffold(
         body: new DefaultTabController(
           length: 4,
@@ -307,20 +307,24 @@ void main() {
   });
 
   testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(),
-      child: new NestedScrollView(
-        physics: const _CustomPhysics(),
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            const SliverAppBar(
-              floating: true,
-              title: const Text('AA'),
-            ),
-          ];
-        },
-        body: new Container(),
-    )));
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
+        child: new NestedScrollView(
+          physics: const _CustomPhysics(),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              const SliverAppBar(
+                floating: true,
+                title: const Text('AA'),
+              ),
+            ];
+          },
+          body: new Container(),
+        ),
+      ),
+    ));
     expect(find.text('AA'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 500));
     final Offset point1 = tester.getCenter(find.text('AA'));

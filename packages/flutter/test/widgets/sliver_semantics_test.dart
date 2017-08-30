@@ -23,8 +23,9 @@ void main() {
         child: new Text('Item $i'),
       );
     });
-    await tester.pumpWidget(
-      new MediaQuery(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
         data: const MediaQueryData(),
         child: new CustomScrollView(
           controller: scrollController,
@@ -39,6 +40,7 @@ void main() {
             ),
           ],
         ),
+      ),
     ));
 
     // AppBar is child of node with semantic scroll actions.
@@ -293,8 +295,9 @@ void main() {
       );
     });
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
-    await tester.pumpWidget(
-      new MediaQuery(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
         data: const MediaQueryData(),
         child: new CustomScrollView(
           slivers: <Widget>[
@@ -309,7 +312,7 @@ void main() {
           controller: controller,
         ),
       ),
-    );
+    ));
 
     // 'Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
@@ -375,8 +378,9 @@ void main() {
         ),
       );
     });
-    await tester.pumpWidget(
-      new MediaQuery(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
         data: const MediaQueryData(),
         child: new CustomScrollView(
           controller: controller,
@@ -388,7 +392,7 @@ void main() {
           ]..addAll(slivers),
         ),
       ),
-    );
+    ));
 
     // 'Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
@@ -452,8 +456,9 @@ void main() {
       );
     });
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
-    await tester.pumpWidget(
-      new MediaQuery(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
         data: const MediaQueryData(),
         child: new CustomScrollView(
           reverse: true,  // This is the important setting for this test.
@@ -469,7 +474,7 @@ void main() {
           controller: controller,
         ),
       ),
-    );
+    ));
 
     // 'Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
@@ -536,8 +541,9 @@ void main() {
         ),
       );
     });
-    await tester.pumpWidget(
-      new MediaQuery(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
         data: const MediaQueryData(),
         child: new CustomScrollView(
           reverse: true,  // This is the important setting for this test.
@@ -550,7 +556,7 @@ void main() {
           ]..addAll(slivers),
         ),
       ),
-    );
+    ));
 
     // 'Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
@@ -622,8 +628,9 @@ void main() {
         child: new Text('Backward Item $i'),
       );
     });
-    await tester.pumpWidget(
-      new MediaQuery(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
         data: const MediaQueryData(),
         child: new Scrollable(
           controller: controller,
@@ -658,7 +665,7 @@ void main() {
           },
         ),
       ),
-    );
+    ));
 
     // 'Forward Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Forward Item 0')));

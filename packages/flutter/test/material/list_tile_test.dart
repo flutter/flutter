@@ -126,11 +126,11 @@ void main() {
   });
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
-      child: new Material(
-        child: new Center(
-          child: new ListTile(
+      child: const Material(
+        child: const Center(
+          child: const ListTile(
             leading: const Text('leading'),
             title: const Text('title'),
             trailing: const Text('trailing'),
