@@ -1187,7 +1187,7 @@ class Align extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// If non-null, sets its width to the child's width multipled by this factor.
   ///
@@ -1200,20 +1200,28 @@ class Align extends SingleChildRenderObjectWidget {
   final double heightFactor;
 
   @override
-  RenderPositionedBox createRenderObject(BuildContext context) => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
+  RenderPositionedBox createRenderObject(BuildContext context) {
+    return new RenderPositionedBox(
+      alignment: alignment,
+      widthFactor: widthFactor,
+      heightFactor: heightFactor,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPositionedBox renderObject) {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
-      ..heightFactor = heightFactor;
+      ..heightFactor = heightFactor
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
     description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
     description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
@@ -1539,7 +1547,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
     this.alignment: FractionalOffset.center,
     this.widthFactor,
     this.heightFactor,
-    Widget child
+    Widget child,
   }) : assert(alignment != null),
        assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0),
@@ -1572,14 +1580,15 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   @override
   RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) {
     return new RenderFractionallySizedOverflowBox(
       alignment: alignment,
       widthFactor: widthFactor,
-      heightFactor: heightFactor
+      heightFactor: heightFactor,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -1588,13 +1597,14 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
-      ..heightFactor = heightFactor;
+      ..heightFactor = heightFactor
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
     description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
     description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
@@ -1680,7 +1690,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     this.maxWidth,
     this.minHeight,
     this.maxHeight,
-    Widget child
+    Widget child,
   }) : super(key: key, child: child);
 
   /// How to align the child.
@@ -1692,7 +1702,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -1717,7 +1727,8 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       minWidth: minWidth,
       maxWidth: maxWidth,
       minHeight: minHeight,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -1728,13 +1739,14 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       ..minWidth = minWidth
       ..maxWidth = maxWidth
       ..minHeight = minHeight
-      ..maxHeight = maxHeight;
+      ..maxHeight = maxHeight
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
     description.add(new DoubleProperty('minWidth', minWidth, defaultValue: null));
     description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: null));
     description.add(new DoubleProperty('minHeight', minHeight, defaultValue: null));
@@ -1752,7 +1764,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
     Key key,
     @required this.size,
     this.alignment: FractionalOffset.center,
-    Widget child
+    Widget child,
   }) : assert(size != null),
        assert(alignment != null),
        super(key: key, child: child);
@@ -1766,7 +1778,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// The size this widget should attempt to be.
   final Size size;
@@ -1775,7 +1787,8 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   RenderSizedOverflowBox createRenderObject(BuildContext context) {
     return new RenderSizedOverflowBox(
       alignment: alignment,
-      requestedSize: size
+      requestedSize: size,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -1783,13 +1796,14 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSizedOverflowBox renderObject) {
     renderObject
       ..alignment = alignment
-      ..requestedSize = size;
+      ..requestedSize = size
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
     description.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }

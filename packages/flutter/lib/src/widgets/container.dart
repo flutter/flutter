@@ -278,7 +278,7 @@ class Container extends StatelessWidget {
   /// constraints are unbounded, then the child will be shrink-wrapped instead.
   ///
   /// Ignored if [child] is null.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
   /// placed inside this padding.
@@ -362,7 +362,7 @@ class Container extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));

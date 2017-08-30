@@ -42,7 +42,7 @@ class TestTextState extends State<TestText> {
 }
 
 void main() {
-  testWidgets('ListTile geometry', (WidgetTester tester) async {
+  testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
     // See https://material.io/guidelines/components/lists.html
 
     bool hasSubtitle;
@@ -123,6 +123,33 @@ void main() {
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(76.0);
+  });
+
+  testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.rtl,
+      child: new Material(
+        child: new Center(
+          child: new ListTile(
+            leading: const Text('leading'),
+            title: const Text('title'),
+            trailing: const Text('trailing'),
+          ),
+        ),
+      ),
+    ));
+
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+
+    void testHorizontalGeometry() {
+      expect(right('leading'), 800.0 - 16.0);
+      expect(right('title'), 800.0 - 72.0);
+      expect(left('leading') - right('title'), 16.0);
+      expect(left('trailing'), 16.0);
+    }
+
+    testHorizontalGeometry();
   });
 
   testWidgets('ListTile.divideTiles', (WidgetTester tester) async {
