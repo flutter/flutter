@@ -19,8 +19,9 @@ class TestCanvas implements Canvas {
 
 void main() {
   testWidgets('Scrollbar doesn\'t show when tapping list', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new Center(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Center(
         child: new Container(
           decoration: new BoxDecoration(
             border: new Border.all(color: const Color(0xFFFFFF00))
@@ -38,12 +39,12 @@ void main() {
                 new Container(height: 40.0, child: const Text('5')),
                 new Container(height: 40.0, child: const Text('6')),
                 new Container(height: 40.0, child: const Text('7')),
-              ]
-            )
-          )
-        )
-      )
-    );
+              ],
+            ),
+          ),
+        ),
+      ),
+    ));
 
     SchedulerBinding.instance.debugAssertNoTransientCallbacks('Building a list with a scrollbar triggered an animation.');
     await tester.tap(find.byType(ListView));
@@ -61,19 +62,20 @@ void main() {
   });
 
   testWidgets('ScrollbarPainter does not divide by zero', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new Container(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Container(
         height: 200.0,
         width: 300.0,
         child: new Scrollbar(
           child: new ListView(
             children: <Widget>[
               new Container(height: 40.0, child: const Text('0')),
-            ]
-          )
-        )
-      )
-    );
+            ],
+          ),
+        ),
+      ),
+    ));
 
     final CustomPaint custom = tester.widget(find.descendant(of: find.byType(Scrollbar), matching: find.byType(CustomPaint)).first);
     final dynamic scrollPainter = custom.foregroundPainter;
