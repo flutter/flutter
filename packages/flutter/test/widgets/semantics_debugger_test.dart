@@ -219,13 +219,16 @@ void main() {
 
     await tester.pumpWidget(
       new SemanticsDebugger(
-        child: new Material(
-          child: new Center(
-            child: new Slider(
-              value: value,
-              onChanged: (double newValue) {
-                value = newValue;
-              },
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new Center(
+              child: new Slider(
+                value: value,
+                onChanged: (double newValue) {
+                  value = newValue;
+                },
+              ),
             ),
           ),
         ),
