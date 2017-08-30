@@ -52,7 +52,7 @@ class ExpandIcon extends StatefulWidget {
   /// gestures.
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
   _ExpandIconState createState() => new _ExpandIconState();

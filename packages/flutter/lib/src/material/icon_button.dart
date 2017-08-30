@@ -103,12 +103,12 @@ class IconButton extends StatelessWidget {
   /// to input gestures.
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// Defines how the icon is positioned within the IconButton.
   ///
   /// This property must not be null. It defaults to [FractionalOffset.center].
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// The icon to display inside the button.
   ///
