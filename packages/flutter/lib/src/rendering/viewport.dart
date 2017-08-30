@@ -403,7 +403,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       final GrowthDirection growthDirection = pivotParent.constraints.growthDirection;
       switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
         case AxisDirection.up:
-          leadingScrollOffset = pivot.size.height - bounds.bottom;
+          double offset;
+          switch (growthDirection) {
+            case GrowthDirection.forward:
+              offset = bounds.bottom;
+              break;
+            case GrowthDirection.reverse:
+              offset = bounds.top;
+              break;
+          }
+          leadingScrollOffset = pivot.size.height - offset;
           targetMainAxisExtent = bounds.height;
           break;
         case AxisDirection.right:
@@ -415,7 +424,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
           targetMainAxisExtent = bounds.height;
           break;
         case AxisDirection.left:
-          leadingScrollOffset = pivot.size.width - bounds.right;
+          double offset;
+          switch (growthDirection) {
+            case GrowthDirection.forward:
+              offset = bounds.right;
+              break;
+            case GrowthDirection.reverse:
+              offset = bounds.left;
+              break;
+          }
+          leadingScrollOffset = pivot.size.width - offset;
           targetMainAxisExtent = bounds.width;
           break;
       }
