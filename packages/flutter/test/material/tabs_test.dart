@@ -802,8 +802,9 @@ void main() {
       length: 3,
     );
 
-    await tester.pumpWidget(
-      new SizedBox.expand(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new SizedBox.expand(
         child: new Center(
           child: new SizedBox(
             width: 400.0,
@@ -819,7 +820,7 @@ void main() {
           ),
         ),
       ),
-    );
+    ));
 
     expect(tabController.index, 1);
 
@@ -848,8 +849,9 @@ void main() {
       length: 3,
     );
 
-    await tester.pumpWidget(
-      new SizedBox.expand(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new SizedBox.expand(
         child: new Center(
           child: new SizedBox(
             width: 400.0,
@@ -866,7 +868,7 @@ void main() {
           ),
         ),
       ),
-    );
+    ));
 
     expect(tabController.index, 1);
 

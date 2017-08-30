@@ -11,15 +11,44 @@ import 'package:flutter/widgets.dart';
 Finder findKey(int i) => find.byKey(new ValueKey<int>(i));
 
 Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse: false }) {
-  return new Center(
-    child: new SizedBox(
-      width: 600.0,
-      height: 400.0,
-      child: new SingleChildScrollView(
-        scrollDirection: scrollDirection,
-        reverse: reverse,
-        child: new ListBody(
-          mainAxis: scrollDirection,
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Center(
+      child: new SizedBox(
+        width: 600.0,
+        height: 400.0,
+        child: new SingleChildScrollView(
+          scrollDirection: scrollDirection,
+          reverse: reverse,
+          child: new ListBody(
+            mainAxis: scrollDirection,
+            children: <Widget>[
+              new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
+              new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
+              new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0),
+              new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0),
+              new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0),
+              new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0),
+              new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget buildListView(Axis scrollDirection, { bool reverse: false, bool shrinkWrap: false }) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Center(
+      child: new SizedBox(
+        width: 600.0,
+        height: 400.0,
+        child: new ListView(
+          scrollDirection: scrollDirection,
+          reverse: reverse,
+          shrinkWrap: shrinkWrap,
           children: <Widget>[
             new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
             new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
@@ -30,29 +59,6 @@ Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse: false })
             new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
           ],
         ),
-      ),
-    ),
-  );
-}
-
-Widget buildListView(Axis scrollDirection, { bool reverse: false, bool shrinkWrap: false }) {
-  return new Center(
-    child: new SizedBox(
-      width: 600.0,
-      height: 400.0,
-      child: new ListView(
-        scrollDirection: scrollDirection,
-        reverse: reverse,
-        shrinkWrap: shrinkWrap,
-        children: <Widget>[
-          new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
-          new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
-          new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0),
-          new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0),
-          new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0),
-          new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0),
-          new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
-        ],
       ),
     ),
   );
@@ -423,8 +429,9 @@ void main() {
         await tester.pump();
       }
 
-      await tester.pumpWidget(
-        new Center(
+      await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
           child: new SizedBox(
             width: 600.0,
             height: 400.0,
@@ -454,7 +461,7 @@ void main() {
             ),
           ),
         )
-      );
+      ));
 
       await prepare(321.0);
       Scrollable.ensureVisible(findContext(0));

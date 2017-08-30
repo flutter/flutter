@@ -449,10 +449,17 @@ class _PageViewState extends State<PageView> {
   }
 
   AxisDirection _getDirection(BuildContext context) {
-    // TODO(abarth): Consider reading direction.
     switch (widget.scrollDirection) {
       case Axis.horizontal:
-        return widget.reverse ? AxisDirection.left : AxisDirection.right;
+        final TextDirection textDirection = Directionality.of(context);
+        assert(textDirection != null);
+        switch (textDirection) {
+          case TextDirection.rtl:
+            return widget.reverse ? AxisDirection.right : AxisDirection.left;
+          case TextDirection.ltr:
+            return widget.reverse ? AxisDirection.left : AxisDirection.right;
+        }
+        return null;
       case Axis.vertical:
         return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }
