@@ -391,9 +391,9 @@ class ListTile extends StatelessWidget {
       children.add(IconTheme.merge(
         data: new IconThemeData(color: _iconColor(theme, tileTheme)),
         child: new Container(
-          margin: const EdgeInsets.only(right: 16.0),
+          margin: const EdgeInsetsDirectional.only(end: 16.0),
           width: 40.0,
-          alignment: FractionalOffset.centerLeft,
+          alignment: FractionalOffsetDirectional.centerStart,
           child: leading,
         ),
       ));
@@ -425,8 +425,8 @@ class ListTile extends StatelessWidget {
 
     if (trailing != null) {
       children.add(new Container(
-        margin: const EdgeInsets.only(left: 16.0),
-        alignment: FractionalOffset.centerRight,
+        margin: const EdgeInsetsDirectional.only(start: 16.0),
+        alignment: FractionalOffsetDirectional.centerEnd,
         child: trailing,
       ));
     }
