@@ -61,7 +61,7 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
     .listen((String s) { printTrace('compile debug message: $s'); });
   server.stdout
     .transform(UTF8.decoder)
-    .transform(new LineSplitter())
+    .transform(const LineSplitter())
     .listen(stdoutHandler.handler);
   await server.exitCode;
   return stdoutHandler.outputFilename.future;
@@ -84,6 +84,12 @@ class ResidentCompiler {
   Process _server;
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
 
+  /// If invoked for the first time, it compiles Dart script identified by
+  /// [mainPath], [invalidatedFiles] list is ignored.
+  /// Otherwise, [mainPath] is ignored, but [invalidatedFiles] is recompiled
+  /// into new binary.
+  /// Binary file name is returned if compilation was successful, otherwise
+  /// `null` is returned.
   Future<String> recompile(String mainPath, List<String> invalidatedFiles) async {
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
@@ -114,11 +120,11 @@ class ResidentCompiler {
     }
     _server.stdout
       .transform(UTF8.decoder)
-      .transform(new LineSplitter())
+      .transform(const LineSplitter())
       .listen(stdoutHandler.handler);
     _server.stderr
       .transform(UTF8.decoder)
-      .transform(new LineSplitter())
+      .transform(const LineSplitter())
       .listen((String s) { printTrace('compile debug message: $s'); });
 
     _server.stdin.writeln('compile $scriptFilename');
@@ -126,10 +132,17 @@ class ResidentCompiler {
     return stdoutHandler.outputFilename.future;
   }
 
+
+  /// Should be invoked when results of compilation are accepted by the client.
+  ///
+  /// Either [accept] or [reject] should be called after every [recompile] call.
   void accept() {
     _server.stdin.writeln('accept');
   }
 
+  /// Should be invoked when results of compilation are rejected by the client.
+  ///
+  /// Either [accept] or [reject] should be called after every [recompile] call.
   void reject() {
     _server.stdin.writeln('reject');
   }
