@@ -13,7 +13,7 @@ import 'i18n/localizations.dart';
 ///
 /// See also:
 ///
-///  * [DefaultMaterialLocalizations], which implements this interface and
+///  * [DefaultMaterialLocalizations], which implements this interface
 ///    and supports a variety of locales.
 abstract class MaterialLocalizations {
   /// The tooltip for the leading [AppBar] menu (aka 'hamburger') button
