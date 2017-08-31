@@ -110,11 +110,10 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
-    argParser.addOption('kernel',
+    argParser.addFlag('preview-dart-2',
         hide: !verboseHelp,
-        help: 'Path to a pre-built kernel blob to use when running.\n'
-              'This option only exists for testing new kernel code execution on devices\n'
-              'and is not needed during normal application development.');
+        defaultsTo: false,
+        help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Specify the path to the .packages file.');
@@ -177,7 +176,7 @@ class RunCommand extends RunCommandBase {
   @override
   Future<Map<String, String>> get usageValues async {
     final bool isEmulator = await devices[0].isLocalEmulator;
-    final String deviceType = devices.length == 1 
+    final String deviceType = devices.length == 1
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple';
 
@@ -300,7 +299,7 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(device);
+      return new FlutterDevice(device, previewDart2: argResults['preview-dart-2']);
     }).toList();
 
     ResidentRunner runner;
@@ -311,7 +310,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
-        kernelFilePath: argResults['kernel'],
+        previewDart2: argResults['preview-dart-2'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: argResults['packages'],
         projectAssets: argResults['project-assets'],
@@ -324,6 +323,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
+        previewDart2: argResults['preview-dart-2'],
         stayResident: stayResident,
       );
     }

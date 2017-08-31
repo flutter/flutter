@@ -42,6 +42,10 @@ TaskFunction createFlutterGalleryBuildTest() {
   return new BuildTest('${flutterDirectory.path}/examples/flutter_gallery');
 }
 
+TaskFunction createFlutterGalleryPreviewDart2BuildTest() {
+  return new BuildTest('${flutterDirectory.path}/examples/flutter_gallery', previewDart2: true);
+}
+
 TaskFunction createComplexLayoutBuildTest() {
   return new BuildTest('${flutterDirectory.path}/dev/benchmarks/complex_layout');
 }
@@ -165,9 +169,9 @@ class PerfTest {
 /// Measures how long it takes to build a Flutter app and how big the compiled
 /// code is.
 class BuildTest {
+  const BuildTest(this.testDirectory, {this.previewDart2: false});
 
-  const BuildTest(this.testDirectory);
-
+  final bool previewDart2;
   final String testDirectory;
 
   Future<TaskResult> call() async {
@@ -176,8 +180,8 @@ class BuildTest {
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final Map<String, dynamic> aotResults = await _buildAot();
-      final Map<String, dynamic> debugResults = await _buildDebug();
+      final Map<String, dynamic> aotResults = await _buildAot(previewDart2);
+      final Map<String, dynamic> debugResults = await _buildDebug(previewDart2);
 
       final Map<String, dynamic> metrics = <String, dynamic>{}
         ..addAll(aotResults)
@@ -187,16 +191,19 @@ class BuildTest {
     });
   }
 
-  static Future<Map<String, dynamic>> _buildAot() async {
+  static Future<Map<String, dynamic>> _buildAot(bool previewDart2) async {
     await flutter('build', options: <String>['clean']);
     final Stopwatch watch = new Stopwatch()..start();
-    final String buildLog = await evalFlutter('build', options: <String>[
+    final List<String> options = <String>[
       'aot',
       '-v',
       '--release',
       '--no-pub',
-      '--target-platform', 'android-arm'  // Generate blobs instead of assembly.
-    ]);
+      '--target-platform', 'android-arm',  // Generate blobs instead of assembly.
+    ];
+    if (previewDart2)
+      options.add('--preview-dart-2');
+    final String buildLog = await evalFlutter('build', options: options);
     watch.stop();
 
     final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
@@ -210,7 +217,7 @@ class BuildTest {
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _buildDebug() async {
+  static Future<Map<String, dynamic>> _buildDebug(bool previewDart2) async {
     await flutter('build', options: <String>['clean']);
 
     final Stopwatch watch = new Stopwatch();
@@ -221,7 +228,10 @@ class BuildTest {
       watch.stop();
     } else {
       watch.start();
-      await flutter('build', options: <String>['apk', '--debug']);
+      final List<String> options = <String>['apk', '--debug'];
+      if (previewDart2)
+        options.add('--preview-dart-2');
+      await flutter('build', options: options);
       watch.stop();
     }
 
