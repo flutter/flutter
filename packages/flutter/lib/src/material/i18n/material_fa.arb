@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "منوی ناوبری را باز کنید",
   "backButtonTooltip": "بازگشت",
   "closeButtonTooltip": "بستن",

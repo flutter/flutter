@@ -80,6 +80,25 @@ abstract class MaterialLocalizations {
   /// Label for the [AboutBox] button that shows the [LicensePage].
   String get viewLicensesButtonLabel;
 
+  /// The abbreviation for ante meridiem (before noon) shown in the time picker.
+  String get anteMeridiemAbbreviation;
+
+  /// The abbreviation for post meridiem (after noon) shown in the time picker.
+  String get postMeridiemAbbreviation;
+
+  /// The pattern used to format time of day.
+  ///
+  /// This should match a "Short Time" pattern as defined by ICU, such as
+  /// "HH:mm" and "h:mm a".
+  ///
+  /// See also:
+  ///
+  ///  * http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US shows the
+  ///    short time pattern used in locale en_US
+  ///  * [TimeOfDayFormats] contains patterns implemented by Flutter's material
+  ///    library.
+  String get timeOfDayFormat;
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -104,19 +123,27 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  DefaultMaterialLocalizations(this.locale) {
+  factory DefaultMaterialLocalizations(Locale locale) {
     assert(locale != null);
-    _nameToValue = localizations[_localeName]
-      ?? localizations[locale.languageCode]
-      ?? localizations['en']
-      ?? <String, String>{};
+    final Map<String, String> englishLocalizations = localizations['en'];
+    assert(englishLocalizations != null);
+
+    final Map<String, String> result = <String, String>{};
+    result.addAll(englishLocalizations);
+    if (locale.languageCode != 'en' && localizations.containsKey(locale.languageCode))
+      result.addAll(localizations[locale.languageCode]);
+    if (localizations.containsKey(locale.toString()))
+      result.addAll(localizations[locale.toString()]);
+    return new DefaultMaterialLocalizations._(locale, result);
   }
 
-  Map<String, String> _nameToValue;
+  DefaultMaterialLocalizations._(this.locale, this._nameToValue);
 
   /// The locale for which the values of this class's localized resources
   /// have been translated.
   final Locale locale;
+
+  final Map<String, String> _nameToValue;
 
   String get _localeName {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
@@ -223,6 +250,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => _nameToValue['viewLicensesButtonLabel'];
+
+  @override
+  String get anteMeridiemAbbreviation => _nameToValue["anteMeridiemAbbreviation"];
+
+  @override
+  String get postMeridiemAbbreviation => _nameToValue["postMeridiemAbbreviation"];
+
+  @override
+  String get timeOfDayFormat => _nameToValue["timeOfDayFormat"];
 
   /// Creates an object that provides localized resource values for the
   /// for the widgets of the material library.

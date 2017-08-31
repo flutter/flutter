@@ -43,7 +43,7 @@ AxisDirection _getDefaultCrossAxisDirection(BuildContext context, AxisDirection 
 /// example, if the [axisDirection] is [AxisDirection.down], the first sliver
 /// before [center] is placed above the [center]. The slivers that are later in
 /// the child list than [center] are placed in order in the [axisDirection]. For
-/// example, in the preceeding scenario, the first sliver after [center] is
+/// example, in the preceding scenario, the first sliver after [center] is
 /// placed below the [center].
 ///
 /// [Viewport] cannot contain box children directly. Instead, use a

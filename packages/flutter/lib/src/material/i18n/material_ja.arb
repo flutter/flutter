@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "ナビゲーションメニューを開く",
   "backButtonTooltip": "戻る",
   "closeButtonTooltip": "閉じる",

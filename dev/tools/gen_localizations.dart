@@ -76,7 +76,7 @@ String generateLocalizationsMap() {
 const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {''');
 
   final String lastLocale = localeToResources.keys.last;
-  for (String locale in localeToResources.keys) {
+  for (String locale in localeToResources.keys.toList()..sort()) {
     output.writeln('  "$locale": const <String, String>{');
 
     final Map<String, String> resources = localeToResources[locale];
@@ -126,7 +126,7 @@ void main(List<String> args) {
     }
   }
 
-  final String regenerate = 'dart gen_localizations ${directory.path} ${args[1]}';
+  final String regenerate = 'dart dev/tools/gen_localizations.dart ${directory.path} ${args[1]}';
   print(outputHeader.replaceFirst('@(regenerate)', regenerate));
   print(generateLocalizationsMap());
 }

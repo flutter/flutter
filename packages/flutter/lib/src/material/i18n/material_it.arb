@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "HH:mm",
   "openAppDrawerTooltip": "Apri il menu di navigazione",
   "backButtonTooltip": "Indietro",
   "closeButtonTooltip": "Chiudi",
