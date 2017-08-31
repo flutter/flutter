@@ -424,7 +424,7 @@ void main() {
       buildFrame(
         buildContent: (BuildContext context) {
           pageContext = context;
-          return new Text('Hello World');
+          return const Text('Hello World');
         }
       )
     );
