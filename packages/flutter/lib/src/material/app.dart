@@ -26,18 +26,16 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationStyle: TextDecorationStyle.double
 );
 
-// Delegate that fetches the default (English) strings.
 class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const _MaterialLocalizationsDelegate();
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) {
-    return new SynchronousFuture<MaterialLocalizations>(const MaterialLocalizations());
-  }
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
 }
+
 
 /// An application that uses material design.
 ///
