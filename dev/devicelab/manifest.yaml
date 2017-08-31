@@ -132,7 +132,6 @@ tasks:
       Runs tests of flutter run commands.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
-    flaky: true
 
   service_extensions_test:
     description: >
