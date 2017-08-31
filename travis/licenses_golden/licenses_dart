@@ -1,4 +1,4 @@
-Signature: 7f678372ed02334bc7092a7f47c3ee2b
+Signature: 7e0d25918a2cfb878026cbe861f99cfc
 
 UNUSED LICENSES:
 
@@ -700,10 +700,10 @@ FILE: ../../../dart/runtime/vm/snapshot_test_in.dat
 FILE: ../../../dart/samples/build_dart/test.foo
 FILE: ../../../dart/samples/build_dart_simple/test.foo
 FILE: ../../../dart/sdk/lib/_internal/js_runtime/.packages
-FILE: ../../../dart/sdk/lib/dart_server.json
 FILE: ../../../dart/sdk/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../dart/sdk/lib/html/html_common/conversions_dartium.dart
 FILE: ../../../dart/sdk/lib/html/html_common/html_common.dart
+FILE: ../../../dart/sdk/lib/libraries.json
 FILE: ../../../dart/sdk/lib/svg/dartium/svg_dartium.dart
 FILE: ../../../dart/third_party/7zip.tar.gz.sha1
 FILE: ../../../dart/third_party/clang.tar.gz.sha1
@@ -1441,8 +1441,8 @@ FILE: ../../../dart/runtime/vm/kernel_binary.cc
 FILE: ../../../dart/runtime/vm/kernel_binary_flowgraph.cc
 FILE: ../../../dart/runtime/vm/kernel_isolate.cc
 FILE: ../../../dart/runtime/vm/kernel_isolate.h
-FILE: ../../../dart/runtime/vm/kernel_reader.cc
-FILE: ../../../dart/runtime/vm/kernel_reader.h
+FILE: ../../../dart/runtime/vm/kernel_loader.cc
+FILE: ../../../dart/runtime/vm/kernel_loader.h
 FILE: ../../../dart/runtime/vm/kernel_to_il.cc
 FILE: ../../../dart/runtime/vm/kernel_to_il.h
 FILE: ../../../dart/runtime/vm/lockers.cc
@@ -1516,6 +1516,14 @@ FILE: ../../../dart/runtime/bin/error_exit.h
 FILE: ../../../dart/runtime/bin/gzip.cc
 FILE: ../../../dart/runtime/bin/gzip.h
 FILE: ../../../dart/runtime/bin/isolate_data.cc
+FILE: ../../../dart/runtime/bin/namespace.cc
+FILE: ../../../dart/runtime/bin/namespace.h
+FILE: ../../../dart/runtime/bin/namespace_android.cc
+FILE: ../../../dart/runtime/bin/namespace_fuchsia.cc
+FILE: ../../../dart/runtime/bin/namespace_linux.cc
+FILE: ../../../dart/runtime/bin/namespace_macos.cc
+FILE: ../../../dart/runtime/bin/namespace_patch.dart
+FILE: ../../../dart/runtime/bin/namespace_win.cc
 FILE: ../../../dart/runtime/bin/secure_socket_filter.cc
 FILE: ../../../dart/runtime/bin/secure_socket_filter.h
 FILE: ../../../dart/runtime/bin/secure_socket_utils.cc
@@ -1596,6 +1604,7 @@ FILE: ../../../dart/runtime/vm/timeline_win.cc
 FILE: ../../../dart/runtime/vm/zone_text_buffer.cc
 FILE: ../../../dart/runtime/vm/zone_text_buffer.h
 FILE: ../../../dart/sdk/lib/internal/linked_list.dart
+FILE: ../../../dart/sdk/lib/io/namespace_impl.dart
 FILE: ../../../dart/sdk/lib/io/sync_socket.dart
 FILE: ../../../dart/sdk/lib/vmservice/named_lookup.dart
 ----------------------------------------------------------------------------------------------------
