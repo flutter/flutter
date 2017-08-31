@@ -13,7 +13,7 @@ void main() {
   testWidgets('markNeedsSemanticsUpdate allways resets node', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
-    await tester.pumpWidget(new TestWidget());
+    await tester.pumpWidget(const TestWidget());
     final RenderTest renderObj = tester.renderObject(find.byType(TestWidget));
     expect(renderObj.labelWasReset, hasLength(1));
     expect(renderObj.labelWasReset.last, true);

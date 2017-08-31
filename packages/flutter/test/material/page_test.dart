@@ -276,11 +276,11 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => new Material(
         child: new FlatButton(
-          child: new Text('PUSH'),
+          child: const Text('PUSH'),
           onPressed: () { Navigator.of(context).pushNamed('/b'); },
         ),
       ),
-      '/b': (BuildContext context) => new Container(child: new Text('HELLO')),
+      '/b': (BuildContext context) => new Container(child: const Text('HELLO')),
     };
     await tester.pumpWidget(
       new MaterialApp(

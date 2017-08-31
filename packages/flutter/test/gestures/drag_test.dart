@@ -253,7 +253,7 @@ void main() {
     tester.route(pointer.move(const Offset(30.0, 25.0), timeStamp: const Duration(milliseconds: 30)));
     tester.route(pointer.move(const Offset(40.0, 25.0), timeStamp: const Duration(milliseconds: 40)));
     tester.route(pointer.move(const Offset(50.0, 25.0), timeStamp: const Duration(milliseconds: 50)));
-    tester.route(new PointerMoveEvent(
+    tester.route(const PointerMoveEvent(
       pointer: 1,
       // Simulate a small synthesized wobble which would have slowed down the
       // horizontal velocity from 1 px/ms and introduced a slight vertical velocity.

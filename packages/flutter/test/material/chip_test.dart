@@ -178,13 +178,13 @@ void main() {
   });
 
   testWidgets('Chip in row works ok', (WidgetTester tester) async {
-    final TextStyle style = new TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
+    final TextStyle style = const TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
           child: new Row(
             children: <Widget>[
-              new Chip(label: new Text('Test'), labelStyle: style),
+              new Chip(label: const Text('Test'), labelStyle: style),
             ],
           ),
         ),
@@ -197,7 +197,7 @@ void main() {
         home: new Material(
           child: new Row(
             children: <Widget>[
-              new Flexible(child: new Chip(label: new Text('Test'), labelStyle: style)),
+              new Flexible(child: new Chip(label: const Text('Test'), labelStyle: style)),
             ],
           ),
         ),
@@ -210,7 +210,7 @@ void main() {
         home: new Material(
           child: new Row(
             children: <Widget>[
-              new Expanded(child: new Chip(label: new Text('Test'), labelStyle: style)),
+              new Expanded(child: new Chip(label: const Text('Test'), labelStyle: style)),
             ],
           ),
         ),
@@ -228,7 +228,7 @@ void main() {
               child: new Center(
                 child: new Chip(
                   onDeleted: () { },
-                  label: new Text('ABC'),
+                  label: const Text('ABC'),
                 ),
               ),
             );

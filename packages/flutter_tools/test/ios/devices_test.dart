@@ -90,7 +90,7 @@ iPhone SE (11.0) [667E8DCD-5DCD-4C80-93A9-60D1D995206F] (Simulator)
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
   Runner(libsystem_asl.dylib)[297] <Notice>: I is for ichigo
   '''.codeUnits]));
-        when(mockProcess.stderr).thenReturn(new Stream<List<int>>.empty());
+        when(mockProcess.stderr).thenReturn(const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
         when(mockProcess.exitCode).thenReturn(new Future<int>.delayed(Duration.ZERO, () => 0));
         return new Future<Process>.value(mockProcess);

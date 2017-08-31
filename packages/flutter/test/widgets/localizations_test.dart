@@ -130,7 +130,7 @@ void main() {
       buildFrame(
         buildContent: (BuildContext context) {
           pageContext = context;
-          return new Text('Hello World');
+          return const Text('Hello World');
         }
       )
     );
@@ -153,7 +153,7 @@ void main() {
         locale: locale,
         buildContent: (BuildContext context) {
           pageContext = context;
-          return new Text('Hello World');
+          return const Text('Hello World');
         },
       )
     );
@@ -295,7 +295,7 @@ void main() {
                 locale: const Locale('en', 'GB'),
                 delegates: <LocalizationsDelegate<dynamic>>[
                   new SyncTestLocalizationsDelegate(),
-                  new DefaultWidgetsLocalizationsDelegate(),
+                  const DefaultWidgetsLocalizationsDelegate(),
                 ],
                 // Create a new context within the en_GB Localization
                 child: new Builder(

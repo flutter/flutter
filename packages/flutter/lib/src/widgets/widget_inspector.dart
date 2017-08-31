@@ -318,7 +318,7 @@ class _RenderInspectorOverlay extends RenderBox {
 
   @override
   void performResize() {
-    size = constraints.constrain(new Size(double.INFINITY, double.INFINITY));
+    size = constraints.constrain(const Size(double.INFINITY, double.INFINITY));
   }
 
   @override
