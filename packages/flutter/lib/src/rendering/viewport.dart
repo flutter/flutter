@@ -458,11 +458,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(child.parent == this);
     assert(child is RenderSliver);
     final RenderSliver sliver = child;
-    final double extendOfPinnedSlivers = paintExtentOfSliversPinnedBefore(sliver);
+    final double extentOfPinnedSlivers = paintExtentOfSliversPinnedBefore(sliver);
     leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
-        leadingScrollOffset -= extendOfPinnedSlivers;
+        leadingScrollOffset -= extentOfPinnedSlivers;
         break;
       case GrowthDirection.reverse:
         // Nothing to do.
@@ -472,10 +472,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     double mainAxisExtent;
     switch (axis) {
       case Axis.horizontal:
-        mainAxisExtent = size.width - extendOfPinnedSlivers;
+        mainAxisExtent = size.width - extentOfPinnedSlivers;
         break;
       case Axis.vertical:
-        mainAxisExtent = size.height - extendOfPinnedSlivers;
+        mainAxisExtent = size.height - extentOfPinnedSlivers;
         break;
     }
 
@@ -590,7 +590,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @protected
   double scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild);
 
-  /// Returns the total paint extend of all slivers that are pinned at the edge
+  /// Returns the total paint extent of all slivers that are pinned at the edge
   /// of the viewport before [child].
   ///
   /// This is the extent to which the actual area in which content can scroll
