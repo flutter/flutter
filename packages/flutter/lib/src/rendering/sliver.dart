@@ -557,7 +557,7 @@ class SliverGeometry extends Diagnosticable {
   /// The maximum extent by which this sliver can reduce the area in which
   /// content can scroll if the sliver were pinned at the edge.
   ///
-  /// Slivers, that never get pinned at the edge, should return zero.
+  /// Slivers that never get pinned at the edge, should return zero.
   ///
   /// A pinned app bar is an example for a sliver that would use this setting:
   /// When the app bar is pinned to the top, the area in which content can
