@@ -132,7 +132,7 @@ void main() {
     expect(paragraph.size.height, equals(lineHeight));
 
     relayoutWith(maxLines: 3, softWrap: false, overflow: TextOverflow.ellipsis);
-    expect(paragraph.size.height, equals(2 * lineHeight));
+    expect(paragraph.size.height, equals(3 * lineHeight));
 
     relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(2 * lineHeight));
