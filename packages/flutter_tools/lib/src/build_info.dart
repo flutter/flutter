@@ -10,7 +10,7 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor, {this.previewDart2});
+  const BuildInfo(this.mode, this.flavor, { this.previewDart2 });
 
   final BuildMode mode;
   /// Represents a custom Android product flavor or an Xcode scheme, null for

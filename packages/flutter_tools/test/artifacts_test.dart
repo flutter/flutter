@@ -31,7 +31,6 @@ void main() {
           artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework')
       );
-
       expect(
           artifacts.getArtifactPath(Artifact.flutterTester),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester')
@@ -50,7 +49,6 @@ void main() {
           artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),
           'ios-release'
       );
-
       expect(
           artifacts.getEngineType(TargetPlatform.darwin_x64),
           'darwin-x64'
@@ -87,10 +85,13 @@ void main() {
           artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'Flutter.framework')
       );
-
       expect(
           artifacts.getArtifactPath(Artifact.flutterTester),
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'flutter_tester')
+      );
+      expect(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        fs.path.join(tempDir.path, 'out', 'host_debug_unopt', 'dart-sdk')
       );
     }, overrides: <Type, Generator> {
       Platform: () => new FakePlatform(operatingSystem: 'linux')
@@ -105,7 +106,6 @@ void main() {
           artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),
           'android_debug_unopt'
       );
-
       expect(
           artifacts.getEngineType(TargetPlatform.darwin_x64),
           'android_debug_unopt'

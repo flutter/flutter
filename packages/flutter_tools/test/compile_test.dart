@@ -151,5 +151,3 @@ class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockStream extends Mock implements Stream<List<int>> {}
 class MockStdIn extends Mock implements IOSink {}
-
-
