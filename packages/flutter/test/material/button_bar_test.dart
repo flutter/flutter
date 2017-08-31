@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('ButtonBar default control smoketest', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Directionality(
+      const Directionality(
         textDirection: TextDirection.ltr,
         child: const ButtonBar(),
       ),

@@ -110,7 +110,7 @@ void main() {
             icon: const Icon(Icons.view_carousel),
             itemBuilder: simplePopupMenuItemBuilder,
         );
-      }, throwsA(new isInstanceOf<AssertionError>()));
+      }, throwsA(const isInstanceOf<AssertionError>()));
     });
 
     testWidgets('PopupMenuButton creates IconButton when given an icon', (WidgetTester tester) async {

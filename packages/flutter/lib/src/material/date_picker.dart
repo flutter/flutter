@@ -27,8 +27,10 @@ import 'material_localizations.dart';
 import 'theme.dart';
 import 'typography.dart';
 
+/// Initial display mode of the date picker dialog.
+///
 /// Date picker UI mode for either showing a list of available years or a
-/// monthly calendar.
+/// monthly calendar initially in the dialog shown by calling [showDatePicker].
 ///
 /// Also see:
 ///
@@ -36,6 +38,7 @@ import 'typography.dart';
 enum DatePickerMode {
   /// Show a date picker UI for choosing a month and day.
   day,
+
   /// Show a date picker UI for choosing a year.
   year,
 }
@@ -852,7 +855,7 @@ typedef bool SelectableDayPredicate(DateTime day);
 ///
 /// An optional [initialDatePickerMode] argument can be used to display the
 /// date picker initially in the year or month+day picker mode. It defaults
-/// to month+day, but must not be null.
+/// to month+day, and must not be null.
 ///
 /// See also:
 ///

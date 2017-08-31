@@ -98,7 +98,7 @@ void main() {
       if (result != 0)
         throw 'Received unexpected exit code $result from run process.';
       print('test: validating that the app has in fact closed...');
-      await client.done.timeout(new Duration(seconds: 5));
+      await client.done.timeout(const Duration(seconds: 5));
     });
     return new TaskResult.success(null);
   });

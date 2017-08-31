@@ -16,7 +16,7 @@ Future<TestStepResult> systemNavigatorPop() {
 
   channel.setMessageHandler((String message) async {
     completer.complete(
-        new TestStepResult('System navigation pop', '', TestStatus.ok));
+        const TestStepResult('System navigation pop', '', TestStatus.ok));
     return '';
   });
   SystemNavigator.pop();

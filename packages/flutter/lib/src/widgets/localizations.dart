@@ -16,10 +16,17 @@ import 'framework.dart';
 // class Intl { static String message(String s, { String name, String locale }) => ''; }
 // Future<Null> initializeMessages(String locale) => null;
 
+// Used by loadAll() to record LocalizationsDelegate.load() futures we're
+// waiting for.
+class _Pending {
+  _Pending(this.delegate, this.futureValue);
+  final LocalizationsDelegate<dynamic> delegate;
+  final Future<dynamic> futureValue;
+}
+
 // A utility function used by Localizations to generate one future
 // that completes when all of the LocalizationsDelegate.load() futures
-// complete. The returned map is indexed by the type of each input
-// future's value.
+// complete. The returned map is indexed by each delegate's type.
 //
 // The input future values must have distinct types.
 //
@@ -31,38 +38,41 @@ import 'framework.dart';
 // This is more complicated than just applying Future.wait to input
 // because some of the input.values may be SynchronousFutures. We don't want
 // to Future.wait for the synchronous futures.
-Future<Map<Type, dynamic>> _loadAll(Iterable<Future<dynamic>> inputValues) {
+Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegate<dynamic>> delegates) {
   final Map<Type, dynamic> output = <Type, dynamic>{};
-  List<Future<dynamic>> outputFutures;
+  List<_Pending> pendingList;
 
-  for (Future<dynamic> inputValue in inputValues) {
+  for (LocalizationsDelegate<dynamic> delegate in delegates) {
+    final Future<dynamic> inputValue = delegate.load(locale);
     dynamic completedValue;
     final Future<dynamic> futureValue = inputValue.then<dynamic>((dynamic value) {
       return completedValue = value;
     });
     if (completedValue != null) { // inputValue was a SynchronousFuture
-      final Type type = completedValue.runtimeType;
+      final Type type = delegate.type;
       assert(!output.containsKey(type));
       output[type] = completedValue;
     } else {
-      outputFutures ??= <Future<dynamic>>[];
-      outputFutures.add(futureValue);
+      pendingList ??= <_Pending>[];
+      pendingList.add(new _Pending(delegate, futureValue));
     }
   }
 
-  // All of the input.values were synchronous futures, we're done.
-  if (outputFutures == null)
+  // All of the delegate.load() values were synchronous futures, we're done.
+  if (pendingList == null)
     return new SynchronousFuture<Map<Type, dynamic>>(output);
 
-  // Some of input.values were asynchronous futures. Wait for them.
-  return Future.wait<dynamic>(outputFutures).then<Map<Type, dynamic>>((List<dynamic> values) {
-    for (dynamic value in values) {
-      final Type type = value.runtimeType;
-      assert(!output.containsKey(type));
-      output[type] = value;
-     }
-    return output;
-  });
+  // Some of delegate.load() values were asynchronous futures. Wait for them.
+  return Future.wait<dynamic>(pendingList.map((_Pending p) => p.futureValue))
+    .then<Map<Type, dynamic>>((List<dynamic> values) {
+      assert(values.length == pendingList.length);
+      for (int i = 0; i < values.length; i += 1) {
+        final Type type = pendingList[i].delegate.type;
+        assert(!output.containsKey(type));
+        output[type] = values[i];
+      }
+      return output;
+    });
 }
 
 /// A factory for a set of localized resources of type `T`, to be loaded by a
@@ -92,8 +102,10 @@ abstract class LocalizationsDelegate<T> {
   /// after [load] has completed.
   bool shouldReload(covariant LocalizationsDelegate<T> old);
 
+  Type get type => T;
+
   @override
-  String toString() => '$runtimeType';
+  String toString() => '$runtimeType[$type]';
 }
 
 /// Interface for localized resource values for the lowest levels of the Flutter
@@ -346,12 +358,8 @@ class _LocalizationsState extends State<Localizations> {
       return;
     }
 
-    final Iterable<Future<dynamic>> allResources = delegates.map((LocalizationsDelegate<dynamic> delegate) {
-      return delegate.load(locale);
-    });
-
     Map<Type, dynamic> typeToResources;
-    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(allResources)
+    final Future<Map<Type, dynamic>> typeToResourcesFuture = _loadAll(locale, delegates)
       .then((Map<Type, dynamic> value) {
         return typeToResources = value;
       });
@@ -383,7 +391,6 @@ class _LocalizationsState extends State<Localizations> {
   T resourcesFor<T>(Type type) {
     assert(type != null);
     final T resources = _typeToResources[type];
-    assert(resources.runtimeType == type);
     return resources;
   }
 

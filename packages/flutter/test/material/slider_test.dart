@@ -472,10 +472,10 @@ void main() {
     ));
 
     // Disable slider
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: new Material(
-        child: new Slider(
+      child: const Material(
+        child: const Slider(
           value: 0.5,
           onChanged: null,
         ),
