@@ -49,11 +49,14 @@ source_set("flow") {
     "raster_cache_key.h",
   ]
 
+  public_deps = [
+    "//garnet/public/lib/ftl",
+  ]
+
   deps = [
     "//flutter/common",
     "//flutter/glue",
     "//flutter/synchronization",
-    "//lib/ftl",
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
@@ -71,7 +74,7 @@ source_set("flow") {
     deps += [
       "//apps/mozart/lib/scene:client",
       "//apps/mozart/services/scene",
-      "//lib/fidl/dart/sdk_ext",
+      "//garnet/public/lib/fidl/dart/sdk_ext",
     ]
 
     public_deps = [

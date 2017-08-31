@@ -121,14 +121,11 @@ deps = {
    # build. Eventually, we'll manage these dependencies together with Fuchsia
    # and not have to specific specific hashes.
 
-  'src/lib/ftl':
-   Var('fuchsia_git') + '/ftl' + '@' + 'bd6e605513008bc074d0e8022446cea8a06a3ce7',
+  'src/garnet':
+   Var('fuchsia_git') + '/garnet' + '@' + '745be610ec5a6738d3bcbdab45b6402d477ce635',
 
   'src/lib/tonic':
-   Var('fuchsia_git') + '/tonic' + '@' + '7a9263c95612e04ae8d066fa73b56dc938b5a37b',
-
-  'src/lib/zip':
-   Var('fuchsia_git') + '/zip' + '@' + '92dc87ca645fe8e9f5151ef6dac86d8311a7222f',
+   Var('fuchsia_git') + '/tonic' + '@' + 'fca532244483192e961cb826d9d0c05947cf288c',
 
   'src/third_party/benchmark':
    Var('fuchsia_git') + '/third_party/benchmark' + '@' + '296537bc48d380adf21567c5d736ab79f5363d22',

@@ -30,7 +30,7 @@ source_set("mac_desktop_platform") {
     "//flutter/shell/platform/darwin/common",
     "//flutter/shell/testing",
     "//flutter/synchronization",
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
     "//third_party/skia",
   ]
 }

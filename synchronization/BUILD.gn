@@ -11,9 +11,9 @@ source_set("synchronization") {
     "semaphore.h",
   ]
 
-  deps = [
+  public_deps = [
     "//flutter/glue",
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
   ]
 }
 

@@ -95,7 +95,7 @@ source_set("txt") {
   public_configs = [ ":txt_config" ]
 
   public_deps = [
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
     "//third_party/harfbuzz",
     "//third_party/icu",
     "//third_party/skia",
