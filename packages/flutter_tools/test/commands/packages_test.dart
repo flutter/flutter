@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io' show IOSink;
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
@@ -101,46 +103,14 @@ void main() {
         });
       },
     });
-    testUsingContext('publish with forced non-interactive mode, no arguments', () async {
+    testUsingContext('publish', () async {
+      // TODO(mravn): test that interactivity works.
       log.clear();
       await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
       expect(log, hasLength(1));
-      expect(log[0], hasLength(3));
+      expect(log[0], hasLength(2));
       expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
       expect(log[0][1], 'publish');
-      expect(log[0][2], '--force');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () {
-        return new MockProcessManager((List<dynamic> command) {
-          log.add(command);
-        });
-      },
-    });
-    testUsingContext('publish with forced non-interactive mode, with arguments', () async {
-      log.clear();
-      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish', '--server', 'foo']);
-      expect(log, hasLength(1));
-      expect(log[0], hasLength(5));
-      expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(log[0][1], 'publish');
-      expect(log[0][2], '--force');
-      expect(log[0][3], '--server');
-      expect(log[0][4], 'foo');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () {
-        return new MockProcessManager((List<dynamic> command) {
-          log.add(command);
-        });
-      },
-    });
-    testUsingContext('publish in non-interactive mode', () async {
-      log.clear();
-      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish', '--dry-run']);
-      expect(log, hasLength(1));
-      expect(log[0], hasLength(3));
-      expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(log[0][1], 'publish');
-      expect(log[0][2], '--dry-run');
     }, overrides: <Type, Generator>{
       ProcessManager: () {
         return new MockProcessManager((List<dynamic> command) {
@@ -176,11 +146,16 @@ class MockProcessManager implements ProcessManager {
 }
 
 class MockProcess implements Process {
-  @override
-  Stream<List<int>> get stdout => new MockStream<List<int>>();
+  MockProcess();
 
   @override
-  Stream<List<int>> get stderr => new MockStream<List<int>>();
+  Stream<List<int>> get stdout => const Stream<List<int>>.empty();
+
+  @override
+  Stream<List<int>> get stderr => const Stream<List<int>>.empty();
+
+  @override
+  IOSink get stdin => new MockIOSink();
 
   @override
   Future<int> get exitCode => new Future<int>.value(0);
@@ -189,29 +164,43 @@ class MockProcess implements Process {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-class MockStream<T> implements Stream<T> {
+class MockIOSink implements IOSink {
   @override
-  Stream<S> transform<S>(StreamTransformer<T, S> streamTransformer) => new MockStream<S>();
+  Encoding encoding;
 
   @override
-  Stream<T> where(bool test(T event)) => new MockStream<T>();
+  Future<dynamic> addStream(Stream<List<int>> stream) async => null;
 
   @override
-  StreamSubscription<T> listen(void onData(T event), {Function onError, void onDone(), bool cancelOnError}) {
-    return new MockStreamSubscription<T>();
+  void add(List<int> data) {
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) => null;
-}
-
-class MockStreamSubscription<T> implements StreamSubscription<T> {
-  @override
-  Future<E> asFuture<E>([E futureValue]) => new Future<E>.value();
+  void addError(dynamic error, [StackTrace stackTrace]) {
+  }
 
   @override
-  Future<Null> cancel() => null;
+  void write(Object obj) {
+  }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) => null;
+  void writeln([Object obj = ""]) {
+  }
+
+  @override
+  void writeCharCode(int charCode) {
+  }
+
+  @override
+  void writeAll(Iterable<dynamic> objects, [String separator = ""]) {
+  }
+
+  @override
+  Future<dynamic> get done async => null;
+
+  @override
+  Future<dynamic> close() async => null;
+
+  @override
+  Future<dynamic> flush() async => null;
 }
