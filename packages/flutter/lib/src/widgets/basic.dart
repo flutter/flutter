@@ -2903,7 +2903,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// [Expanded] or [Flexible] widgets) are together wider than the row itself,
 /// then the row is said to have overflowed. When a row overflows, the row does
 /// not have any remaining space to share between its [Expanded] and [Flexible]
-/// children. The row reports this this by drawing a yellow and black striped
+/// children. The row reports this by drawing a yellow and black striped
 /// warning box on the edge that is overflowing. If there is room on the outside
 /// of the row, the amount of overflow is printed in red lettering.
 ///
