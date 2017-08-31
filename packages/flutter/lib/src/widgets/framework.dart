@@ -2611,12 +2611,10 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// See also:
   ///
   /// - [Offstage] widget that hides its children.
-  /// - [Finder][finder] that skips offstage widgets by default.
+  /// - [Finder] that skips offstage widgets by default.
   /// - [RenderObject.visitChildrenForSemantics], in contrast to this method,
   ///   designed specifically for excluding parts of the UI from the semantics
   ///   tree.
-  ///
-  /// [finder]: https://docs.flutter.io/flutter/flutter_test/Finder-class.html
   void debugVisitOnstageChildren(ElementVisitor visitor) => visitChildren(visitor);
 
   /// Wrapper around [visitChildren] for [BuildContext].
