@@ -37,7 +37,7 @@ void VsyncWaiterAndroid::AsyncWaitForVsync(Callback callback) {
   });
 }
 
-void VsyncWaiterAndroid::OnVsync(long frameTimeNanos) {
+void VsyncWaiterAndroid::OnVsync(int64_t frameTimeNanos) {
   Callback callback = std::move(callback_);
   callback_ = Callback();
   blink::Threads::UI()->PostTask([callback, frameTimeNanos] {
@@ -61,7 +61,7 @@ static void OnNativeVsync(JNIEnv* env,
   VsyncWaiterAndroid* waiter = weak->get();
   delete weak;
   if (waiter) {
-    waiter->OnVsync(frameTimeNanos);
+    waiter->OnVsync(static_cast<int64_t>(frameTimeNanos));
   }
 }
 
