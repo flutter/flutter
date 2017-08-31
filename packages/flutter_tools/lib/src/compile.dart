@@ -5,11 +5,13 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:usage/uuid/uuid.dart';
 
 import 'artifacts.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/process_manager.dart';
 import 'globals.dart';
 
 String _dartExecutable() {
@@ -45,14 +47,18 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
   // This is a URI, not a file path, so the forward slash is correct even on Windows.
   if (!sdkRoot.endsWith('/'))
     sdkRoot = '$sdkRoot/';
-  final Process server = await Process.start(_dartExecutable(),
-    <String>[frontendServer, '--sdk-root', sdkRoot, mainPath]
-  );
+  final Process server = await processManager.start(<String>[
+    _dartExecutable(),
+    frontendServer,
+    '--sdk-root',
+    sdkRoot,
+    mainPath
+  ]);
 
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
   server.stderr
     .transform(UTF8.decoder)
-    .listen(printTrace);
+    .listen((String s) { printTrace('compile debug message: $s'); });
   server.stdout
     .transform(UTF8.decoder)
     .transform(new LineSplitter())
@@ -98,9 +104,13 @@ class ResidentCompiler {
       final String frontendServer = artifacts.getArtifactPath(
         Artifact.frontendServerSnapshotForEngineDartSdk
       );
-      _server = await Process.start(_dartExecutable(),
-        <String>[frontendServer, '--sdk-root', _sdkRoot, '--incremental']
-      );
+      _server = await processManager.start(<String>[
+        _dartExecutable(),
+        frontendServer,
+        '--sdk-root',
+        _sdkRoot,
+        '--incremental'
+      ]);
     }
     _server.stdout
       .transform(UTF8.decoder)
@@ -109,7 +119,7 @@ class ResidentCompiler {
     _server.stderr
       .transform(UTF8.decoder)
       .transform(new LineSplitter())
-      .listen((String s) { printTrace('stderr:>$s'); });
+      .listen((String s) { printTrace('compile debug message: $s'); });
 
     _server.stdin.writeln('compile $scriptFilename');
 
