@@ -35,7 +35,7 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
-// TODO(abarth): Consider adding this to //lib/ftl.
+// TODO(abarth): Consider adding this to //garnet/public/lib/ftl.
 std::string ResolvePath(std::string path) {
   if (!path.empty() && path[0] == '/')
     return path;

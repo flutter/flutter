@@ -58,7 +58,7 @@ source_set("vulkan") {
   }
 
   deps = [
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]

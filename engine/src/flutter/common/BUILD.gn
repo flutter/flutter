@@ -17,7 +17,7 @@ source_set("common") {
   ]
 
   deps = [
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
   ]
 
   public_configs = [ ":flutter_config" ]

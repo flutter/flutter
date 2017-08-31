@@ -112,7 +112,7 @@ source_set("common") {
     "//flutter/runtime",
     "//flutter/sky/engine/wtf",
     "//flutter/synchronization",
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
     "//lib/tonic",
     "//third_party/rapidjson",
     "//third_party/skia",

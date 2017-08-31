@@ -15,7 +15,7 @@ source_set("testing") {
   deps = [
     "//flutter/common",
     "//flutter/shell/common",
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
     "//third_party/skia",
   ]
 }

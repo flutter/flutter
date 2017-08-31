@@ -7,7 +7,7 @@ assert(is_fuchsia)
 import("//build/dart/dart_package.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
-import("//lib/fidl/dart/sdk_ext/sdk_ext.gni")
+import("//garnet/public/lib/fidl/dart/sdk_ext/sdk_ext.gni")
 
 declare_args() {
   flutter_app_default_is_jit = true

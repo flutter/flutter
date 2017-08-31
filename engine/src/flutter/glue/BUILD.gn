@@ -9,7 +9,7 @@ source_set("glue") {
   ]
 
   deps = [
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
   ]
 
   if (is_fuchsia) {

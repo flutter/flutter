@@ -26,7 +26,7 @@ source_set("common") {
     "//flutter/shell/gpu",
     "//flutter/shell/testing",
     "//flutter/sky/engine/wtf",
-    "//lib/ftl",
+    "//garnet/public/lib/ftl",
     "//third_party/skia",
   ]
 }
