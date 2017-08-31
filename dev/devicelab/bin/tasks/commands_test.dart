@@ -13,9 +13,6 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-// "An Observatory debugger and profiler on iPhone SE is available at: http://127.0.0.1:8100/"
-final RegExp observatoryRegExp = new RegExp(r'An Observatory debugger .* is available at: (\S+:(\d+))');
-
 void main() {
   task(() async {
     int vmServicePort;
@@ -38,10 +35,9 @@ void main() {
         .listen((String line) {
           print('run:stdout: $line');
           stdout.add(line);
-          if (line.contains(observatoryRegExp)) {
-            final Match match = observatoryRegExp.firstMatch(line);
-            vmServicePort = int.parse(match.group(2));
-            print('service protocol connection available at ${match.group(1)}');
+          if (lineContainsServicePort(line)) {
+            vmServicePort = parseServicePort(line);
+            print('service protocol connection available at port $vmServicePort');
             print('run: ready!');
             ready.complete();
             ok ??= true;

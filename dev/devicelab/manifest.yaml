@@ -134,6 +134,13 @@ tasks:
     required_agent_capabilities: ["has-android-device"]
     flaky: true
 
+  service_extensions_test:
+    description: >
+      Validates our service protocol extensions.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+    flaky: true
+
   android_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and Android screenshots

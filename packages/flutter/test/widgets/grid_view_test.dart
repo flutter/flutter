@@ -126,8 +126,9 @@ void main() {
   testWidgets('GridView large scroll jump', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
-    await tester.pumpWidget(
-      new GridView.extent(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new GridView.extent(
         scrollDirection: Axis.horizontal,
         maxCrossAxisExtent: 200.0,
         childAspectRatio: 0.75,
@@ -142,7 +143,7 @@ void main() {
           );
         }),
       ),
-    );
+    ));
 
     expect(tester.getSize(find.text('4')), equals(const Size(200.0 / 0.75, 200.0)));
 
