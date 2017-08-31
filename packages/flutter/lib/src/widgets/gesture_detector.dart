@@ -557,10 +557,14 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     });
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      context.visitChildElements((Element element) {
-        final _GestureSemantics widget = element.widget;
-        widget._updateSemanticsActions(semanticsGestureHandler, actions);
-      });
+      semanticsGestureHandler.validActions = actions;
+    }
+  }
+
+  void sendSemanticsScrollEvent() {
+    if (!widget.excludeFromSemantics) {
+      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
+      semanticsGestureHandler.sendSemanticsScrollEvent();
     }
   }
 
@@ -733,10 +737,6 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
           recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsHorizontalDragUpdate : null
       ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
           recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsVerticalDragUpdate : null;
-  }
-
-  void _updateSemanticsActions(RenderSemanticsGestureHandler renderObject, Set<SemanticsAction> actions) {
-    renderObject.validActions = actions;
   }
 
   @override

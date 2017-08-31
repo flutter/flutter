@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ImageFilter, Gradient;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -2980,6 +2981,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   SemanticsNode _innerNode;
+  SemanticsNode _annotatedNode;
+
+  void sendSemanticsScrollEvent() {
+    if (_annotatedNode == null)
+      return;
+    SystemChannels.accessibility.send(_annotatedNode.id);
+  }
 
   @override
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
@@ -3016,6 +3024,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   void _annotate(SemanticsNode node) {
+    _annotatedNode = node;
     List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
       actions.add(SemanticsAction.tap);
