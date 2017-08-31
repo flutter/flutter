@@ -1,27 +1,7 @@
 {
   "openAppDrawerTooltip": "ナビゲーションメニューを開く",
-  "@openAppDrawerTooltip": {
-    "description": "The tooltip for the leading AppBar menu (aka 'hamburger') button",
-    "type": "text"
-  },
   "backButtonTooltip": "バック",
-  "@backButtonTooltip": {
-    "description": "The BackButton's tooltip",
-    "type": "text"
-  },
   "closeButtonTooltip": "閉じる",
-  "@closeButtonTooltip": {
-    "description": "The CloseButton's tooltip",
-    "type": "text"
-  },
   "nextMonthTooltip": "来月",
-  "@nextMonthTooltip": {
-    "description": "The tooltip for the MonthPicker's 'next month' button.",
-    "type": "text"
-  },
-  "previousMonthTooltip": "前の月",
-  "@previousMonthTooltip": {
-    "description": "The tooltip for the MonthPicker's 'previous month' button.",
-    "type": "text"
-  }
+  "previousMonthTooltip": "前の月"
 }

@@ -1,27 +1,7 @@
 {
   "openAppDrawerTooltip": "Apri il menu di navigazione",
-  "@openAppDrawerTooltip": {
-    "description": "The tooltip for the leading AppBar menu (aka 'hamburger') button",
-    "type": "text"
-  },
   "backButtonTooltip": "Indietro",
-  "@backButtonTooltip": {
-    "description": "The BackButton's tooltip",
-    "type": "text"
-  },
   "closeButtonTooltip": "Chiudi",
-  "@closeButtonTooltip": {
-    "description": "The CloseButton's tooltip",
-    "type": "text"
-  },
   "nextMonthTooltip": "Il prossimo mese",
-  "@nextMonthTooltip": {
-    "description": "The tooltip for the MonthPicker's 'next month' button.",
-    "type": "text"
-  },
-  "previousMonthTooltip": "Il mese scorso",
-  "@previousMonthTooltip": {
-    "description": "The tooltip for the MonthPicker's 'previous month' button.",
-    "type": "text"
-  }
+  "previousMonthTooltip": "Il mese scorso"
 }
