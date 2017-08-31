@@ -263,15 +263,16 @@ void main() {
     expect(controller.mostRecentlyUpdatedPosition, isNull);
     expect(controller.initialScrollOffset, 0.0);
 
-    await tester.pumpWidget(
-      new PageView(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new PageView(
         children: <Widget>[
           buildTest(controller: controller, title: 'Page0'),
           buildTest(controller: controller, title: 'Page1'),
           buildTest(controller: controller, title: 'Page2'),
         ],
       ),
-    );
+    ));
 
     // Initially Page0 is visible and  Page0's appbar is fully expanded (height = 200.0).
     expect(find.text('Page0'), findsOneWidget);

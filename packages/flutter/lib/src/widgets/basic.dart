@@ -2063,22 +2063,27 @@ class SliverPadding extends SingleChildRenderObjectWidget {
        super(key: key, child: sliver);
 
   /// The amount of space by which to inset the child sliver.
-  final EdgeInsets padding;
-
-  // TODO(ianh): RTL
+  final EdgeInsetsGeometry padding;
 
   @override
-  RenderSliverPadding createRenderObject(BuildContext context) => new RenderSliverPadding(padding: padding);
+  RenderSliverPadding createRenderObject(BuildContext context) {
+    return new RenderSliverPadding(
+      padding: padding,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverPadding renderObject) {
-    renderObject.padding = padding;
+    renderObject
+      ..padding = padding
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
   }
 }
 

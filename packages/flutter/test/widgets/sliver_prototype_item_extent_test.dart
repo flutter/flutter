@@ -22,17 +22,20 @@ class TestItem extends StatelessWidget {
 }
 
 Widget buildFrame({ int count, double width, double height, Axis scrollDirection }) {
-  return new CustomScrollView(
-    scrollDirection: scrollDirection ?? Axis.vertical,
-    slivers: <Widget>[
-      new SliverPrototypeExtentList(
-        prototypeItem: new TestItem(item: -1, width: width, height: height),
-        delegate: new SliverChildBuilderDelegate(
-          (BuildContext context, int index) => new TestItem(item: index),
-          childCount: count,
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new CustomScrollView(
+      scrollDirection: scrollDirection ?? Axis.vertical,
+      slivers: <Widget>[
+        new SliverPrototypeExtentList(
+          prototypeItem: new TestItem(item: -1, width: width, height: height),
+          delegate: new SliverChildBuilderDelegate(
+            (BuildContext context, int index) => new TestItem(item: index),
+            childCount: count,
+          ),
         ),
-      ),
-    ],
+      ],
+    ),
   );
 }
 
