@@ -458,7 +458,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(child.parent == this);
     assert(child is RenderSliver);
     final RenderSliver sliver = child;
-    final double extendOfPinnedSlivers = paintExtendOfSliversPinnedAtEdgeBefore(sliver);
+    final double extendOfPinnedSlivers = paintExtendOfSliversPinnedBefore(sliver);
     leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
@@ -590,14 +590,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @protected
   double scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild);
 
-  /// Returns the total paint extend of all slivers that are pinned before
-  /// [child].
+  /// Returns the total paint extend of all slivers that are pinned at the edge
+  /// of the viewport before [child].
   ///
   /// This is the extent to which the actual area in which content can scroll
   /// is reduced. For example, an app bar that is pinned at the top will reduce
   /// the are in which content can actually scroll by the height of the app bar.
   @protected
-  double paintExtendOfSliversPinnedAtEdgeBefore(RenderSliver child);
+  double paintExtendOfSliversPinnedBefore(RenderSliver child);
 
   /// Converts the `parentMainAxisPosition` into the child's coordinate system.
   ///
@@ -1022,7 +1022,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 
   @override
-  double paintExtendOfSliversPinnedAtEdgeBefore(RenderSliver child) {
+  double paintExtendOfSliversPinnedBefore(RenderSliver child) {
     assert(child.parent == this);
     final GrowthDirection growthDirection = child.constraints.growthDirection;
     assert(growthDirection != null);
@@ -1331,7 +1331,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   }
 
   @override
-  double paintExtendOfSliversPinnedAtEdgeBefore(RenderSliver child) {
+  double paintExtendOfSliversPinnedBefore(RenderSliver child) {
     assert(child.parent == this);
     assert(child.constraints.growthDirection == GrowthDirection.forward);
     double pinnedExtend = 0.0;
