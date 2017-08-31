@@ -62,9 +62,7 @@ void Animator::BeginFrame(ftl::TimePoint frame_time) {
   // to service potential frame.
   FTL_DCHECK(producer_continuation_);
 
-  // TODO(abarth): We should use |frame_time| instead, but the frame time we get
-  // on Android appears to be unstable.
-  last_begin_frame_time_ = ftl::TimePoint::Now();
+  last_begin_frame_time_ = frame_time;
   engine_->BeginFrame(last_begin_frame_time_);
 }
 
