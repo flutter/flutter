@@ -458,15 +458,24 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(child.parent == this);
     assert(child is RenderSliver);
     final RenderSliver sliver = child;
+    final double extendOfPinnedSlivers = paintExtendOfSliversPinnedAtEdgeBefore(sliver);
     leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
+    switch (sliver.constraints.growthDirection) {
+      case GrowthDirection.forward:
+        leadingScrollOffset -= extendOfPinnedSlivers;
+        break;
+      case GrowthDirection.reverse:
+        // Nothing to do.
+        break;
+    }
 
     double mainAxisExtent;
     switch (axis) {
       case Axis.horizontal:
-        mainAxisExtent = size.width;
+        mainAxisExtent = size.width - extendOfPinnedSlivers;
         break;
       case Axis.vertical:
-        mainAxisExtent = size.height;
+        mainAxisExtent = size.height - extendOfPinnedSlivers;
         break;
     }
 
@@ -581,6 +590,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @protected
   double scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild);
 
+  /// Returns the total paint extend of all slivers that are pinned before
+  /// [child].
+  ///
+  /// This is the extent to which the actual area in which content can scroll
+  /// is reduced. For example, an app bar that is pinned at the top will reduce
+  /// the are in which content can actually scroll by the height of the app bar.
+  @protected
+  double paintExtendOfSliversPinnedAtEdgeBefore(RenderSliver child);
+
   /// Converts the `parentMainAxisPosition` into the child's coordinate system.
   ///
   /// The `parentMainAxisPosition` is a distance from the top edge (for vertical
@@ -631,10 +649,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   void showOnScreen([RenderObject child]) {
     // Logic duplicated in [_RenderSingleChildViewport.showOnScreen].
     if (child != null) {
+      // TODO(goderbauer): Don't scroll if it is already visible.
+      // TODO(goderbauer): Don't guess if we need to align at leading or trailing edge.
       // Move viewport the smallest distance to bring [child] on screen.
       final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
       final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
       final double currentOffset = offset.pixels;
+      // TODO(goderbauer): Don't scroll if that puts us outside of viewport's bounds.
       if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
         offset.jumpTo(leadingEdgeOffset);
       } else {
@@ -1001,6 +1022,32 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 
   @override
+  double paintExtendOfSliversPinnedAtEdgeBefore(RenderSliver child) {
+    assert(child.parent == this);
+    final GrowthDirection growthDirection = child.constraints.growthDirection;
+    assert(growthDirection != null);
+    switch (growthDirection) {
+      case GrowthDirection.forward:
+        double pinnedExtend = 0.0;
+        RenderSliver current = center;
+        while (current != child) {
+          pinnedExtend += current.geometry.maxPinnedExtent;
+          current = childAfter(current);
+        }
+        return pinnedExtend;
+      case GrowthDirection.reverse:
+        double pinnedExtend = 0.0;
+        RenderSliver current = childBefore(center);
+        while (current != child) {
+          pinnedExtend += current.geometry.maxPinnedExtent;
+          current = childBefore(current);
+        }
+        return pinnedExtend;
+    }
+    return null;
+  }
+
+  @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
     final SliverPhysicalParentData childParentData = child.parentData;
@@ -1281,6 +1328,19 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
       current = childAfter(current);
     }
     return scrollOffsetToChild + scrollOffsetWithinChild;
+  }
+
+  @override
+  double paintExtendOfSliversPinnedAtEdgeBefore(RenderSliver child) {
+    assert(child.parent == this);
+    assert(child.constraints.growthDirection == GrowthDirection.forward);
+    double pinnedExtend = 0.0;
+    RenderSliver current = firstChild;
+    while (current != child) {
+      pinnedExtend += current.geometry.maxPinnedExtent;
+      current = childAfter(current);
+    }
+    return pinnedExtend;
   }
 
   @override
