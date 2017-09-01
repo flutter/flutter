@@ -77,7 +77,7 @@ source_set("flow") {
       "//garnet/public/lib/fidl/dart/sdk_ext",
     ]
 
-    public_deps = [
+    public_deps += [
       "//magenta/system/ulib/mx",
     ]
   }
