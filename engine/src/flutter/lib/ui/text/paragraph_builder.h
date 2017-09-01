@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_TEXT_PARAGRAPH_BUILDER_H_
 #define FLUTTER_LIB_UI_TEXT_PARAGRAPH_BUILDER_H_
 
+#include <memory>
 #include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/sky/engine/core/rendering/RenderObject.h"
 #include "flutter/sky/engine/wtf/OwnPtr.h"
@@ -61,7 +62,7 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
   OwnPtr<RenderView> m_renderView;
   RenderObject* m_renderParagraph;
   RenderObject* m_currentRenderObject;
-  txt::ParagraphBuilder m_paragraphBuilder;
+  std::unique_ptr<txt::ParagraphBuilder> m_paragraphBuilder;
 };
 
 }  // namespace blink

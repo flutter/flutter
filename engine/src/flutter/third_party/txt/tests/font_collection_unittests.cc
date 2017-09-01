@@ -22,6 +22,8 @@
 
 namespace txt {
 
+#if 0
+
 TEST(FontCollection, HasDefaultRegistrations) {
   std::string defaultFamilyName = txt::FontCollection::GetDefaultFamilyName();
 
@@ -94,5 +96,7 @@ TEST(FontCollection, GetFamilyNames) {
   ASSERT_EQ(names.count(""), 0ull);
   ASSERT_EQ(names.count("Another Fake Font"), 0ull);
 }
+
+#endif  // 0
 
 }  // namespace txt

@@ -5,7 +5,6 @@
 #include "flutter/runtime/asset_font_selector.h"
 
 #include "flutter/assets/zip_asset_store.h"
-#include "flutter/lib/ui/text/font_collection_mgr.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/sky/engine/platform/fonts/FontData.h"
 #include "flutter/sky/engine/platform/fonts/FontFaceCreationParams.h"

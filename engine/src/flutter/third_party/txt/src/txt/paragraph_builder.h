@@ -31,11 +31,8 @@ namespace txt {
 
 class ParagraphBuilder {
  public:
-  explicit ParagraphBuilder(ParagraphStyle style);
-
-  ParagraphBuilder(ParagraphStyle style, FontCollection* font_collection);
-
-  ParagraphBuilder();
+  ParagraphBuilder(ParagraphStyle style,
+                   std::shared_ptr<FontCollection> font_collection);
 
   ~ParagraphBuilder();
 
@@ -71,10 +68,6 @@ class ParagraphBuilder {
 
   void SetParagraphStyle(const ParagraphStyle& style);
 
-  // It is recommended to initialize the ParagraphBuilder with a font collection
-  // as default font collection fallback will be deprecated.
-  void SetFontCollection(FontCollection* font_collection);
-
   // Constructs a Paragraph object that can be used to layout and paint the text
   // to a SkCanvas.
   std::unique_ptr<Paragraph> Build();
@@ -82,9 +75,9 @@ class ParagraphBuilder {
  private:
   std::vector<uint16_t> text_;
   std::vector<size_t> style_stack_;
+  std::shared_ptr<FontCollection> font_collection_;
   StyledRuns runs_;
   ParagraphStyle paragraph_style_;
-  FontCollection* font_collection_ = nullptr;
 
   // Break any newline '\n' characters into their own runs. This allows
   // Paragraph::Layout to cleanly discover and handle newlines.

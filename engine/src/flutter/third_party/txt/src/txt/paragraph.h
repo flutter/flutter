@@ -17,10 +17,12 @@
 #ifndef LIB_TXT_SRC_PARAGRAPH_H_
 #define LIB_TXT_SRC_PARAGRAPH_H_
 
+#include <set>
 #include <tuple>
 #include <vector>
 
 #include "font_collection.h"
+#include "lib/ftl/compiler_specific.h"
 #include "lib/ftl/macros.h"
 #include "minikin/LineBreaker.h"
 #include "paint_record.h"
@@ -142,32 +144,32 @@ class Paragraph {
 
  private:
   friend class ParagraphBuilder;
-  FRIEND_TEST(RenderTest, SimpleParagraph);
-  FRIEND_TEST(RenderTest, SimpleRedParagraph);
-  FRIEND_TEST(RenderTest, RainbowParagraph);
-  FRIEND_TEST(RenderTest, DefaultStyleParagraph);
-  FRIEND_TEST(RenderTest, BoldParagraph);
-  FRIEND_TEST(RenderTest, LeftAlignParagraph);
-  FRIEND_TEST(RenderTest, RightAlignParagraph);
-  FRIEND_TEST(RenderTest, CenterAlignParagraph);
-  FRIEND_TEST(RenderTest, JustifyAlignParagraph);
-  FRIEND_TEST(RenderTest, DecorationsParagraph);
-  FRIEND_TEST(RenderTest, ItalicsParagraph);
-  FRIEND_TEST(RenderTest, ChineseParagraph);
-  FRIEND_TEST(RenderTest, DISABLED_ArabicParagraph);
-  FRIEND_TEST(RenderTest, SpacingParagraph);
-  FRIEND_TEST(RenderTest, LongWordParagraph);
-  FRIEND_TEST(RenderTest, KernScaleParagraph);
-  FRIEND_TEST(RenderTest, NewlineParagraph);
-  FRIEND_TEST(RenderTest, EmojiParagraph);
-  FRIEND_TEST(RenderTest, HyphenBreakParagraph);
-  FRIEND_TEST(RenderTest, RepeatLayoutParagraph);
+  FRIEND_TEST(ParagraphTest, SimpleParagraph);
+  FRIEND_TEST(ParagraphTest, SimpleRedParagraph);
+  FRIEND_TEST(ParagraphTest, RainbowParagraph);
+  FRIEND_TEST(ParagraphTest, DefaultStyleParagraph);
+  FRIEND_TEST(ParagraphTest, BoldParagraph);
+  FRIEND_TEST(ParagraphTest, LeftAlignParagraph);
+  FRIEND_TEST(ParagraphTest, RightAlignParagraph);
+  FRIEND_TEST(ParagraphTest, CenterAlignParagraph);
+  FRIEND_TEST(ParagraphTest, JustifyAlignParagraph);
+  FRIEND_TEST(ParagraphTest, DecorationsParagraph);
+  FRIEND_TEST(ParagraphTest, ItalicsParagraph);
+  FRIEND_TEST(ParagraphTest, ChineseParagraph);
+  FRIEND_TEST(ParagraphTest, DISABLED_ArabicParagraph);
+  FRIEND_TEST(ParagraphTest, SpacingParagraph);
+  FRIEND_TEST(ParagraphTest, LongWordParagraph);
+  FRIEND_TEST(ParagraphTest, KernScaleParagraph);
+  FRIEND_TEST(ParagraphTest, NewlineParagraph);
+  FRIEND_TEST(ParagraphTest, EmojiParagraph);
+  FRIEND_TEST(ParagraphTest, HyphenBreakParagraph);
+  FRIEND_TEST(ParagraphTest, RepeatLayoutParagraph);
 
   // Starting data to layout.
   std::vector<uint16_t> text_;
   StyledRuns runs_;
   ParagraphStyle paragraph_style_;
-  FontCollection* font_collection_;
+  std::shared_ptr<FontCollection> font_collection_;
 
   minikin::LineBreaker breaker_;
 
@@ -215,12 +217,10 @@ class Paragraph {
 
   void SetParagraphStyle(const ParagraphStyle& style);
 
-  void SetFontCollection(FontCollection* font_collection);
+  void SetFontCollection(std::shared_ptr<FontCollection> font_collection);
 
-  // Pass the runs to breaker_.
-  // NOTE: This is O(N^2) due to minikin breaking being O(N^2) where N = sum of
-  // all text added using this method. This is insignificant with normal usage.
-  void AddRunsToLineBreaker(
+  FTL_WARN_UNUSED_RESULT
+  bool AddRunsToLineBreaker(
       std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
           collection_map);
 

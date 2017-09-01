@@ -23,17 +23,14 @@
 
 namespace txt {
 
-ParagraphBuilder::ParagraphBuilder(ParagraphStyle style,
-                                   FontCollection* font_collection)
-    : font_collection_(font_collection) {
+ParagraphBuilder::ParagraphBuilder(
+    ParagraphStyle style,
+    std::shared_ptr<FontCollection> font_collection)
+    : font_collection_(std::move(font_collection)) {
   SetParagraphStyle(style);
 }
 
-ParagraphBuilder::ParagraphBuilder(ParagraphStyle style) {
-  SetParagraphStyle(style);
-}
-
-ParagraphBuilder::ParagraphBuilder() {}
+ParagraphBuilder::~ParagraphBuilder() = default;
 
 void ParagraphBuilder::SetParagraphStyle(const ParagraphStyle& style) {
   paragraph_style_ = style;
@@ -45,12 +42,6 @@ void ParagraphBuilder::SetParagraphStyle(const ParagraphStyle& style) {
   text_style.font_size = paragraph_style_.font_size;
   PushStyle(text_style);
 }
-
-void ParagraphBuilder::SetFontCollection(FontCollection* font_collection) {
-  font_collection_ = font_collection;
-}
-
-ParagraphBuilder::~ParagraphBuilder() = default;
 
 void ParagraphBuilder::PushStyle(const TextStyle& style) {
   const size_t text_index = text_.size();
@@ -106,12 +97,6 @@ void ParagraphBuilder::SplitNewlineRuns() {
 }
 
 std::unique_ptr<Paragraph> ParagraphBuilder::Build() {
-  if (font_collection_ == nullptr) {
-    // Will be deprecated when full compatibility with Flutter Engine is
-    // complete.
-    font_collection_ = &FontCollection::GetFontCollection("");
-  }
-
   runs_.EndRunIfNeeded(text_.size());
 
   SplitNewlineRuns();

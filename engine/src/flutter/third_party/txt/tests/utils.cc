@@ -24,7 +24,7 @@ namespace txt {
 static std::string gFontDir;
 static ftl::CommandLine gCommandLine;
 
-const std::string GetFontDir() {
+const std::string& GetFontDir() {
   return gFontDir;
 }
 
