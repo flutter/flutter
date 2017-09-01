@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
-import 'overlay.dart';
 import 'routes.dart';
 
 /// A modal route that replaces the entire screen.
@@ -43,11 +42,6 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     if (settings.isInitialRoute)
       controller.value = 1.0;
     return controller;
-  }
-
-  /// Subclasses can override this method to customize how heroes are inserted.
-  void insertHeroOverlayEntry(OverlayEntry entry, Object tag, OverlayState overlay) {
-    overlay.insert(entry);
   }
 }
 
