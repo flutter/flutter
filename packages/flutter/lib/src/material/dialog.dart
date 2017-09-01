@@ -145,7 +145,7 @@ class AlertDialog extends StatelessWidget {
   ///
   /// Uses material design default if none is supplied. If there is no title, no
   /// padding will be provided.
-  final EdgeInsets titlePadding;
+  final EdgeInsetsGeometry titlePadding;
 
   /// The (optional) content of the dialog is displayed in the center of the
   /// dialog in a lighter font.
@@ -158,7 +158,7 @@ class AlertDialog extends StatelessWidget {
   /// Padding around the content.
   ///
   /// Uses material design default if none is supplied.
-  final EdgeInsets contentPadding;
+  final EdgeInsetsGeometry contentPadding;
 
   /// The (optional) set of actions that are displayed at the bottom of the
   /// dialog.
@@ -174,7 +174,7 @@ class AlertDialog extends StatelessWidget {
 
     if (title != null) {
       children.add(new Padding(
-        padding: titlePadding ?? new EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+        padding: titlePadding ?? new EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
           child: title,
@@ -185,7 +185,7 @@ class AlertDialog extends StatelessWidget {
     if (content != null) {
       children.add(new Flexible(
         child: new Padding(
-          padding: contentPadding ?? const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
+          padding: contentPadding ?? const EdgeInsetsDirectional.fromSTEB(24.0, 20.0, 24.0, 24.0),
           child: new DefaultTextStyle(
             style: Theme.of(context).textTheme.subhead,
             child: content,
@@ -352,7 +352,7 @@ class SimpleDialog extends StatelessWidget {
   ///
   /// Uses material design default if none is supplied. If there is no title, no
   /// padding will be provided.
-  final EdgeInsets titlePadding;
+  final EdgeInsetsGeometry titlePadding;
 
   /// The (optional) content of the dialog is displayed in a
   /// [SingleChildScrollView] underneath the title.
@@ -363,7 +363,7 @@ class SimpleDialog extends StatelessWidget {
   /// Padding around the content.
   ///
   /// Uses material design default if none is supplied.
-  final EdgeInsets contentPadding;
+  final EdgeInsetsGeometry contentPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -371,7 +371,7 @@ class SimpleDialog extends StatelessWidget {
 
     if (title != null) {
       body.add(new Padding(
-        padding: titlePadding ?? const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+        padding: titlePadding ?? const EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 0.0),
         child: new DefaultTextStyle(
           style: Theme.of(context).textTheme.title,
           child: title
@@ -382,7 +382,7 @@ class SimpleDialog extends StatelessWidget {
     if (children != null) {
       body.add(new Flexible(
         child: new SingleChildScrollView(
-          padding: contentPadding ?? const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
+          padding: contentPadding ?? const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 16.0),
           child: new ListBody(children: children),
         )
       ));

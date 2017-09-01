@@ -52,10 +52,10 @@ class DrawerHeader extends StatelessWidget {
   /// system status bar.
   ///
   /// If the child is null, the padding has no effect.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The margin around the drawer header.
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
   /// The duration for animations of the [decoration].
   final Duration duration;
@@ -82,20 +82,20 @@ class DrawerHeader extends StatelessWidget {
         border: new Border(
           bottom: new BorderSide(
             color: theme.dividerColor,
-            width: 0.0
-          )
-        )
+            width: 0.0,
+          ),
+        ),
       ),
       child: new AnimatedContainer(
-        padding: padding + new EdgeInsets.only(top: statusBarHeight),
+        padding: padding.add(new EdgeInsets.only(top: statusBarHeight)),
         decoration: decoration,
         duration: duration,
         curve: curve,
         child: child == null ? null : new DefaultTextStyle(
           style: theme.textTheme.body2,
-          child: child
-        )
-      )
+          child: child,
+        ),
+      ),
     );
   }
 }

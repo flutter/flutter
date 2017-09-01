@@ -66,7 +66,7 @@ class Tooltip extends StatefulWidget {
   /// The amount of space by which to inset the child.
   ///
   /// Defaults to 16.0 logical pixels in each direction.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The amount of vertical distance between the widget and the displayed tooltip.
   final double verticalOffset;
@@ -192,7 +192,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       child: new Semantics(
         label: widget.message,
         child: widget.child,
-      )
+      ),
     );
   }
 }
@@ -261,7 +261,7 @@ class _TooltipOverlay extends StatelessWidget {
 
   final String message;
   final double height;
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -281,7 +281,7 @@ class _TooltipOverlay extends StatelessWidget {
           delegate: new _TooltipPositionDelegate(
             target: target,
             verticalOffset: verticalOffset,
-            preferBelow: preferBelow
+            preferBelow: preferBelow,
           ),
           child: new FadeTransition(
             opacity: animation,
@@ -290,19 +290,19 @@ class _TooltipOverlay extends StatelessWidget {
               child: new Container(
                 decoration: new BoxDecoration(
                   color: darkTheme.backgroundColor,
-                  borderRadius: new BorderRadius.circular(2.0)
+                  borderRadius: new BorderRadius.circular(2.0),
                 ),
                 height: height,
                 padding: padding,
                 child: new Center(
                   widthFactor: 1.0,
-                  child: new Text(message, style: darkTheme.textTheme.body1)
-                )
-              )
-            )
-          )
-        )
-      )
+                  child: new Text(message, style: darkTheme.textTheme.body1),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
