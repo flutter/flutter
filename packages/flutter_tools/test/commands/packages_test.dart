@@ -117,7 +117,7 @@ void main() {
         return new MockProcessManager((List<dynamic> command) {
           log.add(command);
           final Process process = new PromptingProcess('Proceed (y/n)? ', <String>['hello', 'world']);
-          new Future<Null>.delayed(new Duration(), () {
+          new Future<Null>.delayed(const Duration(), () {
             process.stdin.writeln('y');
           });
           return process;
