@@ -12,6 +12,10 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import io.flutter.plugin.common.BasicMessageChannel;
+import io.flutter.plugin.common.JSONMessageCodec;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -25,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class AccessibilityBridge extends AccessibilityNodeProvider {
+class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMessageChannel.MessageHandler<Object> {
     private static final String TAG = "FlutterView";
 
     private Map<Integer, SemanticsObject> mObjects;
@@ -33,6 +37,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
     private boolean mAccessibilityEnabled = false;
     private SemanticsObject mFocusedObject;
     private SemanticsObject mHoveredObject;
+
+    private final BasicMessageChannel<Object> mFlutterAccessibilityChannel;
 
     private static final int SEMANTICS_ACTION_TAP = 1 << 0;
     private static final int SEMANTICS_ACTION_LONG_PRESS = 1 << 1;
@@ -57,10 +63,17 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
         assert owner != null;
         mOwner = owner;
         mObjects = new HashMap<Integer, SemanticsObject>();
+        mFlutterAccessibilityChannel = new BasicMessageChannel<>(owner, "flutter/accessibility",
+            JSONMessageCodec.INSTANCE);
     }
 
     void setAccessibilityEnabled(boolean accessibilityEnabled) {
         mAccessibilityEnabled = accessibilityEnabled;
+        if (accessibilityEnabled) {
+            mFlutterAccessibilityChannel.setMessageHandler(this);
+        } else {
+            mFlutterAccessibilityChannel.setMessageHandler(null);
+        }
     }
 
     @Override
@@ -323,6 +336,27 @@ class AccessibilityBridge extends AccessibilityNodeProvider {
             event.setSource(mOwner, virtualViewId);
             mOwner.getParent().requestSendAccessibilityEvent(mOwner, event);
         }
+    }
+
+    // Message Handler for [mFlutterAccessibilityChannel].
+    public void onMessage(Object message, BasicMessageChannel.Reply<Object> reply) {
+        @SuppressWarnings("unchecked")
+        final JSONObject annotatedEvent = (JSONObject)message;
+        try {
+            final int nodeId = annotatedEvent.getInt("nodeId");
+            final JSONObject event = annotatedEvent.getJSONObject("data");
+            final String type = event.getString("type");
+
+            switch (type) {
+                case "scroll":
+                    sendAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_SCROLLED);
+                    break;
+                default:
+                    assert false;
+            }
+        } catch (JSONException e) {
+          throw new IllegalArgumentException("Invalid JSON", e);
+       }
     }
 
     private void willRemoveSemanticsObject(SemanticsObject object) {
