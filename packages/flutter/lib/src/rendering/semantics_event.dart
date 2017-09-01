@@ -9,6 +9,9 @@
 /// user additional clues about the current state of the UI.
 abstract class SemanticsEvent {
 
+  /// Initializes internal fields.
+  ///
+  /// `type` is a string that identifies this class of [SemanticsEvent]s.
   SemanticsEvent(this.type);
 
   /// The type of this event.
@@ -21,6 +24,7 @@ abstract class SemanticsEvent {
 /// Notifies that a scroll action has been completed.
 class ScrollSemanticsEvent extends SemanticsEvent {
 
+  /// Creates a [ScrollSemanticsEvent].
   // TODO(goderbauer): add more metadata to this event (e.g. how far are we scrolled?).
   ScrollSemanticsEvent() : super('scroll');
 

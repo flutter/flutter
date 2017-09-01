@@ -2983,6 +2983,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsNode _innerNode;
   SemanticsNode _annotatedNode;
 
+  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
+  /// annotated with this object's semantics information.
   void sendSemanticsEvent(SemanticsEvent event) {
     _annotatedNode?.sendEvent(event);
   }
