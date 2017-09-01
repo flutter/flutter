@@ -167,7 +167,6 @@ executable("txt_benchmarks") {
   testonly = true
 
   sources = [
-    "benchmarks/font_collection_benchmarks.cc",
     "benchmarks/paint_record_benchmarks.cc",
     "benchmarks/paragraph_benchmarks.cc",
     "benchmarks/paragraph_builder_benchmarks.cc",

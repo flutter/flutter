@@ -20,12 +20,16 @@
 
 namespace txt {
 
-const std::string GetFontDir();
+class FontCollection;
+
+const std::string& GetFontDir();
 
 void SetFontDir(const std::string& dir);
 
 const ftl::CommandLine& GetCommandLineForProcess();
 
 void SetCommandLine(ftl::CommandLine cmd);
+
+std::shared_ptr<FontCollection> GetTestFontCollection();
 
 }  // namespace txt
