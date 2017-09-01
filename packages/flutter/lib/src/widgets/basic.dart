@@ -2916,12 +2916,15 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ## Troubleshooting
 ///
-/// ### Why is my row turning red?
+/// ### Why does my row have a yellow and black warning stripe?
 ///
-/// If the contents of the row overflow, meaning that together they are wider
-/// than the row, then the row runs out of space to give its [Expanded] and
-/// [Flexible] children, and reports this by drawing a red warning box on the
-/// edge that is overflowing.
+/// If the non-flexible contents of the row (those that are not wrapped in
+/// [Expanded] or [Flexible] widgets) are together wider than the row itself,
+/// then the row is said to have overflowed. When a row overflows, the row does
+/// not have any remaining space to share between its [Expanded] and [Flexible]
+/// children. The row reports this by drawing a yellow and black striped
+/// warning box on the edge that is overflowing. If there is room on the outside
+/// of the row, the amount of overflow is printed in red lettering.
 ///
 /// #### Story time
 ///
@@ -2947,7 +2950,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// be thiiiiiiiiiiiiiiiiiiiis wide.", and goes well beyond the space that the
 /// row has available, not wrapping. The row responds, "That's not fair, now I
 /// have no more room available for my other children!", and gets angry and
-/// turns red.
+/// sprouts a yellow and black strip.
 ///
 /// The fix is to wrap the second child in an [Expanded] widget, which tells the
 /// row that the child should be given the remaining room:
@@ -3108,6 +3111,58 @@ class Row extends Flex {
 ///   ],
 /// )
 /// ```
+///
+/// ## Troubleshooting
+///
+/// ### When the incoming vertical constraints are unbounded
+///
+/// When a [Column] has one or more [Expanded] or [Flexible] children, and is
+/// placed in another [Column], or in a [ListView], or in some other context
+/// that does not provide a maximum height constraint for the [Column], you will
+/// get an exception at runtime saying that there are children with non-zero
+/// flex but the vertical constraints are unbounded.
+///
+/// The problem, as described in the details that accompany that exception, is
+/// that using [Flexible] or [Expanded] means that the remaining space after
+/// laying out all the other children must be shared equally, but if the
+/// incoming vertical constraints are unbounded, there is infinite remaining
+/// space.
+///
+/// The key to solving this problem is usually to determine why the [Column] is
+/// receiving unbounded vertical constraints.
+///
+/// One common reason for this to happen is that the [Column] has been placed in
+/// another [Column] (without using [Expanded] or [Flexible] around the inner
+/// nested [Column]). When a [Column] lays out its non-flex children (those that
+/// have neither [Expanded] or [Flexible] around them), it gives them unbounded
+/// constraints so that they can determine their own dimensions (passing
+/// unbounded constraints usually signals to the child that it should
+/// shrink-wrap its contents). The solution in this case is typically to just
+/// wrap the inner column in an [Expanded] to indicate that it should take the
+/// remaining space of the outer column, rather than being allowed to take any
+/// amount of room it desires.
+///
+/// Another reason for this message to be displayed is nesting a [Column] inside
+/// a [ListView] or other vertical scrollable. In that scenario, there really is
+/// infinite vertical space (the whole point of a vertical scrolling list is to
+/// allow infinite space vertically). In such scenarios, it is usually worth
+/// examining why the inner [Column] should have an [Expanded] or [Flexible]
+/// child: what size should the inner children really be? The solution in this
+/// case is typically to remove the [Expanded] or [Flexible] widgets from around
+/// the inner children.
+///
+/// For more discussion about constraints, see [BoxConstraints].
+///
+/// ### The yellow and black striped banner
+///
+/// When the contents of a [Column] exceed the amount of space available, the
+/// [Column] overflows, and the contents are clipped. In debug mode, a yellow
+/// and black striped bar is rendered at the overflowing edge to indicate the
+/// problem, and a message is printed below the [Column] saying how much
+/// overflow was detected.
+///
+/// The usual solution is to use a [ListView] rather than a [Column], to enable
+/// the contents to scroll when vertical space is limited.
 ///
 /// ## Layout algorithm
 ///

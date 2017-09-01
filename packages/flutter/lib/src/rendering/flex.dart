@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'box.dart';
 import 'object.dart';
@@ -933,6 +934,17 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return defaultHitTestChildren(result, position: position);
   }
 
+  static const Color _black = const Color(0xBF000000);
+  static const Color _yellow = const Color(0xBFFFFF00);
+  static const double _kMarkerSize = 0.1;
+  static const TextStyle _debugMarkerTextStyle = const TextStyle(
+    color: const Color(0xFF900000),
+    fontSize: 7.5,
+    fontWeight: FontWeight.w800,
+  );
+  static Paint _debugMarkerPaint;
+  TextPainter _debugMarkerLabel;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_overflow <= 0.0) {
@@ -944,34 +956,65 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
 
     assert(() {
-      // In debug mode, if you have overflow, we highlight where the
-      // overflow would be by painting that area red. Since that is
-      // likely to be clipped by an ancestor, we also draw a thick red
-      // line at the edge that's overflowing.
+      // In debug mode, if you have overflow, we highlight where the overflow
+      // would be by painting the edge of that area with a yellow and black
+      // striped bar.
+      _debugMarkerPaint ??= new Paint()
+        ..shader = new ui.Gradient.linear(
+          const Offset(0.0, 0.0),
+          const Offset(10.0, 10.0),
+          <Color>[_black, _yellow, _yellow, _black],
+          <double>[0.25, 0.25, 0.75, 0.75],
+          TileMode.repeated,
+        );
 
-      // If you do want clipping, use a RenderClip (Clip in the
-      // Widgets library).
+      String pixels;
+      if (_overflow > 10.0) {
+        pixels = _overflow.toStringAsFixed(0);
+      } else if (_overflow > 1.0) {
+        pixels = _overflow.toStringAsFixed(1);
+      } else {
+        pixels = _overflow.toStringAsPrecision(3);
+      }
 
-      final Paint markerPaint = new Paint()..color = const Color(0xE0FF0000);
-      final Paint highlightPaint = new Paint()..color = const Color(0x7FFF0000);
-      const double kMarkerSize = 0.1;
-      Rect markerRect, overflowRect;
-      switch(direction) {
+      String label;
+      Rect markerRect;
+      switch (direction) {
         case Axis.horizontal:
-          markerRect = offset + new Offset(size.width * (1.0 - kMarkerSize), 0.0) &
-                       new Size(size.width * kMarkerSize, size.height);
-          overflowRect = offset + new Offset(size.width, 0.0) &
-                         new Size(_overflow, size.height);
+          markerRect = offset + new Offset(size.width * (1.0 - _kMarkerSize), 0.0) &
+                                new Size(size.width * _kMarkerSize, size.height);
+          label = 'ROW OVERFLOWED BY $pixels PIXELS';
           break;
         case Axis.vertical:
-          markerRect = offset + new Offset(0.0, size.height * (1.0 - kMarkerSize)) &
-                       new Size(size.width, size.height * kMarkerSize);
-          overflowRect = offset + new Offset(0.0, size.height) &
-                         new Size(size.width, _overflow);
+          markerRect = offset + new Offset(0.0, size.height * (1.0 - _kMarkerSize)) &
+                                new Size(size.width, size.height * _kMarkerSize);
+          label = 'COLUMN OVERFLOWED BY $pixels PIXELS';
           break;
       }
-      context.canvas.drawRect(markerRect, markerPaint);
-      context.canvas.drawRect(overflowRect, highlightPaint);
+      context.canvas.drawRect(markerRect, _debugMarkerPaint);
+
+      _debugMarkerLabel ??= new TextPainter();
+      _debugMarkerLabel.text = new TextSpan( // this is a no-op if the label hasn't changed
+        text: label,
+        style: _debugMarkerTextStyle,
+      );
+      _debugMarkerLabel.layout(); // this is a no-op if the label hasn't changed
+
+      // TODO(ianh): RTL support
+      switch (direction) {
+        case Axis.horizontal:
+          context.canvas.save();
+          final Offset offset = markerRect.centerRight;
+          context.canvas.translate(offset.dx, offset.dy);
+          context.canvas.rotate(-math.PI / 2.0);
+          _debugMarkerLabel.paint(context.canvas, new Offset(-_debugMarkerLabel.width / 2.0, 0.0));
+          context.canvas.restore();
+          break;
+        case Axis.vertical:
+          _debugMarkerLabel.paint(context.canvas, markerRect.bottomCenter - new Offset(_debugMarkerLabel.width / 2.0, 0.0));
+          break;
+      }
+
       return true;
     });
   }
