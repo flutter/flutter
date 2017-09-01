@@ -297,7 +297,7 @@ Future<String> _buildAotSnapshot(
       final Set<String> snapshotInputPaths = await readDepfile(dependencies)
         ..add(mainPath)
         ..addAll(outputPaths);
-      final Checksum newChecksum = new Checksum.fromFiles(snapshotType, snapshotInputPaths);
+      final Checksum newChecksum = new Checksum.fromFiles(snapshotType, mainPath, snapshotInputPaths);
       if (oldChecksum == newChecksum) {
         printStatus('Skipping AOT snapshot build. Checksums match.');
         return outputPath;
@@ -375,7 +375,7 @@ Future<String> _buildAotSnapshot(
     final Set<String> snapshotInputPaths = await readDepfile(dependencies)
       ..add(mainPath)
       ..addAll(outputPaths);
-    final Checksum checksum = new Checksum.fromFiles(snapshotType, snapshotInputPaths);
+    final Checksum checksum = new Checksum.fromFiles(snapshotType, mainPath, snapshotInputPaths);
     await checksumFile.writeAsString(checksum.toJson());
   } catch (e, s) {
     // Log exception and continue, this step is a performance improvement only.
