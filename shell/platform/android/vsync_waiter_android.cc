@@ -37,18 +37,22 @@ void VsyncWaiterAndroid::AsyncWaitForVsync(Callback callback) {
   });
 }
 
-void VsyncWaiterAndroid::OnVsync(int64_t frameTimeNanos) {
+void VsyncWaiterAndroid::OnVsync(int64_t frameTimeNanos,
+                                 int64_t frameTargetTimeNanos) {
   Callback callback = std::move(callback_);
   callback_ = Callback();
-  blink::Threads::UI()->PostTask([callback, frameTimeNanos] {
+  blink::Threads::UI()->PostTask([callback, frameTimeNanos, frameTargetTimeNanos] {
     callback(ftl::TimePoint::FromEpochDelta(
-        ftl::TimeDelta::FromNanoseconds(frameTimeNanos)));
+                 ftl::TimeDelta::FromNanoseconds(frameTimeNanos)),
+             ftl::TimePoint::FromEpochDelta(
+                 ftl::TimeDelta::FromNanoseconds(frameTargetTimeNanos)));
   });
 }
 
 static void OnNativeVsync(JNIEnv* env,
                           jclass jcaller,
                           jlong frameTimeNanos,
+                          jlong frameTargetTimeNanos,
                           jlong cookie) {
   // Note: The tag name must be "VSYNC" (it is special) so that the "Highlight
   // Vsync" checkbox in the timeline can be enabled.
@@ -61,14 +65,15 @@ static void OnNativeVsync(JNIEnv* env,
   VsyncWaiterAndroid* waiter = weak->get();
   delete weak;
   if (waiter) {
-    waiter->OnVsync(static_cast<int64_t>(frameTimeNanos));
+    waiter->OnVsync(static_cast<int64_t>(frameTimeNanos),
+                    static_cast<int64_t>(frameTargetTimeNanos));
   }
 }
 
 bool VsyncWaiterAndroid::Register(JNIEnv* env) {
   static const JNINativeMethod methods[] = {{
       .name = "nativeOnVsync",
-      .signature = "(JJ)V",
+      .signature = "(JJJ)V",
       .fnPtr = reinterpret_cast<void*>(&OnNativeVsync),
   }};
 

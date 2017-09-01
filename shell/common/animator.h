@@ -35,7 +35,8 @@ class Animator {
  private:
   using LayerTreePipeline = flutter::Pipeline<flow::LayerTree>;
 
-  void BeginFrame(ftl::TimePoint frame_time);
+  void BeginFrame(ftl::TimePoint frame_start_time,
+                  ftl::TimePoint frame_target_time);
 
   void AwaitVSync();
 
@@ -44,11 +45,13 @@ class Animator {
   Engine* engine_;
 
   ftl::TimePoint last_begin_frame_time_;
+  int64_t dart_frame_deadline_;
   ftl::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
   flutter::Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;
   int64_t frame_number_;
   bool paused_;
+  bool frame_scheduled_;
 
   ftl::WeakPtrFactory<Animator> weak_factory_;
 
