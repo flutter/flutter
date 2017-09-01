@@ -11,6 +11,41 @@
 ///
 /// This variable is used by [MaterialLocalizations].
 const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {
+  "sd": const <String, String>{
+    "openAppDrawerTooltip": r"اوپن جي مينڊيٽ مينيو",
+    "backButtonTooltip": r"پوئتي",
+    "closeButtonTooltip": r"بند ڪريو",
+    "nextMonthTooltip": r"ايندڙ مهيني",
+    "previousMonthTooltip": r"پويون مهينو"
+  },
+  "fa": const <String, String>{
+    "openAppDrawerTooltip": r"منوی ناوبری را باز کنید",
+    "backButtonTooltip": r"بازگشت",
+    "closeButtonTooltip": r"بستن",
+    "nextMonthTooltip": r"ماه بعد",
+    "previousMonthTooltip": r"ماه گذشته"
+  },
+  "ur": const <String, String>{
+    "openAppDrawerTooltip": r"کھولیں نیویگیشن مینو",
+    "backButtonTooltip": r"واپس",
+    "closeButtonTooltip": r"بند کریں",
+    "nextMonthTooltip": r"اگلا مھینہ",
+    "previousMonthTooltip": r"پچھلا مھینہ"
+  },
+  "ps": const <String, String>{
+    "openAppDrawerTooltip": r"د پرانیستی نیینګ مینو",
+    "backButtonTooltip": r"شاته",
+    "closeButtonTooltip": r"بنده",
+    "nextMonthTooltip": r"بله میاشت",
+    "previousMonthTooltip": r"تیره میاشت"
+  },
+  "he": const <String, String>{
+    "openAppDrawerTooltip": r"פתח תפריט ניווט",
+    "backButtonTooltip": r"אחורה",
+    "closeButtonTooltip": r"סגור",
+    "nextMonthTooltip": r"חודש הבא",
+    "previousMonthTooltip": r"חודש שעבר"
+  },
   "ar": const <String, String>{
     "openAppDrawerTooltip": r"افتح قائمة التنقل",
     "backButtonTooltip": r"الى الخلف",

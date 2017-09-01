@@ -1,27 +1,7 @@
 {
   "openAppDrawerTooltip": "打开导航菜单",
-  "@openAppDrawerTooltip": {
-    "description": "The tooltip for the leading AppBar menu (aka 'hamburger') button",
-    "type": "text"
-  },
   "backButtonTooltip": "背部",
-  "@backButtonTooltip": {
-    "description": "The BackButton's tooltip",
-    "type": "text"
-  },
   "closeButtonTooltip": "关",
-  "@closeButtonTooltip": {
-    "description": "The CloseButton's tooltip",
-    "type": "text"
-  },
   "nextMonthTooltip": "-下月就29了。",
-  "@nextMonthTooltip": {
-    "description": "The tooltip for the MonthPicker's 'next month' button.",
-    "type": "text"
-  },
-  "previousMonthTooltip": "前一个月",
-  "@previousMonthTooltip": {
-    "description": "The tooltip for the MonthPicker's 'previous month' button.",
-    "type": "text"
-  }
+  "previousMonthTooltip": "前一个月"
 }
