@@ -388,7 +388,6 @@ class SemanticsNode extends AbstractNode {
     if (hadInheritedMergeAllDescendantsIntoThisNode)
       _inheritedMergeAllDescendantsIntoThisNodeValue = true;
     _label = '';
-    _tags.clear();
     _markDirty();
   }
 
