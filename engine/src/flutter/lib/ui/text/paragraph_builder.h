@@ -31,7 +31,7 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
                                               const std::string& fontFamily,
                                               double fontSize,
                                               double lineHeight,
-                                              const std::string& ellipsis);
+                                              const std::u16string& ellipsis);
 
   ~ParagraphBuilder() override;
 
@@ -55,7 +55,7 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
                             const std::string& fontFamily,
                             double fontSize,
                             double lineHeight,
-                            const std::string& ellipsis);
+                            const std::u16string& ellipsis);
 
   void createRenderView();
 

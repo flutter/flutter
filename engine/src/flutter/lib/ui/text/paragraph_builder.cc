@@ -108,7 +108,7 @@ PassRefPtr<RenderStyle> decodeParagraphStyle(RenderStyle* parentStyle,
                                              const std::string& fontFamily,
                                              double fontSize,
                                              double lineHeight,
-                                             const std::string& ellipsis) {
+                                             const std::u16string& ellipsis) {
   FTL_DCHECK(encoded.num_elements() == 5);
 
   RefPtr<RenderStyle> style = RenderStyle::create();
@@ -155,8 +155,10 @@ PassRefPtr<RenderStyle> decodeParagraphStyle(RenderStyle* parentStyle,
   if (mask & psMaxLinesMask)
     style->setMaxLines(encoded[psMaxLinesIndex]);
 
-  if (mask & psEllipsisMask)
-    style->setEllipsis(AtomicString::fromUTF8(ellipsis.c_str()));
+  if (mask & psEllipsisMask) {
+    style->setEllipsis(
+        AtomicString(reinterpret_cast<const UChar*>(ellipsis.c_str())));
+  }
 
   return style.release();
 }
@@ -193,7 +195,7 @@ ftl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
     const std::string& fontFamily,
     double fontSize,
     double lineHeight,
-    const std::string& ellipsis) {
+    const std::u16string& ellipsis) {
   return ftl::MakeRefCounted<ParagraphBuilder>(encoded, fontFamily, fontSize,
                                                lineHeight, ellipsis);
 }
@@ -202,7 +204,7 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
                                    const std::string& fontFamily,
                                    double fontSize,
                                    double lineHeight,
-                                   const std::string& ellipsis) {
+                                   const std::u16string& ellipsis) {
   if (!Settings::Get().using_blink) {
     int32_t mask = encoded[0];
     txt::ParagraphStyle style;
@@ -232,8 +234,9 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
     if (mask & psMaxLinesMask)
       style.max_lines = encoded[psMaxLinesIndex];
 
-    if (mask & psEllipsisMask)
+    if (mask & psEllipsisMask) {
       style.ellipsis = ellipsis;
+    }
 
     m_paragraphBuilder = std::make_unique<txt::ParagraphBuilder>(
         style, blink::FontCollection::ForProcess().GetFontCollection());
