@@ -1192,6 +1192,9 @@ FILE: ../../../flutter/third_party/txt/src/txt/asset_font_style_set.cc
 FILE: ../../../flutter/third_party/txt/src/txt/asset_font_style_set.h
 FILE: ../../../flutter/third_party/txt/src/txt/directory_asset_data_provider.cc
 FILE: ../../../flutter/third_party/txt/src/txt/directory_asset_data_provider.h
+FILE: ../../../flutter/third_party/txt/src/txt/platform.cc
+FILE: ../../../flutter/third_party/txt/src/txt/platform.h
+FILE: ../../../flutter/third_party/txt/src/txt/platform_mac.mm
 FILE: ../../../flutter/vulkan/vulkan_native_surface_magma.cc
 FILE: ../../../flutter/vulkan/vulkan_native_surface_magma.h
 ----------------------------------------------------------------------------------------------------
