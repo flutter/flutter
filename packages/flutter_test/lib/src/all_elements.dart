@@ -51,7 +51,7 @@ class _DepthFirstChildIterator implements Iterator<Element> {
     assert(element != null);
     final List<Element> children = <Element>[];
     if (skipOffstage) {
-      element.visitChildrenForSemantics(children.add);
+      element.debugVisitOnstageChildren(children.add);
     } else {
       element.visitChildren(children.add);
     }

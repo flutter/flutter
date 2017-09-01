@@ -1851,9 +1851,9 @@ class _OffstageElement extends SingleChildRenderObjectElement {
   Offstage get widget => super.widget;
 
   @override
-  void visitChildrenForSemantics(ElementVisitor visitor) {
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
     if (!widget.offstage)
-      super.visitChildrenForSemantics(visitor);
+      super.debugVisitOnstageChildren(visitor);
   }
 }
 
