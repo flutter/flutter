@@ -84,6 +84,7 @@ void main() {
       ProcessManager: () {
         return new MockProcessManager((List<dynamic> command) {
           log.add(command);
+          return new MockProcess();
         });
       },
     });
@@ -100,11 +101,11 @@ void main() {
       ProcessManager: () {
         return new MockProcessManager((List<dynamic> command) {
           log.add(command);
+          return new MockProcess();
         });
       },
     });
     testUsingContext('publish', () async {
-      // TODO(mravn): test that interactivity works.
       log.clear();
       await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
       expect(log, hasLength(1));
@@ -115,18 +116,25 @@ void main() {
       ProcessManager: () {
         return new MockProcessManager((List<dynamic> command) {
           log.add(command);
+          final Process process = new PromptingProcess('Proceed (y/n)? ', <String>['hello', 'world']);
+          new Future<Null>.delayed(new Duration(), () {
+            process.stdin.writeln('y');
+          });
+          return process;
         });
       },
     });
   });
 }
 
-typedef void StartCallback(List<dynamic> command);
+/// A strategy for creating Process objects from a list of commands.
+typedef Process ProcessFactory(List<dynamic> command);
 
+/// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager implements ProcessManager {
-  MockProcessManager(this.onStart);
+  MockProcessManager(this.processFactory);
 
-  final StartCallback onStart;
+  final ProcessFactory processFactory;
 
   @override
   Future<Process> start(
@@ -137,17 +145,59 @@ class MockProcessManager implements ProcessManager {
     bool runInShell: false,
     ProcessStartMode mode: ProcessStartMode.NORMAL,
   }) {
-    onStart(command);
-    return new Future<Process>.value(new MockProcess());
+    return new Future<Process>.value(processFactory(command));
   }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-class MockProcess implements Process {
-  MockProcess();
+/// Process that prompts the user to proceed, then asynchronously writes
+/// some lines to stdout before it exits.
+class PromptingProcess implements Process {
+  PromptingProcess(String prompt, List<String> outputLines) {
+    _stdoutController.add(UTF8.encode(prompt));
+    _stdin.future.then((List<int> bytes) async {
+      // echo stdin to stdout
+      _stdoutController.add(bytes);
+      if (bytes[0] == UTF8.encode('y')[0]) {
+        for (final String line in outputLines) {
+          await new Future<Null>.delayed(const Duration(), () {
+            _stdoutController.add(UTF8.encode('$line\n'));
+          });
+        }
+        await new Future<Null>.delayed(const Duration(), () {
+          _stdoutController.close();
+        });
+      }
+    });
+  }
 
+  final StreamController<List<int>> _stdoutController = new StreamController<List<int>>();
+  final CompleterIOSink _stdin = new CompleterIOSink();
+
+  @override
+  Stream<List<int>> get stdout => _stdoutController.stream;
+
+  @override
+  Stream<List<int>> get stderr => const Stream<List<int>>.empty();
+
+  @override
+  IOSink get stdin => _stdin;
+
+  @override
+  Future<int> get exitCode async {
+    await _stdoutController.done;
+    return 0;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+/// An inactive process that consumes anything on stdin and produces no
+/// output.
+class MockProcess implements Process {
   @override
   Stream<List<int>> get stdout => const Stream<List<int>>.empty();
 
@@ -164,6 +214,7 @@ class MockProcess implements Process {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
+/// An IOSink that drops any received data.
 class MockIOSink implements IOSink {
   @override
   Encoding encoding;
@@ -203,4 +254,18 @@ class MockIOSink implements IOSink {
 
   @override
   Future<dynamic> flush() async => null;
+}
+
+
+/// An IOSink that completes a future with the first line written to it.
+class CompleterIOSink extends MockIOSink {
+  final Completer<List<int>> _completer = new Completer<List<int>>();
+
+  Future<List<int>> get future => _completer.future;
+
+  @override
+  void writeln([Object obj = ""]) {
+    if (!_completer.isCompleted)
+      _completer.complete(UTF8.encode('$obj\n'));
+  }
 }

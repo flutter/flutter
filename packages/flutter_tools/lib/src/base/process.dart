@@ -181,12 +181,12 @@ Future<int> runInteractively(List<String> command, {
     environment: environment,
   );
   process.stdin.addStream(stdin);
-  final Future<dynamic> stdOutDone = stdout.addStream(process.stdout);
-  final Future<dynamic> stdErrDone = stderr.addStream(process.stderr);
   // Wait for stdout and stderr to be fully processed, because process.exitCode
   // may complete first.
-  await stdOutDone;
-  await stdErrDone;
+  Future.wait<dynamic>(<Future<dynamic>>[
+    stdout.addStream(process.stdout),
+    stderr.addStream(process.stderr),
+  ]);
   return await process.exitCode;
 }
 
