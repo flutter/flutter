@@ -561,10 +561,10 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     }
   }
 
-  void sendSemanticsScrollEvent() {
+  void sendSemanticsEvent(SemanticsEvent event) {
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      semanticsGestureHandler.sendSemanticsScrollEvent();
+      semanticsGestureHandler.sendSemanticsEvent(event);
     }
   }
 

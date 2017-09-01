@@ -8,12 +8,15 @@ import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 import 'node.dart';
+import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
+export 'semantics_event.dart';
 
 /// Interface for [RenderObject]s to implement when they want to support
 /// being tapped, etc.
@@ -654,6 +657,17 @@ class SemanticsNode extends AbstractNode {
       children: children,
     );
     _dirty = false;
+  }
+
+  /// Sends a [SemanticsEvent] associated with this [SemanticsNode].
+  void sendEvent(SemanticsEvent event) {
+    assert(attached);
+    assert(!_dirty);
+    final Map<String, dynamic> annotatedEvent = <String, dynamic>{
+      'nodeId': id,
+      'data': event.toJson(),
+    };
+    SystemChannels.accessibility.send(annotatedEvent);
   }
 
   @override

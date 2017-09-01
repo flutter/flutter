@@ -2983,10 +2983,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsNode _innerNode;
   SemanticsNode _annotatedNode;
 
-  void sendSemanticsScrollEvent() {
-    if (_annotatedNode == null)
-      return;
-    SystemChannels.accessibility.send(_annotatedNode.id);
+  void sendSemanticsEvent(SemanticsEvent event) {
+    _annotatedNode?.sendEvent(event);
   }
 
   @override
