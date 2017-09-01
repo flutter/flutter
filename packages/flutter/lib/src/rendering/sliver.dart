@@ -486,7 +486,7 @@ class SliverGeometry extends Diagnosticable {
     this.paintOrigin: 0.0,
     double layoutExtent,
     this.maxPaintExtent: 0.0,
-    this.maxPinnedExtent: 0.0,
+    this.maxScrollObstructionExtent: 0.0,
     double hitTestExtent,
     bool visible,
     this.hasVisualOverflow: false,
@@ -562,7 +562,7 @@ class SliverGeometry extends Diagnosticable {
   /// A pinned app bar is an example for a sliver that would use this setting:
   /// When the app bar is pinned to the top, the area in which content can
   /// actually scroll is reduced by the height of the app bar.
-  final double maxPinnedExtent;
+  final double maxScrollObstructionExtent;
 
   /// The distance from where this sliver started painting to the bottom of
   /// where it should accept hits.

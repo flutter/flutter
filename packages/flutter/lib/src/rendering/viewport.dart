@@ -458,7 +458,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(child.parent == this);
     assert(child is RenderSliver);
     final RenderSliver sliver = child;
-    final double extentOfPinnedSlivers = paintExtentOfSliversPinnedBefore(sliver);
+    final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
     leadingScrollOffset = scrollOffsetOf(sliver, leadingScrollOffset);
     switch (sliver.constraints.growthDirection) {
       case GrowthDirection.forward:
@@ -590,14 +590,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @protected
   double scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild);
 
-  /// Returns the total paint extent of all slivers that are pinned at the edge
+  /// Returns the total scroll obstruction extent of all slivers in theild].
   /// of the viewport before [child].
   ///
-  /// This is the extent to which the actual area in which content can scroll
+  /// This is the extent by which the actual area in which content can scroll
   /// is reduced. For example, an app bar that is pinned at the top will reduce
   /// the are in which content can actually scroll by the height of the app bar.
   @protected
-  double paintExtentOfSliversPinnedBefore(RenderSliver child);
+  double maxScrollObstructionExtentBefore(RenderSliver child);
 
   /// Converts the `parentMainAxisPosition` into the child's coordinate system.
   ///
@@ -1022,7 +1022,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 
   @override
-  double paintExtentOfSliversPinnedBefore(RenderSliver child) {
+  double maxScrollObstructionExtentBefore(RenderSliver child) {
     assert(child.parent == this);
     final GrowthDirection growthDirection = child.constraints.growthDirection;
     assert(growthDirection != null);
@@ -1031,7 +1031,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         double pinnedExtent = 0.0;
         RenderSliver current = center;
         while (current != child) {
-          pinnedExtent += current.geometry.maxPinnedExtent;
+          pinnedExtent += current.geometry.maxScrollObstructionExtent;
           current = childAfter(current);
         }
         return pinnedExtent;
@@ -1039,7 +1039,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         double pinnedExtent = 0.0;
         RenderSliver current = childBefore(center);
         while (current != child) {
-          pinnedExtent += current.geometry.maxPinnedExtent;
+          pinnedExtent += current.geometry.maxScrollObstructionExtent;
           current = childBefore(current);
         }
         return pinnedExtent;
@@ -1331,13 +1331,13 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   }
 
   @override
-  double paintExtentOfSliversPinnedBefore(RenderSliver child) {
+  double maxScrollObstructionExtentBefore(RenderSliver child) {
     assert(child.parent == this);
     assert(child.constraints.growthDirection == GrowthDirection.forward);
     double pinnedExtent = 0.0;
     RenderSliver current = firstChild;
     while (current != child) {
-      pinnedExtent += current.geometry.maxPinnedExtent;
+      pinnedExtent += current.geometry.maxScrollObstructionExtent;
       current = childAfter(current);
     }
     return pinnedExtent;
