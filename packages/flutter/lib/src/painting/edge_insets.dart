@@ -752,10 +752,10 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
   EdgeInsets resolve(TextDirection direction) {
     assert(direction != null);
     switch (direction) {
-      case TextDirection.ltr:
-        return new EdgeInsets.fromLTRB(start, top, end, bottom);
       case TextDirection.rtl:
         return new EdgeInsets.fromLTRB(end, top, start, bottom);
+      case TextDirection.ltr:
+        return new EdgeInsets.fromLTRB(start, top, end, bottom);
     }
     return null;
   }
@@ -856,10 +856,10 @@ class _MixedEdgeInsets extends EdgeInsetsGeometry {
   EdgeInsets resolve(TextDirection direction) {
     assert(direction != null);
     switch (direction) {
+      case TextDirection.rtl:
+        return new EdgeInsets.fromLTRB(_end + _left, _top, _start + _right, _bottom);
       case TextDirection.ltr:
         return new EdgeInsets.fromLTRB(_start + _left, _top, _end + _right, _bottom);
-      case TextDirection.rtl:
-        return new EdgeInsets.fromLTRB(_end + _left, _top, _start + _left, _bottom);
     }
     return null;
   }

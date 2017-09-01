@@ -29,6 +29,7 @@ export 'package:flutter/rendering.dart' show
   FlowDelegate,
   FlowPaintingContext,
   FractionalOffsetTween,
+  FractionalOffsetGeometryTween,
   HitTestBehavior,
   LayerLink,
   MainAxisAlignment,
