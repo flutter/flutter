@@ -89,7 +89,7 @@ void main() {
           return new Viewport(
             offset: offset,
             slivers: <Widget>[
-              new SliverAppBar(
+              const SliverAppBar(
                 pinned: true,
                 expandedHeight: kExpandedAppBarHeight,
                 flexibleSpace: const FlexibleSpaceBar(
@@ -153,7 +153,7 @@ void main() {
           return new Viewport(
             offset: offset,
             slivers: <Widget>[
-              new SliverAppBar(
+              const SliverAppBar(
                 pinned: true,
                 expandedHeight: kExpandedAppBarHeight,
                 flexibleSpace: const FlexibleSpaceBar(
