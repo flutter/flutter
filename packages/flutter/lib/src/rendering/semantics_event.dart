@@ -21,6 +21,7 @@ abstract class SemanticsEvent {
 /// Notifies that a scroll action has been completed.
 class ScrollSemanticsEvent extends SemanticsEvent {
 
+  // TODO(goderbauer): add more metadata to this event (e.g. how far are we scrolled?).
   ScrollSemanticsEvent() : super('scroll');
 
   @override
