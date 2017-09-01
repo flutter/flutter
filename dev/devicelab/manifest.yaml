@@ -316,6 +316,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  flutter_gallery__preview_dart_2_build:
+    description: >
+      Collects various performance metrics from AOT builds of the Flutter
+      Gallery under --preview-dart-2 that enables new Dart 2.0 frontend.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   flutter_gallery__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on Android.
