@@ -27,15 +27,16 @@
 
 namespace txt {
 
-TEST_F(RenderTest, SimpleParagraph) {
+using ParagraphTest = RenderTest;
+
+TEST_F(ParagraphTest, SimpleParagraph) {
   const char* text = "Hello World Text Dialog";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
@@ -60,15 +61,14 @@ TEST_F(RenderTest, SimpleParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, SimpleRedParagraph) {
+TEST_F(ParagraphTest, SimpleRedParagraph) {
   const char* text = "I am RED";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorRED;
@@ -94,7 +94,7 @@ TEST_F(RenderTest, SimpleRedParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, RainbowParagraph) {
+TEST_F(ParagraphTest, RainbowParagraph) {
   const char* text1 = "Red Roboto";
   auto icu_text1 = icu::UnicodeString::fromUTF8(text1);
   std::u16string u16_text1(icu_text1.getBuffer(),
@@ -121,8 +121,7 @@ TEST_F(RenderTest, RainbowParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 2;
   paragraph_style.text_align = TextAlign::left;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style1;
   text_style1.color = SK_ColorRED;
@@ -188,15 +187,14 @@ TEST_F(RenderTest, RainbowParagraph) {
 }
 
 // Currently, this should render nothing without a supplied TextStyle.
-TEST_F(RenderTest, DefaultStyleParagraph) {
+TEST_F(ParagraphTest, DefaultStyleParagraph) {
   const char* text = "No TextStyle! Uh Oh!";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorRED;
@@ -219,15 +217,14 @@ TEST_F(RenderTest, DefaultStyleParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, BoldParagraph) {
+TEST_F(ParagraphTest, BoldParagraph) {
   const char* text = "This is Red max bold text!";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_family = "Roboto";
@@ -257,7 +254,7 @@ TEST_F(RenderTest, BoldParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, LeftAlignParagraph) {
+TEST_F(ParagraphTest, LeftAlignParagraph) {
   const char* text =
       "This is a very long sentence to test if the text will properly wrap "
       "around and go to the next line. Sometimes, short sentence. Longer "
@@ -283,8 +280,7 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::left;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -354,7 +350,7 @@ TEST_F(RenderTest, LeftAlignParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, RightAlignParagraph) {
+TEST_F(ParagraphTest, RightAlignParagraph) {
   const char* text =
       "This is a very long sentence to test if the text will properly wrap "
       "around and go to the next line. Sometimes, short sentence. Longer "
@@ -380,8 +376,7 @@ TEST_F(RenderTest, RightAlignParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::right;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -458,7 +453,7 @@ TEST_F(RenderTest, RightAlignParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, CenterAlignParagraph) {
+TEST_F(ParagraphTest, CenterAlignParagraph) {
   const char* text =
       "This is a very long sentence to test if the text will properly wrap "
       "around and go to the next line. Sometimes, short sentence. Longer "
@@ -484,8 +479,7 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::center;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -566,7 +560,7 @@ TEST_F(RenderTest, CenterAlignParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, JustifyAlignParagraph) {
+TEST_F(ParagraphTest, JustifyAlignParagraph) {
   const char* text =
       "This is a very long sentence to test if the text will properly wrap "
       "around and go to the next line. Sometimes, short sentence. Longer "
@@ -590,8 +584,7 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::justify;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -653,12 +646,11 @@ TEST_F(RenderTest, JustifyAlignParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, DecorationsParagraph) {
+TEST_F(ParagraphTest, DecorationsParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::left;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 26;
@@ -730,10 +722,9 @@ TEST_F(RenderTest, DecorationsParagraph) {
   ASSERT_EQ(paragraph->records_[5].style().decoration_color, SK_ColorRED);
 }
 
-TEST_F(RenderTest, ItalicsParagraph) {
+TEST_F(ParagraphTest, ItalicsParagraph) {
   txt::ParagraphStyle paragraph_style;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorRED;
@@ -762,7 +753,7 @@ TEST_F(RenderTest, ItalicsParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, ChineseParagraph) {
+TEST_F(ParagraphTest, ChineseParagraph) {
   const char* text =
       "左線読設重説切後碁給能上目秘使約。満毎冠行来昼本可必図将発確年。今属場育"
       "図情闘陰野高備込制詩西校客。審対江置講今固残必託地集済決維駆年策。立得庭"
@@ -776,8 +767,7 @@ TEST_F(RenderTest, ChineseParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::justify;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
@@ -808,7 +798,7 @@ TEST_F(RenderTest, ChineseParagraph) {
 }
 
 // TODO(garyq): Support RTL languages.
-TEST_F(RenderTest, DISABLED_ArabicParagraph) {
+TEST_F(ParagraphTest, DISABLED_ArabicParagraph) {
   const char* text =
       "من أسر وإعلان الخاصّة وهولندا،, عل قائمة الضغوط بالمطالبة تلك. الصفحة "
       "بمباركة التقليدية قام عن. تصفح";
@@ -820,8 +810,7 @@ TEST_F(RenderTest, DISABLED_ArabicParagraph) {
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::right;
   paragraph_style.rtl = true;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
@@ -858,7 +847,7 @@ TEST_F(RenderTest, DISABLED_ArabicParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
+TEST_F(ParagraphTest, GetGlyphPositionAtCoordinateParagraph) {
   const char* text =
       "12345 67890 12345 67890 12345 67890 12345 67890 12345 67890 12345 "
       "67890 12345";
@@ -869,8 +858,7 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 10;
   paragraph_style.text_align = TextAlign::left;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 50;
@@ -920,7 +908,7 @@ TEST_F(RenderTest, GetGlyphPositionAtCoordinateParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(85, 10000), 74ull);
 }
 
-TEST_F(RenderTest, GetRectsForRangeParagraph) {
+TEST_F(ParagraphTest, GetRectsForRangeParagraph) {
   const char* text =
       "12345,  \"67890\" 12345 67890 12345 67890 12345 67890 12345 67890 12345 "
       "67890 12345";
@@ -931,8 +919,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 10;
   paragraph_style.text_align = TextAlign::left;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 50;
@@ -1062,7 +1049,7 @@ TEST_F(RenderTest, GetRectsForRangeParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, GetWordBoundaryParagraph) {
+TEST_F(ParagraphTest, GetWordBoundaryParagraph) {
   const char* text =
       "12345  67890 12345 67890 12345 67890 12345 67890 12345 67890 12345 "
       "67890 12345";
@@ -1073,8 +1060,7 @@ TEST_F(RenderTest, GetWordBoundaryParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 10;
   paragraph_style.text_align = TextAlign::left;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 52;
@@ -1161,7 +1147,7 @@ TEST_F(RenderTest, GetWordBoundaryParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, SpacingParagraph) {
+TEST_F(ParagraphTest, SpacingParagraph) {
   const char* text = "H";
   auto icu_text = icu::UnicodeString::fromUTF8(text);
   std::u16string u16_text(icu_text.getBuffer(),
@@ -1170,8 +1156,7 @@ TEST_F(RenderTest, SpacingParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 10;
   paragraph_style.text_align = TextAlign::left;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_size = 50;
@@ -1248,7 +1233,7 @@ TEST_F(RenderTest, SpacingParagraph) {
   ASSERT_EQ(paragraph->records_[6].style().word_spacing, 20);
 }
 
-TEST_F(RenderTest, LongWordParagraph) {
+TEST_F(ParagraphTest, LongWordParagraph) {
   const char* text =
       "A "
       "veryverylongwordtoseewherethiswillwraporifitwillatallandifitdoesthenthat"
@@ -1259,8 +1244,7 @@ TEST_F(RenderTest, LongWordParagraph) {
 
   txt::ParagraphStyle paragraph_style;
   paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_family = "Roboto";
@@ -1292,13 +1276,12 @@ TEST_F(RenderTest, LongWordParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, KernScaleParagraph) {
+TEST_F(ParagraphTest, KernScaleParagraph) {
   float scale = 3.0f;
 
   txt::ParagraphStyle paragraph_style;
   paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_family = "Droid Serif";
@@ -1335,11 +1318,11 @@ TEST_F(RenderTest, KernScaleParagraph) {
   EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 253.36328125f);
 }
 
-TEST_F(RenderTest, NewlineParagraph) {
+TEST_F(ParagraphTest, NewlineParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_family = "Roboto";
@@ -1390,7 +1373,7 @@ TEST_F(RenderTest, NewlineParagraph) {
   EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().y(), 406);
 }
 
-TEST_F(RenderTest, EmojiParagraph) {
+TEST_F(ParagraphTest, EmojiParagraph) {
   const char* text =
       "😀😃😄😁😆😅😂🤣☺😇🙂😍😡😟😢😻👽💩👍👎🙏👌👋👄👁👦👼👨‍🚀👨‍🚒🙋‍♂️👳👨‍👨‍👧‍👧\
       💼👡👠☂🐶🐰🐻🐼🐷🐒🐵🐔🐧🐦🐋🐟🐡🕸🐌🐴🐊🐄🐪🐘🌸🌏🔥🌟🌚🌝💦💧\
@@ -1401,8 +1384,8 @@ TEST_F(RenderTest, EmojiParagraph) {
                           icu_text.getBuffer() + icu_text.length());
 
   txt::ParagraphStyle paragraph_style;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
@@ -1418,9 +1401,13 @@ TEST_F(RenderTest, EmojiParagraph) {
   paragraph->Layout(GetTestCanvasWidth());
 
   paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
+
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[i]);
   }
+
   ASSERT_EQ(paragraph->records_.size(), 8ull);
 
   EXPECT_EQ(paragraph->records_[0].line(), 0ull);
@@ -1428,14 +1415,9 @@ TEST_F(RenderTest, EmojiParagraph) {
   EXPECT_EQ(paragraph->records_[2].line(), 2ull);
   EXPECT_EQ(paragraph->records_[3].line(), 3ull);
   EXPECT_EQ(paragraph->records_[7].line(), 7ull);
-
-  // TODO(garyq): Add more robust tests for emojis, currently, look at the
-  // resulting file to check if emojis are drawn properly.
-
-  ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, HyphenBreakParagraph) {
+TEST_F(ParagraphTest, HyphenBreakParagraph) {
   const char* text =
       "A "
       "very-very-long-Hyphen-word-to-see-where-this-will-wrap-or-if-it-will-at-"
@@ -1447,8 +1429,8 @@ TEST_F(RenderTest, HyphenBreakParagraph) {
 
   txt::ParagraphStyle paragraph_style;
   paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_family = "Roboto";
@@ -1480,7 +1462,7 @@ TEST_F(RenderTest, HyphenBreakParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(RenderTest, RepeatLayoutParagraph) {
+TEST_F(ParagraphTest, RepeatLayoutParagraph) {
   const char* text =
       "Sentence to layout at diff widths to get diff line counts. short words "
       "short words short words short words short words short words short words "
@@ -1491,8 +1473,7 @@ TEST_F(RenderTest, RepeatLayoutParagraph) {
 
   txt::ParagraphStyle paragraph_style;
   paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.font_family = "Roboto";

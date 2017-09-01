@@ -64,23 +64,23 @@ class StyledRuns {
   void SplitNewlineRuns(std::list<size_t> newline_positions);
 
  private:
-  FRIEND_TEST(RenderTest, SimpleParagraph);
-  FRIEND_TEST(RenderTest, SimpleRedParagraph);
-  FRIEND_TEST(RenderTest, RainbowParagraph);
-  FRIEND_TEST(RenderTest, DefaultStyleParagraph);
-  FRIEND_TEST(RenderTest, BoldParagraph);
-  FRIEND_TEST(RenderTest, LeftAlignParagraph);
-  FRIEND_TEST(RenderTest, RightAlignParagraph);
-  FRIEND_TEST(RenderTest, CenterAlignParagraph);
-  FRIEND_TEST(RenderTest, JustifyAlignParagraph);
-  FRIEND_TEST(RenderTest, DecorationsParagraph);
-  FRIEND_TEST(RenderTest, ItalicsParagraph);
-  FRIEND_TEST(RenderTest, ChineseParagraph);
-  FRIEND_TEST(RenderTest, DISABLED_ArabicParagraph);
-  FRIEND_TEST(RenderTest, LongWordParagraph);
-  FRIEND_TEST(RenderTest, KernParagraph);
-  FRIEND_TEST(RenderTest, HyphenBreakParagraph);
-  FRIEND_TEST(RenderTest, RepeatLayoutParagraph);
+  FRIEND_TEST(ParagraphTest, SimpleParagraph);
+  FRIEND_TEST(ParagraphTest, SimpleRedParagraph);
+  FRIEND_TEST(ParagraphTest, RainbowParagraph);
+  FRIEND_TEST(ParagraphTest, DefaultStyleParagraph);
+  FRIEND_TEST(ParagraphTest, BoldParagraph);
+  FRIEND_TEST(ParagraphTest, LeftAlignParagraph);
+  FRIEND_TEST(ParagraphTest, RightAlignParagraph);
+  FRIEND_TEST(ParagraphTest, CenterAlignParagraph);
+  FRIEND_TEST(ParagraphTest, JustifyAlignParagraph);
+  FRIEND_TEST(ParagraphTest, DecorationsParagraph);
+  FRIEND_TEST(ParagraphTest, ItalicsParagraph);
+  FRIEND_TEST(ParagraphTest, ChineseParagraph);
+  FRIEND_TEST(ParagraphTest, DISABLED_ArabicParagraph);
+  FRIEND_TEST(ParagraphTest, LongWordParagraph);
+  FRIEND_TEST(ParagraphTest, KernParagraph);
+  FRIEND_TEST(ParagraphTest, HyphenBreakParagraph);
+  FRIEND_TEST(ParagraphTest, RepeatLayoutParagraph);
 
   struct IndexedRun {
     size_t style_index = 0;

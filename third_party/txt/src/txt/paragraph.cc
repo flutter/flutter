@@ -137,25 +137,25 @@ void Paragraph::InitBreaker() {
   breaker_.setText();
 }
 
-// NOTE: Minikin LineBreaker addStyleRun() has an O(N^2) (according to
-// benchmarks) time complexity where N is the total number of characters.
-// However, this is not significant for reasonably sized paragraphs. It is
-// currently recommended to break up very long paragraphs (10k+ characters) to
-// ensure speedy layout.
-void Paragraph::AddRunsToLineBreaker(
+bool Paragraph::AddRunsToLineBreaker(
     std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
-        collection_map) {
+        collection_map /* TODO: Cache the font collection here. */) {
   minikin::FontStyle font;
   minikin::MinikinPaint paint;
   for (size_t i = 0; i < runs_.size(); ++i) {
     auto run = runs_.GetRun(i);
     GetFontAndMinikinPaint(run.style, &font, &paint);
-    breaker_.addStyleRun(&paint,
-                         font_collection_->GetMinikinFontCollectionForFamily(
-                             run.style.font_family),
-                         font, run.start, run.end, false,
+    auto collection = font_collection_->GetMinikinFontCollectionForFamily(
+        run.style.font_family);
+    if (collection == nullptr) {
+      FTL_DLOG(INFO) << "Could not find font collection for family \""
+                     << run.style.font_family << "\".";
+      return false;
+    }
+    breaker_.addStyleRun(&paint, collection, font, run.start, run.end, false,
                          run.style.letter_spacing);
   }
+  return true;
 }
 
 void Paragraph::FillWhitespaceSet(size_t start,
@@ -172,8 +172,9 @@ void Paragraph::FillWhitespaceSet(size_t start,
 
 void Paragraph::Layout(double width, bool force) {
   // Do not allow calling layout multiple times without changing anything.
-  if (!needs_layout_ && width == width_ && !force)
+  if (!needs_layout_ && width == width_ && !force) {
     return;
+  }
   needs_layout_ = false;
 
   width_ = width;
@@ -182,6 +183,7 @@ void Paragraph::Layout(double width, bool force) {
       collection_map;
 
   breaker_.setLineWidths(0.0f, 0, width_);
+
   // TODO(garyq): Get hyphenator working. Hyphenator should be created with
   // a pattern binary dataset. Should be something along these lines:
   //
@@ -189,8 +191,14 @@ void Paragraph::Layout(double width, bool force) {
   //     minikin::Hyphenator::loadBinary(<paramsgohere>);
   //   breaker_.setLocale(icu::Locale::getRoot(), &hyph);
   //
+
+  // TODO: Maybe create a new breaker altogether.
   InitBreaker();
-  AddRunsToLineBreaker(collection_map);
+
+  if (!AddRunsToLineBreaker(collection_map)) {
+    return;
+  }
+
   breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
   breaker_.setStrategy(paragraph_style_.break_strategy);
   size_t breaks_count = breaker_.computeBreaks();
@@ -601,8 +609,9 @@ void Paragraph::SetParagraphStyle(const ParagraphStyle& style) {
   paragraph_style_ = style;
 }
 
-void Paragraph::SetFontCollection(FontCollection* font_collection) {
-  font_collection_ = font_collection;
+void Paragraph::SetFontCollection(
+    std::shared_ptr<FontCollection> font_collection) {
+  font_collection_ = std::move(font_collection);
 }
 
 // The x,y coordinates will be the very top left corner of the rendered

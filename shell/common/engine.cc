@@ -19,6 +19,7 @@
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/snapshot/snapshot.h"
+#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
@@ -109,7 +110,8 @@ static const uint8_t* MemMapSnapshot(const std::string& aot_snapshot_path,
   }
 
   int mmap_flags = PROT_READ;
-  if (executable) mmap_flags |= PROT_EXEC;
+  if (executable)
+    mmap_flags |= PROT_EXEC;
 
   void* symbol = mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd.get(), 0);
   if (symbol == MAP_FAILED) {
@@ -338,7 +340,8 @@ bool Engine::HandleLifecyclePlatformMessage(blink::PlatformMessage* message) {
   }
 
   // Always schedule a frame when the app does become active as per API
-  // recommendation https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1622956-applicationdidbecomeactive?language=objc
+  // recommendation
+  // https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1622956-applicationdidbecomeactive?language=objc
   if (state == "AppLifecycleState.resumed" && have_surface_) {
     ScheduleFrame();
   }
@@ -435,12 +438,11 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
 }
 
 void Engine::ConfigureRuntime(const std::string& script_uri,
-    const std::vector<uint8_t>& platform_kernel) {
+                              const std::vector<uint8_t>& platform_kernel) {
   runtime_ = blink::RuntimeController::Create(this);
-  runtime_->CreateDartController(std::move(script_uri),
-                                 default_isolate_snapshot_data,
-                                 default_isolate_snapshot_instr,
-                                 platform_kernel);
+  runtime_->CreateDartController(
+      std::move(script_uri), default_isolate_snapshot_data,
+      default_isolate_snapshot_instr, platform_kernel);
   runtime_->SetViewportMetrics(viewport_metrics_);
   runtime_->SetLocale(language_code_, country_code_);
   runtime_->SetSemanticsEnabled(semantics_enabled_);
@@ -451,6 +453,10 @@ void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
     blink::TestFontSelector::Install();
   } else if (asset_store_) {
     blink::AssetFontSelector::Install(asset_store_);
+    if (!blink::Settings::Get().using_blink) {
+      blink::FontCollection::ForProcess().RegisterFontsFromAssetStore(
+          asset_store_);
+    }
   }
 }
 
@@ -490,11 +496,12 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 }
 
 void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
-  blink::Threads::Platform()->PostTask(ftl::MakeCopyable(
-      [ platform_view = platform_view_.lock(), update = std::move(update) ]() mutable {
-        if (platform_view)
-          platform_view->UpdateSemantics(std::move(update));
-      }));
+  blink::Threads::Platform()->PostTask(ftl::MakeCopyable([
+    platform_view = platform_view_.lock(), update = std::move(update)
+  ]() mutable {
+    if (platform_view)
+      platform_view->UpdateSemantics(std::move(update));
+  }));
 }
 
 void Engine::HandlePlatformMessage(

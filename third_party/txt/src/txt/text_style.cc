@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-#include "text_style.h"
 #include "font_style.h"
 #include "font_weight.h"
+#include "text_style.h"
 #include "third_party/skia/include/core/SkColor.h"
 
 namespace txt {
+
+std::string TextStyle::GetDefaultFontFamily() {
+  return "Roboto";
+}
+
+TextStyle::TextStyle() : font_family(GetDefaultFontFamily()) {}
 
 bool TextStyle::equals(const TextStyle& other) const {
   if (color != other.color)

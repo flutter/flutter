@@ -21,10 +21,20 @@
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkStream.h"
+#include "txt/asset_font_manager.h"
+#include "txt/directory_asset_data_provider.h"
+#include "txt/font_collection.h"
+#include "utils.h"
 
-RenderTest::RenderTest() : snapshots_(0) {}
+namespace txt {
 
-RenderTest::~RenderTest() {}
+RenderTest::RenderTest()
+    : snapshots_(0), font_collection_(std::make_shared<FontCollection>()) {
+  font_collection_->PushBack(sk_make_sp<AssetFontManager>(
+      std::make_unique<txt::DirectoryAssetDataProvider>(GetFontDir())));
+}
+
+RenderTest::~RenderTest() = default;
 
 SkCanvas* RenderTest::GetCanvas() {
   return canvas_ == nullptr ? nullptr : canvas_.get();
@@ -82,7 +92,13 @@ void RenderTest::SetUp() {
   canvas_->clear(SK_ColorWHITE);
 }
 
+std::shared_ptr<FontCollection> RenderTest::GetTestFontCollection() const {
+  return font_collection_;
+}
+
 void RenderTest::TearDown() {
   canvas_ = nullptr;
   bitmap_ = nullptr;
 }
+
+}  // namespace txt

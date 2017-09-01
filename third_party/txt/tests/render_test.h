@@ -16,11 +16,13 @@
 
 #include <memory>
 #include <string>
-
 #include "gtest/gtest.h"
 #include "lib/ftl/macros.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "txt/font_collection.h"
+
+namespace txt {
 
 class RenderTest : public ::testing::Test {
  public:
@@ -36,6 +38,8 @@ class RenderTest : public ::testing::Test {
 
   size_t GetTestCanvasHeight() const;
 
+  std::shared_ptr<txt::FontCollection> GetTestFontCollection() const;
+
  protected:
   void SetUp() override;
 
@@ -45,8 +49,11 @@ class RenderTest : public ::testing::Test {
   size_t snapshots_;
   std::unique_ptr<SkBitmap> bitmap_;
   std::unique_ptr<SkCanvas> canvas_;
+  std::shared_ptr<txt::FontCollection> font_collection_;
 
   std::string GetNextSnapshotName();
 
   FTL_DISALLOW_COPY_AND_ASSIGN(RenderTest);
 };
+
+}  // namespace txt

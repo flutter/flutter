@@ -20,7 +20,7 @@
 
 namespace txt {
 
-const std::string GetFontDir();
+const std::string& GetFontDir();
 
 void SetFontDir(const std::string& dir);
 

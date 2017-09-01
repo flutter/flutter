@@ -6,6 +6,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
+#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/sky/engine/core/rendering/RenderInline.h"
 #include "flutter/sky/engine/core/rendering/RenderParagraph.h"
@@ -234,7 +235,8 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
     if (mask & psEllipsisMask)
       style.ellipsis = ellipsis;
 
-    m_paragraphBuilder.SetParagraphStyle(style);
+    m_paragraphBuilder = std::make_unique<txt::ParagraphBuilder>(
+        style, blink::FontCollection::ForProcess().GetFontCollection());
   } else {
     // Blink version.
     createRenderView();
@@ -273,7 +275,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
   if (!Settings::Get().using_blink) {
     // Set to use the properties of the previous style if the property is not
     // explicitly given.
-    txt::TextStyle style = m_paragraphBuilder.PeekStyle();
+    txt::TextStyle style = m_paragraphBuilder->PeekStyle();
 
     if (mask & tsColorMask)
       style.color = encoded[tsColorIndex];
@@ -322,7 +324,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
       style.height = height;
     }
 
-    m_paragraphBuilder.PushStyle(style);
+    m_paragraphBuilder->PushStyle(style);
   } else {
     // Blink Version.
     RefPtr<RenderStyle> style = RenderStyle::create();
@@ -400,7 +402,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 
 void ParagraphBuilder::pop() {
   if (!Settings::Get().using_blink) {
-    m_paragraphBuilder.Pop();
+    m_paragraphBuilder->Pop();
   } else {
     // Blink Version.
     if (m_currentRenderObject)
@@ -410,7 +412,7 @@ void ParagraphBuilder::pop() {
 
 void ParagraphBuilder::addText(const std::string& text) {
   if (!Settings::Get().using_blink) {
-    m_paragraphBuilder.AddText(text);
+    m_paragraphBuilder->AddText(text);
   } else {
     // Blink Version.
     if (!m_currentRenderObject)
@@ -426,7 +428,7 @@ void ParagraphBuilder::addText(const std::string& text) {
 ftl::RefPtr<Paragraph> ParagraphBuilder::build() {
   m_currentRenderObject = nullptr;
   if (!Settings::Get().using_blink) {
-    return Paragraph::Create(m_paragraphBuilder.Build());
+    return Paragraph::Create(m_paragraphBuilder->Build());
   } else {
     return Paragraph::Create(m_renderView.release());
   }
