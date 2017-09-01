@@ -78,9 +78,10 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
 /// A factory for a set of localized resources of type `T`, to be loaded by a
 /// [Localizations] widget.
 ///
-/// Typical applications have one [Localizations] widget which is
-/// created by the [WidgetsApp] and configured with the app's
-/// `localizationsDelegates` parameter.
+/// Typical applications have one [Localizations] widget which is created by the
+/// [WidgetsApp] and configured with the app's `localizationsDelegates`
+/// parameter (a list of delegates). The delegate's [type] is used to identify
+/// the object created by an individual delegate's [load] method.
 abstract class LocalizationsDelegate<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -102,6 +103,17 @@ abstract class LocalizationsDelegate<T> {
   /// after [load] has completed.
   bool shouldReload(covariant LocalizationsDelegate<T> old);
 
+  /// The type of the object returned by the [load] method, T by default.
+  ///
+  /// This type is used to retrieve the object "loaded" by this
+  /// [LocalizationsDelegate] from the [Localizations] inherited widget.
+  /// For example the object loaded by `LocalizationsDelegate<Foo>` would
+  /// be retrieved with:
+  /// ```dart
+  /// Foo foo = Localizations.of<Foo>(context, Foo);
+  /// ```
+  ///
+  /// It's rarely necessary to override this getter.
   Type get type => T;
 
   @override
@@ -141,6 +153,11 @@ abstract class WidgetsLocalizations {
 
 /// Localized values for widgets.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
+  /// Construct an object that defines the localized values for the widgets
+  /// library for the given `locale`.
+  ///
+  /// [LocalizationsDelegate] implementations typically call the static [load]
+  /// function, rather than constructing this class directly.
   DefaultWidgetsLocalizations(this.locale) {
     final String language = locale.languageCode.toLowerCase();
     _textDirection = _rtlLanguages.contains(language) ? TextDirection.rtl : TextDirection.ltr;
