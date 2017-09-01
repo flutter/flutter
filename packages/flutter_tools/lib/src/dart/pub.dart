@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -55,7 +57,13 @@ Future<Null> pubGet({
     if (offline)
       args.add('--offline');
     try {
-      await pub(args, directory: directory, filter: _filterOverrideWarnings, failureMessage: 'pub $command failed');
+      await pub(
+        args,
+        directory: directory,
+        filter: _filterOverrideWarnings,
+        failureMessage: 'pub $command failed',
+        retry: true,
+      );
     } finally {
       status.stop();
     }
@@ -73,15 +81,29 @@ typedef String MessageFilter(String message);
 Future<Null> pub(List<String> arguments, {
   String directory,
   MessageFilter filter,
-  String failureMessage: 'pub failed'
+  String failureMessage: 'pub failed',
+  @required bool retry,
 }) async {
   final List<String> command = <String>[ sdkBinaryName('pub') ]..addAll(arguments);
-  final int code = await runCommandAndStreamOutput(
-    command,
-    workingDirectory: directory,
-    mapFunction: filter,
-    environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
-  );
+  int attempts = 0;
+  int duration = 1;
+  int code;
+  while (true) {
+    attempts += 1;
+    code = await runCommandAndStreamOutput(
+      command,
+      workingDirectory: directory,
+      mapFunction: filter,
+      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
+    );
+    if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
+      break;
+    printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
+    await new Future<Null>.delayed(new Duration(seconds: duration));
+    if (duration < 64)
+      duration *= 2;
+  }
+  assert(code != null);
   if (code != 0)
     throwToolExit('$failureMessage ($code)', exitCode: code);
 }

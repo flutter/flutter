@@ -74,7 +74,7 @@ void main()  {
       }
     });
 
-    testUsingContext('does not change ASCI casing of path', () {
+    testUsingContext('does not change ASCII casing of path', () {
       final String testPath = fs.path.join(dataPath, 'asci_casing');
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
