@@ -69,7 +69,7 @@ class Drawer extends StatelessWidget {
   const Drawer({
     Key key,
     this.elevation: 16.0,
-    this.child
+    this.child,
   }) : super(key: key);
 
   /// The z-coordinate at which to place this drawer. This controls the size of
@@ -89,8 +89,8 @@ class Drawer extends StatelessWidget {
       constraints: const BoxConstraints.expand(width: _kWidth),
       child: new Material(
         elevation: elevation,
-        child: child
-      )
+        child: child,
+      ),
     );
   }
 }
@@ -117,7 +117,7 @@ class DrawerController extends StatefulWidget {
   /// The [child] argument must not be null and is typically a [Drawer].
   const DrawerController({
     GlobalKey key,
-    @required this.child
+    @required this.child,
   }) : assert(child != null),
        super(key: key);
 
@@ -217,14 +217,31 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _move(DragUpdateDetails details) {
-    _controller.value += details.primaryDelta / _width;
+    final double delta = details.primaryDelta / _width;
+    switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        _controller.value -= delta;
+        break;
+      case TextDirection.ltr:
+        _controller.value += delta;
+        break;
+    }
   }
 
   void _settle(DragEndDetails details) {
     if (_controller.isDismissed)
       return;
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
-      _controller.fling(velocity: details.velocity.pixelsPerSecond.dx / _width);
+      final double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
+      switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        _controller.fling(velocity: -visualVelocity);
+        break;
+      case TextDirection.ltr:
+        _controller.fling(velocity: visualVelocity);
+        break;
+    }
+
     } else if (_controller.value < 0.5) {
       close();
     } else {
@@ -250,7 +267,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: FractionalOffset.centerLeft,
+        alignment: FractionalOffsetDirectional.centerStart,
         child: new GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
@@ -282,9 +299,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 ),
               ),
               new Align(
-                alignment: FractionalOffset.centerLeft,
+                alignment: FractionalOffsetDirectional.centerStart,
                 child: new Align(
-                  alignment: FractionalOffset.centerRight,
+                  alignment: FractionalOffsetDirectional.centerEnd,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(
