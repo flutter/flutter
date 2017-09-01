@@ -13,6 +13,32 @@ import 'theme.dart';
 const double _kPanelHeaderCollapsedHeight = 48.0;
 const double _kPanelHeaderExpandedHeight = 64.0;
 
+class _SaltedKey<S, V> extends LocalKey {
+  const _SaltedKey(this.salt, this.value);
+
+  final S salt;
+  final V value;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final _SaltedKey<S, V> typedOther = other;
+    return salt == typedOther.salt
+        && value == typedOther.value;
+  }
+
+  @override
+  int get hashCode => hashValues(runtimeType, salt, value);
+
+  @override
+  String toString() {
+    final String saltString = S == String ? '<\'$salt\'>' : '<$salt>';
+    final String valueString = V == String ? '<\'$value\'>' : '<$value>';
+    return '[$saltString $valueString]';
+  }
+}
+
 /// Signature for the callback that's called when an [ExpansionPanel] is
 /// expanded or collapsed.
 ///
@@ -109,7 +135,7 @@ class ExpansionPanelList extends StatelessWidget {
 
     for (int i = 0; i < children.length; i += 1) {
       if (_isChildExpanded(i) && i != 0 && !_isChildExpanded(i - 1))
-        items.add(new MaterialGap(key: new ValueKey<int>(i * 2 - 1)));
+        items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, i * 2 - 1)));
 
       final Row header = new Row(
         children: <Widget>[
@@ -144,7 +170,7 @@ class ExpansionPanelList extends StatelessWidget {
 
       items.add(
         new MaterialSlice(
-          key: new ValueKey<int>(i * 2),
+          key: new _SaltedKey<BuildContext, int>(context, i * 2),
           child: new Column(
             children: <Widget>[
               header,
@@ -163,7 +189,7 @@ class ExpansionPanelList extends StatelessWidget {
       );
 
       if (_isChildExpanded(i) && i != children.length - 1)
-        items.add(new MaterialGap(key: new ValueKey<int>(i * 2 + 1)));
+        items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, i * 2 + 1)));
     }
 
     return new MergeableMaterial(
