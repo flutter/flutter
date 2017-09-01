@@ -68,7 +68,12 @@ String generateString(String s) {
 String generateLocalizationsMap() {
   final StringBuffer output = new StringBuffer();
 
-  output.writeln('const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {');
+  output.writeln('''
+/// Maps from [Locale.languageCode] to a map that contains the localized strings
+/// for that locale.
+///
+/// This variable is used by [MaterialLocalizations].
+const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {''');
 
   final String lastLocale = localeToResources.keys.last;
   for (String locale in localeToResources.keys) {

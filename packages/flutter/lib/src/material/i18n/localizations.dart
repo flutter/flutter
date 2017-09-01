@@ -6,6 +6,10 @@
 // To regenerate the file, use:
 // dart gen_localizations packages/flutter/lib/src/material/i18n material
 
+/// Maps from [Locale.languageCode] to a map that contains the localized strings
+/// for that locale.
+///
+/// This variable is used by [MaterialLocalizations].
 const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {
   "ar": const <String, String>{
     "openAppDrawerTooltip": r"افتح قائمة التنقل",
