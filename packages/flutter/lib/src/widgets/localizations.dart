@@ -154,7 +154,7 @@ abstract class WidgetsLocalizations {
 /// Localized values for widgets.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
-  /// library for given `locale`.
+  /// library for the given `locale`.
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
