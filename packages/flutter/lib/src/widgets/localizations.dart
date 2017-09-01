@@ -166,7 +166,6 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   // See http://en.wikipedia.org/wiki/Right-to-left
   static const List<String> _rtlLanguages = const <String>[
     'ar',  // Arabic
-    'dv',  // Dhivehi
     'fa',  // Farsi
     'he',  // Hebrew
     'ps',  // Pashto

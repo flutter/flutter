@@ -53,13 +53,6 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextMonthTooltip": r"الشهر القادم",
     "previousMonthTooltip": r"الشهر الماضى"
   },
-  "dv": const <String, String>{
-    "openAppDrawerTooltip": r"Open navigation menu",
-    "backButtonTooltip": r"Back",
-    "closeButtonTooltip": r"Close",
-    "nextMonthTooltip": r"Next month",
-    "previousMonthTooltip": r"Previous month"
-  },
   "it": const <String, String>{
     "openAppDrawerTooltip": r"Apri il menu di navigazione",
     "backButtonTooltip": r"Indietro",
