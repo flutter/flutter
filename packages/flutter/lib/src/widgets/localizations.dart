@@ -289,9 +289,9 @@ class Localizations extends StatefulWidget {
     @required this.locale,
     @required this.delegates,
     this.child,
-  }) : assert(locale != null),
-       assert(delegates != null),
-       super(key: key) {
+  }) : super(key: key) {
+    assert(locale != null);
+    assert(delegates != null);
     assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
   }
 
