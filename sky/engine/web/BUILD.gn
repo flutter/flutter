@@ -19,7 +19,7 @@ source_set("web") {
   ]
 
   if (is_fuchsia) {
-    deps += [ "//lib/mtl" ]
+    deps += [ "//garnet/public/lib/mtl" ]
   } else {
     deps += [ "//flutter/fml" ]
   }

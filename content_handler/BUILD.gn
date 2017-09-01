@@ -62,7 +62,7 @@ template("flutter_content_handler") {
              "//flutter/vulkan",
              "//garnet/public/lib/fidl/dart/sdk_ext",
              "//garnet/public/lib/ftl",
-             "//lib/mtl",
+             "//garnet/public/lib/mtl",
              "//lib/tonic",
              "//garnet/public/lib/zip",
              "//magma:vulkan",
