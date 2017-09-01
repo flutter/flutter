@@ -28,9 +28,7 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
   const _WidgetsLocalizationsDelegate();
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(const WidgetsLocalizations());
-  }
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;

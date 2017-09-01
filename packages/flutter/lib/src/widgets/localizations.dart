@@ -114,20 +114,13 @@ abstract class LocalizationsDelegate<T> {
 /// In particular, this maps locales to a specific [Directionality] using the
 /// [textDirection] property.
 ///
-/// This class provides a default placeholder implementation that returns
-/// hard-coded American English values.
-class WidgetsLocalizations {
-  /// Create a placeholder object for the localized resources of the lowest
-  /// levels of the Flutter framework which only provides values for American
-  /// English.
-  const WidgetsLocalizations();
-
-  /// The locale for which the values of this class's localized resources
-  /// have been translated.
-  Locale get locale => const Locale('en', 'US');
-
+/// See also:
+///
+///  * [DefaultWidgetsLocalizations], which implements this interface and
+///    supports a variety of locales.
+abstract class WidgetsLocalizations {
   /// The reading direction for text in this locale.
-  TextDirection get textDirection => TextDirection.ltr;
+  TextDirection get textDirection;
 
   /// The `WidgetsLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -143,6 +136,42 @@ class WidgetsLocalizations {
   /// ```
   static WidgetsLocalizations of(BuildContext context) {
     return Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations);
+  }
+}
+
+/// Localized values for widgets.
+class DefaultWidgetsLocalizations implements WidgetsLocalizations {
+  DefaultWidgetsLocalizations(this.locale) {
+    final String language = locale.languageCode.toLowerCase();
+    _textDirection = _rtlLanguages.contains(language) ? TextDirection.rtl : TextDirection.ltr;
+  }
+
+  // See http://en.wikipedia.org/wiki/Right-to-left
+  static const List<String> _rtlLanguages = const <String>[
+    'ar',  // Arabic
+    'dv',  // Dhivehi
+    'fa',  // Farsi
+    'he',  // Hebrew
+    'ps',  // Pashto
+    'sd',  // Sindhi
+    'ur',  // Urdu
+  ];
+
+  /// The locale for which the values of this class's localized resources
+  /// have been translated.
+  final Locale locale;
+
+  @override
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+
+  /// Creates an object that provides localized resource values for the
+  /// lowest levels of the Flutter framework.
+  ///
+  /// This method is typically used to create a [LocalizationsDelegate].
+  /// The [WidgetsApp] does so by default.
+  static Future<WidgetsLocalizations> load(Locale locale) {
+    return new SynchronousFuture<WidgetsLocalizations>(new DefaultWidgetsLocalizations(locale));
   }
 }
 

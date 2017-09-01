@@ -417,6 +417,26 @@ void main() {
     expect(modifiedDelegate.shouldReloadValues, <bool>[true]);
   });
 
+  testWidgets('Directionality tracks system locale', (WidgetTester tester) async {
+    BuildContext pageContext;
+
+    await tester.pumpWidget(
+      buildFrame(
+        buildContent: (BuildContext context) {
+          pageContext = context;
+          return const Text('Hello World');
+        }
+      )
+    );
+
+    await tester.binding.setLocale('en', 'GB');
+    await tester.pump();
+    expect(Directionality.of(pageContext), TextDirection.ltr);
+
+    await tester.binding.setLocale('ar', 'EG');
+    await tester.pump();
+    expect(Directionality.of(pageContext), TextDirection.rtl);
+  });
 }
 
 // Same as _WidgetsLocalizationsDelegate in widgets/app.dart
@@ -424,9 +444,7 @@ class DefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsL
   const DefaultWidgetsLocalizationsDelegate();
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(const WidgetsLocalizations());
-  }
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
   @override
   bool shouldReload(DefaultWidgetsLocalizationsDelegate old) => false;
