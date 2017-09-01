@@ -1,0 +1,592 @@
+Signature: eca598039e46cb0d9d691d4d76cae8ab
+
+UNUSED LICENSES:
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+USED LICENSES:
+
+====================================================================================================
+LIBRARY: garnet
+ORIGIN: ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/macros.h
+FILE: ../../../garnet/public/lib/fidl/dart/lib/bindings.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/core.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/bindings/message.dart
+FILE: ../../../garnet/public/lib/fidl/examples/services/geometry.fidl
+----------------------------------------------------------------------------------------------------
+Copyright 2014 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: garnet
+ORIGIN: ../../../garnet/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/core/vmo.dart
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/constants.dart
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/handle.cc
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/handle.dart
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/handle.h
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/system.cc
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/system.dart
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/system.h
+FILE: ../../../garnet/public/lib/fidl/examples/echo_client_cpp/echo_client.cc
+FILE: ../../../garnet/public/lib/fidl/examples/echo_client_go/echo_client.go
+FILE: ../../../garnet/public/lib/fidl/examples/echo_server_cpp/echo_server.cc
+FILE: ../../../garnet/public/lib/fidl/examples/echo_server_go/echo_server.go
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/endpoints.rs
+FILE: ../../../garnet/public/lib/ftl/files/directory_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/files/file_descriptor_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/files/path_win.cc
+FILE: ../../../garnet/public/lib/ftl/files/symlink_win.cc
+FILE: ../../../garnet/public/lib/ftl/ftl_export.h
+FILE: ../../../garnet/public/lib/ftl/functional/apply.h
+FILE: ../../../garnet/public/lib/ftl/functional/apply_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/functional/auto_call_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/functional/cancelable_callback.h
+FILE: ../../../garnet/public/lib/ftl/functional/cancelable_callback_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/inttypes.h
+FILE: ../../../garnet/public/lib/ftl/log_settings_command_line.cc
+FILE: ../../../garnet/public/lib/ftl/log_settings_command_line.h
+FILE: ../../../garnet/public/lib/ftl/portable_unistd.h
+FILE: ../../../garnet/public/lib/ftl/random/rand_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/random/uuid_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/strings/join_strings.h
+FILE: ../../../garnet/public/lib/ftl/strings/join_strings_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/cond_var_win.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/mutex_win.cc
+FILE: ../../../garnet/public/lib/ftl/threading/thread.cc
+FILE: ../../../garnet/public/lib/ftl/threading/thread.h
+FILE: ../../../garnet/public/lib/ftl/threading/thread_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/time/stopwatch_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/time/time_delta_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/time/time_point_unittest.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: garnet
+ORIGIN: ../../../garnet/public/lib/fidl/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../garnet/public/lib/fidl/c/waiter/async_waiter.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/formatting.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message_validator.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/synchronous_connector.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/synchronous_connector.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/message_validator.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/synchronous_interface_ptr.h
+FILE: ../../../garnet/public/lib/fidl/cpp/waiter/default.h
+FILE: ../../../garnet/public/lib/fidl/dart/analysis_options_fidl
+FILE: ../../../garnet/public/lib/fidl/dart/lib/_sdkext
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/bindings/codec.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/bindings/enum.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/bindings/interface.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/bindings/struct.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/bindings/union.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/core/channel.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/core/channel_reader.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/core/errors.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/core/eventpair.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/core/socket.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/core/socket_reader.dart
+FILE: ../../../garnet/public/lib/fidl/dart/lib/src/core/types.dart
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/internal.dart
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/handle_waiter.cc
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/handle_waiter.dart
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/handle_waiter.h
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/natives.cc
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/natives.dart
+FILE: ../../../garnet/public/lib/fidl/dart/sdk_ext/src/natives.h
+FILE: ../../../garnet/public/lib/fidl/examples/hello_fidl/main.cc
+FILE: ../../../garnet/public/lib/fidl/examples/hello_fidl/telephone.fidl
+FILE: ../../../garnet/public/lib/fidl/examples/hello_fidl_dart/main.dart
+FILE: ../../../garnet/public/lib/fidl/examples/services/hello.fidl
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/compiler/generated/fidl_files/fidl_files.core.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/compiler/generated/fidl_types/fidl_types.core.go
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/Cargo.toml
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/client.rs
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/cookiemap.rs
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/encoding.rs
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/error.rs
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/interface.rs
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/lib.rs
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/message.rs
+FILE: ../../../garnet/public/lib/fidl/rust/fidl/src/server.rs
+FILE: ../../../garnet/public/lib/fidl/tools/sublime/FIDL.sublime-syntax
+FILE: ../../../garnet/public/lib/fidl/tools/vim/ftdetect/fidl.vim
+FILE: ../../../garnet/public/lib/fidl/tools/vim/syntax/fidl.vim
+FILE: ../../../garnet/public/lib/ftl/arraysize.h
+FILE: ../../../garnet/public/lib/ftl/arraysize_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/build_config.h
+FILE: ../../../garnet/public/lib/ftl/command_line.cc
+FILE: ../../../garnet/public/lib/ftl/command_line.h
+FILE: ../../../garnet/public/lib/ftl/command_line_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/compiler_specific.h
+FILE: ../../../garnet/public/lib/ftl/debug/debugger.cc
+FILE: ../../../garnet/public/lib/ftl/debug/debugger.h
+FILE: ../../../garnet/public/lib/ftl/files/directory.cc
+FILE: ../../../garnet/public/lib/ftl/files/directory.h
+FILE: ../../../garnet/public/lib/ftl/files/eintr_wrapper.h
+FILE: ../../../garnet/public/lib/ftl/files/file.cc
+FILE: ../../../garnet/public/lib/ftl/files/file.h
+FILE: ../../../garnet/public/lib/ftl/files/file_descriptor.cc
+FILE: ../../../garnet/public/lib/ftl/files/file_descriptor.h
+FILE: ../../../garnet/public/lib/ftl/files/file_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/files/path.h
+FILE: ../../../garnet/public/lib/ftl/files/path_posix.cc
+FILE: ../../../garnet/public/lib/ftl/files/path_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/files/scoped_temp_dir.cc
+FILE: ../../../garnet/public/lib/ftl/files/scoped_temp_dir.h
+FILE: ../../../garnet/public/lib/ftl/files/scoped_temp_dir_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/files/symlink.h
+FILE: ../../../garnet/public/lib/ftl/files/symlink_posix.cc
+FILE: ../../../garnet/public/lib/ftl/files/unique_fd.cc
+FILE: ../../../garnet/public/lib/ftl/files/unique_fd.h
+FILE: ../../../garnet/public/lib/ftl/functional/auto_call.h
+FILE: ../../../garnet/public/lib/ftl/functional/closure.h
+FILE: ../../../garnet/public/lib/ftl/functional/make_copyable.h
+FILE: ../../../garnet/public/lib/ftl/functional/make_copyable_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/log_level.h
+FILE: ../../../garnet/public/lib/ftl/log_settings.cc
+FILE: ../../../garnet/public/lib/ftl/log_settings.h
+FILE: ../../../garnet/public/lib/ftl/log_settings_state.cc
+FILE: ../../../garnet/public/lib/ftl/log_settings_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/logging.cc
+FILE: ../../../garnet/public/lib/ftl/logging.h
+FILE: ../../../garnet/public/lib/ftl/macros.h
+FILE: ../../../garnet/public/lib/ftl/memory/ref_counted.h
+FILE: ../../../garnet/public/lib/ftl/memory/ref_counted_internal.h
+FILE: ../../../garnet/public/lib/ftl/memory/ref_counted_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/memory/ref_ptr.h
+FILE: ../../../garnet/public/lib/ftl/memory/ref_ptr_internal.h
+FILE: ../../../garnet/public/lib/ftl/memory/unique_object.h
+FILE: ../../../garnet/public/lib/ftl/memory/weak_ptr.h
+FILE: ../../../garnet/public/lib/ftl/memory/weak_ptr_internal.cc
+FILE: ../../../garnet/public/lib/ftl/memory/weak_ptr_internal.h
+FILE: ../../../garnet/public/lib/ftl/memory/weak_ptr_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/random/rand.cc
+FILE: ../../../garnet/public/lib/ftl/random/rand.h
+FILE: ../../../garnet/public/lib/ftl/random/uuid.cc
+FILE: ../../../garnet/public/lib/ftl/random/uuid.h
+FILE: ../../../garnet/public/lib/ftl/strings/ascii.cc
+FILE: ../../../garnet/public/lib/ftl/strings/ascii.h
+FILE: ../../../garnet/public/lib/ftl/strings/ascii_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/strings/concatenate.cc
+FILE: ../../../garnet/public/lib/ftl/strings/concatenate.h
+FILE: ../../../garnet/public/lib/ftl/strings/concatenate_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/strings/split_string.cc
+FILE: ../../../garnet/public/lib/ftl/strings/split_string.h
+FILE: ../../../garnet/public/lib/ftl/strings/split_string_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/strings/string_number_conversions.cc
+FILE: ../../../garnet/public/lib/ftl/strings/string_number_conversions.h
+FILE: ../../../garnet/public/lib/ftl/strings/string_number_conversions_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/strings/string_printf.cc
+FILE: ../../../garnet/public/lib/ftl/strings/string_printf.h
+FILE: ../../../garnet/public/lib/ftl/strings/string_printf_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/strings/string_view.cc
+FILE: ../../../garnet/public/lib/ftl/strings/string_view.h
+FILE: ../../../garnet/public/lib/ftl/strings/string_view_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/strings/trim.cc
+FILE: ../../../garnet/public/lib/ftl/strings/trim.h
+FILE: ../../../garnet/public/lib/ftl/strings/trim_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/strings/utf_codecs.cc
+FILE: ../../../garnet/public/lib/ftl/strings/utf_codecs.h
+FILE: ../../../garnet/public/lib/ftl/synchronization/cond_var.h
+FILE: ../../../garnet/public/lib/ftl/synchronization/cond_var_posix.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/cond_var_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/monitor.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/monitor.h
+FILE: ../../../garnet/public/lib/ftl/synchronization/mutex.h
+FILE: ../../../garnet/public/lib/ftl/synchronization/mutex_posix.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/mutex_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/sleep.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/sleep.h
+FILE: ../../../garnet/public/lib/ftl/synchronization/thread_annotations.h
+FILE: ../../../garnet/public/lib/ftl/synchronization/thread_annotations_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/thread_checker.h
+FILE: ../../../garnet/public/lib/ftl/synchronization/thread_checker_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/waitable_event.cc
+FILE: ../../../garnet/public/lib/ftl/synchronization/waitable_event.h
+FILE: ../../../garnet/public/lib/ftl/synchronization/waitable_event_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/tasks/one_shot_timer.cc
+FILE: ../../../garnet/public/lib/ftl/tasks/one_shot_timer.h
+FILE: ../../../garnet/public/lib/ftl/tasks/one_shot_timer_unittest.cc
+FILE: ../../../garnet/public/lib/ftl/tasks/task_runner.cc
+FILE: ../../../garnet/public/lib/ftl/tasks/task_runner.h
+FILE: ../../../garnet/public/lib/ftl/time/stopwatch.cc
+FILE: ../../../garnet/public/lib/ftl/time/stopwatch.h
+FILE: ../../../garnet/public/lib/ftl/time/time_delta.h
+FILE: ../../../garnet/public/lib/ftl/time/time_point.cc
+FILE: ../../../garnet/public/lib/ftl/time/time_point.h
+FILE: ../../../garnet/public/lib/ftl/time/time_printers.cc
+FILE: ../../../garnet/public/lib/ftl/time/time_unittest.cc
+FILE: ../../../garnet/public/lib/zip/create_unzipper.cc
+FILE: ../../../garnet/public/lib/zip/create_unzipper.h
+FILE: ../../../garnet/public/lib/zip/memory_io.cc
+FILE: ../../../garnet/public/lib/zip/memory_io.h
+FILE: ../../../garnet/public/lib/zip/unique_unzipper.cc
+FILE: ../../../garnet/public/lib/zip/unique_unzipper.h
+FILE: ../../../garnet/public/lib/zip/unique_zipper.cc
+FILE: ../../../garnet/public/lib/zip/unique_zipper.h
+FILE: ../../../garnet/public/lib/zip/unzipper.cc
+FILE: ../../../garnet/public/lib/zip/unzipper.h
+FILE: ../../../garnet/public/lib/zip/zipper.cc
+FILE: ../../../garnet/public/lib/zip/zipper.h
+----------------------------------------------------------------------------------------------------
+Copyright 2016 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: garnet
+ORIGIN: ../../../garnet/public/lib/fidl/cpp/bindings/internal/array_internal.cc + ../../../garnet/public/lib/fidl/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/array.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/array_internal.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/array_internal.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/bindings_internal.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/bindings_serialization.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/bindings_serialization.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/buffer.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/connector.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/connector.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message_builder.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message_builder.h
+----------------------------------------------------------------------------------------------------
+Copyright 2013 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: garnet
+ORIGIN: ../../../garnet/public/lib/fidl/cpp/bindings/internal/array_serialization.h + ../../../garnet/public/lib/fidl/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/binding.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/binding_set.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/interface_ptr.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/interface_ptr_set.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/interface_request.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/array_serialization.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/bounds_checker.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/bounds_checker.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/fixed_buffer.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/fixed_buffer.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/interface_ptr_internal.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/map_data_internal.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/map_internal.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/map_serialization.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message_header_validator.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message_header_validator.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message_internal.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/no_interface.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/router.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/router.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/shared_data.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/string_serialization.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/string_serialization.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/template_util.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/validate_params.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/validation_errors.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/validation_errors.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/map.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/message.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/no_interface.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/string.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/struct_ptr.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/type_converter.h
+----------------------------------------------------------------------------------------------------
+Copyright 2014 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: garnet
+ORIGIN: ../../../garnet/public/lib/fidl/cpp/bindings/internal/iterator_util.h + ../../../garnet/public/lib/fidl/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/interface_handle.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/iterator_util.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/map_serialization_forward.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message_validation.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/message_validation.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/union_accessor.h
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/validation_util.cc
+FILE: ../../../garnet/public/lib/fidl/cpp/bindings/internal/validation_util.h
+----------------------------------------------------------------------------------------------------
+Copyright 2015 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: garnet
+ORIGIN: ../../../garnet/public/lib/fidl/examples/services/echo.fidl + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../garnet/public/lib/fidl/examples/services/echo.fidl
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: garnet
+ORIGIN: ../../../third_party/icu/scripts/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/async_waiter.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/connector.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/decoder.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/encoder.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/interface.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/message.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/router.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/stub.go
+FILE: ../../../garnet/public/lib/fidl/go/src/fidl/bindings/util.go
+----------------------------------------------------------------------------------------------------
+Copyright 2015 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: icu
+ORIGIN: ../../../garnet/public/lib/ftl/third_party/icu/LICENSE
+TYPE: LicenseType.unknown
+FILE: ../../../garnet/public/lib/ftl/third_party/icu/icu_utf.cc
+FILE: ../../../garnet/public/lib/ftl/third_party/icu/icu_utf.h
+----------------------------------------------------------------------------------------------------
+ICU License - ICU 1.8.1 and later
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright (c) 1995-2009 International Business Machines Corporation and others
+
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, provided that the above
+copyright notice(s) and this permission notice appear in all copies of
+the Software and that both the above copyright notice(s) and this
+permission notice appear in supporting documentation.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY
+SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER
+RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder
+shall not be used in advertising or otherwise to promote the sale, use
+or other dealings in this Software without prior written authorization
+of the copyright holder.
+====================================================================================================
+Total license count: 9

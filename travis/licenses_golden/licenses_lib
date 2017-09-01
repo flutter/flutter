@@ -1,4 +1,4 @@
-Signature: ae15db9c182e88d1e8b76e7fb41c34e1
+Signature: c6853c1bbc8db501fa71fb05acb5f2ba
 
 UNUSED LICENSES:
 
@@ -7,210 +7,11 @@ UNUSED LICENSES:
 USED LICENSES:
 
 ====================================================================================================
-LIBRARY: ftl
 LIBRARY: tonic
-LIBRARY: zip
-ORIGIN: ../../../lib/ftl/LICENSE
+ORIGIN: ../../../garnet/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../lib/ftl/arraysize.h
-FILE: ../../../lib/ftl/arraysize_unittest.cc
-FILE: ../../../lib/ftl/build_config.h
-FILE: ../../../lib/ftl/command_line.cc
-FILE: ../../../lib/ftl/command_line.h
-FILE: ../../../lib/ftl/command_line_unittest.cc
-FILE: ../../../lib/ftl/compiler_specific.h
-FILE: ../../../lib/ftl/debug/debugger.cc
-FILE: ../../../lib/ftl/debug/debugger.h
-FILE: ../../../lib/ftl/files/directory.cc
-FILE: ../../../lib/ftl/files/directory.h
-FILE: ../../../lib/ftl/files/eintr_wrapper.h
-FILE: ../../../lib/ftl/files/file.cc
-FILE: ../../../lib/ftl/files/file.h
-FILE: ../../../lib/ftl/files/file_descriptor.cc
-FILE: ../../../lib/ftl/files/file_descriptor.h
-FILE: ../../../lib/ftl/files/file_unittest.cc
-FILE: ../../../lib/ftl/files/path.h
-FILE: ../../../lib/ftl/files/path_posix.cc
-FILE: ../../../lib/ftl/files/path_unittest.cc
-FILE: ../../../lib/ftl/files/scoped_temp_dir.cc
-FILE: ../../../lib/ftl/files/scoped_temp_dir.h
-FILE: ../../../lib/ftl/files/scoped_temp_dir_unittest.cc
-FILE: ../../../lib/ftl/files/symlink.h
-FILE: ../../../lib/ftl/files/symlink_posix.cc
-FILE: ../../../lib/ftl/files/unique_fd.cc
-FILE: ../../../lib/ftl/files/unique_fd.h
-FILE: ../../../lib/ftl/functional/auto_call.h
-FILE: ../../../lib/ftl/functional/closure.h
-FILE: ../../../lib/ftl/functional/make_copyable.h
-FILE: ../../../lib/ftl/functional/make_copyable_unittest.cc
-FILE: ../../../lib/ftl/log_level.h
-FILE: ../../../lib/ftl/log_settings.cc
-FILE: ../../../lib/ftl/log_settings.h
-FILE: ../../../lib/ftl/log_settings_state.cc
-FILE: ../../../lib/ftl/log_settings_unittest.cc
-FILE: ../../../lib/ftl/logging.cc
-FILE: ../../../lib/ftl/logging.h
-FILE: ../../../lib/ftl/macros.h
-FILE: ../../../lib/ftl/memory/ref_counted.h
-FILE: ../../../lib/ftl/memory/ref_counted_internal.h
-FILE: ../../../lib/ftl/memory/ref_counted_unittest.cc
-FILE: ../../../lib/ftl/memory/ref_ptr.h
-FILE: ../../../lib/ftl/memory/ref_ptr_internal.h
-FILE: ../../../lib/ftl/memory/unique_object.h
-FILE: ../../../lib/ftl/memory/weak_ptr.h
-FILE: ../../../lib/ftl/memory/weak_ptr_internal.cc
-FILE: ../../../lib/ftl/memory/weak_ptr_internal.h
-FILE: ../../../lib/ftl/memory/weak_ptr_unittest.cc
-FILE: ../../../lib/ftl/random/rand.cc
-FILE: ../../../lib/ftl/random/rand.h
-FILE: ../../../lib/ftl/random/uuid.cc
-FILE: ../../../lib/ftl/random/uuid.h
-FILE: ../../../lib/ftl/strings/ascii.cc
-FILE: ../../../lib/ftl/strings/ascii.h
-FILE: ../../../lib/ftl/strings/ascii_unittest.cc
-FILE: ../../../lib/ftl/strings/concatenate.cc
-FILE: ../../../lib/ftl/strings/concatenate.h
-FILE: ../../../lib/ftl/strings/concatenate_unittest.cc
-FILE: ../../../lib/ftl/strings/split_string.cc
-FILE: ../../../lib/ftl/strings/split_string.h
-FILE: ../../../lib/ftl/strings/split_string_unittest.cc
-FILE: ../../../lib/ftl/strings/string_number_conversions.cc
-FILE: ../../../lib/ftl/strings/string_number_conversions.h
-FILE: ../../../lib/ftl/strings/string_number_conversions_unittest.cc
-FILE: ../../../lib/ftl/strings/string_printf.cc
-FILE: ../../../lib/ftl/strings/string_printf.h
-FILE: ../../../lib/ftl/strings/string_printf_unittest.cc
-FILE: ../../../lib/ftl/strings/string_view.cc
-FILE: ../../../lib/ftl/strings/string_view.h
-FILE: ../../../lib/ftl/strings/string_view_unittest.cc
-FILE: ../../../lib/ftl/strings/trim.cc
-FILE: ../../../lib/ftl/strings/trim.h
-FILE: ../../../lib/ftl/strings/trim_unittest.cc
-FILE: ../../../lib/ftl/strings/utf_codecs.cc
-FILE: ../../../lib/ftl/strings/utf_codecs.h
-FILE: ../../../lib/ftl/synchronization/cond_var.h
-FILE: ../../../lib/ftl/synchronization/cond_var_posix.cc
-FILE: ../../../lib/ftl/synchronization/cond_var_unittest.cc
-FILE: ../../../lib/ftl/synchronization/monitor.cc
-FILE: ../../../lib/ftl/synchronization/monitor.h
-FILE: ../../../lib/ftl/synchronization/mutex.h
-FILE: ../../../lib/ftl/synchronization/mutex_posix.cc
-FILE: ../../../lib/ftl/synchronization/mutex_unittest.cc
-FILE: ../../../lib/ftl/synchronization/sleep.cc
-FILE: ../../../lib/ftl/synchronization/sleep.h
-FILE: ../../../lib/ftl/synchronization/thread_annotations.h
-FILE: ../../../lib/ftl/synchronization/thread_annotations_unittest.cc
-FILE: ../../../lib/ftl/synchronization/thread_checker.h
-FILE: ../../../lib/ftl/synchronization/thread_checker_unittest.cc
-FILE: ../../../lib/ftl/synchronization/waitable_event.cc
-FILE: ../../../lib/ftl/synchronization/waitable_event.h
-FILE: ../../../lib/ftl/synchronization/waitable_event_unittest.cc
-FILE: ../../../lib/ftl/tasks/one_shot_timer.cc
-FILE: ../../../lib/ftl/tasks/one_shot_timer.h
-FILE: ../../../lib/ftl/tasks/one_shot_timer_unittest.cc
-FILE: ../../../lib/ftl/tasks/task_runner.cc
-FILE: ../../../lib/ftl/tasks/task_runner.h
-FILE: ../../../lib/ftl/time/stopwatch.cc
-FILE: ../../../lib/ftl/time/stopwatch.h
-FILE: ../../../lib/ftl/time/time_delta.h
-FILE: ../../../lib/ftl/time/time_point.cc
-FILE: ../../../lib/ftl/time/time_point.h
-FILE: ../../../lib/ftl/time/time_printers.cc
-FILE: ../../../lib/ftl/time/time_unittest.cc
-FILE: ../../../lib/tonic/converter/dart_converter.cc
-FILE: ../../../lib/tonic/converter/dart_converter.h
-FILE: ../../../lib/tonic/dart_message_handler.cc
-FILE: ../../../lib/tonic/dart_message_handler.h
-FILE: ../../../lib/tonic/dart_microtask_queue.cc
-FILE: ../../../lib/tonic/dart_microtask_queue.h
-FILE: ../../../lib/tonic/dart_sticky_error.cc
-FILE: ../../../lib/tonic/dart_sticky_error.h
-FILE: ../../../lib/tonic/debugger/dart_debugger.cc
-FILE: ../../../lib/tonic/debugger/dart_debugger.h
-FILE: ../../../lib/tonic/file_loader/file_loader.cc
-FILE: ../../../lib/tonic/file_loader/file_loader.h
-FILE: ../../../lib/tonic/logging/dart_error.cc
-FILE: ../../../lib/tonic/logging/dart_error.h
-FILE: ../../../lib/tonic/logging/dart_invoke.cc
-FILE: ../../../lib/tonic/logging/dart_invoke.h
-FILE: ../../../lib/tonic/parsers/packages_map.cc
-FILE: ../../../lib/tonic/parsers/packages_map.h
-FILE: ../../../lib/tonic/scopes/dart_api_scope.h
-FILE: ../../../lib/tonic/scopes/dart_isolate_scope.cc
-FILE: ../../../lib/tonic/scopes/dart_isolate_scope.h
-FILE: ../../../lib/tonic/typed_data/dart_byte_data.h
-FILE: ../../../lib/tonic/typed_data/int32_list.h
-FILE: ../../../lib/tonic/typed_data/uint8_list.h
-FILE: ../../../lib/zip/create_unzipper.cc
-FILE: ../../../lib/zip/create_unzipper.h
-FILE: ../../../lib/zip/memory_io.cc
-FILE: ../../../lib/zip/memory_io.h
-FILE: ../../../lib/zip/unique_unzipper.cc
-FILE: ../../../lib/zip/unique_unzipper.h
-FILE: ../../../lib/zip/unique_zipper.cc
-FILE: ../../../lib/zip/unique_zipper.h
-FILE: ../../../lib/zip/unzipper.cc
-FILE: ../../../lib/zip/unzipper.h
-FILE: ../../../lib/zip/zipper.cc
-FILE: ../../../lib/zip/zipper.h
-----------------------------------------------------------------------------------------------------
-Copyright 2016 The Fuchsia Authors. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: ftl
-ORIGIN: ../../../lib/ftl/files/directory_unittest.cc + ../../../lib/ftl/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../lib/ftl/files/directory_unittest.cc
-FILE: ../../../lib/ftl/files/file_descriptor_unittest.cc
-FILE: ../../../lib/ftl/files/path_win.cc
-FILE: ../../../lib/ftl/files/symlink_win.cc
-FILE: ../../../lib/ftl/ftl_export.h
-FILE: ../../../lib/ftl/functional/apply.h
-FILE: ../../../lib/ftl/functional/apply_unittest.cc
-FILE: ../../../lib/ftl/functional/auto_call_unittest.cc
-FILE: ../../../lib/ftl/functional/cancelable_callback.h
-FILE: ../../../lib/ftl/functional/cancelable_callback_unittest.cc
-FILE: ../../../lib/ftl/inttypes.h
-FILE: ../../../lib/ftl/portable_unistd.h
-FILE: ../../../lib/ftl/random/rand_unittest.cc
-FILE: ../../../lib/ftl/random/uuid_unittest.cc
-FILE: ../../../lib/ftl/strings/join_strings.h
-FILE: ../../../lib/ftl/strings/join_strings_unittest.cc
-FILE: ../../../lib/ftl/synchronization/cond_var_win.cc
-FILE: ../../../lib/ftl/synchronization/mutex_win.cc
-FILE: ../../../lib/ftl/threading/thread.cc
-FILE: ../../../lib/ftl/threading/thread.h
-FILE: ../../../lib/ftl/threading/thread_unittest.cc
-FILE: ../../../lib/ftl/time/stopwatch_unittest.cc
-FILE: ../../../lib/ftl/time/time_delta_unittest.cc
-FILE: ../../../lib/ftl/time/time_point_unittest.cc
+FILE: ../../../lib/tonic/dart_list.cc
+FILE: ../../../lib/tonic/dart_list.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 The Fuchsia Authors. All rights reserved.
 
@@ -242,49 +43,66 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
-LIBRARY: icu
-ORIGIN: ../../../lib/ftl/third_party/icu/LICENSE
-TYPE: LicenseType.unknown
-FILE: ../../../lib/ftl/third_party/icu/icu_utf.cc
-FILE: ../../../lib/ftl/third_party/icu/icu_utf.h
+LIBRARY: tonic
+ORIGIN: ../../../garnet/public/lib/fidl/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../lib/tonic/converter/dart_converter.cc
+FILE: ../../../lib/tonic/converter/dart_converter.h
+FILE: ../../../lib/tonic/dart_message_handler.cc
+FILE: ../../../lib/tonic/dart_message_handler.h
+FILE: ../../../lib/tonic/dart_microtask_queue.cc
+FILE: ../../../lib/tonic/dart_microtask_queue.h
+FILE: ../../../lib/tonic/dart_sticky_error.cc
+FILE: ../../../lib/tonic/dart_sticky_error.h
+FILE: ../../../lib/tonic/debugger/dart_debugger.cc
+FILE: ../../../lib/tonic/debugger/dart_debugger.h
+FILE: ../../../lib/tonic/file_loader/file_loader.cc
+FILE: ../../../lib/tonic/file_loader/file_loader.h
+FILE: ../../../lib/tonic/logging/dart_error.cc
+FILE: ../../../lib/tonic/logging/dart_error.h
+FILE: ../../../lib/tonic/logging/dart_invoke.cc
+FILE: ../../../lib/tonic/logging/dart_invoke.h
+FILE: ../../../lib/tonic/parsers/packages_map.cc
+FILE: ../../../lib/tonic/parsers/packages_map.h
+FILE: ../../../lib/tonic/scopes/dart_api_scope.h
+FILE: ../../../lib/tonic/scopes/dart_isolate_scope.cc
+FILE: ../../../lib/tonic/scopes/dart_isolate_scope.h
+FILE: ../../../lib/tonic/typed_data/dart_byte_data.h
+FILE: ../../../lib/tonic/typed_data/int32_list.h
+FILE: ../../../lib/tonic/typed_data/uint8_list.h
 ----------------------------------------------------------------------------------------------------
-ICU License - ICU 1.8.1 and later
+Copyright 2016 The Fuchsia Authors. All rights reserved.
 
-COPYRIGHT AND PERMISSION NOTICE
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
 
-Copyright (c) 1995-2009 International Business Machines Corporation and others
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
 
-All rights reserved.
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-"Software"), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, and/or sell copies of the Software, and to permit persons
-to whom the Software is furnished to do so, provided that the above
-copyright notice(s) and this permission notice appear in all copies of
-the Software and that both the above copyright notice(s) and this
-permission notice appear in supporting documentation.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
-OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY
-SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER
-RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
-CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-Except as contained in this notice, the name of a copyright holder
-shall not be used in advertising or otherwise to promote the sale, use
-or other dealings in this Software without prior written authorization
-of the copyright holder.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
 LIBRARY: tonic
-ORIGIN: ../../../lib/tonic/mx/mx_converter.h + ../../../lib/ftl/LICENSE
+ORIGIN: ../../../lib/tonic/typed_data/dart_byte_data.cc + ../../../garnet/public/lib/fidl/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../lib/tonic/dart_args.h
 FILE: ../../../lib/tonic/dart_binding_macros.h
@@ -301,7 +119,6 @@ FILE: ../../../lib/tonic/dart_state.h
 FILE: ../../../lib/tonic/dart_wrappable.cc
 FILE: ../../../lib/tonic/dart_wrappable.h
 FILE: ../../../lib/tonic/dart_wrapper_info.h
-FILE: ../../../lib/tonic/mx/mx_converter.h
 FILE: ../../../lib/tonic/typed_data/dart_byte_data.cc
 FILE: ../../../lib/tonic/typed_data/float32_list.cc
 FILE: ../../../lib/tonic/typed_data/float32_list.h
@@ -338,4 +155,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 4
+Total license count: 3

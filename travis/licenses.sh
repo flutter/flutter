@@ -1,3 +1,4 @@
+set -e
 shopt -s nullglob
 
 echo "Verifying license script is still happy..."
