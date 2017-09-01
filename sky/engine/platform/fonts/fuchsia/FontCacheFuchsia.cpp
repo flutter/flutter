@@ -4,16 +4,16 @@
 
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
 
-#include <limits>
 #include <magenta/syscalls.h>
 #include <mx/vmar.h>
 #include <mx/vmo.h>
+#include <limits>
 #include <utility>
 
-#include "apps/fonts/services/font_provider.fidl.h"
 #include "flutter/sky/engine/platform/fonts/AlternateFontFamily.h"
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/fonts/FontDescription.h"
+#include "lib/fonts/fidl/font_provider.fidl.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkTypeface.h"

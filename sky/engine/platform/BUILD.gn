@@ -285,7 +285,7 @@ source_set("platform") {
       "fonts/fuchsia/FontCacheFuchsia.h",
     ]
 
-    deps += [ "//apps/fonts/services" ]
+    deps += [ "//garnet/public/lib/fonts/fidl" ]
   }
 
   configs += [
