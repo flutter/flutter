@@ -375,6 +375,8 @@ class _FlutterLogoPainter extends BoxPainter {
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     offset += _config.margin.topLeft;
     final Size canvasSize = _config.margin.deflateSize(configuration.size);
+    if (canvasSize.isEmpty)
+      return;
     Size logoSize;
     if (_config._position > 0.0) {
       // horizontal style

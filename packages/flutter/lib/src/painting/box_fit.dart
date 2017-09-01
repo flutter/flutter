@@ -125,6 +125,9 @@ class FittedSizes {
 ///  * [DecoratedBox], [BoxDecoration], and [DecorationImage], which together
 ///    provide access to [paintImage] at the widgets layer.
 FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
+  if (inputSize.height <= 0.0 || inputSize.width <= 0.0 || outputSize.height <= 0.0 || outputSize.width <= 0.0)
+    return const FittedSizes(Size.zero, Size.zero);
+
   Size sourceSize, destinationSize;
   switch (fit) {
     case BoxFit.fill:
