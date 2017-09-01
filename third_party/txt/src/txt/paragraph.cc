@@ -254,6 +254,7 @@ void Paragraph::Layout(double width, bool force) {
   std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
   std::vector<size_t> buffer_sizes;
   int word_count = 0;
+  size_t max_lines = paragraph_style_.max_lines;
 
   auto postprocess_line = [this, &x_queue, &y]() -> void {
     size_t record_index = 0;
@@ -326,22 +327,68 @@ void Paragraph::Layout(double width, bool force) {
 
     size_t layout_start = run.start;
     // Layout until the end of the run or too many lines.
-    while (layout_start < run.end && lines_ < paragraph_style_.max_lines) {
+    while (layout_start < run.end && lines_ < max_lines) {
       const size_t next_break = (break_index > breaks_count - 1)
                                     ? std::numeric_limits<size_t>::max()
                                     : breaks[break_index];
       const size_t layout_end = std::min(run.end, next_break);
 
       bool bidiFlags = paragraph_style_.rtl;
+      std::shared_ptr<minikin::FontCollection> minikin_font_collection =
+          font_collection_->GetMinikinFontCollectionForFamily(
+              run.style.font_family);
+
+      uint16_t* text_ptr = text.data() + layout_start;
+      size_t text_count = layout_end - layout_start;
+      std::vector<uint16_t> ellipsized_text;
+
+      // Apply ellipsizing if the run was not completely laid out and this
+      // is the last line (or lines are unlimited).
+      const std::u16string& ellipsis = paragraph_style_.ellipsis;
+      if (ellipsis.length() && !isinf(width_) && run.end != layout_end &&
+          (lines_ == max_lines - 1 ||
+           max_lines == std::numeric_limits<size_t>::max())) {
+        float ellipsis_width = layout.measureText(
+            reinterpret_cast<const uint16_t*>(ellipsis.data()),
+            0, ellipsis.length(), ellipsis.length(), bidiFlags,
+            font, minikin_paint, minikin_font_collection, nullptr);
+
+        std::vector<float> text_advances(text_count);
+        float text_width = layout.measureText(
+            text.data() + layout_start, 0, text_count, text_count,
+            bidiFlags, font, minikin_paint, minikin_font_collection,
+            text_advances.data());
+
+        // Truncate characters from the text until the ellipsis fits.
+        size_t truncate_count = 0;
+        while (truncate_count < text_count &&
+               text_width + ellipsis_width > width_) {
+          text_width -= text_advances[text_count - truncate_count - 1];
+          truncate_count++;
+        }
+
+        ellipsized_text.reserve(text_count - truncate_count + ellipsis.length());
+        ellipsized_text.insert(ellipsized_text.begin(),
+                               text.begin() + layout_start,
+                               text.begin() + layout_end - truncate_count);
+        ellipsized_text.insert(ellipsized_text.end(),
+                               ellipsis.begin(), ellipsis.end());
+        text_ptr = ellipsized_text.data();
+        text_count = ellipsized_text.size();
+
+        // If there is no line limit, then skip all lines after the ellipsized
+        // line.
+        if (max_lines == std::numeric_limits<size_t>::max())
+          max_lines = lines_ + 1;
+      }
+
       // Minikin Layout doLayout() has an O(N^2) (according to
       // benchmarks) time complexity where N is the total number of characters.
       // However, this is not significant for reasonably sized paragraphs. It is
       // currently recommended to break up very long paragraphs (10k+
       // characters) to ensure speedy layout.
-      layout.doLayout(text.data() + layout_start, 0, layout_end - layout_start,
-                      layout_end - layout_start, bidiFlags, font, minikin_paint,
-                      font_collection_->GetMinikinFontCollectionForFamily(
-                          run.style.font_family));
+      layout.doLayout(text_ptr, 0, text_count, text_count,
+                      bidiFlags, font, minikin_paint, minikin_font_collection);
       FillWhitespaceSet(layout_start, layout_end,
                         minikin::getHbFontLocked(layout.getFont(0)));
 

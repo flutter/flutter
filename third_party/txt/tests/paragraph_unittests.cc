@@ -1522,4 +1522,36 @@ TEST_F(ParagraphTest, RepeatLayoutParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(ParagraphTest, Ellipsize) {
+  const char* text =
+      "This is a very long sentence to test if the text will properly wrap "
+      "around and go to the next line. Sometimes, short sentence. Longer "
+      "sentences are okay too because they are nessecary. Very short. ";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.ellipsis = u"\u2026";
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth());
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
+
+  // Check that the ellipsizer limited the text to one line and did not wrap
+  // to a second line.
+  ASSERT_EQ(paragraph->records_.size(), 1ull);
+}
+
 }  // namespace txt
