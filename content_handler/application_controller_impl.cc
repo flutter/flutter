@@ -6,6 +6,9 @@
 
 #include <utility>
 
+#include <magenta/status.h>
+#include <mxio/namespace.h>
+
 #include "application/lib/app/connect.h"
 #include "flutter/content_handler/app.h"
 #include "flutter/content_handler/runtime_holder.h"
@@ -56,14 +59,49 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   auto request = service_provider.NewRequest();
   service_provider_bridge_.set_backend(std::move(service_provider));
 
+  mxio_ns_t* mxio_ns = SetupNamespace(startup_info->flat_namespace);
+  if (mxio_ns == nullptr) {
+    FTL_LOG(ERROR) << "Failed to initialize namespace";
+  }
+
   url_ = startup_info->launch_info->url;
   runtime_holder_.reset(new RuntimeHolder());
   runtime_holder_->Init(
+      mxio_ns,
       app::ApplicationContext::CreateFrom(std::move(startup_info)),
       std::move(request), std::move(bundle));
 }
 
 ApplicationControllerImpl::~ApplicationControllerImpl() = default;
+
+constexpr char kServiceRootPath[] = "/svc";
+
+mxio_ns_t* ApplicationControllerImpl::SetupNamespace(
+    const app::FlatNamespacePtr& flat) {
+  mxio_ns_t* mxio_namespc;
+  mx_status_t status = mxio_ns_create(&mxio_namespc);
+  if (status != MX_OK) {
+    FTL_LOG(ERROR) << "Failed to create namespace";
+    return nullptr;
+  }
+  for (size_t i = 0; i < flat->paths.size(); ++i) {
+    if (flat->paths[i] == kServiceRootPath) {
+      // Ownership of /svc goes to the ApplicationContext created above.
+      continue;
+    }
+    mx::channel dir = std::move(flat->directories[i]);
+    mx_handle_t dir_handle = dir.release();
+    const char* path = flat->paths[i].data();
+    status = mxio_ns_bind(mxio_namespc, path, dir_handle);
+    if (status != MX_OK) {
+      FTL_LOG(ERROR) << "Failed to bind " << flat->paths[i] << " to namespace";
+      mx_handle_close(dir_handle);
+      mxio_ns_destroy(mxio_namespc);
+      return nullptr;
+    }
+  }
+  return mxio_namespc;
+}
 
 void ApplicationControllerImpl::Kill() {
   runtime_holder_.reset();

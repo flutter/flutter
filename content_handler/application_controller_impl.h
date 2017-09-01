@@ -7,6 +7,8 @@
 
 #include <memory>
 
+#include <mxio/namespace.h>
+
 #include "application/lib/svc/service_provider_bridge.h"
 #include "application/services/application_controller.fidl.h"
 #include "application/services/application_runner.fidl.h"
@@ -49,6 +51,8 @@ class ApplicationControllerImpl : public app::ApplicationController,
 
  private:
   void StartRuntimeIfReady();
+
+  mxio_ns_t* SetupNamespace(const app::FlatNamespacePtr& flat);
 
   App* app_;
   fidl::Binding<app::ApplicationController> binding_;

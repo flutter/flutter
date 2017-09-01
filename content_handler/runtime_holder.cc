@@ -6,6 +6,7 @@
 
 #include <dlfcn.h>
 #include <magenta/dlfcn.h>
+#include <mxio/namespace.h>
 #include <utility>
 
 #include "application/lib/app/connect.h"
@@ -94,6 +95,7 @@ RuntimeHolder::~RuntimeHolder() {
 }
 
 void RuntimeHolder::Init(
+    mxio_ns_t* namespc,
     std::unique_ptr<app::ApplicationContext> context,
     fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
     std::vector<char> bundle) {
@@ -101,6 +103,7 @@ void RuntimeHolder::Init(
   rasterizer_ = Rasterizer::Create();
   FTL_DCHECK(rasterizer_);
 
+  namespc_ = namespc;
   context_ = std::move(context);
   outgoing_services_ = std::move(outgoing_services);
 
@@ -351,8 +354,22 @@ void RuntimeHolder::HandlePlatformMessage(
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
   if (asset_store_)
     blink::AssetFontSelector::Install(asset_store_);
+  InitDartIoInternal();
   InitFidlInternal();
   InitMozartInternal();
+}
+
+void RuntimeHolder::InitDartIoInternal() {
+  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
+
+  Dart_Handle namespace_type =
+      Dart_GetType(io_lib, ToDart("_Namespace"), 0, nullptr);
+  DART_CHECK_VALID(namespace_type);
+  Dart_Handle namespace_args[1];
+  namespace_args[0] = Dart_NewInteger(reinterpret_cast<intptr_t>(namespc_));
+  DART_CHECK_VALID(namespace_args[0]);
+  DART_CHECK_VALID(Dart_Invoke(
+      namespace_type, ToDart("_setupNamespace"), 1, namespace_args));
 }
 
 void RuntimeHolder::InitFidlInternal() {

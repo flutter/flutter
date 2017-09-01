@@ -6,6 +6,7 @@
 #define FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 
 #include <mx/channel.h>
+#include <mxio/namespace.h>
 
 #include <unordered_set>
 
@@ -39,7 +40,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   RuntimeHolder();
   ~RuntimeHolder();
 
-  void Init(std::unique_ptr<app::ApplicationContext> context,
+  void Init(mxio_ns_t* namespc,
+            std::unique_ptr<app::ApplicationContext> context,
             fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
             std::vector<char> bundle);
   void CreateView(const std::string& script_uri,
@@ -83,6 +85,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   bool HandleAssetPlatformMessage(blink::PlatformMessage* message);
   bool HandleTextInputPlatformMessage(blink::PlatformMessage* message);
 
+  void InitDartIoInternal();
   void InitFidlInternal();
   void InitMozartInternal();
 
@@ -92,6 +95,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void OnRedrawFrame();
   void Invalidate();
 
+  mxio_ns_t* namespc_;
   std::unique_ptr<app::ApplicationContext> context_;
   fidl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
   std::vector<char> root_bundle_data_;
