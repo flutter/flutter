@@ -105,6 +105,8 @@ source_set("txt") {
     set_sources_assignment_filter([])
     sources += [ "src/txt/platform_mac.mm" ]
     set_sources_assignment_filter(sources_assignment_filter)
+  } else if (is_android) {
+    sources += [ "src/txt/platform_android.cc" ]
   } else {
     sources += [ "src/txt/platform.cc" ]
   }

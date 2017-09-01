@@ -148,8 +148,8 @@ bool Paragraph::AddRunsToLineBreaker(
     auto collection = font_collection_->GetMinikinFontCollectionForFamily(
         run.style.font_family);
     if (collection == nullptr) {
-      FTL_DLOG(INFO) << "Could not find font collection for family \""
-                     << run.style.font_family << "\".";
+      FTL_LOG(INFO) << "Could not find font collection for family \""
+                    << run.style.font_family << "\".";
       return false;
     }
     breaker_.addStyleRun(&paint, collection, font, run.start, run.end, false,
