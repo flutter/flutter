@@ -81,7 +81,9 @@ void main() {
       initialScrollOffset: kItemHeight / 2,
     );
 
-    await tester.pumpWidget(new MediaQuery(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
       data: new MediaQueryData(),
         child: new Scrollable(
         controller: scrollController,
@@ -103,7 +105,7 @@ void main() {
           );
         }),
       ),
-    );
+    ));
 
     expect(scrollController.offset, kItemHeight / 2);
 
@@ -145,27 +147,29 @@ void main() {
       initialScrollOffset: kItemHeight / 2,
     );
 
-    await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(),
-      child: new Scrollable(
-        controller: scrollController,
-        viewportBuilder: (BuildContext context, ViewportOffset offset) {
-          return new Viewport(
-            offset: offset,
-            slivers: <Widget>[
-              const SliverAppBar(
-                pinned: true,
-                expandedHeight: kExpandedAppBarHeight,
-                flexibleSpace: const FlexibleSpaceBar(
-                  title: const Text('App Bar'),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child:new MediaQuery(
+        data: new MediaQueryData(),
+        child: new Scrollable(
+          controller: scrollController,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return new Viewport(
+              offset: offset,
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  expandedHeight: kExpandedAppBarHeight,
+                  flexibleSpace: const FlexibleSpaceBar(
+                    title: const Text('App Bar'),
+                  ),
                 ),
-              ),
-            ]..addAll(slivers),
-          );
-        },
+              ]..addAll(slivers),
+            );
+          },
+        ),
       ),
-    ),
-    );
+    ));
 
     expect(scrollController.offset, kItemHeight / 2);
 
