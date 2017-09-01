@@ -25,6 +25,7 @@
 #include <vector>
 #include "font_skia.h"
 #include "lib/ftl/logging.h"
+#include "txt/platform.h"
 #include "txt/text_style.h"
 
 namespace txt {
@@ -107,7 +108,7 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
     return font_collection;
   }
 
-  const auto default_font_family = TextStyle::GetDefaultFontFamily();
+  const auto default_font_family = GetDefaultFontFamily();
   if (family != default_font_family) {
     return GetMinikinFontCollectionForFamily(default_font_family);
   }

@@ -46,8 +46,6 @@ class TextStyle {
   double word_spacing = 0.0;
   double height = 1.0;
 
-  static std::string GetDefaultFontFamily();
-
   TextStyle();
 
   bool equals(const TextStyle& other) const;
