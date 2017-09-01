@@ -9482,7 +9482,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: txt
 ORIGIN: ../../../dart/third_party/observatory_pub_packages/packages/quiver/LICENSE
 TYPE: LicenseType.apache
-FILE: ../../../flutter/third_party/txt/benchmarks/font_collection_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/paint_record_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/paragraph_benchmarks.cc
 FILE: ../../../flutter/third_party/txt/benchmarks/paragraph_builder_benchmarks.cc

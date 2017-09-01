@@ -17,6 +17,8 @@
 #include <string>
 
 #include "lib/ftl/command_line.h"
+#include "txt/directory_asset_data_provider.h"
+#include "txt/font_collection.h"
 #include "utils.h"
 
 namespace txt {
@@ -24,7 +26,7 @@ namespace txt {
 static std::string gFontDir;
 static ftl::CommandLine gCommandLine;
 
-const std::string GetFontDir() {
+const std::string& GetFontDir() {
   return gFontDir;
 }
 
@@ -38,6 +40,13 @@ const ftl::CommandLine& GetCommandLineForProcess() {
 
 void SetCommandLine(ftl::CommandLine cmd) {
   gCommandLine = std::move(cmd);
+}
+
+std::shared_ptr<FontCollection> GetTestFontCollection() {
+  auto collection = std::make_shared<FontCollection>();
+  collection->PushBack(sk_make_sp<AssetFontManager>(
+      std::make_unique<DirectoryAssetDataProvider>(GetFontDir())));
+  return collection;
 }
 
 }  // namespace txt

@@ -45,8 +45,7 @@ static void BM_ParagraphShortLayout(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
@@ -86,8 +85,8 @@ static void BM_ParagraphLongLayout(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
@@ -128,8 +127,8 @@ static void BM_ParagraphJustifyLayout(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
@@ -152,8 +151,7 @@ static void BM_ParagraphManyStylesLayout(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
   for (int i = 0; i < 1000; ++i) {
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
@@ -177,9 +175,8 @@ static void BM_ParagraphTextBigO(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
 
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
@@ -206,8 +203,8 @@ static void BM_ParagraphStylesBigO(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   for (int i = 0; i < state.range(0); ++i) {
     builder.PushStyle(text_style);
@@ -235,8 +232,7 @@ static void BM_ParagraphPaintSimple(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
   auto paragraph = builder.Build();
@@ -282,8 +278,7 @@ static void BM_ParagraphPaintLarge(benchmark::State& state) {
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
   auto paragraph = builder.Build();
@@ -316,8 +311,7 @@ static void BM_ParagraphPaintDecoration(benchmark::State& state) {
   text_style.decoration_style = TextDecorationStyle(kSolid);
   text_style.color = SK_ColorBLACK;
 
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
-  txt::ParagraphBuilder builder(paragraph_style, &font_collection);
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   builder.PushStyle(text_style);
   builder.AddText(u16_text);
@@ -367,9 +361,8 @@ static void BM_ParagraphMinikinDoLayout(benchmark::State& state) {
   paint.letterSpacing = text_style.letter_spacing;
   paint.wordSpacing = text_style.word_spacing;
 
-  auto collection =
-      FontCollection::GetFontCollection(txt::GetFontDir())
-          .GetMinikinFontCollectionForFamily(text_style.font_family);
+  auto collection = GetTestFontCollection()->GetMinikinFontCollectionForFamily(
+      text_style.font_family);
 
   while (state.KeepRunning()) {
     minikin::Layout layout;
@@ -398,7 +391,7 @@ static void BM_ParagraphMinikinAddStyleRun(benchmark::State& state) {
   paint.letterSpacing = text_style.letter_spacing;
   paint.wordSpacing = text_style.word_spacing;
 
-  auto font_collection = FontCollection::GetFontCollection(txt::GetFontDir());
+  auto font_collection = GetTestFontCollection();
 
   minikin::LineBreaker breaker;
   breaker.setLocale(icu::Locale(), nullptr);
@@ -409,7 +402,7 @@ static void BM_ParagraphMinikinAddStyleRun(benchmark::State& state) {
   while (state.KeepRunning()) {
     for (int i = 0; i < 20; ++i) {
       breaker.addStyleRun(
-          &paint, font_collection.GetMinikinFontCollectionForFamily("Roboto"),
+          &paint, font_collection->GetMinikinFontCollectionForFamily("Roboto"),
           font, state.range(0) / 20 * i, state.range(0) / 20 * (i + 1), false,
           0);
     }
