@@ -117,7 +117,7 @@ linter:
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
-    # - prefer_final_fields # https://github.com/dart-lang/linter/issues/506
+    - prefer_final_fields
     - prefer_final_locals
     # - prefer_foreach # not yet tested
     # - prefer_function_declarations_over_variables # not yet tested
@@ -127,7 +127,7 @@ linter:
     - prefer_is_not_empty
     # - prefer_single_quote_strings # not yet tested
     # - public_member_api_docs # this is the only difference from analysis_options_repo.yaml
-    # - recursive_getters # https://github.com/dart-lang/linter/issues/452
+    - recursive_getters
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first
@@ -140,7 +140,7 @@ linter:
     # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
-    # - unnecessary_overrides # https://github.com/dart-lang/linter/issues/626 and https://github.com/dart-lang/linter/issues/627
+    - unnecessary_overrides
     - unnecessary_this
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
