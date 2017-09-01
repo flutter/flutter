@@ -665,6 +665,7 @@ class SemanticsNode extends AbstractNode {
     assert(!_dirty);
     final Map<String, dynamic> annotatedEvent = <String, dynamic>{
       'nodeId': id,
+      'type': event.type,
       'data': event.toJson(),
     };
     SystemChannels.accessibility.send(annotatedEvent);
