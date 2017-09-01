@@ -1,3 +1,4 @@
+dart:io,_Namespace,_setupNamespace
 dart:fidl.internal,::,_environment
 dart:fidl.internal,::,_outgoingServices
 dart:fidl.internal,GetSizeResult,GetSizeResult.
