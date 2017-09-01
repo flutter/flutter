@@ -40,13 +40,21 @@ void VsyncWaiterMac::OnDisplayLink(void* context) {
 }
 
 void VsyncWaiterMac::OnDisplayLink() {
-  ftl::TimePoint frame_time = ftl::TimePoint::Now();
+  ftl::TimePoint frame_start_time = ftl::TimePoint::Now();
+  ftl::TimePoint frame_target_time =
+      frame_start_time +
+      ftl::TimeDelta::FromSecondsF(
+          CVDisplayLinkGetActualOutputVideoRefreshPeriod(link_));
+
   CVDisplayLinkStop(link_);
+
   auto callback = std::move(callback_);
   callback_ = Callback();
 
   blink::Threads::UI()->PostTask(
-      [callback, frame_time] { callback(frame_time); });
+      [callback, frame_start_time, frame_target_time] {
+        callback(frame_start_time, frame_target_time);
+      });
 }
 
 void VsyncWaiterMac::AsyncWaitForVsync(Callback callback) {

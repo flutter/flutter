@@ -50,6 +50,7 @@ class Engine : public blink::RuntimeDelegate {
                           const std::string& packages);
 
   void BeginFrame(ftl::TimePoint frame_time);
+  void NotifyIdle(int64_t deadline);
 
   void RunFromSource(const std::string& main,
                      const std::string& packages,

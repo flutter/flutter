@@ -243,6 +243,12 @@ void Engine::BeginFrame(ftl::TimePoint frame_time) {
     runtime_->BeginFrame(frame_time);
 }
 
+void Engine::NotifyIdle(int64_t deadline) {
+  TRACE_EVENT0("flutter", "Engine::NotifyIdle");
+  if (runtime_)
+    runtime_->NotifyIdle(deadline);
+}
+
 void Engine::RunFromSource(const std::string& main,
                            const std::string& packages,
                            const std::string& bundle_path) {

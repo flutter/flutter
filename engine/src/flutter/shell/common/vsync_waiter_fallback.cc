@@ -26,11 +26,11 @@ VsyncWaiterFallback::VsyncWaiterFallback()
 
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
+constexpr ftl::TimeDelta interval = ftl::TimeDelta::FromSecondsF(1.0 / 60.0);
+
 void VsyncWaiterFallback::AsyncWaitForVsync(Callback callback) {
   FTL_DCHECK(!callback_);
   callback_ = std::move(callback);
-
-  constexpr ftl::TimeDelta interval = ftl::TimeDelta::FromSecondsF(1.0 / 60.0);
 
   ftl::TimePoint now = ftl::TimePoint::Now();
   ftl::TimePoint next = SnapToNextTick(now, phase_, interval);
@@ -42,7 +42,7 @@ void VsyncWaiterFallback::AsyncWaitForVsync(Callback callback) {
         ftl::TimePoint frame_time = ftl::TimePoint::Now();
         Callback callback = std::move(self->callback_);
         self->callback_ = Callback();
-        callback(frame_time);
+        callback(frame_time, frame_time + interval);
       },
       next - now);
 }

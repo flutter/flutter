@@ -7,6 +7,7 @@
 #include "flutter/common/threads.h"
 #include "flutter/fml/trace_event.h"
 #include "lib/ftl/time/stopwatch.h"
+#include "dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
 
@@ -16,10 +17,13 @@ Animator::Animator(ftl::WeakPtr<Rasterizer> rasterizer,
     : rasterizer_(rasterizer),
       waiter_(waiter),
       engine_(engine),
+      last_begin_frame_time_(),
+      dart_frame_deadline_(0),
       layer_tree_pipeline_(ftl::MakeRefCounted<LayerTreePipeline>(2)),
       pending_frame_semaphore_(1),
       frame_number_(1),
       paused_(false),
+      frame_scheduled_(false),
       weak_factory_(this) {}
 
 Animator::~Animator() = default;
@@ -37,9 +41,17 @@ void Animator::Start() {
   RequestFrame();
 }
 
-void Animator::BeginFrame(ftl::TimePoint frame_time) {
+static int64_t FtlToDartOrEarlier(ftl::TimePoint time) {
+  int64_t dart_now = Dart_TimelineGetMicros();
+  ftl::TimePoint ftl_now = ftl::TimePoint::Now();
+  return (time - ftl_now).ToMicroseconds() + dart_now;
+}
+
+void Animator::BeginFrame(ftl::TimePoint frame_start_time,
+                          ftl::TimePoint frame_target_time) {
   TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
 
+  frame_scheduled_ = false;
   pending_frame_semaphore_.Signal();
 
   if (!producer_continuation_) {
@@ -62,8 +74,15 @@ void Animator::BeginFrame(ftl::TimePoint frame_time) {
   // to service potential frame.
   FTL_DCHECK(producer_continuation_);
 
-  last_begin_frame_time_ = frame_time;
+  last_begin_frame_time_ = frame_start_time;
+  dart_frame_deadline_ = FtlToDartOrEarlier(frame_target_time);
   engine_->BeginFrame(last_begin_frame_time_);
+
+  if (!frame_scheduled_) {
+    // We don't have another frame pending, so we're waiting on user input
+    // or I/O. Allow the Dart VM 100 ms.
+    engine_->NotifyIdle(dart_frame_deadline_ + 100000);
+  }
 }
 
 void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
@@ -111,14 +130,17 @@ void Animator::RequestFrame() {
                                  frame_number);
         self->AwaitVSync();
       });
+  frame_scheduled_ = true;
 }
 
 void Animator::AwaitVSync() {
   waiter_->AsyncWaitForVsync([self = weak_factory_.GetWeakPtr()](
-      ftl::TimePoint frame_time) {
+      ftl::TimePoint frame_start_time, ftl::TimePoint frame_target_time) {
     if (self)
-      self->BeginFrame(frame_time);
+      self->BeginFrame(frame_start_time, frame_target_time);
   });
+
+  engine_->NotifyIdle(dart_frame_deadline_);
 }
 
 }  // namespace shell

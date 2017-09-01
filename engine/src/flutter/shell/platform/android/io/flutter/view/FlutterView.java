@@ -35,6 +35,7 @@ import io.flutter.plugin.common.*;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.view.VsyncWaiter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -662,6 +663,9 @@ public class FlutterView extends SurfaceView
             mMetrics.physicalPaddingRight,
             mMetrics.physicalPaddingBottom,
             mMetrics.physicalPaddingLeft);
+
+        float fps = getDisplay().getRefreshRate();
+        VsyncWaiter.refreshPeriodNanos = (long)(1000000000.0 / fps);
     }
 
     // Called by native to send us a platform message.

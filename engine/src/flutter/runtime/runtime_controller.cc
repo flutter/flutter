@@ -76,6 +76,15 @@ void RuntimeController::BeginFrame(ftl::TimePoint frame_time) {
   GetWindow()->BeginFrame(frame_time);
 }
 
+void RuntimeController::NotifyIdle(int64_t deadline) {
+  UIDartState* dart_state = dart_controller_->dart_state();
+  if (!dart_state) {
+    return;
+  }
+  DartState::Scope scope(dart_state);
+  Dart_NotifyIdle(deadline);
+}
+
 void RuntimeController::DispatchPlatformMessage(
     ftl::RefPtr<PlatformMessage> message) {
   TRACE_EVENT0("flutter", "RuntimeController::DispatchPlatformMessage");

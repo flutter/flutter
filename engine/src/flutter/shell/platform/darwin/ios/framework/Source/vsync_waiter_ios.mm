@@ -47,6 +47,11 @@
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
+  // ftl::TimePoint and CATimeInterval both use mach_absolute_time.
+  ftl::TimePoint frame_start_time = ftl::TimePoint::Now();
+  ftl::TimePoint frame_target_time =
+      ftl::TimePoint::FromEpochDelta(ftl::TimeDelta::FromSecondsF(link.targetTimestamp));
+
   _displayLink.paused = YES;
 
   // Note: Even though we know we are on the UI thread already (since the
@@ -57,9 +62,9 @@
   //
   // We are not using the PostTask for thread switching, but to make task
   // observers work.
-  blink::Threads::UI()->PostTask([callback = _pendingCallback]() {
-    callback(ftl::TimePoint::Now());
-  });
+  blink::Threads::UI()->PostTask([
+    callback = _pendingCallback, frame_start_time, frame_target_time
+  ]() { callback(frame_start_time, frame_target_time); });
 
   _pendingCallback = nullptr;
 }

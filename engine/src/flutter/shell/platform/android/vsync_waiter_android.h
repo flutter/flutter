@@ -22,7 +22,7 @@ class VsyncWaiterAndroid : public VsyncWaiter {
 
   void AsyncWaitForVsync(Callback callback) override;
 
-  void OnVsync(int64_t frameTimeNanos);
+  void OnVsync(int64_t frameTimeNanos, int64_t frameTargetTimeNanos);
 
  private:
   Callback callback_;
