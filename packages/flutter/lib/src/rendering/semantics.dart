@@ -352,7 +352,7 @@ class SemanticsNode extends AbstractNode {
     }
   }
 
-  Set<SemanticsTag> _tags = new Set<SemanticsTag>();
+  final Set<SemanticsTag> _tags = new Set<SemanticsTag>();
 
   /// Tags the [SemanticsNode] with [tag].
   ///
