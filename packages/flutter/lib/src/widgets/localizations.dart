@@ -113,7 +113,7 @@ abstract class LocalizationsDelegate<T> {
   /// Foo foo = Localizations.of<Foo>(context, Foo);
   /// ```
   ///
-  /// It's rarely necessary to override this method.
+  /// It's rarely necessary to override this getter.
   Type get type => T;
 
   @override
