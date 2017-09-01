@@ -29,40 +29,38 @@ void main() {
   osx.operatingSystem = 'macos';
 
   group('getAttachedDevices', () {
-    MockXcode mockXcode;
+    MockIMobileDevice mockIMobileDevice;
 
     setUp(() {
-      mockXcode = new MockXcode();
+      mockIMobileDevice = new MockIMobileDevice();
     });
 
     testUsingContext('return no devices if Xcode is not installed', () async {
-      when(mockXcode.isInstalled).thenReturn(false);
+      when(mockIMobileDevice.isInstalled).thenReturn(false);
       expect(await IOSDevice.getAttachedDevices(), isEmpty);
     }, overrides: <Type, Generator>{
-      Xcode: () => mockXcode,
+      IMobileDevice: () => mockIMobileDevice,
     });
 
     testUsingContext('returns no devices if none are attached', () async {
-      when(mockXcode.isInstalled).thenReturn(true);
-      when(mockXcode.getAvailableDevices()).thenReturn(new Future<String>.value(''));
+      when(iMobileDevice.isInstalled).thenReturn(true);
+      when(iMobileDevice.getAvailableDeviceIDs()).thenReturn(new Future<String>.value(''));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, isEmpty);
     }, overrides: <Type, Generator>{
-      Xcode: () => mockXcode,
+      IMobileDevice: () => mockIMobileDevice,
     });
 
     testUsingContext('returns attached devices', () async {
-      when(mockXcode.isInstalled).thenReturn(true);
-      when(mockXcode.getAvailableDevices()).thenReturn(new Future<String>.value('''
-Known Devices:
-je-mappelle-horse [ED6552C4-B774-5A4E-8B5A-606710C87C77]
-La tele me regarde (10.3.2) [98206e7a4afd4aedaff06e687594e089dede3c44]
-Puits sans fond (10.3.2) [f577a7903cc54959be2e34bc4f7f80b7009efcf4]
-iPhone 6 Plus (9.3) [FBA880E6-4020-49A5-8083-DCD50CA5FA09] (Simulator)
-iPhone 6s (11.0) [E805F496-FC6A-4EA4-92FF-B7901FF4E7CC] (Simulator)
-iPhone 7 (11.0) + Apple Watch Series 2 - 38mm (4.0) [60027FDD-4A7A-42BF-978F-C2209D27AD61] (Simulator)
-iPhone SE (11.0) [667E8DCD-5DCD-4C80-93A9-60D1D995206F] (Simulator)
+      when(iMobileDevice.isInstalled).thenReturn(true);
+      when(iMobileDevice.getAvailableDeviceIDs()).thenReturn(new Future<String>.value('''
+98206e7a4afd4aedaff06e687594e089dede3c44
+f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName')).thenReturn('La tele me regarde');
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion')).thenReturn('10.3.2');
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName')).thenReturn('Puits sans fond');
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion')).thenReturn('11.0');
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(2));
       expect(devices[0].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
@@ -70,7 +68,7 @@ iPhone SE (11.0) [667E8DCD-5DCD-4C80-93A9-60D1D995206F] (Simulator)
       expect(devices[1].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
       expect(devices[1].name, 'Puits sans fond');
     }, overrides: <Type, Generator>{
-      Xcode: () => mockXcode,
+      IMobileDevice: () => mockIMobileDevice,
     });
   });
 

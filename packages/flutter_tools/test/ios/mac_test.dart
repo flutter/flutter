@@ -22,8 +22,37 @@ class MockFile extends Mock implements File {}
 
 void main() {
   group('IMobileDevice', () {
-    final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
-    osx.operatingSystem = 'macos';
+    final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform())
+      ..operatingSystem = 'macos';
+    MockProcessManager mockProcessManager;
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
+    });
+
+    testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
+      when(mockProcessManager.run(<String>['idevice_id', '-l']))
+          .thenThrow(const ProcessException('idevice_id', const <String>['-l']));
+      expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
+      when(mockProcessManager.run(<String>['idevice_id', '-l']))
+          .thenReturn(new ProcessResult(1, 1, '', 'Sad today'));
+      expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
+      when(mockProcessManager.run(<String>['idevice_id', '-l']))
+          .thenReturn(new ProcessResult(1, 0, 'foo', ''));
+      expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
 
     group('screenshot', () {
       final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
@@ -68,7 +97,6 @@ void main() {
 
   group('Xcode', () {
     MockProcessManager mockProcessManager;
-    final FakePlatform fakePlatform = new FakePlatform(environment: <String, String>{'USER': 'rwaters'});
     Xcode xcode;
 
     setUp(() {
@@ -211,69 +239,6 @@ void main() {
       expect(xcode.eulaSigned, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('getAvailableDevices throws ToolExit when instruments is not installed', () async {
-      when(mockProcessManager.run(<String>['ps', '-e', '-o', 'user,ppid,pid,comm']))
-          .thenReturn(new ProcessResult(1, 0, '', ''));
-      when(mockProcessManager.run(<String>['/usr/bin/instruments', '-s', 'devices']))
-          .thenThrow(const ProcessException('/usr/bin/instruments', const <String>['-s', 'devices']));
-      expect(() async => await xcode.getAvailableDevices(), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('getAvailableDevices throws ToolExit when instruments returns non-zero', () async {
-      when(mockProcessManager.run(<String>['ps', '-e', '-o', 'user,ppid,pid,comm']))
-          .thenReturn(new ProcessResult(1, 0, '', ''));
-      when(mockProcessManager.run(<String>['/usr/bin/instruments', '-s', 'devices']))
-          .thenReturn(new ProcessResult(1, 1, '', 'Sad today'));
-      expect(() async => await xcode.getAvailableDevices(), throwsToolExit());
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('getAvailableDevices returns instruments output when installed', () async {
-      when(mockProcessManager.run(<String>['ps', '-e', '-o', 'user,ppid,pid,comm']))
-          .thenReturn(new ProcessResult(1, 0, '', ''));
-      when(mockProcessManager.run(<String>['/usr/bin/instruments', '-s', 'devices']))
-          .thenReturn(new ProcessResult(1, 0, 'Known Devices:\niPhone 6s (10.3.3) [foo]', ''));
-      expect(await xcode.getAvailableDevices(), 'Known Devices:\niPhone 6s (10.3.3) [foo]');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('getAvailableDevices works even if orphan listing fails', () async {
-      when(mockProcessManager.run(<String>['ps', '-e', '-o', 'user,ppid,pid,comm']))
-          .thenReturn(new ProcessResult(1, 1, '', ''));
-      when(mockProcessManager.run(<String>['/usr/bin/instruments', '-s', 'devices']))
-          .thenReturn(new ProcessResult(1, 0, 'Known Devices:\niPhone 6s (10.3.3) [foo]', ''));
-      expect(await xcode.getAvailableDevices(), 'Known Devices:\niPhone 6s (10.3.3) [foo]');
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
-    testUsingContext('getAvailableDevices cleans up orphaned intstruments processes', () async {
-      when(mockProcessManager.run(<String>['ps', '-e', '-o', 'user,ppid,pid,comm']))
-          .thenReturn(new ProcessResult(1, 0, '''
-USER     PPID   PID COMM
-rwaters     1 36580 /Applications/Xcode.app/Contents/Developer/usr/bin/make
-rwaters 36579 36581 /Applications/Xcode.app/Contents/Developer/usr/bin/instruments
-rwaters     1 36582 /Applications/Xcode.app/Contents/Developer/usr/bin/instruments
-rwaters     1 36583 /Applications/Xcode.app/Contents/SharedFrameworks/DVTInstrumentsFoundation.framework/Resources/DTServiceHub
-rwaters 36581 36584 /Applications/Xcode.app/Contents/SharedFrameworks/DVTInstrumentsFoundation.framework/Resources/DTServiceHub
-''', ''));
-      when(mockProcessManager.run(<String>['/usr/bin/instruments', '-s', 'devices']))
-          .thenReturn(new ProcessResult(1, 0, 'Known Devices:\niPhone 6s (10.3.3) [foo]', ''));
-      await xcode.getAvailableDevices();
-      verify(mockProcessManager.killPid(36582));
-      verify(mockProcessManager.killPid(36583));
-      verifyNever(mockProcessManager.killPid(36580));
-      verifyNever(mockProcessManager.killPid(36581));
-      verifyNever(mockProcessManager.killPid(36584));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-      Platform: () => fakePlatform,
     });
   });
 
