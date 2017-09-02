@@ -12,7 +12,7 @@
 
 namespace flow {
 
-SceneUpdateContext::SceneUpdateContext(mozart::client::Session* session,
+SceneUpdateContext::SceneUpdateContext(scenic_lib::Session* session,
                                        SurfaceProducer* surface_producer)
     : session_(session), surface_producer_(surface_producer) {
   FTL_DCHECK(surface_producer_ != nullptr);
@@ -48,7 +48,7 @@ void SceneUpdateContext::RemoveExportNode(ExportNode* export_node) {
   export_nodes_.erase(export_node);
 }
 
-void SceneUpdateContext::CreateFrame(mozart::client::EntityNode& entity_node,
+void SceneUpdateContext::CreateFrame(scenic_lib::EntityNode& entity_node,
                                      const SkRRect& rrect,
                                      SkColor color,
                                      const SkRect& paint_bounds,
@@ -64,7 +64,7 @@ void SceneUpdateContext::CreateFrame(mozart::client::EntityNode& entity_node,
   // and possibly for its texture.
   // TODO(MZ-137): Need to be able to express the radii as vectors.
   SkRect shape_bounds = rrect.getBounds();
-  mozart::client::RoundedRectangle shape(
+  scenic_lib::RoundedRectangle shape(
       session_,                                      // session
       rrect.width(),                                 // width
       rrect.height(),                                // height
@@ -73,7 +73,7 @@ void SceneUpdateContext::CreateFrame(mozart::client::EntityNode& entity_node,
       rrect.radii(SkRRect::kLowerRight_Corner).x(),  // bottom_right_radius
       rrect.radii(SkRRect::kLowerLeft_Corner).x()    // bottom_left_radius
       );
-  mozart::client::ShapeNode shape_node(session_);
+  scenic_lib::ShapeNode shape_node(session_);
   shape_node.SetShape(shape);
   shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
                             shape_bounds.height() * 0.5f + shape_bounds.top(),
@@ -101,9 +101,9 @@ void SceneUpdateContext::CreateFrame(mozart::client::EntityNode& entity_node,
   if (inner_bounds != shape_bounds && rrect.contains(inner_bounds)) {
     SetShapeColor(shape_node, color);
 
-    mozart::client::Rectangle inner_shape(session_, inner_bounds.width(),
+    scenic_lib::Rectangle inner_shape(session_, inner_bounds.width(),
                                           inner_bounds.height());
-    mozart::client::ShapeNode inner_node(session_);
+    scenic_lib::ShapeNode inner_node(session_);
     inner_node.SetShape(inner_shape);
     inner_node.SetTranslation(inner_bounds.width() * 0.5f + inner_bounds.left(),
                               inner_bounds.height() * 0.5f + inner_bounds.top(),
@@ -120,16 +120,16 @@ void SceneUpdateContext::CreateFrame(mozart::client::EntityNode& entity_node,
 }
 
 void SceneUpdateContext::SetShapeTextureOrColor(
-    mozart::client::ShapeNode& shape_node,
+    scenic_lib::ShapeNode& shape_node,
     SkColor color,
     SkScalar scale_x,
     SkScalar scale_y,
     const SkRect& paint_bounds,
     std::vector<Layer*> paint_layers) {
-  mozart::client::Image* image = GenerateImageIfNeeded(
+  scenic_lib::Image* image = GenerateImageIfNeeded(
       color, scale_x, scale_y, paint_bounds, std::move(paint_layers));
   if (image != nullptr) {
-    mozart::client::Material material(session_);
+    scenic_lib::Material material(session_);
     material.SetTexture(*image);
     shape_node.SetMaterial(material);
     return;
@@ -138,18 +138,18 @@ void SceneUpdateContext::SetShapeTextureOrColor(
   SetShapeColor(shape_node, color);
 }
 
-void SceneUpdateContext::SetShapeColor(mozart::client::ShapeNode& shape_node,
+void SceneUpdateContext::SetShapeColor(scenic_lib::ShapeNode& shape_node,
                                        SkColor color) {
   if (SkColorGetA(color) == 0)
     return;
 
-  mozart::client::Material material(session_);
+  scenic_lib::Material material(session_);
   material.SetColor(SkColorGetR(color), SkColorGetG(color), SkColorGetB(color),
                     SkColorGetA(color));
   shape_node.SetMaterial(material);
 }
 
-mozart::client::Image* SceneUpdateContext::GenerateImageIfNeeded(
+scenic_lib::Image* SceneUpdateContext::GenerateImageIfNeeded(
     SkColor color,
     SkScalar scale_x,
     SkScalar scale_y,
@@ -227,10 +227,10 @@ SceneUpdateContext::Entity::~Entity() {
 }
 
 SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
-                               mozart::client::Shape& shape,
+                               scenic_lib::Shape& shape,
                                const SkRect& shape_bounds)
     : Entity(context) {
-  mozart::client::ShapeNode shape_node(context.session());
+  scenic_lib::ShapeNode shape_node(context.session());
   shape_node.SetShape(shape);
   shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
                             shape_bounds.height() * 0.5f + shape_bounds.top(),

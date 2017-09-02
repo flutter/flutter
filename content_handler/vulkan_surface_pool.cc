@@ -11,7 +11,7 @@ namespace flutter_runner {
 VulkanSurfacePool::VulkanSurfacePool(vulkan::VulkanProcTable& p_vk,
                                      sk_sp<GrContext> context,
                                      sk_sp<GrVkBackendContext> backend_context,
-                                     mozart::client::Session* mozart_session)
+                                     scenic_lib::Session* mozart_session)
     : vk_(p_vk),
       context_(std::move(context)),
       backend_context_(std::move(backend_context)),

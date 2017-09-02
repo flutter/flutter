@@ -209,7 +209,7 @@ void RuntimeHolder::CreateView(
   input_connection_->SetEventListener(std::move(input_listener));
 
   // Setup the session.
-  fidl::InterfaceHandle<mozart2::SceneManager> scene_manager;
+  fidl::InterfaceHandle<scenic::SceneManager> scene_manager;
   view_manager_->GetSceneManager(scene_manager.NewRequest());
 
   blink::Threads::Gpu()->PostTask(ftl::MakeCopyable([

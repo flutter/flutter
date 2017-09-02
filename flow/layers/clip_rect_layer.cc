@@ -24,7 +24,7 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
   FTL_DCHECK(needs_system_composite());
 
-  mozart::client::Rectangle shape(context.session(),   // session
+  scenic_lib::Rectangle shape(context.session(),   // session
                                   clip_rect_.width(),  //  width
                                   clip_rect_.height()  //  height
                                   );

@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 #include "flutter/content_handler/session_connection.h"
-#include "apps/mozart/lib/scene/session_helpers.h"
+#include "apps/mozart/lib/scenic/fidl_helpers.h"
 
 namespace flutter_runner {
 
-SessionConnection::SessionConnection(mozart2::SceneManagerPtr scene_manager,
+SessionConnection::SessionConnection(scenic::SceneManagerPtr scene_manager,
                                      mx::eventpair import_token)
     : session_(scene_manager.get()),
       root_node_(&session_),
@@ -18,12 +18,11 @@ SessionConnection::SessionConnection(mozart2::SceneManagerPtr scene_manager,
   session_.set_connection_error_handler(
       std::bind(&SessionConnection::OnSessionError, this));
   session_.set_event_handler(std::bind(&SessionConnection::OnSessionEvents,
-                                       this, std::placeholders::_1,
-                                       std::placeholders::_2));
+                                       this, std::placeholders::_1));
 
   root_node_.Bind(std::move(import_token));
-  root_node_.SetEventMask(mozart2::kMetricsEventMask);
-  session_.Present(0, [](mozart2::PresentationInfoPtr info) {});
+  root_node_.SetEventMask(scenic::kMetricsEventMask);
+  session_.Present(0, [](scenic::PresentationInfoPtr info) {});
 
   present_callback_ =
       std::bind(&SessionConnection::OnPresent, this, std::placeholders::_1);
@@ -39,9 +38,8 @@ void SessionConnection::OnSessionError() {
   FTL_CHECK(false) << "Session connection was terminated.";
 }
 
-void SessionConnection::OnSessionEvents(uint64_t presentation_time,
-                                        fidl::Array<mozart2::EventPtr> events) {
-  mozart2::MetricsPtr new_metrics;
+void SessionConnection::OnSessionEvents(fidl::Array<scenic::EventPtr> events) {
+  scenic::MetricsPtr new_metrics;
   for (const auto& event : events) {
     if (event->is_metrics() &&
         event->get_metrics()->node_id == root_node_.id()) {
@@ -69,7 +67,7 @@ void SessionConnection::Present(flow::CompositorContext::ScopedFrame& frame,
   // tasks.
   session_.Present(0,                 // presentation_time. Placeholder for now.
                    present_callback_  // callback
-                   );
+  );
 
   // Execute paint tasks and signal fences.
   auto surfaces_to_submit = scene_update_context_.ExecutePaintTasks(frame);
@@ -82,7 +80,7 @@ void SessionConnection::Present(flow::CompositorContext::ScopedFrame& frame,
   EnqueueClearOps();
 }
 
-void SessionConnection::OnPresent(mozart2::PresentationInfoPtr info) {
+void SessionConnection::OnPresent(scenic::PresentationInfoPtr info) {
   ASSERT_IS_GPU_THREAD;
   auto callback = pending_on_present_callback_;
   pending_on_present_callback_ = nullptr;
@@ -93,7 +91,7 @@ void SessionConnection::EnqueueClearOps() {
   ASSERT_IS_GPU_THREAD;
   // We are going to be sending down a fresh node hierarchy every frame. So just
   // enqueue a detach op on the imported root node.
-  session_.Enqueue(mozart::NewDetachChildrenOp(root_node_.id()));
+  session_.Enqueue(scenic_lib::NewDetachChildrenOp(root_node_.id()));
 }
 
 }  // namespace flutter_runner

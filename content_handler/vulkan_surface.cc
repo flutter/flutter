@@ -14,7 +14,7 @@ namespace flutter_runner {
 VulkanSurface::VulkanSurface(vulkan::VulkanProcTable& p_vk,
                              sk_sp<GrContext> context,
                              sk_sp<GrVkBackendContext> backend_context,
-                             mozart::client::Session* session,
+                             scenic_lib::Session* session,
                              const SkISize& size)
     : vk_(p_vk),
       backend_context_(std::move(backend_context)),
@@ -226,30 +226,30 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
   return true;
 }
 
-bool VulkanSurface::PushSessionImageSetupOps(mozart::client::Session* session,
+bool VulkanSurface::PushSessionImageSetupOps(scenic_lib::Session* session,
                                              mx::vmo exported_vmo) {
   if (sk_surface_ == nullptr) {
     return false;
   }
 
-  mozart::client::Memory memory(session, std::move(exported_vmo),
-                                mozart2::MemoryType::VK_DEVICE_MEMORY);
+  scenic_lib::Memory memory(session, std::move(exported_vmo),
+                                scenic::MemoryType::VK_DEVICE_MEMORY);
 
-  auto image_info = mozart2::ImageInfo::New();
+  auto image_info = scenic::ImageInfo::New();
   image_info->width = sk_surface_->width();
   image_info->height = sk_surface_->height();
   image_info->stride = 4 * sk_surface_->width();
-  image_info->pixel_format = mozart2::ImageInfo::PixelFormat::BGRA_8;
-  image_info->color_space = mozart2::ImageInfo::ColorSpace::SRGB;
-  image_info->tiling = mozart2::ImageInfo::Tiling::LINEAR;
+  image_info->pixel_format = scenic::ImageInfo::PixelFormat::BGRA_8;
+  image_info->color_space = scenic::ImageInfo::ColorSpace::SRGB;
+  image_info->tiling = scenic::ImageInfo::Tiling::LINEAR;
 
-  session_image_ = std::make_unique<mozart::client::Image>(
+  session_image_ = std::make_unique<scenic_lib::Image>(
       memory, 0 /* memory offset */, std::move(image_info));
 
   return session_image_ != nullptr;
 }
 
-mozart::client::Image* VulkanSurface::GetImage() {
+scenic_lib::Image* VulkanSurface::GetImage() {
   ASSERT_IS_GPU_THREAD;
   if (!valid_) {
     return 0;

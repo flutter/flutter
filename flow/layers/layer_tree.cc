@@ -40,7 +40,7 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
 
 #if defined(OS_FUCHSIA)
 void LayerTree::UpdateScene(SceneUpdateContext& context,
-                            mozart::client::ContainerNode& container) {
+                            scenic_lib::ContainerNode& container) {
   TRACE_EVENT0("flutter", "LayerTree::UpdateScene");
 
   SceneUpdateContext::Transform transform(context, 1.f / device_pixel_ratio_,

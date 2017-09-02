@@ -5,8 +5,8 @@
 #ifndef FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
 #define FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
 
-#include "apps/mozart/lib/scene/client/resources.h"
-#include "apps/mozart/lib/scene/client/session.h"
+#include "apps/mozart/lib/scenic/client/resources.h"
+#include "apps/mozart/lib/scenic/client/session.h"
 #include "flutter/content_handler/vulkan_surface.h"
 #include "flutter/content_handler/vulkan_surface_pool.h"
 #include "flutter/flow/scene_update_context.h"
@@ -21,7 +21,7 @@ namespace flutter_runner {
 
 class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer {
  public:
-  VulkanSurfaceProducer(mozart::client::Session* mozart_session);
+  VulkanSurfaceProducer(scenic_lib::Session* mozart_session);
 
   ~VulkanSurfaceProducer();
 
@@ -56,7 +56,7 @@ class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer {
   std::unique_ptr<VulkanSurfacePool> surface_pool_;
   bool valid_ = false;
 
-  bool Initialize(mozart::client::Session* mozart_session);
+  bool Initialize(scenic_lib::Session* mozart_session);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(VulkanSurfaceProducer);
 };

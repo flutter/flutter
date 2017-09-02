@@ -46,7 +46,7 @@ template("flutter_content_handler") {
              "//application/lib/svc",
              "//apps/icu_data/lib",
              "//apps/mozart/lib/flutter/sdk_ext",
-             "//apps/mozart/lib/scene:client",
+             "//apps/mozart/lib/scenic:client",
              "//apps/mozart/services/input",
              "//apps/mozart/services/views",
              "//apps/tracing/lib/trace:provider",

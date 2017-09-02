@@ -54,13 +54,13 @@ bool VulkanRasterizer::IsValid() const {
 }
 
 void VulkanRasterizer::SetScene(
-    fidl::InterfaceHandle<mozart2::SceneManager> scene_manager,
+    fidl::InterfaceHandle<scenic::SceneManager> scene_manager,
     mx::eventpair import_token,
     ftl::Closure metrics_changed_callback) {
   ASSERT_IS_GPU_THREAD;
   FTL_DCHECK(valid_ && !session_connection_);
   session_connection_ = std::make_unique<SessionConnection>(
-      mozart2::SceneManagerPtr::Create(std::move(scene_manager)),
+      scenic::SceneManagerPtr::Create(std::move(scene_manager)),
       std::move(import_token));
   session_connection_->set_metrics_changed_callback(
       std::move(metrics_changed_callback));

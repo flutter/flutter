@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "apps/mozart/services/scene/session.fidl.h"
+#include "apps/mozart/services/scenic/session.fidl.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "lib/ftl/functional/closure.h"
 #include "lib/ftl/macros.h"
@@ -22,7 +22,7 @@ class Rasterizer {
   static std::unique_ptr<Rasterizer> Create();
 
   virtual void SetScene(
-      fidl::InterfaceHandle<mozart2::SceneManager> scene_manager,
+      fidl::InterfaceHandle<scenic::SceneManager> scene_manager,
       mx::eventpair import_token,
       ftl::Closure metrics_changed_callback) = 0;
 

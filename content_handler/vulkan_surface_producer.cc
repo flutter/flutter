@@ -13,7 +13,7 @@
 namespace flutter_runner {
 
 VulkanSurfaceProducer::VulkanSurfaceProducer(
-    mozart::client::Session* mozart_session) {
+    scenic_lib::Session* mozart_session) {
   valid_ = Initialize(mozart_session);
 
   if (valid_) {
@@ -28,7 +28,7 @@ VulkanSurfaceProducer::VulkanSurfaceProducer(
 VulkanSurfaceProducer::~VulkanSurfaceProducer() = default;
 
 bool VulkanSurfaceProducer::Initialize(
-    mozart::client::Session* mozart_session) {
+    scenic_lib::Session* mozart_session) {
   vk_ = ftl::MakeRefCounted<vulkan::VulkanProcTable>();
 
   std::vector<std::string> extensions = {VK_KHR_SURFACE_EXTENSION_NAME};

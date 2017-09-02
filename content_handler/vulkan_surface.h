@@ -5,7 +5,7 @@
 #pragma once
 
 #include <memory>
-#include "apps/mozart/lib/scene/client/resources.h"
+#include "apps/mozart/lib/scenic/client/resources.h"
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
@@ -25,7 +25,7 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   VulkanSurface(vulkan::VulkanProcTable& p_vk,
                 sk_sp<GrContext> context,
                 sk_sp<GrVkBackendContext> backend_context,
-                mozart::client::Session* session,
+                scenic_lib::Session* session,
                 const SkISize& size);
 
   ~VulkanSurface() override;
@@ -44,7 +44,7 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
       std::function<void(void)> on_writes_committed) override;
 
   // |flow::SceneUpdateContext::SurfaceProducerSurface|
-  mozart::client::Image* GetImage() override;
+  scenic_lib::Image* GetImage() override;
 
   // |flow::SceneUpdateContext::SurfaceProducerSurface|
   sk_sp<SkSurface> GetSkiaSurface() const override;
@@ -52,11 +52,11 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
  private:
   vulkan::VulkanProcTable& vk_;
   sk_sp<GrVkBackendContext> backend_context_;
-  mozart::client::Session* session_;
+  scenic_lib::Session* session_;
   vulkan::VulkanHandle<VkImage> vk_image_;
   vulkan::VulkanHandle<VkDeviceMemory> vk_memory_;
   sk_sp<SkSurface> sk_surface_;
-  std::unique_ptr<mozart::client::Image> session_image_;
+  std::unique_ptr<scenic_lib::Image> session_image_;
   mx::event acquire_event_;
   mx::event release_event_;
   mtl::MessageLoop::HandlerKey event_handler_key_ = 0;
@@ -80,7 +80,7 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
 
   bool CreateFences();
 
-  bool PushSessionImageSetupOps(mozart::client::Session* session,
+  bool PushSessionImageSetupOps(scenic_lib::Session* session,
                                 mx::vmo exported_vmo);
 
   void Reset();

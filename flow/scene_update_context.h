@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "apps/mozart/lib/scene/client/resources.h"
+#include "apps/mozart/lib/scenic/client/resources.h"
 #include "flutter/flow/compositor_context.h"
 #include "lib/ftl/build_config.h"
 #include "lib/ftl/logging.h"
@@ -39,7 +39,7 @@ class SceneUpdateContext {
     virtual void SignalWritesFinished(
         std::function<void(void)> on_writes_committed) = 0;
 
-    virtual mozart::client::Image* GetImage() = 0;
+    virtual scenic_lib::Image* GetImage() = 0;
 
     virtual sk_sp<SkSurface> GetSkiaSurface() const = 0;
   };
@@ -59,19 +59,19 @@ class SceneUpdateContext {
     ~Entity();
 
     SceneUpdateContext& context() { return context_; }
-    mozart::client::EntityNode& entity_node() { return entity_node_; }
+    scenic_lib::EntityNode& entity_node() { return entity_node_; }
 
    private:
     SceneUpdateContext& context_;
     Entity* const previous_entity_;
 
-    mozart::client::EntityNode entity_node_;
+    scenic_lib::EntityNode entity_node_;
   };
 
   class Clip : public Entity {
    public:
     Clip(SceneUpdateContext& context,
-         mozart::client::Shape& shape,
+         scenic_lib::Shape& shape,
          const SkRect& shape_bounds);
     ~Clip();
   };
@@ -108,15 +108,15 @@ class SceneUpdateContext {
     SkRect paint_bounds_;
   };
 
-  SceneUpdateContext(mozart::client::Session* session,
+  SceneUpdateContext(scenic_lib::Session* session,
                      SurfaceProducer* surface_producer);
 
   ~SceneUpdateContext();
 
-  mozart::client::Session* session() { return session_; }
+  scenic_lib::Session* session() { return session_; }
 
   bool has_metrics() const { return !!metrics_; }
-  void set_metrics(mozart2::MetricsPtr metrics) {
+  void set_metrics(scenic::MetricsPtr metrics) {
     metrics_ = std::move(metrics);
   }
 
@@ -153,19 +153,19 @@ class SceneUpdateContext {
     std::vector<Layer*> layers;
   };
 
-  void CreateFrame(mozart::client::EntityNode& entity_node,
+  void CreateFrame(scenic_lib::EntityNode& entity_node,
                    const SkRRect& rrect,
                    SkColor color,
                    const SkRect& paint_bounds,
                    std::vector<Layer*> paint_layers);
-  void SetShapeTextureOrColor(mozart::client::ShapeNode& shape_node,
+  void SetShapeTextureOrColor(scenic_lib::ShapeNode& shape_node,
                               SkColor color,
                               SkScalar scale_x,
                               SkScalar scale_y,
                               const SkRect& paint_bounds,
                               std::vector<Layer*> paint_layers);
-  void SetShapeColor(mozart::client::ShapeNode& shape_node, SkColor color);
-  mozart::client::Image* GenerateImageIfNeeded(
+  void SetShapeColor(scenic_lib::ShapeNode& shape_node, SkColor color);
+  scenic_lib::Image* GenerateImageIfNeeded(
       SkColor color,
       SkScalar scale_x,
       SkScalar scale_y,
@@ -176,10 +176,10 @@ class SceneUpdateContext {
   float top_scale_x_ = 1.f;
   float top_scale_y_ = 1.f;
 
-  mozart::client::Session* const session_;
+  scenic_lib::Session* const session_;
   SurfaceProducer* const surface_producer_;
 
-  mozart2::MetricsPtr metrics_;
+  scenic::MetricsPtr metrics_;
 
   std::vector<PaintTask> paint_tasks_;
 

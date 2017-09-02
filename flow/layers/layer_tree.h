@@ -36,7 +36,7 @@ class LayerTree {
   }
 
   void UpdateScene(SceneUpdateContext& context,
-                   mozart::client::ContainerNode& container);
+                   scenic_lib::ContainerNode& container);
 #endif
 
   void Paint(CompositorContext::ScopedFrame& frame);
