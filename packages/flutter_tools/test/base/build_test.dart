@@ -404,6 +404,7 @@ void main() {
 
       await fs.file('main.dart').writeAsString('void main() {}');
       await fs.file('other.dart').writeAsString('void main() { print("Kanpai ima kimi wa jinsei no ookina ookina butai ni tachi"); }');
+      await fs.file('output.snapshot').create();
       await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
       await fs.file('output.snapshot.d.checksums').writeAsString(JSON.encode(<String, dynamic>{
         'version': '$kVersion',
