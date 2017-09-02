@@ -32,6 +32,3 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lib.fidl.dart/bindings.dart';
 import 'package:lib.fidl.dart/core.dart';
-import 'package:lib.widgets/model.dart';
-import 'package:lib.widgets/modular.dart';
-import 'package:lib.widgets/widgets.dart';
