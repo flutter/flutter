@@ -6,7 +6,7 @@
 
 #if defined(OS_FUCHSIA)
 
-#include "apps/mozart/lib/scene/session_helpers.h"  // nogncheck
+#include "apps/mozart/lib/scenic/fidl_helpers.h"  // nogncheck
 
 #endif  // defined(OS_FUCHSIA)
 
@@ -33,7 +33,7 @@ void ClipPathLayer::UpdateScene(SceneUpdateContext& context) {
   // TODO(MZ-140): Must be able to specify paths as shapes to nodes.
   //               Treating the shape as a rectangle for now.
   auto bounds = clip_path_.getBounds();
-  mozart::client::Rectangle shape(context.session(),  // session
+  scenic_lib::Rectangle shape(context.session(),  // session
                                   bounds.width(),     //  width
                                   bounds.height()     //  height
                                   );

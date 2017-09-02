@@ -9,7 +9,7 @@
 
 #include <mx/eventpair.h>
 
-#include "apps/mozart/lib/scene/client/resources.h"
+#include "apps/mozart/lib/scenic/client/resources.h"
 #include "flutter/flow/scene_update_context.h"
 #include "lib/fidl/dart/sdk_ext/src/handle.h"
 #include "lib/ftl/build_config.h"
@@ -31,7 +31,7 @@ class ExportNodeHolder : public ftl::RefCountedThreadSafe<ExportNodeHolder> {
 
   // Calls Bind() on the wrapped ExportNode.
   void Bind(SceneUpdateContext& context,
-            mozart::client::ContainerNode& container,
+            scenic_lib::ContainerNode& container,
             const SkPoint& offset,
             bool hit_testable);
 
@@ -57,7 +57,7 @@ class ExportNode {
   // Binds the export token to the entity node and adds it as a child of
   // the specified container. Must be called on the Rasterizer thread.
   void Bind(SceneUpdateContext& context,
-            mozart::client::ContainerNode& container,
+            scenic_lib::ContainerNode& container,
             const SkPoint& offset,
             bool hit_testable);
 
@@ -72,7 +72,7 @@ class ExportNode {
   // Member variables can only be read or modified on Rasterizer thread.
   SceneUpdateContext* scene_update_context_ = nullptr;
   mx::eventpair export_token_;
-  std::unique_ptr<mozart::client::EntityNode> node_;
+  std::unique_ptr<scenic_lib::EntityNode> node_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ExportNode);
 };
