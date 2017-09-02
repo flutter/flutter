@@ -232,7 +232,7 @@ abstract class Finder {
   /// Whether this finder skips nodes that are offstage.
   ///
   /// If this is true, then the elements are walked using
-  /// [Element.visitChildrenForSemantics]. This skips offstage children of
+  /// [Element.debugVisitOnstageChildren]. This skips offstage children of
   /// [Offstage] widgets, as well as children of inactive [Route]s.
   final bool skipOffstage;
 

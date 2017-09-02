@@ -49,7 +49,9 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _painter ??= new _ScrollbarPainter(this);
-    _painter.color = Theme.of(context).highlightColor;
+    _painter
+      ..color = Theme.of(context).highlightColor
+      ..textDirection = Directionality.of(context);
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -102,9 +104,19 @@ class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Color _color;
   set color(Color value) {
     assert(value != null);
-    if (color == value)
+    if (_color == value)
       return;
     _color = value;
+    notifyListeners();
+  }
+
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
     notifyListeners();
   }
 
@@ -142,8 +154,19 @@ class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   Paint get _paint => new Paint()..color = color.withOpacity(_opacity.value);
 
+  double _getThumbX(Size size) {
+    assert(textDirection != null);
+    switch (textDirection) {
+      case TextDirection.rtl:
+        return 0.0;
+      case TextDirection.ltr:
+        return size.width - _kThumbGirth;
+    }
+    return null;
+  }
+
   void _paintVerticalThumb(Canvas canvas, Size size, double thumbOffset, double thumbExtent) {
-    final Offset thumbOrigin = new Offset(size.width - _kThumbGirth, thumbOffset);
+    final Offset thumbOrigin = new Offset(_getThumbX(size), thumbOffset);
     final Size thumbSize = new Size(_kThumbGirth, thumbExtent);
     canvas.drawRect(thumbOrigin & thumbSize, _paint);
   }

@@ -264,7 +264,7 @@ class ScrollController extends ChangeNotifier {
       description.add('no clients');
     } else if (_positions.length == 1) {
       // Don't actually list the client itself, since its toString may refer to us.
-      description.add('one client, offset ${offset.toStringAsFixed(1)}');
+      description.add('one client, offset ${offset?.toStringAsFixed(1)}');
     } else {
       description.add('${_positions.length} clients');
     }

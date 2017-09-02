@@ -94,6 +94,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     node.addTag(RenderSemanticsGestureHandler.useTwoPaneSemantics);
   }
 
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    for (RenderSliver sliver in childrenInPaintOrder) {
+      if (sliver.geometry.paintExtent != 0 &&
+          sliver.constraints.overlap < sliver.geometry.paintOrigin + sliver.geometry.paintExtent)
+        visitor(sliver);
+    }
+  }
+
   /// The direction in which the [SliverConstraints.scrollOffset] increases.
   ///
   /// For example, if the [axisDirection] is [AxisDirection.down], a scroll
@@ -394,7 +403,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       final GrowthDirection growthDirection = pivotParent.constraints.growthDirection;
       switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
         case AxisDirection.up:
-          leadingScrollOffset = pivot.size.height - bounds.bottom;
+          double offset;
+          switch (growthDirection) {
+            case GrowthDirection.forward:
+              offset = bounds.bottom;
+              break;
+            case GrowthDirection.reverse:
+              offset = bounds.top;
+              break;
+          }
+          leadingScrollOffset = pivot.size.height - offset;
           targetMainAxisExtent = bounds.height;
           break;
         case AxisDirection.right:
@@ -406,7 +424,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
           targetMainAxisExtent = bounds.height;
           break;
         case AxisDirection.left:
-          leadingScrollOffset = pivot.size.width - bounds.right;
+          double offset;
+          switch (growthDirection) {
+            case GrowthDirection.forward:
+              offset = bounds.right;
+              break;
+            case GrowthDirection.reverse:
+              offset = bounds.left;
+              break;
+          }
+          leadingScrollOffset = pivot.size.width - offset;
           targetMainAxisExtent = bounds.width;
           break;
       }

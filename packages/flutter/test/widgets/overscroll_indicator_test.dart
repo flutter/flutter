@@ -180,15 +180,16 @@ void main() {
   });
 
   testWidgets('Overscroll horizontally', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new CustomScrollView(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new CustomScrollView(
         scrollDirection: Axis.horizontal,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: <Widget>[
           const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
         ],
       ),
-    );
+    ));
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()..saveRestore());
@@ -202,8 +203,9 @@ void main() {
   });
 
   testWidgets('Nested overscrolls do not throw exceptions', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      new PageView(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new PageView(
         children: <Widget>[
           new ListView(
             children: <Widget>[
@@ -216,7 +218,7 @@ void main() {
           ),
         ],
       ),
-    );
+    ));
 
     await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 2000.0));
     await tester.pumpAndSettle();
@@ -225,8 +227,9 @@ void main() {
   testWidgets('Changing settings', (WidgetTester tester) async {
     RenderObject painter;
 
-    await tester.pumpWidget(
-      new ScrollConfiguration(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ScrollConfiguration(
         behavior: new TestScrollBehavior1(),
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
@@ -237,15 +240,16 @@ void main() {
           ],
         ),
       ),
-    );
+    ));
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
     expect(painter, isNot(paints..circle()..circle()));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
-    await tester.pumpWidget(
-      new ScrollConfiguration(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ScrollConfiguration(
         behavior: new TestScrollBehavior2(),
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
@@ -255,7 +259,7 @@ void main() {
           ],
         ),
       ),
-    );
+    ));
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A0000FF))..saveRestore());

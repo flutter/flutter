@@ -343,7 +343,6 @@ class AndroidDevice extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
@@ -361,7 +360,6 @@ class AndroidDevice extends Device {
       await buildApk(
           target: mainPath,
           buildInfo: debuggingOptions.buildInfo,
-          kernelPath: kernelPath,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.

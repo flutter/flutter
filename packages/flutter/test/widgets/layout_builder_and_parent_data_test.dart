@@ -29,6 +29,7 @@ class SizeChangerState extends State<SizeChanger> {
   @override
   Widget build(BuildContext context) {
     return new Row(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new SizedBox(
           height: _flag ? 50.0 : 100.0,

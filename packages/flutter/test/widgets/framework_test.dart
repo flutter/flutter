@@ -486,7 +486,7 @@ void main() {
     expect(
       element.toStringDeep(),
       equalsIgnoringHashCodes(
-        'Column-[GlobalKey#00000](renderObject: RenderFlex#00000)\n'
+        'Column-[GlobalKey#00000](direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#00000)\n'
         '├Container\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
@@ -506,4 +506,42 @@ void main() {
       ),
     );
   });
+
+  testWidgets('Element diagnostics with null child', (WidgetTester tester) async {
+    await tester.pumpWidget(new NullChildTest());
+    final NullChildElement test = tester.element<NullChildElement>(find.byType(NullChildTest));
+    test.includeChild = true;
+    expect(
+      tester.binding.renderViewElement.toStringDeep(),
+      equalsIgnoringHashCodes(
+        '[root](renderObject: RenderView#4a0f0)\n'
+        '└NullChildTest(dirty)\n'
+        ' └<null child>\n',
+      ),
+    );
+    test.includeChild = false;
+  });
+}
+
+class NullChildTest extends Widget {
+  @override
+  Element createElement() => new NullChildElement(this);
+}
+
+class NullChildElement extends Element {
+  NullChildElement(Widget widget) : super(widget);
+
+  bool includeChild = false;
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    if (includeChild)
+      visitor(null);
+  }
+
+  @override
+  void forgetChild(Element child) { }
+
+  @override
+  void performRebuild() { }
 }

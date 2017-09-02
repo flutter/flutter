@@ -37,12 +37,14 @@ enum _ScaffoldSlot {
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
-    this.padding,
-    this.statusBarHeight,
+    @required this.padding,
+    @required this.statusBarHeight,
+    @required this.textDirection,
   });
 
   final EdgeInsets padding;
   final double statusBarHeight;
+  final TextDirection textDirection;
 
   @override
   void performLayout(Size size) {
@@ -111,7 +113,16 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
     if (hasChild(_ScaffoldSlot.floatingActionButton)) {
       final Size fabSize = layoutChild(_ScaffoldSlot.floatingActionButton, looseConstraints);
-      final double fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
+      double fabX;
+      assert(textDirection != null);
+      switch (textDirection) {
+        case TextDirection.rtl:
+          fabX = _kFloatingActionButtonMargin;
+          break;
+        case TextDirection.ltr:
+          fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
+          break;
+      }
       double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
       if (snackBarSize.height > 0.0)
         fabY = math.min(fabY, contentBottom - snackBarSize.height - fabSize.height - _kFloatingActionButtonMargin);
@@ -133,8 +144,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
-    return padding != oldDelegate.padding
-        || statusBarHeight != oldDelegate.statusBarHeight;
+    return oldDelegate.padding != padding
+        || oldDelegate.statusBarHeight != statusBarHeight
+        || oldDelegate.textDirection != textDirection;
   }
 }
 
@@ -605,14 +617,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   }
 
   /// Removes the current [SnackBar] by running its normal exit animation.
+  ///
+  /// The closed completer is called after the animation is complete.
   void hideCurrentSnackBar({ SnackBarClosedReason reason: SnackBarClosedReason.hide }) {
     assert(reason != null);
     if (_snackBars.isEmpty || _snackBarController.status == AnimationStatus.dismissed)
       return;
     final Completer<SnackBarClosedReason> completer = _snackBars.first._completer;
-    if (!completer.isCompleted)
-      completer.complete(reason);
-    _snackBarController.reverse();
+    _snackBarController.reverse().then<Null>((Null _) {
+      assert(mounted);
+      if (!completer.isCompleted)
+        completer.complete(reason);
+    });
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
   }
@@ -864,6 +880,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             delegate: new _ScaffoldLayout(
               padding: padding,
               statusBarHeight: padding.top,
+              textDirection: Directionality.of(context),
             ),
           ),
         ),

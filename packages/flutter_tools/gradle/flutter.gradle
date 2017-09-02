@@ -222,9 +222,9 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
-        File kernel
-        if (project.hasProperty('kernel')) {
-            kernel = project.file(project.property('kernel'))
+        Boolean previewDart2Value = false
+        if (project.hasProperty('preview-dart-2')) {
+            previewDart2Value = project.property('preview-dart-2')
         }
 
         project.android.applicationVariants.all { variant ->
@@ -243,7 +243,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
-                kernelFile kernel
+                previewDart2 previewDart2Value
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -256,7 +256,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
-                kernelFile kernel
+                previewDart2 previewDart2Value
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -285,8 +285,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String localEngineSrcPath
     @Input
     String targetPath
-    @Optional @InputFile
-    File kernelFile
+    @Optional
+    Boolean previewDart2
     File sourceDir
     File intermediateDir
 
@@ -319,6 +319,9 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--target", targetPath
                 args "--target-platform", "android-arm"
                 args "--output-dir", "${intermediateDir}"
+                if (previewDart2) {
+                    args "--preview-dart-2"
+                }
                 args "--${buildMode}"
             }
         }
@@ -333,15 +336,17 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "build", "flx"
             args "--suppress-analytics"
             args "--target", targetPath
-            if (kernelFile != null) {
-                args "--kernel", kernelFile.absolutePath
+            if (previewDart2) {
+                args "--preview-dart-2"
             }
             args "--output-file", "${intermediateDir}/app.flx"
             if (buildMode != "debug") {
                 args "--precompiled"
             } else {
-                args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
-                args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
+                if (!previewDart2) {
+                    args "--snapshot", "${intermediateDir}/snapshot_blob.bin"
+                    args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
+                }
             }
             args "--working-dir", "${intermediateDir}/flx"
         }

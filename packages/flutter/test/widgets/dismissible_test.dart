@@ -42,14 +42,17 @@ Widget buildTest({ double startToEndThreshold }) {
         );
       }
 
-      return new Container(
-        padding: const EdgeInsets.all(10.0),
-        child: new ListView(
-          scrollDirection: scrollDirection,
-          itemExtent: itemExtent,
-          children: <int>[0, 1, 2, 3, 4]
-            .where((int i) => !dismissedItems.contains(i))
-            .map(buildDismissibleItem).toList(),
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Container(
+          padding: const EdgeInsets.all(10.0),
+          child: new ListView(
+            scrollDirection: scrollDirection,
+            itemExtent: itemExtent,
+            children: <int>[0, 1, 2, 3, 4]
+              .where((int i) => !dismissedItems.contains(i))
+              .map(buildDismissibleItem).toList(),
+          ),
         ),
       );
     },

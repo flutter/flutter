@@ -132,7 +132,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   }
 
   // A cache of VMService connections.
-  HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
+  final HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
 
   VMService _getVMService(int port) {
     if (!_vmServiceCache.containsKey(port)) {
@@ -172,11 +172,12 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
   // Find ports where there is a view isolate with the given name
   Future<List<int>> _filterPorts(List<int> ports, String viewFilter) async {
+    printTrace('Looing for view $viewFilter');
     final List<int> result = <int>[];
     for (FlutterView v in await _getViews(ports)) {
       final Uri addr = v.owner.vmService.httpAddress;
       printTrace('At $addr, found view: ${v.uiIsolate.name}');
-      if (v.uiIsolate.name.indexOf(viewFilter) == 0)
+      if (v.uiIsolate.name.contains(viewFilter))
         result.add(addr.port);
     }
     return result;

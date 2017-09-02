@@ -21,73 +21,76 @@ class _CustomPhysics extends ClampingScrollPhysics {
 }
 
 Widget buildTest({ ScrollController controller, String title:'TTTTTTTT' }) {
-  return new MediaQuery(
-    data: const MediaQueryData(),
-    child: new Scaffold(
-      body: new DefaultTabController(
-        length: 4,
-        child: new NestedScrollView(
-          controller: controller,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-            return <Widget>[
-              new SliverAppBar(
-                title: new Text(title),
-                pinned: true,
-                expandedHeight: 200.0,
-                forceElevated: innerBoxIsScrolled,
-                bottom: new TabBar(
-                  tabs: const <Tab>[
-                    const Tab(text: 'AA'),
-                    const Tab(text: 'BB'),
-                    const Tab(text: 'CC'),
-                    const Tab(text: 'DD'),
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new MediaQuery(
+      data: const MediaQueryData(),
+      child: new Scaffold(
+        body: new DefaultTabController(
+          length: 4,
+          child: new NestedScrollView(
+            controller: controller,
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return <Widget>[
+                new SliverAppBar(
+                  title: new Text(title),
+                  pinned: true,
+                  expandedHeight: 200.0,
+                  forceElevated: innerBoxIsScrolled,
+                  bottom: new TabBar(
+                    tabs: const <Tab>[
+                      const Tab(text: 'AA'),
+                      const Tab(text: 'BB'),
+                      const Tab(text: 'CC'),
+                      const Tab(text: 'DD'),
+                    ],
+                  ),
+                ),
+              ];
+            },
+            body: new TabBarView(
+              children: <Widget>[
+                new ListView(
+                  children: <Widget>[
+                    new Container(
+                      height: 300.0,
+                      child: const Text('aaa1'),
+                    ),
+                    new Container(
+                      height: 200.0,
+                      child: const Text('aaa2'),
+                    ),
+                    new Container(
+                      height: 100.0,
+                      child: const Text('aaa3'),
+                    ),
+                    new Container(
+                      height: 50.0,
+                      child: const Text('aaa4'),
+                    ),
                   ],
                 ),
-              ),
-            ];
-          },
-          body: new TabBarView(
-            children: <Widget>[
-              new ListView(
-                children: <Widget>[
-                  new Container(
-                    height: 300.0,
-                    child: const Text('aaa1'),
-                  ),
-                  new Container(
-                    height: 200.0,
-                    child: const Text('aaa2'),
-                  ),
-                  new Container(
-                    height: 100.0,
-                    child: const Text('aaa3'),
-                  ),
-                  new Container(
-                    height: 50.0,
-                    child: const Text('aaa4'),
-                  ),
-                ],
-              ),
-              new ListView(
-                children: <Widget>[
-                  new Container(
-                    height: 100.0,
-                    child: const Text('bbb1'),
-                  ),
-                ],
-              ),
-              new Container(
-                child: const Center(child: const Text('ccc1')),
-              ),
-              new ListView(
-                children: <Widget>[
-                  new Container(
-                    height: 10000.0,
-                    child: const Text('ddd1'),
-                  ),
-                ],
-              ),
-            ],
+                new ListView(
+                  children: <Widget>[
+                    new Container(
+                      height: 100.0,
+                      child: const Text('bbb1'),
+                    ),
+                  ],
+                ),
+                new Container(
+                  child: const Center(child: const Text('ccc1')),
+                ),
+                new ListView(
+                  children: <Widget>[
+                    new Container(
+                      height: 10000.0,
+                      child: const Text('ddd1'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -260,15 +263,16 @@ void main() {
     expect(controller.mostRecentlyUpdatedPosition, isNull);
     expect(controller.initialScrollOffset, 0.0);
 
-    await tester.pumpWidget(
-      new PageView(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new PageView(
         children: <Widget>[
           buildTest(controller: controller, title: 'Page0'),
           buildTest(controller: controller, title: 'Page1'),
           buildTest(controller: controller, title: 'Page2'),
         ],
       ),
-    );
+    ));
 
     // Initially Page0 is visible and  Page0's appbar is fully expanded (height = 200.0).
     expect(find.text('Page0'), findsOneWidget);
@@ -303,20 +307,24 @@ void main() {
   });
 
   testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(),
-      child: new NestedScrollView(
-        physics: const _CustomPhysics(),
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            const SliverAppBar(
-              floating: true,
-              title: const Text('AA'),
-            ),
-          ];
-        },
-        body: new Container(),
-    )));
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
+        child: new NestedScrollView(
+          physics: const _CustomPhysics(),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              const SliverAppBar(
+                floating: true,
+                title: const Text('AA'),
+              ),
+            ];
+          },
+          body: new Container(),
+        ),
+      ),
+    ));
     expect(find.text('AA'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 500));
     final Offset point1 = tester.getCenter(find.text('AA'));

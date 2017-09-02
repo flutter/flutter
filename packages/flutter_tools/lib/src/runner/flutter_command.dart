@@ -143,10 +143,13 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   BuildInfo getBuildInfo() {
-    if (argParser.options.containsKey('flavor'))
-      return new BuildInfo(getBuildMode(), argResults['flavor']);
-    else
-      return new BuildInfo(getBuildMode(), null);
+    return new BuildInfo(getBuildMode(),
+      argParser.options.containsKey('flavor')
+        ? argResults['flavor']
+        : null,
+      previewDart2: argParser.options.containsKey('preview-dart-2')
+        ? argResults['preview-dart-2']
+        : false);
   }
 
   void setupApplicationPackages() {

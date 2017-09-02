@@ -8,14 +8,31 @@ import 'package:flutter/material.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Viewport basic test', (WidgetTester tester) async {
-    await tester.pumpWidget(new Scrollbar(
-      child: new SingleChildScrollView(
-        child: const SizedBox(width: 4000.0, height: 4000.0),
+  testWidgets('Viewport basic test (LTR)', (WidgetTester tester) async {
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Scrollbar(
+        child: new SingleChildScrollView(
+          child: const SizedBox(width: 4000.0, height: 4000.0),
+        ),
       ),
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
-    expect(find.byType(Scrollbar), paints..rect());
+    expect(find.byType(Scrollbar), paints..rect(rect: new Rect.fromLTRB(800.0 - 6.0, 1.5, 800.0, 91.5)));
+  });
+
+  testWidgets('Viewport basic test (RTL)', (WidgetTester tester) async {
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.rtl,
+      child: new Scrollbar(
+        child: new SingleChildScrollView(
+          child: const SizedBox(width: 4000.0, height: 4000.0),
+        ),
+      ),
+    ));
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+    await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
+    expect(find.byType(Scrollbar), paints..rect(rect: new Rect.fromLTRB(0.0, 1.5, 6.0, 91.5)));
   });
 }

@@ -470,7 +470,7 @@ class _TheatreElement extends RenderObjectElement {
   }
 
   @override
-  void visitChildrenForSemantics(ElementVisitor visitor) {
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
     if (_onstage != null)
       visitor(_onstage);
   }

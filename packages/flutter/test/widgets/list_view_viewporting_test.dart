@@ -117,13 +117,16 @@ void main() {
     };
 
     Widget builder() {
-      return new FlipWidget(
-        left: new ListView.builder(
-          scrollDirection: Axis.horizontal,
-          controller: new ScrollController(initialScrollOffset: 300.0),
-          itemBuilder: itemBuilder,
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FlipWidget(
+          left: new ListView.builder(
+            scrollDirection: Axis.horizontal,
+            controller: new ScrollController(initialScrollOffset: 300.0),
+            itemBuilder: itemBuilder,
+          ),
+          right: const Text('Not Today'),
         ),
-        right: const Text('Not Today'),
       );
     }
 

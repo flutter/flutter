@@ -10,7 +10,7 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor);
+  const BuildInfo(this.mode, this.flavor, { this.previewDart2 });
 
   final BuildMode mode;
   /// Represents a custom Android product flavor or an Xcode scheme, null for
@@ -20,6 +20,9 @@ class BuildInfo {
   /// `assemblePaidRelease`), and the Xcode build configuration will be
   /// Mode-Flavor (e.g. Release-Paid).
   final String flavor;
+
+  // Whether build should be done using Dart2 Frontend parser.
+  final bool previewDart2;
 
   static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);

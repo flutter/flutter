@@ -7,10 +7,19 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../services/mocks_for_image_cache.dart';
 
+Future<Null> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
+  await tester.pumpWidget(
+    new Directionality(
+      textDirection: TextDirection.ltr,
+      child: widget,
+    ),
+  );
+}
+
 void main() {
   testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
     try {
-      await tester.pumpWidget(new CupertinoTabBar(
+      await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
         items: <BottomNavigationBarItem>[
           const BottomNavigationBarItem(
             icon: const ImageIcon(const TestImageProvider(24, 24)),
@@ -19,13 +28,14 @@ void main() {
         ],
       ));
       fail('Should not be possible to create a tab bar with just one item');
-    } on AssertionError {
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('items.length'));
       // Exception expected.
     }
   });
 
   testWidgets('Active and inactive colors', (WidgetTester tester) async {
-    await tester.pumpWidget(new CupertinoTabBar(
+    await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         const BottomNavigationBarItem(
           icon: const ImageIcon(const TestImageProvider(24, 24)),
@@ -55,7 +65,7 @@ void main() {
   });
 
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
-    await tester.pumpWidget(new CupertinoTabBar(
+    await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         const BottomNavigationBarItem(
           icon: const ImageIcon(const TestImageProvider(24, 24)),
@@ -70,7 +80,7 @@ void main() {
 
     expect(find.byType(BackdropFilter), findsOneWidget);
 
-    await tester.pumpWidget(new CupertinoTabBar(
+    await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         const BottomNavigationBarItem(
           icon: const ImageIcon(const TestImageProvider(24, 24)),
@@ -90,7 +100,7 @@ void main() {
   testWidgets('Tap callback', (WidgetTester tester) async {
     int callbackTab;
 
-    await tester.pumpWidget(new CupertinoTabBar(
+      await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         const BottomNavigationBarItem(
           icon: const ImageIcon(const TestImageProvider(24, 24)),

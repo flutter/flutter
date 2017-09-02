@@ -255,6 +255,8 @@ class FlutterEngine extends CachedArtifact {
   List<List<String>> _getBinaryDirs() {
     final List<List<String>> binaryDirs = <List<String>>[];
 
+    binaryDirs.add(<String>['common', 'flutter_patched_sdk.zip']);
+
     if (cache.includeAllPlatforms)
       binaryDirs
         ..addAll(_osxBinaryDirs)
@@ -281,18 +283,21 @@ class FlutterEngine extends CachedArtifact {
 
   List<List<String>> get _osxBinaryDirs => <List<String>>[
     <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+    <String>['darwin-x64', 'dart-sdk-darwin-x64.zip'],
     <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
     <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
   ];
 
   List<List<String>> get _linuxBinaryDirs => <List<String>>[
     <String>['linux-x64', 'linux-x64/artifacts.zip'],
+    <String>['linux-x64', 'dart-sdk-linux-x64.zip'],
     <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
     <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
   ];
 
   List<List<String>> get _windowsBinaryDirs => <List<String>>[
     <String>['windows-x64', 'windows-x64/artifacts.zip'],
+    <String>['windows-x64', 'dart-sdk-windows-x64.zip'],
     <String>['android-arm-profile/windows-x64', 'android-arm-profile/windows-x64.zip'],
     <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
   ];

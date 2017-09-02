@@ -90,3 +90,70 @@ enum RenderComparison {
   /// change in a render object.
   layout,
 }
+
+/// The two cardinal directions in two dimensions.
+///
+/// The axis is always relative to the current coordinate space. This means, for
+/// example, that a [horizontal] axis might actually be diagonally from top
+/// right to bottom left, due to some local [Transform] applied to the scene.
+///
+/// See also:
+///
+///  * [AxisDirection], which is a directional version of this enum (with values
+///    light left and right, rather than just horizontal).
+///  * [TextDirection], which disambiguates between left-to-right horizontal
+///    content and right-to-left horizontal content.
+enum Axis {
+  /// Left and right.
+  ///
+  /// See also:
+  ///
+  ///  * [TextDirection], which disambiguates between left-to-right horizontal
+  ///    content and right-to-left horizontal content.
+  horizontal,
+
+  /// Up and down.
+  vertical,
+}
+
+/// Returns the opposite of the given [Axis].
+///
+/// Specifically, returns [Axis.horizontal] for [Axis.vertical], and
+/// vice versa.
+///
+/// See also:
+///
+///  * [flipAxisDirection], which does the same thing for [AxisDirection] values.
+Axis flipAxis(Axis direction) {
+  assert(direction != null);
+  switch (direction) {
+    case Axis.horizontal:
+      return Axis.vertical;
+    case Axis.vertical:
+      return Axis.horizontal;
+  }
+  return null;
+}
+
+/// A direction in which boxes flow vertically.
+///
+/// This is used by the flex algorithm (e.g. [Column]) to decide in which
+/// direction to draw boxes.
+///
+/// This is also used to disambiguate `start` and `end` values (e.g.
+/// [MainAxisAlignment.start] or [CrossAxisAlignment.end]).
+///
+/// See also:
+///
+///  * [TextDirection], which controls the same thing but horizontally.
+enum VerticalDirection {
+  /// Boxes should start at the bottom and be stacked vertically towards the top.
+  ///
+  /// The "start" is at the bottom, the "end" is at the top.
+  up,
+
+  /// Boxes should start at the top and be stacked vertically towards the bottom.
+  ///
+  /// The "start" is at the top, the "end" is at the bottom.
+  down,
+}

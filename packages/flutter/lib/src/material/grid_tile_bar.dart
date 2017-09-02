@@ -63,13 +63,13 @@ class GridTileBar extends StatelessWidget {
       decoration = new BoxDecoration(color: backgroundColor);
 
     final List<Widget> children = <Widget>[];
-    final EdgeInsets padding = new EdgeInsets.only(
-      left: leading != null ? 8.0 : 16.0,
-      right: trailing != null ? 8.0 : 16.0,
+    final EdgeInsetsDirectional padding = new EdgeInsetsDirectional.only(
+      start: leading != null ? 8.0 : 16.0,
+      end: trailing != null ? 8.0 : 16.0,
     );
 
     if (leading != null)
-      children.add(new Padding(padding: const EdgeInsets.only(right: 8.0), child: leading));
+      children.add(new Padding(padding: const EdgeInsetsDirectional.only(end: 8.0), child: leading));
 
     final ThemeData theme = Theme.of(context);
     final ThemeData darkTheme = new ThemeData(
@@ -114,7 +114,7 @@ class GridTileBar extends StatelessWidget {
     }
 
     if (trailing != null)
-      children.add(new Padding(padding: const EdgeInsets.only(left: 8.0), child: trailing));
+      children.add(new Padding(padding: const EdgeInsetsDirectional.only(start: 8.0), child: trailing));
 
     return new Container(
       padding: padding,

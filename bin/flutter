@@ -65,6 +65,7 @@ if [ ! -d "$FLUTTER_ROOT/.git" ]; then
   exit 1
 fi
 
+FLUTTER_TOOL_ARGS="--assert-initializer $FLUTTER_TOOL_ARGS"
 # To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
 # FLUTTER_TOOL_ARGS="--checked $FLUTTER_TOOL_ARGS"
 # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"

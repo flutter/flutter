@@ -433,13 +433,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           }
         ));
         assert(_parentZone != null);
-        assert(_pendingExceptionDetails != null);
+        assert(_pendingExceptionDetails != null, 'A test overrode FlutterError.onError but either failed to return it to its original state, or had unexpected additional errors that it could not handle. Typically, this is caused by using expect() before restoring FlutterError.onError.');
         _parentZone.run<Null>(_testCompletionHandler);
       }
     );
     _parentZone = Zone.current;
     final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
-    testZone.runBinaryGuarded(_runTestBody, testBody, invariantTester)
+    testZone.runBinary(_runTestBody, testBody, invariantTester)
       .whenComplete(_testCompletionHandler);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
     return _currentTestCompleter.future;

@@ -73,8 +73,9 @@ class TestViewportScrollPosition extends ScrollPositionWithSingleContext {
 void main() {
   testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = new GlobalKey();
-    await tester.pumpWidget(
-      new ScrollConfiguration(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ScrollConfiguration(
         behavior: new TestBehavior(),
         child: new Scrollbar(
           child: new Scrollable(
@@ -159,7 +160,7 @@ void main() {
           ),
         ),
       ),
-    );
+    ));
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));

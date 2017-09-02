@@ -18,7 +18,7 @@ class _FlavorState extends State<Flavor> {
   @override
   void initState() {
     super.initState();
-    new MethodChannel('flavor').invokeMethod('getFlavor').then((String flavor) {
+    const MethodChannel('flavor').invokeMethod('getFlavor').then((String flavor) {
       setState(() {
         _flavor = flavor;
       });
@@ -27,8 +27,8 @@ class _FlavorState extends State<Flavor> {
 
   @override
   Widget build(BuildContext context) {
-    return _flavor == null 
-      ? new Text('Awaiting flavor...')
+    return _flavor == null
+      ? const Text('Awaiting flavor...')
       : new Text(_flavor, key: const ValueKey<String>('flavor'));
   }
 }

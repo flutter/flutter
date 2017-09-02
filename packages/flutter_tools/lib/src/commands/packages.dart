@@ -103,7 +103,7 @@ class PackagesTestCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() => pub(<String>['run', 'test']..addAll(argResults.rest));
+  Future<Null> runCommand() => pub(<String>['run', 'test']..addAll(argResults.rest), retry: false);
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
@@ -124,5 +124,5 @@ class PackagesPassthroughCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() => pub(argResults.rest);
+  Future<Null> runCommand() => pub(argResults.rest, retry: false);
 }

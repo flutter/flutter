@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter;
+import 'dart:ui' as ui show ImageFilter, Gradient;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -1014,6 +1014,35 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   Rect describeApproximatePaintClip(RenderObject child) {
     return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
   }
+
+  Paint _debugPaint;
+  TextPainter _debugText;
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    assert(() {
+      _debugPaint ??= new Paint()
+        ..shader = new ui.Gradient.linear(
+          const Offset(0.0, 0.0),
+          const Offset(10.0, 10.0),
+          <Color>[const Color(0x00000000), const Color(0xFFFF00FF), const Color(0xFFFF00FF), const Color(0x00000000)],
+          <double>[0.25, 0.25, 0.75, 0.75],
+          TileMode.repeated,
+        )
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke;
+      _debugText ??= new TextPainter(
+        text: const TextSpan(
+          text: '✂',
+          style: const TextStyle(
+            color: const Color(0xFFFF00FF),
+              fontSize: 14.0,
+            ),
+          ),
+        )
+        ..layout();
+      return true;
+    });
+  }
 }
 
 /// Clips its child using a rectangle.
@@ -1051,6 +1080,18 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
       _updateClip();
       context.pushClipRect(needsCompositing, offset, _clip, super.paint);
     }
+  }
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    assert(() {
+      if (child != null) {
+        super.debugPaintSize(context, offset);
+        context.canvas.drawRect(_clip.shift(offset), _debugPaint);
+        _debugText.paint(context.canvas, offset + new Offset(_clip.width / 8.0, -_debugText.text.style.fontSize * 1.1));
+      }
+      return true;
+    });
   }
 }
 
@@ -1111,6 +1152,18 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
       context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint);
     }
   }
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    assert(() {
+      if (child != null) {
+        super.debugPaintSize(context, offset);
+        context.canvas.drawRRect(_clip.shift(offset), _debugPaint);
+        _debugText.paint(context.canvas, offset + new Offset(_clip.tlRadiusX, -_debugText.text.style.fontSize * 1.1));
+      }
+      return true;
+    });
+  }
 }
 
 /// Clips its child using an oval.
@@ -1163,6 +1216,18 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
       context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint);
     }
   }
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    assert(() {
+      if (child != null) {
+        super.debugPaintSize(context, offset);
+        context.canvas.drawPath(_getClipPath(_clip).shift(offset), _debugPaint);
+        _debugText.paint(context.canvas, offset + new Offset((_clip.width - _debugText.width) / 2.0, -_debugText.text.style.fontSize * 1.1));
+      }
+      return true;
+    });
+  }
 }
 
 /// Clips its child using a path.
@@ -1208,6 +1273,18 @@ class RenderClipPath extends _RenderCustomClip<Path> {
       _updateClip();
       context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint);
     }
+  }
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    assert(() {
+      if (child != null) {
+        super.debugPaintSize(context, offset);
+        context.canvas.drawPath(_clip.shift(offset), _debugPaint);
+        _debugText.paint(context.canvas, offset);
+      }
+      return true;
+    });
   }
 }
 
@@ -1783,6 +1860,8 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
+    if (size.isEmpty)
+      return false;
     _updatePaintData();
     Matrix4 inverse;
     try {
@@ -1798,8 +1877,12 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    _updatePaintData();
-    transform.multiply(_transform);
+    if (size.isEmpty) {
+      transform.setZero();
+    } else {
+      _updatePaintData();
+      transform.multiply(_transform);
+    }
   }
 
   @override
@@ -2904,7 +2987,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
       super.assembleSemanticsNode(node, children);
       return;
     }
-    
+
     _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
     _innerNode
       ..wasAffectedByClip = node.wasAffectedByClip
@@ -2912,7 +2995,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
 
     semanticsAnnotator(_innerNode);
 
-    final List<SemanticsNode> excluded = <SemanticsNode>[];
+    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
       if (child.hasTag(excludeFromScrolling))
@@ -2920,7 +3003,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
       else
         included.add(child);
     }
-    excluded.add(_innerNode);
     node.addChildren(excluded);
     _innerNode.addChildren(included);
     _innerNode.finalizeChildren();

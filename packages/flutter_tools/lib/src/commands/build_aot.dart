@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../artifacts.dart';
+import '../base/build.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -12,6 +13,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../resident_runner.dart';
@@ -34,7 +36,8 @@ class BuildAotCommand extends BuildSubCommand {
         allowed: <String>['android-arm', 'ios']
       )
       ..addFlag('interpreter')
-      ..addFlag('quiet', defaultsTo: false);
+      ..addFlag('quiet', defaultsTo: false)
+      ..addFlag('preview-dart-2', negatable: false);
   }
 
   @override
@@ -62,7 +65,8 @@ class BuildAotCommand extends BuildSubCommand {
       platform,
       getBuildMode(),
       outputPath: argResults['output-dir'],
-      interpreter: argResults['interpreter']
+      interpreter: argResults['interpreter'],
+      previewDart2: argResults['preview-dart-2'],
     );
     status?.stop();
 
@@ -89,7 +93,8 @@ Future<String> buildAotSnapshot(
   TargetPlatform platform,
   BuildMode buildMode, {
   String outputPath,
-  bool interpreter: false
+  bool interpreter: false,
+  bool previewDart2: false,
 }) async {
   outputPath ??= getAotBuildDirectory();
   try {
@@ -98,7 +103,8 @@ Future<String> buildAotSnapshot(
       platform,
       buildMode,
       outputPath: outputPath,
-      interpreter: interpreter
+      interpreter: interpreter,
+      previewDart2: previewDart2,
     );
   } on String catch (error) {
     // Catch the String exceptions thrown from the `runCheckedSync` methods below.
@@ -107,12 +113,14 @@ Future<String> buildAotSnapshot(
   }
 }
 
+// TODO(cbracken): split AOT and Assembly AOT snapshotting logic and migrate to Snapshotter class.
 Future<String> _buildAotSnapshot(
   String mainPath,
   TargetPlatform platform,
   BuildMode buildMode, {
   String outputPath,
-  bool interpreter: false
+  bool interpreter: false,
+  bool previewDart2: false,
 }) async {
   outputPath ??= getAotBuildDirectory();
   if (!isAotBuildMode(buildMode) && !interpreter) {
@@ -135,7 +143,11 @@ Future<String> _buildAotSnapshot(
   final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
   final String dependencies = fs.path.join(outputDir.path, 'snapshot.d');
 
-  final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
+  final String vmEntryPoints = artifacts.getArtifactPath(
+    Artifact.dartVmEntryPointsTxt,
+    platform,
+    buildMode,
+  );
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
   final PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
@@ -149,12 +161,15 @@ Future<String> _buildAotSnapshot(
   final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
   final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
-  final List<String> filePaths = <String>[
+  final List<String> inputPaths = <String>[
     vmEntryPoints,
     ioEntryPoints,
     uiPath,
     vmServicePath,
+    mainPath,
   ];
+
+  final Set<String> outputPaths = new Set<String>();
 
   // These paths are used only on iOS.
   String snapshotDartIOS;
@@ -164,13 +179,15 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
+      outputPaths.addAll(<String>[
+        vmSnapshotData,
+        isolateSnapshotData,
+      ]);
       break;
     case TargetPlatform.ios:
       snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
       assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
-      filePaths.addAll(<String>[
-        snapshotDartIOS,
-      ]);
+      inputPaths.add(snapshotDartIOS);
       break;
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
@@ -179,9 +196,9 @@ Future<String> _buildAotSnapshot(
       assert(false);
   }
 
-  final List<String> missingFiles = filePaths.where((String p) => !fs.isFileSync(p)).toList();
-  if (missingFiles.isNotEmpty) {
-    printError('Missing files: $missingFiles');
+  final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
+  if (missingInputs.isNotEmpty) {
+    printError('Missing input files: $missingInputs');
     return null;
   }
   if (!processManager.canRun(genSnapshot)) {
@@ -208,6 +225,17 @@ Future<String> _buildAotSnapshot(
     genSnapshotCmd.add('--embedder_entry_points_manifest=$ioEntryPoints');
   }
 
+  // iOS symbols used to load snapshot data in the engine.
+  const String kVmSnapshotData = 'kDartVmSnapshotData';
+  const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
+
+  // iOS snapshot generated files, compiled object files.
+  final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
+  final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
+  final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
+  final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
+  final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
+
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
@@ -224,9 +252,14 @@ Future<String> _buildAotSnapshot(
       if (interpreter) {
         genSnapshotCmd.add('--snapshot_kind=core');
         genSnapshotCmd.add(snapshotDartIOS);
+        outputPaths.addAll(<String>[
+          kVmSnapshotDataO,
+          kIsolateSnapshotDataO,
+        ]);
       } else {
         genSnapshotCmd.add('--snapshot_kind=app-aot-assembly');
         genSnapshotCmd.add('--assembly=$assembly');
+        outputPaths.add(assemblyO);
       }
       break;
     case TargetPlatform.darwin_x64:
@@ -243,7 +276,37 @@ Future<String> _buildAotSnapshot(
     ]);
   }
 
+  if (previewDart2) {
+    mainPath = await compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      mainPath: mainPath,
+    );
+  }
+
   genSnapshotCmd.add(mainPath);
+
+  final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
+  final File checksumFile = fs.file('$dependencies.checksum');
+  final List<File> checksumFiles = <File>[checksumFile, fs.file(dependencies)]
+      ..addAll(inputPaths.map(fs.file))
+      ..addAll(outputPaths.map(fs.file));
+  if (checksumFiles.every((File file) => file.existsSync())) {
+    try {
+      final String json = await checksumFile.readAsString();
+      final Checksum oldChecksum = new Checksum.fromJson(json);
+      final Set<String> snapshotInputPaths = await readDepfile(dependencies)
+        ..add(mainPath)
+        ..addAll(outputPaths);
+      final Checksum newChecksum = new Checksum.fromFiles(snapshotType, snapshotInputPaths);
+      if (oldChecksum == newChecksum) {
+        printStatus('Skipping AOT snapshot build. Checksums match.');
+        return outputPath;
+      }
+    } catch (e, s) {
+      // Log exception and continue, this step is a performance improvement only.
+      printStatus('Error during AOT snapshot checksum check: $e\n$s');
+    }
+  }
 
   final RunResult results = await runAsync(genSnapshotCmd);
   if (results.exitCode != 0) {
@@ -260,16 +323,6 @@ Future<String> _buildAotSnapshot(
   // end-developer can link into their app.
   if (platform == TargetPlatform.ios) {
     printStatus('Building App.framework...');
-
-    // These names are known to from the engine.
-    const String kVmSnapshotData = 'kDartVmSnapshotData';
-    const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
-
-    final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
-    final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
-    final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
-    final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
-    final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
 
     final List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
 
@@ -315,6 +368,18 @@ Future<String> _buildAotSnapshot(
       linkCommand.add(assemblyO);
     }
     await runCheckedAsync(linkCommand);
+  }
+
+  // Compute and record checksums.
+  try {
+    final Set<String> snapshotInputPaths = await readDepfile(dependencies)
+      ..add(mainPath)
+      ..addAll(outputPaths);
+    final Checksum checksum = new Checksum.fromFiles(snapshotType, snapshotInputPaths);
+    await checksumFile.writeAsString(checksum.toJson());
+  } catch (e, s) {
+    // Log exception and continue, this step is a performance improvement only.
+    printStatus('Error during AOT snapshot checksum output: $e\n$s');
   }
 
   return outputPath;

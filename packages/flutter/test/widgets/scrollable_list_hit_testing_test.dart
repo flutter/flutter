@@ -11,20 +11,23 @@ const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 void main() {
   testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
-    await tester.pumpWidget(new Center(
-      child: new Container(
-        height: 50.0,
-        child: new ListView(
-          itemExtent: 290.0,
-          scrollDirection: Axis.horizontal,
-          children: items.map((int item) {
-            return new Container(
-              child: new GestureDetector(
-                onTap: () { tapped.add(item); },
-                child: new Text('$item'),
-              ),
-            );
-          }).toList(),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Center(
+        child: new Container(
+          height: 50.0,
+          child: new ListView(
+            itemExtent: 290.0,
+            scrollDirection: Axis.horizontal,
+            children: items.map((int item) {
+              return new Container(
+                child: new GestureDetector(
+                  onTap: () { tapped.add(item); },
+                  child: new Text('$item'),
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ),
     ));

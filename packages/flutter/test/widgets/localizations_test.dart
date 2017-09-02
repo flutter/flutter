@@ -42,6 +42,9 @@ class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizati
     shouldReloadValues.add(prefix != old.prefix);
     return prefix != old.prefix;
   }
+
+  @override
+  String toString() => '$runtimeType($prefix)';
 }
 
 class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizations> {
@@ -58,6 +61,9 @@ class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizat
     shouldReloadValues.add(prefix != old.prefix);
     return prefix != old.prefix;
   }
+
+  @override
+  String toString() => '$runtimeType($prefix)';
 }
 
 class MoreLocalizations {
@@ -124,7 +130,7 @@ void main() {
       buildFrame(
         buildContent: (BuildContext context) {
           pageContext = context;
-          return new Text('Hello World');
+          return const Text('Hello World');
         }
       )
     );
@@ -147,7 +153,7 @@ void main() {
         locale: locale,
         buildContent: (BuildContext context) {
           pageContext = context;
-          return new Text('Hello World');
+          return const Text('Hello World');
         },
       )
     );
@@ -289,6 +295,7 @@ void main() {
                 locale: const Locale('en', 'GB'),
                 delegates: <LocalizationsDelegate<dynamic>>[
                   new SyncTestLocalizationsDelegate(),
+                  const DefaultWidgetsLocalizationsDelegate(),
                 ],
                 // Create a new context within the en_GB Localization
                 child: new Builder(
@@ -359,6 +366,7 @@ void main() {
     expect(find.text('A: ---en_US'), findsOneWidget);
     expect(find.text('B: en_US'), findsOneWidget);
     expect(modifiedDelegate.shouldReloadValues, <bool>[true]);
+    expect(originalDelegate.shouldReloadValues, <bool>[]);
   });
 
   testWidgets('Localizations async delegate shouldReload returns true', (WidgetTester tester) async {
@@ -409,4 +417,35 @@ void main() {
     expect(modifiedDelegate.shouldReloadValues, <bool>[true]);
   });
 
+  testWidgets('Directionality tracks system locale', (WidgetTester tester) async {
+    BuildContext pageContext;
+
+    await tester.pumpWidget(
+      buildFrame(
+        buildContent: (BuildContext context) {
+          pageContext = context;
+          return const Text('Hello World');
+        }
+      )
+    );
+
+    await tester.binding.setLocale('en', 'GB');
+    await tester.pump();
+    expect(Directionality.of(pageContext), TextDirection.ltr);
+
+    await tester.binding.setLocale('ar', 'EG');
+    await tester.pump();
+    expect(Directionality.of(pageContext), TextDirection.rtl);
+  });
+}
+
+// Same as _WidgetsLocalizationsDelegate in widgets/app.dart
+class DefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const DefaultWidgetsLocalizationsDelegate();
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+
+  @override
+  bool shouldReload(DefaultWidgetsLocalizationsDelegate old) => false;
 }
