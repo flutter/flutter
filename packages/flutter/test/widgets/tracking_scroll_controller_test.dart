@@ -9,18 +9,23 @@ void main() {
   testWidgets('TrackingScrollController saves offset',
       (WidgetTester tester) async {
     final TrackingScrollController controller = new TrackingScrollController();
+    final double listItemHeight = 100.0;
 
     await tester.pumpWidget(
-      new PageView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          return new ListView(
-              controller: controller,
-              children: new List<Widget>.generate(
-                10,
-                (int i) => new Container(
-                    height: 100.0, child: new Text("Page$index-Item$i")),
-              ).toList());
-        },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return new ListView(
+                controller: controller,
+                children: new List<Widget>.generate(
+                  10,
+                  (int i) => new Container(
+                      height: listItemHeight,
+                      child: new Text("Page$index-Item$i")),
+                ).toList());
+          },
+        ),
       ),
     );
 
@@ -29,7 +34,7 @@ void main() {
     expect(find.text('Page2-Item0'), findsNothing);
     expect(find.text('Page2-Item1'), findsNothing);
 
-    controller.jumpTo(110.0);
+    controller.jumpTo(listItemHeight + 10);
     await (tester.pumpAndSettle());
 
     await tester.fling(
@@ -50,7 +55,7 @@ void main() {
     expect(find.text('Page2-Item0'), findsNothing);
     expect(find.text('Page2-Item1'), findsOneWidget);
 
-    await tester.pumpWidget(new Text("Another page"));
+    await tester.pumpWidget(const Text("Another page"));
 
     expect(controller.initialScrollOffset, 0.0);
   });
