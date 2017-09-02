@@ -126,7 +126,15 @@ void main() {
       });
 
       testUsingContext('populates checksums for valid JSON', () async {
-        final String json = '{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}';
+        final String json = JSON.encode(<String, dynamic>{
+          'version': kVersion,
+          'buildMode': BuildMode.release.toString(),
+          'targetPlatform': TargetPlatform.ios.toString(),
+          'files': <String, dynamic>{
+            'a.dart': '8a21a15fad560b799f6731d436c1b698',
+            'b.dart': '6f144e08b58cd0925328610fad7ac07c',
+          },
+        });
         final Checksum checksum = new Checksum.fromJson(json);
 
         final Map<String, dynamic> content = JSON.decode(checksum.toJson());
@@ -141,7 +149,14 @@ void main() {
       });
 
       testUsingContext('throws ArgumentError for unknown versions', () async {
-        final String json = '{"version":"bad","buildMode":"BuildMode.release","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}';
+        final String json = JSON.encode(<String, dynamic>{
+          'version': 'bad',
+          'buildMode': BuildMode.release.toString(),
+          'files': <String, dynamic>{
+            'a.dart': '8a21a15fad560b799f6731d436c1b698',
+            'b.dart': '6f144e08b58cd0925328610fad7ac07c',
+          },
+        });
         expect(() => new Checksum.fromJson(json), throwsArgumentError);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
@@ -150,41 +165,90 @@ void main() {
 
     group('operator ==', () {
       testUsingContext('reports not equal if build modes do not match', () async {
-        final Checksum a = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.debug","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        final Checksum b = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        expect(a == b, isFalse);
+        final Map<String, dynamic> a = <String, dynamic>{
+          'version': kVersion,
+          'buildMode': BuildMode.debug.toString(),
+          'targetPlatform': TargetPlatform.ios.toString(),
+          'files': <String, dynamic>{
+            'a.dart': '8a21a15fad560b799f6731d436c1b698',
+            'b.dart': '6f144e08b58cd0925328610fad7ac07c',
+          },
+        };
+        final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
+        b['buildMode'] = BuildMode.release.toString();
+        expect(new Checksum.fromJson(JSON.encode(a)) == new Checksum.fromJson(JSON.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('reports not equal if target platforms do not match', () async {
-        final Checksum a = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        final Checksum b = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.fuchsia","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        expect(a == b, isFalse);
+        final Map<String, dynamic> a = <String, dynamic>{
+          'version': kVersion,
+          'buildMode': BuildMode.debug.toString(),
+          'targetPlatform': TargetPlatform.ios.toString(),
+          'files': <String, dynamic>{
+            'a.dart': '8a21a15fad560b799f6731d436c1b698',
+            'b.dart': '6f144e08b58cd0925328610fad7ac07c',
+          },
+        };
+        final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
+        b['targetPlatform'] = TargetPlatform.android_arm.toString();
+        expect(new Checksum.fromJson(JSON.encode(a)) == new Checksum.fromJson(JSON.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('reports not equal if checksums do not match', () async {
-        final Checksum a = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        final Checksum b = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07d"}}');
-        expect(a == b, isFalse);
+        final Map<String, dynamic> a = <String, dynamic>{
+          'version': kVersion,
+          'buildMode': BuildMode.debug.toString(),
+          'targetPlatform': TargetPlatform.ios.toString(),
+          'files': <String, dynamic>{
+            'a.dart': '8a21a15fad560b799f6731d436c1b698',
+            'b.dart': '6f144e08b58cd0925328610fad7ac07c',
+          },
+        };
+        final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
+        b['files'] = <String, dynamic>{
+          'a.dart': '8a21a15fad560b799f6731d436c1b698',
+          'b.dart': '6f144e08b58cd0925328610fad7ac07d',
+        };
+        expect(new Checksum.fromJson(JSON.encode(a)) == new Checksum.fromJson(JSON.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('reports not equal if keys do not match', () async {
-        final Checksum a = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        final Checksum b = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","c.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        expect(a == b, isFalse);
+        final Map<String, dynamic> a = <String, dynamic>{
+          'version': kVersion,
+          'buildMode': BuildMode.debug.toString(),
+          'targetPlatform': TargetPlatform.ios.toString(),
+          'files': <String, dynamic>{
+            'a.dart': '8a21a15fad560b799f6731d436c1b698',
+            'b.dart': '6f144e08b58cd0925328610fad7ac07c',
+          },
+        };
+        final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
+        b['files'] = <String, dynamic>{
+          'a.dart': '8a21a15fad560b799f6731d436c1b698',
+          'c.dart': '6f144e08b58cd0925328610fad7ac07d',
+        };
+        expect(new Checksum.fromJson(JSON.encode(a)) == new Checksum.fromJson(JSON.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('reports equal if all checksums match', () async {
-        final Checksum a = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        final Checksum b = new Checksum.fromJson('{"version":"$kVersion","buildMode":"BuildMode.release","targetPlatform":"TargetPlatform.ios","files":{"a.dart":"8a21a15fad560b799f6731d436c1b698","b.dart":"6f144e08b58cd0925328610fad7ac07c"}}');
-        expect(a == b, isTrue);
+        final Map<String, dynamic> a = <String, dynamic>{
+          'version': kVersion,
+          'buildMode': BuildMode.debug.toString(),
+          'targetPlatform': TargetPlatform.ios.toString(),
+          'files': <String, dynamic>{
+            'a.dart': '8a21a15fad560b799f6731d436c1b698',
+            'b.dart': '6f144e08b58cd0925328610fad7ac07c',
+          },
+        };
+        expect(new Checksum.fromJson(JSON.encode(a)) == new Checksum.fromJson(JSON.encode(a)), isTrue);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
