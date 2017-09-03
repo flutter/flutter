@@ -166,7 +166,7 @@ class AnimatedCrossFade extends StatefulWidget {
   /// How the children should be aligned while the size is animating.
   ///
   /// Defaults to [FractionalOffset.topCenter].
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// A builder that positions the [firstChild] and [secondChild] widgets.
   ///
@@ -218,7 +218,7 @@ class AnimatedCrossFade extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, defaultValue: FractionalOffset.topCenter));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, defaultValue: FractionalOffset.topCenter));
   }
 }
 
@@ -356,6 +356,6 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     super.debugFillProperties(description);
     description.add(new EnumProperty<CrossFadeState>('crossFadeState', widget.crossFadeState));
     description.add(new DiagnosticsProperty<AnimationController>('controller', _controller, showName: false));
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', widget.alignment, defaultValue: FractionalOffset.topCenter));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', widget.alignment, defaultValue: FractionalOffset.topCenter));
   }
 }
