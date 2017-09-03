@@ -20,7 +20,7 @@ class FractionalOffsetTween extends Tween<FractionalOffset> {
   /// Creates a fractional offset tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
-  /// is treated as meaning the center.
+  /// is treated as meaning the top left.
   FractionalOffsetTween({ FractionalOffset begin, FractionalOffset end })
     : super(begin: begin, end: end);
 
@@ -44,7 +44,7 @@ class FractionalOffsetGeometryTween extends Tween<FractionalOffsetGeometry> {
   /// Creates a fractional offset geometry tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
-  /// is treated as meaning the center.
+  /// is treated as described in [FractionalOffsetGeometryTween.lerp].
   FractionalOffsetGeometryTween({
     FractionalOffsetGeometry begin,
     FractionalOffsetGeometry end,
