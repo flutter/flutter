@@ -57,10 +57,13 @@ class _FakeGenSnapshot implements GenSnapshot {
 void main() {
   group('SnapshotType', () {
     test('throws, if build mode is null', () {
-      expect(() => const SnapshotType(TargetPlatform.android_x64, null), throwsA(AssertionError));
+      expect(
+        () => new SnapshotType(TargetPlatform.android_x64, null),
+        throwsA(anything),
+      );
     });
     test('does not throw, if target platform is null', () {
-      expect(const SnapshotType(null, BuildMode.release), isNotNull);
+      expect(new SnapshotType(null, BuildMode.release), isNotNull);
     });
   });
   group('Fingerprint', () {
@@ -83,7 +86,7 @@ void main() {
         await fs.file('a.dart').create();
         expect(
           () => new Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']),
-          throwsA(ArgumentError),
+          throwsArgumentError,
         );
       }, overrides: <Type, Generator>{ FileSystem: () => fs });
 
@@ -105,14 +108,14 @@ void main() {
         expect(json['version'], mockVersion.frameworkRevision);
       }, overrides: <Type, Generator>{ FlutterVersion: () => mockVersion });
 
-      test('includes provided properties', () {
+      testUsingContext('includes provided properties', () {
         final Fingerprint fingerprint = new Fingerprint.fromBuildInputs(<String, String>{'a': 'A', 'b': 'B'}, <String>[]);
 
         final Map<String, dynamic> json = JSON.decode(fingerprint.toJson());
         expect(json['properties'], hasLength(2));
         expect(json['properties']['a'], 'A');
         expect(json['properties']['b'], 'B');
-      });
+      }, overrides: <Type, Generator>{ FlutterVersion: () => mockVersion });
     });
 
     group('fromJson', () {
@@ -137,11 +140,13 @@ void main() {
         });
         final Fingerprint fingerprint = new Fingerprint.fromJson(json);
         final Map<String, dynamic> content = JSON.decode(fingerprint.toJson());
-        expect(content, hasLength(5));
+        expect(content, hasLength(3));
         expect(content['version'], mockVersion.frameworkRevision);
-        expect(content['buildMode'], BuildMode.release.toString());
-        expect(content['targetPlatform'], TargetPlatform.ios.toString());
-        expect(content['mainPath'], 'a.dart');
+        expect(content['properties'], hasLength(3));
+        expect(content['properties']['buildMode'], BuildMode.release.toString());
+        expect(content['properties']['targetPlatform'], TargetPlatform.ios.toString());
+        expect(content['properties']['mainPath'], 'a.dart');
+        expect(content['files'], hasLength(2));
         expect(content['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
         expect(content['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
       }, overrides: <Type, Generator>{
@@ -180,7 +185,9 @@ void main() {
           'files': <String, dynamic>{},
         };
         final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
-        b['properties']['buildMode'] = BuildMode.release.toString();
+        b['properties'] = <String, String>{
+          'buildMode': BuildMode.release.toString(),
+        };
         expect(new Fingerprint.fromJson(JSON.encode(a)) == new Fingerprint.fromJson(JSON.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
@@ -208,9 +215,6 @@ void main() {
       testUsingContext('reports not equal if file paths do not match', () async {
         final Map<String, dynamic> a = <String, dynamic>{
           'version': kVersion,
-          'buildMode': BuildMode.debug.toString(),
-          'targetPlatform': TargetPlatform.ios.toString(),
-          'entrypoint': 'a.dart',
           'properties': <String, String>{},
           'files': <String, dynamic>{
             'a.dart': '8a21a15fad560b799f6731d436c1b698',
@@ -220,7 +224,7 @@ void main() {
         final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
         b['files'] = <String, dynamic>{
           'a.dart': '8a21a15fad560b799f6731d436c1b698',
-          'c.dart': '6f144e08b58cd0925328610fad7ac07c',
+          'c.dart': '6f144e08b58cd0925328610fad7ac07d',
         };
         expect(new Fingerprint.fromJson(JSON.encode(a)) == new Fingerprint.fromJson(JSON.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
@@ -313,8 +317,7 @@ void main() {
       when(mockVersion.frameworkRevision).thenReturn(kVersion);
     });
 
-    testUsingContext(
-        'builds snapshot and checksums when no checksums are present', () async {
+    testUsingContext('builds snapshot and checksums when no checksums are present', () async {
       await fs.file('main.dart').writeAsString('void main() {}');
       await fs.file('output.snapshot').create();
       await fs.file('output.snapshot.d').writeAsString('snapshot : main.dart');
@@ -327,33 +330,28 @@ void main() {
 
       expect(genSnapshot.callCount, 1);
 
-      final Map<String, dynamic> json = JSON.decode(
-          await fs.file('output.snapshot.d.checksums').readAsString());
+      final Map<String, dynamic> json = JSON.decode(await fs.file('output.snapshot.d.fingerprint').readAsString());
       expect(json['files'], hasLength(2));
       expect(json['files']['main.dart'], '27f5ebf0f8c559b2af9419d190299a5e');
-      expect(
-          json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
+      expect(json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       FlutterVersion: () => mockVersion,
       GenSnapshot: () => genSnapshot,
     });
 
-    testUsingContext(
-        'builds snapshot and checksums when checksums differ', () async {
+    testUsingContext('builds snapshot and checksums when checksums differ', () async {
       await fs.file('main.dart').writeAsString('void main() {}');
       await fs.file('output.snapshot').create();
-      await fs.file('output.snapshot.d').writeAsString(
-          'output.snapshot : main.dart');
-      await fs.file('output.snapshot.d.checksums').writeAsString(
-          JSON.encode(<String, dynamic>{
-            'version': '$kVersion',
-            'buildMode': BuildMode.debug.toString(),
-            'files': <String, dynamic>{
-              'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
-              'output.snapshot': 'deadbeef01234567890abcdef0123456',
-            },
-          }));
+      await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
+      await fs.file('output.snapshot.d.fingerprint').writeAsString(JSON.encode(<String, dynamic>{
+        'version': '$kVersion',
+        'buildMode': BuildMode.debug.toString(),
+        'files': <String, dynamic>{
+          'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
+          'output.snapshot': 'deadbeef01234567890abcdef0123456',
+        },
+      }));
       await snapshotter.buildScriptSnapshot(
         mainPath: 'main.dart',
         snapshotPath: 'output.snapshot',
@@ -363,32 +361,31 @@ void main() {
 
       expect(genSnapshot.callCount, 1);
 
-      final Map<String, dynamic> json = JSON.decode(
-          await fs.file('output.snapshot.d.checksums').readAsString());
+      final Map<String, dynamic> json = JSON.decode(await fs.file('output.snapshot.d.fingerprint').readAsString());
       expect(json['files'], hasLength(2));
       expect(json['files']['main.dart'], '27f5ebf0f8c559b2af9419d190299a5e');
-      expect(
-          json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
+      expect(json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       FlutterVersion: () => mockVersion,
       GenSnapshot: () => genSnapshot,
     });
 
-    testUsingContext(
-        'builds snapshot and checksums when checksums match but previous snapshot not present', () async {
+    testUsingContext('builds snapshot and checksums when checksums match but previous snapshot not present', () async {
       await fs.file('main.dart').writeAsString('void main() {}');
-      await fs.file('output.snapshot.d').writeAsString(
-          'output.snapshot : main.dart');
-      await fs.file('output.snapshot.d.checksums').writeAsString(
-          JSON.encode(<String, dynamic>{
-            'version': '$kVersion',
-            'buildMode': BuildMode.debug.toString(),
-            'files': <String, dynamic>{
-              'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
-              'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
-            },
-          }));
+      await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
+      await fs.file('output.snapshot.d.fingerprint').writeAsString(JSON.encode(<String, dynamic>{
+        'version': '$kVersion',
+        'properties': <String, String>{
+          'buildMode': BuildMode.debug.toString(),
+          'targetPlatform': '',
+          'mainPath': 'lib/main.dart',
+        },
+        'files': <String, dynamic>{
+          'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
+          'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
+        },
+      }));
       await snapshotter.buildScriptSnapshot(
         mainPath: 'main.dart',
         snapshotPath: 'output.snapshot',
@@ -398,20 +395,17 @@ void main() {
 
       expect(genSnapshot.callCount, 1);
 
-      final Map<String, dynamic> json = JSON.decode(
-          await fs.file('output.snapshot.d.checksums').readAsString());
+      final Map<String, dynamic> json = JSON.decode(await fs.file('output.snapshot.d.fingerprint').readAsString());
       expect(json['files'], hasLength(2));
       expect(json['files']['main.dart'], '27f5ebf0f8c559b2af9419d190299a5e');
-      expect(
-          json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
+      expect(json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       FlutterVersion: () => mockVersion,
       GenSnapshot: () => genSnapshot,
     });
 
-    testUsingContext(
-        'builds snapshot and checksums when main entry point changes', () async {
+    testUsingContext('builds snapshot and fingerprint when main entry point changes', () async {
       final _FakeGenSnapshot genSnapshot = new _FakeGenSnapshot(
         snapshotPath: 'output.snapshot',
         depfilePath: 'output.snapshot.d',
@@ -444,34 +438,76 @@ void main() {
       );
 
       expect(genSnapshot.callCount, 1);
-      final Map<String, dynamic> json = JSON.decode(
-          await fs.file('output.snapshot.d.checksums').readAsString());
+      final Map<String, dynamic> json = JSON.decode(await fs.file('output.snapshot.d.fingerprint').readAsString());
+      expect(json['properties']['mainPath'], 'other.dart');
       expect(json['files'], hasLength(2));
       expect(json['files']['other.dart'], '3238d0ae341339b1731d3c2e195ad177');
-      expect(
-          json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
+      expect(json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       FlutterVersion: () => mockVersion,
     });
 
-    testUsingContext(
-        'skips snapshot when checksums match and previous snapshot is present', () async {
+    testUsingContext('builds snapshot and fingerprint when main entry point changes to other dependency', () async {
+      final _FakeGenSnapshot genSnapshot = new _FakeGenSnapshot(
+        snapshotPath: 'output.snapshot',
+        depfilePath: 'output.snapshot.d',
+        depfileContent: 'output.snapshot : main.dart other.dart',
+      );
+      context.setVariable(GenSnapshot, genSnapshot);
+
+      await fs.file('main.dart').writeAsString('void main() {}');
+      await fs.file('other.dart').writeAsString('void main() { print("Kanpai ima kimi wa jinsei no ookina ookina butai ni tachi"); }');
+      await fs.file('output.snapshot').create();
+      await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart other.dart');
+      await fs.file('output.snapshot.d.fingerprint').writeAsString(JSON.encode(<String, dynamic>{
+        'version': '$kVersion',
+        'properties': <String, String>{
+          'buildMode': BuildMode.debug.toString(),
+          'targetPlatform': '',
+          'mainPath': 'main.dart',
+        },
+        'files': <String, dynamic>{
+          'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
+          'other.dart': '3238d0ae341339b1731d3c2e195ad177',
+          'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
+        },
+      }));
+      await snapshotter.buildScriptSnapshot(
+        mainPath: 'other.dart',
+        snapshotPath: 'output.snapshot',
+        depfilePath: 'output.snapshot.d',
+        packagesPath: '.packages',
+      );
+
+      expect(genSnapshot.callCount, 1);
+      final Map<String, dynamic> json = JSON.decode(await fs.file('output.snapshot.d.fingerprint').readAsString());
+      expect(json['properties']['mainPath'], 'other.dart');
+      expect(json['files'], hasLength(3));
+      expect(json['files']['main.dart'], '27f5ebf0f8c559b2af9419d190299a5e');
+      expect(json['files']['other.dart'], '3238d0ae341339b1731d3c2e195ad177');
+      expect(json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      FlutterVersion: () => mockVersion,
+    });
+
+    testUsingContext('skips snapshot when fingerprints match and previous snapshot is present', () async {
       await fs.file('main.dart').writeAsString('void main() {}');
       await fs.file('output.snapshot').create();
-      await fs.file('output.snapshot.d').writeAsString(
-          'output.snapshot : main.dart');
-      await fs.file('output.snapshot.d.checksums').writeAsString(
-          JSON.encode(<String, dynamic>{
-            'version': '$kVersion',
-            'buildMode': BuildMode.debug.toString(),
-            'targetPlatform': '',
-            'mainPath': 'main.dart',
-            'files': <String, dynamic>{
-              'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
-              'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
-            },
-          }));
+      await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
+      await fs.file('output.snapshot.d.fingerprint').writeAsString(JSON.encode(<String, dynamic>{
+        'version': '$kVersion',
+        'properties': <String, String>{
+          'buildMode': BuildMode.debug.toString(),
+          'targetPlatform': '',
+          'mainPath': 'main.dart',
+        },
+        'files': <String, dynamic>{
+          'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
+          'output.snapshot': 'd41d8cd98f00b204e9800998ecf8427e',
+        },
+      }));
       await snapshotter.buildScriptSnapshot(
         mainPath: 'main.dart',
         snapshotPath: 'output.snapshot',
@@ -481,12 +517,10 @@ void main() {
 
       expect(genSnapshot.callCount, 0);
 
-      final Map<String, dynamic> json = JSON.decode(
-          await fs.file('output.snapshot.d.checksums').readAsString());
+      final Map<String, dynamic> json = JSON.decode(await fs.file('output.snapshot.d.fingerprint').readAsString());
       expect(json['files'], hasLength(2));
       expect(json['files']['main.dart'], '27f5ebf0f8c559b2af9419d190299a5e');
-      expect(
-          json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
+      expect(json['files']['output.snapshot'], 'd41d8cd98f00b204e9800998ecf8427e');
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       FlutterVersion: () => mockVersion,
@@ -496,7 +530,7 @@ void main() {
     group('createFingerprint', () {
       test('creates fingerprint with target platform', () {
         final Fingerprint fingerprint = Snapshotter.createFingerprint(
-          const SnapshotType(TargetPlatform.android_x64, BuildMode.release),
+          new SnapshotType(TargetPlatform.android_x64, BuildMode.release),
           'lib/main.dart',
           <String>[],
         );
@@ -508,7 +542,7 @@ void main() {
       });
       test('creates fingerprint without target platform', () {
         final Fingerprint fingerprint = Snapshotter.createFingerprint(
-          const SnapshotType(null, BuildMode.release),
+          new SnapshotType(null, BuildMode.release),
           'lib/main.dart',
           <String>[],
         );
@@ -522,7 +556,7 @@ void main() {
         await fs.file('a.dart').create();
         await fs.file('b.dart').create();
         final Fingerprint fingerprint = Snapshotter.createFingerprint(
-          const SnapshotType(TargetPlatform.android_x64, BuildMode.release),
+          new SnapshotType(TargetPlatform.android_x64, BuildMode.release),
           'lib/main.dart',
           <String>['a.dart', 'b.dart'],
         );

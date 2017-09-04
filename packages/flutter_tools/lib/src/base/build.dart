@@ -21,7 +21,9 @@ GenSnapshot get genSnapshot => context.putIfAbsent(GenSnapshot, () => const GenS
 
 /// A snapshot build configuration.
 class SnapshotType {
-  const SnapshotType(this.platform, this.mode): assert(mode != null);
+  SnapshotType(this.platform, this.mode) {
+    assert(mode != null);
+  }
 
   final TargetPlatform platform;
   final BuildMode mode;
@@ -86,14 +88,14 @@ class Fingerprint {
     final String version = content['version'];
     if (version != FlutterVersion.instance.frameworkRevision)
       throw new ArgumentError('Incompatible fingerprint version: $version');
-    _checksums = content['checksums'] ?? <String, String>{};
+    _checksums = content['files'] ?? <String, String>{};
     _properties = content['properties'] ?? <String, String>{};
   }
 
   Map<String, String> _checksums;
   Map<String, String> _properties;
 
-  String toJson() => JSON.encode(<String, dynamic>{
+  String  toJson() => JSON.encode(<String, dynamic>{
     'version': FlutterVersion.instance.frameworkRevision,
     'properties': _properties,
     'files': _checksums,
@@ -163,7 +165,7 @@ class Snapshotter {
     @required String depfilePath,
     @required String packagesPath
   }) async {
-    const SnapshotType type = const SnapshotType(null, BuildMode.debug);
+    final SnapshotType type = new SnapshotType(null, BuildMode.debug);
     final List<String> args = <String>[
       '--snapshot_kind=script',
       '--script_snapshot=$snapshotPath',
