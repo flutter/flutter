@@ -71,70 +71,72 @@ void main() {
   });
 
   group('packages test/pub', () {
-    final List<List<dynamic>> log = <List<dynamic>>[];
+    MockProcessManager mockProcessManager;
+    MockStdio mockStdio;
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
+      mockStdio = new MockStdio();
+    });
+
     testUsingContext('test', () async {
-      log.clear();
       await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
-      expect(log, hasLength(1));
-      expect(log[0], hasLength(3));
-      expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(log[0][1], 'run');
-      expect(log[0][2], 'test');
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'run');
+      expect(commands[2], 'test');
     }, overrides: <Type, Generator>{
-      ProcessManager: () {
-        return new MockProcessManager((List<dynamic> command) {
-          log.add(command);
-          return new MockProcess();
-        });
-      },
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
     });
+
     testUsingContext('run', () async {
-      log.clear();
       await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
-      expect(log, hasLength(1));
-      expect(log[0], hasLength(4));
-      expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(log[0][1], 'run');
-      expect(log[0][2], '--foo');
-      expect(log[0][3], 'bar');
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(4));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'run');
+      expect(commands[2], '--foo');
+      expect(commands[3], 'bar');
     }, overrides: <Type, Generator>{
-      ProcessManager: () {
-        return new MockProcessManager((List<dynamic> command) {
-          log.add(command);
-          return new MockProcess();
-        });
-      },
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
     });
+
     testUsingContext('publish', () async {
-      log.clear();
-      await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
-      expect(log, hasLength(1));
-      expect(log[0], hasLength(2));
-      expect(log[0][0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(log[0][1], 'publish');
+      final PromptingProcess process = new PromptingProcess();
+      mockProcessManager.processFactory = (List<String> commands) => process;
+      final Future<Null> runPackages = createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
+      final Future<Null> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
+      final Future<Null> simulateUserInput = new Future<Null>(() {
+        mockStdio.simulateStdin('y');
+      });
+      await Future.wait(<Future<Null>>[runPackages, runPrompt, simulateUserInput]);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(2));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], 'publish');
+      final List<String> stdout = mockStdio.writtenToStdout;
+      expect(stdout, hasLength(4));
+      expect(stdout.sublist(0, 2), contains('Proceed (y/n)? '));
+      expect(stdout.sublist(0, 2), contains('y\n'));
+      expect(stdout[2], 'hello\n');
+      expect(stdout[3], 'world\n');
     }, overrides: <Type, Generator>{
-      ProcessManager: () {
-        return new MockProcessManager((List<dynamic> command) {
-          log.add(command);
-          final Process process = new PromptingProcess('Proceed (y/n)? ', <String>['hello', 'world']);
-          new Future<Null>.delayed(const Duration(), () {
-            process.stdin.writeln('y');
-          });
-          return process;
-        });
-      },
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
     });
   });
 }
 
 /// A strategy for creating Process objects from a list of commands.
-typedef Process ProcessFactory(List<dynamic> command);
+typedef Process ProcessFactory(List<String> command);
 
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager implements ProcessManager {
-  MockProcessManager(this.processFactory);
-
-  final ProcessFactory processFactory;
+  ProcessFactory processFactory = (List<String> commands) => new MockProcess();
+  List<String> commands;
 
   @override
   Future<Process> start(
@@ -145,6 +147,7 @@ class MockProcessManager implements ProcessManager {
     bool runInShell: false,
     ProcessStartMode mode: ProcessStartMode.NORMAL,
   }) {
+    commands = command;
     return new Future<Process>.value(processFactory(command));
   }
 
@@ -152,24 +155,26 @@ class MockProcessManager implements ProcessManager {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-/// Process that prompts the user to proceed, then asynchronously writes
+/// A process that prompts the user to proceed, then asynchronously writes
 /// some lines to stdout before it exits.
 class PromptingProcess implements Process {
-  PromptingProcess(String prompt, List<String> outputLines) {
-    _stdoutController.add(UTF8.encode(prompt));
+  Future<Null> showPrompt(String prompt, List<String> outputLines) async {
     _stdin.future.then((List<int> bytes) async {
       // echo stdin to stdout
       _stdoutController.add(bytes);
       if (bytes[0] == UTF8.encode('y')[0]) {
         for (final String line in outputLines) {
-          await new Future<Null>.delayed(const Duration(), () {
+          await new Future<Null>(() {
             _stdoutController.add(UTF8.encode('$line\n'));
           });
         }
-        await new Future<Null>.delayed(const Duration(), () {
+        await new Future<Null>(() {
           _stdoutController.close();
         });
       }
+    });
+    await new Future<Null>(() {
+      _stdoutController.add(UTF8.encode(prompt));
     });
   }
 
@@ -195,9 +200,10 @@ class PromptingProcess implements Process {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-/// An inactive process that consumes anything on stdin and produces no
-/// output.
+/// An inactive process that collects stdin and produces no output.
 class MockProcess implements Process {
+  final IOSink _stdin = new MemoryIOSink();
+
   @override
   Stream<List<int>> get stdout => const Stream<List<int>>.empty();
 
@@ -205,7 +211,7 @@ class MockProcess implements Process {
   Stream<List<int>> get stderr => const Stream<List<int>>.empty();
 
   @override
-  IOSink get stdin => new MockIOSink();
+  IOSink get stdin => _stdin;
 
   @override
   Future<int> get exitCode => new Future<int>.value(0);
@@ -214,58 +220,97 @@ class MockProcess implements Process {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
-/// An IOSink that drops any received data.
-class MockIOSink implements IOSink {
-  @override
-  Encoding encoding;
-
-  @override
-  Future<dynamic> addStream(Stream<List<int>> stream) async => null;
-
-  @override
-  void add(List<int> data) {
-  }
-
-  @override
-  void addError(dynamic error, [StackTrace stackTrace]) {
-  }
-
-  @override
-  void write(Object obj) {
-  }
-
-  @override
-  void writeln([Object obj = ""]) {
-  }
-
-  @override
-  void writeCharCode(int charCode) {
-  }
-
-  @override
-  void writeAll(Iterable<dynamic> objects, [String separator = ""]) {
-  }
-
-  @override
-  Future<dynamic> get done async => null;
-
-  @override
-  Future<dynamic> close() async => null;
-
-  @override
-  Future<dynamic> flush() async => null;
-}
-
-
 /// An IOSink that completes a future with the first line written to it.
-class CompleterIOSink extends MockIOSink {
+class CompleterIOSink extends MemoryIOSink {
   final Completer<List<int>> _completer = new Completer<List<int>>();
 
   Future<List<int>> get future => _completer.future;
 
   @override
-  void writeln([Object obj = ""]) {
+  void add(List<int> data) {
     if (!_completer.isCompleted)
-      _completer.complete(UTF8.encode('$obj\n'));
+      _completer.complete(data);
+    super.add(data);
   }
+}
+
+/// A Stdio that collects stdout and supports simulated stdin.
+class MockStdio extends Stdio {
+  final MemoryIOSink _stdout = new MemoryIOSink();
+  final StreamController<List<int>> _stdin = new StreamController<List<int>>();
+
+  @override
+  IOSink get stdout => _stdout;
+
+  @override
+  Stream<List<int>> get stdin => _stdin.stream;
+
+  void simulateStdin(String line) {
+    _stdin.add(UTF8.encode('$line\n'));
+  }
+
+  List<String> get writtenToStdout => _stdout.writes.map(_stdout.encoding.decode).toList();
+}
+
+/// An IOSink that collects whatever is written to it.
+class MemoryIOSink implements IOSink {
+  @override
+  Encoding encoding = UTF8;
+
+  final List<List<int>> writes = <List<int>>[];
+
+  @override
+  void add(List<int> data) {
+    writes.add(data);
+  }
+
+  @override
+  Future<Null> addStream(Stream<List<int>> stream) {
+    final Completer<Null> completer = new Completer<Null>();
+    stream.listen((List<int> data) {
+      add(data);
+    }).onDone(() => completer.complete(null));
+    return completer.future;
+  }
+
+  @override
+  void writeCharCode(int charCode) {
+    add(<int>[charCode]);
+  }
+
+  @override
+  void write(Object obj) {
+    add(encoding.encode('$obj'));
+  }
+
+  @override
+  void writeln([Object obj = ""]) {
+    add(encoding.encode('$obj\n'));
+  }
+
+  @override
+  void writeAll(Iterable<dynamic> objects, [String separator = ""]) {
+    bool addSeparator = false;
+    for (dynamic object in objects) {
+      if (addSeparator) {
+        write(separator);
+      }
+      write(object);
+      addSeparator = true;
+    }
+  }
+
+  @override
+  void addError(dynamic error, [StackTrace stackTrace]) {
+    throw new UnimplementedError();
+  }
+
+  @override
+  Future<Null> get done => close();
+
+  @override
+  Future<Null> close() async => null;
+
+  @override
+  Future<Null> flush() async => null;
 }

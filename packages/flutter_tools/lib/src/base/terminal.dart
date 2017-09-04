@@ -61,14 +61,17 @@ class AnsiTerminal {
     // [_ENOTTY] or [_INVALID_HANDLE], we should check beforehand if stdin is
     // connected to a terminal or not.
     // (Requires https://github.com/dart-lang/sdk/issues/29083 to be resolved.)
+    if (stdin is! Stdin)
+      return;
+    final Stdin realStdin = stdin;
     try {
       // The order of setting lineMode and echoMode is important on Windows.
       if (value) {
-        stdin.echoMode = false;
-        stdin.lineMode = false;
+        realStdin.echoMode = false;
+        realStdin.lineMode = false;
       } else {
-        stdin.lineMode = true;
-        stdin.echoMode = true;
+        realStdin.lineMode = true;
+        realStdin.echoMode = true;
       }
     } on StdinException catch (error) {
       if (!_lineModeIgnorableErrors.contains(error.osError?.errorCode))
