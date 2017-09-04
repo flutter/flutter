@@ -361,8 +361,8 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   for (_Asset main in assetVariants.keys) {
     final List<String> variants = <String>[];
     for (_Asset variant in assetVariants[main])
-      variants.add(variant.relativePath);
-    json[main.relativePath] = variants;
+      variants.add(variant.assetEntry);
+    json[main.assetEntry] = variants;
   }
   return new DevFSStringContent(JSON.encode(json));
 }
