@@ -80,7 +80,7 @@ class ExpansionPanelList extends StatelessWidget {
        assert(animationDuration != null),
        super(key: key);
 
-  /// The children of the expansion panel list. They are layed in a similar
+  /// The children of the expansion panel list. They are laid out in a similar
   /// fashion to [ListBody].
   final List<ExpansionPanel> children;
 

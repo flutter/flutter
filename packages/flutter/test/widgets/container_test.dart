@@ -135,6 +135,11 @@ void main() {
   });
 
   testWidgets('Can be placed in an infinite box', (WidgetTester tester) async {
-    await tester.pumpWidget(new ListView(children: <Widget>[new Container()]));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(children: <Widget>[new Container()]),
+      ),
+    );
   });
 }

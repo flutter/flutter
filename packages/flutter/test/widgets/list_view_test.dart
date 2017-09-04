@@ -18,18 +18,28 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 
 void main() {
   testWidgets('ListView default control', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new ListView(itemExtent: 100.0)));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new ListView(itemExtent: 100.0),
+        ),
+      ),
+    );
   });
 
   testWidgets('ListView itemExtent control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ListView(
-        itemExtent: 200.0,
-        children: new List<Widget>.generate(20, (int i) {
-          return new Container(
-            child: new Text('$i'),
-          );
-        }),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 200.0,
+          children: new List<Widget>.generate(20, (int i) {
+            return new Container(
+              child: new Text('$i'),
+            );
+          }),
+        ),
       ),
     );
 
@@ -68,18 +78,21 @@ void main() {
     final List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new ListView(
-        itemExtent: 200.0,
-        children: new List<Widget>.generate(20, (int i) {
-          return new Builder(
-            builder: (BuildContext context) {
-              log.add(i);
-              return new Container(
-                child: new Text('$i'),
-              );
-            }
-          );
-        }),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 200.0,
+          children: new List<Widget>.generate(20, (int i) {
+            return new Builder(
+              builder: (BuildContext context) {
+                log.add(i);
+                return new Container(
+                  child: new Text('$i'),
+                );
+              }
+            );
+          }),
+        ),
       ),
     );
 
@@ -107,8 +120,11 @@ void main() {
 
   testWidgets('ListView can build out of underflow', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ListView(
-        itemExtent: 100.0,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 100.0,
+        ),
       ),
     );
 
@@ -120,13 +136,16 @@ void main() {
     expect(find.text('5'), findsNothing);
 
     await tester.pumpWidget(
-      new ListView(
-        itemExtent: 100.0,
-        children: new List<Widget>.generate(2, (int i) {
-          return new Container(
-            child: new Text('$i'),
-          );
-        }),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 100.0,
+          children: new List<Widget>.generate(2, (int i) {
+            return new Container(
+              child: new Text('$i'),
+            );
+          }),
+        ),
       ),
     );
 
@@ -138,13 +157,16 @@ void main() {
     expect(find.text('5'), findsNothing);
 
     await tester.pumpWidget(
-      new ListView(
-        itemExtent: 100.0,
-        children: new List<Widget>.generate(5, (int i) {
-          return new Container(
-            child: new Text('$i'),
-          );
-        }),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 100.0,
+          children: new List<Widget>.generate(5, (int i) {
+            return new Container(
+              child: new Text('$i'),
+            );
+          }),
+        ),
       ),
     );
 
@@ -158,15 +180,18 @@ void main() {
 
   testWidgets('ListView can build out of overflow padding', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
-          width: 0.0,
-          height: 0.0,
-          child: new ListView(
-            padding: const EdgeInsets.all(8.0),
-            children: <Widget>[
-              const Text('padded'),
-            ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new SizedBox(
+            width: 0.0,
+            height: 0.0,
+            child: new ListView(
+              padding: const EdgeInsets.all(8.0),
+              children: <Widget>[
+                const Text('padded'),
+              ],
+            ),
           ),
         ),
       ),
@@ -176,15 +201,18 @@ void main() {
 
   testWidgets('ListView with itemExtent in unbounded context', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new SingleChildScrollView(
-        child: new ListView(
-          itemExtent: 100.0,
-          shrinkWrap: true,
-          children: new List<Widget>.generate(20, (int i) {
-            return new Container(
-              child: new Text('$i'),
-            );
-          }),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SingleChildScrollView(
+          child: new ListView(
+            itemExtent: 100.0,
+            shrinkWrap: true,
+            children: new List<Widget>.generate(20, (int i) {
+              return new Container(
+                child: new Text('$i'),
+              );
+            }),
+          ),
         ),
       ),
     );
@@ -203,9 +231,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new ListView.custom(
-        itemExtent: 110.0,
-        childrenDelegate: delegate,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView.custom(
+          itemExtent: 110.0,
+          childrenDelegate: delegate,
+        ),
       ),
     );
 
@@ -213,9 +244,12 @@ void main() {
     delegate.log.clear();
 
     await tester.pumpWidget(
-      new ListView.custom(
-        itemExtent: 210.0,
-        childrenDelegate: delegate,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView.custom(
+          itemExtent: 210.0,
+          childrenDelegate: delegate,
+        ),
       ),
     );
 

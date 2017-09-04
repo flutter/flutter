@@ -18,14 +18,17 @@ void main() {
   testWidgets('Sliver appbars - scrolling', (WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new BigSliver(key: key1 = new GlobalKey()),
-          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate()),
-          new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate()),
-          new BigSliver(key: key4 = new GlobalKey()),
-          new BigSliver(key: key5 = new GlobalKey()),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new BigSliver(key: key1 = new GlobalKey()),
+            new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate()),
+            new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate()),
+            new BigSliver(key: key4 = new GlobalKey()),
+            new BigSliver(key: key5 = new GlobalKey()),
+          ],
+        ),
       ),
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
@@ -51,13 +54,16 @@ void main() {
     final GlobalKey key = new GlobalKey();
     final TestDelegate delegate = new TestDelegate();
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          const BigSliver(),
-          new SliverPersistentHeader(key: key, delegate: delegate),
-          const BigSliver(),
-          const BigSliver(),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            const BigSliver(),
+            new SliverPersistentHeader(key: key, delegate: delegate),
+            const BigSliver(),
+            const BigSliver(),
+          ],
+        ),
       ),
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
@@ -70,19 +76,22 @@ void main() {
 
   testWidgets('Sliver appbars - scrolling - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: <Widget>[
-          new SliverPersistentHeader(delegate: new TestDelegate()),
-          new SliverList(
-            delegate: new SliverChildListDelegate(<Widget>[
-              const SizedBox(
-                height: 300.0,
-                child: const Text('X'),
-              ),
-            ]),
-          ),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: <Widget>[
+            new SliverPersistentHeader(delegate: new TestDelegate()),
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(
+                  height: 300.0,
+                  child: const Text('X'),
+                ),
+              ]),
+            ),
+          ],
+        ),
       ),
     );
 

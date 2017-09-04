@@ -195,16 +195,21 @@ void main() {
     final StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
-    await tester.pumpWidget(new ListView(
-      itemExtent: 100.0,
-      children: <Widget>[
-        new Container(
-          key: const Key('container'),
-          height: 100.0,
-          child: new StateMarker(key: key),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 100.0,
+          children: <Widget>[
+            new Container(
+              key: const Key('container'),
+              height: 100.0,
+              child: new StateMarker(key: key),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals("marked"));

@@ -61,7 +61,12 @@ void main() {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i += 1)
       textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i', style: testFont)));
-    await tester.pumpWidget(new ListView(children: textWidgets));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(children: textWidgets)
+      ),
+    );
 
     expect(log, equals(<String>[]));
     await tester.tap(find.byType(Scrollable));
@@ -84,7 +89,12 @@ void main() {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i += 1)
       textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i', style: testFont)));
-    await tester.pumpWidget(new ListView(children: textWidgets));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(children: textWidgets)
+      ),
+    );
 
     expect(log, equals(<String>[]));
     await tester.tap(find.byType(Scrollable));

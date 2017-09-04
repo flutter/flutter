@@ -11,20 +11,25 @@ void main() {
   testWidgets('ListView control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new ListView(
-      children: kStates.map<Widget>((String state) {
-        return new GestureDetector(
-          onTap: () {
-            log.add(state);
-          },
-          child: new Container(
-            height: 200.0,
-            color: const Color(0xFF0000FF),
-            child: new Text(state),
-          ),
-        );
-      }).toList()
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: kStates.map<Widget>((String state) {
+            return new GestureDetector(
+              onTap: () {
+                log.add(state);
+              },
+              child: new Container(
+                height: 200.0,
+                color: const Color(0xFF0000FF),
+                child: new Text(state),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
 
     await tester.tap(find.text('Alabama'));
     expect(log, equals(<String>['Alabama']));
@@ -45,14 +50,17 @@ void main() {
 
   testWidgets('ListView restart ballistic activity out of range', (WidgetTester tester) async {
     Widget buildListView(int n) {
-      return new ListView(
-        children: kStates.take(n).map<Widget>((String state) {
-          return new Container(
-            height: 200.0,
-            color: const Color(0xFF0000FF),
-            child: new Text(state),
-          );
-        }).toList()
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: kStates.take(n).map<Widget>((String state) {
+            return new Container(
+              height: 200.0,
+              color: const Color(0xFF0000FF),
+              child: new Text(state),
+            );
+          }).toList(),
+        ),
       );
     }
 
@@ -72,26 +80,31 @@ void main() {
   testWidgets('CustomScrollView control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new CustomScrollView(
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(
-            kStates.map<Widget>((String state) {
-              return new GestureDetector(
-                onTap: () {
-                  log.add(state);
-                },
-                child: new Container(
-                  height: 200.0,
-                  color: const Color(0xFF0000FF),
-                  child: new Text(state),
-                ),
-              );
-            }).toList(),
-          ),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(
+                kStates.map<Widget>((String state) {
+                  return new GestureDetector(
+                    onTap: () {
+                      log.add(state);
+                    },
+                    child: new Container(
+                      height: 200.0,
+                      color: const Color(0xFF0000FF),
+                      child: new Text(state),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     await tester.tap(find.text('Alabama'));
     expect(log, equals(<String>['Alabama']));
@@ -114,21 +127,26 @@ void main() {
     final List<Type> log = <Type>[];
     final ScrollController controller = new ScrollController();
 
-    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification notification) {
-        log.add(notification.runtimeType);
-        return false;
-      },
-      child: new ListView(
-        controller: controller,
-        children: kStates.map<Widget>((String state) {
-          return new Container(
-            height: 200.0,
-            child: new Text(state),
-          );
-        }).toList(),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notification) {
+            log.add(notification.runtimeType);
+            return false;
+          },
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(
+                height: 200.0,
+                child: new Text(state),
+              );
+            }).toList(),
+          ),
+        ),
       ),
-    ));
+    );
 
     expect(log, isEmpty);
 
@@ -226,30 +244,45 @@ void main() {
 
   testWidgets('CustomScrollView sets PrimaryScrollController when primary', (WidgetTester tester) async {
     final ScrollController primaryScrollController = new ScrollController();
-    await tester.pumpWidget(new PrimaryScrollController(
-      controller: primaryScrollController,
-      child: new CustomScrollView(primary: true),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PrimaryScrollController(
+          controller: primaryScrollController,
+          child: new CustomScrollView(primary: true),
+        ),
+      ),
+    );
     final Scrollable scrollable = tester.widget(find.byType(Scrollable));
     expect(scrollable.controller, primaryScrollController);
   });
 
   testWidgets('ListView sets PrimaryScrollController when primary', (WidgetTester tester) async {
     final ScrollController primaryScrollController = new ScrollController();
-    await tester.pumpWidget(new PrimaryScrollController(
-      controller: primaryScrollController,
-      child: new ListView(primary: true),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PrimaryScrollController(
+          controller: primaryScrollController,
+          child: new ListView(primary: true),
+        ),
+      ),
+    );
     final Scrollable scrollable = tester.widget(find.byType(Scrollable));
     expect(scrollable.controller, primaryScrollController);
   });
 
   testWidgets('GridView sets PrimaryScrollController when primary', (WidgetTester tester) async {
     final ScrollController primaryScrollController = new ScrollController();
-    await tester.pumpWidget(new PrimaryScrollController(
-      controller: primaryScrollController,
-      child: new GridView.count(primary: true, crossAxisCount: 1),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PrimaryScrollController(
+          controller: primaryScrollController,
+          child: new GridView.count(primary: true, crossAxisCount: 1),
+        ),
+      ),
+    );
     final Scrollable scrollable = tester.widget(find.byType(Scrollable));
     expect(scrollable.controller, primaryScrollController);
   });
@@ -257,18 +290,23 @@ void main() {
   testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
     const Key innerKey = const Key('inner');
     final ScrollController primaryScrollController = new ScrollController();
-    await tester.pumpWidget(new PrimaryScrollController(
-      controller: primaryScrollController,
-      child: new ListView(
-        primary: true,
-        children: <Widget>[
-          new Container(
-            constraints: const BoxConstraints(maxHeight: 200.0),
-            child: new ListView(key: innerKey, primary: true),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PrimaryScrollController(
+          controller: primaryScrollController,
+          child: new ListView(
+            primary: true,
+            children: <Widget>[
+              new Container(
+                constraints: const BoxConstraints(maxHeight: 200.0),
+                child: new ListView(key: innerKey, primary: true),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-    ));
+    );
 
     final Scrollable innerScrollable = tester.widget(
       find.descendant(
@@ -302,11 +340,14 @@ void main() {
   testWidgets('primary:true leads to scrolling', (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
-      new NotificationListener<OverscrollNotification>(
-        onNotification: (OverscrollNotification message) { scrolled = true; return false; },
-        child: new ListView(
-          primary: true,
-          children: <Widget>[],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new NotificationListener<OverscrollNotification>(
+          onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+          child: new ListView(
+            primary: true,
+            children: <Widget>[],
+          ),
         ),
       ),
     );
@@ -317,11 +358,14 @@ void main() {
   testWidgets('primary:false leads to no scrolling', (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
-      new NotificationListener<OverscrollNotification>(
-        onNotification: (OverscrollNotification message) { scrolled = true; return false; },
-        child: new ListView(
-          primary: false,
-          children: <Widget>[],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new NotificationListener<OverscrollNotification>(
+          onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+          child: new ListView(
+            primary: false,
+            children: <Widget>[],
+          ),
         ),
       ),
     );
@@ -332,12 +376,15 @@ void main() {
   testWidgets('physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behaviour', (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
-      new NotificationListener<OverscrollNotification>(
-        onNotification: (OverscrollNotification message) { scrolled = true; return false; },
-        child: new ListView(
-          primary: false,
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new NotificationListener<OverscrollNotification>(
+          onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+          child: new ListView(
+            primary: false,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[],
+          ),
         ),
       ),
     );
@@ -348,12 +395,15 @@ void main() {
   testWidgets('physics:ScrollPhysics actually overrides primary:true default behaviour', (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
-      new NotificationListener<OverscrollNotification>(
-        onNotification: (OverscrollNotification message) { scrolled = true; return false; },
-        child: new ListView(
-          primary: true,
-          physics: const ScrollPhysics(),
-          children: <Widget>[],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new NotificationListener<OverscrollNotification>(
+          onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+          child: new ListView(
+            primary: true,
+            physics: const ScrollPhysics(),
+            children: <Widget>[],
+          ),
         ),
       ),
     );

@@ -118,20 +118,23 @@ void main() {
     String errorText(String input) => fieldKey.currentState.value?.toString() + '/error';
 
     Widget builder() {
-      return new Center(
-        child: new Material(
-          child: new Form(
-            key: formKey,
-            autovalidate: true,
-            child: new ListView(
-              children: <Widget>[
-                new TextFormField(
-                  key: fieldKey,
-                ),
-                new TextFormField(
-                  validator: errorText,
-                ),
-              ],
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Material(
+            child: new Form(
+              key: formKey,
+              autovalidate: true,
+              child: new ListView(
+                children: <Widget>[
+                  new TextFormField(
+                    key: fieldKey,
+                  ),
+                  new TextFormField(
+                    validator: errorText,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

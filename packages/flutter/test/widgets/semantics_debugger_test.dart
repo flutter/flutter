@@ -124,23 +124,26 @@ void main() {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
-      new SemanticsDebugger(
-        child: new Material(
-          child: new ListView(
-            children: <Widget>[
-              new RaisedButton(
-                onPressed: () {
-                  log.add('top');
-                },
-                child: const Text('TOP'),
-              ),
-              new RaisedButton(
-                onPressed: () {
-                  log.add('bottom');
-                },
-                child: const Text('BOTTOM'),
-              ),
-            ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new Material(
+            child: new ListView(
+              children: <Widget>[
+                new RaisedButton(
+                  onPressed: () {
+                    log.add('top');
+                  },
+                  child: const Text('TOP'),
+                ),
+                new RaisedButton(
+                  onPressed: () {
+                    log.add('bottom');
+                  },
+                  child: const Text('BOTTOM'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -159,15 +162,18 @@ void main() {
     final Key childKey = new UniqueKey();
 
     await tester.pumpWidget(
-      new SemanticsDebugger(
-        child: new ListView(
-          children: <Widget>[
-            new Container(
-              key: childKey,
-              height: 5000.0,
-              color: Colors.green[500],
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new ListView(
+            children: <Widget>[
+              new Container(
+                key: childKey,
+                height: 5000.0,
+                color: Colors.green[500],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -252,23 +258,26 @@ void main() {
     final bool valueBottom = true;
 
     await tester.pumpWidget(
-      new SemanticsDebugger(
-        child: new Material(
-          child: new ListView(
-            children: <Widget>[
-              new Checkbox(
-                key: keyTop,
-                value: valueTop,
-                onChanged: (bool newValue) {
-                  valueTop = newValue;
-                },
-              ),
-              new Checkbox(
-                key: keyBottom,
-                value: valueBottom,
-                onChanged: null,
-              ),
-            ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new Material(
+            child: new ListView(
+              children: <Widget>[
+                new Checkbox(
+                  key: keyTop,
+                  value: valueTop,
+                  onChanged: (bool newValue) {
+                    valueTop = newValue;
+                  },
+                ),
+                new Checkbox(
+                  key: keyBottom,
+                  value: valueBottom,
+                  onChanged: null,
+                ),
+              ],
+            ),
           ),
         ),
       ),

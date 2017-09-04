@@ -50,26 +50,29 @@ void main() {
     String paragraphText(RenderParagraph paragraph) => paragraph.text.text;
 
     await tester.pumpWidget(
-      new WidgetInspector(
-        key: inspectorKey,
-        selectButtonBuilder: selectButtonBuilder,
-        child: new Material(
-          child: new ListView(
-            children: <Widget>[
-              new RaisedButton(
-                key: topButtonKey,
-                onPressed: () {
-                  log.add('top');
-                },
-                child: const Text('TOP'),
-              ),
-              new RaisedButton(
-                onPressed: () {
-                  log.add('bottom');
-                },
-                child: const Text('BOTTOM'),
-              ),
-            ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new WidgetInspector(
+          key: inspectorKey,
+          selectButtonBuilder: selectButtonBuilder,
+          child: new Material(
+            child: new ListView(
+              children: <Widget>[
+                new RaisedButton(
+                  key: topButtonKey,
+                  onPressed: () {
+                    log.add('top');
+                  },
+                  child: const Text('TOP'),
+                ),
+                new RaisedButton(
+                  onPressed: () {
+                    log.add('bottom');
+                  },
+                  child: const Text('BOTTOM'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -118,16 +121,19 @@ void main() {
     dynamic getInspectorState() => inspectorKey.currentState;
 
     await tester.pumpWidget(
-      new WidgetInspector(
-        key: inspectorKey,
-        selectButtonBuilder: selectButtonBuilder,
-        child: new ListView(
-          children: <Widget>[
-            new Container(
-              key: childKey,
-              height: 5000.0,
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new WidgetInspector(
+          key: inspectorKey,
+          selectButtonBuilder: selectButtonBuilder,
+          child: new ListView(
+            children: <Widget>[
+              new Container(
+                key: childKey,
+                height: 5000.0,
+              ),
+            ],
+          ),
         ),
       ),
     );

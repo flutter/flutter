@@ -23,16 +23,19 @@ void main() {
   testWidgets('RefreshIndicator', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: refresh,
-        child: new ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
-            return new SizedBox(
-              height: 200.0,
-              child: new Text(item),
-            );
-          }).toList(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: refresh,
+          child: new ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+              return new SizedBox(
+                height: 200.0,
+                child: new Text(item),
+              );
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -48,17 +51,20 @@ void main() {
   testWidgets('RefreshIndicator - bottom', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: refresh,
-        child: new ListView(
-          reverse: true,
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            const SizedBox(
-              height: 200.0,
-              child: const Text('X'),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: refresh,
+          child: new ListView(
+            reverse: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              const SizedBox(
+                height: 200.0,
+                child: const Text('X'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -74,16 +80,19 @@ void main() {
   testWidgets('RefreshIndicator - top - position', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: holdRefresh,
-        child: new ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            const SizedBox(
-              height: 200.0,
-              child: const Text('X'),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: new ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              const SizedBox(
+                height: 200.0,
+                child: const Text('X'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -98,17 +107,20 @@ void main() {
   testWidgets('RefreshIndicator - bottom - position', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: holdRefresh,
-        child: new ListView(
-          reverse: true,
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            const SizedBox(
-              height: 200.0,
-              child: const Text('X'),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: holdRefresh,
+          child: new ListView(
+            reverse: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              const SizedBox(
+                height: 200.0,
+                child: const Text('X'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -123,16 +135,19 @@ void main() {
   testWidgets('RefreshIndicator - no movement', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: refresh,
-        child: new ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            const SizedBox(
-              height: 200.0,
-              child: const Text('X'),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: refresh,
+          child: new ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              const SizedBox(
+                height: 200.0,
+                child: const Text('X'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -149,16 +164,19 @@ void main() {
   testWidgets('RefreshIndicator - not enough', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: refresh,
-        child: new ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            const SizedBox(
-              height: 200.0,
-              child: const Text('X'),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: refresh,
+          child: new ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              const SizedBox(
+                height: 200.0,
+                child: const Text('X'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -174,16 +192,19 @@ void main() {
   testWidgets('RefreshIndicator - show - slow', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: holdRefresh, // this one never returns
-        child: new ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            const SizedBox(
-              height: 200.0,
-              child: const Text('X'),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: holdRefresh, // this one never returns
+          child: new ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              const SizedBox(
+                height: 200.0,
+                child: const Text('X'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -215,16 +236,19 @@ void main() {
   testWidgets('RefreshIndicator - show - fast', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: refresh,
-        child: new ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            const SizedBox(
-              height: 200.0,
-              child: const Text('X'),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: refresh,
+          child: new ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              const SizedBox(
+                height: 200.0,
+                child: const Text('X'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -257,16 +281,19 @@ void main() {
   testWidgets('RefreshIndicator - show - fast - twice', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
-      new RefreshIndicator(
-        onRefresh: refresh,
-        child: new ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          children: <Widget>[
-            const SizedBox(
-              height: 200.0,
-              child: const Text('X'),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new RefreshIndicator(
+          onRefresh: refresh,
+          child: new ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <Widget>[
+              const SizedBox(
+                height: 200.0,
+                child: const Text('X'),
+              ),
+            ],
+          ),
         ),
       ),
     );

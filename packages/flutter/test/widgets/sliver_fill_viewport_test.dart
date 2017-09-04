@@ -12,12 +12,15 @@ void main() {
     });
 
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new SliverFillViewport(
-            delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
-          ),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverFillViewport(
+              delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -73,6 +76,7 @@ void main() {
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
+        ' │   crossAxisDirection: AxisDirection.right,\n'
         ' │   viewportMainAxisExtent: 600.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
         ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true)\n'
@@ -107,7 +111,7 @@ void main() {
         '       ║ TextSpan:\n'
         '       ║   <all styles inherited>\n'
         '       ║   "0"\n'
-        '       ╚═══════════\n',
+        '       ╚═══════════\n'
       ),
     );
   });

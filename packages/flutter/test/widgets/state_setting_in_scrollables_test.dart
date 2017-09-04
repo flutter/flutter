@@ -79,7 +79,12 @@ class FooScrollBehavior extends ScrollBehavior {
 
 void main() {
   testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
-    await tester.pumpWidget(new Foo());
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Foo(),
+      ),
+    );
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
     await tester.tap(find.byType(GestureDetector).first);
     await tester.pumpAndSettle();

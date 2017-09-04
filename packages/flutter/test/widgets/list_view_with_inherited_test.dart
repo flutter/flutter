@@ -21,8 +21,11 @@ Widget buildCard(BuildContext context, int index) {
 }
 
 Widget buildFrame() {
-  return new ListView.builder(
-    itemBuilder: buildCard,
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new ListView.builder(
+      itemBuilder: buildCard,
+    ),
   );
 }
 

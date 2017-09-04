@@ -89,6 +89,21 @@ Axis axisDirectionToAxis(AxisDirection axisDirection) {
   return null;
 }
 
+/// Returns the [AxisDirection] in which reading occurs in the given [TextDirection].
+///
+/// Specifically, returns [AxisDirection.left] for [TextDirection.rtl] and
+/// [AxisDirection.right] for [TextDirection.ltr].
+AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
+  assert(textDirection != null);
+  switch (textDirection) {
+    case TextDirection.rtl:
+      return AxisDirection.left;
+    case TextDirection.ltr:
+      return AxisDirection.right;
+  }
+  return null;
+}
+
 /// Returns the opposite of the given [AxisDirection].
 ///
 /// Specifically, returns [AxisDirection.up] for [AxisDirection.down] (and
@@ -192,6 +207,7 @@ class SliverConstraints extends Constraints {
     @required this.overlap,
     @required this.remainingPaintExtent,
     @required this.crossAxisExtent,
+    @required this.crossAxisDirection,
     @required this.viewportMainAxisExtent,
   }) : assert(axisDirection != null),
        assert(growthDirection != null),
@@ -200,6 +216,7 @@ class SliverConstraints extends Constraints {
        assert(overlap != null),
        assert(remainingPaintExtent != null),
        assert(crossAxisExtent != null),
+       assert(crossAxisDirection != null),
        assert(viewportMainAxisExtent != null);
 
   /// Creates a copy of this object but with the given fields replaced with the
@@ -212,6 +229,7 @@ class SliverConstraints extends Constraints {
     double overlap,
     double remainingPaintExtent,
     double crossAxisExtent,
+    AxisDirection crossAxisDirection,
     double viewportMainAxisExtent,
   }) {
     return new SliverConstraints(
@@ -222,6 +240,7 @@ class SliverConstraints extends Constraints {
       overlap: overlap ?? this.overlap,
       remainingPaintExtent: remainingPaintExtent ?? this.remainingPaintExtent,
       crossAxisExtent: crossAxisExtent ?? this.crossAxisExtent,
+      crossAxisDirection: crossAxisDirection ?? this.crossAxisDirection,
       viewportMainAxisExtent: viewportMainAxisExtent ?? this.viewportMainAxisExtent,
     );
   }
@@ -315,8 +334,14 @@ class SliverConstraints extends Constraints {
 
   /// The number of pixels in the cross-axis.
   ///
-  /// For a vertical list, this is the width of the sliver..
+  /// For a vertical list, this is the width of the sliver.
   final double crossAxisExtent;
+
+  /// The direction in which children should be placed in the cross axis.
+  ///
+  /// Typically used in vertical lists to describe whether the ambient
+  /// [TextDirection] is [TextDirection.rtl] or [TextDirection.ltr].
+  final AxisDirection crossAxisDirection;
 
   /// The number of pixels the viewport can display in the main axis.
   ///
@@ -361,6 +386,7 @@ class SliverConstraints extends Constraints {
   bool get isNormalized {
     return scrollOffset >= 0.0
         && crossAxisExtent >= 0.0
+        && axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)
         && viewportMainAxisExtent >= 0.0
         && remainingPaintExtent >= 0.0;
   }
@@ -421,6 +447,8 @@ class SliverConstraints extends Constraints {
       verify(viewportMainAxisExtent != null, 'The "viewportMainAxisExtent" is null.');
       verify(scrollOffset >= 0.0, 'The "scrollOffset" is negative.');
       verify(crossAxisExtent >= 0.0, 'The "crossAxisExtent" is negative.');
+      verify(crossAxisDirection != null, 'The "crossAxisDirection" is null.');
+      verify(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection), 'The "axisDirection" and the "crossAxisDirection" are along the same axis.');
       verify(viewportMainAxisExtent >= 0.0, 'The "viewportMainAxisExtent" is negative.');
       verify(remainingPaintExtent >= 0.0, 'The "remainingPaintExtent" is negative.');
       verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
@@ -437,18 +465,28 @@ class SliverConstraints extends Constraints {
       return false;
     final SliverConstraints typedOther = other;
     assert(typedOther.debugAssertIsValid());
-    return axisDirection == typedOther.axisDirection &&
-           growthDirection == typedOther.growthDirection &&
-           scrollOffset == typedOther.scrollOffset &&
-           overlap == typedOther.overlap &&
-           remainingPaintExtent == typedOther.remainingPaintExtent &&
-           crossAxisExtent == typedOther.crossAxisExtent &&
-           viewportMainAxisExtent == typedOther.viewportMainAxisExtent;
+    return typedOther.axisDirection == axisDirection
+        && typedOther.growthDirection == growthDirection
+        && typedOther.scrollOffset == scrollOffset
+        && typedOther.overlap == overlap
+        && typedOther.remainingPaintExtent == remainingPaintExtent
+        && typedOther.crossAxisExtent == crossAxisExtent
+        && typedOther.crossAxisDirection == crossAxisDirection
+        && typedOther.viewportMainAxisExtent == viewportMainAxisExtent;
   }
 
   @override
   int get hashCode {
-    return hashValues(axisDirection, growthDirection, scrollOffset, overlap, remainingPaintExtent, crossAxisExtent, viewportMainAxisExtent);
+    return hashValues(
+      axisDirection,
+      growthDirection,
+      scrollOffset,
+      overlap,
+      remainingPaintExtent,
+      crossAxisExtent,
+      crossAxisDirection,
+      viewportMainAxisExtent,
+    );
   }
 
   @override
@@ -461,6 +499,7 @@ class SliverConstraints extends Constraints {
              'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
              (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
              'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, ' +
+             'crossAxisDirection: $crossAxisDirection, ' +
              'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}' +
            ')';
   }
