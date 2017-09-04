@@ -24,34 +24,34 @@ void main() {
       assetsSection = '';
     } else {
       final StringBuffer buffer = new StringBuffer();
-      buffer.write(
-'''
+      buffer.write('''
 flutter:
      assets:
-'''
-      );
+''');
 
       for (String asset in assets) {
-        buffer.write(
-'''
+        buffer.write('''
        - $asset
-''')
-        ;
+''');
       }
       assetsSection = buffer.toString();
     }
 
     fs.file(path)
       ..createSync(recursive: true)
-      ..writeAsStringSync(
-'''
+      ..writeAsStringSync('''
 name: $name
 dependencies:
   flutter:
     sdk: flutter
 $assetsSection
-'''
-      );
+''');
+  }
+
+  void establishFlutterRoot() {
+    // Setting flutterRoot here so that it picks up the MemoryFileSystem's
+    // path separator.
+    Cache.flutterRoot = getFlutterRoot();
   }
 
   void writePackagesFile(String packages) {
@@ -85,11 +85,17 @@ $assetsSection
     );
   }
 
+  void writeAssets(String path, List<String> assets) {
+    for (String asset in assets) {
+      fs.file('$path$asset')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(asset);
+    }
+  }
+
   group('AssetBundle assets from package', () {
     testUsingContext('One package with no assets', () async {
-      // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-      // path separator.
-      Cache.flutterRoot = getFlutterRoot();
+      establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -103,28 +109,24 @@ $assetsSection
     });
 
     testUsingContext('One package with one asset', () async {
-      // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-      // path separator.
-      Cache.flutterRoot = getFlutterRoot();
+      establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final String asset = 'a/foo';
+      final List<String> assets = ['a/foo'];
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
-        assets: <String>[asset],
+        assets: assets,
       );
 
-      fs.file('p/p/$asset')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(asset);
+      writeAssets('p/p/', assets);
 
       final String expectedAssetManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo"]}';
       await buildAndVerifyAssets(
-        <String>[asset],
+        assets,
         <String>['test_package'],
         expectedAssetManifest,
       );
@@ -133,9 +135,7 @@ $assetsSection
     });
 
     testUsingContext('One package with asset variants', () async {
-//      // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-//      // path separator.
-      Cache.flutterRoot = getFlutterRoot();
+      establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -146,12 +146,7 @@ $assetsSection
       );
 
       final List<String> assets = <String>['a/foo', 'a/v/foo'];
-
-      for (String asset in assets) {
-        fs.file('p/p/$asset')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(asset);
-      }
+      writeAssets('p/p/', assets);
 
       final String expectedManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
@@ -166,9 +161,7 @@ $assetsSection
     });
 
     testUsingContext('One package with two assets', () async {
-      // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-      // path separator.
-      Cache.flutterRoot = getFlutterRoot();
+      establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
@@ -180,12 +173,7 @@ $assetsSection
         assets: assets,
       );
 
-      for (String asset in assets) {
-        fs.file('p/p/$asset')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(asset);
-      }
-
+      writeAssets('p/p/', assets);
       final String expectedAssetManifest =
           '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
           '"packages/test_package/a/bar":["packages/test_package/a/bar"]}';
@@ -200,14 +188,15 @@ $assetsSection
     });
 
     testUsingContext('Two packages with assets', () async {
-      // Setting flutterRoot here so that it picks up the MemoryFileSystem's
-      // path separator.
-      Cache.flutterRoot = getFlutterRoot();
+      establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
-      writePubspecFile('p/p/pubspec.yaml', 'test_package',
-          assets: <String>['a/foo']);
+      writePubspecFile(
+        'p/p/pubspec.yaml',
+        'test_package',
+        assets: <String>['a/foo'],
+      );
       writePubspecFile(
         'p2/p/pubspec.yaml',
         'test_package2',
@@ -215,18 +204,8 @@ $assetsSection
       );
 
       final List<String> assets = <String>['a/foo', 'a/v/foo'];
-
-      for (String asset in assets) {
-        fs.file('p/p/$asset')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(asset);
-      }
-
-      for (String asset in assets) {
-        fs.file('p2/p/$asset')
-          ..createSync(recursive: true)
-          ..writeAsStringSync(asset);
-      }
+      writeAssets('p/p/', assets);
+      writeAssets('p2/p/', assets);
 
       final String expectedAssetManifest =
           '{"packages/test_package/a/foo":'
