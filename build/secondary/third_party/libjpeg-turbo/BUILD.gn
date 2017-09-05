@@ -65,7 +65,7 @@ source_set("libjpeg") {
     "//third_party/libjpeg-turbo/jutils.c",
   ]
 
-  if (current_cpu == "arm") {
+  if (current_cpu == "arm" && !is_ios) {
     sources += [
       "//third_party/libjpeg-turbo/simd/jsimd_arm.c",
       "//third_party/libjpeg-turbo/simd/jsimd_arm_neon.S",
