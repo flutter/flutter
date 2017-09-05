@@ -267,6 +267,9 @@ void RuntimeHolder::CreateView(
     runtime_->dart_controller()->RunFromScriptSnapshot(snapshot.data(),
                                                        snapshot.size());
   }
+
+  runtime_->dart_controller()->dart_state()->SetReturnCodeCallback(
+      [this](int32_t return_code) { return_code_ = return_code; });
 }
 
 Dart_Port RuntimeHolder::GetUIIsolateMainPort() {

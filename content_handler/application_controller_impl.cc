@@ -104,6 +104,7 @@ mxio_ns_t* ApplicationControllerImpl::SetupNamespace(
 }
 
 void ApplicationControllerImpl::Kill() {
+  SendReturnCode(runtime_holder_->return_code());
   runtime_holder_.reset();
   app_->Destroy(this);
   // |this| has been deleted at this point.
@@ -111,6 +112,17 @@ void ApplicationControllerImpl::Kill() {
 
 void ApplicationControllerImpl::Detach() {
   binding_.set_connection_error_handler(ftl::Closure());
+}
+
+void ApplicationControllerImpl::Wait(const WaitCallback& callback) {
+  wait_callbacks_.push_back(callback);
+}
+
+void ApplicationControllerImpl::SendReturnCode(int32_t return_code) {
+  for (const auto& iter : wait_callbacks_) {
+    iter(return_code);
+  }
+  wait_callbacks_.clear();
 }
 
 void ApplicationControllerImpl::CreateView(

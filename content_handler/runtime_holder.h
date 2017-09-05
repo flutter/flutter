@@ -51,6 +51,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   Dart_Port GetUIIsolateMainPort();
   std::string GetUIIsolateName();
 
+  int32_t return_code() { return return_code_; }
+
  private:
   // |blink::RuntimeDelegate| implementation:
   std::string DefaultRouteName() override;
@@ -117,6 +119,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   bool frame_outstanding_ = false;
   bool frame_scheduled_ = false;
   bool frame_rendering_ = false;
+  int32_t return_code_ = 0;
 
   ftl::WeakPtrFactory<RuntimeHolder> weak_factory_;
 

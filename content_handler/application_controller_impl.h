@@ -39,6 +39,7 @@ class ApplicationControllerImpl : public app::ApplicationController,
 
   void Kill() override;
   void Detach() override;
+  void Wait(const WaitCallback& callback) override;
 
   // |mozart::ViewProvider| implementation
 
@@ -51,6 +52,7 @@ class ApplicationControllerImpl : public app::ApplicationController,
 
  private:
   void StartRuntimeIfReady();
+  void SendReturnCode(int32_t return_code);
 
   mxio_ns_t* SetupNamespace(const app::FlatNamespacePtr& flat);
 
@@ -63,6 +65,8 @@ class ApplicationControllerImpl : public app::ApplicationController,
 
   std::string url_;
   std::unique_ptr<RuntimeHolder> runtime_holder_;
+
+  std::vector<WaitCallback> wait_callbacks_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(ApplicationControllerImpl);
 };
