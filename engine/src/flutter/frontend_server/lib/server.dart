@@ -11,7 +11,8 @@ import 'package:front_end/incremental_kernel_generator.dart';
 import 'package:front_end/compiler_options.dart';
 import 'package:front_end/kernel_generator.dart';
 import 'package:kernel/ast.dart';
-import 'package:kernel/kernel.dart' as kernel;
+import 'package:kernel/binary/ast_to_binary.dart';
+import 'package:kernel/binary/limited_ast_to_binary.dart';
 import 'package:kernel/target/flutter.dart';
 import 'package:kernel/target/targets.dart';
 import 'package:usage/uuid/uuid.dart';
@@ -82,32 +83,35 @@ abstract class CompilerInterface {
   void invalidate(Uri uri);
 }
 
-/// Class that for test mocking purposes encapsulates interaction with
-/// global kernel methods.
-class KernelSerializer {
-  /// Writes given kernel `program` to `path`.
-  Future<dynamic> writeProgramToBinary(Program program, String path) {
-    return kernel.writeProgramToBinary(program, path);
-  }
+/// Class that for test mocking purposes encapsulates creation of [BinaryPrinter].
+class BinaryPrinterFactory {
+  /// Creates new [BinaryPrinter] to write to [targetSink].
+  BinaryPrinter newBinaryPrinter(IOSink targetSink) {
+    return new LimitedBinaryPrinter(
+      targetSink,
+      (_) => true /* predicate */,
+      false /* excludeUriToSource */);  }
 }
 
 class _FrontendCompiler implements CompilerInterface {
-  _FrontendCompiler(this._outputStream, { this.kernelSerializer }) {
+  _FrontendCompiler(this._outputStream, { this.printerFactory }) {
     _outputStream ??= stdout;
-    kernelSerializer ??= new KernelSerializer();
+    printerFactory ??= new BinaryPrinterFactory();
   }
 
   StringSink _outputStream;
-  KernelSerializer kernelSerializer;
+  BinaryPrinterFactory printerFactory;
 
   IncrementalKernelGenerator _generator;
   String _filename;
+  String _kernelBinaryFilename;
 
   @override
   Future<Null> compile(String filename, ArgResults options, {
     IncrementalKernelGenerator generator,
   }) async {
     _filename = filename;
+    _kernelBinaryFilename = "$filename.dill";
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln("result $boundaryKey");
     final Uri sdkRoot = _ensureFolderPath(options['sdk-root']);
@@ -123,7 +127,7 @@ class _FrontendCompiler implements CompilerInterface {
       _generator = generator != null
         ? generator
         : await IncrementalKernelGenerator.newInstance(
-            compilerOptions, Uri.base.resolve(_filename)
+          compilerOptions, Uri.base.resolve(_filename)
         );
       final DeltaProgram deltaProgram = await _generator.computeDelta();
       program = deltaProgram.newProgram;
@@ -136,9 +140,11 @@ class _FrontendCompiler implements CompilerInterface {
       program = await kernelForProgram(Uri.base.resolve(_filename), compilerOptions);
     }
     if (program != null) {
-      final String kernelBinaryFilename = _filename + ".dill";
-      await kernelSerializer.writeProgramToBinary(program, kernelBinaryFilename);
-      _outputStream.writeln("$boundaryKey $kernelBinaryFilename");
+      final IOSink sink = new File(_kernelBinaryFilename).openWrite();
+      final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
+      printer.writeProgramFile(program);
+      _outputStream.writeln("$boundaryKey $_kernelBinaryFilename");
+      await sink.close();
     } else
       _outputStream.writeln(boundaryKey);
     return null;
@@ -149,10 +155,11 @@ class _FrontendCompiler implements CompilerInterface {
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln("result $boundaryKey");
     final DeltaProgram deltaProgram = await _generator.computeDelta();
-    final Program program = deltaProgram.newProgram;
-    final String kernelBinaryFilename = _filename + ".dill";
-    await kernelSerializer.writeProgramToBinary(program, kernelBinaryFilename);
+    final IOSink sink = new File(_kernelBinaryFilename).openWrite();
+    final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
+    printer.writeProgramFile(deltaProgram.newProgram);
     _outputStream.writeln("$boundaryKey");
+    await sink.close();
     return null;
   }
 
@@ -188,13 +195,13 @@ Future<int> starter(List<String> args, {
   CompilerInterface compiler,
   Stream<List<int>> input, StringSink output,
   IncrementalKernelGenerator generator,
-  KernelSerializer kernelSerializer
+  BinaryPrinterFactory binaryPrinterFactory,
 }) async {
   final ArgResults options = _argParser.parse(args);
   if (options['train'])
     return 0;
 
-  compiler ??= new _FrontendCompiler(output, kernelSerializer: kernelSerializer);
+  compiler ??= new _FrontendCompiler(output, printerFactory: binaryPrinterFactory);
   input ??= stdin;
 
   if (options.rest.isNotEmpty) {
@@ -205,9 +212,9 @@ Future<int> starter(List<String> args, {
   _State state = _State.READY_FOR_INSTRUCTION;
   String boundaryKey;
   input
-      .transform(UTF8.decoder)
-      .transform(new LineSplitter())
-      .listen((String string) async {
+    .transform(UTF8.decoder)
+    .transform(new LineSplitter())
+    .listen((String string) async {
     switch (state) {
       case _State.READY_FOR_INSTRUCTION:
         const String COMPILE_INSTRUCTION_SPACE = 'compile ';
