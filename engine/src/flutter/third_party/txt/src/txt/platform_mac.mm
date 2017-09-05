@@ -5,7 +5,7 @@
 #include <TargetConditionals.h>
 #include "txt/platform.h"
 
-#if TARGET_OS_EMBEDDED
+#if TARGET_OS_EMBEDDED || TARGET_OS_SIMULATOR
 #include <UIKit/UIKit.h>
 #define FONT_CLASS UIFont
 #else  // TARGET_OS_EMBEDDED
