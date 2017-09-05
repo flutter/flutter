@@ -301,7 +301,7 @@ void main() {
 
 Future<Null> _createProject(
     Directory dir, List<String> createArgs, List<String> expectedPaths,
-    { List<String> unexpectedPaths = const <String>[], bool plugin = false, bool pubGet = false }) async {
+    { List<String> unexpectedPaths = const <String>[], bool plugin = false}) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = new CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
