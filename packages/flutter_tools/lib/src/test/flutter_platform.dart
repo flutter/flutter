@@ -153,9 +153,8 @@ class _FlutterPlatform extends PlatformPlugin {
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
-      // Callback hookups' Futures are uninteresting.
-      // ignore: unawaited_futures
-      controller.sink.done.whenComplete(() { controllerSinkClosed = true; });
+      // Callback can't throw since it's just setting a variable.
+      controller.sink.done.whenComplete(() { controllerSinkClosed = true; }); // ignore: unawaited_futures
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, 0);
@@ -391,9 +390,8 @@ class _FlutterPlatform extends PlatformPlugin {
         }
       }
       if (!controllerSinkClosed) {
-        // Waiting below.
-        // ignore: unawaited_futures
-        controller.sink.close();
+        // Waiting below with await.
+        controller.sink.close(); // ignore: unawaited_futures
         printTrace('test $ourTestCount: waiting for controller sink to close');
         await controller.sink.done;
       }
