@@ -344,8 +344,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         final JSONObject annotatedEvent = (JSONObject)message;
         try {
             final int nodeId = annotatedEvent.getInt("nodeId");
-            final JSONObject event = annotatedEvent.getJSONObject("data");
-            final String type = event.getString("type");
+            final String type = annotatedEvent.getString("type");
 
             switch (type) {
                 case "scroll":
