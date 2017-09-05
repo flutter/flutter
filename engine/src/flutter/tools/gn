@@ -71,8 +71,14 @@ def to_gn_args(args):
     gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
     gn_args['is_clang'] = not sys.platform.startswith(('cygwin', 'win'))
 
+    enable_lto = args.lto
+    if args.unoptimized:
+      # There is no point in enabling LTO in unoptimized builds.
+      enable_lto = False
+
     if args.target_os != 'win':
-      gn_args['enable_lto'] = not args.unoptimized
+      # The GN arg is not available in the windows toolchain.
+      gn_args['enable_lto'] = enable_lto
 
     aot = args.runtime_mode != 'debug'
     if args.target_os == 'android':
@@ -186,6 +192,9 @@ def parse_args(args):
 
   parser.add_argument('--goma', default=True, action='store_true')
   parser.add_argument('--no-goma', dest='goma', action='store_false')
+
+  parser.add_argument('--lto', default=True, action='store_true')
+  parser.add_argument('--no-lto', dest='lto', action='store_false')
 
   parser.add_argument('--clang', default=True, action='store_true')
   parser.add_argument('--no-clang', dest='clang', action='store_false')
