@@ -20,7 +20,9 @@ String _dartExecutable() {
     Artifact.engineDartSdkPath
   );
   if (!fs.isDirectorySync(engineDartSdkPath)) {
-    throwToolExit('No dart sdk Flutter host engine build found at $engineDartSdkPath.', exitCode: 2);
+    throwToolExit('No dart sdk Flutter host engine build found at $engineDartSdkPath.\n'
+      'Note that corresponding host engine build is required even when targeting particular device platforms.',
+      exitCode: 2);
   }
   return fs.path.join(engineDartSdkPath, 'bin', 'dart');
 }
