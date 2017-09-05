@@ -110,6 +110,21 @@ void main() {
         ' └SemanticsNode(6; Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
     );
   });
+
+  test('reset clears tags', () {
+    const SemanticsTag tag = const SemanticsTag('tag for testing');
+    final SemanticsNode node = new SemanticsNode();
+
+    expect(node.hasTag(tag), isFalse);
+
+    node.addTag(tag);
+
+    expect(node.hasTag(tag), isTrue);
+
+    node.reset();
+
+    expect(node.hasTag(tag), isFalse);
+  });
 }
 
 class TestRender extends RenderProxyBox {
