@@ -91,7 +91,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'Your Mac needs to enabled for developer mode before using Xcode for the first time.\n'
-          'Run \'sudo DevToolsSecurity -enable\' or open Xcode'
+          'Run \'sudo DevToolsSecurity -enable\' to enable developer mode.'
         ));
       }
 
