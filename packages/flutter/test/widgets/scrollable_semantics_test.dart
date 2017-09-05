@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -71,6 +72,128 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
 
     expect(scrollController.offset, 0.0);
+  });
+
+  testWidgets('showOnScreen works with pinned app bar and sliver list', (WidgetTester tester) async {
+    new SemanticsTester(tester); // enables semantics tree generation
+
+    const double kItemHeight = 100.0;
+    const double kExpandedAppBarHeight = 56.0;
+
+    final List<Widget> containers = <Widget>[];
+    for (int i = 0; i < 80; i++)
+      containers.add(new MergeSemantics(child: new Container(
+        height: kItemHeight,
+        child: new Text('container $i'),
+      )));
+
+    final ScrollController scrollController = new ScrollController(
+      initialScrollOffset: kItemHeight / 2,
+    );
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+      data: const MediaQueryData(),
+        child: new Scrollable(
+        controller: scrollController,
+        viewportBuilder: (BuildContext context, ViewportOffset offset) {
+          return new Viewport(
+            offset: offset,
+            slivers: <Widget>[
+              const SliverAppBar(
+                pinned: true,
+                expandedHeight: kExpandedAppBarHeight,
+                flexibleSpace: const FlexibleSpaceBar(
+                  title: const Text('App Bar'),
+                ),
+              ),
+              new SliverList(
+                delegate: new SliverChildListDelegate(containers),
+              )
+            ],
+          );
+        }),
+      ),
+    ));
+
+    expect(scrollController.offset, kItemHeight / 2);
+
+    final int firstContainerId = tester.renderObject(find.byWidget(containers.first)).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(firstContainerId, SemanticsAction.showOnScreen);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.getTopLeft(find.byWidget(containers.first)).dy, kExpandedAppBarHeight);
+
+    final int secondContainerId = tester.renderObject(find.byWidget(containers[1])).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(secondContainerId, SemanticsAction.showOnScreen);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.getTopLeft(find.byWidget(containers[1])).dy, kExpandedAppBarHeight);
+  });
+
+  testWidgets('showOnScreen works with pinned app bar and individual slivers', (WidgetTester tester) async {
+    new SemanticsTester(tester); // enables semantics tree generation
+
+    const double kItemHeight = 100.0;
+    const double kExpandedAppBarHeight = 256.0;
+
+
+    final List<Widget> semantics = <Widget>[];
+    final List<Widget> slivers = new List<Widget>.generate(30, (int i) {
+      final Widget child = new MergeSemantics(
+        child: new Container(
+          child: new Text('Item $i'),
+          height: 72.0,
+        ),
+      );
+      semantics.add(child);
+      return new SliverToBoxAdapter(
+        child: child,
+      );
+    });
+
+    final ScrollController scrollController = new ScrollController(
+      initialScrollOffset: kItemHeight / 2,
+    );
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child:new MediaQuery(
+        data: const MediaQueryData(),
+        child: new Scrollable(
+          controller: scrollController,
+          viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            return new Viewport(
+              offset: offset,
+              slivers: <Widget>[
+                const SliverAppBar(
+                  pinned: true,
+                  expandedHeight: kExpandedAppBarHeight,
+                  flexibleSpace: const FlexibleSpaceBar(
+                    title: const Text('App Bar'),
+                  ),
+                ),
+              ]..addAll(slivers),
+            );
+          },
+        ),
+      ),
+    ));
+
+    expect(scrollController.offset, kItemHeight / 2);
+
+    final int id0 = tester.renderObject(find.byWidget(semantics[0])).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(id0, SemanticsAction.showOnScreen);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.getTopLeft(find.byWidget(semantics[0])).dy, kToolbarHeight);
+
+    final int id1 = tester.renderObject(find.byWidget(semantics[1])).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(id1, SemanticsAction.showOnScreen);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.getTopLeft(find.byWidget(semantics[1])).dy, kToolbarHeight);
   });
 }
 
