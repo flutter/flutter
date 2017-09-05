@@ -39,7 +39,7 @@ void main() {
     testUsingContext('project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--no-pub'],
+        <String>[],
         <String>[
           'android/app/src/main/java/com/yourcompany/flutterproject/MainActivity.java',
           'ios/Runner/AppDelegate.h',
@@ -73,7 +73,7 @@ void main() {
     testUsingContext('package project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--no-pub', '--template=package'],
+        <String>['--template=package'],
         <String>[
           'lib/flutter_project.dart',
           'test/flutter_project_test.dart',
@@ -100,7 +100,7 @@ void main() {
     testUsingContext('plugin project', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--no-pub', '--template=plugin'],
+        <String>['--template=plugin'],
         <String>[
           'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
           'ios/Classes/FlutterProjectPlugin.h',
@@ -180,7 +180,7 @@ void main() {
     testUsingContext('project with-driver-test', () async {
       return _createAndAnalyzeProject(
         projectDir,
-        <String>['--no-pub', '--with-driver-test'],
+        <String>['--with-driver-test'],
         <String>['lib/main.dart'],
       );
     });
