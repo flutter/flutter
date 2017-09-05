@@ -394,9 +394,9 @@ class AppDomain extends Domain {
 
     if (options.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
-      // Callback failures are unlikely.
-      // ignore: unawaited_futures
-      connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) {
+      // We don't want to wait for this future to complete and callbacks won't fail.
+      // As it just writes to stdout.
+      connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) { // ignore: unawaited_futures
         final Map<String, dynamic> params = <String, dynamic>{
           'port': info.httpUri.port,
           'wsUri': info.wsUri.toString(),
@@ -407,9 +407,9 @@ class AppDomain extends Domain {
       });
     }
     final Completer<Null> appStartedCompleter = new Completer<Null>();
-    // Callback failures are unlikely.
-    // ignore: unawaited_futures
-    appStartedCompleter.future.then<Null>((Null value) {
+    // We don't want to wait for this future to complete and callbacks won't fail.
+    // As it just writes to stdout.
+    appStartedCompleter.future.then<Null>((Null value) { // ignore: unawaited_futures
       _sendAppEvent(app, 'started');
     });
 
