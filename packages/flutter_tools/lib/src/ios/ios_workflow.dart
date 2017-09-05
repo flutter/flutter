@@ -34,7 +34,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
 
-  String get iosDeployMinimumVersion => '1.9.0';
+  String get iosDeployMinimumVersion => '1.9.2';
 
   Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
