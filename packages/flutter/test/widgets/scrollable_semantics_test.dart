@@ -84,7 +84,7 @@ void main() {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
-      data: new MediaQueryData(),
+      data: const MediaQueryData(),
         child: new Scrollable(
         controller: scrollController,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
@@ -150,7 +150,7 @@ void main() {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child:new MediaQuery(
-        data: new MediaQueryData(),
+        data: const MediaQueryData(),
         child: new Scrollable(
           controller: scrollController,
           viewportBuilder: (BuildContext context, ViewportOffset offset) {
