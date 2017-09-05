@@ -114,7 +114,7 @@ $assetsSection
       writePubspecFile('pubspec.yaml', 'test');
       writePackagesFile('test_package:p/p/lib/');
 
-      final List<String> assets = ['a/foo'];
+      final List<String> assets = <String>['a/foo'];
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',

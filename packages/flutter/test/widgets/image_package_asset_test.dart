@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('AssetImage from package', () {
-    final AssetImage image = new AssetImage(
+    final AssetImage image = const AssetImage(
       'assets/image.png',
       package: 'test_package',
     );
@@ -16,7 +16,7 @@ void main() {
   });
 
   test('ExactAssetImage from package', () {
-    final ExactAssetImage image = new ExactAssetImage(
+    final ExactAssetImage image = const ExactAssetImage(
       'assets/image.png',
       scale: 1.5,
       package: 'test_package',
