@@ -208,7 +208,10 @@ void main() {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
       textWidgets.add(new Text('$i'));
-    await tester.pumpWidget(new ListView(children: textWidgets));
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView(children: textWidgets),
+    ));
 
     await flingUp(tester);
 
