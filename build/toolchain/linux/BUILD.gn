@@ -88,6 +88,28 @@ gcc_toolchain("clang_x64") {
   is_clang = true
 }
 
+gcc_toolchain("clang_arm64") {
+  if (use_clang_type_profiler) {
+    prefix = rebase_path("//third_party/llvm-allocated-type/Linux_x64/bin",
+                         root_build_dir)
+  } else {
+    prefix = rebase_path("//buildtools/toolchain/clang+llvm-x86_64-linux/bin",
+                         root_build_dir)
+  }
+  cc = "${compiler_prefix}$prefix/clang"
+  cxx = "${compiler_prefix}$prefix/clang++"
+
+  readelf = "readelf"
+  nm = "nm"
+  ar = "ar"
+  ld = cxx
+  strip = "strip"
+
+  toolchain_cpu = "arm64"
+  toolchain_os = "linux"
+  is_clang = true
+}
+
 gcc_toolchain("x64") {
   cc = "${compiler_prefix}gcc"
   cxx = "${compiler_prefix}g++"
