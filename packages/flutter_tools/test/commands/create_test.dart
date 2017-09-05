@@ -49,7 +49,7 @@ void main() {
           'test/widget_test.dart'
         ],
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('kotlin/swift project', () async {
       return _createProject(
@@ -95,7 +95,7 @@ void main() {
           'test/widget_test.dart',
         ],
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('plugin project', () async {
       return _createAndAnalyzeProject(
@@ -114,7 +114,7 @@ void main() {
         ],
         plugin: true,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('plugin project (legacy)', () async {
       return _createProject(
@@ -183,7 +183,7 @@ void main() {
         <String>['--with-driver-test'],
         <String>['lib/main.dart'],
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     // Verify content and formatting
     testUsingContext('content', () async {
