@@ -661,7 +661,8 @@ class SemanticsNode extends AbstractNode {
 
   /// Sends a [SemanticsEvent] associated with this [SemanticsNode].
   void sendEvent(SemanticsEvent event) {
-    assert(attached);
+    if (!attached)
+      return;
     assert(!_dirty);
     final Map<String, dynamic> annotatedEvent = <String, dynamic>{
       'nodeId': id,
