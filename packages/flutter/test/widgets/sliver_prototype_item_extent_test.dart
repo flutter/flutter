@@ -114,17 +114,20 @@ void main() {
     }).toList();
 
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new SliverPrototypeExtentList(
-            prototypeItem: items[0],
-            delegate: new SliverChildBuilderDelegate(
-              (BuildContext context, int index) => items[index],
-              childCount: 10,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverPrototypeExtentList(
+              prototypeItem: items[0],
+              delegate: new SliverChildBuilderDelegate(
+                (BuildContext context, int index) => items[index],
+                childCount: 10,
+              ),
             ),
-          ),
-        ],
-      )
+          ],
+        ),
+      ),
     );
 
     // Item 0 exists in the list and as the prototype item.

@@ -7,17 +7,22 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 Future<Null> test(WidgetTester tester, double offset, { double anchor: 0.0 }) {
-  return tester.pumpWidget(new Viewport(
-    anchor: anchor / 600.0,
-    offset: new ViewportOffset.fixed(offset),
-    slivers: <Widget>[
-      const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-      const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-      const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-      const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-      const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
-    ],
-  ));
+  return tester.pumpWidget(
+    new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Viewport(
+        anchor: anchor / 600.0,
+        offset: new ViewportOffset.fixed(offset),
+        slivers: <Widget>[
+          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 400.0)),
+        ],
+      ),
+    ),
+  );
 }
 
 void verify(WidgetTester tester, List<Offset> idealPositions, List<bool> idealVisibles) {

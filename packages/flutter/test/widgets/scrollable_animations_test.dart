@@ -12,10 +12,15 @@ void main() {
     for (int i = 0; i < 80; i++)
       textWidgets.add(new Text('$i'));
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      children: textWidgets,
-      controller: controller,
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: textWidgets,
+          controller: controller,
+        ),
+      ),
+    );
 
     expectNoAnimation();
     final double currentPosition = controller.position.pixels;
@@ -30,10 +35,15 @@ void main() {
     for (int i = 0; i < 80; i++)
       textWidgets.add(new Text('$i'));
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      children: textWidgets,
-      controller: controller,
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: textWidgets,
+          controller: controller,
+        ),
+      ),
+    );
 
     expectNoAnimation();
 
@@ -51,10 +61,15 @@ void main() {
     for (int i = 0; i < 80; i++)
       textWidgets.add(new Text('$i'));
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      children: textWidgets,
-      controller: controller,
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: textWidgets,
+          controller: controller,
+        ),
+      ),
+    );
 
     expectNoAnimation();
 

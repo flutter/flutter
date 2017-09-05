@@ -182,12 +182,15 @@ void main() {
       );
     });
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
-          height: containerHeight,
-          child: new CustomScrollView(
-            controller: scrollController,
-            slivers: slivers,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new SizedBox(
+            height: containerHeight,
+            child: new CustomScrollView(
+              controller: scrollController,
+              slivers: slivers,
+            ),
           ),
         ),
       ),
@@ -237,8 +240,11 @@ void main() {
       );
     });
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: slivers,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: slivers,
+        ),
       ),
     );
 

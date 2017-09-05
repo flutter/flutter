@@ -282,80 +282,83 @@ class _TestState extends State<Test> {
 
   @override
   Widget build(BuildContext context) {
-    return new Column(
-      children: <Widget>[
-        new Expanded(
-          child: new ListView(
-            controller: _beforeController,
-            children: <Widget>[
-              new Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                height: 250.0,
-                color: const Color(0xFF90F090),
-                child: const Center(child: const Text('Hello A')),
-              ),
-              new Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                height: 250.0,
-                color: const Color(0xFF90F090),
-                child: const Center(child: const Text('Hello B')),
-              ),
-              new Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                height: 250.0,
-                color: const Color(0xFF90F090),
-                child: const Center(child: const Text('Hello C')),
-              ),
-              new Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                height: 250.0,
-                color: const Color(0xFF90F090),
-                child: const Center(child: const Text('Hello D')),
-              ),
-            ],
+    return new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Column(
+        children: <Widget>[
+          new Expanded(
+            child: new ListView(
+              controller: _beforeController,
+              children: <Widget>[
+                new Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  height: 250.0,
+                  color: const Color(0xFF90F090),
+                  child: const Center(child: const Text('Hello A')),
+                ),
+                new Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  height: 250.0,
+                  color: const Color(0xFF90F090),
+                  child: const Center(child: const Text('Hello B')),
+                ),
+                new Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  height: 250.0,
+                  color: const Color(0xFF90F090),
+                  child: const Center(child: const Text('Hello C')),
+                ),
+                new Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  height: 250.0,
+                  color: const Color(0xFF90F090),
+                  child: const Center(child: const Text('Hello D')),
+                ),
+              ],
+            ),
           ),
-        ),
-        const Divider(),
-        new Expanded(
-          child: new ListView(
-            controller: _afterController,
-            children: <Widget>[
-              new Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                height: 250.0,
-                color: const Color(0xFF9090F0),
-                child: const Center(child: const Text('Hello 1')),
-              ),
-              new Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                height: 250.0,
-                color: const Color(0xFF9090F0),
-                child: const Center(child: const Text('Hello 2')),
-              ),
-              new Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                height: 250.0,
-                color: const Color(0xFF9090F0),
-                child: const Center(child: const Text('Hello 3')),
-              ),
-              new Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                height: 250.0,
-                color: const Color(0xFF9090F0),
-                child: const Center(child: const Text('Hello 4')),
-              ),
-            ],
+          const Divider(),
+          new Expanded(
+            child: new ListView(
+              controller: _afterController,
+              children: <Widget>[
+                new Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  height: 250.0,
+                  color: const Color(0xFF9090F0),
+                  child: const Center(child: const Text('Hello 1')),
+                ),
+                new Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  height: 250.0,
+                  color: const Color(0xFF9090F0),
+                  child: const Center(child: const Text('Hello 2')),
+                ),
+                new Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  height: 250.0,
+                  color: const Color(0xFF9090F0),
+                  child: const Center(child: const Text('Hello 3')),
+                ),
+                new Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  height: 250.0,
+                  color: const Color(0xFF9090F0),
+                  child: const Center(child: const Text('Hello 4')),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

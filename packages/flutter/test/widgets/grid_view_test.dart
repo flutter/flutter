@@ -10,29 +10,39 @@ import 'states.dart';
 
 void main() {
   testWidgets('Empty GridView', (WidgetTester tester) async {
-    await tester.pumpWidget(new GridView.count(
-      crossAxisCount: 4,
-      children: const <Widget>[],
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.count(
+          crossAxisCount: 4,
+          children: const <Widget>[],
+        ),
+      ),
+    );
   });
 
   testWidgets('GridView.count control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new GridView.count(
-      crossAxisCount: 4,
-      children: kStates.map((String state) {
-        return new GestureDetector(
-          onTap: () {
-            log.add(state);
-          },
-          child: new Container(
-            color: const Color(0xFF0000FF),
-            child: new Text(state),
-          ),
-        );
-      }).toList(),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.count(
+          crossAxisCount: 4,
+          children: kStates.map((String state) {
+            return new GestureDetector(
+              onTap: () {
+                log.add(state);
+              },
+              child: new Container(
+                color: const Color(0xFF0000FF),
+                child: new Text(state),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
 
     expect(tester.getSize(find.text('Arkansas')), equals(const Size(200.0, 200.0)));
 
@@ -85,20 +95,25 @@ void main() {
   testWidgets('GridView.extent control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new GridView.extent(
-      maxCrossAxisExtent: 200.0,
-      children: kStates.map((String state) {
-        return new GestureDetector(
-          onTap: () {
-            log.add(state);
-          },
-          child: new Container(
-            color: const Color(0xFF0000FF),
-            child: new Text(state),
-          ),
-        );
-      }).toList(),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.extent(
+          maxCrossAxisExtent: 200.0,
+          children: kStates.map((String state) {
+            return new GestureDetector(
+              onTap: () {
+                log.add(state);
+              },
+              child: new Container(
+                color: const Color(0xFF0000FF),
+                child: new Text(state),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
 
     expect(tester.getSize(find.text('Arkansas')), equals(const Size(200.0, 200.0)));
 
@@ -126,24 +141,26 @@ void main() {
   testWidgets('GridView large scroll jump', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new GridView.extent(
-        scrollDirection: Axis.horizontal,
-        maxCrossAxisExtent: 200.0,
-        childAspectRatio: 0.75,
-        children: new List<Widget>.generate(80, (int i) {
-          return new Builder(
-            builder: (BuildContext context) {
-              log.add(i);
-              return new Container(
-                child: new Text('$i'),
-              );
-            }
-          );
-        }),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.extent(
+          scrollDirection: Axis.horizontal,
+          maxCrossAxisExtent: 200.0,
+          childAspectRatio: 0.75,
+          children: new List<Widget>.generate(80, (int i) {
+            return new Builder(
+              builder: (BuildContext context) {
+                log.add(i);
+                return new Container(
+                  child: new Text('$i'),
+                );
+              }
+            );
+          }),
+        ),
       ),
-    ));
+    );
 
     expect(tester.getSize(find.text('4')), equals(const Size(200.0 / 0.75, 200.0)));
 
@@ -153,7 +170,6 @@ void main() {
       6, 7, 8, // col 2
     ]));
     log.clear();
-
 
     final ScrollableState state = tester.state(find.byType(Scrollable));
     final ScrollPosition position = state.position;
@@ -188,20 +204,23 @@ void main() {
     final List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new GridView(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+          ),
+          children: new List<Widget>.generate(40, (int i) {
+            return new Builder(
+              builder: (BuildContext context) {
+                log.add(i);
+                return new Container(
+                  child: new Text('$i'),
+                );
+              }
+            );
+          }),
         ),
-        children: new List<Widget>.generate(40, (int i) {
-          return new Builder(
-            builder: (BuildContext context) {
-              log.add(i);
-              return new Container(
-                child: new Text('$i'),
-              );
-            }
-          );
-        }),
       ),
     );
 
@@ -215,20 +234,23 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(
-      new GridView(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+          ),
+          children: new List<Widget>.generate(40, (int i) {
+            return new Builder(
+              builder: (BuildContext context) {
+                log.add(i);
+                return new Container(
+                  child: new Text('$i'),
+                );
+              }
+            );
+          }),
         ),
-        children: new List<Widget>.generate(40, (int i) {
-          return new Builder(
-            builder: (BuildContext context) {
-              log.add(i);
-              return new Container(
-                child: new Text('$i'),
-              );
-            }
-          );
-        }),
       ),
     );
 
@@ -247,20 +269,23 @@ void main() {
     final List<int> log = <int>[];
 
     await tester.pumpWidget(
-      new GridView(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 200.0,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView(
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 200.0,
+          ),
+          children: new List<Widget>.generate(40, (int i) {
+            return new Builder(
+              builder: (BuildContext context) {
+                log.add(i);
+                return new Container(
+                  child: new Text('$i'),
+                );
+              }
+            );
+          }),
         ),
-        children: new List<Widget>.generate(40, (int i) {
-          return new Builder(
-            builder: (BuildContext context) {
-              log.add(i);
-              return new Container(
-                child: new Text('$i'),
-              );
-            }
-          );
-        }),
       ),
     );
 
@@ -274,20 +299,23 @@ void main() {
     log.clear();
 
     await tester.pumpWidget(
-      new GridView(
-        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 400.0,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView(
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 400.0,
+          ),
+          children: new List<Widget>.generate(40, (int i) {
+            return new Builder(
+              builder: (BuildContext context) {
+                log.add(i);
+                return new Container(
+                  child: new Text('$i'),
+                );
+              }
+            );
+          }),
         ),
-        children: new List<Widget>.generate(40, (int i) {
-          return new Builder(
-            builder: (BuildContext context) {
-              log.add(i);
-              return new Container(
-                child: new Text('$i'),
-              );
-            }
-          );
-        }),
       ),
     );
 
@@ -311,15 +339,20 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(new Center(
-      child: new SizedBox(
-        height: 200.0,
-        child: new GridView.count(
-          crossAxisCount: 2,
-          children: <Widget>[ container, container, container, container ],
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new SizedBox(
+            height: 200.0,
+            child: new GridView.count(
+              crossAxisCount: 2,
+              children: <Widget>[ container, container, container, container ],
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(find.byType(GridView), paints..rect(color: green)..rect(color: green));
     expect(find.byType(GridView), isNot(paints..rect(color: green)..rect(color: green)..rect(color: green)));
@@ -327,17 +360,20 @@ void main() {
 
   testWidgets('GridView in zero context', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
-          width: 0.0,
-          height: 0.0,
-          child: new GridView.count(
-            crossAxisCount: 4,
-            children: new List<Widget>.generate(20, (int i) {
-              return new Container(
-                child: new Text('$i'),
-              );
-            }),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new SizedBox(
+            width: 0.0,
+            height: 0.0,
+            child: new GridView.count(
+              crossAxisCount: 4,
+              children: new List<Widget>.generate(20, (int i) {
+                return new Container(
+                  child: new Text('$i'),
+                );
+              }),
+            ),
           ),
         ),
       ),
@@ -349,15 +385,18 @@ void main() {
 
   testWidgets('GridView in unbounded context', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new SingleChildScrollView(
-        child: new GridView.count(
-          crossAxisCount: 4,
-          shrinkWrap: true,
-          children: new List<Widget>.generate(20, (int i) {
-            return new Container(
-              child: new Text('$i'),
-            );
-          }),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SingleChildScrollView(
+          child: new GridView.count(
+            crossAxisCount: 4,
+            shrinkWrap: true,
+            children: new List<Widget>.generate(20, (int i) {
+              return new Container(
+                child: new Text('$i'),
+              );
+            }),
+          ),
         ),
       ),
     );
@@ -367,21 +406,52 @@ void main() {
   });
 
   testWidgets('GridView.builder control test', (WidgetTester tester) async {
-    await tester.pumpWidget(new GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+          ),
+          shrinkWrap: true,
+          itemCount: 20,
+          itemBuilder: (BuildContext context, int index) {
+            return new Container(
+              child: new Text('$index'),
+            );
+          },
+        ),
       ),
-      shrinkWrap: true,
-      itemCount: 20,
-      itemBuilder: (BuildContext context, int index) {
-        return new Container(
-          child: new Text('$index'),
-        );
-      },
-    ));
+    );
     expect(find.text('0'), findsOneWidget);
     expect(find.text('11'), findsOneWidget);
     expect(find.text('12'), findsNothing);
+  });
+
+  testWidgets('GridView cross axis layout', (WidgetTester tester) async {
+    final Key target = new UniqueKey();
+
+    Widget build(TextDirection textDirection) {
+      return new Directionality(
+        textDirection: textDirection,
+        child: new GridView.count(
+          crossAxisCount: 4,
+          children: <Widget>[
+            new Container(key: target),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(TextDirection.ltr));
+
+    expect(tester.getTopLeft(find.byKey(target)), Offset.zero);
+    expect(tester.getBottomRight(find.byKey(target)), const Offset(200.0, 200.0));
+
+    await tester.pumpWidget(build(TextDirection.rtl));
+
+    expect(tester.getTopLeft(find.byKey(target)), const Offset(600.0, 0.0));
+    expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 200.0));
   });
 
   // TODO(ianh): can you tap a grid cell that is slightly off the bottom of the screen?

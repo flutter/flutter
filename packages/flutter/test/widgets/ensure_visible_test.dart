@@ -387,29 +387,34 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(new Center(
-        child: new SizedBox(
-          width: 600.0,
-          height: 400.0,
-          child: new Scrollable(
-            viewportBuilder: (BuildContext context, ViewportOffset offset) {
-              return new Viewport(
-                offset: offset,
-                center: const ValueKey<int>(4),
-                slivers: <Widget>[
-                  buildSliver(0),
-                  buildSliver(1),
-                  buildSliver(2),
-                  buildSliver(3),
-                  buildSliver(4),
-                  buildSliver(5),
-                  buildSliver(6),
-                ],
-              );
-            },
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Center(
+            child: new SizedBox(
+              width: 600.0,
+              height: 400.0,
+              child: new Scrollable(
+                viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                  return new Viewport(
+                    offset: offset,
+                    center: const ValueKey<int>(4),
+                    slivers: <Widget>[
+                      buildSliver(0),
+                      buildSliver(1),
+                      buildSliver(2),
+                      buildSliver(3),
+                      buildSliver(4),
+                      buildSliver(5),
+                      buildSliver(6),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
-      ));
+      );
 
       await prepare(-125.0);
       Scrollable.ensureVisible(findContext(3));
@@ -628,35 +633,40 @@ void main() {
         await tester.pump();
       }
 
-      await tester.pumpWidget(new Center(
-        child: new SizedBox(
-          width: 600.0,
-          height: 400.0,
-          child: new Scrollable(
-            viewportBuilder: (BuildContext context, ViewportOffset offset) {
-              return new Viewport(
-                offset: offset,
-                center: const ValueKey<String>('center'),
-                slivers: <Widget>[
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-6), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-5), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-4), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-3), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-2), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-1), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0), key: const ValueKey<String>('center')),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0)),
-                  new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0)),
-                ],
-              );
-            },
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Center(
+            child: new SizedBox(
+              width: 600.0,
+              height: 400.0,
+              child: new Scrollable(
+                viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                  return new Viewport(
+                    offset: offset,
+                    center: const ValueKey<String>('center'),
+                    slivers: <Widget>[
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-6), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-5), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-4), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-3), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-2), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-1), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0), key: const ValueKey<String>('center')),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0)),
+                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0)),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
-      ));
+      );
 
       await prepare(480.0);
       Scrollable.ensureVisible(findContext(3));

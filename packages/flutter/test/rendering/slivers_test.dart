@@ -11,6 +11,7 @@ import 'rendering_tester.dart';
 void main() {
   test('RenderViewport basic test - no children', () {
     final RenderViewport root = new RenderViewport(
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
     );
     expect(root, hasAGoodToStringDeep);
@@ -22,6 +23,7 @@ void main() {
         '   constraints: null\n'
         '   size: MISSING\n'
         '   axisDirection: down\n'
+        '   crossAxisDirection: right\n'
         '   offset: _FixedViewportOffset#00000(offset: 0.0)\n'
         '   anchor: 0.0\n'
       ),
@@ -37,6 +39,7 @@ void main() {
         '   constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '   size: Size(800.0, 600.0)\n'
         '   axisDirection: down\n'
+        '   crossAxisDirection: right\n'
         '   offset: _FixedViewportOffset#00000(offset: 900.0)\n'
         '   anchor: 0.0\n',
       ),
@@ -48,6 +51,7 @@ void main() {
   test('RenderViewport basic test - down', () {
     RenderBox a, b, c, d, e;
     final RenderViewport root = new RenderViewport(
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -72,6 +76,7 @@ void main() {
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
         ' │ axisDirection: down\n'
+        ' │ crossAxisDirection: right\n'
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
         ' │ anchor: 0.0\n'
         ' │\n'
@@ -80,6 +85,7 @@ void main() {
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │ │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
+        ' │ │   crossAxisDirection: AxisDirection.right,\n'
         ' │ │   viewportMainAxisExtent: 600.0)\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, paintExtent: 400.0,\n'
         ' │ │   maxPaintExtent: 400.0)\n'
@@ -94,6 +100,7 @@ void main() {
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │ │   0.0, remainingPaintExtent: 200.0, crossAxisExtent: 800.0,\n'
+        ' │ │   crossAxisDirection: AxisDirection.right,\n'
         ' │ │   viewportMainAxisExtent: 600.0)\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, paintExtent: 200.0,\n'
         ' │ │   maxPaintExtent: 400.0, hasVisualOverflow: true)\n'
@@ -108,6 +115,7 @@ void main() {
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │ │   0.0, remainingPaintExtent: 0.0, crossAxisExtent: 800.0,\n'
+        ' │ │   crossAxisDirection: AxisDirection.right,\n'
         ' │ │   viewportMainAxisExtent: 600.0)\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, hidden,\n'
         ' │ │   maxPaintExtent: 400.0, hasVisualOverflow: true)\n'
@@ -122,6 +130,7 @@ void main() {
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │ │   0.0, remainingPaintExtent: 0.0, crossAxisExtent: 800.0,\n'
+        ' │ │   crossAxisDirection: AxisDirection.right,\n'
         ' │ │   viewportMainAxisExtent: 600.0)\n'
         ' │ │ geometry: SliverGeometry(scrollExtent: 400.0, hidden,\n'
         ' │ │   maxPaintExtent: 400.0, hasVisualOverflow: true)\n'
@@ -136,6 +145,7 @@ void main() {
         '   │ constraints: SliverConstraints(AxisDirection.down,\n'
         '   │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         '   │   0.0, remainingPaintExtent: 0.0, crossAxisExtent: 800.0,\n'
+        '   │   crossAxisDirection: AxisDirection.right,\n'
         '   │   viewportMainAxisExtent: 600.0)\n'
         '   │ geometry: SliverGeometry(scrollExtent: 400.0, hidden,\n'
         '   │   maxPaintExtent: 400.0, hasVisualOverflow: true)\n'
@@ -143,7 +153,7 @@ void main() {
         '   └─child: RenderSizedBox#00000 NEEDS-PAINT\n'
         '       parentData: paintOffset=Offset(0.0, -0.0) (can use size)\n'
         '       constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
-        '       size: Size(800.0, 400.0)\n',
+        '       size: Size(800.0, 400.0)\n'
       ),
     );
     expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
@@ -191,6 +201,7 @@ void main() {
     RenderBox a, b, c, d, e;
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.up,
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -249,6 +260,7 @@ void main() {
     RenderBox a, b, c, d, e;
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.right,
+      crossAxisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(400.0, 100.0))),
@@ -332,6 +344,7 @@ void main() {
     RenderBox a, b, c, d, e;
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.left,
+      crossAxisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(400.0, 100.0))),
@@ -387,6 +400,7 @@ void main() {
 
   test('RenderShrinkWrappingViewport basic test - no children', () {
     final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
     );
     expect(root, hasAGoodToStringDeep);
@@ -398,6 +412,7 @@ void main() {
   test('RenderShrinkWrappingViewport basic test - down', () {
     RenderBox a, b, c, d, e;
     final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -457,6 +472,7 @@ void main() {
     RenderBox a, b, c, d, e;
     final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.up,
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -510,6 +526,7 @@ void main() {
     RenderBox a, b, c, d, e;
     final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.right,
+      crossAxisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(400.0, 100.0))),
@@ -563,6 +580,7 @@ void main() {
     RenderBox a, b, c, d, e;
     final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.left,
+      crossAxisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(400.0, 100.0))),
@@ -617,6 +635,7 @@ void main() {
     final RenderBox root = new RenderPositionedBox(
       child: child = new RenderShrinkWrappingViewport(
         axisDirection: AxisDirection.left,
+        crossAxisDirection: AxisDirection.down,
         offset: new ViewportOffset.fixed(200.0),
         children: <RenderSliver>[
           new RenderSliverToBoxAdapter(child: new RenderSizedBox(const Size(400.0, 100.0))),
@@ -636,6 +655,7 @@ void main() {
     final RenderBox root = new RenderPositionedBox(
       child: child = new RenderShrinkWrappingViewport(
         axisDirection: AxisDirection.right,
+        crossAxisDirection: AxisDirection.down,
         offset: new ViewportOffset.fixed(200.0),
         children: <RenderSliver>[
           new RenderSliverToBoxAdapter(child: new RenderSizedBox(const Size(300.0, 100.0))),
@@ -687,6 +707,7 @@ void main() {
     );
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         sliver,
@@ -708,6 +729,7 @@ void main() {
     );
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.right,
+      crossAxisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         sliver,

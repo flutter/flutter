@@ -121,19 +121,24 @@ void main() {
 
   testWidgets('splashing survives scrolling when keep-alive is enabled', (WidgetTester tester) async {
     Future<Null> runTest(bool keepAlive) async {
-      await tester.pumpWidget(new Material(
-        child: new CompositedTransformFollower( // forces a layer, which makes the paints easier to separate out
-          link: new LayerLink(),
-          child: new ListView(
-            addAutomaticKeepAlives: keepAlive,
-            children: <Widget>[
-              new Container(height: 500.0, child: new InkWell(onTap: () { }, child: const Placeholder())),
-              new Container(height: 500.0),
-              new Container(height: 500.0),
-            ],
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Material(
+            child: new CompositedTransformFollower( // forces a layer, which makes the paints easier to separate out
+              link: new LayerLink(),
+              child: new ListView(
+                addAutomaticKeepAlives: keepAlive,
+                children: <Widget>[
+                  new Container(height: 500.0, child: new InkWell(onTap: () { }, child: const Placeholder())),
+                  new Container(height: 500.0),
+                  new Container(height: 500.0),
+                ],
+              ),
+            ),
           ),
         ),
-      ));
+      );
       expect(tester.renderObject<RenderProxyBox>(find.byType(PhysicalModel)).child, paintsNothing);
       await tester.tap(find.byType(InkWell));
       await tester.pump();

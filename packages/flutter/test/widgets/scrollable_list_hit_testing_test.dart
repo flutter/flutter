@@ -11,26 +11,28 @@ const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 void main() {
   testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new Center(
-        child: new Container(
-          height: 50.0,
-          child: new ListView(
-            itemExtent: 290.0,
-            scrollDirection: Axis.horizontal,
-            children: items.map((int item) {
-              return new Container(
-                child: new GestureDetector(
-                  onTap: () { tapped.add(item); },
-                  child: new Text('$item'),
-                ),
-              );
-            }).toList(),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 50.0,
+            child: new ListView(
+              itemExtent: 290.0,
+              scrollDirection: Axis.horizontal,
+              children: items.map((int item) {
+                return new Container(
+                  child: new GestureDetector(
+                    onTap: () { tapped.add(item); },
+                    child: new Text('$item'),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ),
       ),
-    ));
+    );
     await tester.drag(find.text('2'), const Offset(-280.0, 0.0));
     await tester.pump(const Duration(seconds: 1));
     // screen is 800px wide, and has the following items:
@@ -51,23 +53,28 @@ void main() {
 
   testWidgets('Tap item after scroll - vertical', (WidgetTester tester) async {
     final List<int> tapped = <int>[];
-    await tester.pumpWidget(new Center(
-      child: new Container(
-        width: 50.0,
-        child: new ListView(
-          itemExtent: 290.0,
-          scrollDirection: Axis.vertical,
-          children: items.map((int item) {
-            return new Container(
-              child: new GestureDetector(
-                onTap: () { tapped.add(item); },
-                child: new Text('$item'),
-              ),
-            );
-          }).toList(),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            width: 50.0,
+            child: new ListView(
+              itemExtent: 290.0,
+              scrollDirection: Axis.vertical,
+              children: items.map((int item) {
+                return new Container(
+                  child: new GestureDetector(
+                    onTap: () { tapped.add(item); },
+                    child: new Text('$item'),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
         ),
       ),
-    ));
+    );
     await tester.drag(find.text('1'), const Offset(0.0, -280.0));
     await tester.pump(const Duration(seconds: 1));
     // screen is 600px tall, and has the following items:
@@ -92,17 +99,20 @@ void main() {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new ListView(
-        itemExtent: 290.0,
-        padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-        children: items.map((int item) {
-          return new Container(
-            child: new GestureDetector(
-              onTap: () { tapped.add(item); },
-              child: new Text('$item'),
-            ),
-          );
-        }).toList(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 290.0,
+          padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
+          children: items.map((int item) {
+            return new Container(
+              child: new GestureDetector(
+                onTap: () { tapped.add(item); },
+                child: new Text('$item'),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
     await tester.tapAt(const Offset(200.0, 19.0));
@@ -123,18 +133,21 @@ void main() {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new ListView(
-        itemExtent: 290.0,
-        reverse: true,
-        padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-        children: items.map((int item) {
-          return new Container(
-            child: new GestureDetector(
-              onTap: () { tapped.add(item); },
-              child: new Text('$item'),
-            ),
-          );
-        }).toList(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 290.0,
+          reverse: true,
+          padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
+          children: items.map((int item) {
+            return new Container(
+              child: new GestureDetector(
+                onTap: () { tapped.add(item); },
+                child: new Text('$item'),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
     await tester.tapAt(const Offset(200.0, 600.0 - 9.0));
@@ -156,16 +169,19 @@ void main() {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new ListView(
-        itemExtent: 200.0,
-        children: items.map((int item) {
-          return new Container(
-            child: new GestureDetector(
-              onTap: () { tapped.add(item); },
-              child: new Text('$item'),
-            ),
-          );
-        }).toList(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 200.0,
+          children: items.map((int item) {
+            return new Container(
+              child: new GestureDetector(
+                onTap: () { tapped.add(item); },
+                child: new Text('$item'),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
 

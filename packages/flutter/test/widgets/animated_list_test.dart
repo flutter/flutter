@@ -10,17 +10,20 @@ void main() {
     final Map<int, Animation<double>> animations = <int, Animation<double>>{};
 
     await tester.pumpWidget(
-      new AnimatedList(
-        initialItemCount: 2,
-        itemBuilder: (BuildContext context, int index, Animation<double> animation) {
-          animations[index] = animation;
-          return new SizedBox(
-            height: 100.0,
-            child: new Center(
-              child: new Text('item $index'),
-            ),
-          );
-        },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new AnimatedList(
+          initialItemCount: 2,
+          itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+            animations[index] = animation;
+            return new SizedBox(
+              height: 100.0,
+              child: new Center(
+                child: new Text('item $index'),
+              ),
+            );
+          },
+        ),
       ),
     );
 
@@ -36,21 +39,24 @@ void main() {
     final GlobalKey<AnimatedListState> listKey = new GlobalKey<AnimatedListState>();
 
     await tester.pumpWidget(
-      new AnimatedList(
-        key: listKey,
-        itemBuilder: (BuildContext context, int index, Animation<double> animation) {
-          return new SizeTransition(
-            key: new ValueKey<int>(index),
-            axis: Axis.vertical,
-            sizeFactor: animation,
-            child: new SizedBox(
-              height: 100.0,
-              child: new Center(
-                child: new Text('item $index'),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new AnimatedList(
+          key: listKey,
+          itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+            return new SizeTransition(
+              key: new ValueKey<int>(index),
+              axis: Axis.vertical,
+              sizeFactor: animation,
+              child: new SizedBox(
+                height: 100.0,
+                child: new Center(
+                  child: new Text('item $index'),
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
 
@@ -122,12 +128,15 @@ void main() {
     }
 
     await tester.pumpWidget(
-      new AnimatedList(
-        key: listKey,
-        initialItemCount: 3,
-        itemBuilder: (BuildContext context, int index, Animation<double> animation) {
-          return buildItem(context, items[index], animation);
-        },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new AnimatedList(
+          key: listKey,
+          initialItemCount: 3,
+          itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+            return buildItem(context, items[index], animation);
+          },
+        ),
       ),
     );
 

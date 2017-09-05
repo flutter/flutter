@@ -15,19 +15,22 @@ void main() {
     // so if our widget is 100 pixels tall, it should fit exactly 6 times.
 
     Widget builder() {
-      return new FlipWidget(
-        left: new ListView.builder(
-          itemExtent: 100.0,
-          itemBuilder: (BuildContext context, int index) {
-            callbackTracker.add(index);
-            return new Container(
-              key: new ValueKey<int>(index),
-              height: 100.0,
-              child: new Text('$index'),
-            );
-          },
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FlipWidget(
+          left: new ListView.builder(
+            itemExtent: 100.0,
+            itemBuilder: (BuildContext context, int index) {
+              callbackTracker.add(index);
+              return new Container(
+                key: new ValueKey<int>(index),
+                height: 100.0,
+                child: new Text('$index'),
+              );
+            },
+          ),
+          right: const Text('Not Today'),
         ),
-        right: const Text('Not Today'),
       );
     }
 
@@ -67,14 +70,17 @@ void main() {
       );
     };
 
-    FlipWidget buildWidget() {
-      return new FlipWidget(
-        left: new ListView.builder(
-          controller: new ScrollController(initialScrollOffset: 300.0),
-          itemExtent: 200.0,
-          itemBuilder: itemBuilder,
+    Widget buildWidget() {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FlipWidget(
+          left: new ListView.builder(
+            controller: new ScrollController(initialScrollOffset: 300.0),
+            itemExtent: 200.0,
+            itemBuilder: itemBuilder,
+          ),
+          right: const Text('Not Today')
         ),
-        right: const Text('Not Today')
       );
     }
 
@@ -187,10 +193,13 @@ void main() {
       return new Text('$index', key: new ValueKey<int>(index));
     };
 
-    final Widget testWidget = new ListView.builder(
-      itemBuilder: itemBuilder,
-      itemExtent: 300.0,
-      itemCount: 10,
+    final Widget testWidget = new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView.builder(
+        itemBuilder: itemBuilder,
+        itemExtent: 300.0,
+        itemCount: 10,
+      ),
     );
 
     void jumpTo(double newScrollOffset) {

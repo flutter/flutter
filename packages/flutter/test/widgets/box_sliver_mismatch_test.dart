@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -33,24 +34,28 @@ void main() {
 
   testWidgets('Box in a sliver', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CustomScrollView(
+      new Viewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: new ViewportOffset.zero(),
         slivers: <Widget>[
           const SizedBox(),
         ],
-      )
+      ),
     );
 
     expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(
-      new CustomScrollView(
+      new Viewport(
+        crossAxisDirection: AxisDirection.right,
+        offset: new ViewportOffset.zero(),
         slivers: <Widget>[
           const SliverPadding(
             padding: EdgeInsets.zero,
             sliver: const SizedBox(),
           ),
         ],
-      )
+      ),
     );
 
     expect(tester.takeException(), isFlutterError);

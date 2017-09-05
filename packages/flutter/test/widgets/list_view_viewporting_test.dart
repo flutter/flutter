@@ -16,18 +16,21 @@ void main() {
     // so if our widget is 100 pixels tall, it should fit exactly 6 times.
 
     Widget builder() {
-      return new FlipWidget(
-        left: new ListView.builder(
-          itemBuilder: (BuildContext context, int index) {
-            callbackTracker.add(index);
-            return new Container(
-              key: new ValueKey<int>(index),
-              height: 100.0,
-              child: new Text("$index"),
-            );
-          },
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FlipWidget(
+          left: new ListView.builder(
+            itemBuilder: (BuildContext context, int index) {
+              callbackTracker.add(index);
+              return new Container(
+                key: new ValueKey<int>(index),
+                height: 100.0,
+                child: new Text("$index"),
+              );
+            },
+          ),
+          right: const Text('Not Today'),
         ),
-        right: const Text('Not Today'),
       );
     }
 
@@ -68,12 +71,15 @@ void main() {
     };
 
     Widget builder() {
-      return new FlipWidget(
-        left: new ListView.builder(
-          controller: new ScrollController(initialScrollOffset: 300.0),
-          itemBuilder: itemBuilder,
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FlipWidget(
+          left: new ListView.builder(
+            controller: new ScrollController(initialScrollOffset: 300.0),
+            itemBuilder: itemBuilder,
+          ),
+          right: const Text('Not Today'),
         ),
-        right: const Text('Not Today'),
       );
     }
 
@@ -173,8 +179,11 @@ void main() {
     }
 
     Widget builder() {
-      return new ListView.builder(
-        itemBuilder: itemBuilder,
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView.builder(
+          itemBuilder: itemBuilder,
+        ),
       );
     }
 
@@ -214,12 +223,15 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setter) {
-          setState = setter;
-          return new Theme(data: themeData, child: viewport);
-        }
-      )
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return new Theme(data: themeData, child: viewport);
+          },
+        ),
+      ),
     );
 
     DecoratedBox widget = tester.firstWidget(find.byType(DecoratedBox));
@@ -249,9 +261,12 @@ void main() {
     };
 
     await tester.pumpWidget(
-      new ListView.builder(
-        padding: const EdgeInsets.fromLTRB(7.0, 3.0, 5.0, 11.0),
-        itemBuilder: itemBuilder,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView.builder(
+          padding: const EdgeInsets.fromLTRB(7.0, 3.0, 5.0, 11.0),
+          itemBuilder: itemBuilder,
+        ),
       ),
     );
 
@@ -262,14 +277,19 @@ void main() {
   });
 
   testWidgets('ListView underflow extents', (WidgetTester tester) async {
-    await tester.pumpWidget(new ListView(
-      addAutomaticKeepAlives: false,
-      children: <Widget>[
-        new Container(height: 100.0),
-        new Container(height: 100.0),
-        new Container(height: 100.0),
-      ],
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          addAutomaticKeepAlives: false,
+          children: <Widget>[
+            new Container(height: 100.0),
+            new Container(height: 100.0),
+            new Container(height: 100.0),
+          ],
+        ),
+      ),
+    );
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
 
@@ -294,6 +314,7 @@ void main() {
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
+        ' │   crossAxisDirection: AxisDirection.right,\n'
         ' │   viewportMainAxisExtent: 600.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 300.0, paintExtent: 300.0,\n'
         ' │   maxPaintExtent: 300.0)\n'
@@ -453,7 +474,7 @@ void main() {
         '           parentData: <none> (can use size)\n'
         '           constraints: BoxConstraints(w=800.0, h=100.0)\n'
         '           size: Size(800.0, 100.0)\n'
-        '           additionalConstraints: BoxConstraints(biggest)\n',
+        '           additionalConstraints: BoxConstraints(biggest)\n'
       ),
     );
 

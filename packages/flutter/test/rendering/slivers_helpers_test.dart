@@ -25,6 +25,7 @@ void main() {
       overlap: 0.0,
       remainingPaintExtent: 0.0,
       crossAxisExtent: 0.0,
+      crossAxisDirection: AxisDirection.right,
       viewportMainAxisExtent: 0.0,
     );
     final SliverConstraints b = a.copyWith();
@@ -52,6 +53,7 @@ void main() {
       overlap: 20.0,
       remainingPaintExtent: 30.0,
       crossAxisExtent: 40.0,
+      crossAxisDirection: AxisDirection.right,
       viewportMainAxisExtent: 30.0,
     );
     expect(c, equals(d));

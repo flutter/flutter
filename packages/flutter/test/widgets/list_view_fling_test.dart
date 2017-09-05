@@ -10,11 +10,16 @@ const double kFlingOffset = kHeight * 20.0;
 
 void main() {
   testWidgets('Flings don\'t stutter', (WidgetTester tester) async {
-    await tester.pumpWidget(new ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return new Container(height: kHeight);
-      },
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            return new Container(height: kHeight);
+          },
+        ),
+      ),
+    );
 
     double getCurrentOffset() {
       return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;

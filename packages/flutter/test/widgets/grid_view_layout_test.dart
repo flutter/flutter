@@ -14,16 +14,21 @@ void main() {
       const DecoratedBox(decoration: const BoxDecoration()),
     ];
 
-    await tester.pumpWidget(new Center(
-      child: new Container(
-        width: 200.0,
-        child: new GridView.extent(
-          maxCrossAxisExtent: 100.0,
-          shrinkWrap: true,
-          children: children,
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            width: 200.0,
+            child: new GridView.extent(
+              maxCrossAxisExtent: 100.0,
+              shrinkWrap: true,
+              children: children,
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     expect(tester.renderObjectList<RenderBox>(find.byType(DecoratedBox)), hasLength(4));
 
@@ -38,16 +43,21 @@ void main() {
 
     expect(grid.debugNeedsLayout, false);
 
-    await tester.pumpWidget(new Center(
-      child: new Container(
-        width: 200.0,
-        child: new GridView.extent(
-          maxCrossAxisExtent: 60.0,
-          shrinkWrap: true,
-          children: children,
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            width: 200.0,
+            child: new GridView.extent(
+              maxCrossAxisExtent: 60.0,
+              shrinkWrap: true,
+              children: children,
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     for (RenderBox box in tester.renderObjectList<RenderBox>(find.byType(DecoratedBox))) {
       expect(box.size.width, equals(50.0), reason: "child width");

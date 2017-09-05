@@ -79,6 +79,7 @@ void main() {
     RenderSliver s;
     RenderBox b;
     final RenderViewport root = new RenderViewport(
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         s = new RenderSliverPadding(
@@ -106,6 +107,7 @@ void main() {
     final RenderBox b = new RenderPadding(
       padding: const EdgeInsets.all(10.0),
       child: new RenderViewport(
+        crossAxisDirection: AxisDirection.right,
         offset: new ViewportOffset.zero(),
         children: <RenderSliver>[
           s = new RenderSliverPadding(

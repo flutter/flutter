@@ -119,13 +119,8 @@ class SingleChildScrollView extends StatelessWidget {
       case Axis.horizontal:
         final TextDirection textDirection = Directionality.of(context);
         assert(textDirection != null);
-        switch (textDirection) {
-          case TextDirection.rtl:
-            return reverse ? AxisDirection.right : AxisDirection.left;
-          case TextDirection.ltr:
-            return reverse ? AxisDirection.left : AxisDirection.right;
-        }
-        return null;
+        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
+        return reverse ? flipAxisDirection(axisDirection) : axisDirection;
       case Axis.vertical:
         return reverse ? AxisDirection.up : AxisDirection.down;
     }

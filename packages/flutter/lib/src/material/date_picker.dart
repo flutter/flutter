@@ -205,6 +205,7 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
       crossAxisStride: tileWidth,
       childMainAxisExtent: tileHeight,
       childCrossAxisExtent: tileWidth,
+      reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
     );
   }
 

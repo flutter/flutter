@@ -81,10 +81,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// Initializes fields for subclasses.
   RenderViewportBase({
     AxisDirection axisDirection: AxisDirection.down,
+    @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
   }) : assert(axisDirection != null),
+       assert(crossAxisDirection != null),
        assert(offset != null),
+       assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
        _axisDirection = axisDirection,
+       _crossAxisDirection = crossAxisDirection,
        _offset = offset;
 
   @override
@@ -115,6 +119,22 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (value == _axisDirection)
       return;
     _axisDirection = value;
+    markNeedsLayout();
+  }
+
+  /// The direction in which child should be laid out in the cross axis.
+  ///
+  /// For example, if the [axisDirection] is [AxisDirection.down], this property
+  /// is typically [AxisDirection.left] if the ambient [TextDirection] is
+  /// [TextDirection.rtl] and [AxisDirection.right] if the ambient
+  /// [TextDirection] is [TextDirection.ltr].
+  AxisDirection get crossAxisDirection => _crossAxisDirection;
+  AxisDirection _crossAxisDirection;
+  set crossAxisDirection(AxisDirection value) {
+    assert(value != null);
+    if (value == _crossAxisDirection)
+      return;
+    _crossAxisDirection = value;
     markNeedsLayout();
   }
 
@@ -271,6 +291,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         overlap: maxPaintOffset - layoutOffset,
         remainingPaintExtent: math.max(0.0, remainingPaintExtent - layoutOffset + initialLayoutOffset),
         crossAxisExtent: crossAxisExtent,
+        crossAxisDirection: crossAxisDirection,
         viewportMainAxisExtent: mainAxisExtent,
       ), parentUsesSize: true);
 
@@ -507,6 +528,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    description.add(new EnumProperty<AxisDirection>('crossAxisDirection', crossAxisDirection));
     description.add(new DiagnosticsProperty<ViewportOffset>('offset', offset));
   }
 
@@ -687,6 +709,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
   RenderViewport({
     AxisDirection axisDirection: AxisDirection.down,
+    @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
     double anchor: 0.0,
     List<RenderSliver> children,
@@ -695,7 +718,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
        assert(anchor >= 0.0 && anchor <= 1.0),
        _anchor = anchor,
        _center = center,
-       super(axisDirection: axisDirection, offset: offset) {
+       super(axisDirection: axisDirection, crossAxisDirection: crossAxisDirection, offset: offset) {
     addAll(children);
     if (center == null && firstChild != null)
       _center = firstChild;
@@ -1120,9 +1143,10 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
   RenderShrinkWrappingViewport({
     AxisDirection axisDirection: AxisDirection.down,
+    @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
     List<RenderSliver> children,
-  }) : super(axisDirection: axisDirection, offset: offset) {
+  }) : super(axisDirection: axisDirection, crossAxisDirection: crossAxisDirection, offset: offset) {
     addAll(children);
   }
 

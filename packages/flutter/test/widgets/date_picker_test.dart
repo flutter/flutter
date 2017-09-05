@@ -9,19 +9,22 @@ void main() {
   testWidgets('Can select a day', (WidgetTester tester) async {
     DateTime currentValue;
 
-    final Widget widget = new Material(
-      child: new ListView(
-        children: <Widget>[
-          new MonthPicker(
-            selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),
-            firstDate: new DateTime.utc(2013),
-            lastDate: new DateTime.utc(2018),
-            onChanged: (DateTime dateTime) {
-              currentValue = dateTime;
-            }
-          )
-        ]
-      )
+    final Widget widget = new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Material(
+        child: new ListView(
+          children: <Widget>[
+            new MonthPicker(
+              selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),
+              firstDate: new DateTime.utc(2013),
+              lastDate: new DateTime.utc(2018),
+              onChanged: (DateTime dateTime) {
+                currentValue = dateTime;
+              },
+            ),
+          ],
+        ),
+      ),
     );
 
     await tester.pumpWidget(widget);

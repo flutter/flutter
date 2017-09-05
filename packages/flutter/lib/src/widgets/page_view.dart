@@ -453,13 +453,8 @@ class _PageViewState extends State<PageView> {
       case Axis.horizontal:
         final TextDirection textDirection = Directionality.of(context);
         assert(textDirection != null);
-        switch (textDirection) {
-          case TextDirection.rtl:
-            return widget.reverse ? AxisDirection.right : AxisDirection.left;
-          case TextDirection.ltr:
-            return widget.reverse ? AxisDirection.left : AxisDirection.right;
-        }
-        return null;
+        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
+        return widget.reverse ? flipAxisDirection(axisDirection) : axisDirection;
       case Axis.vertical:
         return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }

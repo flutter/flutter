@@ -24,10 +24,13 @@ Future<Null> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
 void main() {
   testWidgets('Overscroll indicator color', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          ],
+        ),
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
@@ -57,10 +60,13 @@ void main() {
 
   testWidgets('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          ],
+        ),
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
@@ -92,10 +98,13 @@ void main() {
 
   testWidgets('Overscroll indicator changes side when you shift sides', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          ],
+        ),
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
@@ -125,11 +134,14 @@ void main() {
   group('Flipping direction of scrollable doesn\'t change overscroll behavior', () {
     testWidgets('down', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
-          ],
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            ],
+          ),
         ),
       );
       final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
@@ -142,12 +154,15 @@ void main() {
 
     testWidgets('up', (WidgetTester tester) async {
       await tester.pumpWidget(
-        new CustomScrollView(
-          reverse: true,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
-          ],
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new CustomScrollView(
+            reverse: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            ],
+          ),
         ),
       );
       final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
@@ -161,11 +176,14 @@ void main() {
 
   testWidgets('Overscroll in both directions', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: <Widget>[
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+          ],
+        ),
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
@@ -180,16 +198,18 @@ void main() {
   });
 
   testWidgets('Overscroll horizontally', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new CustomScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
-        ],
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: <Widget>[
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+          ],
+        ),
       ),
-    ));
+    );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()..saveRestore());
@@ -227,39 +247,43 @@ void main() {
   testWidgets('Changing settings', (WidgetTester tester) async {
     RenderObject painter;
 
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new ScrollConfiguration(
-        behavior: new TestScrollBehavior1(),
-        child: new CustomScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const AlwaysScrollableScrollPhysics(),
-          reverse: true,
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
-          ],
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ScrollConfiguration(
+          behavior: new TestScrollBehavior1(),
+          child: new CustomScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const AlwaysScrollableScrollPhysics(),
+            reverse: true,
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            ],
+          ),
         ),
       ),
-    ));
+    );
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
     expect(painter, isNot(paints..circle()..circle()));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new ScrollConfiguration(
-        behavior: new TestScrollBehavior2(),
-        child: new CustomScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: <Widget>[
-            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
-          ],
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ScrollConfiguration(
+          behavior: new TestScrollBehavior2(),
+          child: new CustomScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: <Widget>[
+              const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            ],
+          ),
         ),
       ),
-    ));
+    );
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A0000FF))..saveRestore());
