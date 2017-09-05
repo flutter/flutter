@@ -7,7 +7,7 @@ import 'dart:convert' show JSON;
 
 import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
-import 'package:quiver/core.dart' show hash3;
+import 'package:quiver/core.dart' show hash4;
 
 import '../artifacts.dart';
 import '../build_info.dart';
@@ -62,7 +62,7 @@ class GenSnapshot {
 /// build step. This assumes that build outputs are strictly a product of the
 /// input files.
 class Checksum {
-  Checksum.fromFiles(SnapshotType type, Set<String> inputPaths) {
+  Checksum.fromFiles(SnapshotType type, this._mainPath, Set<String> inputPaths) {
     final Iterable<File> files = inputPaths.map(fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty)
@@ -99,11 +99,16 @@ class Checksum {
     if (_targetPlatform == null)
       throw new ArgumentError('Target platform unspecified in checksum JSON');
 
+    _mainPath = content['entrypoint'];
+    if (_mainPath == null)
+      throw new ArgumentError('Entrypoint unspecified in checksum JSON');
+
     _checksums = content['files'];
     if (_checksums == null)
       throw new ArgumentError('File checksums unspecified in checksum JSON');
   }
 
+  String _mainPath;
   String _buildMode;
   String _targetPlatform;
   Map<String, String> _checksums;
@@ -111,6 +116,7 @@ class Checksum {
   String toJson() => JSON.encode(<String, dynamic>{
     'version': FlutterVersion.instance.frameworkRevision,
     'buildMode': _buildMode,
+    'entrypoint': _mainPath,
     'targetPlatform': _targetPlatform,
     'files': _checksums,
   });
@@ -120,12 +126,13 @@ class Checksum {
     return other is Checksum &&
         _buildMode == other._buildMode &&
         _targetPlatform == other._targetPlatform &&
+        _mainPath == other._mainPath &&
         _checksums.length == other._checksums.length &&
         _checksums.keys.every((String key) => _checksums[key] == other._checksums[key]);
   }
 
   @override
-  int get hashCode => hash3(_buildMode, _targetPlatform, _checksums);
+  int get hashCode => hash4(_buildMode, _targetPlatform, _mainPath, _checksums);
 }
 
 final RegExp _separatorExpr = new RegExp(r'([^\\]) ');
@@ -238,7 +245,7 @@ class Snapshotter {
         final Checksum oldChecksum = new Checksum.fromJson(await checksumFile.readAsString());
         final Set<String> checksumPaths = await readDepfile(depfilePath)
           ..addAll(<String>[outputSnapshotPath, mainPath]);
-        final Checksum newChecksum = new Checksum.fromFiles(type, checksumPaths);
+        final Checksum newChecksum = new Checksum.fromFiles(type, mainPath, checksumPaths);
         return oldChecksum != newChecksum;
       }
     } catch (e, s) {
@@ -252,7 +259,7 @@ class Snapshotter {
     try {
       final Set<String> checksumPaths = await readDepfile(depfilePath)
         ..addAll(<String>[outputSnapshotPath, mainPath]);
-      final Checksum checksum = new Checksum.fromFiles(type, checksumPaths);
+      final Checksum checksum = new Checksum.fromFiles(type, mainPath, checksumPaths);
       await fs.file(checksumsPath).writeAsString(checksum.toJson());
     } catch (e, s) {
       // Log exception and continue, this step is a performance improvement only.
