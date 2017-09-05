@@ -55,7 +55,9 @@ class VulkanHandle {
   /// the lifetime of the handle extends past the lifetime of this object.
   void ReleaseOwnership() { disposer_ = nullptr; }
 
- private:
+  void Reset() { DisposeIfNecessary(); }
+
+private:
   Handle handle_;
   Disposer disposer_;
 

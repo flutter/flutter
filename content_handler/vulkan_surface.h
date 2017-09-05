@@ -49,7 +49,13 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   // |flow::SceneUpdateContext::SurfaceProducerSurface|
   sk_sp<SkSurface> GetSkiaSurface() const override;
 
- private:
+  // This transfers ownership of the GrBackendSemaphore but not the underlying
+  // VkSemaphore (i.e. it is ok to let the returned GrBackendSemaphore go out of
+  // scope but it is not ok to call VkDestroySemaphore on the underlying
+  // VkSemaphore)
+  GrBackendSemaphore GetAcquireSemaphore() const;
+
+private:
   vulkan::VulkanProcTable& vk_;
   sk_sp<GrVkBackendContext> backend_context_;
   scenic_lib::Session* session_;
@@ -58,6 +64,7 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   sk_sp<SkSurface> sk_surface_;
   std::unique_ptr<scenic_lib::Image> session_image_;
   mx::event acquire_event_;
+  vulkan::VulkanHandle<VkSemaphore> acquire_semaphore_;
   mx::event release_event_;
   mtl::MessageLoop::HandlerKey event_handler_key_ = 0;
   std::function<void(void)> pending_on_writes_committed_;
@@ -84,6 +91,9 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
                                 mx::vmo exported_vmo);
 
   void Reset();
+
+  vulkan::VulkanHandle<VkSemaphore>
+  SemaphoreFromEvent(const mx::event &event) const;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
 };

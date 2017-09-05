@@ -5,6 +5,7 @@
 #include "flutter/content_handler/vulkan_surface.h"
 #include "flutter/common/threads.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/src/gpu/vk/GrVkImage.h"
@@ -69,8 +70,63 @@ SkISize VulkanSurface::GetSize() const {
   return SkISize::Make(sk_surface_->width(), sk_surface_->height());
 }
 
+GrBackendSemaphore VulkanSurface::GetAcquireSemaphore() const {
+  GrBackendSemaphore gr_semaphore;
+  gr_semaphore.initVulkan(acquire_semaphore_);
+  return gr_semaphore;
+}
+
+vulkan::VulkanHandle<VkSemaphore>
+VulkanSurface::SemaphoreFromEvent(const mx::event &event) const {
+  VkResult result;
+  VkSemaphore semaphore;
+
+  mx::event semaphore_event;
+  mx_status_t status = event.duplicate(MX_RIGHT_SAME_RIGHTS, &semaphore_event);
+  if (status != MX_OK) {
+    FTL_DLOG(ERROR) << "failed to duplicate semaphore event";
+    return vulkan::VulkanHandle<VkSemaphore>();
+  }
+
+  VkSemaphoreCreateInfo create_info = {
+      .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+      .pNext = nullptr,
+      .flags = 0,
+  };
+
+  result = VK_CALL_LOG_ERROR(vk_.CreateSemaphore(
+      backend_context_->fDevice, &create_info, nullptr, &semaphore));
+  if (result != VK_SUCCESS) {
+    return vulkan::VulkanHandle<VkSemaphore>();
+  }
+
+  VkImportSemaphoreFdInfoKHR import_info = {
+      .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR,
+      .pNext = nullptr,
+      .semaphore = semaphore,
+      .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT_KHR,
+      .fd = semaphore_event.release()};
+
+  result = VK_CALL_LOG_ERROR(
+      vk_.ImportSemaphoreFdKHR(backend_context_->fDevice, &import_info));
+  if (result != VK_SUCCESS) {
+    return vulkan::VulkanHandle<VkSemaphore>();
+  }
+
+  return vulkan::VulkanHandle<VkSemaphore>(
+      semaphore, [this](VkSemaphore semaphore) {
+        vk_.DestroySemaphore(backend_context_->fDevice, semaphore, nullptr);
+      });
+}
+
 bool VulkanSurface::CreateFences() {
   if (mx::event::create(0, &acquire_event_) != MX_OK) {
+    return false;
+  }
+
+  acquire_semaphore_ = SemaphoreFromEvent(acquire_event_);
+  if (!acquire_semaphore_) {
+    FTL_DLOG(ERROR) << "failed to create acquire semaphore";
     return false;
   }
 
@@ -295,12 +351,6 @@ void VulkanSurface::SignalWritesFinished(
       << "Attempted to signal a write on the surface when the previous write "
          "has not yet been acknowledged by the compositor.";
 
-  // Signal the acquire end to the compositor.
-  if (acquire_event_.signal(0u, MX_EVENT_SIGNALED) != MX_OK) {
-    on_writes_committed();
-    return;
-  }
-
   pending_on_writes_committed_ = on_writes_committed;
 }
 
@@ -312,6 +362,14 @@ void VulkanSurface::Reset() {
     valid_ = false;
     FTL_DLOG(ERROR)
         << "Could not reset fences. The surface is no longer valid.";
+  }
+
+  // Need to make a new  acquire semaphore every frame or else validation layers
+  // get confused about why no one is waiting on it in this VkInstance
+  acquire_semaphore_.Reset();
+  acquire_semaphore_ = SemaphoreFromEvent(acquire_event_);
+  if (!acquire_semaphore_) {
+    FTL_DLOG(ERROR) << "failed to create acquire semaphore";
   }
 
   // It is safe for the caller to collect the surface in the callback.

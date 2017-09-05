@@ -118,6 +118,7 @@ class VulkanProcTable : public ftl::RefCountedThreadSafe<VulkanProcTable> {
   DEFINE_PROC(CreateMagmaSurfaceKHR);
   DEFINE_PROC(ExportDeviceMemoryMAGMA);
   DEFINE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR);
+  DEFINE_PROC(ImportSemaphoreFdKHR);
 #endif  // OS_FUCHSIA
 
 #undef DEFINE_PROC

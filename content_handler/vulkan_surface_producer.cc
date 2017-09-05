@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/content_handler/vulkan_surface_producer.h"
-#include <memory>
-#include <string>
-#include <vector>
+#include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "third_party/skia/src/gpu/vk/GrVkUtil.h"
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace flutter_runner {
 
@@ -25,13 +26,21 @@ VulkanSurfaceProducer::VulkanSurfaceProducer(
   }
 }
 
-VulkanSurfaceProducer::~VulkanSurfaceProducer() = default;
+VulkanSurfaceProducer::~VulkanSurfaceProducer() {
+  // Make sure queue is idle before we start destroying surfaces
+  VkResult wait_result =
+      VK_CALL_LOG_ERROR(vk_->QueueWaitIdle(backend_context_->fQueue));
+  FTL_DCHECK(wait_result == VK_SUCCESS);
+};
 
 bool VulkanSurfaceProducer::Initialize(
     scenic_lib::Session* mozart_session) {
   vk_ = ftl::MakeRefCounted<vulkan::VulkanProcTable>();
 
-  std::vector<std::string> extensions = {VK_KHR_SURFACE_EXTENSION_NAME};
+  std::vector<std::string> extensions = {
+      VK_KHR_SURFACE_EXTENSION_NAME,
+      VK_KHR_EXTERNAL_SEMAPHORE_CAPABILITIES_EXTENSION_NAME,
+  };
   application_ = std::make_unique<vulkan::VulkanApplication>(
       *vk_, "FlutterContentHandler", std::move(extensions));
 
@@ -110,16 +119,18 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
     std::vector<
         std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>>
         surfaces) {
+
+  std::vector<GrBackendSemaphore> semaphores;
+  semaphores.reserve(surfaces.size());
+  for (auto &surface : surfaces) {
+    auto vk_surface = static_cast<VulkanSurface *>(surface.get());
+    semaphores.push_back(vk_surface->GetAcquireSemaphore());
+  }
+
   // Do a single flush for all canvases derived from the context.
-  context_->flush();
+  context_->flushAndSignalSemaphores(semaphores.size(), semaphores.data());
 
-  // Do a CPU wait.
-  // TODO(chinmaygarde): Remove this once we have support for Vulkan semaphores.
-  VkResult wait_result =
-      VK_CALL_LOG_ERROR(vk_->QueueWaitIdle(backend_context_->fQueue));
-  FTL_DCHECK(wait_result == VK_SUCCESS);
-
-  // Submit surface, this signals acquire events sent along the session.
+  // Submit surface
   for (auto& surface : surfaces) {
     SubmitSurface(std::move(surface));
   }
