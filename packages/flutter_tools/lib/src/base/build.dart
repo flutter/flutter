@@ -248,9 +248,9 @@ class Snapshotter {
         final Checksum newChecksum = new Checksum.fromFiles(type, mainPath, checksumPaths);
         return oldChecksum != newChecksum;
       }
-    } catch (e, s) {
+    } catch (e) {
       // Log exception and continue, this step is a performance improvement only.
-      printTrace('Error during snapshot checksum output: $e\n$s');
+      printTrace('Rebuilding snapshot due to checksum validation error: $e');
     }
     return true;
   }
@@ -263,7 +263,7 @@ class Snapshotter {
       await fs.file(checksumsPath).writeAsString(checksum.toJson());
     } catch (e, s) {
       // Log exception and continue, this step is a performance improvement only.
-      print('Error during snapshot checksum output: $e\n$s');
+      printTrace('Error during snapshot checksum output: $e\n$s');
     }
   }
 }
