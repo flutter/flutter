@@ -34,7 +34,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// The animation curve when transitioning this widget's size to match the
   /// child's size.
@@ -54,16 +54,17 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
       duration: duration,
       curve: curve,
       vsync: vsync,
+      textDirection: Directionality.of(context),
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context,
-                          RenderAnimatedSize renderObject) {
+  void updateRenderObject(BuildContext context, RenderAnimatedSize renderObject) {
     renderObject
       ..alignment = alignment
       ..duration = duration
       ..curve = curve
-      ..vsync = vsync;
+      ..vsync = vsync
+      ..textDirection = Directionality.of(context);
   }
 }
