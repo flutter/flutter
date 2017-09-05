@@ -6,6 +6,7 @@ import 'dart:isolate';
 import 'package:args/src/arg_results.dart';
 import 'package:frontend_server/server.dart';
 import 'package:front_end/incremental_kernel_generator.dart';
+import 'package:kernel/binary/ast_to_binary.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
@@ -14,7 +15,9 @@ class _MockedCompiler extends Mock implements CompilerInterface {}
 class _MockedIncrementalKernelGenerator extends Mock
   implements IncrementalKernelGenerator {}
 
-class _MockedKernelSerializer extends Mock implements KernelSerializer {}
+class _MockedBinaryPrinterFactory extends Mock implements BinaryPrinterFactory {}
+
+class _MockedBinaryPrinter extends Mock implements BinaryPrinter {}
 
 Future<int> main() async {
   group('basic', () {
@@ -231,11 +234,15 @@ Future<int> main() async {
       when(generator.computeDelta()).thenReturn(new Future<DeltaProgram>.value(
         new DeltaProgram(null /* program stub */)
       ));
+      final _MockedBinaryPrinterFactory printerFactory =
+        new _MockedBinaryPrinterFactory();
+      when(printerFactory.newBinaryPrinter(any))
+        .thenReturn(new _MockedBinaryPrinter());
       final int exitcode = await starter(args, compiler: null,
         input: streamController.stream,
         output: ioSink,
         generator: generator,
-        kernelSerializer: new _MockedKernelSerializer()
+        binaryPrinterFactory: printerFactory,
       );
       expect(exitcode, equals(0));
 
