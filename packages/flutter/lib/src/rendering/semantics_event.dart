@@ -8,26 +8,40 @@
 /// These events are usually interpreted by assistive technologies to give the
 /// user additional clues about the current state of the UI.
 abstract class SemanticsEvent {
-
   /// Initializes internal fields.
   ///
-  /// `type` is a string that identifies this class of [SemanticsEvent]s.
+  /// [type] is a string that identifies this class of [SemanticsEvent]s.
   SemanticsEvent(this.type);
 
   /// The type of this event.
+  ///
+  /// The type is used by the engine to translate this event into the
+  /// appropriate native event (`UIAccessibility*Notification` on iOS and
+  /// `AccessibilityEvent` on Android).
   final String type;
 
-  /// Converts this event to a JSON-encodable Map.
-  Map<String, dynamic> toJson();
+  /// Converts this event to a Map that can be encoded with
+  /// [StandardMessageCodec].
+  Map<String, dynamic> toMap();
 }
 
 /// Notifies that a scroll action has been completed.
-class ScrollSemanticsEvent extends SemanticsEvent {
-
-  /// Creates a [ScrollSemanticsEvent].
+///
+/// This event translates into a `AccessibilityEvent.TYPE_VIEW_SCROLLED` on
+/// Android and a `UIAccessibilityPageScrolledNotification` on iOS. It is
+/// processed by the accessibility systems of the operating system to provide
+/// additional feedback to the user about the state of a scrollable view (e.g.
+/// on Android, a ping sound is played to indicate that a scroll action was
+/// successful).
+class ScrollCompletedSemanticsEvent extends SemanticsEvent {
+  /// Creates a [ScrollCompletedSemanticsEvent].
+  ///
+  /// This event should be sent after a scroll action is completed. It is
+  /// interpreted by assistive technologies to provide additional feedback about
+  /// the just completed scroll action to the user.
   // TODO(goderbauer): add more metadata to this event (e.g. how far are we scrolled?).
-  ScrollSemanticsEvent() : super('scroll');
+  ScrollCompletedSemanticsEvent() : super('scroll');
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{};
+  Map<String, dynamic> toMap() => <String, dynamic>{};
 }

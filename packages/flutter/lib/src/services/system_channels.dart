@@ -54,10 +54,15 @@ class SystemChannels {
       const JSONMessageCodec(),
   );
 
-  /// A JSON [BasicMessageChannel] for accessibility events.
+  /// A [BasicMessageChannel] for accessibility events.
+  ///
+  /// See also:
+  ///
+  /// * [SemanticsEvents] and its subclasses for a list of valid accessibility
+  ///   events that can be sent over this channel.
   static const BasicMessageChannel<dynamic> accessibility = const BasicMessageChannel<dynamic>(
     'flutter/accessibility',
-    const JSONMessageCodec(),
+    const StandardMessageCodec(),
   );
 
 }

@@ -660,14 +660,22 @@ class SemanticsNode extends AbstractNode {
   }
 
   /// Sends a [SemanticsEvent] associated with this [SemanticsNode].
+  ///
+  /// Semantics events should be sent to inform interested parties (like
+  /// the accessibility system of the operating system) about changes to the UI.
+  ///
+  /// For example, if this semantics node represents a scrollable list, a
+  /// [ScrollCompletedSemanticsEvent] should be sent after a scroll action is completed.
+  /// That way, the operating system can give additional feedback to the user
+  /// about the state of the UI (e.g. on Android a ping sound is played to
+  /// indicate a successful scroll in accessibility mode).
   void sendEvent(SemanticsEvent event) {
     if (!attached)
       return;
-    assert(!_dirty);
     final Map<String, dynamic> annotatedEvent = <String, dynamic>{
       'nodeId': id,
       'type': event.type,
-      'data': event.toJson(),
+      'data': event.toMap(),
     };
     SystemChannels.accessibility.send(annotatedEvent);
   }
