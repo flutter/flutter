@@ -28,8 +28,12 @@ String _dartExecutable() {
 }
 
 class _StdoutHandler {
+  _StdoutHandler() {
+    reset();
+  }
+
   String boundaryKey;
-  Completer<String> outputFilename = new Completer<String>();
+  Completer<String> outputFilename;
 
   void handler(String string) {
     const String kResultPrefix = 'result ';
@@ -42,6 +46,13 @@ class _StdoutHandler {
         : null);
     else
       printTrace('compile debug message: $string');
+  }
+
+  // This is needed to get ready to process next compilation result output,
+  // with its own boundary key and new completer.
+  void reset() {
+    boundaryKey = null;
+    outputFilename = new Completer<String>();
   }
 }
 
@@ -59,9 +70,12 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
     '--sdk-root',
     sdkRoot,
     mainPath
-  ]);
+  ]).catchError((dynamic error, StackTrace stack) {
+    printTrace('Failed to start frontend server $error, $stack');
+  });
 
   final _StdoutHandler stdoutHandler = new _StdoutHandler();
+
   server.stderr
     .transform(UTF8.decoder)
     .listen((String s) { printTrace('compile debug message: $s'); });
@@ -97,6 +111,8 @@ class ResidentCompiler {
   /// Binary file name is returned if compilation was successful, otherwise
   /// `null` is returned.
   Future<String> recompile(String mainPath, List<String> invalidatedFiles) async {
+    stdoutHandler.reset();
+
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
     if (_server == null)
@@ -112,18 +128,16 @@ class ResidentCompiler {
   }
 
   Future<String> _compile(String scriptFilename) async {
-    if (_server == null) {
-      final String frontendServer = artifacts.getArtifactPath(
-        Artifact.frontendServerSnapshotForEngineDartSdk
-      );
-      _server = await processManager.start(<String>[
-        _dartExecutable(),
-        frontendServer,
-        '--sdk-root',
-        _sdkRoot,
-        '--incremental'
-      ]);
-    }
+    final String frontendServer = artifacts.getArtifactPath(
+      Artifact.frontendServerSnapshotForEngineDartSdk
+    );
+    _server = await processManager.start(<String>[
+      _dartExecutable(),
+      frontendServer,
+      '--sdk-root',
+      _sdkRoot,
+      '--incremental'
+    ]);
     _server.stdout
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
