@@ -164,9 +164,8 @@ class PromptingProcess implements Process {
     // Echo stdin to stdout.
     _stdoutController.add(bytesOnStdin);
     if (bytesOnStdin[0] == UTF8.encode('y')[0]) {
-      for (final String line in outputLines) {
+      for (final String line in outputLines)
         _stdoutController.add(UTF8.encode('$line\n'));
-      }
     }
     await _stdoutController.close();
   }
