@@ -95,6 +95,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         result.setPackageName(mOwner.getContext().getPackageName());
         result.setClassName("Flutter"); // TODO(goderbauer): Set proper class names
         result.setSource(mOwner, virtualViewId);
+        result.setFocusable(object.isFocusable());
 
         if (object.parent != null) {
             assert object.id > 0;
@@ -144,7 +145,6 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         }
         if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0
                 || (object.actions & SEMANTICS_ACTION_DECREASE) != 0 ) {
-            result.setFocusable(true);
             result.setClassName("android.widget.SeekBar");
             if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0) {
                 result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
@@ -507,6 +507,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                 }
             }
             return this;
+        }
+
+        boolean isFocusable() {
+            return flags != 0 || label != null || (actions & ~SEMANTICS_ACTION_SCROLLABLE) != 0;
         }
 
         void updateRecursively(float[] ancestorTransform, Set<SemanticsObject> visitedObjects, boolean forceUpdate) {
