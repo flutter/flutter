@@ -69,6 +69,7 @@ def to_gn_args(args):
     gn_args['skia_use_sfntly'] = False     # PDF handling.
     gn_args['skia_use_libwebp'] = False    # Needs third_party/libwebp.
     gn_args['skia_use_fontconfig'] = False # Use the custom font manager instead.
+    gn_args['is_official_build'] = True    # Disable Skia test utilities.
 
     gn_args['is_debug'] = args.unoptimized
     gn_args['android_full_debug'] = args.target_os == 'android' and args.unoptimized
