@@ -222,7 +222,7 @@ Future<int> main() async {
               boundaryKey = s.substring(RESULT_OUTPUT_SPACE.length);
             }
           } else {
-            if (s == boundaryKey) {
+            if (s.startsWith(boundaryKey)) {
               boundaryKey = null;
               receivedResult.sendPort.send(true);
             }
