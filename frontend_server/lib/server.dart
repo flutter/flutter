@@ -158,7 +158,7 @@ class _FrontendCompiler implements CompilerInterface {
     final IOSink sink = new File(_kernelBinaryFilename).openWrite();
     final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
     printer.writeProgramFile(deltaProgram.newProgram);
-    _outputStream.writeln("$boundaryKey");
+    _outputStream.writeln("$boundaryKey $_kernelBinaryFilename");
     await sink.close();
     return null;
   }
