@@ -7,13 +7,13 @@
 #include <thread>
 #include <utility>
 
-#include "apps/icu_data/lib/icu_data.h"
 #include "apps/tracing/lib/trace/provider.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/tasks/task_runner.h"
+#include "lib/icu_data/cpp/icu_data.h"
 #include "lib/mtl/tasks/message_loop.h"
 
 namespace flutter_runner {
