@@ -67,12 +67,14 @@ class BannerPainter extends CustomPainter {
 
   /// The directionality of the text.
   ///
-  /// This is used to disambiguate how to render bidirectional text. For
+  /// This value is used to disambiguate how to render bidirectional text. For
   /// example, if the message is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
   /// context, the English phrase will be on the right and the Hebrow phrase on
   /// its left.
+  ///
+  /// This value is also used to interpret the [location] of the banner.
   final TextDirection textDirection;
 
   /// Where to show the banner (e.g., the upper right corder).
@@ -134,15 +136,32 @@ class BannerPainter extends CustomPainter {
 
   double _translationX(double width) {
     assert(location != null);
-    switch (location) {
-      case BannerLocation.bottomEnd:
-        return width - _kBottomOffset;
-      case BannerLocation.topEnd:
-        return width;
-      case BannerLocation.bottomStart:
-        return _kBottomOffset;
-      case BannerLocation.topStart:
-        return 0.0;
+    assert(textDirection != null);
+    switch (textDirection) {
+      case TextDirection.rtl:
+        switch (location) {
+          case BannerLocation.bottomEnd:
+            return _kBottomOffset;
+          case BannerLocation.topEnd:
+            return 0.0;
+          case BannerLocation.bottomStart:
+            return width - _kBottomOffset;
+          case BannerLocation.topStart:
+            return width;
+        }
+        break;
+      case TextDirection.ltr:
+        switch (location) {
+          case BannerLocation.bottomEnd:
+            return width - _kBottomOffset;
+          case BannerLocation.topEnd:
+            return width;
+          case BannerLocation.bottomStart:
+            return _kBottomOffset;
+          case BannerLocation.topStart:
+            return 0.0;
+        }
+        break;
     }
     return null;
   }
@@ -150,11 +169,11 @@ class BannerPainter extends CustomPainter {
   double _translationY(double height) {
     assert(location != null);
     switch (location) {
-      case BannerLocation.bottomEnd:
       case BannerLocation.bottomStart:
+      case BannerLocation.bottomEnd:
         return height - _kBottomOffset;
-      case BannerLocation.topEnd:
       case BannerLocation.topStart:
+      case BannerLocation.topEnd:
         return 0.0;
     }
     return null;
@@ -162,13 +181,28 @@ class BannerPainter extends CustomPainter {
 
   double get _rotation {
     assert(location != null);
-    switch (location) {
-      case BannerLocation.bottomStart:
-      case BannerLocation.topEnd:
-        return math.PI / 4.0;
-      case BannerLocation.bottomEnd:
-      case BannerLocation.topStart:
-        return -math.PI / 4.0;
+    assert(textDirection != null);
+    switch (textDirection) {
+      case TextDirection.rtl:
+        switch (location) {
+          case BannerLocation.bottomStart:
+          case BannerLocation.topEnd:
+            return -math.PI / 4.0;
+          case BannerLocation.bottomEnd:
+          case BannerLocation.topStart:
+            return math.PI / 4.0;
+        }
+        break;
+      case TextDirection.ltr:
+        switch (location) {
+          case BannerLocation.bottomStart:
+          case BannerLocation.topEnd:
+            return math.PI / 4.0;
+          case BannerLocation.bottomEnd:
+          case BannerLocation.topStart:
+            return -math.PI / 4.0;
+        }
+        break;
     }
     return null;
   }
