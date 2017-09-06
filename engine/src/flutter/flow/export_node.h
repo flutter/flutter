@@ -11,7 +11,7 @@
 
 #include "apps/mozart/lib/scenic/client/resources.h"
 #include "flutter/flow/scene_update_context.h"
-#include "lib/fidl/dart/sdk_ext/src/handle.h"
+#include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "lib/ftl/build_config.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_counted.h"
@@ -26,7 +26,7 @@ namespace flow {
 // held by the ExportNode.
 class ExportNodeHolder : public ftl::RefCountedThreadSafe<ExportNodeHolder> {
  public:
-  ExportNodeHolder(ftl::RefPtr<fidl::dart::Handle> export_token_handle);
+  ExportNodeHolder(ftl::RefPtr<zircon::dart::Handle> export_token_handle);
   ~ExportNodeHolder();
 
   // Calls Bind() on the wrapped ExportNode.
@@ -50,7 +50,7 @@ class ExportNodeHolder : public ftl::RefCountedThreadSafe<ExportNodeHolder> {
 // must be created and destroyed by the rasterizer thread.
 class ExportNode {
  public:
-  ExportNode(ftl::RefPtr<fidl::dart::Handle> export_token_handle);
+  ExportNode(ftl::RefPtr<zircon::dart::Handle> export_token_handle);
 
   ~ExportNode();
 

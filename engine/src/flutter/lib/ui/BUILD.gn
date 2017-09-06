@@ -99,6 +99,6 @@ source_set("ui") {
     "//third_party/skia:gpu",
   ]
   if (is_fuchsia) {
-    deps += [ "//garnet/public/lib/fidl/dart/sdk_ext" ]
+    deps += [ "//garnet/public/dart-pkg/zircon" ]
   }
 }

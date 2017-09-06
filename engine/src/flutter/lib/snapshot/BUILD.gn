@@ -20,7 +20,8 @@ import("//dart/utils/generate_patch_sdk.gni")
 
 if (is_fuchsia) {
   import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
-  import("//garnet/public/lib/fidl/dart/sdk_ext/sdk_ext.gni")
+  import("//garnet/public/dart-pkg/fuchsia/sdk_ext.gni")
+  import("//garnet/public/dart-pkg/zircon/sdk_ext.gni")
 }
 
 bindings_output_dir = "$root_gen_dir/sky/bindings"
@@ -157,11 +158,13 @@ action("generate_snapshot_bin") {
   }
 
   if (is_fuchsia) {
-    inputs += fidl_dart_sdk_ext_files + mozart_dart_sdk_ext_files
-    fidl_internal_path = rebase_path(fidl_dart_sdk_ext_lib)
+    inputs += zircon_sdk_ext_files + mozart_dart_sdk_ext_files
+    zircon_path = rebase_path(zircon_sdk_ext_lib)
+    fuchsia_path = rebase_path(fuchsia_sdk_ext_lib)
     mozart_internal_path = rebase_path(mozart_dart_sdk_ext_lib)
     args += [
-      "--url_mapping=dart:fidl.internal,$fidl_internal_path",
+      "--url_mapping=dart:zircon,$zircon_path",
+      "--url_mapping=dart:fuchsia,$fuchsia_path",
       "--url_mapping=dart:mozart.internal,$mozart_internal_path",
       "--packages",
       rebase_path("$target_gen_dir/snapshot.packages"),

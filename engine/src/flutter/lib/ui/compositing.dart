@@ -271,7 +271,7 @@ class SceneHost extends NativeFieldWrapperClass2 {
   /// sending the corresponding import token (the other endpoint of the event pair)
   /// to the child.
   ///
-  /// The export token is a dart:fidl.internal Handle, but that type isn't
+  /// The export token is a dart:zircon Handle, but that type isn't
   /// available here. This is called by ChildViewConnection in
   /// //apps/mozart/lib/flutter/.
   ///

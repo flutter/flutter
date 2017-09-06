@@ -74,7 +74,7 @@ source_set("flow") {
     deps += [
       "//apps/mozart/lib/scenic:client",
       "//apps/mozart/services/scenic",
-      "//garnet/public/lib/fidl/dart/sdk_ext",
+      "//garnet/public/dart-pkg/zircon",
     ]
 
     public_deps += [

@@ -7,7 +7,8 @@ assert(is_fuchsia)
 import("//build/dart/dart_package.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
-import("//garnet/public/lib/fidl/dart/sdk_ext/sdk_ext.gni")
+import("//garnet/public/dart-pkg/fuchsia/sdk_ext.gni")
+import("//garnet/public/dart-pkg/zircon/sdk_ext.gni")
 
 declare_args() {
   flutter_app_default_is_jit = true
@@ -18,7 +19,8 @@ gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
 gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
 
 flutter_root = "//lib/flutter"
-flutter_tools_label = "$flutter_root/packages/flutter_tools:fuchsia_builder($host_toolchain)"
+flutter_tools_label =
+    "$flutter_root/packages/flutter_tools:fuchsia_builder($host_toolchain)"
 flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
 flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/fuchsia_builder"
 
@@ -219,12 +221,14 @@ template("flutter_aot_app") {
   action(assembly_label) {
     depfile = assembly_depfile
 
-    inputs = fidl_dart_sdk_ext_files + mozart_dart_sdk_ext_files + [
-      main_dart,
-      "//flutter/runtime/dart_vm_entry_points.txt",
-      "//flutter/runtime/dart_vm_entry_points_fuchsia.txt",
-      "//dart/runtime/bin/dart_io_entries.txt",
-    ]
+    inputs = fuchsia_sdk_ext_files + zircon_sdk_ext_files +
+             mozart_dart_sdk_ext_files +
+             [
+               main_dart,
+               "//flutter/runtime/dart_vm_entry_points.txt",
+               "//flutter/runtime/dart_vm_entry_points_fuchsia.txt",
+               "//dart/runtime/bin/dart_io_entries.txt",
+             ]
 
     outputs = [
       assembly_path,
@@ -248,7 +252,9 @@ template("flutter_aot_app") {
       "--url-mapping",
       "dart:ui," + rebase_path(dart_ui_path),
       "--url-mapping",
-      "dart:fidl.internal," + rebase_path(fidl_dart_sdk_ext_lib),
+      "dart:zircon," + rebase_path(zircon_sdk_ext_lib),
+      "--url-mapping",
+      "dart:fuchsia," + rebase_path(fuchsia_sdk_ext_lib),
       "--url-mapping",
       "dart:mozart.internal," + rebase_path(mozart_dart_sdk_ext_lib),
       "--url-mapping",
@@ -300,8 +306,8 @@ template("flutter_aot_app") {
   }
 
   dylib_path =
-      get_label_info(":$dylib_label($shlib_toolchain)",
-                     "root_out_dir") + "/lib.unstripped/lib$target_name.so"
+      get_label_info(":$dylib_label($shlib_toolchain)", "root_out_dir") +
+      "/lib.unstripped/lib$target_name.so"
 
   action(target_name) {
     depfile = bundle_depfile
@@ -392,7 +398,7 @@ template("flutter_app") {
                                "deps",
                                "manifest",
                                "analysis_options",
-                               "source_dir"
+                               "source_dir",
                              ])
     }
   } else {
@@ -405,7 +411,7 @@ template("flutter_app") {
                                "deps",
                                "manifest",
                                "analysis_options",
-                               "source_dir"
+                               "source_dir",
                              ])
     }
   }
