@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/date_symbols.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import 'button.dart';
 import 'button_bar.dart';
@@ -533,8 +533,31 @@ class _MonthPickerState extends State<MonthPicker> {
     });
   }
 
+  Icon _getPreviousMonthIcon(TextDirection textDirection) {
+    assert(textDirection != null);
+    switch (textDirection) {
+      case TextDirection.rtl:
+        return const Icon(Icons.chevron_right);
+      case TextDirection.ltr:
+        return const Icon(Icons.chevron_left);
+    }
+    return null;
+  }
+
+  Icon _getNextMonthIcon(TextDirection textDirection) {
+    assert(textDirection != null);
+    switch (textDirection) {
+      case TextDirection.rtl:
+        return const Icon(Icons.chevron_left);
+      case TextDirection.ltr:
+        return const Icon(Icons.chevron_right);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final TextDirection textDirection = Directionality.of(context);
     return new SizedBox(
       width: _kMonthPickerPortraitWidth,
       height: _kMaxDayPickerHeight,
@@ -548,20 +571,20 @@ class _MonthPickerState extends State<MonthPicker> {
             itemBuilder: _buildItems,
             onPageChanged: _handleMonthPageChanged,
           ),
-          new Positioned(
+          new PositionedDirectional(
             top: 0.0,
-            left: 8.0,
+            start: 8.0,
             child: new IconButton(
-              icon: const Icon(Icons.chevron_left),
+              icon: _getPreviousMonthIcon(textDirection),
               tooltip: MaterialLocalizations.of(context).previousMonthTooltip,
               onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
             ),
           ),
-          new Positioned(
+          new PositionedDirectional(
             top: 0.0,
-            right: 8.0,
+            end: 8.0,
             child: new IconButton(
-              icon: const Icon(Icons.chevron_right),
+              icon: _getNextMonthIcon(textDirection),
               tooltip: MaterialLocalizations.of(context).nextMonthTooltip,
               onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
             ),
