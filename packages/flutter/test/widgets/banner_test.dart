@@ -17,11 +17,11 @@ class TestCanvas implements Canvas {
 }
 
 void main() {
-  test('A Banner with a location of topLeft paints in the top left', () {
+  test('A Banner with a location of topStart paints in the top left (LTR)', () {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
-      location: BannerLocation.topLeft
+      location: BannerLocation.topStart
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -44,11 +44,11 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(-math.PI / 4.0));
   });
 
-  test('A Banner with a location of topRight paints in the top right', () {
+  test('A Banner with a location of topEnd paints in the top right (LTR)', () {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
-      location: BannerLocation.topRight
+      location: BannerLocation.topEnd
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -71,11 +71,11 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(math.PI / 4.0));
   });
 
-  test('A Banner with a location of bottomLeft paints in the bottom left', () {
+  test('A Banner with a location of bottomStart paints in the bottom left (LTR)', () {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
-      location: BannerLocation.bottomLeft
+      location: BannerLocation.bottomStart
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -98,11 +98,11 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(math.PI / 4.0));
   });
 
-  test('A Banner with a location of bottomRight paints in the bottom right', () {
+  test('A Banner with a location of bottomEnd paints in the bottom right (LTR)', () {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
-      location: BannerLocation.bottomRight
+      location: BannerLocation.bottomEnd
     );
 
     final TestCanvas canvas = new TestCanvas();

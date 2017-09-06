@@ -24,17 +24,25 @@ const TextStyle _kTextStyle = const TextStyle(
 
 /// Where to show a [Banner].
 enum BannerLocation {
-  /// Show the banner in the top right corner.
-  topRight,
+  /// Show the banner in the top-right corner when the ambient [Directionality]
+  /// is [TextDirection.rtl] and in the top-left corner when the ambient
+  /// [Directionality] is [TextDirection.ltr].
+  topStart,
 
-  /// Show the banner in the top left corner.
-  topLeft,
+  /// Show the banner in the top-left corner when the ambient [Directionality]
+  /// is [TextDirection.rtl] and in the top-right corner when the ambient
+  /// [Directionality] is [TextDirection.ltr].
+  topEnd,
 
-  /// Show the banner in the bottom right corner.
-  bottomRight,
+  /// Show the banner in the bottom-right corner when the ambient
+  /// [Directionality] is [TextDirection.rtl] and in the bottom-left corner when
+  /// the ambient [Directionality] is [TextDirection.ltr].
+  bottomStart,
 
-  /// Show the banner in the bottom left corner.
-  bottomLeft,
+  /// Show the banner in the bottom-left corner when the ambient
+  /// [Directionality] is [TextDirection.rtl] and in the bottom-right corner when
+  /// the ambient [Directionality] is [TextDirection.ltr].
+  bottomEnd,
 }
 
 /// Paints a [Banner].
@@ -127,13 +135,13 @@ class BannerPainter extends CustomPainter {
   double _translationX(double width) {
     assert(location != null);
     switch (location) {
-      case BannerLocation.bottomRight:
+      case BannerLocation.bottomEnd:
         return width - _kBottomOffset;
-      case BannerLocation.topRight:
+      case BannerLocation.topEnd:
         return width;
-      case BannerLocation.bottomLeft:
+      case BannerLocation.bottomStart:
         return _kBottomOffset;
-      case BannerLocation.topLeft:
+      case BannerLocation.topStart:
         return 0.0;
     }
     return null;
@@ -142,11 +150,11 @@ class BannerPainter extends CustomPainter {
   double _translationY(double height) {
     assert(location != null);
     switch (location) {
-      case BannerLocation.bottomRight:
-      case BannerLocation.bottomLeft:
+      case BannerLocation.bottomEnd:
+      case BannerLocation.bottomStart:
         return height - _kBottomOffset;
-      case BannerLocation.topRight:
-      case BannerLocation.topLeft:
+      case BannerLocation.topEnd:
+      case BannerLocation.topStart:
         return 0.0;
     }
     return null;
@@ -155,11 +163,11 @@ class BannerPainter extends CustomPainter {
   double get _rotation {
     assert(location != null);
     switch (location) {
-      case BannerLocation.bottomLeft:
-      case BannerLocation.topRight:
+      case BannerLocation.bottomStart:
+      case BannerLocation.topEnd:
         return math.PI / 4.0;
-      case BannerLocation.bottomRight:
-      case BannerLocation.topLeft:
+      case BannerLocation.bottomEnd:
+      case BannerLocation.topStart:
         return -math.PI / 4.0;
     }
     return null;
@@ -265,7 +273,7 @@ class CheckedModeBanner extends StatelessWidget {
         child: result,
         message: 'SLOW MODE',
         textDirection: TextDirection.ltr,
-        location: BannerLocation.topRight,
+        location: BannerLocation.topEnd,
       );
       return true;
     });
