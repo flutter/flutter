@@ -152,21 +152,30 @@ void main() {
       });
 
       testUsingContext('throws ArgumentError for unknown versions', () async {
-        final String json = '{"version":"bad","properties":{},"files":{}}';
+        final String json = JSON.encode(<String, dynamic>{
+          'version': 'bad',
+          'properties':<String, String>{},
+          'files':<String, String>{},
+        });
         expect(() => new Fingerprint.fromJson(json), throwsArgumentError);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('throws ArgumentError if version is not present', () async {
-        final String json = '{"properties":{},"files":{}}';
+        final String json = JSON.encode(<String, dynamic>{
+          'properties':<String, String>{},
+          'files':<String, String>{},
+        });
         expect(() => new Fingerprint.fromJson(json), throwsArgumentError);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('treats missing properties and files entries as if empty', () async {
-        final String json = '{"version":"$kVersion"}';
+        final String json = JSON.encode(<String, dynamic>{
+          'version': kVersion,
+        });
         expect(new Fingerprint.fromJson(json), new Fingerprint.fromBuildInputs(<String, String>{}, <String>[]));
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
@@ -377,7 +386,7 @@ void main() {
         'properties': <String, String>{
           'buildMode': BuildMode.debug.toString(),
           'targetPlatform': '',
-          'entryPoint': 'lib/main.dart',
+          'entryPoint': 'main.dart',
         },
         'files': <String, dynamic>{
           'main.dart': '27f5ebf0f8c559b2af9419d190299a5e',
@@ -415,7 +424,7 @@ void main() {
       await fs.file('output.snapshot').create();
       await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
       await fs.file('output.snapshot.d.fingerprint').writeAsString(JSON.encode(<String, dynamic>{
-        'version': '$kVersion',
+        'version': kVersion,
         'properties': <String, String>{
           'buildMode': BuildMode.debug.toString(),
           'targetPlatform': '',
@@ -451,7 +460,7 @@ void main() {
       await fs.file('output.snapshot').create();
       await fs.file('output.snapshot.d').writeAsString('output.snapshot : main.dart');
       await fs.file('output.snapshot.d.fingerprint').writeAsString(JSON.encode(<String, dynamic>{
-        'version': '$kVersion',
+        'version': kVersion,
         'properties': <String, String>{
           'buildMode': BuildMode.debug.toString(),
           'targetPlatform': '',
