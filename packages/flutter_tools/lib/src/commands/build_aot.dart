@@ -299,12 +299,12 @@ Future<String> _buildAotSnapshot(
         ..addAll(outputPaths);
       final Checksum newChecksum = new Checksum.fromFiles(snapshotType, mainPath, snapshotInputPaths);
       if (oldChecksum == newChecksum) {
-        printStatus('Skipping AOT snapshot build. Checksums match.');
+        printTrace('Skipping AOT snapshot build. Checksums match.');
         return outputPath;
       }
-    } catch (e, s) {
+    } catch (e) {
       // Log exception and continue, this step is a performance improvement only.
-      printStatus('Error during AOT snapshot checksum check: $e\n$s');
+      printTrace('Rebuilding snapshot due to checksum validation error: $e');
     }
   }
 
@@ -379,7 +379,7 @@ Future<String> _buildAotSnapshot(
     await checksumFile.writeAsString(checksum.toJson());
   } catch (e, s) {
     // Log exception and continue, this step is a performance improvement only.
-    printStatus('Error during AOT snapshot checksum output: $e\n$s');
+    printTrace('Error during AOT snapshot checksum output: $e\n$s');
   }
 
   return outputPath;
