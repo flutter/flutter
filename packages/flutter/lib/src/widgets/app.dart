@@ -84,7 +84,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
-  const WidgetsApp({
+  WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
     Key key,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
@@ -108,7 +108,7 @@ class WidgetsApp extends StatefulWidget {
        assert(color != null),
        assert(navigatorObservers != null),
        assert(onLocaleChanged != null),
-       assert(supportedLocales != null),
+       assert(supportedLocales != null && supportedLocales.isNotEmpty),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
        assert(checkerboardOffscreenLayers != null),
@@ -310,7 +310,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey<NavigatorState>(this);
-    assert(widget.supportedLocales.isNotEmpty);
     _locale = widget.onLocaleChanged(null, ui.window.locale, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
