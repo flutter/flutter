@@ -94,6 +94,8 @@ class MaterialApp extends StatefulWidget {
     this.onUnknownRoute,
     this.locale,
     this.localizationsDelegates,
+    this.onLocaleChanged: defaultLocaleChangedHandler,
+    this.supportedLocales: const <Locale>[const Locale('en', 'US')],
     this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
@@ -232,6 +234,31 @@ class MaterialApp extends StatefulWidget {
   /// The delegates collectively define all of the localized resources
   /// for this application's [Localizations] widget.
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// This callback is responsible for choosing the app's locale
+  /// when the app is started, and when the user changes the
+  /// device's locale.
+  ///
+  /// The returned value becomes the locale of this app's [Localizations]
+  /// widget. The `oldLocale` parameter is null when the app starts. The
+  /// `newLocale` is the device's locale when the app started, or the
+  /// device locale the user selected after the app was started.
+  /// The `supportedLocales` parameter is just the value [supportedLocales].
+  ///
+  /// This callback must not be null. Its default value is
+  /// [defaultLocaleChangedHandler]. It is simply passed along to the
+  /// [WidgetsApp] built by this widget.
+  final LocaleChangedCallback onLocaleChanged;
+
+  /// The list of locales that this app has been localized for.
+  ///
+  /// By default only the English locale is supported. Apps should configure
+  /// this list to match the locales they support.
+  ///
+  /// This list must not null. It's default value is just
+  /// `[const Locale('en', 'US')]`. It is simply passed along to the
+  /// [WidgetsApp] built by this widget.
+  final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
   ///
@@ -399,6 +426,8 @@ class _MaterialAppState extends State<MaterialApp> {
         onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
+        onLocaleChanged: widget.onLocaleChanged,
+        supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,

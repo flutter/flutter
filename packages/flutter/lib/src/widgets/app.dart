@@ -23,6 +23,32 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
 
+/// The signature of [WidgetsApp.onLocaleChanged] callback.
+///
+/// A `LocaleChangedCallback` is responsible for computing the locale of the app's
+/// [Localizations] object when the app starts and when user changes the default
+/// locale for the device.
+///
+/// The `oldLocale` is null when the app starts. The `newLocale` is the device's
+/// locale when the app started, or the device locale the user selected after
+/// the app was started. The `supportedLocales` parameter is just the value of
+/// [WidgetApp.supportedLocales].
+typedef Locale LocaleChangedCallback(Locale oldLocale, Locale newLocale, Iterable<Locale> supportedLocales);
+
+/// The default value of the [WidgetsApp.onLocaleChanged] callback.
+///
+/// If `supportedLocales` contains `newLocale` then return it. Otherwise return
+/// the first supported locale whose [Locale.languageCode] matches the new locale's
+/// language code. Failing that, return `oldLocale`, or the first supported
+/// locale if the old locale is null (because this app was just started).
+Locale defaultLocaleChangedHandler(Locale oldLocale, Locale newLocale, Iterable<Locale> supportedLocales) {
+  if (supportedLocales.contains(newLocale))
+    return newLocale;
+  final String languageCode = newLocale.languageCode;
+  return supportedLocales.firstWhere((Locale locale) => locale.languageCode == languageCode,
+    orElse: () => oldLocale ?? supportedLocales.first);
+}
+
 // Delegate that fetches the default (English) strings.
 class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   const _WidgetsLocalizationsDelegate();
@@ -63,6 +89,8 @@ class WidgetsApp extends StatefulWidget {
     this.initialRoute,
     this.locale,
     this.localizationsDelegates,
+    this.onLocaleChanged: defaultLocaleChangedHandler,
+    this.supportedLocales: const <Locale>[const Locale('en', 'US')],
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
@@ -73,6 +101,8 @@ class WidgetsApp extends StatefulWidget {
   }) : assert(onGenerateRoute != null),
        assert(color != null),
        assert(navigatorObservers != null),
+       assert(onLocaleChanged != null),
+       assert(supportedLocales != null),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
        assert(checkerboardOffscreenLayers != null),
@@ -148,6 +178,45 @@ class WidgetsApp extends StatefulWidget {
   /// The delegates collectively define all of the localized resources
   /// for this application's [Localizations] widget.
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// This callback is responsible for choosing the app's locale
+  /// when the app is started, and when the user changes the
+  /// device's locale.
+  ///
+  /// The returned value becomes the locale of this app's [Localizations]
+  /// widget. The `oldLocale` parameter is null when the app starts. The
+  /// `newLocale` is the device's locale when the app started, or the
+  /// device locale the user selected after the app was started.
+  /// The `supportedLocales` parameter is just the value [supportedLocales].
+  ///
+  /// This callback must not be null. Its default value is
+  /// [defaultLocaleChangedHandler].
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialApp.onLocaleChanged], which sets the callback of the
+  ///    [WidgetsApp] it creates.
+  final LocaleChangedCallback onLocaleChanged;
+
+  /// The list of locales that this app has been localized for.
+  ///
+  /// By default only the English locale is supported. Apps should configure
+  /// this list to match the locales they support.
+  ///
+  /// This list must not null. It's default value is just
+  /// `[const Locale('en', 'US')]`.
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialApp.supportedLocales], which sets the `supportedLocales`
+  ///    of the [WidgetsApp] it creates.
+  ///
+  ///  * [onLocaleChanged], an app callback that resolves the app's locale
+  ///    when the device's locale changes.
+  ///
+  ///  * [localizationDelegates], which collectively define all of the localized
+  ///    resources used by this app.
+  final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
   /// https://flutter.io/debugging/#performanceoverlay
@@ -235,7 +304,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey<NavigatorState>(this);
-    _locale = ui.window.locale;
+    _locale = widget.onLocaleChanged(null, ui.window.locale, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -273,9 +342,12 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   void didChangeLocale(Locale locale) {
-    if (locale != _locale) {
+    if (locale == _locale)
+      return;
+    final Locale newLocale = widget.onLocaleChanged(_locale, locale, widget.supportedLocales);
+    if (newLocale != _locale) {
       setState(() {
-        _locale = locale;
+        _locale = newLocale;
       });
     }
   }
