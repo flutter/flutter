@@ -9,13 +9,14 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
 import 'dart:developer';
-import 'dart:fidl.internal';
+import 'dart:fuchsia';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:math';
 import 'dart:mozart.internal';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:zircon';
 
 // These libraries are optional. They are included in the core snapshot and
 // partially compiled to avoid repeating them in each application and improve

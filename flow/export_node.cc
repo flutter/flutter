@@ -10,7 +10,7 @@
 namespace flow {
 
 ExportNodeHolder::ExportNodeHolder(
-    ftl::RefPtr<fidl::dart::Handle> export_token_handle)
+    ftl::RefPtr<zircon::dart::Handle> export_token_handle)
     : export_node_(std::make_unique<ExportNode>(export_token_handle)) {
   ASSERT_IS_UI_THREAD;
 }
@@ -31,7 +31,7 @@ ExportNodeHolder::~ExportNodeHolder() {
       }));
 }
 
-ExportNode::ExportNode(ftl::RefPtr<fidl::dart::Handle> export_token_handle)
+ExportNode::ExportNode(ftl::RefPtr<zircon::dart::Handle> export_token_handle)
     : export_token_(export_token_handle->ReleaseHandle()) {}
 
 ExportNode::~ExportNode() {

@@ -17,6 +17,7 @@
 #include "apps/mozart/services/input/input_connection.fidl.h"
 #include "apps/mozart/services/input/text_input.fidl.h"
 #include "apps/mozart/services/views/view_manager.fidl.h"
+#include "dart-pkg/fuchsia/sdk_ext/fuchsia.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/flow/layers/layer_tree.h"
@@ -88,7 +89,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   bool HandleTextInputPlatformMessage(blink::PlatformMessage* message);
 
   void InitDartIoInternal();
-  void InitFidlInternal();
+  void InitFuchsia();
   void InitMozartInternal();
 
   void PostBeginFrame();

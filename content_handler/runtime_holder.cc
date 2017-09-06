@@ -21,8 +21,7 @@
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
 #include "flutter/runtime/runtime_init.h"
-#include "lib/fidl/dart/sdk_ext/src/handle.h"
-#include "lib/fidl/dart/sdk_ext/src/natives.h"
+#include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
@@ -358,7 +357,7 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
   if (asset_store_)
     blink::AssetFontSelector::Install(asset_store_);
   InitDartIoInternal();
-  InitFidlInternal();
+  InitFuchsia();
   InitMozartInternal();
 }
 
@@ -375,25 +374,11 @@ void RuntimeHolder::InitDartIoInternal() {
       namespace_type, ToDart("_setupNamespace"), 1, namespace_args));
 }
 
-void RuntimeHolder::InitFidlInternal() {
+void RuntimeHolder::InitFuchsia() {
   fidl::InterfaceHandle<app::ApplicationEnvironment> environment;
   context_->ConnectToEnvironmentService(environment.NewRequest());
+  fuchsia::dart::Initialize(std::move(environment), std::move(outgoing_services_));
 
-  Dart_Handle fidl_internal = Dart_LookupLibrary(ToDart("dart:fidl.internal"));
-
-  DART_CHECK_VALID(Dart_SetNativeResolver(
-      fidl_internal, fidl::dart::NativeLookup, fidl::dart::NativeSymbol));
-
-  fidl::dart::Initialize();
-
-  DART_CHECK_VALID(Dart_SetField(fidl_internal, ToDart("_environment"),
-                                 ToDart(fidl::dart::Handle::Create(
-                                     environment.PassHandle().release()))));
-
-  DART_CHECK_VALID(
-      Dart_SetField(fidl_internal, ToDart("_outgoingServices"),
-                    ToDart(fidl::dart::Handle::Create(
-                        outgoing_services_.PassChannel().release()))));
 }
 
 void RuntimeHolder::InitMozartInternal() {
@@ -412,7 +397,7 @@ void RuntimeHolder::InitMozartInternal() {
                         static_cast<mozart::NativesDelegate*>(this)))));
 
   DART_CHECK_VALID(Dart_SetField(mozart_internal, ToDart("_viewContainer"),
-                                 ToDart(fidl::dart::Handle::Create(
+                                 ToDart(zircon::dart::Handle::Create(
                                      view_container.PassHandle().release()))));
 }
 
