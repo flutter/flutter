@@ -354,23 +354,16 @@ Future<Map<String, dynamic>> makeMockResponse(
   });
 }
 
-@proxy
 class MockVMServiceClient extends Mock implements VMServiceClient { }
 
-@proxy
 class MockVM extends Mock implements VM { }
 
-@proxy
 class MockIsolate extends Mock implements VMRunnableIsolate { }
 
-@proxy
 class MockVMPauseStartEvent extends Mock implements VMPauseStartEvent { }
 
-@proxy
 class MockVMPauseBreakpointEvent extends Mock implements VMPauseBreakpointEvent { }
 
-@proxy
 class MockVMResumeEvent extends Mock implements VMResumeEvent { }
 
-@proxy
 class MockPeer extends Mock implements rpc.Peer { }
