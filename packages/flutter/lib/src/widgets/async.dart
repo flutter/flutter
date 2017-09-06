@@ -35,7 +35,7 @@ import 'framework.dart';
 /// receipt of stream data and errors are specified by overriding [afterData] and
 /// [afterError], respectively. If needed, the summary may be updated on stream
 /// termination by overriding [afterDone]. Finally, the summary may be updated
-/// on change of stream by overriding [afterConnected] and [afterConnected].
+/// on change of stream by overriding [afterDisconnected] and [afterConnected].
 ///
 /// [T] is the type of stream events.
 /// [S] is the type of interaction summary.
