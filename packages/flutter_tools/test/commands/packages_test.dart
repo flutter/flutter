@@ -159,23 +159,16 @@ class MockProcessManager implements ProcessManager {
 /// some lines to stdout before it exits.
 class PromptingProcess implements Process {
   Future<Null> showPrompt(String prompt, List<String> outputLines) async {
-    _stdin.future.then((List<int> bytes) async {
-      // echo stdin to stdout
-      _stdoutController.add(bytes);
-      if (bytes[0] == UTF8.encode('y')[0]) {
-        for (final String line in outputLines) {
-          await new Future<Null>(() {
-            _stdoutController.add(UTF8.encode('$line\n'));
-          });
-        }
-        await new Future<Null>(() {
-          _stdoutController.close();
-        });
+    _stdoutController.add(UTF8.encode(prompt));
+    final List<int> bytesOnStdin = await _stdin.future;
+    // Echo stdin to stdout.
+    _stdoutController.add(bytesOnStdin);
+    if (bytesOnStdin[0] == UTF8.encode('y')[0]) {
+      for (final String line in outputLines) {
+        _stdoutController.add(UTF8.encode('$line\n'));
       }
-    });
-    await new Future<Null>(() {
-      _stdoutController.add(UTF8.encode(prompt));
-    });
+    }
+    await _stdoutController.close();
   }
 
   final StreamController<List<int>> _stdoutController = new StreamController<List<int>>();
