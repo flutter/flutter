@@ -258,7 +258,7 @@ class Snapshotter {
     final Map<String, String> properties = <String, String>{
       'buildMode': type.mode.toString(),
       'targetPlatform': type.platform?.toString() ?? '',
-      'mainPath': mainPath,
+      'entryPoint': mainPath,
     };
     return new Fingerprint.fromBuildInputs(properties, inputFilePaths);
   }
