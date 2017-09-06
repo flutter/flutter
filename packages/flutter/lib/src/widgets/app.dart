@@ -76,8 +76,14 @@ class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
   ///
-  /// The boolean arguments, [color], [navigatorObservers], and
-  /// [onGenerateRoute] must not be null.
+  /// The boolean arguments, `color`, `navigatorObservers`, and
+  /// `onGenerateRoute` must not be null.
+  ///
+  /// The `onLocaleChanged` argument must not be null. Its default value
+  /// is [defaultLocaleChangeHandler].
+  ///
+  /// The `supportedLocales` argument must be a list of one or more elements.
+  /// By default supportedLocales is `[const Locale('en', 'US')]`.
   const WidgetsApp({
     Key key,
     @required this.onGenerateRoute,
@@ -304,6 +310,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey<NavigatorState>(this);
+    assert(widget.supportedLocales.isNotEmpty);
     _locale = widget.onLocaleChanged(null, ui.window.locale, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
