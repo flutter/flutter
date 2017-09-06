@@ -769,11 +769,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// The order in which the children of the [SemanticsNode] will be printed is
   /// controlled by the [childOrder] parameter.
-  String toStringDeepOrdered(DebugSemanticsDumpOrder childOrder, [
-    String prefixLineOne = '',
-    String prefixOtherLines = '',
-  ]) {
-    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne, prefixOtherLines);
+  @override
+  String toStringDeep({
+    String prefixLineOne: '',
+    String prefixOtherLines,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversal,
+  }) {
+    assert(childOrder != null);
+    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
   }
 
   @override

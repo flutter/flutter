@@ -94,7 +94,7 @@ void main() {
     });
   });
 
-  test('toStringDeepOrdered() does not throw with transform == null', () {
+  test('toStringDeep() does not throw with transform == null', () {
     final SemanticsNode child1 = new SemanticsNode();
     final SemanticsNode child2 = new SemanticsNode();
     final SemanticsNode root = new SemanticsNode();
@@ -106,14 +106,14 @@ void main() {
     expect(child2.transform, isNull);
 
     expect(
-      root.toStringDeepOrdered(DebugSemanticsDumpOrder.traversal),
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
       'SemanticsNode#8(stale, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
       '├SemanticsNode#6(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
       '└SemanticsNode#7(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
     );
   });
 
-  test('toStringDeepOrdered ', () {
+  test('toStringDeep respects childOrder parameter', () {
     final SemanticsNode child1 = new SemanticsNode()
       ..rect = new Rect.fromLTRB(20.0, 20.0, 20.0, 20.0);
     final SemanticsNode child2 = new SemanticsNode()
@@ -121,20 +121,15 @@ void main() {
     final SemanticsNode root = new SemanticsNode();
     root.addChildren(<SemanticsNode>[child1, child2]);
     root.finalizeChildren();
-
-    expect(root.transform, isNull);
-    expect(child1.transform, isNull);
-    expect(child2.transform, isNull);
-
     expect(
-      root.toStringDeepOrdered(DebugSemanticsDumpOrder.traversal),
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
       'SemanticsNode#11(stale, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
       '├SemanticsNode#10(stale, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n'
       '└SemanticsNode#9(stale, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n',
     );
 
     expect(
-      root.toStringDeepOrdered(DebugSemanticsDumpOrder.inverseHitTest),
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
       'SemanticsNode#11(stale, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
           '├SemanticsNode#9(stale, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n'
           '└SemanticsNode#10(stale, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n',
@@ -142,7 +137,7 @@ void main() {
 
     final SemanticsNode child3 = new SemanticsNode()
       ..rect = new Rect.fromLTRB(0.0, 0.0, 0.0, 0.0);
-    child3.addChildren([
+    child3.addChildren(<SemanticsNode>[
       new SemanticsNode()..rect = new Rect.fromLTRB(20.0, 0.0, 20.0, 0.0),
       new SemanticsNode(),
     ]);
@@ -153,7 +148,7 @@ void main() {
     rootComplex.finalizeChildren();
 
     expect(
-      rootComplex.toStringDeepOrdered(DebugSemanticsDumpOrder.traversal),
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
       'SemanticsNode#15(stale, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
       '├SemanticsNode#12(stale, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
       '│├SemanticsNode#14(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
@@ -163,7 +158,7 @@ void main() {
     );
 
     expect(
-      rootComplex.toStringDeepOrdered(DebugSemanticsDumpOrder.inverseHitTest),
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
       'SemanticsNode#15(stale, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
       '├SemanticsNode#9(stale, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n'
       '├SemanticsNode#10(stale, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n'

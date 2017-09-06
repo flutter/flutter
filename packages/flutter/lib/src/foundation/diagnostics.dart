@@ -679,7 +679,7 @@ abstract class DiagnosticsNode {
   String toString({ TextTreeConfiguration parentConfiguration }) {
     assert(style != null);
     if (style == DiagnosticsTreeStyle.singleLine)
-      return toStringDeep('', '', parentConfiguration);
+      return toStringDeep(parentConfiguration: parentConfiguration);
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
 
@@ -736,7 +736,11 @@ abstract class DiagnosticsNode {
   ///  * [toString], for a brief description of the [value] but not its children.
   ///  * [toStringShallow], for a detailed description of the [value] but not its
   ///    children.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines, TextTreeConfiguration parentConfiguration]) {
+  String toStringDeep({
+    String prefixLineOne: '',
+    String prefixOtherLines,
+    TextTreeConfiguration parentConfiguration,
+  }) {
     prefixOtherLines ??= prefixLineOne;
 
     final List<DiagnosticsNode> children = getChildren();
@@ -796,9 +800,9 @@ abstract class DiagnosticsNode {
       if (property.style != DiagnosticsTreeStyle.singleLine) {
         final TextTreeConfiguration propertyStyle = property.textTreeConfiguration;
         builder.writeRaw(property.toStringDeep(
-            '${builder.prefixOtherLines}${propertyStyle.prefixLineOne}',
-            '${builder.prefixOtherLines}${propertyStyle.linkCharacter}${propertyStyle.prefixOtherLines}',
-            config,
+            prefixLineOne: '${builder.prefixOtherLines}${propertyStyle.prefixLineOne}',
+            prefixOtherLines: '${builder.prefixOtherLines}${propertyStyle.linkCharacter}${propertyStyle.prefixOtherLines}',
+            parentConfiguration: config,
         ));
         continue;
       }
@@ -850,9 +854,9 @@ abstract class DiagnosticsNode {
         if (i == children.length - 1) {
           final String lastChildPrefixLineOne = '$prefixChildren${childConfig.prefixLastChildLineOne}';
           builder.writeRawLine(child.toStringDeep(
-            lastChildPrefixLineOne,
-            '$prefixChildren${childConfig.childLinkSpace}${childConfig.prefixOtherLines}',
-            config,
+            prefixLineOne: lastChildPrefixLineOne,
+            prefixOtherLines: '$prefixChildren${childConfig.childLinkSpace}${childConfig.prefixOtherLines}',
+            parentConfiguration: config,
           ));
           if (childConfig.footer.isNotEmpty)
             builder.writeRaw('$prefixChildren${childConfig.childLinkSpace}${childConfig.footer}');
@@ -860,7 +864,7 @@ abstract class DiagnosticsNode {
           final TextTreeConfiguration nextChildStyle = _childTextConfiguration(children[i + 1], config);
           final String childPrefixLineOne = '$prefixChildren${childConfig.prefixLineOne}';
           final String childPrefixOtherLines ='$prefixChildren${nextChildStyle.linkCharacter}${childConfig.prefixOtherLines}';
-          builder.writeRawLine(child.toStringDeep(childPrefixLineOne, childPrefixOtherLines));
+          builder.writeRawLine(child.toStringDeep(prefixLineOne: childPrefixLineOne, prefixOtherLines: childPrefixOtherLines));
           if (childConfig.footer.isNotEmpty)
             builder.writeRaw('$prefixChildren${nextChildStyle.linkCharacter}${childConfig.footer}');
         }
@@ -2113,8 +2117,8 @@ abstract class DiagnosticableTree extends Diagnosticable {
   ///  * [toString], for a brief description of the object but not its children.
   ///  * [toStringShallow], for a detailed description of the object but not its
   ///    children.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines]) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines }) {
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
   }
 
   @override
@@ -2179,8 +2183,8 @@ abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
   }
 
   @override
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines]) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines }) {
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
   }
 
   @override
