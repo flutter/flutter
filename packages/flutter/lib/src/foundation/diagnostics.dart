@@ -1249,16 +1249,18 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// value with 0 elements would, confusingly, be displayed as the empty
   /// string. It defaults to the string `[]`.
   ///
-  /// The [style] and [hidden] arguments must also not be null.
+  /// The [style], [hidden], and [showName] arguments must also not be null.
   IterableProperty(String name, Iterable<T> value, {
     Object defaultValue: kNoDefaultValue,
     String ifNull,
     String ifEmpty: '[]',
     DiagnosticsTreeStyle style: DiagnosticsTreeStyle.singleLine,
     bool hidden: false,
+    bool showName: true,
   }) : assert(ifEmpty != null),
        assert(style != null),
        assert(hidden != null),
+       assert(showName != null),
        super(
     name,
     value,
@@ -1267,6 +1269,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
     ifEmpty: ifEmpty,
     style: style,
     hidden: hidden,
+    showName: showName,
   );
 
   @override
@@ -1635,8 +1638,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 }
 
 /// [DiagnosticsNode] for an instance of [Diagnosticable].
-class _DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
-  _DiagnosticableNode({
+class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
+  DiagnosticableNode({
     String name,
     @required this.value,
     @required DiagnosticsTreeStyle style,
@@ -1683,7 +1686,7 @@ class _DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 }
 
 /// [DiagnosticsNode] for an instance of [DiagnosticableTree].
-class _DiagnosticableTreeNode extends _DiagnosticableNode<DiagnosticableTree> {
+class _DiagnosticableTreeNode extends DiagnosticableNode<DiagnosticableTree> {
   _DiagnosticableTreeNode({
     String name,
     @required DiagnosticableTree value,
@@ -1841,7 +1844,7 @@ abstract class Diagnosticable {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return new _DiagnosticableNode<Diagnosticable>(
+    return new DiagnosticableNode<Diagnosticable>(
       name: name,
       value: this,
       style: style,

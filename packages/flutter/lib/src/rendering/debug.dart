@@ -145,11 +145,15 @@ List<String> debugDescribeTransform(Matrix4 transform) {
 /// Property which handles [Matrix4] that represent transforms.
 class TransformProperty extends DiagnosticsProperty<Matrix4> {
   /// Create a diagnostics property for [Matrix4] objects.
+  ///
+  /// The [showName] argument must not be null.
   TransformProperty(String name, Matrix4 value, {
+    bool showName: true,
     Object defaultValue: kNoDefaultValue,
-  }) : super(
+  }) : assert(showName != null), super(
     name,
     value,
+    showName: showName,
     defaultValue: defaultValue,
   );
 
