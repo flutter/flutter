@@ -166,6 +166,30 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   return await process.exitCode;
 }
 
+/// Runs the [command] interactively, connecting the stdin/stdout/stderr
+/// streams of this process to those of the child process. Completes with
+/// the exit code of the child process.
+Future<int> runInteractively(List<String> command, {
+  String workingDirectory,
+  bool allowReentrantFlutter: false,
+  Map<String, String> environment
+}) async {
+  final Process process = await runCommand(
+    command,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment,
+  );
+  process.stdin.addStream(stdin);
+  // Wait for stdout and stderr to be fully processed, because process.exitCode
+  // may complete first.
+  Future.wait<dynamic>(<Future<dynamic>>[
+    stdout.addStream(process.stdout),
+    stderr.addStream(process.stderr),
+  ]);
+  return await process.exitCode;
+}
+
 Future<Null> runAndKill(List<String> cmd, Duration timeout) {
   final Future<Process> proc = runDetached(cmd);
   return new Future<Null>.delayed(timeout, () async {

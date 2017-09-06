@@ -124,5 +124,5 @@ class PackagesPassthroughCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() => pub(argResults.rest, retry: false);
+  Future<Null> runCommand() => pubInteractively(argResults.rest);
 }

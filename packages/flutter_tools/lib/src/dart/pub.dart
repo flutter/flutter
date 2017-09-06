@@ -78,23 +78,25 @@ Future<Null> pubGet({
 
 typedef String MessageFilter(String message);
 
+/// Runs pub in 'batch' mode, forwarding complete lines written by pub to its
+/// stdout/stderr streams to the corresponding stream of this process, optionally
+/// applying filtering. The pub process will not receive anything on its stdin stream.
 Future<Null> pub(List<String> arguments, {
   String directory,
   MessageFilter filter,
   String failureMessage: 'pub failed',
   @required bool retry,
 }) async {
-  final List<String> command = <String>[ sdkBinaryName('pub') ]..addAll(arguments);
   int attempts = 0;
   int duration = 1;
   int code;
   while (true) {
     attempts += 1;
     code = await runCommandAndStreamOutput(
-      command,
+      _pubCommand(arguments),
       workingDirectory: directory,
       mapFunction: filter,
-      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
+      environment: _pubEnvironment,
     );
     if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
@@ -107,6 +109,32 @@ Future<Null> pub(List<String> arguments, {
   if (code != 0)
     throwToolExit('$failureMessage ($code)', exitCode: code);
 }
+
+/// Runs pub in 'interactive' mode, directly piping the stdin stream of this
+/// process to that of pub, and the stdout/stderr stream of pub to the corresponding
+/// streams of this process.
+Future<Null> pubInteractively(List<String> arguments, {
+  String directory,
+}) async {
+  final int code = await runInteractively(
+    _pubCommand(arguments),
+    workingDirectory: directory,
+    environment: _pubEnvironment,
+  );
+  if (code != 0)
+    throwToolExit('pub finished with exit code $code', exitCode: code);
+}
+
+/// The command used for running pub.
+List<String> _pubCommand(List<String> arguments) {
+  return <String>[ sdkBinaryName('pub') ]..addAll(arguments);
+}
+
+/// The full environment used when running pub.
+Map<String, String> get _pubEnvironment => <String, String>{
+  'FLUTTER_ROOT': Cache.flutterRoot,
+  _pubEnvironmentKey: _getPubEnvironmentValue(),
+};
 
 final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 
