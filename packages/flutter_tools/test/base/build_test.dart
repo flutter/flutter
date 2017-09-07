@@ -528,7 +528,7 @@ void main() {
           'targetPlatform': 'TargetPlatform.android_x64',
           'entryPoint': 'a.dart',
         }, <String>['a.dart', 'b.dart']));
-      }, overrides: <Type, Generator>{ FileSystem: () => fs});
+      }, overrides: <Type, Generator>{ FileSystem: () => fs });
     });
   });
 }

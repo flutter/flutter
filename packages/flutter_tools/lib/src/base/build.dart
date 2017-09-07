@@ -95,7 +95,7 @@ class Fingerprint {
   Map<String, String> _checksums;
   Map<String, String> _properties;
 
-  String  toJson() => JSON.encode(<String, dynamic>{
+  String toJson() => JSON.encode(<String, dynamic>{
     'version': FlutterVersion.instance.frameworkRevision,
     'properties': _properties,
     'files': _checksums,
