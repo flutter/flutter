@@ -46,7 +46,7 @@ class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliza
 Widget overlay({ Widget child }) {
   return new Localizations(
     locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate>[
+    delegates: <LocalizationsDelegate<dynamic>>[
       new WidgetsLocalizationsDelegate(),
       new MaterialLocalizationsDelegate(),
     ],
@@ -73,7 +73,7 @@ Widget overlay({ Widget child }) {
 Widget boilerplate({ Widget child }) {
   return new Localizations(
     locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate>[
+    delegates: <LocalizationsDelegate<dynamic>>[
       new WidgetsLocalizationsDelegate(),
       new MaterialLocalizationsDelegate(),
     ],
