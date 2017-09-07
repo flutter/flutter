@@ -83,10 +83,11 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       when(mockIMobileDevice.startLogger()).thenAnswer((_) {
         final Process mockProcess = new MockProcess();
         when(mockProcess.stdout).thenReturn(new Stream<List<int>>.fromIterable(<List<int>>['''
-  Runner(libsystem_asl.dylib)[297] <Notice>: A is for ari
+  Runner(Flutter)[297] <Notice>: A is for ari
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
-  Runner(libsystem_asl.dylib)[297] <Notice>: I is for ichigo
+  Runner(Flutter)[297] <Notice>: I is for ichigo
+  Runner(UIKit)[297] <Notice>: E is for enpitsu"
   '''.codeUnits]));
         when(mockProcess.stderr).thenReturn(const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
