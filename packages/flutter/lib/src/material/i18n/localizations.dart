@@ -179,7 +179,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"COLLER",
     "selectAllButtonLabel": r"TOUT SÉLECTIONNER",
-    "viewLicensesButtonLabel": r"VOIR LES LICENCES"
+    "viewLicensesButtonLabel": r"AFFICHER LES LICENCES"
   },
   "zh": const <String, String>{
     "openAppDrawerTooltip": r"打开导航菜单",
@@ -240,7 +240,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "previousMonthTooltip": r"前の月",
     "licensesPageTitle": r"ライセンス",
     "cancelButtonLabel": r"キャンセル",
-    "closeButtonLabel": r"閉",
+    "closeButtonLabel": r"閉じる",
     "continueButtonLabel": r"持続する",
     "copyButtonLabel": r"コピー",
     "cutButtonLabel": r"切り",
