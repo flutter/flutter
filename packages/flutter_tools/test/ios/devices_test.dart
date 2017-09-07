@@ -79,7 +79,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       mockIMobileDevice = new MockIMobileDevice();
     });
 
-    testUsingContext('suppresses blacklisted lines from output', () async {
+    testUsingContext('suppresses non-Flutter lines from output', () async {
       when(mockIMobileDevice.startLogger()).thenAnswer((_) {
         final Process mockProcess = new MockProcess();
         when(mockProcess.stdout).thenReturn(new Stream<List<int>>.fromIterable(<List<int>>['''
