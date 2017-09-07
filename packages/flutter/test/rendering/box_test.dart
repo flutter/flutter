@@ -71,7 +71,7 @@ void main() {
     );
 
     expect(coloredBox, hasAGoodToStringDeep);
-    expect(coloredBox.toStringDeep(), equalsIgnoringHashCodes(
+    expect(coloredBox.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
         'RenderDecoratedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
         '   parentData: MISSING\n'
         '   constraints: MISSING\n'
@@ -94,7 +94,7 @@ void main() {
 
     expect(coloredBox, hasAGoodToStringDeep);
     expect(
-      coloredBox.toStringDeep(),
+      coloredBox.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderDecoratedBox#00000 NEEDS-PAINT\n'
         '   parentData: offset=Offset(10.0, 10.0) (can use size)\n'

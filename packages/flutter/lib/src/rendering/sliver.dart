@@ -1026,7 +1026,7 @@ abstract class RenderSliver extends RenderObject {
     assert(geometry.debugAssertIsValid(
       informationCollector: (StringBuffer information) {
         information.writeln('The RenderSliver that returned the offending geometry was:');
-        information.writeln('  ${toStringShallow('\n  ')}');
+        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
       },
     ));
     assert(() {
@@ -1034,7 +1034,7 @@ abstract class RenderSliver extends RenderObject {
         throw new FlutterError(
           'SliverGeometry has a paintOffset that exceeds the remainingPaintExtent from the constraints.\n'
           'The render object whose geometry violates the constraints is the following:\n'
-          '  ${toStringShallow('\n  ')}\n' +
+          '  ${toStringShallow(joiner: '\n  ')}\n' +
           _debugCompareFloats('remainingPaintExtent', constraints.remainingPaintExtent,
                               'paintExtent', geometry.paintExtent) +
           'The paintExtent must cause the child sliver to paint within the viewport, and so '

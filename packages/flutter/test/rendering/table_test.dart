@@ -23,7 +23,7 @@ void main() {
 
     expect(table, hasAGoodToStringDeep);
     expect(
-      table.toStringDeep(),
+      table.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderTable#00000 NEEDS-PAINT\n'
         ' │ parentData: <none>\n'
@@ -74,7 +74,7 @@ void main() {
 
     expect(table, hasAGoodToStringDeep);
     expect(
-      table.toStringDeep(),
+      table.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderTable#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
         ' │ parentData: offset=Offset(335.0, 185.0) (can use size)\n'
