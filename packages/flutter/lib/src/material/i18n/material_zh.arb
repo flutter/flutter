@@ -1,7 +1,17 @@
 {
   "openAppDrawerTooltip": "打开导航菜单",
-  "backButtonTooltip": "背部",
-  "closeButtonTooltip": "关",
-  "nextMonthTooltip": "-下月就29了。",
-  "previousMonthTooltip": "前一个月"
+  "backButtonTooltip": "返回",
+  "closeButtonTooltip": "关闭",
+  "nextMonthTooltip": "下一个月",
+  "previousMonthTooltip": "上一个月",
+  "licensesPageTitle": "许可证",
+  "cancelButtonLabel": "取消",
+  "continueButtonLabel": "继续",
+  "closeButtonLabel": "关闭",
+  "copyButtonLabel": "复制",
+  "cutButtonLabel": "剪切",
+  "okButtonLabel": "确定",
+  "pasteButtonLabel": "粘贴",
+  "selectAllButtonLabel": "全选",
+  "viewLicensesButtonLabel": "查看许可证"
 }

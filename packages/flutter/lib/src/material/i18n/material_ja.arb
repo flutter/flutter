@@ -1,7 +1,17 @@
 {
   "openAppDrawerTooltip": "ナビゲーションメニューを開く",
-  "backButtonTooltip": "バック",
+  "backButtonTooltip": "戻る",
   "closeButtonTooltip": "閉じる",
-  "nextMonthTooltip": "来月",
-  "previousMonthTooltip": "前の月"
+  "nextMonthTooltip": "前の月へ",
+  "previousMonthTooltip": "前の月へ",
+  "licensesPageTitle": "ライセンス",
+  "cancelButtonLabel": "キャンセル",
+  "closeButtonLabel": "閉じる",
+  "continueButtonLabel": "次へ",
+  "copyButtonLabel": "コピー",
+  "cutButtonLabel": "カット",
+  "okButtonLabel": "OK",
+  "pasteButtonLabel": "貼付け",
+  "selectAllButtonLabel": "全選択",
+  "viewLicensesButtonLabel": "ライセンス表記"
 }

@@ -3,5 +3,15 @@
   "backButtonTooltip": "назад",
   "closeButtonTooltip": "Закрыть",
   "nextMonthTooltip": "В следующем месяце",
-  "previousMonthTooltip": "Предыдущий месяц"
+  "previousMonthTooltip": "Предыдущий месяц",
+  "licensesPageTitle": "Лицензии",
+  "cancelButtonLabel": "ОТМЕНА",
+  "closeButtonLabel": "ЗАКРЫТЬ",
+  "continueButtonLabel": "ПРОДОЛЖАТЬ",
+  "copyButtonLabel": "копия",
+  "cutButtonLabel": "порез",
+  "okButtonLabel": "ОК",
+  "pasteButtonLabel": "Паст",
+  "selectAllButtonLabel": "Выбрать все",
+  "viewLicensesButtonLabel": "ПРОСМОТРЕТЬ ЛИЦЕНЗИИ"
 }

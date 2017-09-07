@@ -31,6 +31,36 @@ abstract class MaterialLocalizations {
   /// The tooltip for the [MonthPicker]'s "previous month" button.
   String get previousMonthTooltip;
 
+  /// Title for the [LicensePage] widget.
+  String get licensesPageTitle;
+
+  /// Label for "cancel" buttons and menu items.
+  String get cancelButtonLabel;
+
+  /// Label for "close" buttons and menu items.
+  String get closeButtonLabel;
+
+  /// Label for "continue" buttons and menu items.
+  String get continueButtonLabel;
+
+  /// Label for "copy" edit buttons and menu items.
+  String get copyButtonLabel;
+
+  /// Label for "cut" edit buttons and menu items.
+  String get cutButtonLabel;
+
+  /// Label for OK buttons and menu items.
+  String get okButtonLabel;
+
+  /// Label for "paste" edit buttons and menu items.
+  String get pasteButtonLabel;
+
+  /// Label for "select all" edit buttons and menu items.
+  String get selectAllButtonLabel;
+
+  /// Label for the [AboutBox] button that shows the [LicensePage].
+  String get viewLicensesButtonLabel;
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -83,6 +113,36 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get previousMonthTooltip => _nameToValue["previousMonthTooltip"];
+
+  @override
+  String get licensesPageTitle => _nameToValue["licensesPageTitle"];
+
+  @override
+  String get cancelButtonLabel => _nameToValue["cancelButtonLabel"];
+
+  @override
+  String get closeButtonLabel => _nameToValue["closeButtonLabel"];
+
+  @override
+  String get continueButtonLabel => _nameToValue["continueButtonLabel"];
+
+  @override
+  String get copyButtonLabel => _nameToValue["copyButtonLabel"];
+
+  @override
+  String get cutButtonLabel => _nameToValue["cutButtonLabel"];
+
+  @override
+  String get okButtonLabel => _nameToValue["okButtonLabel"];
+
+  @override
+  String get pasteButtonLabel => _nameToValue["pasteButtonLabel"];
+
+  @override
+  String get selectAllButtonLabel => _nameToValue["selectAllButtonLabel"];
+
+  @override
+  String get viewLicensesButtonLabel => _nameToValue["viewLicensesButtonLabel"];
 
   /// Creates an object that provides localized resource values for the
   /// for the widgets of the material library.

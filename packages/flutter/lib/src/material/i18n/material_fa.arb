@@ -3,5 +3,15 @@
   "backButtonTooltip": "بازگشت",
   "closeButtonTooltip": "بستن",
   "nextMonthTooltip": "ماه بعد",
-  "previousMonthTooltip": "ماه گذشته"
+  "previousMonthTooltip": "ماه گذشته",
+  "licensesPageTitle": "مجوز",
+  "cancelButtonLabel": "لغو",
+  "closeButtonLabel": "بستن",
+  "continueButtonLabel": "ادامه دهید",
+  "copyButtonLabel": "کپی",
+  "cutButtonLabel": "برش",
+  "okButtonLabel": "تایید",
+  "pasteButtonLabel": "چسباندن",
+  "selectAllButtonLabel": "انتخاب همه",
+  "viewLicensesButtonLabel": "مشاهده مجوز"
 }

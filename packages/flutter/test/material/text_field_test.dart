@@ -27,34 +27,64 @@ class MockClipboard {
   }
 }
 
+class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  @override
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+
+  @override
+  bool shouldReload(MaterialLocalizationsDelegate old) => false;
+}
+
+class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+
+  @override
+  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
+}
+
 Widget overlay({ Widget child }) {
-  return new Directionality(
-    textDirection: TextDirection.ltr,
-    child: new MediaQuery(
-      data: const MediaQueryData(size: const Size(800.0, 600.0)),
-      child: new Overlay(
-        initialEntries: <OverlayEntry>[
-          new OverlayEntry(
-            builder: (BuildContext context) => new Center(
-              child: new Material(
-                child: child,
+  return new Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      new WidgetsLocalizationsDelegate(),
+      new MaterialLocalizationsDelegate(),
+    ],
+    child: new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(size: const Size(800.0, 600.0)),
+        child: new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) => new Center(
+                child: new Material(
+                  child: child,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
 }
 
 Widget boilerplate({ Widget child }) {
-  return new Directionality(
-    textDirection: TextDirection.ltr,
-    child: new MediaQuery(
-      data: const MediaQueryData(size: const Size(800.0, 600.0)),
-      child: new Center(
-        child: new Material(
-          child: child,
+  return new Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      new WidgetsLocalizationsDelegate(),
+      new MaterialLocalizationsDelegate(),
+    ],
+    child: new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(size: const Size(800.0, 600.0)),
+        child: new Center(
+          child: new Material(
+            child: child,
+          ),
         ),
       ),
     ),
