@@ -38,7 +38,7 @@ class ExpansionTile extends StatefulWidget {
     this.backgroundColor,
     this.onExpansionChanged,
     this.children: const <Widget>[],
-    this.trailing
+    this.trailing,
   }) : super(key: key);
 
   /// A widget to display before the title.
