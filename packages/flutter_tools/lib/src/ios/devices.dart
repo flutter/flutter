@@ -356,9 +356,9 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     // Match for lines for the runner in syslog.
     //
     // iOS 9 format:  Runner[297] <Notice>:
-    // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
+    // iOS 10 format: Runner(Flutter)[297] <Notice>:
     final String appName = app == null ? '' : app.name.replaceAll('.app', '');
-    _lineRegex = new RegExp(appName + r'(\(.*\))?\[[\d]+\] <[A-Za-z]+>: ');
+    _lineRegex = new RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
   }
 
   final IOSDevice device;
