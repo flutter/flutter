@@ -13,9 +13,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import io.flutter.plugin.common.BasicMessageChannel;
-import io.flutter.plugin.common.JSONMessageCodec;
-import org.json.JSONException;
-import org.json.JSONObject;
+import io.flutter.plugin.common.StandardMessageCodec;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -64,7 +62,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         mOwner = owner;
         mObjects = new HashMap<Integer, SemanticsObject>();
         mFlutterAccessibilityChannel = new BasicMessageChannel<>(owner, "flutter/accessibility",
-            JSONMessageCodec.INSTANCE);
+            StandardMessageCodec.INSTANCE);
     }
 
     void setAccessibilityEnabled(boolean accessibilityEnabled) {
@@ -341,21 +339,17 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
     // Message Handler for [mFlutterAccessibilityChannel].
     public void onMessage(Object message, BasicMessageChannel.Reply<Object> reply) {
         @SuppressWarnings("unchecked")
-        final JSONObject annotatedEvent = (JSONObject)message;
-        try {
-            final int nodeId = annotatedEvent.getInt("nodeId");
-            final String type = annotatedEvent.getString("type");
+        final HashMap<String, Object> annotatedEvent = (HashMap<String, Object>)message;
+        final int nodeId = (int)annotatedEvent.get("nodeId");
+        final String type = (String)annotatedEvent.get("type");
 
-            switch (type) {
-                case "scroll":
-                    sendAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_SCROLLED);
-                    break;
-                default:
-                    assert false;
-            }
-        } catch (JSONException e) {
-          throw new IllegalArgumentException("Invalid JSON", e);
-       }
+        switch (type) {
+            case "scroll":
+                sendAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_SCROLLED);
+                break;
+            default:
+                assert false;
+        }
     }
 
     private void willRemoveSemanticsObject(SemanticsObject object) {
