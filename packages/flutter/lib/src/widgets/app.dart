@@ -23,31 +23,16 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
 
-/// The signature of [WidgetsApp.onLocaleChanged] callback.
+/// The signature of [WidgetsApp.resolveLocaleCallback].
 ///
-/// A `LocaleChangedCallback` is responsible for computing the locale of the app's
+/// A `ResolveLocaleCallback` is responsible for computing the locale of the app's
 /// [Localizations] object when the app starts and when user changes the default
 /// locale for the device.
 ///
-/// The `oldLocale` is null when the app starts. The `newLocale` is the device's
-/// locale when the app started, or the device locale the user selected after
-/// the app was started. The `supportedLocales` parameter is just the value of
-/// [WidgetApp.supportedLocales].
-typedef Locale LocaleChangedCallback(Locale oldLocale, Locale newLocale, Iterable<Locale> supportedLocales);
-
-/// The default value of the [WidgetsApp.onLocaleChanged] callback.
-///
-/// If `supportedLocales` contains `newLocale` then return it. Otherwise return
-/// the first supported locale whose [Locale.languageCode] matches the new locale's
-/// language code. Failing that, return `oldLocale`, or the first supported
-/// locale if the old locale is null (because this app was just started).
-Locale defaultLocaleChangedHandler(Locale oldLocale, Locale newLocale, Iterable<Locale> supportedLocales) {
-  if (supportedLocales.contains(newLocale))
-    return newLocale;
-  final String languageCode = newLocale.languageCode;
-  return supportedLocales.firstWhere((Locale locale) => locale.languageCode == languageCode,
-    orElse: () => oldLocale ?? supportedLocales.first);
-}
+/// The `locale` is the device's locale when the app started, or the device
+/// locale the user selected after the app was started. The `supportedLocales`
+/// parameter is just the value of [WidgetApp.supportedLocales].
+typedef Locale ResolveLocaleCallback(Locale locale, Iterable<Locale> supportedLocales);
 
 // Delegate that fetches the default (English) strings.
 class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
@@ -76,11 +61,8 @@ class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
   ///
-  /// The boolean arguments, `color`, `navigatorObservers`, and
-  /// `onGenerateRoute` must not be null.
-  ///
-  /// The `onLocaleChanged` argument must not be null. Its default value
-  /// is [defaultLocaleChangeHandler].
+  /// The boolean arguments, [color], [navigatorObservers], and
+  /// [onGenerateRoute] must not be null.
   ///
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
@@ -95,7 +77,7 @@ class WidgetsApp extends StatefulWidget {
     this.initialRoute,
     this.locale,
     this.localizationsDelegates,
-    this.onLocaleChanged: defaultLocaleChangedHandler,
+    this.resolveLocaleCallback,
     this.supportedLocales: const <Locale>[const Locale('en', 'US')],
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
@@ -107,7 +89,6 @@ class WidgetsApp extends StatefulWidget {
   }) : assert(onGenerateRoute != null),
        assert(color != null),
        assert(navigatorObservers != null),
-       assert(onLocaleChanged != null),
        assert(supportedLocales != null && supportedLocales.isNotEmpty),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
@@ -190,24 +171,27 @@ class WidgetsApp extends StatefulWidget {
   /// device's locale.
   ///
   /// The returned value becomes the locale of this app's [Localizations]
-  /// widget. The `oldLocale` parameter is null when the app starts. The
-  /// `newLocale` is the device's locale when the app started, or the
-  /// device locale the user selected after the app was started.
-  /// The `supportedLocales` parameter is just the value [supportedLocales].
+  /// widget. The callback's `locale` parameter is the device's locale when
+  /// the app started, or the device locale the user selected after the app was
+  /// started. The callback's `supportedLocales` parameter is just the value
+  /// [supportedLocales].
   ///
-  /// This callback must not be null. Its default value is
-  /// [defaultLocaleChangedHandler].
+  /// If the callback is null then the resolved locale is:
+  /// - The callback's `locale` parameter if it's equal to a supported locale.
+  /// - The first supported locale with the same [Locale.langaugeCode] as the
+  ///   callback's `locale` parameter.
+  /// - The first supported locale.
   ///
   /// See also:
   ///
-  ///  * [MaterialApp.onLocaleChanged], which sets the callback of the
+  ///  * [MaterialApp.resolveLocaleCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
-  final LocaleChangedCallback onLocaleChanged;
+  final ResolveLocaleCallback resolveLocaleCallback;
 
   /// The list of locales that this app has been localized for.
   ///
-  /// By default only the English locale is supported. Apps should configure
-  /// this list to match the locales they support.
+  /// By default only the American English locale is supported. Apps should
+  /// configure this list to match the locales they support.
   ///
   /// This list must not null. It's default value is just
   /// `[const Locale('en', 'US')]`.
@@ -217,7 +201,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * [MaterialApp.supportedLocales], which sets the `supportedLocales`
   ///    of the [WidgetsApp] it creates.
   ///
-  ///  * [onLocaleChanged], an app callback that resolves the app's locale
+  ///  * [resolveLocaleCallback], an app callback that resolves the app's locale
   ///    when the device's locale changes.
   ///
   ///  * [localizationDelegates], which collectively define all of the localized
@@ -306,11 +290,25 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   GlobalObjectKey<NavigatorState> _navigator;
   Locale _locale;
 
+  Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
+    if (widget.resolveLocaleCallback != null)
+      return widget.resolveLocaleCallback(newLocale, widget.supportedLocales);
+
+    Locale matchesCountryCode;
+    for (Locale locale in supportedLocales) {
+      if (locale == newLocale)
+        return newLocale;
+      if (matchesCountryCode == null && locale.languageCode == newLocale.languageCode)
+        matchesCountryCode = locale;
+    }
+    return matchesCountryCode ?? supportedLocales.first;
+  }
+
   @override
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey<NavigatorState>(this);
-    _locale = widget.onLocaleChanged(null, ui.window.locale, widget.supportedLocales);
+    _locale = _resolveLocale(ui.window.locale, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -350,7 +348,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   void didChangeLocale(Locale locale) {
     if (locale == _locale)
       return;
-    final Locale newLocale = widget.onLocaleChanged(_locale, locale, widget.supportedLocales);
+    final Locale newLocale = _resolveLocale(locale, widget.supportedLocales);
     if (newLocale != _locale) {
       setState(() {
         _locale = newLocale;

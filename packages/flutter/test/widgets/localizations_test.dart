@@ -107,7 +107,7 @@ Widget buildFrame({
   Locale locale,
   Iterable<LocalizationsDelegate<dynamic>> delegates,
   WidgetBuilder buildContent,
-  LocaleChangedCallback onLocaleChanged: defaultLocaleChangedHandler,
+  ResolveLocaleCallback resolveLocaleCallback,
   List<Locale> supportedLocales: const <Locale>[
     const Locale('en', 'US'),
     const Locale('en', 'GB'),
@@ -117,7 +117,7 @@ Widget buildFrame({
     color: const Color(0xFFFFFFFF),
     locale: locale,
     localizationsDelegates: delegates,
-    onLocaleChanged: onLocaleChanged,
+    resolveLocaleCallback: resolveLocaleCallback,
     supportedLocales: supportedLocales,
     onGenerateRoute: (RouteSettings settings) {
       return new PageRouteBuilder<Null>(
@@ -449,10 +449,10 @@ void main() {
     expect(Directionality.of(pageContext), TextDirection.rtl);
   });
 
-  testWidgets('onLocaleChanged override', (WidgetTester tester) async {
+  testWidgets('resolveLocaleCallback override', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildFrame(
-        onLocaleChanged: (Locale oldLocale, Locale newLocale, Iterable<Locale> supportedLocales) {
+        resolveLocaleCallback: (Locale newLocale, Iterable<Locale> supportedLocales) {
           return const Locale('foo', 'BAR');
         },
         buildContent: (BuildContext context) {
@@ -474,7 +474,7 @@ void main() {
     await tester.pumpWidget(
       buildFrame(
         supportedLocales: const <Locale>[
-          const Locale('zh', 'cn'),
+          const Locale('zh', 'CN'),
           const Locale('en', 'GB'),
           const Locale('en', 'CA'),
         ],
@@ -487,7 +487,7 @@ void main() {
     // Startup time. Default test locale is const Locale('', ''), so
     // no supported matches. Use the first locale.
     await tester.pumpAndSettle();
-    expect(find.text('zh_cn'), findsOneWidget);
+    expect(find.text('zh_CN'), findsOneWidget);
 
     // defaultLocaleChangedHandler prefers exact supported locale match
     await tester.binding.setLocale('en', 'CA');
@@ -499,10 +499,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('en_GB'), findsOneWidget);
 
-    // defaultLocaleChangedHandler: no matching supported locale, so no change
+    // defaultLocaleChangedHandler: no matching supported locale, so use the 1st one
     await tester.binding.setLocale('da', 'DA');
     await tester.pumpAndSettle();
-    expect(find.text('en_GB'), findsOneWidget);
+    expect(find.text('zh_CN'), findsOneWidget);
   });
 }
 

@@ -94,7 +94,7 @@ class MaterialApp extends StatefulWidget {
     this.onUnknownRoute,
     this.locale,
     this.localizationsDelegates,
-    this.onLocaleChanged: defaultLocaleChangedHandler,
+    this.resolveLocaleCallback,
     this.supportedLocales: const <Locale>[const Locale('en', 'US')],
     this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
@@ -240,20 +240,28 @@ class MaterialApp extends StatefulWidget {
   /// device's locale.
   ///
   /// The returned value becomes the locale of this app's [Localizations]
-  /// widget. The `oldLocale` parameter is null when the app starts. The
-  /// `newLocale` is the device's locale when the app started, or the
-  /// device locale the user selected after the app was started.
-  /// The `supportedLocales` parameter is just the value [supportedLocales].
+  /// widget. The callback's `locale` parameter is the device's locale when
+  /// the app started, or the device locale the user selected after the app was
+  /// started. The callback's `supportedLocales` parameter is just the value
+  /// [supportedLocales].
   ///
-  /// This callback must not be null. Its default value is
-  /// [defaultLocaleChangedHandler]. It is simply passed along to the
-  /// [WidgetsApp] built by this widget.
-  final LocaleChangedCallback onLocaleChanged;
+  /// An app could use this callback to substitute locales based on the app's
+  /// intended audience. If the device's OS provides a prioritized
+  /// list of locales, this callback could be used to defer to it.
+  ///
+  /// If the callback is null then the resolved locale is:
+  /// - The callback's `locale` parameter if it's equal to a supported locale.
+  /// - The first supported locale with the same [Locale.langaugeCode] as the
+  ///   callback's `locale` parameter.
+  /// - The first supported locale.
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final ResolveLocaleCallback resolveLocaleCallback;
 
   /// The list of locales that this app has been localized for.
   ///
-  /// By default only the English locale is supported. Apps should configure
-  /// this list to match the locales they support.
+  /// By default only the American English locale is supported. Apps should
+  /// configure this list to match the locales they support.
   ///
   /// This list must not null. It's default value is just
   /// `[const Locale('en', 'US')]`. It is simply passed along to the
@@ -426,7 +434,7 @@ class _MaterialAppState extends State<MaterialApp> {
         onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
-        onLocaleChanged: widget.onLocaleChanged,
+        resolveLocaleCallback: widget.resolveLocaleCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
