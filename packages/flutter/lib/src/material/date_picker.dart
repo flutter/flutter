@@ -800,15 +800,16 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         child: _buildPicker(),
       ),
     );
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
         children: <Widget>[
           new FlatButton(
-            child: const Text('CANCEL'),
+            child: new Text(localizations.cancelButtonLabel),
             onPressed: _handleCancel,
           ),
           new FlatButton(
-            child: const Text('OK'),
+            child: new Text(localizations.okButtonLabel),
             onPressed: _handleOk,
           ),
         ],

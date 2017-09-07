@@ -3,5 +3,15 @@
   "backButtonTooltip": "Zurück",
   "closeButtonTooltip": "Schließen ",
   "nextMonthTooltip": "Nächster Monat",
-  "previousMonthTooltip": "Letzter Monat"
+  "previousMonthTooltip": "Letzter Monat",
+  "licensesPageTitle": "Lizenz",
+  "cancelButtonLabel": "STORNIEREN",
+  "closeButtonLabel": "SCHLIESSEN",
+  "continueButtonLabel": "FORTSETZEN",
+  "copyButtonLabel": "KOPIEREN",
+  "cutButtonLabel": "SCHNEIDEN",
+  "okButtonLabel": "OK",
+  "pasteButtonLabel": "Paste",
+  "selectAllButtonLabel": "ALLE AUSWÄHLEN",
+  "viewLicensesButtonLabel": "ANLAGEN LIZENZEN"
 }

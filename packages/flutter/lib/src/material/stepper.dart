@@ -12,6 +12,7 @@ import 'flat_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 import 'typography.dart';
 
@@ -339,6 +340,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     assert(cancelColor != null);
 
     final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     return new Container(
       margin: const EdgeInsets.only(top: 16.0),
@@ -351,7 +353,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               color: _isDark() ? themeData.backgroundColor : themeData.primaryColor,
               textColor: Colors.white,
               textTheme: ButtonTextTheme.normal,
-              child: const Text('CONTINUE'),
+              child: new Text(localizations.continueButtonLabel),
             ),
             new Container(
               margin: const EdgeInsetsDirectional.only(start: 8.0),
@@ -359,7 +361,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 onPressed: widget.onStepCancel,
                 textColor: cancelColor,
                 textTheme: ButtonTextTheme.normal,
-                child: const Text('CANCEL'),
+                child: new Text(localizations.cancelButtonLabel),
               ),
             ),
           ],

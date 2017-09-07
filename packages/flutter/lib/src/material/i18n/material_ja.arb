@@ -3,5 +3,15 @@
   "backButtonTooltip": "バック",
   "closeButtonTooltip": "閉じる",
   "nextMonthTooltip": "来月",
-  "previousMonthTooltip": "前の月"
+  "previousMonthTooltip": "前の月",
+  "licensesPageTitle": "ライセンス",
+  "cancelButtonLabel": "キャンセル",
+  "closeButtonLabel": "閉",
+  "continueButtonLabel": "持続する",
+  "copyButtonLabel": "コピー",
+  "cutButtonLabel": "切り",
+  "okButtonLabel": "OK",
+  "pasteButtonLabel": "貼付け",
+  "selectAllButtonLabel": "すべて選択",
+  "viewLicensesButtonLabel": "ライセンスの表示"
 }

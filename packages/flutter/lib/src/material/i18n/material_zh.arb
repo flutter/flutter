@@ -3,5 +3,15 @@
   "backButtonTooltip": "背部",
   "closeButtonTooltip": "关",
   "nextMonthTooltip": "-下月就29了。",
-  "previousMonthTooltip": "前一个月"
+  "previousMonthTooltip": "前一个月",
+  "licensesPageTitle": "许可证",
+  "cancelButtonLabel": "取消",
+  "continueButtonLabel": "继续",
+  "closeButtonLabel": "关闭",
+  "copyButtonLabel": "副本",
+  "cutButtonLabel": "切除",
+  "okButtonLabel": "好",
+  "pasteButtonLabel": "贴上",
+  "selectAllButtonLabel": "选中所有",
+  "viewLicensesButtonLabel": "查看许可证"
 }
