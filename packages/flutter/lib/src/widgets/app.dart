@@ -176,7 +176,7 @@ class WidgetsApp extends StatefulWidget {
   /// started. The callback's `supportedLocales` parameter is just the value
   /// [supportedLocales].
   ///
-  /// If the callback is null then the resolved locale is:
+  /// If the callback is null or if it returns null then the resolved locale is:
   /// - The callback's `locale` parameter if it's equal to a supported locale.
   /// - The first supported locale with the same [Locale.langaugeCode] as the
   ///   callback's `locale` parameter.
@@ -193,8 +193,14 @@ class WidgetsApp extends StatefulWidget {
   /// By default only the American English locale is supported. Apps should
   /// configure this list to match the locales they support.
   ///
-  /// This list must not null. It's default value is just
+  /// This list must not null. Its default value is just
   /// `[const Locale('en', 'US')]`.
+  ///
+  /// The order of the list matters. By default, if the device's locale doesn't
+  /// exactly match a supported locale then the first supported locale with a
+  /// matching [Locale.languageCode] is used. If that fails then the first
+  /// supported locale is used. The default locale resolution algorithm can
+  /// be overridden with [resolveLocaleCallback].
   ///
   /// See also:
   ///
@@ -291,17 +297,20 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   Locale _locale;
 
   Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
-    if (widget.resolveLocaleCallback != null)
-      return widget.resolveLocaleCallback(newLocale, widget.supportedLocales);
+    if (widget.resolveLocaleCallback != null) {
+      final Locale locale = widget.resolveLocaleCallback(newLocale, widget.supportedLocales);
+      if (locale != null)
+        return locale;
+    }
 
-    Locale matchesCountryCode;
+    Locale matchesLanguageCode;
     for (Locale locale in supportedLocales) {
       if (locale == newLocale)
         return newLocale;
-      if (matchesCountryCode == null && locale.languageCode == newLocale.languageCode)
-        matchesCountryCode = locale;
+      if (locale.languageCode == newLocale.languageCode)
+        matchesLanguageCode ??= locale;
     }
-    return matchesCountryCode ?? supportedLocales.first;
+    return matchesLanguageCode ?? supportedLocales.first;
   }
 
   @override
