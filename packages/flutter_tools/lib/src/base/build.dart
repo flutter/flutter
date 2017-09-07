@@ -7,7 +7,7 @@ import 'dart:convert' show JSON;
 
 import 'package:crypto/crypto.dart' show md5;
 import 'package:meta/meta.dart';
-import 'package:quiver/core.dart' show hash4;
+import 'package:quiver/core.dart' show hash2;
 
 import '../artifacts.dart';
 import '../build_info.dart';
@@ -21,7 +21,9 @@ GenSnapshot get genSnapshot => context.putIfAbsent(GenSnapshot, () => const GenS
 
 /// A snapshot build configuration.
 class SnapshotType {
-  const SnapshotType(this.platform, this.mode);
+  SnapshotType(this.platform, this.mode) {
+    assert(mode != null);
+  }
 
   final TargetPlatform platform;
   final BuildMode mode;
@@ -55,84 +57,70 @@ class GenSnapshot {
   }
 }
 
-/// A collection of checksums for a set of input files.
+/// A fingerprint for a set of build input files and properties.
 ///
-/// This class can be used during build actions to compute a checksum of the
+/// This class can be used during build actions to compute a fingerprint of the
 /// build action inputs, and if unchanged from the previous build, skip the
 /// build step. This assumes that build outputs are strictly a product of the
-/// input files.
-class Checksum {
-  Checksum.fromFiles(SnapshotType type, this._mainPath, Set<String> inputPaths) {
+/// fingerprint inputs.
+class Fingerprint {
+  Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
     final Iterable<File> files = inputPaths.map(fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty)
       throw new ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
 
-    _buildMode = type.mode.toString();
-    _targetPlatform = type.platform?.toString() ?? '';
     _checksums = <String, String>{};
     for (File file in files) {
       final List<int> bytes = file.readAsBytesSync();
       _checksums[file.path] = md5.convert(bytes).toString();
     }
+    _properties = <String, String>{}..addAll(properties);
   }
 
-  /// Creates a checksum from serialized JSON.
+  /// Creates a Fingerprint from serialized JSON.
   ///
-  /// Throws [ArgumentError] in the following cases:
-  /// * Version mismatch between the serializing framework and this framework.
-  /// * buildMode is unspecified.
-  /// * targetPlatform is unspecified.
-  /// * File checksum map is unspecified.
-  Checksum.fromJson(String json) {
+  /// Throws [ArgumentError], if there is a version mismatch between the
+  /// serializing framework and this framework.
+  Fingerprint.fromJson(String json) {
     final Map<String, dynamic> content = JSON.decode(json);
 
     final String version = content['version'];
     if (version != FlutterVersion.instance.frameworkRevision)
-      throw new ArgumentError('Incompatible checksum version: $version');
-
-    _buildMode = content['buildMode'];
-    if (_buildMode == null || _buildMode.isEmpty)
-      throw new ArgumentError('Build mode unspecified in checksum JSON');
-
-    _targetPlatform = content['targetPlatform'];
-    if (_targetPlatform == null)
-      throw new ArgumentError('Target platform unspecified in checksum JSON');
-
-    _mainPath = content['entrypoint'];
-    if (_mainPath == null)
-      throw new ArgumentError('Entrypoint unspecified in checksum JSON');
-
-    _checksums = content['files'];
-    if (_checksums == null)
-      throw new ArgumentError('File checksums unspecified in checksum JSON');
+      throw new ArgumentError('Incompatible fingerprint version: $version');
+    _checksums = content['files'] ?? <String, String>{};
+    _properties = content['properties'] ?? <String, String>{};
   }
 
-  String _mainPath;
-  String _buildMode;
-  String _targetPlatform;
   Map<String, String> _checksums;
+  Map<String, String> _properties;
 
   String toJson() => JSON.encode(<String, dynamic>{
     'version': FlutterVersion.instance.frameworkRevision,
-    'buildMode': _buildMode,
-    'entrypoint': _mainPath,
-    'targetPlatform': _targetPlatform,
+    'properties': _properties,
     'files': _checksums,
   });
 
   @override
   bool operator==(dynamic other) {
-    return other is Checksum &&
-        _buildMode == other._buildMode &&
-        _targetPlatform == other._targetPlatform &&
-        _mainPath == other._mainPath &&
-        _checksums.length == other._checksums.length &&
-        _checksums.keys.every((String key) => _checksums[key] == other._checksums[key]);
+    if (identical(other, this))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final Fingerprint typedOther = other;
+    return _equalMaps(typedOther._checksums, _checksums)
+        && _equalMaps(typedOther._properties, _properties);
+  }
+
+  bool _equalMaps(Map<String, String> a, Map<String, String> b) {
+    return a.length == b.length
+        && a.keys.every((String key) => a[key] == b[key]);
   }
 
   @override
-  int get hashCode => hash4(_buildMode, _targetPlatform, _mainPath, _checksums);
+  // Ignore map entries here to avoid becoming inconsistent with equals
+  // due to differences in map entry order.
+  int get hashCode => hash2(_properties.length, _checksums.length);
 }
 
 final RegExp _separatorExpr = new RegExp(r'([^\\]) ');
@@ -177,14 +165,14 @@ class Snapshotter {
     @required String depfilePath,
     @required String packagesPath
   }) async {
-    const SnapshotType type = const SnapshotType(null, BuildMode.debug);
+    final SnapshotType type = new SnapshotType(null, BuildMode.debug);
     final List<String> args = <String>[
       '--snapshot_kind=script',
       '--script_snapshot=$snapshotPath',
       mainPath,
     ];
 
-    final String checksumsPath = '$depfilePath.checksums';
+    final String fingerprintPath = '$depfilePath.fingerprint';
     final int exitCode = await _build(
       snapshotType: type,
       outputSnapshotPath: snapshotPath,
@@ -192,11 +180,11 @@ class Snapshotter {
       snapshotArgs: args,
       depfilePath: depfilePath,
       mainPath: mainPath,
-      checksumsPath: checksumsPath,
+      fingerprintPath: fingerprintPath,
     );
     if (exitCode != 0)
       return exitCode;
-    await _writeChecksum(type, snapshotPath, depfilePath, mainPath, checksumsPath);
+    await _writeFingerprint(type, snapshotPath, depfilePath, mainPath, fingerprintPath);
     return exitCode;
   }
 
@@ -212,10 +200,10 @@ class Snapshotter {
     @required String packagesPath,
     @required String depfilePath,
     @required String mainPath,
-    @required String checksumsPath,
+    @required String fingerprintPath,
   }) async {
-    if (!await _isBuildRequired(snapshotType, outputSnapshotPath, depfilePath, mainPath, checksumsPath)) {
-      printTrace('Skipping snapshot build. Checksums match.');
+    if (!await _isBuildRequired(snapshotType, outputSnapshotPath, depfilePath, mainPath, fingerprintPath)) {
+      printTrace('Skipping snapshot build. Fingerprints match.');
       return 0;
     }
 
@@ -229,41 +217,49 @@ class Snapshotter {
     if (exitCode != 0)
       return exitCode;
 
-    _writeChecksum(snapshotType, outputSnapshotPath, depfilePath, mainPath, checksumsPath);
+    _writeFingerprint(snapshotType, outputSnapshotPath, depfilePath, mainPath, fingerprintPath);
     return 0;
   }
 
-  Future<bool> _isBuildRequired(SnapshotType type, String outputSnapshotPath, String depfilePath, String mainPath, String checksumsPath) async {
-    final File checksumFile = fs.file(checksumsPath);
+  Future<bool> _isBuildRequired(SnapshotType type, String outputSnapshotPath, String depfilePath, String mainPath, String fingerprintPath) async {
+    final File fingerprintFile = fs.file(fingerprintPath);
     final File outputSnapshotFile = fs.file(outputSnapshotPath);
     final File depfile = fs.file(depfilePath);
-    if (!outputSnapshotFile.existsSync() || !depfile.existsSync() || !checksumFile.existsSync())
+    if (!outputSnapshotFile.existsSync() || !depfile.existsSync() || !fingerprintFile.existsSync())
       return true;
 
     try {
-      if (checksumFile.existsSync()) {
-        final Checksum oldChecksum = new Checksum.fromJson(await checksumFile.readAsString());
-        final Set<String> checksumPaths = await readDepfile(depfilePath)
-          ..addAll(<String>[outputSnapshotPath, mainPath]);
-        final Checksum newChecksum = new Checksum.fromFiles(type, mainPath, checksumPaths);
-        return oldChecksum != newChecksum;
+      if (fingerprintFile.existsSync()) {
+        final Fingerprint oldFingerprint = new Fingerprint.fromJson(await fingerprintFile.readAsString());
+        final Set<String> inputFilePaths = await readDepfile(depfilePath)..addAll(<String>[outputSnapshotPath, mainPath]);
+        final Fingerprint newFingerprint = createFingerprint(type, mainPath, inputFilePaths);
+        return oldFingerprint != newFingerprint;
       }
     } catch (e) {
       // Log exception and continue, this step is a performance improvement only.
-      printTrace('Rebuilding snapshot due to checksum validation error: $e');
+      printTrace('Rebuilding snapshot due to fingerprint check error: $e');
     }
     return true;
   }
 
-  Future<Null> _writeChecksum(SnapshotType type, String outputSnapshotPath, String depfilePath, String mainPath, String checksumsPath) async {
+  Future<Null> _writeFingerprint(SnapshotType type, String outputSnapshotPath, String depfilePath, String mainPath, String fingerprintPath) async {
     try {
-      final Set<String> checksumPaths = await readDepfile(depfilePath)
+      final Set<String> inputFilePaths = await readDepfile(depfilePath)
         ..addAll(<String>[outputSnapshotPath, mainPath]);
-      final Checksum checksum = new Checksum.fromFiles(type, mainPath, checksumPaths);
-      await fs.file(checksumsPath).writeAsString(checksum.toJson());
+      final Fingerprint fingerprint = createFingerprint(type, mainPath, inputFilePaths);
+      await fs.file(fingerprintPath).writeAsString(fingerprint.toJson());
     } catch (e, s) {
       // Log exception and continue, this step is a performance improvement only.
-      printTrace('Error during snapshot checksum output: $e\n$s');
+      print('Error during snapshot fingerprinting: $e\n$s');
     }
+  }
+
+  static Fingerprint createFingerprint(SnapshotType type, String mainPath, Iterable<String> inputFilePaths) {
+    final Map<String, String> properties = <String, String>{
+      'buildMode': type.mode.toString(),
+      'targetPlatform': type.platform?.toString() ?? '',
+      'entryPoint': mainPath,
+    };
+    return new Fingerprint.fromBuildInputs(properties, inputFilePaths);
   }
 }

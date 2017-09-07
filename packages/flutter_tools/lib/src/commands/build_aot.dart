@@ -286,25 +286,25 @@ Future<String> _buildAotSnapshot(
   genSnapshotCmd.add(mainPath);
 
   final SnapshotType snapshotType = new SnapshotType(platform, buildMode);
-  final File checksumFile = fs.file('$dependencies.checksum');
-  final List<File> checksumFiles = <File>[checksumFile, fs.file(dependencies)]
+  final File fingerprintFile = fs.file('$dependencies.fingerprint');
+  final List<File> fingerprintFiles = <File>[fingerprintFile, fs.file(dependencies)]
       ..addAll(inputPaths.map(fs.file))
       ..addAll(outputPaths.map(fs.file));
-  if (checksumFiles.every((File file) => file.existsSync())) {
+  if (fingerprintFiles.every((File file) => file.existsSync())) {
     try {
-      final String json = await checksumFile.readAsString();
-      final Checksum oldChecksum = new Checksum.fromJson(json);
+      final String json = await fingerprintFile.readAsString();
+      final Fingerprint oldFingerprint = new Fingerprint.fromJson(json);
       final Set<String> snapshotInputPaths = await readDepfile(dependencies)
         ..add(mainPath)
         ..addAll(outputPaths);
-      final Checksum newChecksum = new Checksum.fromFiles(snapshotType, mainPath, snapshotInputPaths);
-      if (oldChecksum == newChecksum) {
-        printTrace('Skipping AOT snapshot build. Checksums match.');
+      final Fingerprint newFingerprint = Snapshotter.createFingerprint(snapshotType, mainPath, snapshotInputPaths);
+      if (oldFingerprint == newFingerprint) {
+        printStatus('Skipping AOT snapshot build. Fingerprint match.');
         return outputPath;
       }
     } catch (e) {
       // Log exception and continue, this step is a performance improvement only.
-      printTrace('Rebuilding snapshot due to checksum validation error: $e');
+      printTrace('Rebuilding snapshot due to fingerprint check error: $e');
     }
   }
 
@@ -370,16 +370,16 @@ Future<String> _buildAotSnapshot(
     await runCheckedAsync(linkCommand);
   }
 
-  // Compute and record checksums.
+  // Compute and record build fingerprint.
   try {
     final Set<String> snapshotInputPaths = await readDepfile(dependencies)
       ..add(mainPath)
       ..addAll(outputPaths);
-    final Checksum checksum = new Checksum.fromFiles(snapshotType, mainPath, snapshotInputPaths);
-    await checksumFile.writeAsString(checksum.toJson());
+    final Fingerprint fingerprint = Snapshotter.createFingerprint(snapshotType, mainPath, snapshotInputPaths);
+    await fingerprintFile.writeAsString(fingerprint.toJson());
   } catch (e, s) {
     // Log exception and continue, this step is a performance improvement only.
-    printTrace('Error during AOT snapshot checksum output: $e\n$s');
+    printStatus('Error during AOT snapshot fingerprinting: $e\n$s');
   }
 
   return outputPath;
