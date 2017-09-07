@@ -127,7 +127,7 @@ void main() {
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
       verify(mockFrontendServerStdIn.writeln('compile /path/to/main.dart'));
 
-      await recompile(streamController, generator, mockFrontendServerStdIn,
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill\n');
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
@@ -150,9 +150,9 @@ void main() {
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
       verify(mockFrontendServerStdIn.writeln('compile /path/to/main.dart'));
 
-      await recompile(streamController, generator, mockFrontendServerStdIn,
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill\n');
-      await recompile(streamController, generator, mockFrontendServerStdIn,
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline2\nline3\nabc /path/to/main.dart.dill\n');
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
@@ -167,9 +167,9 @@ void main() {
   });
 }
 
-Future<Null> recompile(StreamController<List<int>> streamController,
+Future<Null> _recompile(StreamController<List<int>> streamController,
   ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
-    String mockCompilerOutput) async {
+  String mockCompilerOutput) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.
   new Future<List<int>>(() {
@@ -177,8 +177,9 @@ Future<Null> recompile(StreamController<List<int>> streamController,
   });
   final String output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
   expect(output, equals('/path/to/main.dart.dill'));
-  final String recompileCommand = verify(mockFrontendServerStdIn.writeln(
-      captureThat(startsWith('recompile ')))).captured[0];
+  final String recompileCommand = verify(
+    mockFrontendServerStdIn.writeln(captureThat(startsWith('recompile ')))
+  ).captured[0];
   final String token1 = recompileCommand.split(' ')[1];
   verify(mockFrontendServerStdIn.writeln('/path/to/main.dart'));
   verify(mockFrontendServerStdIn.writeln(token1));
