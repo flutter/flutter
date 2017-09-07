@@ -66,7 +66,7 @@ void main() {
         key: new ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 400.0, // should be overridden by itemExtent
-        child: new Text('$index')
+        child: new Text('$index', textDirection: TextDirection.ltr)
       );
     };
 
@@ -79,7 +79,7 @@ void main() {
             itemExtent: 200.0,
             itemBuilder: itemBuilder,
           ),
-          right: const Text('Not Today')
+          right: const Text('Not Today'),
         ),
       );
     }
@@ -190,7 +190,7 @@ void main() {
 
     final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
-      return new Text('$index', key: new ValueKey<int>(index));
+      return new Text('$index', key: new ValueKey<int>(index), textDirection: TextDirection.ltr);
     };
 
     final Widget testWidget = new Directionality(

@@ -247,9 +247,10 @@ class _FlutterLogoPainter extends BoxPainter {
           fontFamily: 'Roboto',
           fontSize: 100.0 * 350.0 / 247.0, // 247 is the height of the F when the fontSize is 350, assuming device pixel ratio 1.0
           fontWeight: FontWeight.w300,
-          textBaseline: TextBaseline.alphabetic
-        )
-      )
+          textBaseline: TextBaseline.alphabetic,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
     );
     _textPainter.layout();
     final ui.TextBox textSize = _textPainter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: kLabel.length)).single;

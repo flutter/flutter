@@ -66,7 +66,7 @@ void main() {
         key: new ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 200.0,
-        child: new Text('$index'),
+        child: new Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
@@ -118,7 +118,7 @@ void main() {
         key: new ValueKey<int>(index),
         height: 500.0, // this should be ignored
         width: 200.0,
-        child: new Text('$index'),
+        child: new Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
@@ -169,7 +169,7 @@ void main() {
         key: new ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        child: new Text('$index')
+        child: new Text('$index', textDirection: TextDirection.ltr)
       );
     };
 
@@ -214,7 +214,7 @@ void main() {
         width: 500.0, // this should be ignored
         height: 220.0,
         color: Theme.of(context).primaryColor,
-        child: new Text('$index'),
+        child: new Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
@@ -256,7 +256,7 @@ void main() {
         width: 500.0, // this should be ignored
         height: 220.0,
         color: Colors.green[500],
-        child: new Text('$index'),
+        child: new Text('$index', textDirection: TextDirection.ltr),
       );
     };
 

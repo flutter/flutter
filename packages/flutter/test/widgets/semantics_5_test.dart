@@ -25,6 +25,7 @@ void main() {
           ),
           const Semantics(
             label: 'label', // (force a fork)
+            textDirection: TextDirection.ltr,
           ),
         ]
       )

@@ -37,40 +37,43 @@ BuildOwner owner = new BuildOwner();
 void attachWidgetTreeToRenderTree(RenderProxyBox container) {
   element = new RenderObjectToWidgetAdapter<RenderBox>(
     container: container,
-    child: new Container(
-      height: 300.0,
-      child: new Column(
-        children: <Widget>[
-          const Rectangle(const Color(0xFF00FFFF)),
-          new Material(
-            child: new Container(
-              padding: const EdgeInsets.all(10.0),
-              margin: const EdgeInsets.all(10.0),
-              child: new Row(
-                children: <Widget>[
-                  new RaisedButton(
-                    child: new Row(
-                      children: <Widget>[
-                        new Image.network('https://flutter.io/images/favicon.png'),
-                        const Text('PRESS ME'),
-                      ]
+    child: new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Container(
+        height: 300.0,
+        child: new Column(
+          children: <Widget>[
+            const Rectangle(const Color(0xFF00FFFF)),
+            new Material(
+              child: new Container(
+                padding: const EdgeInsets.all(10.0),
+                margin: const EdgeInsets.all(10.0),
+                child: new Row(
+                  children: <Widget>[
+                    new RaisedButton(
+                      child: new Row(
+                        children: <Widget>[
+                          new Image.network('https://flutter.io/images/favicon.png'),
+                          const Text('PRESS ME'),
+                        ],
+                      ),
+                      onPressed: () {
+                        value = value == null ? 0.1 : (value + 0.1) % 1.0;
+                        attachWidgetTreeToRenderTree(container);
+                      },
                     ),
-                    onPressed: () {
-                      value = value == null ? 0.1 : (value + 0.1) % 1.0;
-                      attachWidgetTreeToRenderTree(container);
-                    }
-                  ),
-                  new CircularProgressIndicator(value: value),
-                ],
-                mainAxisAlignment: MainAxisAlignment.spaceAround
-              )
-            )
-          ),
-          const Rectangle(const Color(0xFFFFFF00)),
-        ],
-        mainAxisAlignment: MainAxisAlignment.spaceBetween
-      )
-    )
+                    new CircularProgressIndicator(value: value),
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                ),
+              ),
+            ),
+            const Rectangle(const Color(0xFFFFFF00)),
+          ],
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ),
+      ),
+    ),
   ).attachToRenderTree(owner, element);
 }
 

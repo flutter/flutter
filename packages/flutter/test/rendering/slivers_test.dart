@@ -19,8 +19,8 @@ void main() {
       root.toStringDeep(),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
-        '   parentData: null\n'
-        '   constraints: null\n'
+        '   parentData: MISSING\n'
+        '   constraints: MISSING\n'
         '   size: MISSING\n'
         '   axisDirection: down\n'
         '   crossAxisDirection: right\n'

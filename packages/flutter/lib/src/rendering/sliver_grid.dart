@@ -553,7 +553,8 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     for (int index = indexOf(firstChild) - 1; index >= firstIndex; --index) {
       final SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
       final RenderBox child = insertAndLayoutLeadingChild(
-          gridGeometry.getBoxConstraints(constraints));
+        gridGeometry.getBoxConstraints(constraints),
+      );
       final SliverGridParentData childParentData = child.parentData;
       childParentData.layoutOffset = gridGeometry.scrollOffset;
       childParentData.crossAxisOffset = gridGeometry.crossAxisOffset;

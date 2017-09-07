@@ -130,7 +130,7 @@ void main() {
       buildFrame(
         buildContent: (BuildContext context) {
           pageContext = context;
-          return const Text('Hello World');
+          return const Text('Hello World', textDirection: TextDirection.ltr);
         }
       )
     );

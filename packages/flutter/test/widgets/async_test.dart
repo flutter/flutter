@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget snapshotText(BuildContext context, AsyncSnapshot<String> snapshot) {
-    return new Text(snapshot.toString());
+    return new Text(snapshot.toString(), textDirection: TextDirection.ltr);
   }
   group('AsyncSnapshot', () {
     test('requiring data succeeds if data is present', () {
@@ -280,5 +280,5 @@ class StringCollector extends StreamBuilderBase<String, List<String>> {
   List<String> afterDisconnected(List<String> current) => current..add('disc');
 
   @override
-  Widget build(BuildContext context, List<String> currentSummary) => new Text(currentSummary.join(', '));
+  Widget build(BuildContext context, List<String> currentSummary) => new Text(currentSummary.join(', '), textDirection: TextDirection.ltr);
 }

@@ -52,7 +52,13 @@ void beginFrame(Duration timeStamp) {
 
 void main() {
   // To create a paragraph of text, we use ParagraphBuilder.
-  final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle())
+  final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
+    // The text below has a primary direction of left-to-right.
+    // The embedded text has other directions.
+    // If this was TextDirection.rtl, the "Hello, world" text would end up on
+    // the other side of the right-to-left text.
+    new ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
+  )
     // We first push a style that turns the text blue.
     ..pushStyle(new ui.TextStyle(color: const ui.Color(0xFF0000FF)))
     ..addText('Hello, ')

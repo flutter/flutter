@@ -150,7 +150,7 @@ void main() {
       itemsPainted = <int>[];
       final List<Widget> items = new List<Widget>.generate(itemCount, (int i) {
         return new CustomPaint(
-          child: new Text('$i'),
+          child: new Text('$i', textDirection: TextDirection.ltr),
           painter: new TestCallbackPainter(
             onPaint: () { itemsPainted.add(i); }
           )
@@ -180,7 +180,7 @@ void main() {
     Widget buildFrame(int index) {
       itemsTapped = <int>[];
       final List<Widget> items = new List<Widget>.generate(itemCount, (int i) {
-        return new GestureDetector(child: new Text('$i'), onTap: () { itemsTapped.add(i); });
+        return new GestureDetector(child: new Text('$i', textDirection: TextDirection.ltr), onTap: () { itemsTapped.add(i); });
       });
       return new Center(child: new IndexedStack(children: items, key: key, index: index));
     }

@@ -18,6 +18,7 @@ void main() {
       new Container(
         child: new Semantics(
           label: 'test1',
+          textDirection: TextDirection.ltr,
           child: new Container()
         )
       )
@@ -32,13 +33,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: const Semantics(label: 'child1')
+            child: const Semantics(label: 'child1', textDirection: TextDirection.ltr),
           ),
           new Container(
             height: 10.0,
             child: const IgnorePointer(
               ignoring: true,
-              child: const Semantics(label: 'child2')
+              child: const Semantics(label: 'child2', textDirection: TextDirection.ltr),
             )
           ),
         ],
@@ -54,13 +55,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: const Semantics(label: 'child1')
+            child: const Semantics(label: 'child1', textDirection: TextDirection.ltr),
           ),
           new Container(
             height: 10.0,
             child: const IgnorePointer(
               ignoring: false,
-              child: const Semantics(label: 'child2')
+              child: const Semantics(label: 'child2', textDirection: TextDirection.ltr),
             )
           ),
         ],
@@ -92,13 +93,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: const Semantics(label: 'child1')
+            child: const Semantics(label: 'child1', textDirection: TextDirection.ltr)
           ),
           new Container(
             height: 10.0,
             child: const IgnorePointer(
               ignoring: true,
-              child: const Semantics(label: 'child2')
+              child: const Semantics(label: 'child2', textDirection: TextDirection.ltr)
             )
           ),
         ],
@@ -113,13 +114,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: const Semantics(label: 'child1')
+            child: const Semantics(label: 'child1', textDirection: TextDirection.ltr)
           ),
           new Container(
             height: 10.0,
             child: const IgnorePointer(
               ignoring: false,
-              child: const Semantics(label: 'child2')
+              child: const Semantics(label: 'child2', textDirection: TextDirection.ltr)
             )
           ),
         ],

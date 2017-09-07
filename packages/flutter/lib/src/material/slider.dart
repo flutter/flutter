@@ -295,6 +295,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     @required TextDirection textDirection,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(textDirection != null),
+       _label = label,
        _value = value,
        _divisions = divisions,
        _activeColor = activeColor,
@@ -303,7 +304,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
        _textTheme = textTheme,
        _onChanged = onChanged,
        _textDirection = textDirection {
-    this.label = label;
+    _updateLabelPainter();
     final GestureArenaTeam team = new GestureArenaTeam();
     _drag = new HorizontalDragGestureRecognizer()
       ..team = team
@@ -356,19 +357,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     if (value == _label)
       return;
     _label = value;
-    if (value != null) {
-      // TODO(abarth): Handle textScaleFactor.
-      // https://github.com/flutter/flutter/issues/5938
-      _labelPainter
-        ..text = new TextSpan(
-          style: _textTheme.body1.copyWith(fontSize: 10.0),
-          text: value
-        )
-        ..layout();
-    } else {
-      _labelPainter.text = null;
-    }
-    markNeedsLayout();
+    _updateLabelPainter();
   }
 
   Color get activeColor => _activeColor;
@@ -424,11 +413,29 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     assert(value != null);
-    if (_textDirection == value)
+    if (value == _textDirection)
       return;
     _textDirection = value;
-    // TODO(abarth): Update _labelPainter's text direction.
-    markNeedsPaint();
+    _updateLabelPainter();
+  }
+
+  void _updateLabelPainter() {
+    if (label != null) {
+      // TODO(abarth): Handle textScaleFactor. https://github.com/flutter/flutter/issues/5938
+      _labelPainter
+        ..text = new TextSpan(
+          style: _textTheme.body1.copyWith(fontSize: 10.0),
+          text: label,
+        )
+        ..textDirection = textDirection
+        ..layout();
+    } else {
+      _labelPainter.text = null;
+    }
+    // Changing the textDirection can result in the layout changing, because the
+    // bidi algorithm might line up the glyphs differently which can result in
+    // different ligatures, different shapes, etc. So we always markNeedsLayout.
+    markNeedsLayout();
   }
 
   double get _trackLength => size.width - 2.0 * _kReactionRadius;
@@ -633,7 +640,6 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
           ..lineTo(center.dx + tipAttachment, center.dy + tipAttachment)
           ..close();
         canvas.drawPath(path, primaryPaint);
-        _labelPainter.layout();
         final Offset labelOffset = new Offset(
           center.dx - _labelPainter.width / 2.0,
           center.dy - _labelPainter.height / 2.0

@@ -17,13 +17,15 @@ void main() {
         child: new PageView.builder(
           itemBuilder: (BuildContext context, int index) {
             return new ListView(
-                controller: controller,
-                children: new List<Widget>.generate(
-                  10,
-                  (int i) => new Container(
-                      height: listItemHeight,
-                      child: new Text("Page$index-Item$i")),
-                ).toList());
+              controller: controller,
+              children: new List<Widget>.generate(
+                10,
+                (int i) => new Container(
+                  height: listItemHeight,
+                  child: new Text('Page$index-Item$i'),
+                ),
+              ).toList(),
+            );
           },
         ),
       ),
@@ -37,8 +39,7 @@ void main() {
     controller.jumpTo(listItemHeight + 10);
     await (tester.pumpAndSettle());
 
-    await tester.fling(
-        find.text('Page0-Item1'), const Offset(-100.0, 0.0), 10000.0);
+    await tester.fling(find.text('Page0-Item1'), const Offset(-100.0, 0.0), 10000.0);
     await (tester.pumpAndSettle());
 
     expect(find.text('Page0-Item1'), findsNothing);
@@ -46,8 +47,7 @@ void main() {
     expect(find.text('Page2-Item0'), findsNothing);
     expect(find.text('Page2-Item1'), findsNothing);
 
-    await tester.fling(
-        find.text('Page1-Item1'), const Offset(-100.0, 0.0), 10000.0);
+    await tester.fling(find.text('Page1-Item1'), const Offset(-100.0, 0.0), 10000.0);
     await (tester.pumpAndSettle());
 
     expect(find.text('Page0-Item1'), findsNothing);
@@ -55,7 +55,7 @@ void main() {
     expect(find.text('Page2-Item0'), findsNothing);
     expect(find.text('Page2-Item1'), findsOneWidget);
 
-    await tester.pumpWidget(const Text("Another page"));
+    await tester.pumpWidget(const Text('Another page', textDirection: TextDirection.ltr));
 
     expect(controller.initialScrollOffset, 0.0);
   });

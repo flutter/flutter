@@ -24,7 +24,7 @@ class TestWidgetState extends State<TestWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => const Text('test');
+  Widget build(BuildContext context) => const Text('test', textDirection: TextDirection.ltr);
 }
 
 void main() {

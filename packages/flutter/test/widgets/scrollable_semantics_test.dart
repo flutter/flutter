@@ -47,7 +47,7 @@ void main() {
     for (int i = 0; i < 80; i++)
       containers.add(new MergeSemantics(child: new Container(
         height: kItemHeight,
-        child: new Text('container $i'),
+        child: new Text('container $i', textDirection: TextDirection.ltr),
       )));
 
     final ScrollController scrollController = new ScrollController(

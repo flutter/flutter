@@ -302,16 +302,16 @@ void main() {
 
   testWidgets('AnimatedCrossFade.layoutBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(const AnimatedCrossFade(
-      firstChild: const Text('AAA'),
-      secondChild: const Text('BBB'),
+      firstChild: const Text('AAA', textDirection: TextDirection.ltr),
+      secondChild: const Text('BBB', textDirection: TextDirection.ltr),
       crossFadeState: CrossFadeState.showFirst,
       duration: const Duration(milliseconds: 50),
     ));
     expect(find.text('AAA'), findsOneWidget);
     expect(find.text('BBB'), findsOneWidget);
     await tester.pumpWidget(new AnimatedCrossFade(
-      firstChild: const Text('AAA'),
-      secondChild: const Text('BBB'),
+      firstChild: const Text('AAA', textDirection: TextDirection.ltr),
+      secondChild: const Text('BBB', textDirection: TextDirection.ltr),
       crossFadeState: CrossFadeState.showFirst,
       duration: const Duration(milliseconds: 50),
       layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
@@ -319,8 +319,8 @@ void main() {
     expect(find.text('AAA'), findsOneWidget);
     expect(find.text('BBB'), findsNothing);
     await tester.pumpWidget(new AnimatedCrossFade(
-      firstChild: const Text('AAA'),
-      secondChild: const Text('BBB'),
+      firstChild: const Text('AAA', textDirection: TextDirection.ltr),
+      secondChild: const Text('BBB', textDirection: TextDirection.ltr),
       crossFadeState: CrossFadeState.showSecond,
       duration: const Duration(milliseconds: 50),
       layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,

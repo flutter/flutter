@@ -63,10 +63,14 @@ Future<Null> pageRight(WidgetTester tester) {
 
 void main() {
   testWidgets('PageView default control', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new Center(child: new PageView())
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new PageView(),
+        ),
+      ),
+    );
   });
 
   testWidgets('PageView control test (LTR)', (WidgetTester tester) async {

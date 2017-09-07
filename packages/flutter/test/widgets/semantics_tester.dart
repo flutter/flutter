@@ -9,6 +9,8 @@ import 'package:meta/meta.dart';
 
 export 'package:flutter/rendering.dart' show SemanticsData;
 
+const String _matcherHelp = 'Try dumping the semantics with debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest) from the package:flutter/rendering.dart library to see what the semantics tree looks like.';
+
 /// Test semantics data that is compared against real semantics tree.
 ///
 /// Useful with [hasSemantics] and [SemanticsTester] to test the contents of the
@@ -33,6 +35,7 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.textDirection,
     this.rect,
     this.transform,
     this.children: const <TestSemantics>[],
@@ -49,6 +52,7 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.textDirection,
     this.transform,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
@@ -73,6 +77,7 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.textDirection,
     this.rect,
     Matrix4 transform,
     this.children: const <TestSemantics>[],
@@ -97,6 +102,13 @@ class TestSemantics {
 
   /// A textual description of this node.
   final String label;
+
+  /// The reading direction of the [label].
+  ///
+  /// Even if this is not set, the [hasSemantics] matcher will verify that if a
+  /// label is present on the [SemanticsNode], a [SemanticsNode.textDirection]
+  /// is also set.
+  final TextDirection textDirection;
 
   /// The bounding box for this node in its coordinate system.
   ///
@@ -142,18 +154,34 @@ class TestSemantics {
 
   bool _matches(SemanticsNode node, Map<dynamic, dynamic> matchState, { bool ignoreRect: false, bool ignoreTransform: false }) {
     final SemanticsData nodeData = node.getSemanticsData();
-    if (node == null || id != node.id
-        || flags != nodeData.flags
-        || actions != nodeData.actions
-        || label != nodeData.label
-        || !setEquals(tags, nodeData.tags)
-        || (!ignoreRect && rect != nodeData.rect)
-        || (!ignoreTransform && transform != nodeData.transform)
-        || children.length != (node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount)) {
-      matchState[TestSemantics] = this;
-      matchState[SemanticsNode] = node;
+
+    bool fail(String message) {
+      matchState[TestSemantics] = 'message\n$_matcherHelp';
       return false;
     }
+
+    if (node == null)
+      return fail('could not find node with id $id.');
+    if (id != node.id)
+      return fail('expected node id $id but found id ${node.id}.');
+    if (flags != nodeData.flags)
+      return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
+    if (actions != nodeData.actions)
+      return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
+    if (label != nodeData.label)
+      return fail('expected node id $id to have label "$label" but found label "${nodeData.label}".');
+    if (textDirection != null && textDirection != nodeData.textDirection)
+      return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
+    if (nodeData.label != '' && nodeData.textDirection == null)
+      return fail('expected node id $id, which has a label, to have a textDirection, but it did not.');
+    if (!ignoreRect && rect != nodeData.rect)
+      return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
+    if (!ignoreTransform && transform != nodeData.transform)
+      return fail('expected node id $id to have transform $transform but found transform:\n${nodeData.transform}.');
+    final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
+    if (children.length != childrenCount)
+      return fail('expected node id $id to have ${children.length} child${ children.length == 1 ? "" : "ren" } but found $childrenCount.');
+
     if (children.isEmpty)
       return true;
     bool result = true;
@@ -167,6 +195,11 @@ class TestSemantics {
       return true;
     });
     return result;
+  }
+
+  @override
+  String toString() {
+    return 'node $id, flags=$flags, actions=$actions, label="$label", textDirection=$textDirection, rect=$rect, transform=$transform, ${children.length} child${ children.length == 1 ? "" : "ren" }';
   }
 }
 
@@ -196,10 +229,8 @@ class SemanticsTester {
   }
 
   @override
-  String toString() => 'SemanticsTester';
+  String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode}';
 }
-
-const String _matcherHelp = 'Try dumping the semantics with debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest) from the package:flutter/rendering.dart library to see what the semantics tree looks like.';
 
 class _HasSemantics extends Matcher {
   const _HasSemantics(this._semantics, { this.ignoreRect: false, this.ignoreTransform: false }) : assert(_semantics != null), assert(ignoreRect != null), assert(ignoreTransform != null);
@@ -215,32 +246,12 @@ class _HasSemantics extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description.add('semantics node id ${_semantics.id}');
+    return description.add('semantics node matching: $_semantics');
   }
 
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final TestSemantics testNode = matchState[TestSemantics];
-    final SemanticsNode node = matchState[SemanticsNode];
-    if (node == null)
-      return mismatchDescription.add('could not find node with id ${testNode.id}.\n$_matcherHelp');
-    if (testNode.id != node.id)
-      return mismatchDescription.add('expected node id ${testNode.id} but found id ${node.id}.\n$_matcherHelp');
-    final SemanticsData data = node.getSemanticsData();
-    if (testNode.flags != data.flags)
-      return mismatchDescription.add('expected node id ${testNode.id} to have flags ${testNode.flags} but found flags ${data.flags}.\n$_matcherHelp');
-    if (testNode.actions != data.actions)
-      return mismatchDescription.add('expected node id ${testNode.id} to have actions ${testNode.actions} but found actions ${data.actions}.\n$_matcherHelp');
-    if (testNode.label != data.label)
-      return mismatchDescription.add('expected node id ${testNode.id} to have label "${testNode.label}" but found label "${data.label}".\n$_matcherHelp');
-    if (!ignoreRect && testNode.rect != data.rect)
-      return mismatchDescription.add('expected node id ${testNode.id} to have rect ${testNode.rect} but found rect ${data.rect}.\n$_matcherHelp');
-    if (!ignoreTransform && testNode.transform != data.transform)
-      return mismatchDescription.add('expected node id ${testNode.id} to have transform ${testNode.transform} but found transform:.\n${data.transform}.\n$_matcherHelp');
-    final int childrenCount = node.mergeAllDescendantsIntoThisNode ? 0 : node.childrenCount;
-    if (testNode.children.length != childrenCount)
-      return mismatchDescription.add('expected node id ${testNode.id} to have ${testNode.children.length} children but found $childrenCount.\n$_matcherHelp');
-    return mismatchDescription;
+    return mismatchDescription.add(matchState[TestSemantics]);
   }
 }
 
@@ -253,10 +264,12 @@ Matcher hasSemantics(TestSemantics semantics, {
 class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({
     this.label,
+    this.textDirection,
     this.actions,
 }) : assert(label != null || actions != null);
 
   final String label;
+  final TextDirection textDirection;
   final List<SemanticsAction> actions;
 
   @override
@@ -278,6 +291,8 @@ class _IncludesNodeWith extends Matcher {
 
   bool checkNode(SemanticsNode node) {
     if (label != null && node.label != label)
+      return false;
+    if (textDirection != null && node.textDirection != textDirection)
       return false;
     if (actions != null) {
       final int expectedActions = actions.fold(0, (int value, SemanticsAction action) => value | action.index);
@@ -302,17 +317,30 @@ class _IncludesNodeWith extends Matcher {
     String string = '';
     if (label != null) {
       string += 'label "$label"';
+      if (textDirection != null)
+        string += ' (${describeEnum(textDirection)})';
+      if (actions != null)
+        string += ' and ';
+    } else if (textDirection != null) {
+      string += 'direction ${describeEnum(textDirection)}';
       if (actions != null)
         string += ' and ';
     }
     if (actions != null) {
-      string += ' actions "${actions.join(', ')}"';
+      string += 'actions "${actions.join(', ')}"';
     }
     return string;
   }
 }
 
-/// Asserts that a node in the semantics tree of [SemanticsTester] has [label] and [actions].
+/// Asserts that a node in the semantics tree of [SemanticsTester] has `label`,
+/// `textDirection`, and `actions`.
 ///
-/// If `null` is provided for either argument it will match against any value.
-Matcher includesNodeWith({ String label, List<SemanticsAction> actions }) => new _IncludesNodeWith(label: label, actions: actions);
+/// If null is provided for an argument, it will match against any value.
+Matcher includesNodeWith({ String label, TextDirection textDirection, List<SemanticsAction> actions }) {
+  return new _IncludesNodeWith(
+    label: label,
+    textDirection: textDirection,
+    actions: actions,
+  );
+}

@@ -356,7 +356,8 @@ List<TextPainter> _initPainters(TextTheme textTheme, List<String> labels) {
     // TODO(abarth): Handle textScaleFactor.
     // https://github.com/flutter/flutter/issues/5939
     painters[i] = new TextPainter(
-      text: new TextSpan(style: style, text: label)
+      text: new TextSpan(style: style, text: label),
+      textDirection: TextDirection.ltr,
     )..layout();
   }
   return painters;

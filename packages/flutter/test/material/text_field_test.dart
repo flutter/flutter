@@ -1260,7 +1260,7 @@ void main() {
   testWidgets('Cannot enter new lines onto single line TextField', (WidgetTester tester) async {
     final TextEditingController textController = new TextEditingController();
 
-    await tester.pumpWidget(new Material(
+    await tester.pumpWidget(boilerplate(
       child: new TextField(controller: textController, decoration: null),
     ));
 
@@ -1272,7 +1272,7 @@ void main() {
   testWidgets('Injected formatters are chained', (WidgetTester tester) async {
     final TextEditingController textController = new TextEditingController();
 
-    await tester.pumpWidget(new Material(
+    await tester.pumpWidget(boilerplate(
       child: new TextField(
         controller: textController,
         decoration: null,
@@ -1293,7 +1293,7 @@ void main() {
   testWidgets('Chained formatters are in sequence', (WidgetTester tester) async {
     final TextEditingController textController = new TextEditingController();
 
-    await tester.pumpWidget(new Material(
+    await tester.pumpWidget(boilerplate(
       child: new TextField(
         controller: textController,
         decoration: null,

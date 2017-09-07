@@ -52,7 +52,7 @@ class DummyStatefulWidget extends StatefulWidget {
 
 class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
   @override
-  Widget build(BuildContext context) => const Text('LEAF');
+  Widget build(BuildContext context) => const Text('LEAF', textDirection: TextDirection.ltr);
 }
 
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
