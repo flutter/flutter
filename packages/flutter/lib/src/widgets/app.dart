@@ -180,7 +180,7 @@ class WidgetsApp extends StatefulWidget {
   /// - The callback's `locale` parameter if it's equal to a supported locale.
   /// - The first supported locale with the same [Locale.langaugeCode] as the
   ///   callback's `locale` parameter.
-  /// - The first supported locale.
+  /// - The first locale in [supportedLocales].
   ///
   /// See also:
   ///
