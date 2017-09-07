@@ -9,11 +9,23 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-// Standard iOS 10 nav bar height without the status bar.
-const double _kNavBarHeight = 44.0;
+/// Standard iOS 10 nav bar height without the status bar.
+const double _kNavBarPersistentHeight = 44.0;
+
+/// Size increase from expanding the nav bar in a [CustomScrollView].
+const double _kNavBarLargeTitleHeightExtension = 30.0;
+
+const double _kNavBarEdgePadding = 16.0;
 
 const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
 const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
+
+const TextStyle _kLargeTitleTextStyle = const TextStyle(
+  fontSize: 34.0,
+  fontWeight: FontWeight.bold,
+  letterSpacing: 0.41,
+  color: CupertinoColors.black,
+);
 
 /// An iOS-styled navigation bar.
 ///
@@ -41,8 +53,9 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
     this.trailing,
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
+    this.largeTitle: false,
   }) : assert(middle != null, 'There must be a middle widget, usually a title.'),
-      super(key: key);
+       super(key: key);
 
   /// Widget to place at the start of the nav bar. Normally a back button
   /// for a normal page or a cancel button for full page dialogs.
@@ -73,8 +86,86 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   /// True if the nav bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
+  /// Use iOS 11 style large title navigation bars.
+  ///
+  /// When true, the navigation bar will split into 2 sections. The static
+  /// top 44px section will be wrapped in a SliverPersistentHeader and a
+  /// second scrollable section behind it will show and replace the `middle`
+  /// section in a larger font when scrolled down.
+  final bool largeTitle;
+
   @override
-  Size get preferredSize => const Size.fromHeight(_kNavBarHeight);
+  Size get preferredSize => const Size.fromHeight(_kNavBarPersistentHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    assert(
+      !largeTitle || middle is Text,
+      "largeTitle mode is only possible when 'middle' is a Text widget",
+    );
+
+    if (!largeTitle) {
+      return new _CupertinoPersistentNavigationBar(
+        leading: leading,
+        middle: middle,
+        trailing: trailing,
+        backgroundColor: backgroundColor,
+        actionsForegroundColor: actionsForegroundColor,
+      );
+    } else {
+      return new SliverPersistentHeader(
+        pinned: true, // iOS navigation bars are always pinned.
+        floating: true,
+        delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
+          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+          leading: leading,
+          middle: middle,
+          trailing: trailing,
+          backgroundColor: backgroundColor,
+          actionsForegroundColor: actionsForegroundColor,
+        ),
+      );
+    }
+  }
+}
+
+/// Returns `child` as is if backgroundColor is opaque. Otherwise, wraps child
+/// with blurring [BackdropFilter].
+Widget _wrapWithBlurEffectIfNecessary({Color backgroundColor, Widget child}) {
+  if (backgroundColor.alpha == 0xFF)
+    return child;
+
+  return new ClipRect(
+    child: new BackdropFilter(
+      filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      child: child,
+    ),
+  );
+}
+
+/// The top part of the nav bar that's never scrolled away.
+class _CupertinoPersistentNavigationBar extends StatelessWidget implements PreferredSizeWidget {
+  const _CupertinoPersistentNavigationBar({
+    Key key,
+    this.leading,
+    @required this.middle,
+    this.trailing,
+    this.backgroundColor,
+    this.actionsForegroundColor,
+  }) : super(key: key);
+
+  final Widget leading;
+
+  final Widget middle;
+
+  final Widget trailing;
+
+  final Color backgroundColor;
+
+  final Color actionsForegroundColor;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(_kNavBarPersistentHeight);
 
   @override
   Widget build(BuildContext context) {
@@ -103,53 +194,115 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
 
     // TODO(xster): automatically build a CupertinoBackButton.
 
-    Widget result = new DecoratedBox(
-      decoration: new BoxDecoration(
-        border: const Border(
-          bottom: const BorderSide(
-            color: _kDefaultNavBarBorderColor,
-            width: 0.0, // One physical pixel.
-            style: BorderStyle.solid,
-          ),
-        ),
-        color: backgroundColor,
-      ),
-      child: new SizedBox(
-        height: _kNavBarHeight + MediaQuery.of(context).padding.top,
-        child: IconTheme.merge(
-          data: new IconThemeData(
-            color: actionsForegroundColor,
-            size: 22.0,
-          ),
-          child: new Padding(
-            padding: new EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top,
-              // TODO(xster): dynamically reduce padding when an automatic
-              // CupertinoBackButton is present.
-              left: 16.0,
-              right: 16.0,
+    return _wrapWithBlurEffectIfNecessary(
+      backgroundColor: backgroundColor,
+      child:  new DecoratedBox(
+        decoration: new BoxDecoration(
+          border: const Border(
+            bottom: const BorderSide(
+              color: _kDefaultNavBarBorderColor,
+              width: 0.0, // One physical pixel.
+              style: BorderStyle.solid,
             ),
-            child: new NavigationToolbar(
-              leading: styledLeading,
-              middle: styledMiddle,
-              trailing: styledTrailing,
-              centerMiddle: true,
+          ),
+          color: backgroundColor,
+        ),
+        child: new SizedBox(
+          height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+          child: IconTheme.merge(
+            data: new IconThemeData(
+              color: actionsForegroundColor,
+              size: 22.0,
+            ),
+            child: new Padding(
+              padding: new EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top,
+                // TODO(xster): dynamically reduce padding when an automatic
+                // CupertinoBackButton is present.
+                left: _kNavBarEdgePadding,
+                right: _kNavBarEdgePadding,
+              ),
+              child: new NavigationToolbar(
+                leading: styledLeading,
+                middle: styledMiddle,
+                trailing: styledTrailing,
+                centerMiddle: true,
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
 
-    if (!opaque) {
-      // For non-opaque backgrounds, apply a blur effect.
-      result = new ClipRect(
-        child: new BackdropFilter(
-          filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-          child: result,
-        ),
-      );
-    }
+class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDelegate {
+  const _CupertinoLargeTitleNavigationBarSliverDelegate({
+    @required this.persistentHeight,
+    this.leading,
+    @required this.middle,
+    this.trailing,
+    this.backgroundColor,
+    this.actionsForegroundColor,
+  }) : assert(persistentHeight != null);
 
-    return result;
+  final double persistentHeight;
+
+  final Widget leading;
+
+  final Text middle;
+
+  final Widget trailing;
+
+  final Color backgroundColor;
+
+  final Color actionsForegroundColor;
+
+  @override
+  double get minExtent => persistentHeight;
+
+  @override
+  double get maxExtent => persistentHeight + _kNavBarLargeTitleHeightExtension;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final bool showLargeTitle = shrinkOffset < maxExtent - minExtent;
+
+    final _CupertinoPersistentNavigationBar persistentNavigationBar =
+        new _CupertinoPersistentNavigationBar(
+      leading: leading,
+      middle: showLargeTitle ? null : middle,
+      trailing: trailing,
+      backgroundColor: backgroundColor,
+      actionsForegroundColor: actionsForegroundColor,
+    );
+
+    return _wrapWithBlurEffectIfNecessary(
+      backgroundColor: backgroundColor,
+      child: new Stack(
+        fit: StackFit.passthrough,
+        children: <Widget>[
+          new PositionedDirectional(
+            start: _kNavBarEdgePadding,
+            bottom: _kNavBarEdgePadding,
+            child: new DefaultTextStyle(
+              style: _kLargeTitleTextStyle,
+              child: middle,
+            ),
+          ),
+          persistentNavigationBar,
+        ],
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(_CupertinoLargeTitleNavigationBarSliverDelegate oldDelegate) {
+    return persistentHeight != oldDelegate.persistentHeight ||
+        leading != oldDelegate.leading ||
+        middle != oldDelegate.middle ||
+        trailing != oldDelegate.trailing ||
+        backgroundColor != oldDelegate.backgroundColor ||
+        actionsForegroundColor != oldDelegate.actionsForegroundColor;
   }
 }
