@@ -112,6 +112,7 @@ void main() {
   // The bottom later is our RenderDots object, and on top of that we show the
   // text.
   final RenderStack stack = new RenderStack(
+    textDirection: TextDirection.ltr,
     children: <RenderBox>[
       new RenderDots(),
       paragraph,

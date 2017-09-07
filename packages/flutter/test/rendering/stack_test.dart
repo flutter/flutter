@@ -26,7 +26,10 @@ void main() {
       ),
     );
 
-    final RenderBox stack = new RenderStack(children: <RenderBox>[red, green]);
+    final RenderBox stack = new RenderStack(
+      textDirection: TextDirection.ltr,
+      children: <RenderBox>[red, green],
+    );
     final StackParentData greenParentData = green.parentData;
     greenParentData
       ..top = 0.0
@@ -59,8 +62,9 @@ void main() {
           additionalConstraints: new BoxConstraints.tight(const Size(100.0, 100.0))
       );
       final RenderBox stack = new RenderIndexedStack(
-          children: <RenderBox>[child1, child2, child3],
           index: 1,
+          textDirection: TextDirection.ltr,
+          children: <RenderBox>[child1, child2, child3],
       );
 
       final List<RenderObject> vistedChildren = <RenderObject>[];

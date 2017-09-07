@@ -15,6 +15,7 @@ void main() {
       final SemanticsTester semantics = new SemanticsTester(tester);
 
       await tester.pumpWidget(new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Semantics(
             label: 'layer#1',
@@ -33,6 +34,7 @@ void main() {
       expect(semantics, isNot(includesNodeWith(label: 'layer#1')));
 
       await tester.pumpWidget(new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Semantics(
             label: 'layer#1',
