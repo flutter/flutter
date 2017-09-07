@@ -731,7 +731,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     bool hideOwner = true;
     if (_dirty) {
       final bool inDirtyNodes = owner != null && owner._dirtyNodes.contains(this);
-      properties.add(new FlagProperty('inDirtyNodes', value: inDirtyNodes, ifTrue: 'dirty', ifFalse: 'stale'));
+      properties.add(new FlagProperty('inDirtyNodes', value: inDirtyNodes, ifTrue: 'dirty', ifFalse: 'STALE'));
       hideOwner = inDirtyNodes;
     }
     properties.add(new DiagnosticsProperty<SemanticsOwner>('owner', owner, hidden: hideOwner));
@@ -803,7 +803,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   Iterable<SemanticsNode> _getChildrenInOrder(DebugSemanticsDumpOrder childOrder) {
     assert(childOrder != null);
     if (_children == null)
-      return <SemanticsNode>[];
+      return const <SemanticsNode>[];
 
     switch(childOrder) {
       case DebugSemanticsDumpOrder.traversal:

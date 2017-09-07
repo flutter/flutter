@@ -1641,14 +1641,19 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   List<DiagnosticsNode> getChildren() => <DiagnosticsNode>[];
 }
 
-/// [DiagnosticsNode] for an instance of [Diagnosticable].
+/// [DiagnosticsNode] that lazily calls the associated [Diagnosticable] [value]
+/// to implement [getChildren] and [getProperties].
 class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
+  /// Create a diagnostics describing a [Diagnosticable] value.
+  ///
+  /// The [value] argument must not be null.
   DiagnosticableNode({
     String name,
     @required this.value,
     @required DiagnosticsTreeStyle style,
     String emptyBodyDescription,
-  }) : super(
+  }) : assert(value != null),
+       super(
          name: name,
          style: style,
        );
