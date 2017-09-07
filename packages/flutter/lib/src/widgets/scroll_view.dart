@@ -248,6 +248,8 @@ abstract class ScrollView extends StatelessWidget {
 /// list and a grid, use a list of three slivers: [SliverAppBar], [SliverList],
 /// and [SliverGrid].
 ///
+/// [Widget]s in these [slivers] must produce [RenderSliver] objects.
+///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
 ///
