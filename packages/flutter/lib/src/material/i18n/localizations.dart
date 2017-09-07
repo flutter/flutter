@@ -218,19 +218,19 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
   "de": const <String, String>{
     "openAppDrawerTooltip": r"Navigationsmenü öffnen",
     "backButtonTooltip": r"Zurück",
-    "closeButtonTooltip": r"Schließen ",
+    "closeButtonTooltip": r"Schließen",
     "nextMonthTooltip": r"Nächster Monat",
-    "previousMonthTooltip": r"Letzter Monat",
-    "licensesPageTitle": r"Lizenz",
-    "cancelButtonLabel": r"STORNIEREN",
+    "previousMonthTooltip": r"Vorheriger Monat",
+    "licensesPageTitle": r"Lizenzen",
+    "cancelButtonLabel": r"ABBRECHEN",
     "closeButtonLabel": r"SCHLIESSEN",
     "continueButtonLabel": r"FORTSETZEN",
     "copyButtonLabel": r"KOPIEREN",
-    "cutButtonLabel": r"SCHNEIDEN",
+    "cutButtonLabel": r"AUSSCHNEIDEN",
     "okButtonLabel": r"OK",
-    "pasteButtonLabel": r"Paste",
-    "selectAllButtonLabel": r"ALLE AUSWÄHLEN",
-    "viewLicensesButtonLabel": r"ANLAGEN LIZENZEN"
+    "pasteButtonLabel": r"EINFÜGEN",
+    "selectAllButtonLabel": r"ALLES AUSWÄHLEN",
+    "viewLicensesButtonLabel": r"LIZENZEN ANZEIGEN"
   },
   "ja": const <String, String>{
     "openAppDrawerTooltip": r"ナビゲーションメニューを開く",

@@ -1,17 +1,17 @@
 {
   "openAppDrawerTooltip": "Navigationsmenü öffnen",
   "backButtonTooltip": "Zurück",
-  "closeButtonTooltip": "Schließen ",
+  "closeButtonTooltip": "Schließen",
   "nextMonthTooltip": "Nächster Monat",
-  "previousMonthTooltip": "Letzter Monat",
-  "licensesPageTitle": "Lizenz",
-  "cancelButtonLabel": "STORNIEREN",
+  "previousMonthTooltip": "Vorheriger Monat",
+  "licensesPageTitle": "Lizenzen",
+  "cancelButtonLabel": "ABBRECHEN",
   "closeButtonLabel": "SCHLIESSEN",
   "continueButtonLabel": "FORTSETZEN",
   "copyButtonLabel": "KOPIEREN",
-  "cutButtonLabel": "SCHNEIDEN",
+  "cutButtonLabel": "AUSSCHNEIDEN",
   "okButtonLabel": "OK",
-  "pasteButtonLabel": "Paste",
-  "selectAllButtonLabel": "ALLE AUSWÄHLEN",
-  "viewLicensesButtonLabel": "ANLAGEN LIZENZEN"
+  "pasteButtonLabel": "EINFÜGEN",
+  "selectAllButtonLabel": "ALLES AUSWÄHLEN",
+  "viewLicensesButtonLabel": "LIZENZEN ANZEIGEN"
 }
