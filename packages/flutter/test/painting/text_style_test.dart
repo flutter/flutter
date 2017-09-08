@@ -129,5 +129,17 @@ void main() {
     final ui.ParagraphStyle ps7 = const TextStyle().getParagraphStyle(textDirection: TextDirection.rtl);
     expect(ps7, equals(new ui.ParagraphStyle(textDirection: TextDirection.rtl)));
     expect(ps7.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: unspecified, lineHeight: unspecified, ellipsis: unspecified)');
+
+    final TextStyle s6 =  const TextStyle(fontFamily: 'test',);
+    expect(s6.fontFamily, 'test');
+    expect(s6.package, isNull);
+    expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
+
+    final TextStyle s7 =  const TextStyle(fontFamily: 'test', package: 'p',);
+    expect(s7.fontFamily, 'packages/p/test');
+    expect(s7.package, 'p');
+    expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
+
+
   });
 }
