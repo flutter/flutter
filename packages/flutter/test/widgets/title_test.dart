@@ -14,4 +14,23 @@ void main() {
     );
     expect(widget.toString, isNot(throwsException));
   });
+
+  testWidgets('should handle a null title correctly', (WidgetTester tester) async {
+    final Title widget = new Title(
+      color: const Color(0xFF00FF00),
+      title: null,
+      child: new Container(),
+    );
+    expect(widget.toString, isNot(throwsException));
+    expect(widget.title, equals(''));
+  });
+
+  testWidgets('should handle having no title correctly', (WidgetTester tester) async {
+    final Title widget = new Title(
+      color: const Color(0xFF00FF00),
+      child: new Container(),
+    );
+    expect(widget.toString, isNot(throwsException));
+    expect(widget.title, equals(''));
+  });
 }
