@@ -107,11 +107,18 @@ Widget buildFrame({
   Locale locale,
   Iterable<LocalizationsDelegate<dynamic>> delegates,
   WidgetBuilder buildContent,
+  LocaleResolutionCallback localeResolutionCallback,
+  List<Locale> supportedLocales: const <Locale>[
+    const Locale('en', 'US'),
+    const Locale('en', 'GB'),
+  ],
 }) {
   return new WidgetsApp(
     color: const Color(0xFFFFFFFF),
     locale: locale,
     localizationsDelegates: delegates,
+    localeResolutionCallback: localeResolutionCallback,
+    supportedLocales: supportedLocales,
     onGenerateRoute: (RouteSettings settings) {
       return new PageRouteBuilder<Null>(
         pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
@@ -182,7 +189,7 @@ void main() {
     );
 
     expect(TestLocalizations.of(pageContext), isNotNull);
-    expect(find.text('_'), findsOneWidget); // default test locale is '_'
+    expect(find.text('en_US'), findsOneWidget);
 
     await tester.binding.setLocale('en', 'GB');
     await tester.pump();
@@ -205,25 +212,25 @@ void main() {
       )
     );
     await tester.pump(const Duration(milliseconds: 50)); // TestLocalizations.loadAsync() takes 100ms
-    expect(find.text('_'), findsNothing); // TestLocalizations hasn't been loaded yet
+    expect(find.text('en_US'), findsNothing); // TestLocalizations hasn't been loaded yet
 
     await tester.pump(const Duration(milliseconds: 50)); // TestLocalizations.loadAsync() completes
     await tester.pumpAndSettle();
-    expect(find.text('_'), findsOneWidget); // default test locale is '_'
-
-    await tester.binding.setLocale('en', 'US');
-    await tester.pump(const Duration(milliseconds: 100));
-    await tester.pumpAndSettle();
-    expect(find.text('en_US'), findsOneWidget);
+    expect(find.text('en_US'), findsOneWidget); // default test locale is US english
 
     await tester.binding.setLocale('en', 'GB');
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(find.text('en_GB'), findsOneWidget);
+
+    await tester.binding.setLocale('en', 'US');
     await tester.pump(const Duration(milliseconds: 50));
     // TestLocalizations.loadAsync() hasn't completed yet so the old text
     // localization is still displayed
-    expect(find.text('en_US'), findsOneWidget);
+    expect(find.text('en_GB'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 50)); // finish the async load
     await tester.pumpAndSettle();
-    expect(find.text('en_GB'), findsOneWidget);
+    expect(find.text('en_US'), findsOneWidget);
   });
 
   testWidgets('Localizations with multiple sync delegates', (WidgetTester tester) async {
@@ -422,6 +429,10 @@ void main() {
 
     await tester.pumpWidget(
       buildFrame(
+        supportedLocales: const <Locale>[
+          const Locale('en', 'GB'),
+          const Locale('ar', 'EG'),
+        ],
         buildContent: (BuildContext context) {
           pageContext = context;
           return const Text('Hello World');
@@ -436,6 +447,62 @@ void main() {
     await tester.binding.setLocale('ar', 'EG');
     await tester.pump();
     expect(Directionality.of(pageContext), TextDirection.rtl);
+  });
+
+  testWidgets('localeResolutionCallback override', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildFrame(
+        localeResolutionCallback: (Locale newLocale, Iterable<Locale> supportedLocales) {
+          return const Locale('foo', 'BAR');
+        },
+        buildContent: (BuildContext context) {
+          return new Text(Localizations.localeOf(context).toString());
+        }
+      )
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.text('foo_BAR'), findsOneWidget);
+
+    await tester.binding.setLocale('en', 'GB');
+    await tester.pumpAndSettle();
+    expect(find.text('foo_BAR'), findsOneWidget);
+  });
+
+
+  testWidgets('supportedLocales and defaultLocaleChangeHandler', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildFrame(
+        supportedLocales: const <Locale>[
+          const Locale('zh', 'CN'),
+          const Locale('en', 'GB'),
+          const Locale('en', 'CA'),
+        ],
+        buildContent: (BuildContext context) {
+          return new Text(Localizations.localeOf(context).toString());
+        }
+      )
+    );
+
+    // Startup time. Default test locale is const Locale('', ''), so
+    // no supported matches. Use the first locale.
+    await tester.pumpAndSettle();
+    expect(find.text('zh_CN'), findsOneWidget);
+
+    // defaultLocaleChangedHandler prefers exact supported locale match
+    await tester.binding.setLocale('en', 'CA');
+    await tester.pumpAndSettle();
+    expect(find.text('en_CA'), findsOneWidget);
+
+    // defaultLocaleChangedHandler chooses 1st matching supported locale.languageCode
+    await tester.binding.setLocale('en', 'US');
+    await tester.pumpAndSettle();
+    expect(find.text('en_GB'), findsOneWidget);
+
+    // defaultLocaleChangedHandler: no matching supported locale, so use the 1st one
+    await tester.binding.setLocale('da', 'DA');
+    await tester.pumpAndSettle();
+    expect(find.text('zh_CN'), findsOneWidget);
   });
 }
 

@@ -12,6 +12,10 @@ Widget buildFrame({
   return new MaterialApp(
     color: const Color(0xFFFFFFFF),
     locale: locale,
+    supportedLocales: const <Locale>[
+      const Locale('en', 'US'),
+      const Locale('es', 'es'),
+    ],
     onGenerateRoute: (RouteSettings settings) {
       return new MaterialPageRoute<Null>(
         builder: (BuildContext context) {
@@ -39,15 +43,16 @@ void main() {
 
     expect(tester.widget<Text>(find.byKey(textKey)).data, 'Back');
 
+    // Unrecognized locale falls back to 'en'
+    await tester.binding.setLocale('foo', 'bar');
+    await tester.pump();
+    expect(tester.widget<Text>(find.byKey(textKey)).data, 'Back');
+
     // Spanish Bolivia locale, falls back to just 'es'
     await tester.binding.setLocale('es', 'bo');
     await tester.pump();
     expect(tester.widget<Text>(find.byKey(textKey)).data, 'Espalda');
 
-    // Unrecognized locale falls back to 'en'
-    await tester.binding.setLocale('foo', 'bar');
-    await tester.pump();
-    expect(tester.widget<Text>(find.byKey(textKey)).data, 'Back');
   });
 
   testWidgets('translations exist for all materia/i18n languages', (WidgetTester tester) async {
