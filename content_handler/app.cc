@@ -7,7 +7,6 @@
 #include <thread>
 #include <utility>
 
-#include "apps/tracing/lib/trace/provider.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
@@ -37,8 +36,6 @@ std::string GetLabelFromURL(const std::string& url) {
 App::App() {
   g_app = this;
   context_ = app::ApplicationContext::CreateFromStartupInfo();
-
-  tracing::InitializeTracer(context_.get(), {});
 
   gpu_thread_ = std::make_unique<mtl::Thread>();
   io_thread_ = std::make_unique<mtl::Thread>();

@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <trace/event.h>
+
 #include "flutter/content_handler/vulkan_surface_pool.h"
-#include "apps/tracing/lib/trace/event.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
 namespace flutter_runner {
