@@ -157,7 +157,7 @@ void main() {
     expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
-  testWidgets('AppBar centerTitle:false title start edge is 16.0 (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 0.0 (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
@@ -169,10 +169,10 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.text('X')).dx, 16.0);
+    expect(tester.getTopLeft(find.text('X')).dx, 0.0);
   });
 
-  testWidgets('AppBar centerTitle:false title start edge is 16.0 (RTL)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 0.0 (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Directionality(
@@ -187,7 +187,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopRight(find.text('X')).dx, 800.0 - 16.0);
+    expect(tester.getTopRight(find.text('X')).dx, 800.0);
   });
 
   testWidgets(
