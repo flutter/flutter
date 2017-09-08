@@ -103,7 +103,7 @@ class SlideTransition extends AnimatedWidget {
   /// The [position] argument must not be null.
   const SlideTransition({
     Key key,
-    @required Animation<FractionalOffset> position,
+    @required Animation<FractionalOffsetGeometry> position,
     this.transformHitTests: true,
     this.child,
   }) : super(key: key, listenable: position);
@@ -112,7 +112,7 @@ class SlideTransition extends AnimatedWidget {
   ///
   /// If the current value of the position animation is (dx, dy), the child will
   /// be translated horizontally by width * dx and vertically by height * dy.
-  Animation<FractionalOffset> get position => listenable;
+  Animation<FractionalOffsetGeometry> get position => listenable;
 
   /// Whether hit testing should be affected by the slide animation.
   ///
@@ -244,11 +244,11 @@ class SizeTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    FractionalOffset alignment;
+    FractionalOffsetDirectional alignment;
     if (axis == Axis.vertical)
-      alignment = new FractionalOffset(0.0, axisAlignment);
+      alignment = new FractionalOffsetDirectional(0.0, axisAlignment);
     else
-      alignment = new FractionalOffset(axisAlignment, 0.0);
+      alignment = new FractionalOffsetDirectional(axisAlignment, 0.0);
     return new ClipRect(
       child: new Align(
         alignment: alignment,

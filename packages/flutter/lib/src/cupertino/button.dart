@@ -61,7 +61,7 @@ class CupertinoButton extends StatefulWidget {
   /// The amount of space to surround the child inside the bounds of the button.
   ///
   /// Defaults to 16.0 pixels.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The color of the button's background.
   ///
