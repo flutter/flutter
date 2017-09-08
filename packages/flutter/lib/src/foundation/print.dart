@@ -104,7 +104,7 @@ enum _WordWrapParseMode { inSpace, inWord, atBreak }
 ///
 /// The default [debugPrint] implementation uses this for its line wrapping.
 Iterable<String> debugWordWrap(String message, int width, { String wrapIndent: '' }) sync* {
-  if (message.length < width || message[0] == '#') {
+  if (message.length < width || message.trimLeft()[0] == '#') {
     yield message;
     return;
   }

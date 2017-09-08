@@ -23,25 +23,30 @@ const TextStyle _kTextStyle = const TextStyle(
 );
 
 /// Where to show a [Banner].
+///
+/// The start and end locations are relative to the ambient [Directionality]
+/// (which can be overridden by [Banner.layoutDirection]).
 enum BannerLocation {
   /// Show the banner in the top-right corner when the ambient [Directionality]
-  /// is [TextDirection.rtl] and in the top-left corner when the ambient
-  /// [Directionality] is [TextDirection.ltr].
+  /// (or [Banner.layoutDirection]) is [TextDirection.rtl] and in the top-left
+  /// corner when the ambient [Directionality] is [TextDirection.ltr].
   topStart,
 
   /// Show the banner in the top-left corner when the ambient [Directionality]
-  /// is [TextDirection.rtl] and in the top-right corner when the ambient
-  /// [Directionality] is [TextDirection.ltr].
+  /// (or [Banner.layoutDirection]) is [TextDirection.rtl] and in the top-right
+  /// corner when the ambient [Directionality] is [TextDirection.ltr].
   topEnd,
 
   /// Show the banner in the bottom-right corner when the ambient
-  /// [Directionality] is [TextDirection.rtl] and in the bottom-left corner when
-  /// the ambient [Directionality] is [TextDirection.ltr].
+  /// [Directionality] (or [Banner.layoutDirection]) is [TextDirection.rtl] and
+  /// in the bottom-left corner when the ambient [Directionality] is
+  /// [TextDirection.ltr].
   bottomStart,
 
   /// Show the banner in the bottom-left corner when the ambient
-  /// [Directionality] is [TextDirection.rtl] and in the bottom-right corner when
-  /// the ambient [Directionality] is [TextDirection.ltr].
+  /// [Directionality] (or [Banner.layoutDirection]) is [TextDirection.rtl] and
+  /// in the bottom-right corner when the ambient [Directionality] is
+  /// [TextDirection.ltr].
   bottomEnd,
 }
 
@@ -49,11 +54,13 @@ enum BannerLocation {
 class BannerPainter extends CustomPainter {
   /// Creates a banner painter.
   ///
-  /// The [message], [textDirection], and [location] arguments must not be null.
+  /// The [message], [textDirection], [location], and [layoutDirection]
+  /// arguments must not be null.
   BannerPainter({
     @required this.message,
     @required this.textDirection,
     @required this.location,
+    @required this.layoutDirection,
     this.color: _kColor,
     this.textStyle: _kTextStyle,
   }) : assert(message != null),
@@ -74,11 +81,20 @@ class BannerPainter extends CustomPainter {
   /// context, the English phrase will be on the right and the Hebrow phrase on
   /// its left.
   ///
-  /// This value is also used to interpret the [location] of the banner.
+  /// See also [layoutDirection], which controls the interpretation of values in
+  /// [location].
   final TextDirection textDirection;
 
   /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
+
+  /// The directionality of the layout.
+  ///
+  /// This value is used to interpret the [location] of the banner.
+  ///
+  /// See also [textDirection], which controls the reading direction of the
+  /// [message].
+  final TextDirection layoutDirection;
 
   /// The color to paint behind the [message].
   ///
@@ -136,8 +152,8 @@ class BannerPainter extends CustomPainter {
 
   double _translationX(double width) {
     assert(location != null);
-    assert(textDirection != null);
-    switch (textDirection) {
+    assert(layoutDirection != null);
+    switch (layoutDirection) {
       case TextDirection.rtl:
         switch (location) {
           case BannerLocation.bottomEnd:
@@ -181,8 +197,8 @@ class BannerPainter extends CustomPainter {
 
   double get _rotation {
     assert(location != null);
-    assert(textDirection != null);
-    switch (textDirection) {
+    assert(layoutDirection != null);
+    switch (layoutDirection) {
       case TextDirection.rtl:
         switch (location) {
           case BannerLocation.bottomStart:
@@ -215,7 +231,8 @@ class BannerPainter extends CustomPainter {
 ///
 /// See also:
 ///
-///  * [CheckedModeBanner].
+///  * [CheckedModeBanner], which the [WidgetsApp] widget includes by default in
+///    debug mode, to show a banner that says "SLOW MODE".
 class Banner extends StatelessWidget {
   /// Creates a banner.
   ///
@@ -226,6 +243,7 @@ class Banner extends StatelessWidget {
     @required this.message,
     this.textDirection,
     @required this.location,
+    this.layoutDirection,
     this.color: _kColor,
     this.textStyle: _kTextStyle,
   }) : assert(message != null),
@@ -250,10 +268,23 @@ class Banner extends StatelessWidget {
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
+  ///
+  /// See also [layoutDirection], which controls the interpretation of the
+  /// [location].
   final TextDirection textDirection;
 
   /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
+
+  /// The directionality of the layout.
+  ///
+  /// This is used to resolve the [location] values.
+  ///
+  /// Defaults to the ambient [Directionality], if any.
+  ///
+  /// See also [textDirection], which controls the reading direction of the
+  /// [message].
+  final TextDirection layoutDirection;
 
   /// The color of the banner.
   final Color color;
@@ -268,6 +299,7 @@ class Banner extends StatelessWidget {
         message: message,
         textDirection: textDirection ?? Directionality.of(context),
         location: location,
+        layoutDirection: layoutDirection ?? Directionality.of(context),
         color: color,
         textStyle: textStyle,
       ),
@@ -281,6 +313,7 @@ class Banner extends StatelessWidget {
     description.add(new StringProperty('message', message, showName: false));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new EnumProperty<BannerLocation>('location', location));
+    description.add(new EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
     description.add(new DiagnosticsProperty<Color>('color', color, showName: false));
     textStyle?.debugFillProperties(description, prefix: 'text ');
   }

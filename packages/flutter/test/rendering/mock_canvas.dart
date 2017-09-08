@@ -248,6 +248,13 @@ abstract class PaintPattern {
   void something(PaintPatternPredicate predicate);
 }
 
+class _MismatchedCall {
+  const _MismatchedCall(this.message, this.callIntroduction, this.call) : assert(call != null);
+  final String message;
+  final String callIntroduction;
+  final RecordedInvocation call;
+}
+
 abstract class _TestRecordingCanvasMatcher extends Matcher {
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
@@ -276,17 +283,16 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
     final StringBuffer description = new StringBuffer();
     final bool result = _evaluatePredicates(canvas.invocations, description);
     if (!result) {
-      const String indent = '\n            '; // the length of '   Which: ' in spaces, plus two more
       if (canvas.invocations.isNotEmpty)
-        description.write(' The complete display list was:');
-        for (Invocation call in canvas.invocations)
-          description.write('$indent${_describeInvocation(call)}');
+        description.write('The complete display list was:');
+        for (RecordedInvocation call in canvas.invocations)
+          description.write('\n  * $call');
+      matchState[this] = 'did not match the pattern.\n$description';
     }
-    matchState[this] = description.toString();
     return result;
   }
 
-  bool _evaluatePredicates(Iterable<Invocation> calls, StringBuffer description);
+  bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description);
 
   @override
   Description describeMismatch(
@@ -306,10 +312,13 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
   }
 
   @override
-  bool _evaluatePredicates(Iterable<Invocation> calls, StringBuffer description) {
+  bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     if (calls.isEmpty)
       return true;
-    description.write('painted the following.');
+    description.write(
+      'painted something, the first call having the following stack:\n'
+      '${calls.first.stackToString(indent: "  ")}\n'
+    );
     return false;
   }
 }
@@ -409,32 +418,42 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  bool _evaluatePredicates(Iterable<Invocation> calls, StringBuffer description) {
+  bool _evaluatePredicates(Iterable<RecordedInvocation> calls, StringBuffer description) {
     if (calls.isEmpty) {
-      description.write('painted nothing.');
+      description.writeln('It painted nothing.');
       return false;
     }
     if (_predicates.isEmpty) {
-      description.write(
-        'painted something, but you must now add a pattern to the paints matcher '
+      description.writeln(
+        'It painted something, but you must now add a pattern to the paints matcher '
         'in the test to verify that it matches the important parts of the following.'
       );
       return false;
     }
     final Iterator<_PaintPredicate> predicate = _predicates.iterator;
-    final Iterator<Invocation> call = calls.iterator..moveNext();
+    final Iterator<RecordedInvocation> call = calls.iterator..moveNext();
     try {
       while (predicate.moveNext()) {
         if (call.current == null) {
-          throw 'painted less on its canvas than the paint pattern expected. '
+          throw 'It painted less on its canvas than the paint pattern expected. '
                 'The first missing paint call was: ${predicate.current}';
         }
         predicate.current.match(call);
       }
       assert(predicate.current == null);
       // We allow painting more than expected.
+    } on _MismatchedCall catch (data) {
+      description.writeln(data.message);
+      description.writeln(data.callIntroduction);
+      description.writeln(data.call.stackToString(indent: '  '));
+      return false;
     } on String catch (s) {
-      description.write(s);
+      description.writeln(s);
+      if (call.current != null) {
+        description.write('The stack of the offending call was:\n${call.current.stackToString(indent: "  ")}\n');
+      } else {
+        description.write('The stack of the first call was:\n${calls.first.stackToString(indent: "  ")}\n');
+      }
       return false;
     }
     return true;
@@ -442,7 +461,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
 }
 
 abstract class _PaintPredicate {
-  void match(Iterator<Invocation> call);
+  void match(Iterator<RecordedInvocation> call);
 
   @override
   String toString() {
@@ -468,20 +487,24 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   String get methodName => _symbolName(symbol);
 
   @override
-  void match(Iterator<Invocation> call) {
+  void match(Iterator<RecordedInvocation> call) {
     int others = 0;
-    final Invocation firstCall = call.current;
-    while (!call.current.isMethod || call.current.memberName != symbol) {
+    final RecordedInvocation firstCall = call.current;
+    while (!call.current.invocation.isMethod || call.current.invocation.memberName != symbol) {
       others += 1;
       if (!call.moveNext())
-        throw 'called $others other method${ others == 1 ? "" : "s" } on the canvas, '
-              'the first of which was ${_describeInvocation(firstCall)}, but did not '
-              'call $methodName at the time where $this was expected.';
+        throw new _MismatchedCall(
+          'It called $others other method${ others == 1 ? "" : "s" } on the canvas, '
+          'the first of which was $firstCall, but did not '
+          'call $methodName at the time where $this was expected.',
+          'The stack for the call to $firstCall was:',
+          firstCall,
+        );
     }
-    final int actualArgumentCount = call.current.positionalArguments.length;
+    final int actualArgumentCount = call.current.invocation.positionalArguments.length;
     if (actualArgumentCount != argumentCount)
-      throw 'called $methodName with $actualArgumentCount argument${actualArgumentCount == 1 ? "" : "s"}; expected $argumentCount.';
-    verifyArguments(call.current.positionalArguments);
+      throw 'It called $methodName with $actualArgumentCount argument${actualArgumentCount == 1 ? "" : "s"}; expected $argumentCount.';
+    verifyArguments(call.current.invocation.positionalArguments);
     call.moveNext();
   }
 
@@ -490,17 +513,17 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   void verifyArguments(List<dynamic> arguments) {
     final Paint paintArgument = arguments[paintArgumentIndex];
     if (color != null && paintArgument.color != color)
-      throw 'called $methodName with a paint whose color, ${paintArgument.color}, was not exactly the expected color ($color).';
+      throw 'It called $methodName with a paint whose color, ${paintArgument.color}, was not exactly the expected color ($color).';
     if (strokeWidth != null && paintArgument.strokeWidth != strokeWidth)
-      throw 'called $methodName with a paint whose strokeWidth, ${paintArgument.strokeWidth}, was not exactly the expected strokeWidth ($strokeWidth).';
+      throw 'It called $methodName with a paint whose strokeWidth, ${paintArgument.strokeWidth}, was not exactly the expected strokeWidth ($strokeWidth).';
     if (hasMaskFilter != null && (paintArgument.maskFilter != null) != hasMaskFilter) {
       if (hasMaskFilter)
-        throw 'called $methodName with a paint that did not have a mask filter, despite expecting one.';
+        throw 'It called $methodName with a paint that did not have a mask filter, despite expecting one.';
       else
-        throw 'called $methodName with a paint that did have a mask filter, despite not expecting one.';
+        throw 'It called $methodName with a paint that did have a mask filter, despite not expecting one.';
     }
     if (style != null && paintArgument.style != style)
-      throw 'called $methodName with a paint whose style, ${paintArgument.style}, was not exactly the expected style ($style).';
+      throw 'It called $methodName with a paint whose style, ${paintArgument.style}, was not exactly the expected style ($style).';
   }
 
   @override
@@ -544,7 +567,7 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
     super.verifyArguments(arguments);
     final T actual = arguments[0];
     if (expected != null && actual != expected)
-      throw 'called $methodName with $T, $actual, which was not exactly the expected $T ($expected).';
+      throw 'It called $methodName with $T, $actual, which was not exactly the expected $T ($expected).';
   }
 
   @override
@@ -601,16 +624,16 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
     if (x != null && y != null) {
       final Offset point = new Offset(x, y);
       if (point != pointArgument)
-        throw 'called $methodName with a center coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
+        throw 'It called $methodName with a center coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
     } else {
       if (x != null && pointArgument.dx != x)
-        throw 'called $methodName with a center coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
+        throw 'It called $methodName with a center coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
       if (y != null && pointArgument.dy != y)
-        throw 'called $methodName with a center coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
+        throw 'It called $methodName with a center coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
     }
     final double radiusArgument = arguments[1];
     if (radius != null && radiusArgument != radius)
-      throw 'called $methodName with radius, ${radiusArgument.toStringAsFixed(1)}, which was not exactly the expected radius (${radius.toStringAsFixed(1)}).';
+      throw 'It called $methodName with radius, ${radiusArgument.toStringAsFixed(1)}, which was not exactly the expected radius (${radius.toStringAsFixed(1)}).';
   }
 
   @override
@@ -654,24 +677,24 @@ class _SomethingPaintPredicate extends _PaintPredicate {
   final PaintPatternPredicate predicate;
 
   @override
-  void match(Iterator<Invocation> call) {
+  void match(Iterator<RecordedInvocation> call) {
     assert(predicate != null);
-    Invocation currentCall;
+    RecordedInvocation currentCall;
     do {
       currentCall = call.current;
       if (currentCall == null)
-        throw 'did not call anything that was matched by the predicate passed to a "something" step of the paint pattern.';
-      if (!currentCall.isMethod)
-        throw 'called ${_describeInvocation(currentCall)}, which was not a method, when the paint pattern expected a method call';
+        throw 'It did not call anything that was matched by the predicate passed to a "something" step of the paint pattern.';
+      if (!currentCall.invocation.isMethod)
+        throw 'It called $currentCall, which was not a method, when the paint pattern expected a method call';
       call.moveNext();
-    } while (!_runPredicate(currentCall.memberName, currentCall.positionalArguments));
+    } while (!_runPredicate(currentCall.invocation.memberName, currentCall.invocation.positionalArguments));
   }
 
   bool _runPredicate(Symbol methodName, List<dynamic> arguments) {
     try {
       return predicate(methodName, arguments);
     } on String catch (s) {
-      throw 'painted something that the predicate passed to a "something" step '
+      throw 'It painted something that the predicate passed to a "something" step '
             'in the paint pattern considered incorrect:\n      $s\n  ';
     }
   }
@@ -688,23 +711,28 @@ class _FunctionPaintPredicate extends _PaintPredicate {
   final List<dynamic> arguments;
 
   @override
-  void match(Iterator<Invocation> call) {
+  void match(Iterator<RecordedInvocation> call) {
     int others = 0;
-    final Invocation firstCall = call.current;
-    while (!call.current.isMethod || call.current.memberName != symbol) {
+    final RecordedInvocation firstCall = call.current;
+    while (!call.current.invocation.isMethod || call.current.invocation.memberName != symbol) {
       others += 1;
       if (!call.moveNext())
-        throw 'called $others other method${ others == 1 ? "" : "s" } on the canvas, '
-              'the first of which was ${_describeInvocation(firstCall)}, but did not '
-              'call ${_symbolName(symbol)}() at the time where $this was expected.';
+        throw new _MismatchedCall(
+          'It called $others other method${ others == 1 ? "" : "s" } on the canvas, '
+          'the first of which was $firstCall, but did not '
+          'call ${_symbolName(symbol)}() at the time where $this was expected.',
+          'The first method that was called when the call to ${_symbolName(symbol)}() '
+          'was expected, $firstCall, was called with the following stack:',
+          firstCall,
+        );
     }
-    if (call.current.positionalArguments.length != arguments.length)
-      throw 'called ${_symbolName(symbol)} with ${call.current.positionalArguments.length} arguments; expected ${arguments.length}.';
+    if (call.current.invocation.positionalArguments.length != arguments.length)
+      throw 'It called ${_symbolName(symbol)} with ${call.current.invocation.positionalArguments.length} arguments; expected ${arguments.length}.';
     for (int index = 0; index < arguments.length; index += 1) {
-      final dynamic actualArgument = call.current.positionalArguments[index];
+      final dynamic actualArgument = call.current.invocation.positionalArguments[index];
       final dynamic desiredArgument = arguments[index];
       if (desiredArgument != null && desiredArgument != actualArgument)
-        throw 'called ${_symbolName(symbol)} with argument $index having value ${_valueName(actualArgument)} when ${_valueName(desiredArgument)} was expected.';
+        throw 'It called ${_symbolName(symbol)} with argument $index having value ${_valueName(actualArgument)} when ${_valueName(desiredArgument)} was expected.';
     }
     call.moveNext();
   }
@@ -720,24 +748,29 @@ class _FunctionPaintPredicate extends _PaintPredicate {
 
 class _SaveRestorePairPaintPredicate extends _PaintPredicate {
   @override
-  void match(Iterator<Invocation> call) {
+  void match(Iterator<RecordedInvocation> call) {
     int others = 0;
-    final Invocation firstCall = call.current;
-    while (!call.current.isMethod || call.current.memberName != #save) {
+    final RecordedInvocation firstCall = call.current;
+    while (!call.current.invocation.isMethod || call.current.invocation.memberName != #save) {
       others += 1;
       if (!call.moveNext())
-        throw 'called $others other method${ others == 1 ? "" : "s" } on the canvas, '
-              'the first of which was ${_describeInvocation(firstCall)}, but did not '
-              'call save() at the time where $this was expected.';
+        throw new _MismatchedCall(
+          'It called $others other method${ others == 1 ? "" : "s" } on the canvas, '
+          'the first of which was $firstCall, but did not '
+          'call save() at the time where $this was expected.',
+          'The first method that was called when the call to save() '
+          'was expected, $firstCall, was called with the following stack:',
+          firstCall,
+        );
     }
     int depth = 1;
     while (depth > 0) {
       if (!call.moveNext())
-        throw 'did not have a matching restore() for the save() that was found where $this was expected.';
-      if (call.current.isMethod) {
-        if (call.current.memberName == #save)
+        throw 'It did not have a matching restore() for the save() that was found where $this was expected.';
+      if (call.current.invocation.isMethod) {
+        if (call.current.invocation.memberName == #save)
           depth += 1;
-        else if (call.current.memberName == #restore)
+        else if (call.current.invocation.memberName == #restore)
           depth -= 1;
       }
     }
@@ -760,26 +793,4 @@ String _symbolName(Symbol symbol) {
   // guaranteed anywhere.
   final String s = '$symbol';
   return s.substring(8, s.length - 2);
-}
-
-// Workaround for https://github.com/dart-lang/sdk/issues/28373
-String _describeInvocation(Invocation call) {
-  final StringBuffer buffer = new StringBuffer();
-  buffer.write(_symbolName(call.memberName));
-  if (call.isSetter) {
-    buffer.write(call.positionalArguments[0].toString());
-  } else if (call.isMethod) {
-    buffer.write('(');
-    buffer.writeAll(call.positionalArguments.map<String>(_valueName), ', ');
-    String separator = call.positionalArguments.isEmpty ? '' : ', ';
-    call.namedArguments.forEach((Symbol name, Object value) {
-      buffer.write(separator);
-      buffer.write(_symbolName(name));
-      buffer.write(': ');
-      buffer.write(_valueName(value));
-      separator = ', ';
-    });
-    buffer.write(')');
-  }
-  return buffer.toString();
 }
