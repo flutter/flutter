@@ -13,9 +13,15 @@ import 'colors.dart';
 const double _kNavBarPersistentHeight = 44.0;
 
 /// Size increase from expanding the nav bar in a [CustomScrollView].
-const double _kNavBarLargeTitleHeightExtension = 30.0;
+const double _kNavBarLargeTitleHeightExtension = 56.0;
+
+/// Number of logical pixels scrolled down before the title disappears from
+/// the normal nav bar and appears as a big title below the nav bar.
+const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
+
+const Duration _kNavBarTitleFadeDuration = const Duration(milliseconds: 150);
 
 const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
 const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
@@ -92,6 +98,9 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   /// top 44px section will be wrapped in a SliverPersistentHeader and a
   /// second scrollable section behind it will show and replace the `middle`
   /// section in a larger font when scrolled down.
+  ///
+  /// Navigation bars with large titles must be used in a sliver group such
+  /// as [CustomScrollView].
   final bool largeTitle;
 
   @override
@@ -105,17 +114,18 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
     );
 
     if (!largeTitle) {
-      return new _CupertinoPersistentNavigationBar(
-        leading: leading,
-        middle: middle,
-        trailing: trailing,
+      return _wrapWithBackground(
         backgroundColor: backgroundColor,
-        actionsForegroundColor: actionsForegroundColor,
+        child: new _CupertinoPersistentNavigationBar(
+          leading: leading,
+          middle: middle,
+          trailing: trailing,
+          actionsForegroundColor: actionsForegroundColor,
+        ),
       );
     } else {
       return new SliverPersistentHeader(
         pinned: true, // iOS navigation bars are always pinned.
-        floating: true,
         delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
           persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
           leading: leading,
@@ -129,16 +139,30 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   }
 }
 
-/// Returns `child` as is if backgroundColor is opaque. Otherwise, wraps child
-/// with blurring [BackdropFilter].
-Widget _wrapWithBlurEffectIfNecessary({Color backgroundColor, Widget child}) {
+/// Returns `child` wrapped with background and a bottom border if background color
+/// is opaque. Otherwise, also blur with [BackdropFilter].
+Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
+  final DecoratedBox childWithBackground = new DecoratedBox(
+    decoration: new BoxDecoration(
+      border: const Border(
+        bottom: const BorderSide(
+          color: _kDefaultNavBarBorderColor,
+          width: 0.0, // One physical pixel.
+          style: BorderStyle.solid,
+        ),
+      ),
+      color: backgroundColor,
+    ),
+    child: child,
+  );
+
   if (backgroundColor.alpha == 0xFF)
-    return child;
+    return childWithBackground;
 
   return new ClipRect(
     child: new BackdropFilter(
       filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-      child: child,
+      child: childWithBackground,
     ),
   );
 }
@@ -150,8 +174,8 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     this.leading,
     @required this.middle,
     this.trailing,
-    this.backgroundColor,
     this.actionsForegroundColor,
+    this.middleVisible,
   }) : super(key: key);
 
   final Widget leading;
@@ -160,9 +184,11 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 
   final Widget trailing;
 
-  final Color backgroundColor;
-
   final Color actionsForegroundColor;
+
+  /// Whether the middle widget has a visible animated opacity. A null value
+  /// means the middle opacity will not be animated.
+  final bool middleVisible;
 
   @override
   Size get preferredSize => const Size.fromHeight(_kNavBarPersistentHeight);
@@ -192,43 +218,36 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       child: middle,
     );
 
+    final Widget animatedStyledMiddle = middleVisible == null
+      ? styledMiddle
+      : new AnimatedOpacity(
+        opacity: middleVisible ? 1.0 : 0.0,
+        duration: _kNavBarTitleFadeDuration,
+        child: styledMiddle,
+      );
+
     // TODO(xster): automatically build a CupertinoBackButton.
 
-    return _wrapWithBlurEffectIfNecessary(
-      backgroundColor: backgroundColor,
-      child:  new DecoratedBox(
-        decoration: new BoxDecoration(
-          border: const Border(
-            bottom: const BorderSide(
-              color: _kDefaultNavBarBorderColor,
-              width: 0.0, // One physical pixel.
-              style: BorderStyle.solid,
-            ),
-          ),
-          color: backgroundColor,
+    return new SizedBox(
+      height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+      child: IconTheme.merge(
+        data: new IconThemeData(
+          color: actionsForegroundColor,
+          size: 22.0,
         ),
-        child: new SizedBox(
-          height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-          child: IconTheme.merge(
-            data: new IconThemeData(
-              color: actionsForegroundColor,
-              size: 22.0,
-            ),
-            child: new Padding(
-              padding: new EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top,
-                // TODO(xster): dynamically reduce padding when an automatic
-                // CupertinoBackButton is present.
-                left: _kNavBarEdgePadding,
-                right: _kNavBarEdgePadding,
-              ),
-              child: new NavigationToolbar(
-                leading: styledLeading,
-                middle: styledMiddle,
-                trailing: styledTrailing,
-                centerMiddle: true,
-              ),
-            ),
+        child: new Padding(
+          padding: new EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top,
+            // TODO(xster): dynamically reduce padding when an automatic
+            // CupertinoBackButton is present.
+            left: _kNavBarEdgePadding,
+            right: _kNavBarEdgePadding,
+          ),
+          child: new NavigationToolbar(
+            leading: styledLeading,
+            middle: animatedStyledMiddle,
+            trailing: styledTrailing,
+            centerMiddle: true,
           ),
         ),
       ),
@@ -266,31 +285,58 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    final bool showLargeTitle = shrinkOffset < maxExtent - minExtent;
+    final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
 
     final _CupertinoPersistentNavigationBar persistentNavigationBar =
         new _CupertinoPersistentNavigationBar(
       leading: leading,
-      middle: showLargeTitle ? null : middle,
+      middle: middle,
       trailing: trailing,
-      backgroundColor: backgroundColor,
+      middleVisible: !showLargeTitle,
       actionsForegroundColor: actionsForegroundColor,
     );
 
-    return _wrapWithBlurEffectIfNecessary(
+    return _wrapWithBackground(
       backgroundColor: backgroundColor,
       child: new Stack(
-        fit: StackFit.passthrough,
+        fit: StackFit.expand,
         children: <Widget>[
-          new PositionedDirectional(
-            start: _kNavBarEdgePadding,
-            bottom: _kNavBarEdgePadding,
-            child: new DefaultTextStyle(
-              style: _kLargeTitleTextStyle,
-              child: middle,
+          new Positioned(
+            top: persistentHeight,
+            left: 0.0,
+            right: 0.0,
+            bottom: 0.0,
+            child: new ClipRect(
+              // The large title starts at the persistent bar.
+              // It's aligned with the bottom of the sliver and expands clipped
+              // and behind the persistent bar.
+              child: new OverflowBox(
+                minHeight: 0.0,
+                maxHeight: double.INFINITY,
+                alignment: FractionalOffsetDirectional.bottomStart,
+                child: new Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: _kNavBarEdgePadding,
+                    bottom: 8.0, // Bottom has a different padding.
+                  ),
+                  child: new DefaultTextStyle(
+                    style: _kLargeTitleTextStyle,
+                    child: new AnimatedOpacity(
+                      opacity: showLargeTitle ? 1.0 : 0.0,
+                      duration: _kNavBarTitleFadeDuration,
+                      child: middle,
+                    )
+                  ),
+                ),
+              ),
             ),
           ),
-          persistentNavigationBar,
+          new Positioned(
+            left: 0.0,
+            right: 0.0,
+            top: 0.0,
+            child: persistentNavigationBar,
+          ),
         ],
       ),
     );
