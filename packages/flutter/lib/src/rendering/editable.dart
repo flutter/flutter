@@ -87,6 +87,10 @@ class TextSelectionPoint {
 class RenderEditable extends RenderBox {
   /// Creates a render object that implements the visual aspects of a text field.
   ///
+  /// The [textAlign] argument must not be null. It defaults to [TextAlign.start].
+  ///
+  /// The [textDirection] argument must not be null.
+  ///
   /// If [showCursor] is not specified, then it defaults to hiding the cursor.
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
@@ -97,7 +101,8 @@ class RenderEditable extends RenderBox {
   /// ViewportOffset.zero] if you have no need for scrolling.
   RenderEditable({
     TextSpan text,
-    TextAlign textAlign,
+    @required TextDirection textDirection,
+    TextAlign textAlign: TextAlign.start,
     Color cursorColor,
     ValueNotifier<bool> showCursor,
     int maxLines: 1,
@@ -107,10 +112,17 @@ class RenderEditable extends RenderBox {
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
-  }) : assert(maxLines == null || maxLines > 0),
+  }) : assert(textAlign != null),
+       assert(textDirection != null, 'RenderEditable created without a textDirection.'),
+       assert(maxLines == null || maxLines > 0),
        assert(textScaleFactor != null),
        assert(offset != null),
-       _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
+       _textPainter = new TextPainter(
+         text: text,
+         textAlign: textAlign,
+         textDirection: textDirection,
+         textScaleFactor: textScaleFactor,
+       ),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
        _maxLines = maxLines,
@@ -146,7 +158,7 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
-  /// The text to display
+  /// The text to display.
   TextSpan get text => _textPainter.text;
   final TextPainter _textPainter;
   set text(TextSpan value) {
@@ -157,12 +169,37 @@ class RenderEditable extends RenderBox {
   }
 
   /// How the text should be aligned horizontally.
+  ///
+  /// This must not be null.
   TextAlign get textAlign => _textPainter.textAlign;
   set textAlign(TextAlign value) {
+    assert(value != null);
     if (_textPainter.textAlign == value)
       return;
     _textPainter.textAlign = value;
     markNeedsPaint();
+  }
+
+  /// The directionality of the text.
+  ///
+  /// This decides how the [TextAlign.start], [TextAlign.end], and
+  /// [TextAlign.justify] values of [textAlign] are interpreted.
+  ///
+  /// This is also used to disambiguate how to render bidirectional text. For
+  /// example, if the [text] is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// its left.
+  ///
+  /// This must not be null.
+  TextDirection get textDirection => _textPainter.textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (_textPainter.textDirection == value)
+      return;
+    _textPainter.textDirection = value;
+    markNeedsTextLayout();
   }
 
   /// The color to use when painting the cursor.

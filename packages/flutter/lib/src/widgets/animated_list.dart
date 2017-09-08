@@ -150,7 +150,7 @@ class AnimatedList extends StatefulWidget {
   final bool shrinkWrap;
 
   /// The amount of space by which to inset the children.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///

@@ -11,7 +11,7 @@ void main() {
     final Widget inner = new Builder(
       builder: (BuildContext context) {
         log.add(Directionality.of(context));
-        return new Placeholder();
+        return const Placeholder();
       }
     );
     await tester.pumpWidget(
@@ -57,13 +57,16 @@ void main() {
       builder: (BuildContext context) {
         expect(Directionality.of(context), isNull);
         good = true;
-        return new Placeholder();
+        return const Placeholder();
       },
     ));
     expect(good, isTrue);
   });
 
   testWidgets('Directionality can\'t be null', (WidgetTester tester) async {
-    expect(() { new Directionality(textDirection: null, child: new Placeholder()); }, throwsAssertionError);
+    expect(() {
+      final TextDirection textDirection = null; // we don't want this instance to be const because otherwise it would throw at compile time.
+      new Directionality(textDirection: textDirection, child: const Placeholder());
+    }, throwsAssertionError);
   });
 }

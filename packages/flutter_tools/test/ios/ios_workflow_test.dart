@@ -296,7 +296,7 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
     this.hasPythonSixModule: true,
     this.hasHomebrew: true,
     bool hasIosDeploy: true,
-    String iosDeployVersionText: '1.9.0',
+    String iosDeployVersionText: '1.9.2',
     bool hasIDeviceInstaller: true,
     String macDevMode: 'Developer mode is already enabled.',
   }) : hasIosDeploy = new Future<bool>.value(hasIosDeploy),

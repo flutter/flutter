@@ -132,6 +132,12 @@ tasks:
       Runs tests of flutter run commands.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
+
+  service_extensions_test:
+    description: >
+      Validates our service protocol extensions.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
     flaky: true
 
   android_sample_catalog_generator:
@@ -139,6 +145,7 @@ tasks:
       Builds sample catalog markdown pages and Android screenshots
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
+    flaky: true
 
   complex_layout_semantics_perf:
     description: >
@@ -306,6 +313,13 @@ tasks:
     description: >
       Collects various performance metrics from AOT builds of the Flutter
       Gallery.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery__preview_dart_2_build:
+    description: >
+      Collects various performance metrics from AOT builds of the Flutter
+      Gallery under --preview-dart-2 that enables new Dart 2.0 frontend.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 

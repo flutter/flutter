@@ -21,10 +21,10 @@ class _CustomPhysics extends ClampingScrollPhysics {
 }
 
 Widget buildTest({ ScrollController controller, String title:'TTTTTTTT' }) {
-  return new MediaQuery(
-    data: const MediaQueryData(),
-    child: new Directionality(
-      textDirection: TextDirection.ltr,
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new MediaQuery(
+      data: const MediaQueryData(),
       child: new Scaffold(
         body: new DefaultTabController(
           length: 4,
@@ -263,15 +263,16 @@ void main() {
     expect(controller.mostRecentlyUpdatedPosition, isNull);
     expect(controller.initialScrollOffset, 0.0);
 
-    await tester.pumpWidget(
-      new PageView(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new PageView(
         children: <Widget>[
           buildTest(controller: controller, title: 'Page0'),
           buildTest(controller: controller, title: 'Page1'),
           buildTest(controller: controller, title: 'Page2'),
         ],
       ),
-    );
+    ));
 
     // Initially Page0 is visible and  Page0's appbar is fully expanded (height = 200.0).
     expect(find.text('Page0'), findsOneWidget);
@@ -306,20 +307,24 @@ void main() {
   });
 
   testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(),
-      child: new NestedScrollView(
-        physics: const _CustomPhysics(),
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            const SliverAppBar(
-              floating: true,
-              title: const Text('AA'),
-            ),
-          ];
-        },
-        body: new Container(),
-    )));
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
+        child: new NestedScrollView(
+          physics: const _CustomPhysics(),
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              const SliverAppBar(
+                floating: true,
+                title: const Text('AA'),
+              ),
+            ];
+          },
+          body: new Container(),
+        ),
+      ),
+    ));
     expect(find.text('AA'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 500));
     final Offset point1 = tester.getCenter(find.text('AA'));

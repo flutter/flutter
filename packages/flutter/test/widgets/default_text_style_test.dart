@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('DefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
-    const Text textWidget = const Text('Hello');
+    const Text textWidget = const Text('Hello', textDirection: TextDirection.ltr);
     const TextStyle s1 = const TextStyle(
       fontSize: 10.0,
       fontWeight: FontWeight.w800,
@@ -16,7 +16,7 @@ void main() {
 
     await tester.pumpWidget(const DefaultTextStyle(
       style: s1,
-      child: textWidget
+      child: textWidget,
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));

@@ -1048,11 +1048,11 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If the parent widget rebuilds and request that this location in the tree
   /// update to display a new widget with the same [runtimeType] and
   /// [Widget.key], the framework will update the [widget] property of this
-  /// [State] object to refer to the new widget and then call the this method
+  /// [State] object to refer to the new widget and then call this method
   /// with the previous widget as an argument.
   ///
-  /// Override this method to respond to changes in the [widget] widget (e.g.,
-  /// to start implicit animations).
+  /// Override this method to respond when the [widget] changes (e.g., to start
+  /// implicit animations).
   ///
   /// The framework always calls [build] after calling [didUpdateWidget], which
   /// means any calls to [setState] in [didUpdateWidget] are redundant.
@@ -2595,10 +2595,27 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// only be called if it is provable that the children are available.
   void visitChildren(ElementVisitor visitor) { }
 
-  /// Calls the argument for each child that is relevant for semantics. By
-  /// default, defers to [visitChildren]. Classes like [Offstage] override this
-  /// to hide their children.
-  void visitChildrenForSemantics(ElementVisitor visitor) => visitChildren(visitor);
+  /// Calls the argument for each child considered onstage.
+  ///
+  /// Classes like [Offstage] and [Overlay] override this method to hide their
+  /// children.
+  ///
+  /// Being onstage affects the element's discoverability during testing when
+  /// you use Flutter's [Finder] objects. For example, when you instruct the
+  /// test framework to tap on a widget, by default the finder will look for
+  /// onstage elements and ignore the offstage ones.
+  ///
+  /// The default implementation defers to [visitChildren] and therefore treats
+  /// the element as onstage.
+  ///
+  /// See also:
+  ///
+  /// - [Offstage] widget that hides its children.
+  /// - [Finder] that skips offstage widgets by default.
+  /// - [RenderObject.visitChildrenForSemantics], in contrast to this method,
+  ///   designed specifically for excluding parts of the UI from the semantics
+  ///   tree.
+  void debugVisitOnstageChildren(ElementVisitor visitor) => visitChildren(visitor);
 
   /// Wrapper around [visitChildren] for [BuildContext].
   @override

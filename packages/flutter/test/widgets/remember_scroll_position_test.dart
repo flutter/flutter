@@ -30,25 +30,30 @@ class ThePositiveNumbers extends StatelessWidget {
 
 Future<Null> performTest(WidgetTester tester, bool maintainState) async {
   final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-  await tester.pumpWidget(new Navigator(
-    key: navigatorKey,
-    onGenerateRoute: (RouteSettings settings) {
-      if (settings.name == '/') {
-        return new MaterialPageRoute<Null>(
-          settings: settings,
-          builder: (_) => new Container(child: const ThePositiveNumbers(from: 0)),
-          maintainState: maintainState,
-        );
-      } else if (settings.name == '/second') {
-        return new MaterialPageRoute<Null>(
-          settings: settings,
-          builder: (_) => new Container(child: const ThePositiveNumbers(from: 10000)),
-          maintainState: maintainState,
-        );
-      }
-      return null;
-    }
-  ));
+  await tester.pumpWidget(
+    new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Navigator(
+        key: navigatorKey,
+        onGenerateRoute: (RouteSettings settings) {
+          if (settings.name == '/') {
+            return new MaterialPageRoute<Null>(
+              settings: settings,
+              builder: (_) => new Container(child: const ThePositiveNumbers(from: 0)),
+              maintainState: maintainState,
+            );
+          } else if (settings.name == '/second') {
+            return new MaterialPageRoute<Null>(
+              settings: settings,
+              builder: (_) => new Container(child: const ThePositiveNumbers(from: 10000)),
+              maintainState: maintainState,
+            );
+          }
+          return null;
+        }
+      ),
+    ),
+  );
 
   // we're 600 pixels high, each item is 100 pixels high, scroll position is
   // 110.0, so we should have 7 items, 1..7.

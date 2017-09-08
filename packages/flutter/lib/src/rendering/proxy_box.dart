@@ -1860,6 +1860,8 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
+    if (size.isEmpty)
+      return false;
     _updatePaintData();
     Matrix4 inverse;
     try {
@@ -1875,8 +1877,12 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    _updatePaintData();
-    transform.multiply(_transform);
+    if (size.isEmpty) {
+      transform.setZero();
+    } else {
+      _updatePaintData();
+      transform.multiply(_transform);
+    }
   }
 
   @override
@@ -2287,7 +2293,8 @@ class RenderCustomPaint extends RenderProxyBox {
     int debugPreviousCanvasSaveCount;
     canvas.save();
     assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; });
-    canvas.translate(offset.dx, offset.dy);
+    if (offset != Offset.zero)
+      canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);
     assert(() {
       // This isn't perfect. For example, we can't catch the case of
@@ -3108,17 +3115,21 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// Creates a render object that attaches a semantic annotation.
   ///
   /// The [container] argument must not be null.
+  ///
+  /// If the [label] is not null, the [textDirection] must also not be null.
   RenderSemanticsAnnotations({
     RenderBox child,
     bool container: false,
     bool checked,
     bool selected,
     String label,
+    TextDirection textDirection,
   }) : assert(container != null),
        _container = container,
        _checked = checked,
        _selected = selected,
        _label = label,
+       _textDirection = textDirection,
        super(child);
 
   /// If 'container' is true, this RenderObject will introduce a new
@@ -3176,11 +3187,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
+  /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
+  ///
+  /// This must not be null if [label] is not null.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (textDirection == value)
+      return;
+    final bool hadValue = textDirection != null;
+    _textDirection = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
   @override
   bool get isSemanticBoundary => container;
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null ? _annotate : null;
+  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null || textDirection != null ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
     if (checked != null) {
@@ -3192,6 +3216,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       node.isSelected = selected;
     if (label != null)
       node.label = label;
+    if (textDirection != null)
+      node.textDirection = textDirection;
   }
 }
 

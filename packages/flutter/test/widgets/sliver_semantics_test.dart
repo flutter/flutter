@@ -24,55 +24,59 @@ void main() {
       );
     });
     await tester.pumpWidget(
-      new MediaQuery(
-        data: const MediaQueryData(),
-        child: new CustomScrollView(
-          controller: scrollController,
-          slivers: <Widget>[
-            new SliverAppBar(
-              pinned: true,
-              expandedHeight: appBarExpandedHeight,
-              title: const Text('Semantics Test with Slivers'),
-            ),
-            new SliverList(
-              delegate: new SliverChildListDelegate(listChildren),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: const MediaQueryData(),
+          child: new CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              const SliverAppBar(
+                pinned: true,
+                expandedHeight: appBarExpandedHeight,
+                title: const Text('Semantics Test with Slivers'),
+              ),
+              new SliverList(
+                delegate: new SliverChildListDelegate(listChildren),
+              ),
+            ],
+          ),
         ),
-    ));
+      ),
+    );
 
     // AppBar is child of node with semantic scroll actions.
     expect(semantics, hasSemantics(
-        new TestSemantics.root(
-          children: <TestSemantics>[
-            new TestSemantics.rootChild(
-              id: 1,
-              tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
-              children: <TestSemantics>[
-                new TestSemantics(
-                  id: 5,
-                  actions: SemanticsAction.scrollUp.index,
-                  children: <TestSemantics>[
-                    new TestSemantics(
-                      id: 2,
-                      label: 'Item 0',
-                    ),
-                    new TestSemantics(
-                      id: 3,
-                      label: 'Item 1',
-                    ),
-                    new TestSemantics(
-                      id: 4,
-                      label: 'Semantics Test with Slivers',
-                    ),
-                  ],
-                ),
-              ],
-            )
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 5,
+                actions: SemanticsAction.scrollUp.index,
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    id: 2,
+                    label: 'Item 0',
+                  ),
+                  new TestSemantics(
+                    id: 3,
+                    label: 'Item 1',
+                  ),
+                  new TestSemantics(
+                    id: 4,
+                    label: 'Semantics Test with Slivers',
+                  ),
+                ],
+              ),
+            ],
+          )
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
     ));
 
     // Scroll down far enough to reach the pinned state of the app bar.
@@ -175,17 +179,20 @@ void main() {
       return new SliverToBoxAdapter(
         child: new Container(
           height: containerHeight,
-          child: new Text('Item $i'),
+          child: new Text('Item $i', textDirection: TextDirection.ltr),
         ),
       );
     });
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
-          height: containerHeight,
-          child: new CustomScrollView(
-            controller: scrollController,
-            slivers: slivers,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new SizedBox(
+            height: containerHeight,
+            child: new CustomScrollView(
+              controller: scrollController,
+              slivers: slivers,
+            ),
           ),
         ),
       ),
@@ -205,10 +212,12 @@ void main() {
                   new TestSemantics(
                     id: 10,
                     label: 'Item 2',
+                    textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
                     id: 11,
                     label: 'Item 1',
+                    textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
@@ -235,11 +244,14 @@ void main() {
       );
     });
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: slivers,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: slivers,
+        ),
       ),
     );
-    
+
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
@@ -253,22 +265,27 @@ void main() {
                   new TestSemantics(
                     id: 14,
                     label: 'Item 4',
+                    textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
                     id: 15,
                     label: 'Item 3',
+                    textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
                     id: 16,
                     label: 'Item 2',
+                    textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
                     id: 17,
                     label: 'Item 1',
+                    textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
                     id: 18,
                     label: 'Item 0',
+                    textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
@@ -289,16 +306,17 @@ void main() {
     final List<Widget> listChildren = new List<Widget>.generate(10, (int i) {
       return new Container(
         height: 200.0,
-        child: new Text('Item $i'),
+        child: new Text('Item $i', textDirection: TextDirection.ltr),
       );
     });
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
-    await tester.pumpWidget(
-      new MediaQuery(
-        data: new MediaQueryData(),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
         child: new CustomScrollView(
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
             ),
@@ -309,7 +327,7 @@ void main() {
           controller: controller,
         ),
       ),
-    );
+    ));
 
     // 'Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
@@ -371,24 +389,25 @@ void main() {
       return new SliverToBoxAdapter(
         child: new Container(
           height: 200.0,
-          child: new Text('Item $i'),
+          child: new Text('Item $i', textDirection: TextDirection.ltr),
         ),
       );
     });
-    await tester.pumpWidget(
-      new MediaQuery(
-        data: new MediaQueryData(),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
         child: new CustomScrollView(
           controller: controller,
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
             ),
           ]..addAll(slivers),
         ),
       ),
-    );
+    ));
 
     // 'Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
@@ -448,17 +467,18 @@ void main() {
     final List<Widget> listChildren = new List<Widget>.generate(10, (int i) {
       return new Container(
         height: 200.0,
-        child: new Text('Item $i'),
+        child: new Text('Item $i', textDirection: TextDirection.ltr),
       );
     });
     final ScrollController controller = new ScrollController(initialScrollOffset: 280.0);
-    await tester.pumpWidget(
-      new MediaQuery(
-        data: new MediaQueryData(),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
         child: new CustomScrollView(
           reverse: true,  // This is the important setting for this test.
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
             ),
@@ -469,7 +489,7 @@ void main() {
           controller: controller,
         ),
       ),
-    );
+    ));
 
     // 'Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
@@ -532,25 +552,26 @@ void main() {
       return new SliverToBoxAdapter(
         child: new Container(
           height: 200.0,
-          child: new Text('Item $i'),
+          child: new Text('Item $i', textDirection: TextDirection.ltr),
         ),
       );
     });
-    await tester.pumpWidget(
-      new MediaQuery(
-        data: new MediaQueryData(),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
         child: new CustomScrollView(
           reverse: true,  // This is the important setting for this test.
           controller: controller,
           slivers: <Widget>[
-            new SliverAppBar(
+            const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
             ),
           ]..addAll(slivers),
         ),
       ),
-    );
+    ));
 
     // 'Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Item 0')));
@@ -613,18 +634,19 @@ void main() {
     final List<Widget> forwardChildren = new List<Widget>.generate(10, (int i) {
       return new Container(
         height: 200.0,
-        child: new Text('Forward Item $i'),
+        child: new Text('Forward Item $i', textDirection: TextDirection.ltr),
       );
     });
     final List<Widget> backwardChildren = new List<Widget>.generate(10, (int i) {
       return new Container(
         height: 200.0,
-        child: new Text('Backward Item $i'),
+        child: new Text('Backward Item $i', textDirection: TextDirection.ltr),
       );
     });
-    await tester.pumpWidget(
-      new MediaQuery(
-        data: new MediaQueryData(),
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(),
         child: new Scrollable(
           controller: controller,
           viewportBuilder: (BuildContext context, ViewportOffset offset) {
@@ -635,11 +657,11 @@ void main() {
                 new SliverList(
                   delegate: new SliverChildListDelegate(backwardChildren),
                 ),
-                new SliverAppBar(
+                const SliverAppBar(
                   pinned: true,
                   expandedHeight: 100.0,
                   flexibleSpace: const FlexibleSpaceBar(
-                    title: const Text('Backward app bar'),
+                    title: const Text('Backward app bar', textDirection: TextDirection.ltr),
                   ),
                 ),
                 new SliverAppBar(
@@ -647,7 +669,7 @@ void main() {
                   key: forwardAppBarKey,
                   expandedHeight: 100.0,
                   flexibleSpace: const FlexibleSpaceBar(
-                    title: const Text('Forward app bar'),
+                    title: const Text('Forward app bar', textDirection: TextDirection.ltr),
                   ),
                 ),
                 new SliverList(
@@ -658,7 +680,7 @@ void main() {
           },
         ),
       ),
-    );
+    ));
 
     // 'Forward Item 0' is covered by app bar.
     expect(semantics, isNot(includesNodeWith(label: 'Forward Item 0')));

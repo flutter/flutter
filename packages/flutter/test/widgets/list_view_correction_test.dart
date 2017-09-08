@@ -8,34 +8,44 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('ListView can handle shrinking top elements', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      controller: controller,
-      children: <Widget>[
-        new Container(height: 400.0, child: const Text('1')),
-        new Container(height: 400.0, child: const Text('2')),
-        new Container(height: 400.0, child: const Text('3')),
-        new Container(height: 400.0, child: const Text('4')),
-        new Container(height: 400.0, child: const Text('5')),
-        new Container(height: 400.0, child: const Text('6')),
-      ],
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          controller: controller,
+          children: <Widget>[
+            new Container(height: 400.0, child: const Text('1')),
+            new Container(height: 400.0, child: const Text('2')),
+            new Container(height: 400.0, child: const Text('3')),
+            new Container(height: 400.0, child: const Text('4')),
+            new Container(height: 400.0, child: const Text('5')),
+            new Container(height: 400.0, child: const Text('6')),
+          ],
+        ),
+      ),
+    );
 
     controller.jumpTo(1000.0);
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
 
-    await tester.pumpWidget(new ListView(
-      controller: controller,
-      children: <Widget>[
-        new Container(height: 200.0, child: const Text('1')),
-        new Container(height: 400.0, child: const Text('2')),
-        new Container(height: 400.0, child: const Text('3')),
-        new Container(height: 400.0, child: const Text('4')),
-        new Container(height: 400.0, child: const Text('5')),
-        new Container(height: 400.0, child: const Text('6')),
-      ],
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          controller: controller,
+          children: <Widget>[
+            new Container(height: 200.0, child: const Text('1')),
+            new Container(height: 400.0, child: const Text('2')),
+            new Container(height: 400.0, child: const Text('3')),
+            new Container(height: 400.0, child: const Text('4')),
+            new Container(height: 400.0, child: const Text('5')),
+            new Container(height: 400.0, child: const Text('6')),
+          ],
+        ),
+      ),
+    );
 
     expect(controller.offset, equals(1000.0));
     expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
@@ -55,15 +65,20 @@ void main() {
 
   testWidgets('ListView can handle inserts at 0', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      controller: controller,
-      children: <Widget>[
-        new Container(height: 400.0, child: const Text('0')),
-        new Container(height: 400.0, child: const Text('1')),
-        new Container(height: 400.0, child: const Text('2')),
-        new Container(height: 400.0, child: const Text('3')),
-      ],
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          controller: controller,
+          children: <Widget>[
+            new Container(height: 400.0, child: const Text('0')),
+            new Container(height: 400.0, child: const Text('1')),
+            new Container(height: 400.0, child: const Text('2')),
+            new Container(height: 400.0, child: const Text('3')),
+          ],
+        ),
+      ),
+    );
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsNothing);
@@ -71,17 +86,22 @@ void main() {
 
     final Finder findItemA = find.descendant(of: find.byType(Container), matching: find.text('A'));
     final Finder findItemB = find.descendant(of: find.byType(Container), matching: find.text('B'));
-    await tester.pumpWidget(new ListView(
-      controller: controller,
-      children: <Widget>[
-        new Container(height: 10.0, child: const Text('A')),
-        new Container(height: 10.0, child: const Text('B')),
-        new Container(height: 400.0, child: const Text('0')),
-        new Container(height: 400.0, child: const Text('1')),
-        new Container(height: 400.0, child: const Text('2')),
-        new Container(height: 400.0, child: const Text('3')),
-      ],
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          controller: controller,
+          children: <Widget>[
+            new Container(height: 10.0, child: const Text('A')),
+            new Container(height: 10.0, child: const Text('B')),
+            new Container(height: 400.0, child: const Text('0')),
+            new Container(height: 400.0, child: const Text('1')),
+            new Container(height: 400.0, child: const Text('2')),
+            new Container(height: 400.0, child: const Text('3')),
+          ],
+        ),
+      ),
+    );
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
     expect(tester.getTopLeft(findItemA).dy, 0.0);
@@ -95,17 +115,22 @@ void main() {
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsNothing);
 
-    await tester.pumpWidget(new ListView(
-      controller: controller,
-      children: <Widget>[
-        new Container(height: 200.0, child: const Text('A')),
-        new Container(height: 200.0, child: const Text('B')),
-        new Container(height: 400.0, child: const Text('0')),
-        new Container(height: 400.0, child: const Text('1')),
-        new Container(height: 400.0, child: const Text('2')),
-        new Container(height: 400.0, child: const Text('3')),
-      ],
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          controller: controller,
+          children: <Widget>[
+            new Container(height: 200.0, child: const Text('A')),
+            new Container(height: 200.0, child: const Text('B')),
+            new Container(height: 400.0, child: const Text('0')),
+            new Container(height: 400.0, child: const Text('1')),
+            new Container(height: 400.0, child: const Text('2')),
+            new Container(height: 400.0, child: const Text('3')),
+          ],
+        ),
+      ),
+    );
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsNothing);
 

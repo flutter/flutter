@@ -10,7 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/date_symbols.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 import 'button.dart';
 import 'button_bar.dart';
@@ -27,8 +27,10 @@ import 'material_localizations.dart';
 import 'theme.dart';
 import 'typography.dart';
 
+/// Initial display mode of the date picker dialog.
+///
 /// Date picker UI mode for either showing a list of available years or a
-/// monthly calendar.
+/// monthly calendar initially in the dialog shown by calling [showDatePicker].
 ///
 /// Also see:
 ///
@@ -36,6 +38,7 @@ import 'typography.dart';
 enum DatePickerMode {
   /// Show a date picker UI for choosing a month and day.
   day,
+
   /// Show a date picker UI for choosing a year.
   year,
 }
@@ -202,6 +205,7 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
       crossAxisStride: tileWidth,
       childMainAxisExtent: tileHeight,
       childCrossAxisExtent: tileWidth,
+      reverseCrossAxis: axisDirectionIsReversed(constraints.crossAxisDirection),
     );
   }
 
@@ -529,8 +533,31 @@ class _MonthPickerState extends State<MonthPicker> {
     });
   }
 
+  Icon _getPreviousMonthIcon(TextDirection textDirection) {
+    assert(textDirection != null);
+    switch (textDirection) {
+      case TextDirection.rtl:
+        return const Icon(Icons.chevron_right);
+      case TextDirection.ltr:
+        return const Icon(Icons.chevron_left);
+    }
+    return null;
+  }
+
+  Icon _getNextMonthIcon(TextDirection textDirection) {
+    assert(textDirection != null);
+    switch (textDirection) {
+      case TextDirection.rtl:
+        return const Icon(Icons.chevron_left);
+      case TextDirection.ltr:
+        return const Icon(Icons.chevron_right);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final TextDirection textDirection = Directionality.of(context);
     return new SizedBox(
       width: _kMonthPickerPortraitWidth,
       height: _kMaxDayPickerHeight,
@@ -544,20 +571,20 @@ class _MonthPickerState extends State<MonthPicker> {
             itemBuilder: _buildItems,
             onPageChanged: _handleMonthPageChanged,
           ),
-          new Positioned(
+          new PositionedDirectional(
             top: 0.0,
-            left: 8.0,
+            start: 8.0,
             child: new IconButton(
-              icon: const Icon(Icons.chevron_left),
+              icon: _getPreviousMonthIcon(textDirection),
               tooltip: MaterialLocalizations.of(context).previousMonthTooltip,
               onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
             ),
           ),
-          new Positioned(
+          new PositionedDirectional(
             top: 0.0,
-            right: 8.0,
+            end: 8.0,
             child: new IconButton(
-              icon: const Icon(Icons.chevron_right),
+              icon: _getNextMonthIcon(textDirection),
               tooltip: MaterialLocalizations.of(context).nextMonthTooltip,
               onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
             ),
@@ -773,15 +800,16 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         child: _buildPicker(),
       ),
     );
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
         children: <Widget>[
           new FlatButton(
-            child: const Text('CANCEL'),
+            child: new Text(localizations.cancelButtonLabel),
             onPressed: _handleCancel,
           ),
           new FlatButton(
-            child: const Text('OK'),
+            child: new Text(localizations.okButtonLabel),
             onPressed: _handleOk,
           ),
         ],
@@ -852,7 +880,7 @@ typedef bool SelectableDayPredicate(DateTime day);
 ///
 /// An optional [initialDatePickerMode] argument can be used to display the
 /// date picker initially in the year or month+day picker mode. It defaults
-/// to month+day, but must not be null.
+/// to month+day, and must not be null.
 ///
 /// See also:
 ///

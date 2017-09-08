@@ -61,6 +61,11 @@ class DecorationTween extends Tween<Decoration> {
 /// [EdgeInsets.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
+///
+/// See also:
+///
+///  * [EdgeInsetsGeometryTween], which interpolates between two
+///    [EdgeInsetsGeometry] objects.
 class EdgeInsetsTween extends Tween<EdgeInsets> {
   /// Creates an [EdgeInsets] tween.
   ///
@@ -71,6 +76,28 @@ class EdgeInsetsTween extends Tween<EdgeInsets> {
   /// Returns the value this variable has at the given animation clock value.
   @override
   EdgeInsets lerp(double t) => EdgeInsets.lerp(begin, end, t);
+}
+
+/// An interpolation between two [EdgeInsetsGeometry]s.
+///
+/// This class specializes the interpolation of [Tween<EdgeInsetsGeometry>] to
+/// use [EdgeInsetsGeometry.lerp].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
+///
+/// See also:
+///
+///  * [EdgeInsetsTween], which interpolates between two [EdgeInsets] objects.
+class EdgeInsetsGeometryTween extends Tween<EdgeInsetsGeometry> {
+  /// Creates an [EdgeInsetsGeometry] tween.
+  ///
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as an [EdgeInsetsGeometry] with no inset.
+  EdgeInsetsGeometryTween({ EdgeInsetsGeometry begin, EdgeInsetsGeometry end }) : super(begin: begin, end: end);
+
+  /// Returns the value this variable has at the given animation clock value.
+  @override
+  EdgeInsetsGeometry lerp(double t) => EdgeInsetsGeometry.lerp(begin, end, t);
 }
 
 /// An interpolation between two [BorderRadius]s.
@@ -358,11 +385,11 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// constraints are unbounded, then the child will be shrink-wrapped instead.
   ///
   /// Ignored if [child] is null.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
   /// placed inside this padding.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The decoration to paint behind the [child].
   ///
@@ -383,7 +410,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   final BoxConstraints constraints;
 
   /// Empty space to surround the [decoration] and [child].
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
@@ -394,33 +421,33 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, showName: false, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
     description.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null, showName: false));
-    description.add(new DiagnosticsProperty<EdgeInsets>('margin', margin, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     description.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 }
 
 class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer> {
-  FractionalOffsetTween _alignment;
-  EdgeInsetsTween _padding;
+  FractionalOffsetGeometryTween _alignment;
+  EdgeInsetsGeometryTween _padding;
   DecorationTween _decoration;
   DecorationTween _foregroundDecoration;
   BoxConstraintsTween _constraints;
-  EdgeInsetsTween _margin;
+  EdgeInsetsGeometryTween _margin;
   Matrix4Tween _transform;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => new FractionalOffsetTween(begin: value));
-    _padding = visitor(_padding, widget.padding, (dynamic value) => new EdgeInsetsTween(begin: value));
+    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => new FractionalOffsetGeometryTween(begin: value));
+    _padding = visitor(_padding, widget.padding, (dynamic value) => new EdgeInsetsGeometryTween(begin: value));
     _decoration = visitor(_decoration, widget.decoration, (dynamic value) => new DecorationTween(begin: value));
     _foregroundDecoration = visitor(_foregroundDecoration, widget.foregroundDecoration, (dynamic value) => new DecorationTween(begin: value));
     _constraints = visitor(_constraints, widget.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
-    _margin = visitor(_margin, widget.margin, (dynamic value) => new EdgeInsetsTween(begin: value));
+    _margin = visitor(_margin, widget.margin, (dynamic value) => new EdgeInsetsGeometryTween(begin: value));
     _transform = visitor(_transform, widget.transform, (dynamic value) => new Matrix4Tween(begin: value));
   }
 
@@ -441,12 +468,12 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetTween>('alignment', _alignment, showName: false, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsTween>('padding', _padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometryTween>('alignment', _alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometryTween>('padding', _padding, defaultValue: null));
     description.add(new DiagnosticsProperty<DecorationTween>('bg', _decoration, defaultValue: null));
     description.add(new DiagnosticsProperty<DecorationTween>('fg', _foregroundDecoration, defaultValue: null));
     description.add(new DiagnosticsProperty<BoxConstraintsTween>('constraints', _constraints, showName: false, defaultValue: null));
-    description.add(new DiagnosticsProperty<EdgeInsetsTween>('margin', _margin, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometryTween>('margin', _margin, defaultValue: null));
     description.add(new ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
   }
 }

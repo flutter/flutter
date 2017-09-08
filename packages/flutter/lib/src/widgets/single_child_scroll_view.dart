@@ -77,7 +77,7 @@ class SingleChildScrollView extends StatelessWidget {
   final bool reverse;
 
   /// The amount of space by which to inset the child.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// An object that can be used to control the position to which this scroll
   /// view is scrolled.
@@ -99,7 +99,7 @@ class SingleChildScrollView extends StatelessWidget {
   /// On iOS, this identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
   ///
-  /// Defaults to true when `scrollDirection` is vertical and `controller` is
+  /// Defaults to true when [scrollDirection] is vertical and [controller] is
   /// not specified.
   final bool primary;
 
@@ -115,10 +115,12 @@ class SingleChildScrollView extends StatelessWidget {
   final Widget child;
 
   AxisDirection _getDirection(BuildContext context) {
-    // TODO(abarth): Consider reading direction.
     switch (scrollDirection) {
       case Axis.horizontal:
-        return reverse ? AxisDirection.left : AxisDirection.right;
+        final TextDirection textDirection = Directionality.of(context);
+        assert(textDirection != null);
+        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
+        return reverse ? flipAxisDirection(axisDirection) : axisDirection;
       case Axis.vertical:
         return reverse ? AxisDirection.up : AxisDirection.down;
     }

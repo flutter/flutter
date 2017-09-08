@@ -1,0 +1,17 @@
+{
+  "openAppDrawerTooltip": "Abrir menu de navegação",
+  "backButtonTooltip": "Costas",
+  "closeButtonTooltip": "Fechar",
+  "nextMonthTooltip": "Próximo mês",
+  "previousMonthTooltip": "Mês anterior",
+  "licensesPageTitle": "Licenças",
+  "cancelButtonLabel": "CANCELAR",
+  "closeButtonLabel": "FECHAR",
+  "continueButtonLabel": "CONTINUAR",
+  "copyButtonLabel": "CÓPIA DE",
+  "cutButtonLabel": "CORTA",
+  "okButtonLabel": "OK",
+  "pasteButtonLabel": "COLAR",
+  "selectAllButtonLabel": "SELECIONAR TUDO",
+  "viewLicensesButtonLabel": "VER LICENÇAS"
+}

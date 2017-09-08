@@ -49,12 +49,12 @@ void main() {
           'test/widget_test.dart'
         ],
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('kotlin/swift project', () async {
-      return _createAndAnalyzeProject(
+      return _createProject(
         projectDir,
-        <String>['--android-language', 'kotlin', '-i', 'swift'],
+        <String>['--no-pub', '--android-language', 'kotlin', '-i', 'swift'],
         <String>[
           'android/app/src/main/kotlin/com/yourcompany/flutterproject/MainActivity.kt',
           'ios/Runner/AppDelegate.swift',
@@ -95,7 +95,7 @@ void main() {
           'test/widget_test.dart',
         ],
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('plugin project', () async {
       return _createAndAnalyzeProject(
@@ -114,12 +114,12 @@ void main() {
         ],
         plugin: true,
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     testUsingContext('plugin project (legacy)', () async {
-      return _createAndAnalyzeProject(
+      return _createProject(
         projectDir,
-        <String>['--plugin'],
+        <String>['--no-pub', '--plugin'],
         <String>[
           'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
           'ios/Classes/FlutterProjectPlugin.h',
@@ -136,9 +136,9 @@ void main() {
     });
 
     testUsingContext('kotlin/swift plugin project', () async {
-      return _createAndAnalyzeProject(
+      return _createProject(
         projectDir,
-        <String>['--template=plugin', '-a', 'kotlin', '--ios-language', 'swift'],
+        <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift'],
         <String>[
           'android/src/main/kotlin/com/yourcompany/flutterproject/FlutterProjectPlugin.kt',
           'ios/Classes/FlutterProjectPlugin.h',
@@ -162,9 +162,9 @@ void main() {
     });
 
     testUsingContext('plugin project with custom org', () async {
-      return _createAndAnalyzeProject(
+      return _createProject(
           projectDir,
-          <String>['--template=plugin', '--org', 'com.bar.foo'],
+          <String>['--no-pub', '--template=plugin', '--org', 'com.bar.foo'],
           <String>[
             'android/src/main/java/com/bar/foo/flutterproject/FlutterProjectPlugin.java',
             'example/android/app/src/main/java/com/bar/foo/flutterprojectexample/MainActivity.java',
@@ -183,7 +183,7 @@ void main() {
         <String>['--with-driver-test'],
         <String>['lib/main.dart'],
       );
-    });
+    }, timeout: const Timeout.factor(2.0));
 
     // Verify content and formatting
     testUsingContext('content', () async {
@@ -299,9 +299,9 @@ void main() {
   });
 }
 
-Future<Null> _createAndAnalyzeProject(
+Future<Null> _createProject(
     Directory dir, List<String> createArgs, List<String> expectedPaths,
-    { List<String> unexpectedPaths = const <String>[], bool plugin = false }) async {
+    { List<String> unexpectedPaths = const <String>[], bool plugin = false}) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = new CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
@@ -316,16 +316,21 @@ Future<Null> _createAndAnalyzeProject(
   for (String path in unexpectedPaths) {
     expect(fs.file(fs.path.join(dir.path, path)).existsSync(), false, reason: '$path exists');
   }
+}
 
+Future<Null> _createAndAnalyzeProject(
+    Directory dir, List<String> createArgs, List<String> expectedPaths,
+    { List<String> unexpectedPaths = const <String>[], bool plugin = false }) async {
+  await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths, plugin: plugin);
   if (plugin) {
-    _analyze(dir.path, target: fs.path.join(dir.path, 'lib', 'flutter_project.dart'));
-    _analyze(fs.path.join(dir.path, 'example'));
+    await _analyzeProject(dir.path, target: fs.path.join(dir.path, 'lib', 'flutter_project.dart'));
+    await _analyzeProject(fs.path.join(dir.path, 'example'));
   } else {
-    _analyze(dir.path);
+    await _analyzeProject(dir.path);
   }
 }
 
-void _analyze(String workingDir, {String target}) {
+Future<Null> _analyzeProject(String workingDir, {String target}) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -335,7 +340,7 @@ void _analyze(String workingDir, {String target}) {
   if (target != null)
     args.add(target);
 
-  final ProcessResult exec = Process.runSync(
+  final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
     args,
     workingDirectory: workingDir,

@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'android/gradle.dart';
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
@@ -16,6 +17,7 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
 import 'dependency_checker.dart';
@@ -32,10 +34,15 @@ class FlutterDevice {
   List<VMService> vmServices;
   DevFS devFS;
   ApplicationPackage package;
+  ResidentCompiler generator;
 
   StreamSubscription<String> _loggingSubscription;
 
-  FlutterDevice(this.device);
+  FlutterDevice(this.device, { bool previewDart2 : false }) {
+    if (previewDart2)
+      generator = new ResidentCompiler(
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+  }
 
   String viewFilter;
 
@@ -244,7 +251,6 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      kernelPath: hotRunner.kernelFilePath,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: hotRunner.usesTerminalUI,
     );
@@ -319,6 +325,8 @@ class FlutterDevice {
   }
 
   Future<bool> updateDevFS({
+    String mainPath,
+    String target,
     AssetBundle bundle,
     bool bundleDirty: false,
     Set<String> fileFilter
@@ -330,9 +338,12 @@ class FlutterDevice {
     int bytes = 0;
     try {
       bytes = await devFS.update(
+        mainPath: mainPath,
+        target: target,
         bundle: bundle,
         bundleDirty: bundleDirty,
-        fileFilter: fileFilter
+        fileFilter: fileFilter,
+        generator: generator
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -341,6 +352,13 @@ class FlutterDevice {
     devFSStatus.stop();
     printTrace('Synced ${getSizeAsMB(bytes)}.');
     return true;
+  }
+
+  void updateReloadStatus(bool wasReloadSuccessful) {
+    if (wasReloadSuccessful)
+      generator?.accept();
+    else
+      generator?.reject();
   }
 }
 

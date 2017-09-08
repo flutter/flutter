@@ -8,16 +8,19 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
     final List<Widget> children = new List<Widget>.generate(20, (int i) {
-      return new Container(child: new Text('$i'));
+      return new Container(child: new Text('$i', textDirection: TextDirection.ltr));
     });
 
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new SliverFillViewport(
-            delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
-          ),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverFillViewport(
+              delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -73,6 +76,7 @@ void main() {
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
         ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
+        ' │   crossAxisDirection: AxisDirection.right,\n'
         ' │   viewportMainAxisExtent: 600.0)\n'
         ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
         ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true)\n'
@@ -103,11 +107,16 @@ void main() {
         '     │ parentData: <none> (can use size)\n'
         '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '     │ size: Size(800.0, 600.0)\n'
+        '     │ textAlign: start\n'
+        '     │ textDirection: ltr\n'
+        '     │ softWrap: wrapping at box width\n'
+        '     │ overflow: clip\n'
+        '     │ maxLines: unlimited\n'
         '     ╘═╦══ text ═══\n'
         '       ║ TextSpan:\n'
         '       ║   <all styles inherited>\n'
         '       ║   "0"\n'
-        '       ╚═══════════\n',
+        '       ╚═══════════\n'
       ),
     );
   });

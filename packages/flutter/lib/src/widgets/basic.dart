@@ -29,6 +29,7 @@ export 'package:flutter/rendering.dart' show
   FlowDelegate,
   FlowPaintingContext,
   FractionalOffsetTween,
+  FractionalOffsetGeometryTween,
   HitTestBehavior,
   LayerLink,
   MainAxisAlignment,
@@ -1187,7 +1188,7 @@ class Align extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// If non-null, sets its width to the child's width multipled by this factor.
   ///
@@ -1200,20 +1201,28 @@ class Align extends SingleChildRenderObjectWidget {
   final double heightFactor;
 
   @override
-  RenderPositionedBox createRenderObject(BuildContext context) => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
+  RenderPositionedBox createRenderObject(BuildContext context) {
+    return new RenderPositionedBox(
+      alignment: alignment,
+      widthFactor: widthFactor,
+      heightFactor: heightFactor,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPositionedBox renderObject) {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
-      ..heightFactor = heightFactor;
+      ..heightFactor = heightFactor
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
     description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
     description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
@@ -1539,7 +1548,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
     this.alignment: FractionalOffset.center,
     this.widthFactor,
     this.heightFactor,
-    Widget child
+    Widget child,
   }) : assert(alignment != null),
        assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0),
@@ -1572,14 +1581,15 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   @override
   RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) {
     return new RenderFractionallySizedOverflowBox(
       alignment: alignment,
       widthFactor: widthFactor,
-      heightFactor: heightFactor
+      heightFactor: heightFactor,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -1588,13 +1598,14 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
-      ..heightFactor = heightFactor;
+      ..heightFactor = heightFactor
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
     description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
     description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
@@ -1680,7 +1691,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
     this.maxWidth,
     this.minHeight,
     this.maxHeight,
-    Widget child
+    Widget child,
   }) : super(key: key, child: child);
 
   /// How to align the child.
@@ -1692,7 +1703,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -1717,7 +1728,8 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       minWidth: minWidth,
       maxWidth: maxWidth,
       minHeight: minHeight,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -1728,13 +1740,14 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       ..minWidth = minWidth
       ..maxWidth = maxWidth
       ..minHeight = minHeight
-      ..maxHeight = maxHeight;
+      ..maxHeight = maxHeight
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
     description.add(new DoubleProperty('minWidth', minWidth, defaultValue: null));
     description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: null));
     description.add(new DoubleProperty('minHeight', minHeight, defaultValue: null));
@@ -1752,7 +1765,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
     Key key,
     @required this.size,
     this.alignment: FractionalOffset.center,
-    Widget child
+    Widget child,
   }) : assert(size != null),
        assert(alignment != null),
        super(key: key, child: child);
@@ -1766,7 +1779,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
 
   /// The size this widget should attempt to be.
   final Size size;
@@ -1775,7 +1788,8 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   RenderSizedOverflowBox createRenderObject(BuildContext context) {
     return new RenderSizedOverflowBox(
       alignment: alignment,
-      requestedSize: size
+      requestedSize: size,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -1783,13 +1797,14 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSizedOverflowBox renderObject) {
     renderObject
       ..alignment = alignment
-      ..requestedSize = size;
+      ..requestedSize = size
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
     description.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }
@@ -1837,9 +1852,9 @@ class _OffstageElement extends SingleChildRenderObjectElement {
   Offstage get widget => super.widget;
 
   @override
-  void visitChildrenForSemantics(ElementVisitor visitor) {
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
     if (!widget.offstage)
-      super.visitChildrenForSemantics(visitor);
+      super.debugVisitOnstageChildren(visitor);
   }
 }
 
@@ -2063,22 +2078,27 @@ class SliverPadding extends SingleChildRenderObjectWidget {
        super(key: key, child: sliver);
 
   /// The amount of space by which to inset the child sliver.
-  final EdgeInsets padding;
-
-  // TODO(ianh): RTL
+  final EdgeInsetsGeometry padding;
 
   @override
-  RenderSliverPadding createRenderObject(BuildContext context) => new RenderSliverPadding(padding: padding);
+  RenderSliverPadding createRenderObject(BuildContext context) {
+    return new RenderSliverPadding(
+      padding: padding,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverPadding renderObject) {
-    renderObject.padding = padding;
+    renderObject
+      ..padding = padding
+      ..textDirection = Directionality.of(context);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
   }
 }
 
@@ -2173,7 +2193,8 @@ class Stack extends MultiChildRenderObjectWidget {
   /// top left corners.
   Stack({
     Key key,
-    this.alignment: FractionalOffset.topLeft,
+    this.alignment: FractionalOffsetDirectional.topStart,
+    this.textDirection,
     this.fit: StackFit.loose,
     this.overflow: Overflow.clip,
     List<Widget> children: const <Widget>[],
@@ -2185,7 +2206,12 @@ class Stack extends MultiChildRenderObjectWidget {
   /// the points determined by [alignment] are co-located. For example, if the
   /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
 
   /// How to size the non-positioned children in the stack.
   ///
@@ -2204,6 +2230,7 @@ class Stack extends MultiChildRenderObjectWidget {
   RenderStack createRenderObject(BuildContext context) {
     return new RenderStack(
       alignment: alignment,
+      textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
       overflow: overflow,
     );
@@ -2213,6 +2240,7 @@ class Stack extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
     renderObject
       ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
       ..overflow = overflow;
   }
@@ -2220,7 +2248,8 @@ class Stack extends MultiChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new EnumProperty<StackFit>('fit', fit));
     description.add(new EnumProperty<Overflow>('overflow', overflow));
   }
@@ -2240,23 +2269,31 @@ class IndexedStack extends Stack {
   /// The [index] argument must not be null.
   IndexedStack({
     Key key,
-    FractionalOffset alignment: FractionalOffset.topLeft,
+    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    TextDirection textDirection,
     StackFit sizing: StackFit.loose,
     this.index: 0,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, alignment: alignment, fit: sizing, children: children);
+  }) : super(key: key, alignment: alignment, textDirection: textDirection, fit: sizing, children: children);
 
   /// The index of the child to show.
   final int index;
 
   @override
-  RenderIndexedStack createRenderObject(BuildContext context) => new RenderIndexedStack(index: index, alignment: alignment);
+  RenderIndexedStack createRenderObject(BuildContext context) {
+    return new RenderIndexedStack(
+      index: index,
+      alignment: alignment,
+      textDirection: textDirection ?? Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
     renderObject
       ..index = index
-      ..alignment = alignment;
+      ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.of(context);
   }
 }
 
@@ -2897,12 +2934,15 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// ## Troubleshooting
 ///
-/// ### Why is my row turning red?
+/// ### Why does my row have a yellow and black warning stripe?
 ///
-/// If the contents of the row overflow, meaning that together they are wider
-/// than the row, then the row runs out of space to give its [Expanded] and
-/// [Flexible] children, and reports this by drawing a red warning box on the
-/// edge that is overflowing.
+/// If the non-flexible contents of the row (those that are not wrapped in
+/// [Expanded] or [Flexible] widgets) are together wider than the row itself,
+/// then the row is said to have overflowed. When a row overflows, the row does
+/// not have any remaining space to share between its [Expanded] and [Flexible]
+/// children. The row reports this by drawing a yellow and black striped
+/// warning box on the edge that is overflowing. If there is room on the outside
+/// of the row, the amount of overflow is printed in red lettering.
 ///
 /// #### Story time
 ///
@@ -2928,7 +2968,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// be thiiiiiiiiiiiiiiiiiiiis wide.", and goes well beyond the space that the
 /// row has available, not wrapping. The row responds, "That's not fair, now I
 /// have no more room available for my other children!", and gets angry and
-/// turns red.
+/// sprouts a yellow and black strip.
 ///
 /// The fix is to wrap the second child in an [Expanded] widget, which tells the
 /// row that the child should be given the remaining room:
@@ -3089,6 +3129,58 @@ class Row extends Flex {
 ///   ],
 /// )
 /// ```
+///
+/// ## Troubleshooting
+///
+/// ### When the incoming vertical constraints are unbounded
+///
+/// When a [Column] has one or more [Expanded] or [Flexible] children, and is
+/// placed in another [Column], or in a [ListView], or in some other context
+/// that does not provide a maximum height constraint for the [Column], you will
+/// get an exception at runtime saying that there are children with non-zero
+/// flex but the vertical constraints are unbounded.
+///
+/// The problem, as described in the details that accompany that exception, is
+/// that using [Flexible] or [Expanded] means that the remaining space after
+/// laying out all the other children must be shared equally, but if the
+/// incoming vertical constraints are unbounded, there is infinite remaining
+/// space.
+///
+/// The key to solving this problem is usually to determine why the [Column] is
+/// receiving unbounded vertical constraints.
+///
+/// One common reason for this to happen is that the [Column] has been placed in
+/// another [Column] (without using [Expanded] or [Flexible] around the inner
+/// nested [Column]). When a [Column] lays out its non-flex children (those that
+/// have neither [Expanded] or [Flexible] around them), it gives them unbounded
+/// constraints so that they can determine their own dimensions (passing
+/// unbounded constraints usually signals to the child that it should
+/// shrink-wrap its contents). The solution in this case is typically to just
+/// wrap the inner column in an [Expanded] to indicate that it should take the
+/// remaining space of the outer column, rather than being allowed to take any
+/// amount of room it desires.
+///
+/// Another reason for this message to be displayed is nesting a [Column] inside
+/// a [ListView] or other vertical scrollable. In that scenario, there really is
+/// infinite vertical space (the whole point of a vertical scrolling list is to
+/// allow infinite space vertically). In such scenarios, it is usually worth
+/// examining why the inner [Column] should have an [Expanded] or [Flexible]
+/// child: what size should the inner children really be? The solution in this
+/// case is typically to remove the [Expanded] or [Flexible] widgets from around
+/// the inner children.
+///
+/// For more discussion about constraints, see [BoxConstraints].
+///
+/// ### The yellow and black striped banner
+///
+/// When the contents of a [Column] exceed the amount of space available, the
+/// [Column] overflows, and the contents are clipped. In debug mode, a yellow
+/// and black striped bar is rendered at the overflowing edge to indicate the
+/// problem, and a message is printed below the [Column] saying how much
+/// overflow was detected.
+///
+/// The usual solution is to use a [ListView] rather than a [Column], to enable
+/// the contents to scroll when vertical space is limited.
 ///
 /// ## Layout algorithm
 ///
@@ -3629,20 +3721,25 @@ class Flow extends MultiChildRenderObjectWidget {
 class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [softWrap], [overflow], nad [textScaleFactor] arguments must
-  /// not be null.
+  /// The [text], [textAlign], [softWrap], [overflow], nad [textScaleFactor]
+  /// arguments must not be null.
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
+  ///
+  /// The [textDirection], if null, defaults to the ambient [Directionality],
+  /// which in that case must not be null.
   const RichText({
     Key key,
     @required this.text,
-    this.textAlign,
+    this.textAlign: TextAlign.start,
+    this.textDirection,
     this.softWrap: true,
     this.overflow: TextOverflow.clip,
     this.textScaleFactor: 1.0,
     this.maxLines,
   }) : assert(text != null),
+       assert(textAlign != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
@@ -3654,6 +3751,22 @@ class RichText extends LeafRenderObjectWidget {
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
+
+  /// The directionality of the text.
+  ///
+  /// This decides how [textAlign] values like [TextAlign.start] and
+  /// [TextAlign.end] are interpreted.
+  ///
+  /// This is also used to disambiguate how to render bidirectional text. For
+  /// example, if the [text] is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// its left.
+  ///
+  /// Defaults to the ambient [Directionality], if any. If there is no ambient
+  /// [Directionality], then this must not be null.
+  final TextDirection textDirection;
 
   /// Whether the text should break at soft line breaks.
   ///
@@ -3679,8 +3792,11 @@ class RichText extends LeafRenderObjectWidget {
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
+    final TextDirection direction = textDirection ?? Directionality.of(context);
+    assert(direction != null, 'A RichText was created with no textDirection and no ambient Directionality widget.');
     return new RenderParagraph(text,
       textAlign: textAlign,
+      textDirection: direction,
       softWrap: softWrap,
       overflow: overflow,
       textScaleFactor: textScaleFactor,
@@ -3693,6 +3809,7 @@ class RichText extends LeafRenderObjectWidget {
     renderObject
       ..text = text
       ..textAlign = textAlign
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
@@ -4214,6 +4331,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.checked,
     this.selected,
     this.label,
+    this.textDirection,
   }) : assert(container != null),
        super(key: key, child: child);
 
@@ -4242,7 +4360,19 @@ class Semantics extends SingleChildRenderObjectWidget {
   final bool selected;
 
   /// Provides a textual description of the widget.
+  ///
+  /// If a label is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
   final String label;
+
+  /// The reading direction of the [label].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
+
+  TextDirection _getTextDirection(BuildContext context) {
+    return textDirection ?? (label != null ? Directionality.of(context) : null);
+  }
 
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
@@ -4251,6 +4381,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       checked: checked,
       selected: selected,
       label: label,
+      textDirection: _getTextDirection(context),
     );
   }
 
@@ -4260,7 +4391,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..checked = checked
       ..selected = selected
-      ..label = label;
+      ..label = label
+      ..textDirection = _getTextDirection(context);
   }
 
   @override
@@ -4269,7 +4401,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     description.add(new DiagnosticsProperty<bool>('container', container));
     description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    description.add(new StringProperty('label', label));
+    description.add(new StringProperty('label', label, defaultValue: ''));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 

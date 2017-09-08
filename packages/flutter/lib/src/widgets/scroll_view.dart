@@ -170,13 +170,20 @@ abstract class ScrollView extends StatelessWidget {
   /// Combines the [scrollDirection] with the [reverse] boolean to obtain the
   /// concrete [AxisDirection].
   ///
-  /// In the future, this function will also consider the reading direction.
+  /// If the [scrollDirection] is [Axis.horizontal], the ambient
+  /// [Directionality] is also consided when selecting the concrete
+  /// [AxisDirection]. For example, if the ambient [Directionality] is
+  /// [TextDirection.rtl], then the non-reversed [AxisDirection] is
+  /// [AxisDirection.left] and the reversed [AxisDirection] is
+  /// [AxisDirection.right].
   @protected
   AxisDirection getDirection(BuildContext context) {
-    // TODO(abarth): Consider reading direction.
     switch (scrollDirection) {
       case Axis.horizontal:
-        return reverse ? AxisDirection.left : AxisDirection.right;
+        final TextDirection textDirection = Directionality.of(context);
+        assert(textDirection != null);
+        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
+        return reverse ? flipAxisDirection(axisDirection) : axisDirection;
       case Axis.vertical:
         return reverse ? AxisDirection.up : AxisDirection.down;
     }
@@ -240,6 +247,8 @@ abstract class ScrollView extends StatelessWidget {
 /// to create a scroll view that contains an expanding app bar followed by a
 /// list and a grid, use a list of three slivers: [SliverAppBar], [SliverList],
 /// and [SliverGrid].
+///
+/// [Widget]s in these [slivers] must produce [RenderSliver] objects.
 ///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
@@ -367,7 +376,7 @@ abstract class BoxScrollView extends ScrollView {
   );
 
   /// The amount of space by which to inset the children.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
   List<Widget> buildSlivers(BuildContext context) {
@@ -384,7 +393,7 @@ abstract class BoxScrollView extends ScrollView {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<EdgeInsets>('padding', padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
 }
 
@@ -545,7 +554,7 @@ class ListView extends BoxScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap: false,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     this.itemExtent,
     bool addAutomaticKeepAlives: true,
     bool addRepaintBoundaries: true,
@@ -597,7 +606,7 @@ class ListView extends BoxScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap: false,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     this.itemExtent,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
@@ -631,7 +640,7 @@ class ListView extends BoxScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap: false,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     this.itemExtent,
     @required this.childrenDelegate,
   }) : assert(childrenDelegate != null),
@@ -825,7 +834,7 @@ class GridView extends BoxScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap: false,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     @required this.gridDelegate,
     bool addAutomaticKeepAlives: true,
     bool addRepaintBoundaries: true,
@@ -874,7 +883,7 @@ class GridView extends BoxScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap: false,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     @required this.gridDelegate,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
@@ -913,7 +922,7 @@ class GridView extends BoxScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap: false,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     @required this.gridDelegate,
     @required this.childrenDelegate,
   }) : assert(gridDelegate != null),
@@ -951,7 +960,7 @@ class GridView extends BoxScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap: false,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     @required int crossAxisCount,
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
@@ -1002,7 +1011,7 @@ class GridView extends BoxScrollView {
     bool primary,
     ScrollPhysics physics,
     bool shrinkWrap: false,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     @required double maxCrossAxisExtent,
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,

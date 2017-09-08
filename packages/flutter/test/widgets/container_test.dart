@@ -60,7 +60,6 @@ void main() {
         ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
         ' │ size: Size(63.0, 88.0)\n'
         ' │ padding: EdgeInsets.all(5.0)\n'
-        ' │ textDirection: null\n'
         ' │\n'
         ' └─child: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
         '   │ creator: ConstrainedBox ← Padding ← Container ← Align ← [root]\n'
@@ -100,7 +99,6 @@ void main() {
         '         │ constraints: BoxConstraints(w=53.0, h=78.0)\n'
         '         │ size: Size(53.0, 78.0)\n'
         '         │ padding: EdgeInsets.all(7.0)\n'
-        '         │ textDirection: null\n'
         '         │\n'
         '         └─child: RenderPositionedBox#00000\n'
         '           │ creator: Align ← Padding ← DecoratedBox ← DecoratedBox ←\n'
@@ -137,6 +135,11 @@ void main() {
   });
 
   testWidgets('Can be placed in an infinite box', (WidgetTester tester) async {
-    await tester.pumpWidget(new ListView(children: <Widget>[new Container()]));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(children: <Widget>[new Container()]),
+      ),
+    );
   });
 }

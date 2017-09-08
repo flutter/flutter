@@ -1212,7 +1212,7 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 ///  * `canvas`: The canvas onto which the image will be painted.
 ///  * `rect`: The region of the canvas into which the image will be painted.
 ///    The image might not fill the entire rectangle (e.g., depending on the
-///    `fit`).
+///    `fit`). If `rect` is empty, nothing is painted.
 ///  * `image`: The image to paint onto the canvas.
 ///  * `colorFilter`: If non-null, the color filter to apply when painting the
 ///    image.
@@ -1251,6 +1251,8 @@ void paintImage({
 }) {
   assert(canvas != null);
   assert(image != null);
+  if (rect.isEmpty)
+    return;
   Size outputSize = rect.size;
   Size inputSize = new Size(image.width.toDouble(), image.height.toDouble());
   Offset sliceBorder;

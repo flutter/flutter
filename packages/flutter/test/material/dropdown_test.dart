@@ -115,18 +115,21 @@ void main() {
     }
 
     Widget build() {
-      return new Navigator(
-        initialRoute: '/',
-        onGenerateRoute: (RouteSettings settings) {
-          return new MaterialPageRoute<Null>(
-            settings: settings,
-            builder: (BuildContext context) {
-              return new Material(
-                child: buildFrame(value: 'one', onChanged: didChangeValue),
-              );
-            },
-          );
-        }
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Navigator(
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            return new MaterialPageRoute<Null>(
+              settings: settings,
+              builder: (BuildContext context) {
+                return new Material(
+                  child: buildFrame(value: 'one', onChanged: didChangeValue),
+                );
+              },
+            );
+          },
+        ),
       );
     }
 

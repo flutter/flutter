@@ -16,23 +16,26 @@ class TestItem extends StatelessWidget {
       width: width,
       height: height,
       alignment: FractionalOffset.center,
-      child: new Text('Item $item'),
+      child: new Text('Item $item', textDirection: TextDirection.ltr),
     );
   }
 }
 
 Widget buildFrame({ int count, double width, double height, Axis scrollDirection }) {
-  return new CustomScrollView(
-    scrollDirection: scrollDirection ?? Axis.vertical,
-    slivers: <Widget>[
-      new SliverPrototypeExtentList(
-        prototypeItem: new TestItem(item: -1, width: width, height: height),
-        delegate: new SliverChildBuilderDelegate(
-          (BuildContext context, int index) => new TestItem(item: index),
-          childCount: count,
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new CustomScrollView(
+      scrollDirection: scrollDirection ?? Axis.vertical,
+      slivers: <Widget>[
+        new SliverPrototypeExtentList(
+          prototypeItem: new TestItem(item: -1, width: width, height: height),
+          delegate: new SliverChildBuilderDelegate(
+            (BuildContext context, int index) => new TestItem(item: index),
+            childCount: count,
+          ),
         ),
-      ),
-    ],
+      ],
+    ),
   );
 }
 
@@ -111,17 +114,20 @@ void main() {
     }).toList();
 
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new SliverPrototypeExtentList(
-            prototypeItem: items[0],
-            delegate: new SliverChildBuilderDelegate(
-              (BuildContext context, int index) => items[index],
-              childCount: 10,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverPrototypeExtentList(
+              prototypeItem: items[0],
+              delegate: new SliverChildBuilderDelegate(
+                (BuildContext context, int index) => items[index],
+                childCount: 10,
+              ),
             ),
-          ),
-        ],
-      )
+          ],
+        ),
+      ),
     );
 
     // Item 0 exists in the list and as the prototype item.

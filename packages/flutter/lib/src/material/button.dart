@@ -88,7 +88,7 @@ class ButtonTheme extends InheritedWidget {
   /// The amount of space to surround the child inside the bounds of the button.
   ///
   /// Defaults to 16.0 pixels of horizontal padding.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -231,7 +231,7 @@ class MaterialButton extends StatefulWidget {
   /// The amount of space to surround the child inside the bounds of the button.
   ///
   /// Defaults to the value from the current [ButtonTheme].
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///

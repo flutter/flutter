@@ -10,20 +10,23 @@ void main() {
     final Key switchKey = new UniqueKey();
     bool value = false;
     await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return new Center(
-            child: new CupertinoSwitch(
-              key: switchKey,
-              value: value,
-              onChanged: (bool newValue) {
-                setState(() {
-                  value = newValue;
-                });
-              },
-            ),
-          );
-        },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Center(
+              child: new CupertinoSwitch(
+                key: switchKey,
+                value: value,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
 
@@ -31,4 +34,93 @@ void main() {
     await tester.tap(find.byKey(switchKey));
     expect(value, isTrue);
   });
+
+  testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Center(
+              child: new CupertinoSwitch(
+                value: value,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+
+    expect(value, isTrue);
+
+    await tester.pump();
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+
+    expect(value, isTrue);
+
+    await tester.pump();
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+
+    expect(value, isFalse);
+  });
+
+  testWidgets('Switch can drag (RTL)', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Center(
+              child: new CupertinoSwitch(
+                value: value,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+
+    expect(value, isTrue);
+
+    await tester.pump();
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(-30.0, 0.0));
+
+    expect(value, isTrue);
+
+    await tester.pump();
+    await tester.drag(find.byType(CupertinoSwitch), const Offset(30.0, 0.0));
+
+    expect(value, isFalse);
+  });
+
 }

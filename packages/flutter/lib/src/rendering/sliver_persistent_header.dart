@@ -297,6 +297,7 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
       paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
       layoutExtent: (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
+      maxScrollObstructionExtent: minExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
   }
@@ -410,6 +411,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
+      maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return math.min(0.0, paintExtent - childExtent);
@@ -519,6 +521,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent - minExtent),
       maxPaintExtent: maxExtent,
+      maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return 0.0;

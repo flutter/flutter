@@ -91,8 +91,8 @@ void main() {
       flex.toStringDeep(),
       equalsIgnoringHashCodes(
         'RenderFlex#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
-        '   parentData: null\n'
-        '   constraints: null\n'
+        '   parentData: MISSING\n'
+        '   constraints: MISSING\n'
         '   size: MISSING\n'
         '   direction: horizontal\n'
         '   mainAxisAlignment: start\n'
@@ -358,7 +358,7 @@ void main() {
     expect(exceptions, isEmpty);
     layout(parent);
     expect(exceptions, isNotEmpty);
-    expect(exceptions.first, new isInstanceOf<FlutterError>());
+    expect(exceptions.first, const isInstanceOf<FlutterError>());
   });
 
   test('MainAxisSize.min inside unconstrained', () {
@@ -388,7 +388,7 @@ void main() {
     expect(exceptions, isEmpty);
     layout(parent);
     expect(exceptions, isNotEmpty);
-    expect(exceptions.first, new isInstanceOf<FlutterError>());
+    expect(exceptions.first, const isInstanceOf<FlutterError>());
   });
 
   test('Flex RTL', () {

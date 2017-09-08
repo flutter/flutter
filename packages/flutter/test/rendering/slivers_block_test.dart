@@ -78,6 +78,7 @@ void main() {
     );
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),
@@ -152,6 +153,7 @@ void main() {
     );
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.up,
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),
@@ -226,6 +228,7 @@ void main() {
     );
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),

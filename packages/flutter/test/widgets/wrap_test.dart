@@ -817,7 +817,7 @@ void main() {
             child: new Wrap(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                const Text('X'),
+                const Text('X', textDirection: TextDirection.ltr),
               ],
             ),
           ),

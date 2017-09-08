@@ -153,7 +153,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   final Decoration decoration;
 
   /// The margin around the drawer header.
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
   /// A widget placed in the upper-left corner that represents the current
   /// user's account. Normally a [CircleAvatar].

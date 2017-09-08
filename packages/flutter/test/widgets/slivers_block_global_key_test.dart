@@ -19,21 +19,26 @@ class _GenerationTextState extends State<GenerationText> {
   _GenerationTextState() : generation = globalGeneration;
   final int generation;
   @override
-  Widget build(BuildContext context) => new Text('${widget.value}:$generation ');
+  Widget build(BuildContext context) => new Text('${widget.value}:$generation ', textDirection: TextDirection.ltr);
 }
 
 Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
   globalGeneration += 1;
-  return tester.pumpWidget(new Viewport(
-    offset: new ViewportOffset.fixed(offset),
-    slivers: <Widget>[
-      new SliverList(
-        delegate: new SliverChildListDelegate(keys.map((int key) {
-          return new SizedBox(key: new GlobalObjectKey(key), height: 100.0, child: new GenerationText(key));
-        }).toList()),
+  return tester.pumpWidget(
+    new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Viewport(
+        offset: new ViewportOffset.fixed(offset),
+        slivers: <Widget>[
+          new SliverList(
+            delegate: new SliverChildListDelegate(keys.map((int key) {
+              return new SizedBox(key: new GlobalObjectKey(key), height: 100.0, child: new GenerationText(key));
+            }).toList()),
+          ),
+        ],
       ),
-    ],
-  ));
+    ),
+  );
 }
 
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {

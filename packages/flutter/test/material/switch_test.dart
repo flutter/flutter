@@ -12,23 +12,26 @@ void main() {
     bool value = false;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new Switch(
-                key: switchKey,
-                value: value,
-                onChanged: (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                }
-              )
-            )
-          );
-        }
-      )
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Material(
+              child: new Center(
+                child: new Switch(
+                  key: switchKey,
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
 
     expect(value, isFalse);
@@ -36,26 +39,29 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Switch can drag', (WidgetTester tester) async {
+  testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
-      new StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return new Material(
-            child: new Center(
-              child: new Switch(
-                value: value,
-                onChanged: (bool newValue) {
-                  setState(() {
-                    value = newValue;
-                  });
-                }
-              )
-            )
-          );
-        }
-      )
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Material(
+              child: new Center(
+                child: new Switch(
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
 
     expect(value, isFalse);
@@ -75,6 +81,52 @@ void main() {
 
     await tester.pump();
     await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+
+    expect(value, isFalse);
+  });
+
+  testWidgets('Switch can drag (RTL)', (WidgetTester tester) async {
+    bool value = false;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Material(
+              child: new Center(
+                child: new Switch(
+                  value: value,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
+
+    expect(value, isFalse);
+
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+
+    expect(value, isTrue);
+
+    await tester.pump();
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+
+    expect(value, isTrue);
+
+    await tester.pump();
+    await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
 
     expect(value, isFalse);
   });

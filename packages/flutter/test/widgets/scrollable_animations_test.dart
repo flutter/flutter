@@ -10,12 +10,17 @@ void main() {
   testWidgets('Does not animate if already at target position', (WidgetTester tester) async {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
-      textWidgets.add(new Text('$i'));
+      textWidgets.add(new Text('$i', textDirection: TextDirection.ltr));
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      children: textWidgets,
-      controller: controller,
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: textWidgets,
+          controller: controller,
+        ),
+      ),
+    );
 
     expectNoAnimation();
     final double currentPosition = controller.position.pixels;
@@ -28,12 +33,17 @@ void main() {
   testWidgets('Does not animate if already at target position within tolerance', (WidgetTester tester) async {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
-      textWidgets.add(new Text('$i'));
+      textWidgets.add(new Text('$i', textDirection: TextDirection.ltr));
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      children: textWidgets,
-      controller: controller,
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: textWidgets,
+          controller: controller,
+        ),
+      ),
+    );
 
     expectNoAnimation();
 
@@ -49,12 +59,17 @@ void main() {
   testWidgets('Animates if going to a position outside of tolerance', (WidgetTester tester) async {
     final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 80; i++)
-      textWidgets.add(new Text('$i'));
+      textWidgets.add(new Text('$i', textDirection: TextDirection.ltr));
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      children: textWidgets,
-      controller: controller,
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: textWidgets,
+          controller: controller,
+        ),
+      ),
+    );
 
     expectNoAnimation();
 

@@ -71,30 +71,19 @@ class IOSDevice extends Device {
   @override
   bool get supportsStartPaused => false;
 
-  // Physical device line format to be matched:
-  // My iPhone (10.3.2) [75b90e947c5f429fa67f3e9169fda0d89f0492f1]
-  //
-  // Other formats in output (desktop, simulator) to be ignored:
-  // my-mac-pro [2C10513E-4dA5-405C-8EF5-C44353DB3ADD]
-  // iPhone 6s (9.3) [F6CEE7CF-81EB-4448-81B4-1755288C7C11] (Simulator)
-  static final RegExp _deviceRegex = new RegExp(r'^(.*) +\((.*)\) +\[(.*)\]$');
-
   static Future<List<IOSDevice>> getAttachedDevices() async {
-    if (!xcode.isInstalled)
+    if (!iMobileDevice.isInstalled)
       return <IOSDevice>[];
 
     final List<IOSDevice> devices = <IOSDevice>[];
-    final Iterable<String> deviceLines = (await xcode.getAvailableDevices())
-        .split('\n')
-        .map((String line) => line.trim());
-    for (String line in deviceLines) {
-      final Match match = _deviceRegex.firstMatch(line);
-      if (match != null) {
-        final String deviceName = match.group(1);
-        final String sdkVersion = match.group(2);
-        final String deviceID = match.group(3);
-        devices.add(new IOSDevice(deviceID, name: deviceName, sdkVersion: sdkVersion));
-      }
+    for (String id in (await iMobileDevice.getAvailableDeviceIDs()).split('\n')) {
+      id = id.trim();
+      if (id.isEmpty)
+        continue;
+
+      final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
+      final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
+      devices.add(new IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
     }
     return devices;
   }
@@ -170,7 +159,7 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false,
-    String kernelPath,
+    bool previewDart2: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
   }) async {
@@ -367,9 +356,9 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     // Match for lines for the runner in syslog.
     //
     // iOS 9 format:  Runner[297] <Notice>:
-    // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
+    // iOS 10 format: Runner(Flutter)[297] <Notice>:
     final String appName = app == null ? '' : app.name.replaceAll('.app', '');
-    _lineRegex = new RegExp(appName + r'(\(.*\))?\[[\d]+\] <[A-Za-z]+>: ');
+    _lineRegex = new RegExp(appName + r'(\(Flutter\))?\[[\d]+\] <[A-Za-z]+>: ');
   }
 
   final IOSDevice device;
@@ -396,19 +385,12 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   }
 
   void _onLine(String line) {
-    // Lines starting with these strings are suppressed from output as noise.
-    const List<String> blacklist = const <String>[
-      'libMobileGestalt ',
-    ];
-
     final Match match = _lineRegex.firstMatch(line);
 
     if (match != null) {
       final String logLine = line.substring(match.end);
-      if (!blacklist.any(logLine.startsWith)) {
-        // Only display the log line after the initial device and executable information.
-        _linesController.add(logLine);
-      }
+      // Only display the log line after the initial device and executable information.
+      _linesController.add(logLine);
     }
   }
 

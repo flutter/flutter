@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -39,7 +39,7 @@ class HotRunner extends ResidentRunner {
     bool usesTerminalUI: true,
     this.benchmarkMode: false,
     this.applicationBinary,
-    this.kernelFilePath,
+    this.previewDart2: false,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
@@ -60,7 +60,7 @@ class HotRunner extends ResidentRunner {
   final Map<String, int> benchmarkData = <String, int>{};
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
-  String kernelFilePath;
+  bool previewDart2 = false;
 
   bool _refreshDartDependencies() {
     if (!hotRunnerConfig.computeDartDependencies) {
@@ -112,7 +112,6 @@ class HotRunner extends ResidentRunner {
 
     for (FlutterDevice device in flutterDevices)
       device.initLogReader();
-
     try {
       final List<Uri> baseUris = await _initDevFS();
       if (connectionInfoCompleter != null) {
@@ -251,6 +250,8 @@ class HotRunner extends ResidentRunner {
 
     for (FlutterDevice device in flutterDevices) {
       final bool result = await device.updateDevFS(
+        mainPath: mainPath,
+        target: target,
         bundle: assetBundle,
         bundleDirty: rebuildBundle,
         fileFilter: _dartDependencies,
@@ -363,15 +364,20 @@ class HotRunner extends ResidentRunner {
   }
 
   /// Returns [true] if the reload was successful.
-  static bool validateReloadReport(Map<String, dynamic> reloadReport) {
+  /// Prints errors if [printErrors] is [true].
+  static bool validateReloadReport(Map<String, dynamic> reloadReport,
+      { bool printErrors: true }) {
     if (reloadReport['type'] != 'ReloadReport') {
-      printError('Hot reload received invalid response: $reloadReport');
+      if (printErrors)
+        printError('Hot reload received invalid response: $reloadReport');
       return false;
     }
     if (!reloadReport['success']) {
-      printError('Hot reload was rejected:');
-      for (Map<String, dynamic> notice in reloadReport['details']['notices'])
-        printError('${notice['message']}');
+      if (printErrors) {
+        printError('Hot reload was rejected:');
+        for (Map<String, dynamic> notice in reloadReport['details']['notices'])
+          printError('${notice['message']}');
+      }
       return false;
     }
     return true;
@@ -464,23 +470,39 @@ class HotRunner extends ResidentRunner {
       return new OperationResult(1, 'Dart source error');
     String reloadMessage;
     try {
-      final String entryPath = fs.path.relative(mainPath, from: projectRootPath);
+      final String entryPath = fs.path.relative(
+        previewDart2 ? mainPath + '.dill' : mainPath,
+        from: projectRootPath
+      );
       if (benchmarkMode)
         vmReloadTimer.start();
-      final List<Future<Map<String, dynamic>>> reloadReportFutures = <Future<Map<String, dynamic>>>[];
+      final Completer<Map<String, dynamic>> retrieveFirstReloadReport = new Completer<Map<String, dynamic>>();
+
+      int countExpectedReports = 0;
       for (FlutterDevice device in flutterDevices) {
+        // List has one report per Flutter view.
         final List<Future<Map<String, dynamic>>> reports = device.reloadSources(
           entryPath,
           pause: pause
         );
-        reloadReportFutures.addAll(reports);
+        countExpectedReports += reports.length;
+        Future.wait(reports).then((List<Map<String, dynamic>> list) {
+          // TODO(aam): Investigate why we are validating only first reload report,
+          // which seems to be current behavior
+          final Map<String, dynamic> firstReport = list.first;
+          // Don't print errors because they will be printed further down when
+          // `validateReloadReport` is called again.
+          device.updateReloadStatus(validateReloadReport(firstReport,
+            printErrors: false));
+          retrieveFirstReloadReport.complete(firstReport);
+        });
       }
-      if (reloadReportFutures.isEmpty) {
+
+      if (countExpectedReports == 0) {
         printError('Unable to hot reload. No instance of Flutter is currently running.');
         return new OperationResult(1, 'No instances running');
       }
-      final Map<String, dynamic> reloadReport = (await Future.wait(reloadReportFutures)).first;
-
+      final Map<String, dynamic> reloadReport = await retrieveFirstReloadReport.future;
       if (!validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');

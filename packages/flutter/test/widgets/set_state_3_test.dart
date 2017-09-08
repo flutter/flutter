@@ -47,7 +47,7 @@ class Leaf extends StatefulWidget {
 
 class LeafState extends State<Leaf> {
   @override
-  Widget build(BuildContext context) => const Text("leaf");
+  Widget build(BuildContext context) => const Text('leaf', textDirection: TextDirection.ltr);
 }
 
 void main() {

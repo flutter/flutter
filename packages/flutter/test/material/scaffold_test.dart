@@ -148,11 +148,11 @@ void main() {
     Widget build(TextDirection textDirection) {
       return new Directionality(
         textDirection: textDirection,
-        child: new MediaQuery(
+        child: const MediaQuery(
           data: const MediaQueryData(
             padding: const EdgeInsets.only(bottom: 200.0),
           ),
-          child: new Scaffold(
+          child: const Scaffold(
             floatingActionButton: const FloatingActionButton(
               onPressed: null,
               child: const Text('1'),

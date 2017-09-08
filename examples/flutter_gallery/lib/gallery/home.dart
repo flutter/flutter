@@ -197,7 +197,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
             opacity: new CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
             child: const Banner(
               message: 'PREVIEW',
-              location: BannerLocation.topRight,
+              location: BannerLocation.topEnd,
             )
           ),
         ]

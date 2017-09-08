@@ -2,7 +2,33 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+
+/// An [Invocation] and the [stack] trace that led to it.
+///
+/// Used by [TestRecordingCanvas] to trace canvas calls.
+class RecordedInvocation {
+  /// Create a record for an invocation list.
+  const RecordedInvocation(this.invocation, { this.stack });
+
+  /// The method that was called and its arguments.
+  final Invocation invocation;
+
+  /// The stack trace at the time of the method call.
+  final StackTrace stack;
+
+  @override
+  String toString() => _describeInvocation(invocation);
+
+  /// Converts [stack] to a string using the [FlutterError.defaultStackFilter] logic.
+  String stackToString({ String indent: '' }) {
+    assert(indent != null);
+    return indent + FlutterError.defaultStackFilter(
+      stack.toString().trimRight().split('\n')
+    ).join('\n$indent');
+  }
+}
 
 /// A [Canvas] for tests that records its method calls.
 ///
@@ -25,7 +51,7 @@ import 'package:flutter/rendering.dart';
 /// pattern matching API over [TestRecordingCanvas].
 class TestRecordingCanvas implements Canvas {
   /// All of the method calls on this canvas.
-  final List<Invocation> invocations = <Invocation>[];
+  final List<RecordedInvocation> invocations = <RecordedInvocation>[];
 
   int _saveCount = 0;
 
@@ -35,25 +61,25 @@ class TestRecordingCanvas implements Canvas {
   @override
   void save() {
     _saveCount += 1;
-    invocations.add(new _MethodCall(#save));
+    invocations.add(new RecordedInvocation(new _MethodCall(#save), stack: StackTrace.current));
   }
 
   @override
   void saveLayer(Rect bounds, Paint paint) {
     _saveCount += 1;
-    invocations.add(new _MethodCall(#saveLayer, <dynamic>[bounds, paint]));
+    invocations.add(new RecordedInvocation(new _MethodCall(#saveLayer, <dynamic>[bounds, paint]), stack: StackTrace.current));
   }
 
   @override
   void restore() {
     _saveCount -= 1;
     assert(_saveCount >= 0);
-    invocations.add(new _MethodCall(#restore));
+    invocations.add(new RecordedInvocation(new _MethodCall(#restore), stack: StackTrace.current));
   }
 
   @override
   void noSuchMethod(Invocation invocation) {
-    invocations.add(invocation);
+    invocations.add(new RecordedInvocation(invocation, stack: StackTrace.current));
   }
 }
 
@@ -100,4 +126,40 @@ class _MethodCall implements Invocation {
   Map<Symbol, dynamic> get namedArguments => <Symbol, dynamic>{};
   @override
   List<dynamic> get positionalArguments => _arguments;
+}
+
+String _valueName(Object value) {
+  if (value is double)
+    return value.toStringAsFixed(1);
+  return value.toString();
+}
+
+// Workaround for https://github.com/dart-lang/sdk/issues/28372
+String _symbolName(Symbol symbol) {
+  // WARNING: Assumes a fixed format for Symbol.toString which is *not*
+  // guaranteed anywhere.
+  final String s = '$symbol';
+  return s.substring(8, s.length - 2);
+}
+
+// Workaround for https://github.com/dart-lang/sdk/issues/28373
+String _describeInvocation(Invocation call) {
+  final StringBuffer buffer = new StringBuffer();
+  buffer.write(_symbolName(call.memberName));
+  if (call.isSetter) {
+    buffer.write(call.positionalArguments[0].toString());
+  } else if (call.isMethod) {
+    buffer.write('(');
+    buffer.writeAll(call.positionalArguments.map<String>(_valueName), ', ');
+    String separator = call.positionalArguments.isEmpty ? '' : ', ';
+    call.namedArguments.forEach((Symbol name, Object value) {
+      buffer.write(separator);
+      buffer.write(_symbolName(name));
+      buffer.write(': ');
+      buffer.write(_valueName(value));
+      separator = ', ';
+    });
+    buffer.write(')');
+  }
+  return buffer.toString();
 }

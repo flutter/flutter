@@ -396,9 +396,9 @@ class ListTile extends StatelessWidget {
       children.add(IconTheme.merge(
         data: iconThemeData,
         child: new Container(
-          margin: const EdgeInsets.only(right: 16.0),
+          margin: const EdgeInsetsDirectional.only(end: 16.0),
           width: 40.0,
-          alignment: FractionalOffset.centerLeft,
+          alignment: FractionalOffsetDirectional.centerStart,
           child: leading,
         ),
       ));
@@ -432,9 +432,9 @@ class ListTile extends StatelessWidget {
       children.add(IconTheme.merge(
         data: iconThemeData,
         child: new Container(
-          margin: const EdgeInsets.only(left: 16.0),
+          margin: const EdgeInsetsDirectional.only(start: 16.0),
           width: 40.0,
-          alignment: FractionalOffset.centerRight,
+          alignment: FractionalOffsetDirectional.centerEnd,,
           child: trailing,
         ),
       ));

@@ -2867,11 +2867,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null));
-    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? "can use size" : null));
-    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints));
+    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, ifNull: 'MISSING'));
+    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints, ifNull: 'MISSING'));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
     description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
-    description.add(new DiagnosticsProperty<SemanticsNode>('_semantics', _semantics, defaultValue: null));
+    description.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
     description.add(new FlagProperty(
       'isBlockingSemanticsOfPreviouslyPaintedNodes',
       value: isBlockingSemanticsOfPreviouslyPaintedNodes,

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -55,7 +57,13 @@ Future<Null> pubGet({
     if (offline)
       args.add('--offline');
     try {
-      await pub(args, directory: directory, filter: _filterOverrideWarnings, failureMessage: 'pub $command failed');
+      await pub(
+        args,
+        directory: directory,
+        filter: _filterOverrideWarnings,
+        failureMessage: 'pub $command failed',
+        retry: true,
+      );
     } finally {
       status.stop();
     }
@@ -70,21 +78,63 @@ Future<Null> pubGet({
 
 typedef String MessageFilter(String message);
 
+/// Runs pub in 'batch' mode, forwarding complete lines written by pub to its
+/// stdout/stderr streams to the corresponding stream of this process, optionally
+/// applying filtering. The pub process will not receive anything on its stdin stream.
 Future<Null> pub(List<String> arguments, {
   String directory,
   MessageFilter filter,
-  String failureMessage: 'pub failed'
+  String failureMessage: 'pub failed',
+  @required bool retry,
 }) async {
-  final List<String> command = <String>[ sdkBinaryName('pub') ]..addAll(arguments);
-  final int code = await runCommandAndStreamOutput(
-    command,
-    workingDirectory: directory,
-    mapFunction: filter,
-    environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
-  );
+  int attempts = 0;
+  int duration = 1;
+  int code;
+  while (true) {
+    attempts += 1;
+    code = await runCommandAndStreamOutput(
+      _pubCommand(arguments),
+      workingDirectory: directory,
+      mapFunction: filter,
+      environment: _pubEnvironment,
+    );
+    if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
+      break;
+    printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
+    await new Future<Null>.delayed(new Duration(seconds: duration));
+    if (duration < 64)
+      duration *= 2;
+  }
+  assert(code != null);
   if (code != 0)
     throwToolExit('$failureMessage ($code)', exitCode: code);
 }
+
+/// Runs pub in 'interactive' mode, directly piping the stdin stream of this
+/// process to that of pub, and the stdout/stderr stream of pub to the corresponding
+/// streams of this process.
+Future<Null> pubInteractively(List<String> arguments, {
+  String directory,
+}) async {
+  final int code = await runInteractively(
+    _pubCommand(arguments),
+    workingDirectory: directory,
+    environment: _pubEnvironment,
+  );
+  if (code != 0)
+    throwToolExit('pub finished with exit code $code', exitCode: code);
+}
+
+/// The command used for running pub.
+List<String> _pubCommand(List<String> arguments) {
+  return <String>[ sdkBinaryName('pub') ]..addAll(arguments);
+}
+
+/// The full environment used when running pub.
+Map<String, String> get _pubEnvironment => <String, String>{
+  'FLUTTER_ROOT': Cache.flutterRoot,
+  _pubEnvironmentKey: _getPubEnvironmentValue(),
+};
 
 final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 

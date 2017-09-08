@@ -12,6 +12,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
 import 'vmservice.dart';
@@ -361,9 +362,12 @@ class DevFS {
 
   /// Update files on the device and return the number of bytes sync'd
   Future<int> update({
+    String mainPath,
+    String target,
     AssetBundle bundle,
     bool bundleDirty: false,
     Set<String> fileFilter,
+    ResidentCompiler generator,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -427,6 +431,18 @@ class DevFS {
     });
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
+      if (generator != null) {
+        final List<String> invalidatedFiles = <String>[];
+        dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
+          if (content is DevFSFileContent)
+            invalidatedFiles.add(content.file.uri.toString());
+        });
+        final String compiledBinary = await generator.recompile(mainPath, invalidatedFiles);
+        if (compiledBinary != null && compiledBinary.isNotEmpty)
+          dirtyEntries.putIfAbsent(Uri.parse(target + '.dill'),
+                  () => new DevFSFileContent(fs.file(compiledBinary)));
+      }
+
       if (_httpWriter != null) {
         try {
           await _httpWriter.write(dirtyEntries);

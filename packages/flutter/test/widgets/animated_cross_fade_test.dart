@@ -10,20 +10,23 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('AnimatedCrossFade test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: const AnimatedCrossFade(
-          firstChild: const SizedBox(
-            width: 100.0,
-            height: 100.0
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const AnimatedCrossFade(
+            firstChild: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: const SizedBox(
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showFirst,
           ),
-          secondChild: const SizedBox(
-            width: 200.0,
-            height: 200.0
-          ),
-          duration: const Duration(milliseconds: 200),
-          crossFadeState: CrossFadeState.showFirst,
-        )
-      )
+        ),
+      ),
     );
 
     expect(find.byType(FadeTransition), findsNWidgets(2));
@@ -32,20 +35,23 @@ void main() {
     expect(box.size.height, equals(100.0));
 
     await tester.pumpWidget(
-      const Center(
-        child: const AnimatedCrossFade(
-          firstChild: const SizedBox(
-            width: 100.0,
-            height: 100.0
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const AnimatedCrossFade(
+            firstChild: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: const SizedBox(
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showSecond,
           ),
-          secondChild: const SizedBox(
-            width: 200.0,
-            height: 200.0
-          ),
-          duration: const Duration(milliseconds: 200),
-          crossFadeState: CrossFadeState.showSecond,
-        )
-      )
+        ),
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -58,20 +64,23 @@ void main() {
 
   testWidgets('AnimatedCrossFade test showSecond', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(
-        child: const AnimatedCrossFade(
-          firstChild: const SizedBox(
-            width: 100.0,
-            height: 100.0
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const AnimatedCrossFade(
+            firstChild: const SizedBox(
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: const SizedBox(
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showSecond,
           ),
-          secondChild: const SizedBox(
-            width: 200.0,
-            height: 200.0
-          ),
-          duration: const Duration(milliseconds: 200),
-          crossFadeState: CrossFadeState.showSecond,
-        )
-      )
+        ),
+      ),
     );
 
     expect(find.byType(FadeTransition), findsNWidgets(2));
@@ -80,48 +89,54 @@ void main() {
     expect(box.size.height, equals(200.0));
   });
 
-  testWidgets('AnimatedCrossFade alignment', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade alignment (VISUAL)', (WidgetTester tester) async {
     final Key firstKey = new UniqueKey();
     final Key secondKey = new UniqueKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedCrossFade(
-          alignment: FractionalOffset.bottomRight,
-          firstChild: new SizedBox(
-            key: firstKey,
-            width: 100.0,
-            height: 100.0
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new AnimatedCrossFade(
+            alignment: FractionalOffset.bottomRight,
+            firstChild: new SizedBox(
+              key: firstKey,
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: new SizedBox(
+              key: secondKey,
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showFirst,
           ),
-          secondChild: new SizedBox(
-            key: secondKey,
-            width: 200.0,
-            height: 200.0
-          ),
-          duration: const Duration(milliseconds: 200),
-          crossFadeState: CrossFadeState.showFirst
-        )
-      )
+        ),
+      ),
     );
 
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedCrossFade(
-          alignment: FractionalOffset.bottomRight,
-          firstChild: new SizedBox(
-            key: firstKey,
-            width: 100.0,
-            height: 100.0
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new AnimatedCrossFade(
+            alignment: FractionalOffset.bottomRight,
+            firstChild: new SizedBox(
+              key: firstKey,
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: new SizedBox(
+              key: secondKey,
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showSecond,
           ),
-          secondChild: new SizedBox(
-            key: secondKey,
-            width: 200.0,
-            height: 200.0
-          ),
-          duration: const Duration(milliseconds: 200),
-          crossFadeState: CrossFadeState.showSecond
-        )
-      )
+        ),
+      ),
     );
 
     await tester.pump(const Duration(milliseconds: 100));
@@ -132,12 +147,131 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
   });
 
+  testWidgets('AnimatedCrossFade alignment (LTR)', (WidgetTester tester) async {
+    final Key firstKey = new UniqueKey();
+    final Key secondKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new AnimatedCrossFade(
+            alignment: FractionalOffsetDirectional.bottomEnd,
+            firstChild: new SizedBox(
+              key: firstKey,
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: new SizedBox(
+              key: secondKey,
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showFirst,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new AnimatedCrossFade(
+            alignment: FractionalOffsetDirectional.bottomEnd,
+            firstChild: new SizedBox(
+              key: firstKey,
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: new SizedBox(
+              key: secondKey,
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showSecond,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final RenderBox box1 = tester.renderObject(find.byKey(firstKey));
+    final RenderBox box2 = tester.renderObject(find.byKey(secondKey));
+    expect(box1.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
+  });
+
+  testWidgets('AnimatedCrossFade alignment (RTL)', (WidgetTester tester) async {
+    final Key firstKey = new UniqueKey();
+    final Key secondKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Center(
+          child: new AnimatedCrossFade(
+            alignment: FractionalOffsetDirectional.bottomEnd,
+            firstChild: new SizedBox(
+              key: firstKey,
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: new SizedBox(
+              key: secondKey,
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showFirst,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Center(
+          child: new AnimatedCrossFade(
+            alignment: FractionalOffsetDirectional.bottomEnd,
+            firstChild: new SizedBox(
+              key: firstKey,
+              width: 100.0,
+              height: 100.0,
+            ),
+            secondChild: new SizedBox(
+              key: secondKey,
+              width: 200.0,
+              height: 200.0,
+            ),
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showSecond,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final RenderBox box1 = tester.renderObject(find.byKey(firstKey));
+    final RenderBox box2 = tester.renderObject(find.byKey(secondKey));
+    expect(box1.localToGlobal(Offset.zero), const Offset(325.0, 175.0));
+    expect(box2.localToGlobal(Offset.zero), const Offset(325.0, 175.0));
+  });
+
   Widget crossFadeWithWatcher({bool towardsSecond: false}) {
-    return new AnimatedCrossFade(
-      firstChild: const _TickerWatchingWidget(),
-      secondChild: new Container(),
-      crossFadeState: towardsSecond ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-      duration: const Duration(milliseconds: 50),
+    return new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new AnimatedCrossFade(
+        firstChild: const _TickerWatchingWidget(),
+        secondChild: new Container(),
+        crossFadeState: towardsSecond ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+        duration: const Duration(milliseconds: 50),
+      ),
     );
   }
 
@@ -185,30 +319,45 @@ void main() {
   });
 
   testWidgets('AnimatedCrossFade.layoutBuilder', (WidgetTester tester) async {
-    await tester.pumpWidget(const AnimatedCrossFade(
-      firstChild: const Text('AAA'),
-      secondChild: const Text('BBB'),
-      crossFadeState: CrossFadeState.showFirst,
-      duration: const Duration(milliseconds: 50),
-    ));
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const AnimatedCrossFade(
+          firstChild: const Text('AAA', textDirection: TextDirection.ltr),
+          secondChild: const Text('BBB', textDirection: TextDirection.ltr),
+          crossFadeState: CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 50),
+        ),
+      ),
+    );
     expect(find.text('AAA'), findsOneWidget);
     expect(find.text('BBB'), findsOneWidget);
-    await tester.pumpWidget(new AnimatedCrossFade(
-      firstChild: const Text('AAA'),
-      secondChild: const Text('BBB'),
-      crossFadeState: CrossFadeState.showFirst,
-      duration: const Duration(milliseconds: 50),
-      layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new AnimatedCrossFade(
+          firstChild: const Text('AAA', textDirection: TextDirection.ltr),
+          secondChild: const Text('BBB', textDirection: TextDirection.ltr),
+          crossFadeState: CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 50),
+          layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
+        ),
+      ),
+    );
     expect(find.text('AAA'), findsOneWidget);
     expect(find.text('BBB'), findsNothing);
-    await tester.pumpWidget(new AnimatedCrossFade(
-      firstChild: const Text('AAA'),
-      secondChild: const Text('BBB'),
-      crossFadeState: CrossFadeState.showSecond,
-      duration: const Duration(milliseconds: 50),
-      layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new AnimatedCrossFade(
+          firstChild: const Text('AAA', textDirection: TextDirection.ltr),
+          secondChild: const Text('BBB', textDirection: TextDirection.ltr),
+          crossFadeState: CrossFadeState.showSecond,
+          duration: const Duration(milliseconds: 50),
+          layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
+        ),
+      ),
+    );
     expect(find.text('BBB'), findsOneWidget);
     expect(find.text('AAA'), findsNothing);
   });

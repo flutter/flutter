@@ -10,8 +10,9 @@ void main() {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(
         style: const TextStyle(height: 1.0),
-        text: 'Hello World'
-      )
+        text: 'Hello World',
+      ),
+      textDirection: TextDirection.ltr,
     );
     final RenderListBody testBlock = new RenderListBody(
       children: <RenderBox>[

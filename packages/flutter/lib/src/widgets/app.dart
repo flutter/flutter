@@ -28,9 +28,7 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
   const _WidgetsLocalizationsDelegate();
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(const WidgetsLocalizations());
-  }
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
   @override
   bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
@@ -298,28 +296,18 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
-    Widget result = new MediaQuery(
-      data: new MediaQueryData.fromWindow(ui.window),
-      child: new Localizations(
-        locale: widget.locale ?? _locale,
-        delegates: _localizationsDelegates.toList(),
-        child: new Title(
-          title: widget.title,
-          color: widget.color,
-          child: new Navigator(
-            key: _navigator,
-            initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
-            onGenerateRoute: widget.onGenerateRoute,
-            onUnknownRoute: widget.onUnknownRoute,
-            observers: widget.navigatorObservers
-          )
-        )
-      )
+    Widget result = new Navigator(
+      key: _navigator,
+      initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
+      onGenerateRoute: widget.onGenerateRoute,
+      onUnknownRoute: widget.onUnknownRoute,
+      observers: widget.navigatorObservers,
     );
+
     if (widget.textStyle != null) {
       result = new DefaultTextStyle(
         style: widget.textStyle,
-        child: result
+        child: result,
       );
     }
 
@@ -337,7 +325,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
       );
     }
-
     if (performanceOverlay != null) {
       result = new Stack(
         children: <Widget>[
@@ -346,11 +333,13 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         ]
       );
     }
+
     if (widget.showSemanticsDebugger) {
       result = new SemanticsDebugger(
         child: result,
       );
     }
+
     assert(() {
       if (widget.debugShowWidgetInspector || WidgetsApp.debugShowWidgetInspectorOverride) {
         result = new WidgetInspector(
@@ -366,7 +355,17 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       return true;
     });
 
-    return result;
+    return new MediaQuery(
+      data: new MediaQueryData.fromWindow(ui.window),
+      child: new Localizations(
+        locale: widget.locale ?? _locale,
+        delegates: _localizationsDelegates.toList(),
+        child: new Title(
+          title: widget.title,
+          color: widget.color,
+          child: result,
+        ),
+      ),
+    );
   }
-
 }

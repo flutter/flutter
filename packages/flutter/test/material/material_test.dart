@@ -60,41 +60,44 @@ void main() {
     final List<Size> log = <Size>[];
 
     await tester.pumpWidget(
-      new Column(
-        children: <Widget>[
-          new SizedBox(
-            width: 150.0,
-            height: 150.0,
-            child: new CustomPaint(
-              painter: new PaintRecorder(log),
-            ),
-          ),
-          new Expanded(
-            child: new Material(
-              child: new Column(
-                children: <Widget>[
-                  new Expanded(
-                    child: new ListView(
-                      children: <Widget>[
-                        new Container(
-                          height: 2000.0,
-                          color: const Color(0xFF00FF00),
-                        ),
-                      ],
-                    ),
-                  ),
-                  new SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                    child: new CustomPaint(
-                      painter: new PaintRecorder(log),
-                    ),
-                  ),
-                ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Column(
+          children: <Widget>[
+            new SizedBox(
+              width: 150.0,
+              height: 150.0,
+              child: new CustomPaint(
+                painter: new PaintRecorder(log),
               ),
             ),
-          ),
-        ],
+            new Expanded(
+              child: new Material(
+                child: new Column(
+                  children: <Widget>[
+                    new Expanded(
+                      child: new ListView(
+                        children: <Widget>[
+                          new Container(
+                            height: 2000.0,
+                            color: const Color(0xFF00FF00),
+                          ),
+                        ],
+                      ),
+                    ),
+                    new SizedBox(
+                      width: 100.0,
+                      height: 100.0,
+                      child: new CustomPaint(
+                        painter: new PaintRecorder(log),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
 

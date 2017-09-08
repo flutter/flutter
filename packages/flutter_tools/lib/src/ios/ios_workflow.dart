@@ -34,7 +34,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
 
-  String get iosDeployMinimumVersion => '1.9.0';
+  String get iosDeployMinimumVersion => '1.9.2';
 
   Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
@@ -91,7 +91,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         xcodeStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'Your Mac needs to enabled for developer mode before using Xcode for the first time.\n'
-          'Run \'sudo DevToolsSecurity -enable\' or open Xcode'
+          'Run \'sudo DevToolsSecurity -enable\' to enable developer mode.'
         ));
       }
 

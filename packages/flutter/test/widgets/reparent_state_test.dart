@@ -56,6 +56,7 @@ void main() {
     final StateMarker grandchild = const StateMarker();
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Container(
             child: new StateMarker(key: left)
@@ -82,6 +83,7 @@ void main() {
     final StateMarker newGrandchild = const StateMarker();
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Container(
             child: new StateMarker(
@@ -129,6 +131,7 @@ void main() {
     final StateMarker grandchild = const StateMarker();
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new StateMarker(key: left),
           new StateMarker(
@@ -151,6 +154,7 @@ void main() {
     final StateMarker newGrandchild = const StateMarker();
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new StateMarker(
             key: right,
@@ -195,16 +199,21 @@ void main() {
     final StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
-    await tester.pumpWidget(new ListView(
-      itemExtent: 100.0,
-      children: <Widget>[
-        new Container(
-          key: const Key('container'),
-          height: 100.0,
-          child: new StateMarker(key: key),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          itemExtent: 100.0,
+          children: <Widget>[
+            new Container(
+              key: const Key('container'),
+              height: 100.0,
+              child: new StateMarker(key: key),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(key.currentState, equals(keyState));
     expect(keyState.marker, equals("marked"));
@@ -219,6 +228,7 @@ void main() {
     final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new StateMarker(key: key),
         new Container(width: 100.0, height: 100.0),
@@ -229,6 +239,7 @@ void main() {
     keyState.marker = "marked";
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new StateMarker(key: key),
@@ -239,6 +250,7 @@ void main() {
     expect(keyState.marker, equals("marked"));
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new StateMarker(key: key),
         new Container(width: 100.0, height: 100.0),
@@ -253,6 +265,7 @@ void main() {
     final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new StateMarker(key: key),
@@ -264,6 +277,7 @@ void main() {
     keyState.marker = "marked";
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(width: 100.0, height: 100.0, child: new StateMarker(key: key)),
         new Container(width: 100.0, height: 100.0),
@@ -274,6 +288,7 @@ void main() {
     expect(keyState.marker, equals("marked"));
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new StateMarker(key: key),
@@ -285,6 +300,7 @@ void main() {
     expect(keyState.marker, equals("marked"));
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new Container(width: 100.0, height: 100.0, child: new StateMarker(key: key)),
@@ -295,6 +311,7 @@ void main() {
     expect(keyState.marker, equals("marked"));
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(width: 100.0, height: 100.0),
         new StateMarker(key: key),
