@@ -16,13 +16,13 @@ void main() {
               key: const ValueKey<int>(0),
               behavior: HitTestBehavior.opaque,
               onTap: () {},
-              child: new SizedBox.expand(),
+              child: const SizedBox.expand(),
             ),
             new GestureDetector(
               key: const ValueKey<int>(1),
               behavior: HitTestBehavior.opaque,
-              onTap: () {},
-              child: new SizedBox.expand(),
+              onTap: () { },
+              child: const SizedBox.expand(),
             ),
           ],
         )
@@ -30,7 +30,7 @@ void main() {
       expect(find.byType(GestureDetector), findsNWidgets(2));
       final Finder hitTestable = find.byType(GestureDetector).hitTestable(at: const FractionalOffset(0.5, 0.5));
       expect(hitTestable, findsOneWidget);
-      expect(hitTestable.evaluate().single.widget.key, const ValueKey<int>(0));
+      expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });
   });
 }

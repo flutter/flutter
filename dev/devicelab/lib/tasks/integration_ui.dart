@@ -27,7 +27,6 @@ Future<TaskResult> runEndToEndTests() async {
     ];
 
     for (final String entryPoint in entryPoints) {
-      await flutter('build', options: <String>['clean']);
       await flutter('drive', options: <String>['--verbose', '-d', deviceId, entryPoint]);
     }
   });

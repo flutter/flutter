@@ -290,7 +290,7 @@ abstract class Finder {
   ///
   /// The [at] parameter specifies the location relative to the size of the
   /// target element where the hit test is performed.
-  Finder hitTestable({@required FractionalOffset at}) => new _HitTestableFinder(this, at);
+  Finder hitTestable({ FractionalOffset at: FractionalOffset.center }) => new _HitTestableFinder(this, at);
 
   @override
   String toString() {
@@ -355,6 +355,7 @@ class _HitTestableFinder extends Finder {
       for (final HitTestEntry entry in hitResult.path) {
         if (entry.target == candidate.renderObject) {
           yield candidate;
+          break;
         }
       }
     }
