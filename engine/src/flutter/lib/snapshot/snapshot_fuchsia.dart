@@ -32,4 +32,3 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lib.fidl.dart/bindings.dart';
-import 'package:lib.fidl.dart/core.dart';
