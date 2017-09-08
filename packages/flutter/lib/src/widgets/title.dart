@@ -11,15 +11,12 @@ import 'framework.dart';
 /// A widget that describes this app in the operating system.
 class Title extends StatelessWidget {
   /// Creates a widget that describes this app to the operating system.
-  ///
-  /// If [title] is null, then the title will be set to the empty string.
   Title({
     Key key,
-    String title,
+    this.title,
     this.color,
     @required this.child,
   }) : assert(color == null || color.alpha == 0xFF),
-       title = title ?? '',
        super(key: key);
 
   /// A one-line description of this app for use in the window manager.

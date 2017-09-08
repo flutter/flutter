@@ -50,12 +50,6 @@ class CreateCommand extends FlutterCommand {
       },
       defaultsTo: 'app',
     );
-    argParser.addFlag(
-        'plugin',
-        negatable: false,
-        defaultsTo: false,
-        hide: true,
-    );
     argParser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
@@ -125,8 +119,6 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     String template = argResults['template'];
-    if (argResults['plugin'])
-      template = 'plugin';
     final bool generatePlugin = template == 'plugin';
     final bool generatePackage = template == 'package';
 
