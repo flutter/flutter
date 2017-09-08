@@ -94,7 +94,7 @@ class MaterialApp extends StatefulWidget {
     this.onUnknownRoute,
     this.locale,
     this.localizationsDelegates,
-    this.resolveLocaleCallback,
+    this.localeResolutionCallback,
     this.supportedLocales: const <Locale>[const Locale('en', 'US')],
     this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
@@ -251,12 +251,12 @@ class MaterialApp extends StatefulWidget {
   ///
   /// If the callback is null then the resolved locale is:
   /// - The callback's `locale` parameter if it's equal to a supported locale.
-  /// - The first supported locale with the same [Locale.langaugeCode] as the
+  /// - The first supported locale with the same [Locale.languageCode] as the
   ///   callback's `locale` parameter.
   /// - The first supported locale.
   ///
   /// This callback is passed along to the [WidgetsApp] built by this widget.
-  final ResolveLocaleCallback resolveLocaleCallback;
+  final LocaleResolutionCallback localeResolutionCallback;
 
   /// The list of locales that this app has been localized for.
   ///
@@ -266,6 +266,32 @@ class MaterialApp extends StatefulWidget {
   /// This list must not null. It's default value is just
   /// `[const Locale('en', 'US')]`. It is simply passed along to the
   /// [WidgetsApp] built by this widget.
+  ///
+  /// The order of the list matters. By default, if the device's locale doesn't
+  /// exactly match a locale in [supportedLocales] then the first locale in
+  /// [supportedLocales] with a matching [Locale.languageCode] is used. If that
+  /// fails then the first locale in [supportedLocales] is used. The default
+  /// locale resolution algorithm can be overridden with [localeResolutionCallback].
+  ///
+  /// The material widgets include translations for locales with the following
+  /// language codes:
+  /// ```
+  /// ar - Arabic
+  /// de - German
+  /// en - English
+  /// es - Spanish
+  /// fa - Farsi (Persian)
+  /// fr - French
+  /// he - Hebrew
+  /// it - Italian
+  /// ja - Japanese
+  /// ps - Pashto
+  /// pt - Portugese
+  /// ru - Russian
+  /// sd - Sindhi
+  /// ur - Urdu
+  /// zh - Chinese (simplified)
+  /// ```
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
@@ -434,7 +460,7 @@ class _MaterialAppState extends State<MaterialApp> {
         onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
-        resolveLocaleCallback: widget.resolveLocaleCallback,
+        localeResolutionCallback: widget.localeResolutionCallback,
         supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,

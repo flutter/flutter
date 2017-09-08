@@ -107,7 +107,7 @@ Widget buildFrame({
   Locale locale,
   Iterable<LocalizationsDelegate<dynamic>> delegates,
   WidgetBuilder buildContent,
-  ResolveLocaleCallback resolveLocaleCallback,
+  LocaleResolutionCallback localeResolutionCallback,
   List<Locale> supportedLocales: const <Locale>[
     const Locale('en', 'US'),
     const Locale('en', 'GB'),
@@ -117,7 +117,7 @@ Widget buildFrame({
     color: const Color(0xFFFFFFFF),
     locale: locale,
     localizationsDelegates: delegates,
-    resolveLocaleCallback: resolveLocaleCallback,
+    localeResolutionCallback: localeResolutionCallback,
     supportedLocales: supportedLocales,
     onGenerateRoute: (RouteSettings settings) {
       return new PageRouteBuilder<Null>(
@@ -449,10 +449,10 @@ void main() {
     expect(Directionality.of(pageContext), TextDirection.rtl);
   });
 
-  testWidgets('resolveLocaleCallback override', (WidgetTester tester) async {
+  testWidgets('localeResolutionCallback override', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildFrame(
-        resolveLocaleCallback: (Locale newLocale, Iterable<Locale> supportedLocales) {
+        localeResolutionCallback: (Locale newLocale, Iterable<Locale> supportedLocales) {
           return const Locale('foo', 'BAR');
         },
         buildContent: (BuildContext context) {
