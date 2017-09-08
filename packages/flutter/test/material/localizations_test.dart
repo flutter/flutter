@@ -77,12 +77,16 @@ void main() {
     for (String language in languages) {
       final Locale locale = new Locale(language, '');
       final MaterialLocalizations localizations = new DefaultMaterialLocalizations(locale);
+
       expect(localizations.openAppDrawerTooltip, isNotNull);
       expect(localizations.backButtonTooltip, isNotNull);
       expect(localizations.closeButtonTooltip, isNotNull);
       expect(localizations.nextMonthTooltip, isNotNull);
       expect(localizations.previousMonthTooltip, isNotNull);
+      expect(localizations.nextPageTooltip, isNotNull);
+      expect(localizations.previousPageTooltip, isNotNull);
       expect(localizations.licensesPageTitle, isNotNull);
+      expect(localizations.rowsPerPageTitle, isNotNull);
       expect(localizations.cancelButtonLabel, isNotNull);
       expect(localizations.closeButtonLabel, isNotNull);
       expect(localizations.continueButtonLabel, isNotNull);
@@ -97,6 +101,19 @@ void main() {
       expect(localizations.selectedRowCountTitle(1), isNotNull);
       expect(localizations.selectedRowCountTitle(2), isNotNull);
       expect(localizations.selectedRowCountTitle(100), isNotNull);
+      expect(localizations.selectedRowCountTitle(0).contains(r'$selectedRowCount'), isFalse);
+      expect(localizations.selectedRowCountTitle(1).contains(r'$selectedRowCount'), isFalse);
+      expect(localizations.selectedRowCountTitle(2).contains(r'$selectedRowCount'), isFalse);
+      expect(localizations.selectedRowCountTitle(100).contains(r'$selectedRowCount'), isFalse);
+
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, true), isNotNull);
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNotNull);
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$firstRow'), isFalse);
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$lastRow'), isFalse);
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$rowCount'), isFalse);
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$firstRow'), isFalse);
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$lastRow'), isFalse);
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$rowCount'), isFalse);
     }
   });
 }

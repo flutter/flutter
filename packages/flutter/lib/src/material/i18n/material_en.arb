@@ -47,6 +47,19 @@
     "type": "text"
   },
 
+  "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
+  "@pageRowInfoTitle": {
+    "description": "Title for the [PaginatedDataTable]'s row info footer",
+    "type": "text"
+  },
+
+  "rowsPerPageTitle": "Rows per page:",
+  "@rowsPerPageTitle": {
+    "description": "Title for the [PaginatedDataTable]'s 'rows per page' footer.",
+    "type": "text"
+  },
+
   "selectedRowCountTitleOne": "1 item selected",
   "selectedRowCountTitleOther": "$selectedRowCount items selected",
   "@selectedRowCountTitle": {

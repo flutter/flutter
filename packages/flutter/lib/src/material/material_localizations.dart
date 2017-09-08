@@ -16,7 +16,7 @@ import 'i18n/localizations.dart';
 ///  * [DefaultMaterialLocalizations], which implements this interface
 ///    and supports a variety of locales.
 abstract class MaterialLocalizations {
-  /// The tooltip for the leading [AppBar] menu (aka 'hamburger') button
+  /// The tooltip for the leading [AppBar] menu (aka 'hamburger') button.
   String get openAppDrawerTooltip;
 
   /// The [BackButton]'s tooltip.
@@ -40,7 +40,13 @@ abstract class MaterialLocalizations {
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
 
-  /// Title for the PaginatedDataTable's selected row count header
+  /// Title for the [PaginatedDataTable]'s row info footer.
+  String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate);
+
+  /// Title for the [PaginatedDataTable]'s "rows per page" footer.
+  String get rowsPerPageTitle;
+
+  /// Title for the PaginatedDataTable's selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
 
   /// Label for "cancel" buttons and menu items.
@@ -108,75 +114,95 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// have been translated.
   final Locale locale;
 
-  @override
-  String get openAppDrawerTooltip => _nameToValue["openAppDrawerTooltip"];
-
-  @override
-  String get backButtonTooltip => _nameToValue["backButtonTooltip"];
-
-  @override
-  String get closeButtonTooltip => _nameToValue["closeButtonTooltip"];
-
-  @override
-  String get nextMonthTooltip => _nameToValue["nextMonthTooltip"];
-
-  @override
-  String get previousMonthTooltip => _nameToValue["previousMonthTooltip"];
-
-  @override
-  String get nextPageTooltip => _nameToValue["nextPageTooltip"];
-
-  @override
-  String get previousPageTooltip => _nameToValue["previousPageTooltip"];
-
-  @override
-  String get licensesPageTitle => _nameToValue["licensesPageTitle"];
-
-  @override
-  String selectedRowCountTitle(int selectedRowCount) {
+  // TODO(hmuller): the rules for mapping from an integer value to
+  // "one" or "two" etc. are locale specific and an additional "few" category
+  // is needed. See http://cldr.unicode.org/index/cldr-spec/plural-rules
+  String _nameToPluralValue(int count, String key) {
     String text;
-    if (selectedRowCount == 0)
-      text = _nameToValue["selectedRowCountTitleZero"];
-    else if (selectedRowCount == 1)
-      text = _nameToValue["selectedRowCountTitleOne"];
-    else if (selectedRowCount == 2)
-      text = _nameToValue["selectedRowCountTitleTwo"];
-    else if (selectedRowCount > 2)
-      text = _nameToValue["selectedRowCountTitleMany"];
-    text ??= _nameToValue["selectedRowCountTitleOther"];
-
+    if (count == 0)
+      text = _nameToValue['${key}Zero'];
+    else if (count == 1)
+      text = _nameToValue['${key}One'];
+    else if (count == 2)
+      text = _nameToValue['${key}Two'];
+    else if (count > 2)
+      text = _nameToValue['${key}Many'];
+    text ??= _nameToValue['${key}Other'];
     assert(text != null);
-    if (text.contains(r'$selectedRowCount'))
-      text = text.replaceFirst(r'$selectedRowCount', selectedRowCount.toString());
     return text;
   }
 
   @override
-  String get cancelButtonLabel => _nameToValue["cancelButtonLabel"];
+  String get openAppDrawerTooltip => _nameToValue['openAppDrawerTooltip'];
 
   @override
-  String get closeButtonLabel => _nameToValue["closeButtonLabel"];
+  String get backButtonTooltip => _nameToValue['backButtonTooltip'];
 
   @override
-  String get continueButtonLabel => _nameToValue["continueButtonLabel"];
+  String get closeButtonTooltip => _nameToValue['closeButtonTooltip'];
 
   @override
-  String get copyButtonLabel => _nameToValue["copyButtonLabel"];
+  String get nextMonthTooltip => _nameToValue['nextMonthTooltip'];
 
   @override
-  String get cutButtonLabel => _nameToValue["cutButtonLabel"];
+  String get previousMonthTooltip => _nameToValue['previousMonthTooltip'];
 
   @override
-  String get okButtonLabel => _nameToValue["okButtonLabel"];
+  String get nextPageTooltip => _nameToValue['nextPageTooltip'];
 
   @override
-  String get pasteButtonLabel => _nameToValue["pasteButtonLabel"];
+  String get previousPageTooltip => _nameToValue['previousPageTooltip'];
 
   @override
-  String get selectAllButtonLabel => _nameToValue["selectAllButtonLabel"];
+  String get licensesPageTitle => _nameToValue['licensesPageTitle'];
 
   @override
-  String get viewLicensesButtonLabel => _nameToValue["viewLicensesButtonLabel"];
+  String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
+    String text = rowCountIsApproximate ? _nameToValue['pageRowsInfoTitleApproximate'] : null;
+    text ??= _nameToValue['pageRowsInfoTitle'];
+    assert(text != null, 'A $locale localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
+    // TODO(hansmuller): this could be more efficient.
+    return text
+      .replaceFirst(r'$firstRow', firstRow.toString())
+      .replaceFirst(r'$lastRow', lastRow.toString())
+      .replaceFirst(r'$rowCount', rowCount.toString());
+  }
+
+  @override
+  String get rowsPerPageTitle => _nameToValue['rowsPerPageTitle'];
+
+  @override
+  String selectedRowCountTitle(int selectedRowCount) {
+    return _nameToPluralValue(selectedRowCount, 'selectedRowCountTitle') // asserts on no match
+      .replaceFirst(r'$selectedRowCount', selectedRowCount.toString());
+  }
+
+  @override
+  String get cancelButtonLabel => _nameToValue['cancelButtonLabel'];
+
+  @override
+  String get closeButtonLabel => _nameToValue['closeButtonLabel'];
+
+  @override
+  String get continueButtonLabel => _nameToValue['continueButtonLabel'];
+
+  @override
+  String get copyButtonLabel => _nameToValue['copyButtonLabel'];
+
+  @override
+  String get cutButtonLabel => _nameToValue['cutButtonLabel'];
+
+  @override
+  String get okButtonLabel => _nameToValue['okButtonLabel'];
+
+  @override
+  String get pasteButtonLabel => _nameToValue['pasteButtonLabel'];
+
+  @override
+  String get selectAllButtonLabel => _nameToValue['selectAllButtonLabel'];
+
+  @override
+  String get viewLicensesButtonLabel => _nameToValue['viewLicensesButtonLabel'];
 
   /// Creates an object that provides localized resource values for the
   /// for the widgets of the material library.

@@ -333,7 +333,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         })
         .toList();
       footerWidgets.addAll(<Widget>[
-        const Text('Rows per page:'),
+        new Text(localizations.rowsPerPageTitle),
         new DropdownButtonHideUnderline(
           child: new DropdownButton<int>(
             items: availableRowsPerPage,
@@ -348,7 +348,12 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     footerWidgets.addAll(<Widget>[
       new Container(width: 32.0),
       new Text(
-        '${_firstRowIndex + 1}\u2013${_firstRowIndex + widget.rowsPerPage} ${ _rowCountApproximate ? "of about" : "of" } $_rowCount'
+        localizations.pageRowsInfoTitle(
+          _firstRowIndex + 1,
+          _firstRowIndex + widget.rowsPerPage,
+          _rowCount,
+          _rowCountApproximate
+        )
       ),
       new Container(width: 32.0),
       new IconButton(
