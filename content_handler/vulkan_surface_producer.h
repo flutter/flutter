@@ -5,8 +5,8 @@
 #ifndef FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
 #define FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
 
-#include "apps/mozart/lib/scenic/client/resources.h"
-#include "apps/mozart/lib/scenic/client/session.h"
+#include "lib/ui/scenic/client/resources.h"
+#include "lib/ui/scenic/client/session.h"
 #include "flutter/content_handler/vulkan_surface.h"
 #include "flutter/content_handler/vulkan_surface_pool.h"
 #include "flutter/flow/scene_update_context.h"

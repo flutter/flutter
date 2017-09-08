@@ -6,7 +6,7 @@ assert(is_fuchsia)
 
 import("//build/dart/dart_package.gni")
 import("//flutter/lib/ui/dart_ui.gni")
-import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
+import("//garnet/public/lib/ui/flutter/sdk_ext/sdk_ext.gni")
 import("//garnet/public/dart-pkg/fuchsia/sdk_ext.gni")
 import("//garnet/public/dart-pkg/zircon/sdk_ext.gni")
 

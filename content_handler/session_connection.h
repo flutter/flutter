@@ -5,8 +5,8 @@
 #ifndef FLUTTER_CONTENT_HANDLER_SESSION_CONNECTION_H_
 #define FLUTTER_CONTENT_HANDLER_SESSION_CONNECTION_H_
 
-#include "apps/mozart/lib/scenic/client/resources.h"
-#include "apps/mozart/lib/scenic/client/session.h"
+#include "lib/ui/scenic/client/resources.h"
+#include "lib/ui/scenic/client/session.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/vulkan_surface_producer.h"
 #include "flutter/flow/compositor_context.h"

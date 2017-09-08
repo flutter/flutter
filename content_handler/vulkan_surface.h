@@ -5,7 +5,7 @@
 #pragma once
 
 #include <memory>
-#include "apps/mozart/lib/scenic/client/resources.h"
+#include "lib/ui/scenic/client/resources.h"
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_proc_table.h"

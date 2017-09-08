@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include "apps/mozart/lib/scenic/client/resources.h"
+#include "lib/ui/scenic/client/resources.h"
 #include "flutter/flow/compositor_context.h"
 #include "lib/ftl/build_config.h"
 #include "lib/ftl/logging.h"

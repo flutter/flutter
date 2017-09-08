@@ -25,8 +25,8 @@
 
 #if defined(OS_FUCHSIA)
 
-#include "apps/mozart/lib/scenic/client/resources.h"  //nogncheck
-#include "apps/mozart/lib/scenic/client/session.h"    //nogncheck
+#include "lib/ui/scenic/client/resources.h"  //nogncheck
+#include "lib/ui/scenic/client/session.h"    //nogncheck
 #include "flutter/flow/scene_update_context.h"       //nogncheck
 
 #endif  // defined(OS_FUCHSIA)

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/content_handler/session_connection.h"
-#include "apps/mozart/lib/scenic/fidl_helpers.h"
+#include "lib/ui/scenic/fidl_helpers.h"
 
 namespace flutter_runner {
 

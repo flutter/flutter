@@ -6,7 +6,7 @@
 
 #if defined(OS_FUCHSIA)
 
-#include "apps/mozart/lib/scenic/fidl_helpers.h"  // nogncheck
+#include "lib/ui/scenic/fidl_helpers.h"  // nogncheck
 
 #endif  // defined(OS_FUCHSIA)
 
