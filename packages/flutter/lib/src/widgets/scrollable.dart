@@ -260,6 +260,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
       controller?.detach(oldPosition);
+      oldPosition.removeListener(_sendSemanticsScrollEvent);
       // It's important that we not dispose the old position until after the
       // viewport has had a chance to unregister its listeners from the old
       // position. So, schedule a microtask to do it.
@@ -268,9 +269,22 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
     _position = controller?.createScrollPosition(_physics, this, oldPosition)
       ?? new ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
+    _position.addListener(_sendSemanticsScrollEvent);
 
     assert(position != null);
     controller?.attach(position);
+  }
+
+  bool _semanticsScrollEventScheduled = false;
+
+  void _sendSemanticsScrollEvent() {
+    if (_semanticsScrollEventScheduled)
+      return;
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      _gestureDetectorKey.currentState?.sendSemanticsEvent(new ScrollCompletedSemanticsEvent());
+      _semanticsScrollEventScheduled = false;
+    });
+    _semanticsScrollEventScheduled = true;
   }
 
   @override

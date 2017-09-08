@@ -8,12 +8,15 @@ import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 import 'node.dart';
+import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
+export 'semantics_event.dart';
 
 /// Interface for [RenderObject]s to implement when they want to support
 /// being tapped, etc.
@@ -695,6 +698,27 @@ class SemanticsNode extends AbstractNode {
       children: children,
     );
     _dirty = false;
+  }
+
+  /// Sends a [SemanticsEvent] associated with this [SemanticsNode].
+  ///
+  /// Semantics events should be sent to inform interested parties (like
+  /// the accessibility system of the operating system) about changes to the UI.
+  ///
+  /// For example, if this semantics node represents a scrollable list, a
+  /// [ScrollCompletedSemanticsEvent] should be sent after a scroll action is completed.
+  /// That way, the operating system can give additional feedback to the user
+  /// about the state of the UI (e.g. on Android a ping sound is played to
+  /// indicate a successful scroll in accessibility mode).
+  void sendEvent(SemanticsEvent event) {
+    if (!attached)
+      return;
+    final Map<String, dynamic> annotatedEvent = <String, dynamic>{
+      'nodeId': id,
+      'type': event.type,
+      'data': event.toMap(),
+    };
+    SystemChannels.accessibility.send(annotatedEvent);
   }
 
   @override
