@@ -7,7 +7,7 @@
 
 #if defined(__Fuchsia__)
 
-#include "apps/tracing/lib/trace/event.h"
+#include <trace/event.h>
 
 #define TRACE_EVENT0(a, b) TRACE_DURATION(a, b)
 #define TRACE_EVENT1(a, b, c, d) TRACE_DURATION(a, b, c, d)
