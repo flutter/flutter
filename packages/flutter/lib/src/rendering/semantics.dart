@@ -155,16 +155,16 @@ class SemanticsData extends Diagnosticable {
       if ((actions & action.index) != 0)
         actionSummary.add(describeEnum(action));
     }
-    properties.add(new IterableProperty<String>('actions', actionSummary, showName: false, hidden: actionSummary.isEmpty));
+    properties.add(new IterableProperty<String>('actions', actionSummary, hidden: actionSummary.isEmpty));
 
     final List<String> flagSummary = <String>[];
     for (SemanticsFlags flag in SemanticsFlags.values.values) {
       if ((flags & flag.index) != 0)
         flagSummary.add(describeEnum(flag));
     }
-    properties.add(new IterableProperty<String>('flags', flagSummary, showName: false, hidden: flagSummary.isEmpty));
-    properties.add(new StringProperty('label', label, showName: false, defaultValue: ''));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(new IterableProperty<String>('flags', flagSummary, hidden: flagSummary.isEmpty));
+    properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 
   @override
@@ -756,13 +756,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       if ((_actions & action.index) != 0)
         actions.add(describeEnum(action));
     }
-    properties.add(new IterableProperty<String>('actions', actions, showName: false, hidden: actions.isEmpty));
-    properties.add(new IterableProperty<SemanticsTag>('tags', _tags, showName: false, hidden: _tags.isEmpty));
+    properties.add(new IterableProperty<String>('actions', actions, hidden: actions.isEmpty));
+    properties.add(new IterableProperty<SemanticsTag>('tags', _tags, hidden: _tags.isEmpty));
     if (hasCheckedState)
       properties.add(new FlagProperty('isChecked', value: isChecked, ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: isSelected, ifTrue: 'selected'));
-    properties.add(new StringProperty('label', label, defaultValue: '', showName: false));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection));
+    properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
