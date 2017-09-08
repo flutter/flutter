@@ -45,7 +45,7 @@ std::string ResolvePath(std::string path) {
 }  // namespace
 
 DartController::DartController() : ui_dart_state_(nullptr),
-    kernel_bytes(nullptr), platform_kernel_bytes(nullptr) {}
+    platform_kernel_bytes(nullptr) {}
 
 DartController::~DartController() {
   if (ui_dart_state_) {
@@ -55,9 +55,6 @@ DartController::~DartController() {
     Dart_SetMessageNotifyCallback(nullptr);
     Dart_ShutdownIsolate();  // deletes ui_dart_state_
     ui_dart_state_ = nullptr;
-  }
-  if (kernel_bytes) {
-    free(kernel_bytes);
   }
   if (platform_kernel_bytes) {
     free(platform_kernel_bytes);
@@ -113,9 +110,9 @@ static void CopyVectorBytes(const std::vector<uint8_t>& vector,
 tonic::DartErrorHandleType DartController::RunFromKernel(
     const std::vector<uint8_t>& kernel) {
   tonic::DartState::Scope scope(dart_state());
-  // Copy kernel bytes so they won't go away after we exit this method.
-  // This is needed because original kernel data has to be available
-  // during code execution.
+  // Copy kernel bytes and pass ownership of the copy to the Dart_LoadKernel,
+  // which is expected to release them.
+  uint8_t* kernel_bytes = nullptr;
   CopyVectorBytes(kernel, kernel_bytes);
 
   Dart_Handle result = Dart_LoadKernel(
