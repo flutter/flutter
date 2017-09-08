@@ -4,7 +4,7 @@
   "closeButtonTooltip": "Schließen",
   "nextMonthTooltip": "Nächster Monat",
   "previousMonthTooltip": "Vorheriger Monat",
-  "nextPageTooltip": "Folgeseite",
+  "nextPageTooltip": "Nächste Seite",
   "previousPageTooltip": "Vorherige Seite",
   "licensesPageTitle": "Lizenzen",
   "pageRowsInfoTitle": "$firstRow–$lastRow von $rowCount",
