@@ -42,9 +42,10 @@
                 },
                 "plugin": {
                     "type": "object",
+                    "additionalProperties": false,
                     "properties": {
-                        "androidPackage": {"type": "string"},
-                        "pluginClass": {"type": "string"}
+                        "androidPackage": { "type": "string" },
+                        "pluginClass": { "type": "string" }
                     } 
                 }
             }
