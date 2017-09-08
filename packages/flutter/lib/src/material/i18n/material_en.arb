@@ -27,5 +27,65 @@
   "@previousMonthTooltip": {
     "description": "The tooltip for the MonthPicker's 'previous month' button.",
     "type": "text"
+  },
+
+  "licensesPageTitle": "Licenses",
+  "@licensesPageTitle": {
+    "description": "The title for the Flutter licenses page.",
+    "type": "text"
+  },
+
+  "cancelButtonLabel": "CANCEL",
+  "@cancelButtonLabel": {
+    "description": "The label for cancel buttons and menu items.",
+    "type": "text"
+  },
+
+  "closeButtonLabel": "CLOSE",
+  "@closeButtonLabel": {
+    "description": "The label for close buttons and menu items.",
+    "type": "text"
+  },
+
+  "continueButtonLabel": "CONTINUE",
+  "@continueButtonLabel": {
+    "description": "The label for continue buttons and menu items.",
+    "type": "text"
+  },
+
+  "copyButtonLabel": "COPY",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items.",
+    "type": "text"
+  },
+
+  "cutButtonLabel": "CUT",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items",
+    "type": "text"
+  },
+
+  "okButtonLabel": "OK",
+  "@okButtonLabel": {
+    "description": "The label for OK buttons and menu items.",
+    "type": "text"
+  },
+
+  "pasteButtonLabel": "PASTE",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items.",
+    "type": "text"
+  },
+
+  "selectAllButtonLabel": "SELECT ALL",
+  "@selectButtonLabel": {
+    "description": "The label for select-all buttons and menu items.",
+    "type": "text"
+  },
+
+  "viewLicensesButtonLabel": "VIEW LICENSES",
+  "@viewLicensesButtonLabel": {
+    "description": "The label for the about box's view licenses button.",
+    "type": "text"
   }
 }

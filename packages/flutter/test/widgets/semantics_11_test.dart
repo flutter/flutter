@@ -72,5 +72,6 @@ class RenderTest extends RenderProxyBox {
   void _annotate(SemanticsNode node) {
     labelWasReset.add(node.label == '');
     node.label = "Label ${labelWasReset.length}";
+    node.textDirection = TextDirection.ltr;
   }
 }

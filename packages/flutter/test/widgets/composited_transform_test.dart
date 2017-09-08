@@ -11,25 +11,28 @@ void main() {
     final LayerLink link = new LayerLink();
     final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
-      new Stack(
-        children: <Widget>[
-          new Positioned(
-            left: 123.0,
-            top: 456.0,
-            child: new CompositedTransformTarget(
-              link: link,
-              child: new Container(height: 10.0, width: 10.0),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new Positioned(
+              left: 123.0,
+              top: 456.0,
+              child: new CompositedTransformTarget(
+                link: link,
+                child: new Container(height: 10.0, width: 10.0),
+              ),
             ),
-          ),
-          new Positioned(
-            left: 787.0,
-            top: 343.0,
-            child: new CompositedTransformFollower(
-              link: link,
-              child: new Container(key: key, height: 10.0, width: 10.0),
+            new Positioned(
+              left: 787.0,
+              top: 343.0,
+              child: new CompositedTransformFollower(
+                link: link,
+                child: new Container(key: key, height: 10.0, width: 10.0),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
     final RenderBox box = key.currentContext.findRenderObject();
@@ -41,31 +44,34 @@ void main() {
     final GlobalKey key1 = new GlobalKey();
     final GlobalKey key2 = new GlobalKey();
     await tester.pumpWidget(
-      new Stack(
-        children: <Widget>[
-          new Positioned(
-            top: 123.0,
-            left: 456.0,
-            child: new Transform.rotate(
-              angle: 1.0, // radians
-              child: new CompositedTransformTarget(
-                link: link,
-                child: new Container(key: key1, height: 10.0, width: 10.0),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 123.0,
+              left: 456.0,
+              child: new Transform.rotate(
+                angle: 1.0, // radians
+                child: new CompositedTransformTarget(
+                  link: link,
+                  child: new Container(key: key1, height: 10.0, width: 10.0),
+                ),
               ),
             ),
-          ),
-          new Positioned(
-            top: 787.0,
-            left: 343.0,
-            child: new Transform.rotate(
-              angle: -0.3, // radians
-              child: new CompositedTransformFollower(
-                link: link,
-                child: new Container(key: key2, height: 10.0, width: 10.0),
+            new Positioned(
+              top: 787.0,
+              left: 343.0,
+              child: new Transform.rotate(
+                angle: -0.3, // radians
+                child: new CompositedTransformFollower(
+                  link: link,
+                  child: new Container(key: key2, height: 10.0, width: 10.0),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
     final RenderBox box1 = key1.currentContext.findRenderObject();
@@ -81,43 +87,46 @@ void main() {
     final GlobalKey key1 = new GlobalKey();
     final GlobalKey key2 = new GlobalKey();
     await tester.pumpWidget(
-      new Stack(
-        children: <Widget>[
-          new Positioned(
-            top: 123.0,
-            left: 456.0,
-            child: new Transform.rotate(
-              angle: 1.0, // radians
-              child: new CompositedTransformTarget(
-                link: link,
-                child: new Container(key: key1, height: 10.0, width: 10.0),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 123.0,
+              left: 456.0,
+              child: new Transform.rotate(
+                angle: 1.0, // radians
+                child: new CompositedTransformTarget(
+                  link: link,
+                  child: new Container(key: key1, height: 10.0, width: 10.0),
+                ),
               ),
             ),
-          ),
-          new Positioned(
-            top: 787.0,
-            left: 343.0,
-            child: new Transform.rotate(
-              angle: -0.3, // radians
-              child: new Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: new CompositedTransformFollower(
-                  link: new LayerLink(),
-                  child: new Transform(
-                    transform: new Matrix4.skew(0.9, 1.1),
-                    child: new Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: new CompositedTransformFollower(
-                        link: link,
-                        child: new Container(key: key2, height: 10.0, width: 10.0),
+            new Positioned(
+              top: 787.0,
+              left: 343.0,
+              child: new Transform.rotate(
+                angle: -0.3, // radians
+                child: new Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: new CompositedTransformFollower(
+                    link: new LayerLink(),
+                    child: new Transform(
+                      transform: new Matrix4.skew(0.9, 1.1),
+                      child: new Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: new CompositedTransformFollower(
+                          link: link,
+                          child: new Container(key: key2, height: 10.0, width: 10.0),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
     final RenderBox box1 = key1.currentContext.findRenderObject();
@@ -135,26 +144,29 @@ void main() {
     final GlobalKey key3 = new GlobalKey();
     bool _tapped = false;
     await tester.pumpWidget(
-      new Stack(
-        children: <Widget>[
-          new Positioned(
-            left: 123.0,
-            top: 456.0,
-            child: new CompositedTransformTarget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new Positioned(
+              left: 123.0,
+              top: 456.0,
+              child: new CompositedTransformTarget(
+                link: link,
+                child: new Container(key: key1, height: 10.0, width: 10.0),
+              ),
+            ),
+            new CompositedTransformFollower(
               link: link,
-              child: new Container(key: key1, height: 10.0, width: 10.0),
+              child: new GestureDetector(
+                key: key2,
+                behavior: HitTestBehavior.opaque,
+                onTap: () { _tapped = true; },
+                child: new Container(key: key3, height: 10.0, width: 10.0),
+              ),
             ),
-          ),
-          new CompositedTransformFollower(
-            link: link,
-            child: new GestureDetector(
-              key: key2,
-              behavior: HitTestBehavior.opaque,
-              onTap: () { _tapped = true; },
-              child: new Container(key: key3, height: 10.0, width: 10.0),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
     final RenderBox box2 = key2.currentContext.findRenderObject();

@@ -13,38 +13,41 @@ void main() {
   testWidgets('Transform origin', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
-      new Stack(
-        children: <Widget>[
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              color: const Color(0xFF0000FF),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
             ),
-          ),
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              child: new Transform(
-                transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                origin: const Offset(100.0, 50.0),
-                child: new GestureDetector(
-                  onTap: () {
-                    didReceiveTap = true;
-                  },
-                  child: new Container(
-                    color: const Color(0xFF00FFFF),
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                child: new Transform(
+                  transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
+                  origin: const Offset(100.0, 50.0),
+                  child: new GestureDetector(
+                    onTap: () {
+                      didReceiveTap = true;
+                    },
+                    child: new Container(
+                      color: const Color(0xFF00FFFF),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 
@@ -58,38 +61,41 @@ void main() {
   testWidgets('Transform alignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
-      new Stack(
-        children: <Widget>[
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              color: const Color(0xFF0000FF),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
             ),
-          ),
-          new Positioned(
-            top: 100.0,
-            left: 100.0,
-            child: new Container(
-              width: 100.0,
-              height: 100.0,
-              child: new Transform(
-                transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                alignment: const FractionalOffset(1.0, 0.5),
-                child: new GestureDetector(
-                  onTap: () {
-                    didReceiveTap = true;
-                  },
-                  child: new Container(
-                    color: const Color(0xFF00FFFF),
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                child: new Transform(
+                  transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
+                  alignment: const FractionalOffset(1.0, 0.5),
+                  child: new GestureDetector(
+                    onTap: () {
+                      didReceiveTap = true;
+                    },
+                    child: new Container(
+                      color: const Color(0xFF00FFFF),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 
@@ -102,40 +108,45 @@ void main() {
 
   testWidgets('Transform offset + alignment', (WidgetTester tester) async {
     bool didReceiveTap = false;
-    await tester.pumpWidget(new Stack(
-      children: <Widget>[
-        new Positioned(
-          top: 100.0,
-          left: 100.0,
-          child: new Container(
-            width: 100.0,
-            height: 100.0,
-            color: const Color(0xFF0000FF),
-          ),
-        ),
-        new Positioned(
-          top: 100.0,
-          left: 100.0,
-          child: new Container(
-            width: 100.0,
-            height: 100.0,
-            child: new Transform(
-              transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-              origin: const Offset(100.0, 0.0),
-              alignment: const FractionalOffset(0.0, 0.5),
-              child: new GestureDetector(
-                onTap: () {
-                  didReceiveTap = true;
-                },
-                child: new Container(
-                  color: const Color(0xFF00FFFF),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
+            ),
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                child: new Transform(
+                  transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
+                  origin: const Offset(100.0, 0.0),
+                  alignment: const FractionalOffset(0.0, 0.5),
+                  child: new GestureDetector(
+                    onTap: () {
+                      didReceiveTap = true;
+                    },
+                    child: new Container(
+                      color: const Color(0xFF00FFFF),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(didReceiveTap, isFalse);
     await tester.tapAt(const Offset(110.0, 110.0));

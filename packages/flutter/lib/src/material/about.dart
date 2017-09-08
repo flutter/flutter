@@ -13,6 +13,7 @@ import 'debug.dart';
 import 'dialog.dart';
 import 'flat_button.dart';
 import 'list_tile.dart';
+import 'material_localizations.dart';
 import 'page.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
@@ -287,7 +288,7 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         new FlatButton(
-          child: const Text('VIEW LICENSES'),
+          child: new Text(MaterialLocalizations.of(context).viewLicensesButtonLabel),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -299,7 +300,7 @@ class AboutDialog extends StatelessWidget {
           }
         ),
         new FlatButton(
-          child: const Text('CLOSE'),
+          child: new Text(MaterialLocalizations.of(context).closeButtonLabel),
           onPressed: () {
             Navigator.pop(context);
           }
@@ -440,7 +441,7 @@ class _LicensePageState extends State<LicensePage> {
     }
     return new Scaffold(
       appBar: new AppBar(
-        title: const Text('Licenses')
+        title: new Text(MaterialLocalizations.of(context).licensesPageTitle),
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.caption,

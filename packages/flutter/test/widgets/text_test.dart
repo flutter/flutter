@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(const MediaQuery(
       data: const MediaQueryData(textScaleFactor: 1.5),
       child: const Center(
-        child: const Text('Hello')
+        child: const Text('Hello', textDirection: TextDirection.ltr)
       )
     ));
 
@@ -19,7 +19,7 @@ void main() {
     expect(text.textScaleFactor, 1.5);
 
     await tester.pumpWidget(const Center(
-      child: const Text('Hello')
+      child: const Text('Hello', textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -27,7 +27,7 @@ void main() {
     expect(text.textScaleFactor, 1.0);
 
     await tester.pumpWidget(const Center(
-      child: const Text('Hello', textScaleFactor: 3.0)
+      child: const Text('Hello', textScaleFactor: 3.0, textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));

@@ -3,5 +3,15 @@
   "backButtonTooltip": "شاته",
   "closeButtonTooltip": "بنده",
   "nextMonthTooltip": "بله میاشت",
-  "previousMonthTooltip": "تیره میاشت"
+  "previousMonthTooltip": "تیره میاشت",
+  "licensesPageTitle": "جوازونه",
+  "cancelButtonLabel": "لغوه کول",
+  "closeButtonLabel": "تړل",
+  "continueButtonLabel": "منځپانګې",
+  "copyButtonLabel": "کاپی",
+  "cutButtonLabel": "کم کړئ",
+  "okButtonLabel": "سمه ده",
+  "pasteButtonLabel": "پیټ کړئ",
+  "selectAllButtonLabel": "غوره کړئ",
+  "viewLicensesButtonLabel": "لیدلس وګورئ"
 }

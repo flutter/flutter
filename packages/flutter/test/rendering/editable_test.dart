@@ -12,6 +12,8 @@ void main() {
         style: const TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
       ),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
       offset: new ViewportOffset.zero(),
     );
     expect(editable.getMinIntrinsicWidth(double.INFINITY), 50.0);
@@ -23,8 +25,8 @@ void main() {
       editable.toStringDeep(),
       equalsIgnoringHashCodes(
         'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
-        ' │ parentData: null\n'
-        ' │ constraints: null\n'
+        ' │ parentData: MISSING\n'
+        ' │ constraints: MISSING\n'
         ' │ size: MISSING\n'
         ' │ cursorColor: null\n'
         ' │ showCursor: ValueNotifier<bool>#00000(false)\n'

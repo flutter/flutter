@@ -297,16 +297,19 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox> children,
-    FractionalOffset alignment: FractionalOffset.topLeft,
+    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    @required TextDirection textDirection,
     StackFit fit: StackFit.loose,
-    Overflow overflow: Overflow.clip
+    Overflow overflow: Overflow.clip,
   }) : assert(alignment != null),
        assert(fit != null),
        assert(overflow != null),
        _alignment = alignment,
+       _textDirection = textDirection,
        _fit = fit,
        _overflow = overflow {
     addAll(children);
+    _applyUpdate();
   }
 
   bool _hasVisualOverflow = false;
@@ -317,19 +320,40 @@ class RenderStack extends RenderBox
       child.parentData = new StackParentData();
   }
 
+  // The resolved absolute insets.
+  FractionalOffset _resolvedAlignment;
+
+  void _applyUpdate() {
+    final FractionalOffset resolvedAlignment = alignment.resolve(textDirection);
+    if (_resolvedAlignment != resolvedAlignment) {
+      _resolvedAlignment = resolvedAlignment;
+      markNeedsLayout();
+    }
+  }
+
   /// How to align the non-positioned children in the stack.
   ///
   /// The non-positioned children are placed relative to each other such that
   /// the points determined by [alignment] are co-located. For example, if the
   /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
-  FractionalOffset get alignment => _alignment;
-  FractionalOffset _alignment;
-  set alignment(FractionalOffset value) {
+  FractionalOffsetGeometry get alignment => _alignment;
+  FractionalOffsetGeometry _alignment;
+  set alignment(FractionalOffsetGeometry value) {
     assert(value != null);
     if (_alignment != value) {
       _alignment = value;
-      markNeedsLayout();
+      _applyUpdate();
+    }
+  }
+
+  /// The text direction with which to resolve [alignment].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection != value) {
+      _textDirection = value;
+      _applyUpdate();
     }
   }
 
@@ -455,7 +479,7 @@ class RenderStack extends RenderBox
       final StackParentData childParentData = child.parentData;
 
       if (!childParentData.isPositioned) {
-        childParentData.offset = alignment.alongOffset(size - child.size);
+        childParentData.offset = _resolvedAlignment.alongOffset(size - child.size);
       } else {
         BoxConstraints childConstraints = const BoxConstraints();
 
@@ -526,7 +550,8 @@ class RenderStack extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection));
     description.add(new EnumProperty<StackFit>('fit', fit));
     description.add(new EnumProperty<Overflow>('overflow', overflow));
   }
@@ -543,11 +568,13 @@ class RenderIndexedStack extends RenderStack {
   /// If the [index] parameter is null, nothing is displayed.
   RenderIndexedStack({
     List<RenderBox> children,
-    FractionalOffset alignment: FractionalOffset.topLeft,
-    int index: 0
+    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    @required TextDirection textDirection,
+    int index: 0,
   }) : _index = index, super(
     children: children,
-    alignment: alignment
+    alignment: alignment,
+    textDirection: textDirection,
   );
 
   @override

@@ -189,7 +189,7 @@ void main() {
             child: new ListView(
               padding: const EdgeInsets.all(8.0),
               children: <Widget>[
-                const Text('padded'),
+                const Text('padded', textDirection: TextDirection.ltr),
               ],
             ),
           ),
@@ -225,7 +225,7 @@ void main() {
     final TestSliverChildListDelegate delegate = new TestSliverChildListDelegate(
       new List<Widget>.generate(20, (int i) {
         return new Container(
-          child: new Text('$i'),
+          child: new Text('$i', textDirection: TextDirection.ltr),
         );
       })
     );

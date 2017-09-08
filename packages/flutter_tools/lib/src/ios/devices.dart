@@ -385,19 +385,12 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   }
 
   void _onLine(String line) {
-    // Lines starting with these strings are suppressed from output as noise.
-    const List<String> blacklist = const <String>[
-      'libMobileGestalt ',
-    ];
-
     final Match match = _lineRegex.firstMatch(line);
 
     if (match != null) {
       final String logLine = line.substring(match.end);
-      if (!blacklist.any(logLine.startsWith)) {
-        // Only display the log line after the initial device and executable information.
-        _linesController.add(logLine);
-      }
+      // Only display the log line after the initial device and executable information.
+      _linesController.add(logLine);
     }
   }
 

@@ -14,7 +14,7 @@ const TextStyle testStyle = const TextStyle(
 void main() {
   testWidgets('Default layout minimum size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(child: const CupertinoButton(
+      boilerplate(child: const CupertinoButton(
         child: const Text('X', style: testStyle),
         onPressed: null,
       ))
@@ -30,7 +30,7 @@ void main() {
   testWidgets('Minimum size parameter', (WidgetTester tester) async {
     final double minSize = 60.0;
     await tester.pumpWidget(
-      new Center(child: new CupertinoButton(
+      boilerplate(child: new CupertinoButton(
         child: const Text('X', style: testStyle),
         onPressed: null,
         minSize: minSize,
@@ -46,7 +46,7 @@ void main() {
 
   testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Center(child: const CupertinoButton(
+      boilerplate(child: const CupertinoButton(
         child: const Text('XXXX', style: testStyle),
         onPressed: null,
       ))
@@ -60,7 +60,7 @@ void main() {
   });
 
   testWidgets('Button with background is wider', (WidgetTester tester) async {
-    await tester.pumpWidget(const Center(child: const CupertinoButton(
+    await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       child: const Text('X', style: testStyle),
       onPressed: null,
       color: const Color(0xFFFFFFFF),
@@ -74,7 +74,7 @@ void main() {
   });
 
   testWidgets('Custom padding', (WidgetTester tester) async {
-    await tester.pumpWidget(const Center(child: const CupertinoButton(
+    await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       child: const Text(' ', style: testStyle),
       onPressed: null,
       padding: const EdgeInsets.all(100.0),
@@ -91,7 +91,7 @@ void main() {
     await tester.pumpWidget(
       new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-          return new Center(
+          return boilerplate(
             child: new CupertinoButton(
               child: const Text('Tap me'),
               onPressed: () {
@@ -115,7 +115,7 @@ void main() {
   });
 
   testWidgets('Disabled button doesn\'t animate', (WidgetTester tester) async {
-    await tester.pumpWidget(const Center(child: const CupertinoButton(
+    await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       child: const Text('Tap me'),
       onPressed: null,
     )));
@@ -126,7 +126,7 @@ void main() {
   });
 
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new CupertinoButton(
+    await tester.pumpWidget(boilerplate(child: new CupertinoButton(
       child: const Text('Tap me'),
       onPressed: () { },
     )));
@@ -146,7 +146,7 @@ void main() {
 
   testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
     final double pressedOpacity = 0.5;
-    await tester.pumpWidget(new Center(child: new CupertinoButton(
+    await tester.pumpWidget(boilerplate(child: new CupertinoButton(
       pressedOpacity: pressedOpacity,
       child: const Text('Tap me'),
       onPressed: () { },
@@ -164,4 +164,11 @@ void main() {
     ));
     expect(opacity.opacity, pressedOpacity);
   });
+}
+
+Widget boilerplate({ Widget child }) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Center(child: child),
+  );
 }

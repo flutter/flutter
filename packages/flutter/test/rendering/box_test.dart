@@ -73,8 +73,8 @@ void main() {
     expect(coloredBox, hasAGoodToStringDeep);
     expect(coloredBox.toStringDeep(), equalsIgnoringHashCodes(
         'RenderDecoratedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
-        '   parentData: null\n'
-        '   constraints: null\n'
+        '   parentData: MISSING\n'
+        '   constraints: MISSING\n'
         '   size: MISSING\n'
         '   decoration: BoxDecoration:\n'
         '     <no decorations specified>\n'

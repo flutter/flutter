@@ -13,6 +13,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             top: 100.0,
@@ -20,8 +21,8 @@ void main() {
             child: new SizedBox(
               key: keyA,
               width: 10.0,
-              height: 10.0
-            )
+              height: 10.0,
+            ),
           ),
           new Positioned(
             left: 100.0,
@@ -29,11 +30,11 @@ void main() {
             child: new SizedBox(
               key: keyB,
               width: 20.0,
-              height: 10.0
-            )
+              height: 10.0,
+            ),
           ),
-        ]
-      )
+        ],
+      ),
     );
 
     final RenderBox boxA = tester.renderObject(find.byKey(keyA));

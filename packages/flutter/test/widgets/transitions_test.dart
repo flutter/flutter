@@ -10,7 +10,7 @@ void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
     final Widget widget = const FadeTransition(
       opacity: kAlwaysCompleteAnimation,
-      child: const Text('Ready'),
+      child: const Text('Ready', textDirection: TextDirection.ltr),
     );
     expect(widget.toString, isNot(throwsException));
   });
@@ -57,7 +57,7 @@ void main() {
         final DecoratedBoxTransition transitionUnderTest =
             new DecoratedBoxTransition(
               decoration: decorationTween.animate(controller),
-              child: const Text("Doesn't matter"),
+              child: const Text('Doesn\'t matter', textDirection: TextDirection.ltr),
             );
 
         await tester.pumpWidget(transitionUnderTest);
@@ -109,7 +109,7 @@ void main() {
           new DecoratedBoxTransition(
             decoration: curvedDecorationAnimation,
             position: DecorationPosition.foreground,
-            child: const Text("Doesn't matter"),
+            child: const Text('Doesn\'t matter', textDirection: TextDirection.ltr),
           );
 
       await tester.pumpWidget(transitionUnderTest);

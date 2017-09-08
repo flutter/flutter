@@ -18,34 +18,37 @@ void main() {
 
     label = '1';
     await tester.pumpWidget(
-      new Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          new MergeSemantics(
-            child: new Semantics(
-              checked: true,
-              container: true,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            new MergeSemantics(
               child: new Semantics(
+                checked: true,
                 container: true,
-                label: label,
-              )
-            )
-          ),
-          new MergeSemantics(
-            child: new Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                const Semantics(
-                  checked: true,
-                ),
-                new Semantics(
+                child: new Semantics(
+                  container: true,
                   label: label,
                 ),
-              ]
-            )
-          ),
-        ]
-      )
+              ),
+            ),
+            new MergeSemantics(
+              child: new Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  const Semantics(
+                    checked: true,
+                  ),
+                  new Semantics(
+                    label: label,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(
@@ -71,34 +74,37 @@ void main() {
 
     label = '2';
     await tester.pumpWidget(
-      new Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          new MergeSemantics(
-            child: new Semantics(
-              checked: true,
-              container: true,
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            new MergeSemantics(
               child: new Semantics(
+                checked: true,
                 container: true,
-                label: label,
-              )
-            )
-          ),
-          new MergeSemantics(
-            child: new Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                const Semantics(
-                  checked: true,
-                ),
-                new Semantics(
+                child: new Semantics(
+                  container: true,
                   label: label,
-                )
-              ]
-            )
-          ),
-        ]
-      )
+                ),
+              ),
+            ),
+            new MergeSemantics(
+              child: new Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  const Semantics(
+                    checked: true,
+                  ),
+                  new Semantics(
+                    label: label,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(

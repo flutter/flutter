@@ -200,6 +200,7 @@ class Text extends StatelessWidget {
     Key key,
     this.style,
     this.textAlign,
+    this.textDirection,
     this.softWrap,
     this.overflow,
     this.textScaleFactor,
@@ -219,6 +220,21 @@ class Text extends StatelessWidget {
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
+
+  /// The directionality of the text.
+  ///
+  /// This decides how [textAlign] values like [TextAlign.start] and
+  /// [TextAlign.end] are interpreted.
+  ///
+  /// This is also used to disambiguate how to render bidirectional text. For
+  /// example, if the [data] is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// its left.
+  ///
+  /// Defaults to the ambient [Directionality], if any.
+  final TextDirection textDirection;
 
   /// Whether the text should break at soft line breaks.
   ///
@@ -257,7 +273,8 @@ class Text extends StatelessWidget {
     if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     return new RichText(
-      textAlign: textAlign ?? defaultTextStyle.textAlign,
+      textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+      textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,

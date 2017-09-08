@@ -11,24 +11,30 @@ void main() {
   testWidgets('WidgetInspector smoke test', (WidgetTester tester) async {
     // This is a smoke test to verify that adding the inspector doesn't crash.
     await tester.pumpWidget(
-      new Stack(
-        children: <Widget>[
-          const Text('a'),
-          const Text('b'),
-          const Text('c'),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            const Text('a', textDirection: TextDirection.ltr),
+            const Text('b', textDirection: TextDirection.ltr),
+            const Text('c', textDirection: TextDirection.ltr),
+          ],
+        ),
       ),
     );
 
     await tester.pumpWidget(
-      new WidgetInspector(
-        selectButtonBuilder: null,
-        child: new Stack(
-          children: <Widget>[
-            const Text('a'),
-            const Text('b'),
-            const Text('c'),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new WidgetInspector(
+          selectButtonBuilder: null,
+          child: new Stack(
+            children: <Widget>[
+              const Text('a', textDirection: TextDirection.ltr),
+              const Text('b', textDirection: TextDirection.ltr),
+              const Text('c', textDirection: TextDirection.ltr),
+            ],
+          ),
         ),
       ),
     );
@@ -172,14 +178,17 @@ void main() {
     bool didLongPress = false;
 
     await tester.pumpWidget(
-      new WidgetInspector(
-        selectButtonBuilder: null,
-        child: new GestureDetector(
-          onLongPress: () {
-            expect(didLongPress, isFalse);
-            didLongPress = true;
-          },
-          child: const Text('target'),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new WidgetInspector(
+          selectButtonBuilder: null,
+          child: new GestureDetector(
+            onLongPress: () {
+              expect(didLongPress, isFalse);
+              didLongPress = true;
+            },
+            child: const Text('target', textDirection: TextDirection.ltr),
+          ),
         ),
       ),
     );
@@ -202,33 +211,36 @@ void main() {
             top: 0.0,
             width: width,
             height: 100.0,
-            child: new Text(width.toString()),
+            child: new Text(width.toString(), textDirection: TextDirection.ltr),
           ),
-        ]
+        ],
       );
     }
     await tester.pumpWidget(
-      new WidgetInspector(
-        key: inspectorKey,
-        selectButtonBuilder: null,
-        child: new Overlay(
-          initialEntries: <OverlayEntry>[
-            new OverlayEntry(
-              opaque: false,
-              maintainState: true,
-              builder: (BuildContext _) => createSubtree(width: 94.0),
-            ),
-            new OverlayEntry(
-              opaque: true,
-              maintainState: true,
-              builder: (BuildContext _) => createSubtree(width: 95.0),
-            ),
-            new OverlayEntry(
-              opaque: false,
-              maintainState: true,
-              builder: (BuildContext _) => createSubtree(width: 96.0, key: clickTarget),
-            ),
-          ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new WidgetInspector(
+          key: inspectorKey,
+          selectButtonBuilder: null,
+          child: new Overlay(
+            initialEntries: <OverlayEntry>[
+              new OverlayEntry(
+                opaque: false,
+                maintainState: true,
+                builder: (BuildContext _) => createSubtree(width: 94.0),
+              ),
+              new OverlayEntry(
+                opaque: true,
+                maintainState: true,
+                builder: (BuildContext _) => createSubtree(width: 95.0),
+              ),
+              new OverlayEntry(
+                opaque: false,
+                maintainState: true,
+                builder: (BuildContext _) => createSubtree(width: 96.0, key: clickTarget),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -24,13 +24,11 @@ void main() {
 
   testWidgets('test default icon buttons are sized up to 48', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
+      wrap(
           child: new IconButton(
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.link),
           ),
-        ),
       ),
     );
 
@@ -43,14 +41,12 @@ void main() {
 
   testWidgets('test small icons are sized up to 48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
+      wrap(
           child: new IconButton(
             iconSize: 10.0,
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.link),
           ),
-        ),
       ),
     );
 
@@ -60,15 +56,13 @@ void main() {
 
   testWidgets('test icons can be small when total size is >48dp', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
+      wrap(
           child: new IconButton(
             iconSize: 10.0,
             padding: const EdgeInsets.all(30.0),
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.link),
           ),
-        ),
       ),
     );
 
@@ -78,15 +72,13 @@ void main() {
 
   testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
+      wrap(
           child: new IconButton(
             padding: EdgeInsets.zero,
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.ac_unit),
             iconSize: 80.0,
           ),
-        ),
       ),
     );
 
@@ -120,14 +112,12 @@ void main() {
 
   testWidgets('test default padding', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
+      wrap(
           child: new IconButton(
             onPressed: mockOnPressedFunction,
             icon: const Icon(Icons.ac_unit),
             iconSize: 80.0,
           ),
-        ),
       ),
     );
 
@@ -203,15 +193,13 @@ void main() {
     final Color directSplashColor = const Color(0xFF00000F);
     final Color directHighlightColor = const Color(0xFF0000F0);
 
-    Widget buttonWidget = new Material(
-      child: new Center(
+    Widget buttonWidget = wrap(
         child: new IconButton(
           icon: const Icon(Icons.android),
           splashColor: directSplashColor,
           highlightColor: directHighlightColor,
           onPressed: () { /* enable the button */ },
         ),
-      ),
     );
 
     await tester.pumpWidget(
@@ -236,13 +224,11 @@ void main() {
     final Color themeSplashColor1 = const Color(0xFF000F00);
     final Color themeHighlightColor1 = const Color(0xFF00FF00);
 
-    buttonWidget = new Material(
-      child: new Center(
+    buttonWidget = wrap(
         child: new IconButton(
           icon: const Icon(Icons.android),
           onPressed: () { /* enable the button */ },
         ),
-      ),
     );
 
     await tester.pumpWidget(
@@ -284,4 +270,13 @@ void main() {
 
     await gesture.up();
   });
+}
+
+Widget wrap({ Widget child }) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Material(
+      child: new Center(child: child),
+    ),
+  );
 }

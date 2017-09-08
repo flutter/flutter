@@ -29,3 +29,11 @@ script:
 cache:
   directories:
     - $HOME/.pub-cache
+matrix:
+  exclude:
+  - os: osx
+    env: SHARD=analyze
+  - os: osx
+    env: SHARD=coverage
+  - os: osx
+    env: SHARD=docs

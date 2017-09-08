@@ -129,7 +129,7 @@ void main() {
                           builder: (BuildContext context) {
                             final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
                             log.add('a: ${v.value}');
-                            return const Text('');
+                            return const Text('', textDirection: TextDirection.ltr);
                           }
                         )
                       )
@@ -146,7 +146,7 @@ void main() {
                         builder: (BuildContext context) {
                           final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
                           log.add('b: ${v.value}');
-                          return const Text('');
+                          return const Text('', textDirection: TextDirection.ltr);
                         }
                       )
                     )
@@ -204,7 +204,7 @@ void main() {
                           builder: (BuildContext context) {
                             final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
                             log.add('a: ${v.value}');
-                            return const Text('');
+                            return const Text('', textDirection: TextDirection.ltr);
                           }
                         )
                       )
@@ -222,7 +222,7 @@ void main() {
                         builder: (BuildContext context) {
                           final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
                           log.add('b: ${v.value}');
-                          return const Text('');
+                          return const Text('', textDirection: TextDirection.ltr);
                         }
                       )
                     )
@@ -265,7 +265,7 @@ void main() {
       builder: (BuildContext context) {
         final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
         log.add(v.value);
-        return const Text('');
+        return const Text('', textDirection: TextDirection.ltr);
       }
     );
 
@@ -336,7 +336,7 @@ void main() {
       builder: (BuildContext context) {
         final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
         log.add(v.value);
-        return const Text('');
+        return const Text('', textDirection: TextDirection.ltr);
       }
     );
 

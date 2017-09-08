@@ -21,12 +21,14 @@ void main() {
           child: new Semantics(
             container: true,
             child: new Stack(
+              textDirection: TextDirection.ltr,
               children: <Widget>[
                 const Semantics(
-                  checked: true
+                  checked: true,
                 ),
                 const Semantics(
-                  label: 'label'
+                  label: 'label',
+                  textDirection: TextDirection.ltr,
                 )
               ]
             )
@@ -39,6 +41,7 @@ void main() {
       new TestSemantics.root(
         flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
         label: 'label',
+        textDirection: TextDirection.ltr,
       )
     ));
 
@@ -50,9 +53,11 @@ void main() {
           child: new Semantics(
             container: true,
             child: new Stack(
+              textDirection: TextDirection.ltr,
               children: <Widget>[
                 const Semantics(
-                  label: 'label'
+                  label: 'label',
+                  textDirection: TextDirection.ltr,
                 ),
                 const Semantics(
                   checked: true
@@ -68,6 +73,7 @@ void main() {
       new TestSemantics.root(
         flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
         label: 'label',
+        textDirection: TextDirection.ltr,
       )
     ));
 

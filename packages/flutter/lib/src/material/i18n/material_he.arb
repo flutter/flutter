@@ -3,5 +3,15 @@
   "backButtonTooltip": "אחורה",
   "closeButtonTooltip": "סגור",
   "nextMonthTooltip": "חודש הבא",
-  "previousMonthTooltip": "חודש שעבר"
+  "previousMonthTooltip": "חודש שעבר",
+  "licensesPageTitle": "רישיונות",
+  "cancelButtonLabel": "ביטול",
+  "closeButtonLabel": "סגור",
+  "continueButtonLabel": "לְהַמשִׁיך",
+  "copyButtonLabel": "קיבלתי!",
+  "cutButtonLabel": "גזור",
+  "okButtonLabel": "בסדר",
+  "pasteButtonLabel": "הדבק",
+  "selectAllButtonLabel": "בחר הכל",
+  "viewLicensesButtonLabel": "ראה רישיונות"
 }

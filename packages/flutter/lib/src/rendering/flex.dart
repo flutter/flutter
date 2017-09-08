@@ -993,12 +993,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
       context.canvas.drawRect(markerRect, _debugMarkerPaint);
 
-      _debugMarkerLabel ??= new TextPainter();
-      _debugMarkerLabel.text = new TextSpan( // this is a no-op if the label hasn't changed
+      _debugMarkerLabel ??= new TextPainter()
+        ..textDirection = TextDirection.ltr; // This label is in English.
+      _debugMarkerLabel.text = new TextSpan( // This is a no-op if the label hasn't changed.
         text: label,
         style: _debugMarkerTextStyle,
       );
-      _debugMarkerLabel.layout(); // this is a no-op if the label hasn't changed
+      _debugMarkerLabel.layout(); // This is a no-op if the label hasn't changed.
 
       // TODO(ianh): RTL support
       switch (direction) {

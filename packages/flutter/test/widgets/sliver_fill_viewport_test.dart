@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
     final List<Widget> children = new List<Widget>.generate(20, (int i) {
-      return new Container(child: new Text('$i'));
+      return new Container(child: new Text('$i', textDirection: TextDirection.ltr));
     });
 
     await tester.pumpWidget(
@@ -107,6 +107,11 @@ void main() {
         '     │ parentData: <none> (can use size)\n'
         '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '     │ size: Size(800.0, 600.0)\n'
+        '     │ textAlign: start\n'
+        '     │ textDirection: ltr\n'
+        '     │ softWrap: wrapping at box width\n'
+        '     │ overflow: clip\n'
+        '     │ maxLines: unlimited\n'
         '     ╘═╦══ text ═══\n'
         '       ║ TextSpan:\n'
         '       ║   <all styles inherited>\n'

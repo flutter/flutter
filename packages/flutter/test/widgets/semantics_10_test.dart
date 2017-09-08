@@ -16,22 +16,22 @@ void main() {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
-        buildTestWidgets(
-          excludeSemantics: false,
-          label: 'label',
-          isSemanticsBoundary: true,
-        )
+      buildTestWidgets(
+        excludeSemantics: false,
+        label: 'label',
+        isSemanticsBoundary: true,
+      ),
     );
 
     callLog.clear();
 
     // The following should not trigger an assert.
     await tester.pumpWidget(
-        buildTestWidgets(
-          excludeSemantics: true,
-          label: 'label CHANGED',
-          isSemanticsBoundary: false,
-        )
+      buildTestWidgets(
+        excludeSemantics: true,
+        label: 'label CHANGED',
+        isSemanticsBoundary: false,
+      ),
     );
 
     expect(callLog, <String>['markNeedsSemanticsUpdate(onlyChanges: true)', 'markNeedsSemanticsUpdate(onlyChanges: false)']);
@@ -41,23 +41,26 @@ void main() {
 }
 
 Widget buildTestWidgets({bool excludeSemantics, String label, bool isSemanticsBoundary}) {
-  return new Semantics(
-    label: 'container',
-    container: true,
-    child: new ExcludeSemantics(
-      excluding: excludeSemantics,
-      child: new TestWidget(
-        label: label,
-        isSemanticBoundary: isSemanticsBoundary,
-        child: new Column(
-          children: <Widget>[
-            const Semantics(
-              label: 'child1',
-            ),
-            const Semantics(
-              label: 'child2',
-            ),
-          ],
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Semantics(
+      label: 'container',
+      container: true,
+      child: new ExcludeSemantics(
+        excluding: excludeSemantics,
+        child: new TestWidget(
+          label: label,
+          isSemanticBoundary: isSemanticsBoundary,
+          child: new Column(
+            children: <Widget>[
+              const Semantics(
+                label: 'child1',
+              ),
+              const Semantics(
+                label: 'child2',
+              ),
+            ],
+          ),
         ),
       ),
     ),
@@ -96,6 +99,7 @@ class RenderTest extends RenderProxyBox {
 
   void _annotate(SemanticsNode node) {
     node.label = _label;
+    node.textDirection = TextDirection.ltr;
   }
 
   String _label;
