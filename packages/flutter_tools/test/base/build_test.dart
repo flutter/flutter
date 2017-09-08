@@ -278,10 +278,12 @@ void main() {
       fs = new MemoryFileSystem();
     });
 
+    final Map<Type, Generator> contextOverrides = <Type, Generator>{ FileSystem: () => fs };
+
     testUsingContext('returns one file if only one is listed', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart');
       expect(await readDepfile('a.d'), unorderedEquals(<String>['/foo/a.dart']));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs });
+    }, overrides: contextOverrides);
 
     testUsingContext('returns multiple files', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart /foo/b.dart');
@@ -289,7 +291,7 @@ void main() {
         '/foo/a.dart',
         '/foo/b.dart',
       ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs });
+    }, overrides: contextOverrides);
 
     testUsingContext('trims extra spaces between files', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart    /foo/b.dart  /foo/c.dart');
@@ -298,7 +300,7 @@ void main() {
         '/foo/b.dart',
         '/foo/c.dart',
       ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs });
+    }, overrides: contextOverrides);
 
     testUsingContext('returns files with spaces and backslashes', () async {
       await fs.file('a.d').writeAsString(r'snapshot.d: /foo/a\ a.dart /foo/b\\b.dart /foo/c\\ c.dart');
@@ -307,7 +309,7 @@ void main() {
         r'/foo/b\b.dart',
         r'/foo/c\ c.dart',
       ]));
-    }, overrides: <Type, Generator>{ FileSystem: () => fs });
+    }, overrides: contextOverrides);
   });
 
   group('Snapshotter', () {
@@ -472,6 +474,14 @@ void main() {
     }, overrides: contextOverrides);
 
     group('createFingerprint', () {
+      final Map<Type, Generator> contextOverrides = <Type, Generator>{
+        FileSystem: () => fs,
+        Artifacts: () => mockArtifacts,
+      };
+      final List<String> artifactPaths = <String>[
+        kVmSnapshotData,
+        kIsolateSnapshotData,
+      ];
       testUsingContext('creates fingerprint with target platform', () {
         final Fingerprint fingerprint = Snapshotter.createFingerprint(
           new SnapshotType(TargetPlatform.android_x64, BuildMode.release),
@@ -482,14 +492,8 @@ void main() {
           'buildMode': 'BuildMode.release',
           'targetPlatform': 'TargetPlatform.android_x64',
           'entryPoint': 'a.dart',
-        }, <String>[
-          kVmSnapshotData,
-          kIsolateSnapshotData,
-        ]));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        Artifacts: () => mockArtifacts,
-      });
+        }, artifactPaths));
+      }, overrides: contextOverrides);
       testUsingContext('creates fingerprint without target platform', () {
         final Fingerprint fingerprint = Snapshotter.createFingerprint(
           new SnapshotType(null, BuildMode.release),
@@ -500,14 +504,8 @@ void main() {
           'buildMode': 'BuildMode.release',
           'targetPlatform': '',
           'entryPoint': 'a.dart',
-        }, <String>[
-          kVmSnapshotData,
-          kIsolateSnapshotData,
-        ]));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        Artifacts: () => mockArtifacts,
-      });
+        }, artifactPaths));
+      }, overrides: contextOverrides);
       testUsingContext('creates fingerprint with file checksums', () async {
         await fs.file('a.dart').create();
         await fs.file('b.dart').create();
@@ -523,13 +521,8 @@ void main() {
         }, <String>[
           'a.dart',
           'b.dart',
-          kVmSnapshotData,
-          kIsolateSnapshotData,
-        ]));
-      }, overrides: <Type, Generator>{
-        FileSystem: () => fs,
-        Artifacts: () => mockArtifacts,
-      });
+        ]..addAll(artifactPaths)));
+      }, overrides: contextOverrides);
     });
   });
 }
