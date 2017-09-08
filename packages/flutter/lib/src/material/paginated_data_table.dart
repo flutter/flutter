@@ -16,6 +16,7 @@ import 'data_table_source.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
@@ -286,6 +287,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   Widget build(BuildContext context) {
     // TODO(ianh): This whole build function doesn't handle RTL yet.
     final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     // HEADER
     final List<Widget> headerWidgets = <Widget>[];
     double startPadding = 24.0;
@@ -300,11 +302,10 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
         startPadding = 12.0;
       }
-    } else if (_selectedRowCount == 1) {
-      // TODO(ianh): Real l10n.
-      headerWidgets.add(const Expanded(child: const Text('1 item selected')));
     } else {
-      headerWidgets.add(new Expanded(child: new Text('$_selectedRowCount items selected')));
+      headerWidgets.add(new Expanded(
+        child: new Text(localizations.selectedRowCountTitle(_selectedRowCount)),
+      ));
     }
     if (widget.actions != null) {
       headerWidgets.addAll(
@@ -353,14 +354,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       new IconButton(
         icon: const Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
-        tooltip: 'Previous page',
+        tooltip: localizations.previousPageTooltip,
         onPressed: _firstRowIndex <= 0 ? null : _handlePrevious
       ),
       new Container(width: 24.0),
       new IconButton(
         icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
-        tooltip: 'Next page',
+        tooltip: localizations.nextPageTooltip,
         onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext
       ),
       new Container(width: 14.0),

@@ -31,8 +31,17 @@ abstract class MaterialLocalizations {
   /// The tooltip for the [MonthPicker]'s "previous month" button.
   String get previousMonthTooltip;
 
+  /// The tooltip for the [PaginatedDataTables]'s "next page" button.
+  String get nextPageTooltip;
+
+  /// The tooltip for the [PaginatedDataTables]'s "previous page" button.
+  String get previousPageTooltip;
+
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
+
+  /// Title for the PaginatedDataTable's selected row count header
+  String selectedRowCountTitle(int selectedRowCount);
 
   /// Label for "cancel" buttons and menu items.
   String get cancelButtonLabel;
@@ -115,7 +124,32 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get previousMonthTooltip => _nameToValue["previousMonthTooltip"];
 
   @override
+  String get nextPageTooltip => _nameToValue["nextPageTooltip"];
+
+  @override
+  String get previousPageTooltip => _nameToValue["previousPageTooltip"];
+
+  @override
   String get licensesPageTitle => _nameToValue["licensesPageTitle"];
+
+  @override
+  String selectedRowCountTitle(int selectedRowCount) {
+    String text;
+    if (selectedRowCount == 0)
+      text = _nameToValue["selectedRowCountTitleZero"];
+    else if (selectedRowCount == 1)
+      text = _nameToValue["selectedRowCountTitleOne"];
+    else if (selectedRowCount == 2)
+      text = _nameToValue["selectedRowCountTitleTwo"];
+    else if (selectedRowCount > 2)
+      text = _nameToValue["selectedRowCountTitleMany"];
+    text ??= _nameToValue["selectedRowCountTitleOther"];
+
+    assert(text != null);
+    if (text.contains(r'$selectedRowCount'))
+      text = text.replaceFirst(r'$selectedRowCount', selectedRowCount.toString());
+    return text;
+  }
 
   @override
   String get cancelButtonLabel => _nameToValue["cancelButtonLabel"];

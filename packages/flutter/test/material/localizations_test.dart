@@ -92,6 +92,11 @@ void main() {
       expect(localizations.pasteButtonLabel, isNotNull);
       expect(localizations.selectAllButtonLabel, isNotNull);
       expect(localizations.viewLicensesButtonLabel, isNotNull);
+
+      expect(localizations.selectedRowCountTitle(0), isNotNull);
+      expect(localizations.selectedRowCountTitle(1), isNotNull);
+      expect(localizations.selectedRowCountTitle(2), isNotNull);
+      expect(localizations.selectedRowCountTitle(100), isNotNull);
     }
   });
 }
