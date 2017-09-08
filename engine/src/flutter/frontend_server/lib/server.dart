@@ -7,8 +7,9 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:front_end/compilation_message.dart';
 
-import 'package:front_end/incremental_kernel_generator.dart';
+import 'package:front_end/byte_store.dart';
 import 'package:front_end/compiler_options.dart';
+import 'package:front_end/incremental_kernel_generator.dart';
 import 'package:front_end/kernel_generator.dart';
 import 'package:kernel/ast.dart';
 import 'package:kernel/binary/ast_to_binary.dart';
@@ -116,6 +117,7 @@ class _FrontendCompiler implements CompilerInterface {
     _outputStream.writeln("result $boundaryKey");
     final Uri sdkRoot = _ensureFolderPath(options['sdk-root']);
     final CompilerOptions compilerOptions = new CompilerOptions()
+      ..byteStore = new MemoryByteStore()
       ..sdkRoot = sdkRoot
       ..strongMode = false
       ..target = new FlutterTarget(new TargetFlags())
