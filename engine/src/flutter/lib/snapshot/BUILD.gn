@@ -19,7 +19,7 @@ import("//dart/runtime/lib/typed_data_sources.gni")
 import("//dart/utils/generate_patch_sdk.gni")
 
 if (is_fuchsia) {
-  import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
+  import("//garnet/public/lib/ui/flutter/sdk_ext/sdk_ext.gni")
   import("//garnet/public/dart-pkg/fuchsia/sdk_ext.gni")
   import("//garnet/public/dart-pkg/zircon/sdk_ext.gni")
 }

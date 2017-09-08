@@ -9,7 +9,7 @@
 
 #include <mx/eventpair.h>
 
-#include "apps/mozart/lib/scenic/client/resources.h"
+#include "lib/ui/scenic/client/resources.h"
 #include "flutter/flow/scene_update_context.h"
 #include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "lib/ftl/build_config.h"
