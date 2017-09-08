@@ -38,7 +38,8 @@ class OrderSwitcherState extends State<OrderSwitcher> {
       children.add(widget.a);
     }
     return new Stack(
-      children: children
+      textDirection: TextDirection.ltr,
+      children: children,
     );
   }
 }

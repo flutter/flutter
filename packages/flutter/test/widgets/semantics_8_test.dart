@@ -21,6 +21,7 @@ void main() {
           child: new Semantics(
             container: true,
             child: new Stack(
+              textDirection: TextDirection.ltr,
               children: <Widget>[
                 const Semantics(
                   checked: true,
@@ -52,6 +53,7 @@ void main() {
           child: new Semantics(
             container: true,
             child: new Stack(
+              textDirection: TextDirection.ltr,
               children: <Widget>[
                 const Semantics(
                   label: 'label',

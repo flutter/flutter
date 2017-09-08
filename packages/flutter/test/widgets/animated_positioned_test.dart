@@ -27,6 +27,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new AnimatedPositioned(
             child: new Container(key: key),
@@ -50,6 +51,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new AnimatedPositioned(
             child: new Container(key: key),
@@ -110,6 +112,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new AnimatedPositioned(
             child: new Container(key: key),
@@ -133,6 +136,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new AnimatedPositioned(
             child: new Container(key: key),
@@ -156,6 +160,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new AnimatedPositioned(
             child: new Container(key: key),
@@ -190,6 +195,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new AnimatedPositioned(
             child: new Container(key: key),
@@ -213,6 +219,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new AnimatedPositioned(
             child: new Container(key: key),

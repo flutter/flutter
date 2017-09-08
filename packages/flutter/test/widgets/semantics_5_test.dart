@@ -14,6 +14,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         fit: StackFit.expand,
         children: <Widget>[
           const Semantics(

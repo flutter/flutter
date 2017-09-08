@@ -2193,7 +2193,8 @@ class Stack extends MultiChildRenderObjectWidget {
   /// top left corners.
   Stack({
     Key key,
-    this.alignment: FractionalOffset.topLeft,
+    this.alignment: FractionalOffsetDirectional.topStart,
+    this.textDirection,
     this.fit: StackFit.loose,
     this.overflow: Overflow.clip,
     List<Widget> children: const <Widget>[],
@@ -2205,7 +2206,12 @@ class Stack extends MultiChildRenderObjectWidget {
   /// the points determined by [alignment] are co-located. For example, if the
   /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
 
   /// How to size the non-positioned children in the stack.
   ///
@@ -2224,6 +2230,7 @@ class Stack extends MultiChildRenderObjectWidget {
   RenderStack createRenderObject(BuildContext context) {
     return new RenderStack(
       alignment: alignment,
+      textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
       overflow: overflow,
     );
@@ -2233,6 +2240,7 @@ class Stack extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
     renderObject
       ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
       ..overflow = overflow;
   }
@@ -2240,7 +2248,8 @@ class Stack extends MultiChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new EnumProperty<StackFit>('fit', fit));
     description.add(new EnumProperty<Overflow>('overflow', overflow));
   }
@@ -2260,23 +2269,31 @@ class IndexedStack extends Stack {
   /// The [index] argument must not be null.
   IndexedStack({
     Key key,
-    FractionalOffset alignment: FractionalOffset.topLeft,
+    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    TextDirection textDirection,
     StackFit sizing: StackFit.loose,
     this.index: 0,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, alignment: alignment, fit: sizing, children: children);
+  }) : super(key: key, alignment: alignment, textDirection: textDirection, fit: sizing, children: children);
 
   /// The index of the child to show.
   final int index;
 
   @override
-  RenderIndexedStack createRenderObject(BuildContext context) => new RenderIndexedStack(index: index, alignment: alignment);
+  RenderIndexedStack createRenderObject(BuildContext context) {
+    return new RenderIndexedStack(
+      index: index,
+      alignment: alignment,
+      textDirection: textDirection ?? Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
     renderObject
       ..index = index
-      ..alignment = alignment;
+      ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.of(context);
   }
 }
 

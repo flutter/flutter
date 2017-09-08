@@ -10,32 +10,35 @@ void main() {
   testWidgets('Can hit test flex children of stacks', (WidgetTester tester) async {
     bool didReceiveTap = false;
     await tester.pumpWidget(
-      new Container(
-        color: const Color(0xFF00FF00),
-        child: new Stack(
-          children: <Widget>[
-            new Positioned(
-              top: 10.0,
-              left: 10.0,
-              child: new Column(
-                children: <Widget>[
-                  new GestureDetector(
-                    onTap: () {
-                      didReceiveTap = true;
-                    },
-                    child: new Container(
-                      color: const Color(0xFF0000FF),
-                      width: 100.0,
-                      height: 100.0,
-                      child: const Center(
-                        child: const Text('X', textDirection: TextDirection.ltr),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Container(
+          color: const Color(0xFF00FF00),
+          child: new Stack(
+            children: <Widget>[
+              new Positioned(
+                top: 10.0,
+                left: 10.0,
+                child: new Column(
+                  children: <Widget>[
+                    new GestureDetector(
+                      onTap: () {
+                        didReceiveTap = true;
+                      },
+                      child: new Container(
+                        color: const Color(0xFF0000FF),
+                        width: 100.0,
+                        height: 100.0,
+                        child: const Center(
+                          child: const Text('X', textDirection: TextDirection.ltr),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
