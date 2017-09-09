@@ -46,6 +46,8 @@ class SceneUpdateContext {
 
   class SurfaceProducer {
    public:
+    virtual ~SurfaceProducer() = default;
+
     virtual std::unique_ptr<SurfaceProducerSurface> ProduceSurface(
         const SkISize& size) = 0;
 

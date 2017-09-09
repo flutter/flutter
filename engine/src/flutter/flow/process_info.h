@@ -15,6 +15,8 @@ namespace flow {
 /// can choose to provide this information however.
 class ProcessInfo {
  public:
+  virtual ~ProcessInfo() = default;
+
   virtual bool SampleNow() = 0;
 
   /// Virtual memory size in bytes.
