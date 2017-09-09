@@ -14,6 +14,8 @@ namespace vulkan {
 
 class VulkanNativeSurface {
  public:
+  virtual ~VulkanNativeSurface() = default;
+
   virtual const char* GetExtensionName() const = 0;
 
   virtual uint32_t GetSkiaExtensionName() const = 0;
