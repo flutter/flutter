@@ -364,6 +364,7 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
 void RuntimeHolder::InitDartIoInternal() {
   Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
 
+  // Set up the namespace.
   Dart_Handle namespace_type =
       Dart_GetType(io_lib, ToDart("_Namespace"), 0, nullptr);
   DART_CHECK_VALID(namespace_type);
@@ -372,6 +373,13 @@ void RuntimeHolder::InitDartIoInternal() {
   DART_CHECK_VALID(namespace_args[0]);
   DART_CHECK_VALID(Dart_Invoke(
       namespace_type, ToDart("_setupNamespace"), 1, namespace_args));
+
+  // Disable dart:io exit()
+  Dart_Handle embedder_config_type =
+      Dart_GetType(io_lib, ToDart("_EmbedderConfig"), 0, nullptr);
+  DART_CHECK_VALID(embedder_config_type);
+  DART_CHECK_VALID(
+      Dart_SetField(embedder_config_type, ToDart("_mayExit"), Dart_False()));
 }
 
 void RuntimeHolder::InitFuchsia() {
