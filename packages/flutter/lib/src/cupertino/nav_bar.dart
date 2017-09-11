@@ -321,6 +321,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
                   ),
                   child: new DefaultTextStyle(
                     style: _kLargeTitleTextStyle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     child: new AnimatedOpacity(
                       opacity: showLargeTitle ? 1.0 : 0.0,
                       duration: _kNavBarTitleFadeDuration,
