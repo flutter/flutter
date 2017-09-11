@@ -101,10 +101,28 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  DefaultMaterialLocalizations(this.locale) {
+  DefaultMaterialLocalizations(Locale locale) {
     assert(locale != null);
-    _nameToValue = localizations[locale.toString()]
-      ?? localizations[locale.languageCode]
+
+    // Android devices (Java really) report deprecated language codes, see
+    // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4140555
+    // and https://developer.android.com/reference/java/util/Locale.html
+    switch(locale.languageCode) {
+      case 'iw':
+        _locale = new Locale('he', locale.countryCode);
+        break;
+      case 'ji':
+        _locale = new Locale('yi', locale.countryCode);
+        break;
+      case 'in':
+        _locale = new Locale('id', locale.countryCode);
+        break;
+      default:
+        _locale = locale;
+    }
+
+    _nameToValue = localizations[_localeName]
+      ?? localizations[_locale.languageCode]
       ?? localizations['en']
       ?? <String, String>{};
   }
@@ -113,7 +131,8 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   /// The locale for which the values of this class's localized resources
   /// have been translated.
-  final Locale locale;
+  Locale get locale => _locale;
+  Locale _locale;
 
   String get _localeName {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
