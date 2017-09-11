@@ -679,7 +679,7 @@ abstract class DiagnosticsNode {
   String toString({ TextTreeConfiguration parentConfiguration }) {
     assert(style != null);
     if (style == DiagnosticsTreeStyle.singleLine)
-      return toStringDeep('', '', parentConfiguration);
+      return toStringDeep(parentConfiguration: parentConfiguration);
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
 
@@ -736,7 +736,11 @@ abstract class DiagnosticsNode {
   ///  * [toString], for a brief description of the [value] but not its children.
   ///  * [toStringShallow], for a detailed description of the [value] but not its
   ///    children.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines, TextTreeConfiguration parentConfiguration]) {
+  String toStringDeep({
+    String prefixLineOne: '',
+    String prefixOtherLines,
+    TextTreeConfiguration parentConfiguration,
+  }) {
     prefixOtherLines ??= prefixLineOne;
 
     final List<DiagnosticsNode> children = getChildren();
@@ -796,9 +800,9 @@ abstract class DiagnosticsNode {
       if (property.style != DiagnosticsTreeStyle.singleLine) {
         final TextTreeConfiguration propertyStyle = property.textTreeConfiguration;
         builder.writeRaw(property.toStringDeep(
-            '${builder.prefixOtherLines}${propertyStyle.prefixLineOne}',
-            '${builder.prefixOtherLines}${propertyStyle.linkCharacter}${propertyStyle.prefixOtherLines}',
-            config,
+            prefixLineOne: '${builder.prefixOtherLines}${propertyStyle.prefixLineOne}',
+            prefixOtherLines: '${builder.prefixOtherLines}${propertyStyle.linkCharacter}${propertyStyle.prefixOtherLines}',
+            parentConfiguration: config,
         ));
         continue;
       }
@@ -850,9 +854,9 @@ abstract class DiagnosticsNode {
         if (i == children.length - 1) {
           final String lastChildPrefixLineOne = '$prefixChildren${childConfig.prefixLastChildLineOne}';
           builder.writeRawLine(child.toStringDeep(
-            lastChildPrefixLineOne,
-            '$prefixChildren${childConfig.childLinkSpace}${childConfig.prefixOtherLines}',
-            config,
+            prefixLineOne: lastChildPrefixLineOne,
+            prefixOtherLines: '$prefixChildren${childConfig.childLinkSpace}${childConfig.prefixOtherLines}',
+            parentConfiguration: config,
           ));
           if (childConfig.footer.isNotEmpty)
             builder.writeRaw('$prefixChildren${childConfig.childLinkSpace}${childConfig.footer}');
@@ -860,7 +864,7 @@ abstract class DiagnosticsNode {
           final TextTreeConfiguration nextChildStyle = _childTextConfiguration(children[i + 1], config);
           final String childPrefixLineOne = '$prefixChildren${childConfig.prefixLineOne}';
           final String childPrefixOtherLines ='$prefixChildren${nextChildStyle.linkCharacter}${childConfig.prefixOtherLines}';
-          builder.writeRawLine(child.toStringDeep(childPrefixLineOne, childPrefixOtherLines));
+          builder.writeRawLine(child.toStringDeep(prefixLineOne: childPrefixLineOne, prefixOtherLines: childPrefixOtherLines));
           if (childConfig.footer.isNotEmpty)
             builder.writeRaw('$prefixChildren${nextChildStyle.linkCharacter}${childConfig.footer}');
         }
@@ -1249,16 +1253,18 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// value with 0 elements would, confusingly, be displayed as the empty
   /// string. It defaults to the string `[]`.
   ///
-  /// The [style] and [hidden] arguments must also not be null.
+  /// The [style], [hidden], and [showName] arguments must also not be null.
   IterableProperty(String name, Iterable<T> value, {
     Object defaultValue: kNoDefaultValue,
     String ifNull,
     String ifEmpty: '[]',
     DiagnosticsTreeStyle style: DiagnosticsTreeStyle.singleLine,
     bool hidden: false,
+    bool showName: true,
   }) : assert(ifEmpty != null),
        assert(style != null),
        assert(hidden != null),
+       assert(showName != null),
        super(
     name,
     value,
@@ -1267,6 +1273,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
     ifEmpty: ifEmpty,
     style: style,
     hidden: hidden,
+    showName: showName,
   );
 
   @override
@@ -1634,14 +1641,19 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   List<DiagnosticsNode> getChildren() => <DiagnosticsNode>[];
 }
 
-/// [DiagnosticsNode] for an instance of [Diagnosticable].
-class _DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
-  _DiagnosticableNode({
+/// [DiagnosticsNode] that lazily calls the associated [Diagnosticable] [value]
+/// to implement [getChildren] and [getProperties].
+class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
+  /// Create a diagnostics describing a [Diagnosticable] value.
+  ///
+  /// The [value] argument must not be null.
+  DiagnosticableNode({
     String name,
     @required this.value,
     @required DiagnosticsTreeStyle style,
     String emptyBodyDescription,
-  }) : super(
+  }) : assert(value != null),
+       super(
          name: name,
          style: style,
        );
@@ -1683,7 +1695,7 @@ class _DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 }
 
 /// [DiagnosticsNode] for an instance of [DiagnosticableTree].
-class _DiagnosticableTreeNode extends _DiagnosticableNode<DiagnosticableTree> {
+class _DiagnosticableTreeNode extends DiagnosticableNode<DiagnosticableTree> {
   _DiagnosticableTreeNode({
     String name,
     @required DiagnosticableTree value,
@@ -1841,7 +1853,7 @@ abstract class Diagnosticable {
   /// relationship between the parent and the node. For example, pass
   /// [DiagnosticsTreeStyle.offstage] to indicate that a node is offstage.
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return new _DiagnosticableNode<Diagnosticable>(
+    return new DiagnosticableNode<Diagnosticable>(
       name: name,
       value: this,
       style: style,
@@ -2110,8 +2122,8 @@ abstract class DiagnosticableTree extends Diagnosticable {
   ///  * [toString], for a brief description of the object but not its children.
   ///  * [toStringShallow], for a detailed description of the object but not its
   ///    children.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines]) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines }) {
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
   }
 
   @override
@@ -2176,8 +2188,8 @@ abstract class DiagnosticableTreeMixin implements DiagnosticableTree {
   }
 
   @override
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines]) {
-    return toDiagnosticsNode().toStringDeep(prefixLineOne, prefixOtherLines);
+  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines }) {
+    return toDiagnosticsNode().toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
   }
 
   @override

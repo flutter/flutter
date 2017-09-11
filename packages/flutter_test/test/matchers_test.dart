@@ -26,7 +26,7 @@ class _MockToStringDeep {
   /// line break.
   List<String> _lines;
 
-  String toStringDeep([String prefixLineOne="", String prefixOtherLines=""]) {
+  String toStringDeep({ String prefixLineOne: "", String prefixOtherLines: "" }) {
     final StringBuffer sb = new StringBuffer();
     if (_lines.isNotEmpty)
       sb.write('$prefixLineOne${_lines.first}');

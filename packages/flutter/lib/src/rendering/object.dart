@@ -2839,11 +2839,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// If the prefix argument is provided, then every line in the output
   /// will be prefixed by that string.
   @override
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines: '' }) {
     final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
 
-    final String result = super.toStringDeep(prefixLineOne, prefixOtherLines);
+    final String result = super.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
 
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
