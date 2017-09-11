@@ -13,16 +13,12 @@ class Title extends StatelessWidget {
   /// Creates a widget that describes this app to the operating system.
   Title({
     Key key,
-    this.title: kDefaultTitle,
-    this.color,
+    this.title: '',
+    this.color: const Color(0xFFFFFFFF),
     @required this.child,
-  }) : assert(color == null || color.alpha == 0xFF),
-       assert(title != null),
+  }) : assert(title != null),
+       assert(color != null && color.alpha == 0xFF),
        super(key: key);
-
-  /// The default title used by this widget, and by the App widgets
-  /// ([MaterialApp], [WidgetsApp], etc.) that use this one.
-  static const String kDefaultTitle = '';
 
   /// A one-line description of this app for use in the window manager.
   final String title;
@@ -47,7 +43,7 @@ class Title extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new StringProperty('title', title, defaultValue: null));
+    description.add(new StringProperty('title', title, defaultValue: ''));
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }
