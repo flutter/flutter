@@ -243,6 +243,11 @@ the following steps.
 3. To run tests on your host machine, build one of the host configurations
    (e.g., `out/host_debug_unopt`). To run examples on Android, build one of the
    Android configurations (e.g., `out/android_debug_unopt`).
+   When running on the device with `--preview-dart-2` flag you will still need
+   to build corresponding host configuration (e.g., `out/host_debug_unopt` if you
+   are using `out/android_debug_unopt`, `out/host_release` if you use `out/android_release`).
+   Host configuration provides standalone dart sdk for the engine, that is used
+   to run engine dart scripts on the host.
 
 You should now be able to run the tests against your locally built
 engine using the `flutter test --local-engine=host_debug_unopt` command. To run

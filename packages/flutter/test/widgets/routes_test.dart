@@ -109,10 +109,15 @@ void main() {
 
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-    await tester.pumpWidget(new Navigator(
-      key: navigatorKey,
-      onGenerateRoute: (_) => new TestRoute('initial')
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (_) => new TestRoute('initial'),
+        ),
+      ),
+    );
     final NavigatorState host = navigatorKey.currentState;
     await runNavigatorTest(
       tester,
@@ -187,10 +192,15 @@ void main() {
 
   testWidgets('Route management - push, remove, pop', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-    await tester.pumpWidget(new Navigator(
-      key: navigatorKey,
-      onGenerateRoute: (_) => new TestRoute('first')
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (_) => new TestRoute('first')
+        ),
+      ),
+    );
     final NavigatorState host = navigatorKey.currentState;
     await runNavigatorTest(
       tester,
@@ -293,10 +303,15 @@ void main() {
 
   testWidgets('Route management - push, replace, popUntil', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-    await tester.pumpWidget(new Navigator(
-      key: navigatorKey,
-      onGenerateRoute: (_) => new TestRoute('A')
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (_) => new TestRoute('A')
+        ),
+      ),
+    );
     final NavigatorState host = navigatorKey.currentState;
     await runNavigatorTest(
       tester,
@@ -370,10 +385,15 @@ void main() {
       onRemove: () { routeA.log('onRemove 1'); }
     ));
     final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
-    await tester.pumpWidget(new Navigator(
-      key: navigatorKey,
-      onGenerateRoute: (_) => routeA
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (_) => routeA
+        ),
+      ),
+    );
     final NavigatorState host = navigatorKey.currentState;
     await runNavigatorTest(
       tester,

@@ -23,13 +23,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: const Semantics(label: 'child1')
+            child: const Semantics(label: 'child1', textDirection: TextDirection.ltr)
           ),
           new Container(
             height: 10.0,
             child: const IgnorePointer(
               ignoring: false,
-              child: const Semantics(label: 'child2')
+              child: const Semantics(label: 'child2', textDirection: TextDirection.ltr)
             )
           ),
         ],
@@ -43,11 +43,13 @@ void main() {
           new TestSemantics.rootChild(
             id: 1,
             label: 'child1',
+            textDirection: TextDirection.ltr,
             rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
           ),
           new TestSemantics.rootChild(
             id: 2,
             label: 'child2',
+            textDirection: TextDirection.ltr,
             rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
             transform: new Matrix4.translationValues(0.0, 10.0, 0.0),
           ),
@@ -61,13 +63,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: const Semantics(label: 'child1')
+            child: const Semantics(label: 'child1', textDirection: TextDirection.ltr)
           ),
           new Container(
             height: 10.0,
             child: const IgnorePointer(
               ignoring: true,
-              child: const Semantics(label: 'child2')
+              child: const Semantics(label: 'child2', textDirection: TextDirection.ltr)
             )
           ),
         ],
@@ -83,13 +85,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: const Semantics(label: 'child1')
+            child: const Semantics(label: 'child1', textDirection: TextDirection.ltr)
           ),
           new Container(
             height: 10.0,
             child: const IgnorePointer(
               ignoring: false,
-              child: const Semantics(label: 'child2')
+              child: const Semantics(label: 'child2', textDirection: TextDirection.ltr)
             )
           ),
         ],
@@ -103,11 +105,13 @@ void main() {
           new TestSemantics.rootChild(
             id: 3,
             label: 'child1',
+            textDirection: TextDirection.ltr,
             rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
           ),
           new TestSemantics.rootChild(
             id: 2,
             label: 'child2',
+            textDirection: TextDirection.ltr,
             rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
             transform: new Matrix4.translationValues(0.0, 10.0, 0.0),
           ),

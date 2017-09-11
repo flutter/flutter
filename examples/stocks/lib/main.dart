@@ -121,6 +121,10 @@ class StocksAppState extends State<StocksApp> {
       localizationsDelegates: <_StocksLocalizationsDelegate>[
         new _StocksLocalizationsDelegate(),
       ],
+      supportedLocales: const <Locale>[
+        const Locale('en', 'US'),
+        const Locale('es', 'ES'),
+      ],
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,

@@ -4,27 +4,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
+
     // This is a smoketest to verify that adding a debugger doesn't crash.
     await tester.pumpWidget(
-      new Stack(
-        children: <Widget>[
-          const Semantics(),
-          const Semantics(
-            container: true,
-          ),
-          const Semantics(
-            label: 'label',
-          ),
-        ],
-      ),
-    );
-
-    await tester.pumpWidget(
-      new SemanticsDebugger(
+      new Directionality(
+        textDirection: TextDirection.ltr,
         child: new Stack(
           children: <Widget>[
             const Semantics(),
@@ -33,8 +22,29 @@ void main() {
             ),
             const Semantics(
               label: 'label',
+              textDirection: TextDirection.ltr,
             ),
           ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new Stack(
+            children: <Widget>[
+              const Semantics(),
+              const Semantics(
+                container: true,
+              ),
+              const Semantics(
+                label: 'label',
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -47,71 +57,80 @@ void main() {
     final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(
-      new SemanticsDebugger(
-        child: new Stack(
-          children: <Widget>[
-            const Semantics(label: 'label1'),
-            new Positioned(
-              key: key,
-              left: 0.0,
-              top: 0.0,
-              width: 100.0,
-              height: 100.0,
-              child: const Semantics(label: 'label2'),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(
-      new SemanticsDebugger(
-        child: new Stack(
-          children: <Widget>[
-            const Semantics(label: 'label1'),
-            new Semantics(
-              container: true,
-              child: new Stack(
-                children: <Widget>[
-                  new Positioned(
-                    key: key,
-                    left: 0.0,
-                    top: 0.0,
-                    width: 100.0,
-                    height: 100.0,
-                    child: const Semantics(label: 'label2'),
-                  ),
-                  const Semantics(label: 'label3'),
-                ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new Stack(
+            children: <Widget>[
+              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Positioned(
+                key: key,
+                left: 0.0,
+                top: 0.0,
+                width: 100.0,
+                height: 100.0,
+                child: const Semantics(label: 'label2', textDirection: TextDirection.ltr),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
 
     await tester.pumpWidget(
-      new SemanticsDebugger(
-        child: new Stack(
-          children: <Widget>[
-            const Semantics(label: 'label1'),
-            new Semantics(
-              container: true,
-              child: new Stack(
-                children: <Widget>[
-                  new Positioned(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new Stack(
+            children: <Widget>[
+              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Semantics(
+                container: true,
+                child: new Stack(
+                  children: <Widget>[
+                    new Positioned(
                       key: key,
                       left: 0.0,
                       top: 0.0,
                       width: 100.0,
                       height: 100.0,
-                      child: const Semantics(label: 'label2')),
-                  const Semantics(label: 'label3'),
-                  const Semantics(label: 'label4'),
-                ],
+                      child: const Semantics(label: 'label2', textDirection: TextDirection.ltr),
+                    ),
+                    const Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new Stack(
+            children: <Widget>[
+              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Semantics(
+                container: true,
+                child: new Stack(
+                  children: <Widget>[
+                    new Positioned(
+                        key: key,
+                        left: 0.0,
+                        top: 0.0,
+                        width: 100.0,
+                        height: 100.0,
+                        child: const Semantics(label: 'label2', textDirection: TextDirection.ltr)),
+                    const Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                    const Semantics(label: 'label4', textDirection: TextDirection.ltr),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -155,6 +174,47 @@ void main() {
 
     await tester.tap(find.text('BOTTOM'));
     expect(log, equals(<String>['bottom']));
+    log.clear();
+  });
+
+  testWidgets('SemanticsDebugger interaction test - negative',
+      (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new Material(
+            child: new ListView(
+              children: <Widget>[
+                new RaisedButton(
+                  onPressed: () {
+                    log.add('top');
+                  },
+                  child: const Text('TOP', textDirection: TextDirection.ltr),
+                ),
+                new ExcludeSemantics(
+                  child: new RaisedButton(
+                    onPressed: () {
+                      log.add('bottom');
+                    },
+                    child: const Text('BOTTOM', textDirection: TextDirection.ltr),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('TOP'));
+    expect(log, equals(<String>['top']));
+    log.clear();
+
+    await tester.tap(find.text('BOTTOM'));
+    expect(log, equals(<String>[]));
     log.clear();
   });
 
@@ -205,13 +265,16 @@ void main() {
     bool didLongPress = false;
 
     await tester.pumpWidget(
-      new SemanticsDebugger(
-        child: new GestureDetector(
-          onLongPress: () {
-            expect(didLongPress, isFalse);
-            didLongPress = true;
-          },
-          child: const Text('target'),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new GestureDetector(
+            onLongPress: () {
+              expect(didLongPress, isFalse);
+              didLongPress = true;
+            },
+            child: const Text('target', textDirection: TextDirection.ltr),
+          ),
         ),
       ),
     );
@@ -224,16 +287,19 @@ void main() {
     double value = 0.75;
 
     await tester.pumpWidget(
-      new SemanticsDebugger(
-        child: new Directionality(
-          textDirection: TextDirection.ltr,
-          child: new Material(
-            child: new Center(
-              child: new Slider(
-                value: value,
-                onChanged: (double newValue) {
-                  value = newValue;
-                },
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new SemanticsDebugger(
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Material(
+              child: new Center(
+                child: new Slider(
+                  value: value,
+                  onChanged: (double newValue) {
+                    value = newValue;
+                  },
+                ),
               ),
             ),
           ),

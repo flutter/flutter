@@ -92,7 +92,7 @@ class TriggerableState extends State<TriggerableWidget> {
   @override
   Widget build(BuildContext context) {
     widget.counter.count++;
-    return new Text("Bang $_count!");
+    return new Text("Bang $_count!", textDirection: TextDirection.ltr);
   }
 }
 

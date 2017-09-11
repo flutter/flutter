@@ -4,6 +4,7 @@
 
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'rendering_tester.dart';
 
@@ -94,8 +95,8 @@ void main() {
   });
 
   test('toStringDeep() does not throw with transform == null', () {
-    final SemanticsNode child2 = new SemanticsNode();
     final SemanticsNode child1 = new SemanticsNode();
+    final SemanticsNode child2 = new SemanticsNode();
     final SemanticsNode root = new SemanticsNode();
     root.addChildren(<SemanticsNode>[child1, child2]);
     root.finalizeChildren();
@@ -104,10 +105,106 @@ void main() {
     expect(child1.transform, isNull);
     expect(child2.transform, isNull);
 
-    expect(root.toStringDeep(DebugSemanticsDumpOrder.traversal),
-        'SemanticsNode(8 (STALE; owner=null); Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-        ' ├SemanticsNode(7; Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-        ' └SemanticsNode(6; Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+    expect(
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
+      'SemanticsNode#8(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      '├SemanticsNode#6(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      '└SemanticsNode#7(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
+    );
+  });
+
+  test('toStringDeep respects childOrder parameter', () {
+    final SemanticsNode child1 = new SemanticsNode()
+      ..rect = new Rect.fromLTRB(20.0, 20.0, 20.0, 20.0);
+    final SemanticsNode child2 = new SemanticsNode()
+      ..rect = new Rect.fromLTRB(10.0, 10.0, 10.0, 10.0);
+    final SemanticsNode root = new SemanticsNode();
+    root.addChildren(<SemanticsNode>[child1, child2]);
+    root.finalizeChildren();
+    expect(
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
+      'SemanticsNode#11(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n'
+      '└SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n',
+    );
+
+    expect(
+      root.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
+      'SemanticsNode#11(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      '├SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n'
+      '└SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n',
+    );
+
+    final SemanticsNode child3 = new SemanticsNode()
+      ..rect = new Rect.fromLTRB(0.0, 0.0, 0.0, 0.0);
+    child3.addChildren(<SemanticsNode>[
+      new SemanticsNode()..rect = new Rect.fromLTRB(20.0, 0.0, 20.0, 0.0),
+      new SemanticsNode(),
+    ]);
+    child3.finalizeChildren();
+
+    final SemanticsNode rootComplex = new SemanticsNode();
+    rootComplex.addChildren(<SemanticsNode>[child1, child2, child3]);
+    rootComplex.finalizeChildren();
+
+    expect(
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
+      'SemanticsNode#15(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      '├SemanticsNode#12(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      '│├SemanticsNode#14(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      '│└SemanticsNode#13(STALE, owner: null, Rect.fromLTRB(20.0, 0.0, 20.0, 0.0))\n'
+      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n'
+      '└SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n',
+    );
+
+    expect(
+      rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
+      'SemanticsNode#15(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      '├SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n'
+      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n'
+      '└SemanticsNode#12(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
+      ' ├SemanticsNode#13(STALE, owner: null, Rect.fromLTRB(20.0, 0.0, 20.0, 0.0))\n'
+      ' └SemanticsNode#14(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
+    );
+  });
+
+  test('debug properties', () {
+    expect(
+      new SemanticsNode().toStringDeep(),
+      'SemanticsNode#16(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
+    );
+
+    final SemanticsNode allProperties = new SemanticsNode()
+      ..rect = new Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..mergeAllDescendantsIntoThisNode = true
+      ..transform = new Matrix4.translation(new Vector3(10.0, 10.0, 0.0))
+      ..wasAffectedByClip = true
+      ..addAction(SemanticsAction.scrollUp)
+      ..addAction(SemanticsAction.longPress)
+      ..addAction(SemanticsAction.showOnScreen)
+      ..isChecked = false
+      ..isSelected = true
+      ..label = "Use all the properties"
+      ..textDirection = TextDirection.rtl;
+    expect(
+      allProperties.toStringDeep(),
+      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), clipped, actions: [longPress, scrollUp, showOnScreen], selected, label: "Use all the properties", textDirection: rtl)\n',
+    );
+    expect(
+      allProperties.getSemanticsData().toString(),
+      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [isSelected], label: "Use all the properties", textDirection: rtl)',
+    );
+
+    final SemanticsNode scaled = new SemanticsNode()
+      ..rect = new Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..transform = new Matrix4.diagonal3(new Vector3(10.0, 10.0, 1.0));
+    expect(
+      scaled.toStringDeep(),
+      'SemanticsNode#18(STALE, owner: null, Rect.fromLTRB(50.0, 10.0, 70.0, 40.0) scaled by 10.0x)\n',
+    );
+    expect(
+      scaled.getSemanticsData().toString(),
+      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [10.0,0.0,0.0,0.0; 0.0,10.0,0.0,0.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0])',
     );
   });
 

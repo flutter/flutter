@@ -69,8 +69,8 @@ class TextField extends StatefulWidget {
   /// the number of lines. By default, it is 1, meaning this is a single-line
   /// text field. If it is not null, it must be greater than zero.
   ///
-  /// The [keyboardType], [autofocus], [obscureText], and [autocorrect] arguments
-  /// must not be null.
+  /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
+  /// [autocorrect] arguments must not be null.
   const TextField({
     Key key,
     this.controller,
@@ -78,7 +78,7 @@ class TextField extends StatefulWidget {
     this.decoration: const InputDecoration(),
     this.keyboardType: TextInputType.text,
     this.style,
-    this.textAlign,
+    this.textAlign: TextAlign.start,
     this.autofocus: false,
     this.obscureText: false,
     this.autocorrect: true,
@@ -87,6 +87,7 @@ class TextField extends StatefulWidget {
     this.onSubmitted,
     this.inputFormatters,
   }) : assert(keyboardType != null),
+       assert(textAlign != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
@@ -125,6 +126,8 @@ class TextField extends StatefulWidget {
   final TextStyle style;
 
   /// How the text being edited should be aligned horizontally.
+  ///
+  /// Defaults to [TextAlign.start].
   final TextAlign textAlign;
 
   /// Whether this text field should focus itself if nothing else is already

@@ -38,7 +38,12 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(headerKey)).dy,
            lessThan(tester.getTopLeft(find.byKey(footerKey)).dy));
 
-    await tester.pumpWidget(const GridTile(child: const Text('Simple')));
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const GridTile(child: const Text('Simple')),
+      ),
+    );
 
     expect(find.text('Simple'), findsOneWidget);
   });

@@ -60,11 +60,11 @@ void main() {
     final RelativeRectTween rect = new RelativeRectTween(
       begin: new RelativeRect.fromRect(
         new Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
-        new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0)
+        new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
       ),
       end: new RelativeRect.fromRect(
         new Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
-        new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0)
+        new Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
       )
     );
     final AnimationController controller = new AnimationController(
@@ -83,22 +83,25 @@ void main() {
     }
 
     await tester.pumpWidget(
-      new Center(
-        child: new Container(
-          height: 100.0,
-          width: 100.0,
-          child: new Stack(
-            children: <Widget>[
-              new PositionedTransition(
-                rect: rect.animate(controller),
-                child: new Container(
-                  key: key
-                )
-              )
-            ]
-          )
-        )
-      )
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            height: 100.0,
+            width: 100.0,
+            child: new Stack(
+              children: <Widget>[
+                new PositionedTransition(
+                  rect: rect.animate(controller),
+                  child: new Container(
+                    key: key,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     ); // t=0
     recordMetrics();
     final Completer<Null> completer = new Completer<Null>();

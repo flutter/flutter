@@ -3,5 +3,15 @@
   "backButtonTooltip": "واپس",
   "closeButtonTooltip": "بند کریں",
   "nextMonthTooltip": "اگلا مھینہ",
-  "previousMonthTooltip": "پچھلا مھینہ"
+  "previousMonthTooltip": "پچھلا مھینہ",
+  "licensesPageTitle": "لائسنس",
+  "cancelButtonLabel": "منسوخ کریں",
+  "closeButtonLabel": "بند کریں",
+  "continueButtonLabel": "جاری رکھیں",
+  "copyButtonLabel": "کاپی",
+  "cutButtonLabel": "کاٹیں",
+  "okButtonLabel": "ٹھیک ہے",
+  "pasteButtonLabel": "چسپاں",
+  "selectAllButtonLabel": "تکاپیمام منتخب کریں",
+  "viewLicensesButtonLabel": "لائسنس دیکھیں"
 }

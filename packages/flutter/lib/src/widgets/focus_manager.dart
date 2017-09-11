@@ -456,6 +456,6 @@ class FocusManager {
     final String indent = '  ';
     return '${describeIdentity(this)}$status\n'
       '${indent}currentFocus: $_currentFocus\n'
-      '${rootScope.toStringDeep(indent, indent)}';
+      '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
   }
 }

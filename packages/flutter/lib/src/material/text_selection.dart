@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 
 import 'flat_button.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 const double _kHandleSize = 22.0;
@@ -39,20 +40,21 @@ class _TextSelectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     if (!value.selection.isCollapsed) {
-      items.add(new FlatButton(child: const Text('CUT'), onPressed: handleCut));
-      items.add(new FlatButton(child: const Text('COPY'), onPressed: handleCopy));
+      items.add(new FlatButton(child: new Text(localizations.cutButtonLabel), onPressed: handleCut));
+      items.add(new FlatButton(child: new Text(localizations.copyButtonLabel), onPressed: handleCopy));
     }
     items.add(new FlatButton(
-      child: const Text('PASTE'),
+      child: new Text(localizations.pasteButtonLabel),
       // TODO(https://github.com/flutter/flutter/issues/11254):
       // This should probably be grayed-out if there is nothing to paste.
       onPressed: handlePaste,
     ));
     if (value.text.isNotEmpty) {
       if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: handleSelectAll));
+        items.add(new FlatButton(child: new Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
     }
 
     return new Material(

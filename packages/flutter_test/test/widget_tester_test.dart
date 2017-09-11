@@ -5,10 +5,15 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const List<Widget> fooBarTexts = const <Text>[
+  const Text('foo', textDirection: TextDirection.ltr),
+  const Text('bar', textDirection: TextDirection.ltr),
+];
+
 void main() {
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo'));
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
       expect(find.text('foo'), findsOneWidget);
     });
 
@@ -34,7 +39,7 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo'));
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       TestFailure failure;
       try {
@@ -52,7 +57,7 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message when skipping', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo'));
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       TestFailure failure;
       try {
@@ -70,7 +75,7 @@ void main() {
     });
 
     testWidgets('pumping', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo'));
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
       int count;
 
       final AnimationController test = new AnimationController(
@@ -106,7 +111,7 @@ void main() {
 
   group('find.byElementPredicate', () {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo'));
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       final String customDescription = 'custom description';
       TestFailure failure;
@@ -123,7 +128,7 @@ void main() {
 
   group('find.byWidgetPredicate', () {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(const Text('foo'));
+      await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       final String customDescription = 'custom description';
       TestFailure failure;
@@ -143,7 +148,7 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+          new Column(children: fooBarTexts),
         ],
       ));
 
@@ -157,8 +162,8 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
-          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+          new Column(children: fooBarTexts),
+          new Column(children: fooBarTexts),
         ],
       ));
 
@@ -172,8 +177,8 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: <Text>[const Text('foo')]),
-          const Text('bar'),
+          new Column(children: <Text>[const Text('foo', textDirection: TextDirection.ltr)]),
+          const Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
 
@@ -198,7 +203,7 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+          new Column(children: fooBarTexts),
         ],
       ));
 
@@ -212,7 +217,7 @@ void main() {
       await tester.pumpWidget(new Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+          new Column(children: fooBarTexts),
         ],
       ));
 

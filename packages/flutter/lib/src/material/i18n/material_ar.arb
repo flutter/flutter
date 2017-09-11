@@ -3,5 +3,15 @@
   "backButtonTooltip": "الى الخلف",
   "closeButtonTooltip": "إغلا",
   "nextMonthTooltip": "الشهر القادم",
-  "previousMonthTooltip": "الشهر الماضى"
+  "previousMonthTooltip": "الشهر الماضى",
+  "licensesPageTitle": "التّراخيص",
+  "cancelButtonLabel": "إلغاء",
+  "closeButtonLabel": "أغلاق",
+  "continueButtonLabel": "استمر",
+  "copyButtonLabel": "نسخ",
+  "cutButtonLabel": "كِم جارح",
+  "okButtonLabel": "حسنا",
+  "pasteButtonLabel": "عجين",
+  "selectAllButtonLabel": "اختر الكل",
+  "viewLicensesButtonLabel": "عرض التراخيص"
 }

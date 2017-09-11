@@ -154,7 +154,7 @@ class TestWidget extends StatelessWidget {
     return new GestureDetector(
         onTap: tapHandler(context),
         onLongPress: longPressHandler(context),
-        child: const Text('X'),
+        child: const Text('X', textDirection: TextDirection.ltr),
     );
   }
 }

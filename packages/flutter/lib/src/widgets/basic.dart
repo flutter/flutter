@@ -2193,7 +2193,8 @@ class Stack extends MultiChildRenderObjectWidget {
   /// top left corners.
   Stack({
     Key key,
-    this.alignment: FractionalOffset.topLeft,
+    this.alignment: FractionalOffsetDirectional.topStart,
+    this.textDirection,
     this.fit: StackFit.loose,
     this.overflow: Overflow.clip,
     List<Widget> children: const <Widget>[],
@@ -2205,7 +2206,12 @@ class Stack extends MultiChildRenderObjectWidget {
   /// the points determined by [alignment] are co-located. For example, if the
   /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
-  final FractionalOffset alignment;
+  final FractionalOffsetGeometry alignment;
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
 
   /// How to size the non-positioned children in the stack.
   ///
@@ -2224,6 +2230,7 @@ class Stack extends MultiChildRenderObjectWidget {
   RenderStack createRenderObject(BuildContext context) {
     return new RenderStack(
       alignment: alignment,
+      textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
       overflow: overflow,
     );
@@ -2233,6 +2240,7 @@ class Stack extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
     renderObject
       ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
       ..overflow = overflow;
   }
@@ -2240,7 +2248,8 @@ class Stack extends MultiChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new EnumProperty<StackFit>('fit', fit));
     description.add(new EnumProperty<Overflow>('overflow', overflow));
   }
@@ -2260,23 +2269,31 @@ class IndexedStack extends Stack {
   /// The [index] argument must not be null.
   IndexedStack({
     Key key,
-    FractionalOffset alignment: FractionalOffset.topLeft,
+    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    TextDirection textDirection,
     StackFit sizing: StackFit.loose,
     this.index: 0,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, alignment: alignment, fit: sizing, children: children);
+  }) : super(key: key, alignment: alignment, textDirection: textDirection, fit: sizing, children: children);
 
   /// The index of the child to show.
   final int index;
 
   @override
-  RenderIndexedStack createRenderObject(BuildContext context) => new RenderIndexedStack(index: index, alignment: alignment);
+  RenderIndexedStack createRenderObject(BuildContext context) {
+    return new RenderIndexedStack(
+      index: index,
+      alignment: alignment,
+      textDirection: textDirection ?? Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
     renderObject
       ..index = index
-      ..alignment = alignment;
+      ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.of(context);
   }
 }
 
@@ -3704,20 +3721,25 @@ class Flow extends MultiChildRenderObjectWidget {
 class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [softWrap], [overflow], nad [textScaleFactor] arguments must
-  /// not be null.
+  /// The [text], [textAlign], [softWrap], [overflow], nad [textScaleFactor]
+  /// arguments must not be null.
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
+  ///
+  /// The [textDirection], if null, defaults to the ambient [Directionality],
+  /// which in that case must not be null.
   const RichText({
     Key key,
     @required this.text,
-    this.textAlign,
+    this.textAlign: TextAlign.start,
+    this.textDirection,
     this.softWrap: true,
     this.overflow: TextOverflow.clip,
     this.textScaleFactor: 1.0,
     this.maxLines,
   }) : assert(text != null),
+       assert(textAlign != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
@@ -3729,6 +3751,22 @@ class RichText extends LeafRenderObjectWidget {
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
+
+  /// The directionality of the text.
+  ///
+  /// This decides how [textAlign] values like [TextAlign.start] and
+  /// [TextAlign.end] are interpreted.
+  ///
+  /// This is also used to disambiguate how to render bidirectional text. For
+  /// example, if the [text] is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// its left.
+  ///
+  /// Defaults to the ambient [Directionality], if any. If there is no ambient
+  /// [Directionality], then this must not be null.
+  final TextDirection textDirection;
 
   /// Whether the text should break at soft line breaks.
   ///
@@ -3754,8 +3792,11 @@ class RichText extends LeafRenderObjectWidget {
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
+    final TextDirection direction = textDirection ?? Directionality.of(context);
+    assert(direction != null, 'A RichText was created with no textDirection and no ambient Directionality widget.');
     return new RenderParagraph(text,
       textAlign: textAlign,
+      textDirection: direction,
       softWrap: softWrap,
       overflow: overflow,
       textScaleFactor: textScaleFactor,
@@ -3768,6 +3809,7 @@ class RichText extends LeafRenderObjectWidget {
     renderObject
       ..text = text
       ..textAlign = textAlign
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
@@ -4289,6 +4331,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.checked,
     this.selected,
     this.label,
+    this.textDirection,
   }) : assert(container != null),
        super(key: key, child: child);
 
@@ -4317,7 +4360,19 @@ class Semantics extends SingleChildRenderObjectWidget {
   final bool selected;
 
   /// Provides a textual description of the widget.
+  ///
+  /// If a label is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
   final String label;
+
+  /// The reading direction of the [label].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
+
+  TextDirection _getTextDirection(BuildContext context) {
+    return textDirection ?? (label != null ? Directionality.of(context) : null);
+  }
 
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
@@ -4326,6 +4381,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       checked: checked,
       selected: selected,
       label: label,
+      textDirection: _getTextDirection(context),
     );
   }
 
@@ -4335,7 +4391,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..checked = checked
       ..selected = selected
-      ..label = label;
+      ..label = label
+      ..textDirection = _getTextDirection(context);
   }
 
   @override
@@ -4344,7 +4401,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     description.add(new DiagnosticsProperty<bool>('container', container));
     description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    description.add(new StringProperty('label', label));
+    description.add(new StringProperty('label', label, defaultValue: ''));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 

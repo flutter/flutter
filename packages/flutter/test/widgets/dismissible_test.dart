@@ -14,48 +14,51 @@ List<int> dismissedItems = <int>[];
 Widget background;
 
 Widget buildTest({ double startToEndThreshold }) {
-  return new StatefulBuilder(
-    builder: (BuildContext context, StateSetter setState) {
-      Widget buildDismissibleItem(int item) {
-        return new Dismissible(
-          key: new ValueKey<int>(item),
-          direction: dismissDirection,
-          onDismissed: (DismissDirection direction) {
-            setState(() {
-              reportedDismissDirection = direction;
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        Widget buildDismissibleItem(int item) {
+          return new Dismissible(
+            key: new ValueKey<int>(item),
+            direction: dismissDirection,
+            onDismissed: (DismissDirection direction) {
+              setState(() {
+                reportedDismissDirection = direction;
+                expect(dismissedItems.contains(item), isFalse);
+                dismissedItems.add(item);
+              });
+            },
+            onResize: () {
               expect(dismissedItems.contains(item), isFalse);
-              dismissedItems.add(item);
-            });
-          },
-          onResize: () {
-            expect(dismissedItems.contains(item), isFalse);
-          },
-          background: background,
-          dismissThresholds: startToEndThreshold == null
-              ? <DismissDirection, double>{}
-              : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+            },
+            background: background,
+            dismissThresholds: startToEndThreshold == null
+                ? <DismissDirection, double>{}
+                : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+            child: new Container(
+              width: itemExtent,
+              height: itemExtent,
+              child: new Text(item.toString()),
+            ),
+          );
+        }
+
+        return new Directionality(
+          textDirection: TextDirection.ltr,
           child: new Container(
-            width: itemExtent,
-            height: itemExtent,
-            child: new Text(item.toString()),
+            padding: const EdgeInsets.all(10.0),
+            child: new ListView(
+              scrollDirection: scrollDirection,
+              itemExtent: itemExtent,
+              children: <int>[0, 1, 2, 3, 4]
+                .where((int i) => !dismissedItems.contains(i))
+                .map(buildDismissibleItem).toList(),
+            ),
           ),
         );
-      }
-
-      return new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new Container(
-          padding: const EdgeInsets.all(10.0),
-          child: new ListView(
-            scrollDirection: scrollDirection,
-            itemExtent: itemExtent,
-            children: <int>[0, 1, 2, 3, 4]
-              .where((int i) => !dismissedItems.contains(i))
-              .map(buildDismissibleItem).toList(),
-          ),
-        ),
-      );
-    },
+      },
+    ),
   );
 }
 
@@ -287,18 +290,23 @@ void main() {
   // actually remove the dismissed widget, which is a violation of the
   // Dismissible contract. This is not an example of good practice.
   testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(
-      child: new Container(
-        width: 100.0,
-        height: 1000.0,
-        child: new Column(
-          children: <Widget>[
-            const Test1215DismissibleWidget('1'),
-            const Test1215DismissibleWidget('2'),
-          ],
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new Container(
+            width: 100.0,
+            height: 1000.0,
+            child: new Column(
+              children: <Widget>[
+                const Test1215DismissibleWidget('1'),
+                const Test1215DismissibleWidget('2'),
+              ],
+            ),
+          ),
         ),
       ),
-    ));
+    );
     expect(find.text('1'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     await dismissElement(tester, find.text('2'), gestureDirection: DismissDirection.startToEnd);

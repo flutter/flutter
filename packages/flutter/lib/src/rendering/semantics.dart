@@ -8,12 +8,15 @@ import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 import 'node.dart';
+import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
+export 'semantics_event.dart';
 
 /// Interface for [RenderObject]s to implement when they want to support
 /// being tapped, etc.
@@ -88,20 +91,24 @@ class SemanticsTag {
 ///
 /// Typically obtained from [SemanticsNode.getSemanticsData].
 @immutable
-class SemanticsData {
+class SemanticsData extends Diagnosticable {
   /// Creates a semantics data object.
   ///
   /// The [flags], [actions], [label], and [Rect] arguments must not be null.
+  ///
+  /// If [label] is not empty, then [textDirection] must also not be null.
   const SemanticsData({
     @required this.flags,
     @required this.actions,
     @required this.label,
+    @required this.textDirection,
     @required this.rect,
     @required this.tags,
-    this.transform
+    this.transform,
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
+       assert(label == '' || textDirection != null, 'A SemanticsData object with label "$label" had a null textDirection.'),
        assert(rect != null),
        assert(tags != null);
 
@@ -112,7 +119,12 @@ class SemanticsData {
   final int actions;
 
   /// A textual description of this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
   final String label;
+
+  /// The reading direction for the text in [label].
+  final TextDirection textDirection;
 
   /// The bounding box for this node in its coordinate system.
   final Rect rect;
@@ -134,23 +146,28 @@ class SemanticsData {
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
 
   @override
-  String toString() {
-    final StringBuffer buffer = new StringBuffer();
-    buffer.write('$runtimeType($rect');
-    if (transform != null)
-      buffer.write('; $transform');
+  String toStringShort() => '$runtimeType';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(new DiagnosticsProperty<Rect>('rect', rect, showName: false));
+    properties.add(new TransformProperty('transform', transform, showName: false, defaultValue: null));
+    final List<String> actionSummary = <String>[];
     for (SemanticsAction action in SemanticsAction.values.values) {
       if ((actions & action.index) != 0)
-        buffer.write('; $action');
+        actionSummary.add(describeEnum(action));
     }
+    properties.add(new IterableProperty<String>('actions', actionSummary, hidden: actionSummary.isEmpty));
+
+    final List<String> flagSummary = <String>[];
     for (SemanticsFlags flag in SemanticsFlags.values.values) {
       if ((flags & flag.index) != 0)
-        buffer.write('; $flag');
+        flagSummary.add(describeEnum(flag));
     }
-    if (label.isNotEmpty)
-      buffer.write('; "$label"');
-    buffer.write(')');
-    return buffer.toString();
+    properties.add(new IterableProperty<String>('flags', flagSummary, hidden: flagSummary.isEmpty));
+    properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 
   @override
@@ -161,13 +178,37 @@ class SemanticsData {
     return typedOther.flags == flags
         && typedOther.actions == actions
         && typedOther.label == label
+        && typedOther.textDirection == textDirection
         && typedOther.rect == rect
         && setEquals(typedOther.tags, tags)
         && typedOther.transform == transform;
   }
 
   @override
-  int get hashCode => hashValues(flags, actions, label, rect, tags, transform);
+  int get hashCode => hashValues(flags, actions, label, textDirection, rect, tags, transform);
+}
+
+class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
+  _SemanticsDiagnosticableNode({
+    String name,
+    @required SemanticsNode value,
+    @required DiagnosticsTreeStyle style,
+    @required this.childOrder,
+  }) : super(
+    name: name,
+    value: value,
+    style: style,
+  );
+
+  final DebugSemanticsDumpOrder childOrder;
+
+  @override
+  List<DiagnosticsNode> getChildren() {
+    if (value != null)
+      return value.debugDescribeChildren(childOrder: childOrder);
+
+    return const <DiagnosticsNode>[];
+  }
 }
 
 /// A node that represents some semantic data.
@@ -176,7 +217,7 @@ class SemanticsData {
 /// (i.e., during [PipelineOwner.flushSemantics]), which happens after
 /// compositing. The semantics tree is then uploaded into the engine for use
 /// by assistive technology.
-class SemanticsNode extends AbstractNode {
+class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Creates a semantic node.
   ///
   /// Each semantic node has a unique identifier that is assigned when the node
@@ -196,7 +237,7 @@ class SemanticsNode extends AbstractNode {
     VoidCallback showOnScreen,
     SemanticsOwner owner,
   }) : id = 0,
-        _showOnScreen = showOnScreen,
+       _showOnScreen = showOnScreen,
        _actionHandler = handler {
     attach(owner);
   }
@@ -342,12 +383,25 @@ class SemanticsNode extends AbstractNode {
   set isSelected(bool value) => _setFlag(SemanticsFlags.isSelected, value);
 
   /// A textual description of this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
   String get label => _label;
   String _label = '';
   set label(String value) {
     assert(value != null);
     if (_label != value) {
       _label = value;
+      _markDirty();
+    }
+  }
+
+  /// The reading direction for the text in [label].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (_textDirection != value) {
+      _textDirection = value;
       _markDirty();
     }
   }
@@ -385,6 +439,7 @@ class SemanticsNode extends AbstractNode {
     if (hadInheritedMergeAllDescendantsIntoThisNode)
       _inheritedMergeAllDescendantsIntoThisNodeValue = true;
     _label = '';
+    _textDirection = null;
     _tags.clear();
     _markDirty();
   }
@@ -598,18 +653,31 @@ class SemanticsNode extends AbstractNode {
     int flags = _flags;
     int actions = _actions;
     String label = _label;
+    TextDirection textDirection = _textDirection;
     final Set<SemanticsTag> tags = new Set<SemanticsTag>.from(_tags);
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
         flags |= node._flags;
         actions |= node._actions;
+        textDirection ??= node._textDirection;
         tags.addAll(node._tags);
         if (node.label.isNotEmpty) {
+          String nestedLabel = node.label;
+          if (textDirection != node.textDirection && node.textDirection != null) {
+            switch (node.textDirection) {
+              case TextDirection.rtl:
+                nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
+                break;
+              case TextDirection.ltr:
+                nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
+                break;
+            }
+          }
           if (label.isEmpty)
-            label = node.label;
+            label = nestedLabel;
           else
-            label = '$label\n${node.label}';
+            label = '$label\n$nestedLabel';
         }
         return true;
       });
@@ -619,6 +687,7 @@ class SemanticsNode extends AbstractNode {
       flags: flags,
       actions: actions,
       label: label,
+      textDirection: textDirection,
       rect: rect,
       transform: transform,
       tags: tags,
@@ -650,82 +719,116 @@ class SemanticsNode extends AbstractNode {
       actions: data.actions,
       rect: data.rect,
       label: data.label,
+      textDirection: data.textDirection,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
     );
     _dirty = false;
   }
 
+  /// Sends a [SemanticsEvent] associated with this [SemanticsNode].
+  ///
+  /// Semantics events should be sent to inform interested parties (like
+  /// the accessibility system of the operating system) about changes to the UI.
+  ///
+  /// For example, if this semantics node represents a scrollable list, a
+  /// [ScrollCompletedSemanticsEvent] should be sent after a scroll action is completed.
+  /// That way, the operating system can give additional feedback to the user
+  /// about the state of the UI (e.g. on Android a ping sound is played to
+  /// indicate a successful scroll in accessibility mode).
+  void sendEvent(SemanticsEvent event) {
+    if (!attached)
+      return;
+    final Map<String, dynamic> annotatedEvent = <String, dynamic>{
+      'nodeId': id,
+      'type': event.type,
+      'data': event.toMap(),
+    };
+    SystemChannels.accessibility.send(annotatedEvent);
+  }
+
   @override
-  String toString() {
-    final StringBuffer buffer = new StringBuffer();
-    buffer.write('$runtimeType($id');
-    if (_dirty)
-      buffer.write(' (${ owner != null && owner._dirtyNodes.contains(this) ? "dirty" : "STALE; owner=$owner" })');
-    if (_shouldMergeAllDescendantsIntoThisNode)
-      buffer.write(' (leaf merge)');
+  String toStringShort() => '$runtimeType#$id';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    bool hideOwner = true;
+    if (_dirty) {
+      final bool inDirtyNodes = owner != null && owner._dirtyNodes.contains(this);
+      properties.add(new FlagProperty('inDirtyNodes', value: inDirtyNodes, ifTrue: 'dirty', ifFalse: 'STALE'));
+      hideOwner = inDirtyNodes;
+    }
+    properties.add(new DiagnosticsProperty<SemanticsOwner>('owner', owner, hidden: hideOwner));
+    properties.add(new FlagProperty('shouldMergeAllDescendantsIntoThisNode', value: _shouldMergeAllDescendantsIntoThisNode, ifTrue: 'leaf merge'));
     final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
     if (offset != null) {
-      buffer.write('; ${rect.shift(offset)}');
+      properties.add(new DiagnosticsProperty<Rect>('rect', rect.shift(offset), showName: false));
     } else {
       final double scale = transform != null ? MatrixUtils.getAsScale(transform) : null;
+      String description;
       if (scale != null) {
-        buffer.write('; $rect scaled by ${scale.toStringAsFixed(1)}x');
+        description = '$rect scaled by ${scale.toStringAsFixed(1)}x';
       } else if (transform != null && !MatrixUtils.isIdentity(transform)) {
         final String matrix = transform.toString().split('\n').take(4).map((String line) => line.substring(4)).join('; ');
-        buffer.write('; $rect with transform [$matrix]');
-      } else {
-        buffer.write('; $rect');
+        description = '$rect with transform [$matrix]';
       }
+      properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
-    if (wasAffectedByClip)
-      buffer.write(' (clipped)');
+    properties.add(new FlagProperty('wasAffectedByClip', value: wasAffectedByClip, ifTrue: 'clipped'));
+    final List<String> actions = <String>[];
     for (SemanticsAction action in SemanticsAction.values.values) {
       if ((_actions & action.index) != 0)
-        buffer.write('; $action');
+        actions.add(describeEnum(action));
     }
-    for (SemanticsTag tag in _tags)
-      buffer.write('; $tag');
-    if (hasCheckedState) {
-      if (isChecked)
-        buffer.write('; checked');
-      else
-        buffer.write('; unchecked');
-    }
-    if (isSelected)
-      buffer.write('; selected');
-    if (label.isNotEmpty)
-      buffer.write('; "$label"');
-    buffer.write(')');
-    return buffer.toString();
+    properties.add(new IterableProperty<String>('actions', actions, hidden: actions.isEmpty));
+    properties.add(new IterableProperty<SemanticsTag>('tags', _tags, hidden: _tags.isEmpty));
+    if (hasCheckedState)
+      properties.add(new FlagProperty('isChecked', value: isChecked, ifTrue: 'checked', ifFalse: 'unchecked'));
+    properties.add(new FlagProperty('isSelected', value: isSelected, ifTrue: 'selected'));
+    properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
   ///
   /// The order in which the children of the [SemanticsNode] will be printed is
   /// controlled by the [childOrder] parameter.
-  String toStringDeep(DebugSemanticsDumpOrder childOrder, [
-    String prefixLineOne = '',
-    String prefixOtherLines = ''
-  ]) {
+  @override
+  String toStringDeep({
+    String prefixLineOne: '',
+    String prefixOtherLines,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversal,
+  }) {
     assert(childOrder != null);
-    final StringBuffer result = new StringBuffer()
-      ..write(prefixLineOne)
-      ..write(this)
-      ..write('\n');
-    if (_children != null && _children.isNotEmpty) {
-      final List<SemanticsNode> childrenInOrder = _getChildrenInOrder(childOrder);
-      for (int index = 0; index < childrenInOrder.length - 1; index += 1) {
-        final SemanticsNode child = childrenInOrder[index];
-        result.write(child.toStringDeep(childOrder, "$prefixOtherLines \u251C", "$prefixOtherLines \u2502"));
-      }
-      result.write(childrenInOrder.last.toStringDeep(childOrder, "$prefixOtherLines \u2514", "$prefixOtherLines  "));
-    }
-    return result.toString();
+    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({
+    String name,
+    DiagnosticsTreeStyle style: DiagnosticsTreeStyle.dense,
+    DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversal,
+  }) {
+    return new _SemanticsDiagnosticableNode(
+      name: name,
+      value: this,
+      style: style,
+      childOrder: childOrder,
+    );
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren({ DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.inverseHitTest }) {
+    return _getChildrenInOrder(childOrder)
+      .map<DiagnosticsNode>((SemanticsNode node) => node.toDiagnosticsNode(childOrder: childOrder))
+      .toList();
   }
 
   Iterable<SemanticsNode> _getChildrenInOrder(DebugSemanticsDumpOrder childOrder) {
     assert(childOrder != null);
+    if (_children == null)
+      return const <SemanticsNode>[];
+
     switch(childOrder) {
       case DebugSemanticsDumpOrder.traversal:
         return new List<SemanticsNode>.from(_children)..sort(_geometryComparator);

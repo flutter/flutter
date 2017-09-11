@@ -141,7 +141,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
-      final double middleStartMargin = leadingWidth + _kMiddleMargin;
+      final double middleStartMargin = hasChild(_ToolbarSlot.leading) ? leadingWidth + _kMiddleMargin : 0.0;
       double middleStart = middleStartMargin;
       final double middleY = (size.height - middleSize.height) / 2.0;
       // If the centered middle will not fit between the leading and trailing

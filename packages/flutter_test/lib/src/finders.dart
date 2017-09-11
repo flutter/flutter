@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
@@ -284,6 +285,13 @@ abstract class Finder {
   /// matched by this finder.
   Finder get last => new _LastFinder(this);
 
+  /// Returns a variant of this finder that only matches elements reachable by
+  /// a hit test.
+  ///
+  /// The [at] parameter specifies the location relative to the size of the
+  /// target element where the hit test is performed.
+  Finder hitTestable({ FractionalOffset at: FractionalOffset.center }) => new _HitTestableFinder(this, at);
+
   @override
   String toString() {
     final String additional = skipOffstage ? ' (ignoring offstage widgets)' : '';
@@ -324,6 +332,33 @@ class _LastFinder extends Finder {
   @override
   Iterable<Element> apply(Iterable<Element> candidates) sync* {
     yield parent.apply(candidates).last;
+  }
+}
+
+class _HitTestableFinder extends Finder {
+  _HitTestableFinder(this.parent, this.offset);
+
+  final Finder parent;
+  final FractionalOffset offset;
+
+  @override
+  String get description => '${parent.description} (considering only hit-testable ones)';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) sync* {
+    for (final Element candidate in parent.apply(candidates)) {
+      final RenderBox box = candidate.renderObject;
+      assert(box != null);
+      final Offset absoluteOffset = box.localToGlobal(offset.alongSize(box.size));
+      final HitTestResult hitResult = new HitTestResult();
+      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
+      for (final HitTestEntry entry in hitResult.path) {
+        if (entry.target == candidate.renderObject) {
+          yield candidate;
+          break;
+        }
+      }
+    }
   }
 }
 

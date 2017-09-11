@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ImageFilter, Gradient;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1038,6 +1039,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
               fontSize: 14.0,
             ),
           ),
+          textDirection: TextDirection.rtl, // doesn't matter, it's one character
         )
         ..layout();
       return true;
@@ -2293,7 +2295,8 @@ class RenderCustomPaint extends RenderProxyBox {
     int debugPreviousCanvasSaveCount;
     canvas.save();
     assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; });
-    canvas.translate(offset.dx, offset.dy);
+    if (offset != Offset.zero)
+      canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);
     assert(() {
       // This isn't perfect. For example, we can't catch the case of
@@ -2980,6 +2983,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   SemanticsNode _innerNode;
+  SemanticsNode _annotatedNode;
+
+  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
+  /// annotated with this object's semantics information.
+  void sendSemanticsEvent(SemanticsEvent event) {
+    _annotatedNode?.sendEvent(event);
+  }
 
   @override
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
@@ -3016,6 +3026,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   void _annotate(SemanticsNode node) {
+    _annotatedNode = node;
     List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
       actions.add(SemanticsAction.tap);
@@ -3114,17 +3125,21 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// Creates a render object that attaches a semantic annotation.
   ///
   /// The [container] argument must not be null.
+  ///
+  /// If the [label] is not null, the [textDirection] must also not be null.
   RenderSemanticsAnnotations({
     RenderBox child,
     bool container: false,
     bool checked,
     bool selected,
     String label,
+    TextDirection textDirection,
   }) : assert(container != null),
        _container = container,
        _checked = checked,
        _selected = selected,
        _label = label,
+       _textDirection = textDirection,
        super(child);
 
   /// If 'container' is true, this RenderObject will introduce a new
@@ -3182,11 +3197,24 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
+  /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
+  ///
+  /// This must not be null if [label] is not null.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (textDirection == value)
+      return;
+    final bool hadValue = textDirection != null;
+    _textDirection = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
   @override
   bool get isSemanticBoundary => container;
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null ? _annotate : null;
+  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null || textDirection != null ? _annotate : null;
 
   void _annotate(SemanticsNode node) {
     if (checked != null) {
@@ -3198,6 +3226,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       node.isSelected = selected;
     if (label != null)
       node.label = label;
+    if (textDirection != null)
+      node.textDirection = textDirection;
   }
 }
 
