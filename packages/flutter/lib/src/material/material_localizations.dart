@@ -38,6 +38,9 @@ abstract class MaterialLocalizations {
   /// The tooltip for the [PaginatedDataTables]'s "previous page" button.
   String get previousPageTooltip;
 
+  /// The default [PopupMenuButton] tooltip.
+  String get showMenuTooltip;
+
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
 
@@ -101,28 +104,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  DefaultMaterialLocalizations(Locale locale) {
+  DefaultMaterialLocalizations(this.locale) {
     assert(locale != null);
-
-    // Android devices (Java really) report deprecated language codes, see
-    // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4140555
-    // and https://developer.android.com/reference/java/util/Locale.html
-    switch(locale.languageCode) {
-      case 'iw':
-        _locale = new Locale('he', locale.countryCode);
-        break;
-      case 'ji':
-        _locale = new Locale('yi', locale.countryCode);
-        break;
-      case 'in':
-        _locale = new Locale('id', locale.countryCode);
-        break;
-      default:
-        _locale = locale;
-    }
-
     _nameToValue = localizations[_localeName]
-      ?? localizations[_locale.languageCode]
+      ?? localizations[locale.languageCode]
       ?? localizations['en']
       ?? <String, String>{};
   }
@@ -131,8 +116,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   /// The locale for which the values of this class's localized resources
   /// have been translated.
-  Locale get locale => _locale;
-  Locale _locale;
+  Locale locale;
 
   String get _localeName {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
@@ -184,6 +168,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get previousPageTooltip => _nameToValue['previousPageTooltip'];
+
+  @override
+  String get showMenuTooltip => _nameToValue['showMenuTooltip'];
 
   @override
   String get licensesPageTitle => _nameToValue['licensesPageTitle'];

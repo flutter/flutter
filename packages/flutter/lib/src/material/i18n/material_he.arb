@@ -6,6 +6,7 @@
   "previousMonthTooltip": "חודש שעבר",
   "nextPageTooltip": "עמוד הבא",
   "previousPageTooltip": "עמוד קודם",
+  "showMenuTooltip": "הצג תפריט",
   "licensesPageTitle": "רישיונות",
   "pageRowsInfoTitle": "$firstRow–$lastRow מתוך $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow מתוך כ $rowCount",

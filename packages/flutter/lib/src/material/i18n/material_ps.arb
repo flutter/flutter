@@ -6,6 +6,7 @@
   "previousMonthTooltip": "تیره میاشت",
   "nextPageTooltip": "بله پاڼه",
   "previousPageTooltip": "مخکینی مخ",
+  "showMenuTooltip": "غورنۍ ښودل",
   "licensesPageTitle": "جوازونه",
   "pageRowsInfoTitle": "$firstRow–$lastRow د $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow څخه $rowCount د",

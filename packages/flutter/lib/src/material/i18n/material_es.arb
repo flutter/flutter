@@ -6,6 +6,7 @@
   "previousMonthTooltip": "Mes anterior",
   "nextPageTooltip": "Siguiente página",
   "previousPageTooltip": "Pagina anterior",
+  "showMenuTooltip": "Muestrame el menu",
   "licensesPageTitle": "Licencias",
   "pageRowsInfoTitle": "$firstRow–$lastRow de $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow de aproximadamente $rowCount",

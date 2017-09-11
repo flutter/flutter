@@ -14,6 +14,7 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'list_tile.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -674,7 +675,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     @required this.itemBuilder,
     this.initialValue,
     this.onSelected,
-    this.tooltip: 'Show menu',
+    this.tooltip,
     this.elevation: 8.0,
     this.padding: const EdgeInsets.all(8.0),
     this.child,
@@ -765,7 +766,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       : new IconButton(
           icon: widget.icon ?? _getIcon(Theme.of(context).platform),
           padding: widget.padding,
-          tooltip: widget.tooltip,
+          tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
           onPressed: showButtonMenu,
         );
   }

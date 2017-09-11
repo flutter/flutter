@@ -6,6 +6,7 @@
   "previousMonthTooltip": "پچھلا مھینہ",
   "nextPageTooltip": "اگلا صفحہ",
   "previousPageTooltip": "سابقہ ​​صفحہ",
+  "showMenuTooltip": "مینو دکھائیں",
   "licensesPageTitle": "لائسنس",
   "pageRowsInfoTitle": "$firstRow–$lastRow کے $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow میں سے $rowCount تقریبا",

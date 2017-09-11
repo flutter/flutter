@@ -6,6 +6,7 @@
   "previousMonthTooltip": "Предыдущий месяц",
   "nextPageTooltip": "Следущая страница",
   "previousPageTooltip": "Предыдущая страница",
+  "showMenuTooltip": "Показать меню",
   "pageRowsInfoTitle": "$firstRow–$lastRow из $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow около $rowCount",
   "rowsPerPageTitle": "Строки на страницу:",

@@ -41,6 +41,12 @@
     "type": "text"
   },
 
+  "showMenuTooltip": "Show menu",
+  "@showMenuTooltip": {
+    "description": "The default PopupMenuButton tooltip",
+    "type": "text"
+  },
+
   "licensesPageTitle": "Licenses",
   "@licensesPageTitle": {
     "description": "The title for the Flutter licenses page.",

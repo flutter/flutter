@@ -6,6 +6,7 @@
   "previousMonthTooltip": "ماه گذشته",
   "nextPageTooltip": "صفحه بعد",
   "previousPageTooltip": "صفحه قبلی",
+  "showMenuTooltip": "نمایش منو",
   "licensesPageTitle": "مجوز",
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow از حدود $rowCount",

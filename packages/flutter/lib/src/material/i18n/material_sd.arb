@@ -6,6 +6,7 @@
   "previousMonthTooltip": "پويون مهينو",
   "nextPageTooltip": "اڳيون پيج",
   "previousPageTooltip": "پويون صفحو",
+  "showMenuTooltip": "ڏيکاريو",
   "licensesPageTitle": "لائسنس",
   "pageRowsInfoTitle": "$firstRow–$lastRow جي $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow کان $rowCount تقريبن",
