@@ -118,7 +118,7 @@ class CreateCommand extends FlutterCommand {
     if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
-    String template = argResults['template'];
+    final String template = argResults['template'];
     final bool generatePlugin = template == 'plugin';
     final bool generatePackage = template == 'package';
 
