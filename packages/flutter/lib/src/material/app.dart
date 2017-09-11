@@ -84,7 +84,7 @@ class MaterialApp extends StatefulWidget {
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   MaterialApp({ // can't be const because the asserts use methods on Map :-(
     Key key,
-    this.title,
+    this.title: Title.kDefaultTitle,
     this.color,
     this.theme,
     this.home,

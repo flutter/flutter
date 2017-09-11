@@ -11,16 +11,18 @@ import 'framework.dart';
 /// A widget that describes this app in the operating system.
 class Title extends StatelessWidget {
   /// Creates a widget that describes this app to the operating system.
-  ///
-  /// If [title] is null, then the title will be set to the empty string.
   Title({
     Key key,
-    String title,
+    this.title: kDefaultTitle,
     this.color,
     @required this.child,
   }) : assert(color == null || color.alpha == 0xFF),
-       title = title ?? '',
+       assert(title != null),
        super(key: key);
+
+  /// The default title used by this widget, and by the App widgets
+  /// ([MaterialApp], [WidgetsApp], etc.) that use this one.
+  static const String kDefaultTitle = '';
 
   /// A one-line description of this app for use in the window manager.
   final String title;

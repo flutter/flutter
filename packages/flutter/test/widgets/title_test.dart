@@ -15,22 +15,12 @@ void main() {
     expect(widget.toString, isNot(throwsException));
   });
 
-  testWidgets('should handle a null title', (WidgetTester tester) async {
-    final Title widget = new Title(
-      color: const Color(0xFF00FF00),
-      title: null,
-      child: new Container(),
-    );
-    expect(widget.toString, isNot(throwsException));
-    expect(widget.title, equals(''));
-  });
-
   testWidgets('should handle having no title', (WidgetTester tester) async {
     final Title widget = new Title(
       color: const Color(0xFF00FF00),
       child: new Container(),
     );
     expect(widget.toString, isNot(throwsException));
-    expect(widget.title, equals(''));
+    expect(widget.title, equals(Title.kDefaultTitle));
   });
 }

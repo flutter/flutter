@@ -56,7 +56,7 @@ class WidgetsApp extends StatefulWidget {
     Key key,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
-    this.title,
+    this.title: Title.kDefaultTitle,
     this.textStyle,
     @required this.color,
     this.navigatorObservers: const <NavigatorObserver>[],
