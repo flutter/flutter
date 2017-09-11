@@ -16,7 +16,7 @@ void main() {
     expect(widget.toString, isNot(throwsException));
   });
 
-  testWidgets('should handle having no title or color', (WidgetTester tester) async {
+  testWidgets('should handle having no title', (WidgetTester tester) async {
     final Title widget = new Title(
       child: new Container(),
       color: const Color(0xFF00FF00),
