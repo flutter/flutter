@@ -9,7 +9,7 @@
 #include <mxio/namespace.h>
 #include <utility>
 
-#include "application/lib/app/connect.h"
+#include "lib/app/cpp/connect.h"
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"

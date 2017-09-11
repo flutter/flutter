@@ -9,7 +9,7 @@
 #include <magenta/status.h>
 #include <mxio/namespace.h>
 
-#include "application/lib/app/connect.h"
+#include "lib/app/cpp/connect.h"
 #include "flutter/content_handler/app.h"
 #include "flutter/content_handler/runtime_holder.h"
 #include "lib/ftl/logging.h"

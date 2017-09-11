@@ -42,8 +42,8 @@ template("flutter_content_handler") {
     ]
 
     deps = [
-             "//application/lib/app",
-             "//application/lib/svc",
+             "//garnet/public/lib/app/cpp",
+             "//garnet/public/lib/svc/cpp",
              "//garnet/public/lib/ui/flutter/sdk_ext",
              "//garnet/public/lib/ui/scenic:client",
              "//garnet/public/lib/ui/input/fidl",

@@ -21,7 +21,7 @@ import 'dart:zircon';
 // These libraries are optional. They are included in the core snapshot and
 // partially compiled to avoid repeating them in each application and improve
 // startup time.
-import 'package:application.lib.app.dart/app.dart';
+import 'package:lib.app.dart/app.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';

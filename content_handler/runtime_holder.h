@@ -10,9 +10,9 @@
 
 #include <unordered_set>
 
-#include "application/lib/app/application_context.h"
-#include "application/services/application_environment.fidl.h"
-#include "application/services/service_provider.fidl.h"
+#include "lib/app/cpp/application_context.h"
+#include "lib/app/fidl/application_environment.fidl.h"
+#include "lib/app/fidl/service_provider.fidl.h"
 #include "lib/ui/flutter/sdk_ext/src/natives.h"
 #include "lib/ui/input/fidl/input_connection.fidl.h"
 #include "lib/ui/input/fidl/text_input.fidl.h"
