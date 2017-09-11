@@ -707,7 +707,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Matches IconButton's 8 dps padding by default. In some cases, notably where
   /// this button appears as the trailing element of a list item, it's useful to be able
   /// to set the padding to zero.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// If provided, the widget used for this button.
   final Widget child;

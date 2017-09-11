@@ -128,7 +128,7 @@ class ExpansionPanelList extends StatelessWidget {
             )
           ),
           new Container(
-            margin: const EdgeInsets.only(right: 8.0),
+            margin: const EdgeInsetsDirectional.only(end: 8.0),
             child: new ExpandIcon(
               isExpanded: _isChildExpanded(i),
               padding: const EdgeInsets.all(16.0),

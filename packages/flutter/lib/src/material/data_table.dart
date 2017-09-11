@@ -362,7 +362,7 @@ class DataTable extends StatelessWidget {
     ValueChanged<bool> onCheckboxChanged
   }) {
     Widget contents = new Padding(
-      padding: const EdgeInsets.fromLTRB(_kTablePadding, 0.0, _kTablePadding / 2.0, 0.0),
+      padding: const EdgeInsetsDirectional.only(start: _kTablePadding, end: _kTablePadding / 2.0),
       child: new Center(
         child: new Checkbox(
           activeColor: color,
@@ -385,7 +385,7 @@ class DataTable extends StatelessWidget {
 
   Widget _buildHeadingCell({
     BuildContext context,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     Widget label,
     String tooltip,
     bool numeric,
@@ -408,7 +408,7 @@ class DataTable extends StatelessWidget {
     label = new Container(
       padding: padding,
       height: _kHeadingRowHeight,
-      alignment: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
+      alignment: numeric ? FractionalOffset.centerRight : FractionalOffsetDirectional.centerStart,
       child: new AnimatedDefaultTextStyle(
         style: new TextStyle(
           // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
@@ -441,7 +441,7 @@ class DataTable extends StatelessWidget {
 
   Widget _buildDataCell({
     BuildContext context,
-    EdgeInsets padding,
+    EdgeInsetsGeometry padding,
     Widget label,
     bool numeric,
     bool placeholder,
@@ -458,7 +458,7 @@ class DataTable extends StatelessWidget {
     label = new Container(
       padding: padding,
       height: _kDataRowHeight,
-      alignment: new FractionalOffset(numeric ? 1.0 : 0.0, 0.5), // TODO(ianh): RTL for non-numeric
+      alignment: numeric ? FractionalOffset.centerRight : FractionalOffsetDirectional.centerStart,
       child: new DefaultTextStyle(
         style: new TextStyle(
           // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
@@ -544,11 +544,9 @@ class DataTable extends StatelessWidget {
 
     for (int dataColumnIndex = 0; dataColumnIndex < columns.length; dataColumnIndex += 1) {
       final DataColumn column = columns[dataColumnIndex];
-      final EdgeInsets padding = new EdgeInsets.fromLTRB(
-        dataColumnIndex == 0 ? showCheckboxColumn ? _kTablePadding / 2.0 : _kTablePadding : _kColumnSpacing / 2.0,
-        0.0,
-        dataColumnIndex == columns.length - 1 ? _kTablePadding : _kColumnSpacing / 2.0,
-        0.0
+      final EdgeInsetsDirectional padding = new EdgeInsetsDirectional.only(
+        start: dataColumnIndex == 0 ? showCheckboxColumn ? _kTablePadding / 2.0 : _kTablePadding : _kColumnSpacing / 2.0,
+        end: dataColumnIndex == columns.length - 1 ? _kTablePadding : _kColumnSpacing / 2.0,
       );
       if (dataColumnIndex == _onlyTextColumn) {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);

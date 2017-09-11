@@ -405,7 +405,7 @@ class _LicensePageState extends State<LicensePage> {
           } else {
             assert(paragraph.indent >= 0);
             _licenses.add(new Padding(
-              padding: new EdgeInsets.only(top: 8.0, left: 16.0 * paragraph.indent),
+              padding: new EdgeInsetsDirectional.only(top: 8.0, start: 16.0 * paragraph.indent),
               child: new Text(paragraph.text)
             ));
           }
