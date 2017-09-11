@@ -1,5 +1,6 @@
 dart:fuchsia,::,_environment
 dart:fuchsia,::,_outgoingServices
+dart:io,_EmbedderConfig,_mayExit
 dart:io,_Namespace,_setupNamespace
 dart:mozart.internal,::,_context
 dart:mozart.internal,::,_viewContainer
