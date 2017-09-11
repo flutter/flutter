@@ -14,7 +14,7 @@
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/fonts/FontDescription.h"
 #include "lib/fonts/fidl/font_provider.fidl.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
@@ -80,14 +80,14 @@ sk_sp<SkData> MakeSkDataFromVMO(const mx::vmo& vmo) {
 fonts::FontProviderPtr* g_font_provider = nullptr;
 
 fonts::FontProviderPtr& GetFontProvider() {
-  FTL_CHECK(g_font_provider);
+  FXL_CHECK(g_font_provider);
   return *g_font_provider;
 }
 
 }  // namespace
 
 void SetFontProvider(fonts::FontProviderPtr provider) {
-  FTL_CHECK(!g_font_provider);
+  FXL_CHECK(!g_font_provider);
   g_font_provider = new fonts::FontProviderPtr;
   *g_font_provider = std::move(provider);
 }
@@ -121,7 +121,7 @@ sk_sp<SkTypeface> FontCache::createTypeface(
       [&response](fonts::FontResponsePtr r) { response = std::move(r); });
   font_provider.WaitForIncomingResponse();
 
-  FTL_DCHECK(response)
+  FXL_DCHECK(response)
       << "Unable to contact the font provider. Did you run "
          "Flutter in an environment that has a font manager?\n"
          "See <https://fuchsia.googlesource.com/modular/+/master/README.md>.";

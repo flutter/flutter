@@ -12,7 +12,7 @@
 
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 @interface VSyncClient : NSObject
 
@@ -41,16 +41,16 @@
 }
 
 - (void)await:(shell::VsyncWaiter::Callback)callback {
-  FTL_DCHECK(!_pendingCallback);
+  FXL_DCHECK(!_pendingCallback);
   _pendingCallback = std::move(callback);
   _displayLink.paused = NO;
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
-  // ftl::TimePoint and CATimeInterval both use mach_absolute_time.
-  ftl::TimePoint frame_start_time = ftl::TimePoint::Now();
-  ftl::TimePoint frame_target_time =
-      ftl::TimePoint::FromEpochDelta(ftl::TimeDelta::FromSecondsF(link.targetTimestamp));
+  // fxl::TimePoint and CATimeInterval both use mach_absolute_time.
+  fxl::TimePoint frame_start_time = fxl::TimePoint::Now();
+  fxl::TimePoint frame_target_time =
+      fxl::TimePoint::FromEpochDelta(fxl::TimeDelta::FromSecondsF(link.targetTimestamp));
 
   _displayLink.paused = YES;
 

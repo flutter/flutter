@@ -16,7 +16,7 @@ executable("linux") {
     "//flutter/fml",
     "//flutter/shell/common",
     "//flutter/shell/testing",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//lib/tonic",
     "//third_party/skia",
   ]

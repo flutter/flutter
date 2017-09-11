@@ -45,7 +45,7 @@ group("flutter") {
       "//flutter/synchronization:synchronization_unittests",
       "//flutter/third_party/txt:txt_benchmarks",
       "//flutter/third_party/txt:txt_unittests",
-      "//garnet/public/lib/ftl:ftl_unittests",
+      "//garnet/public/lib/fxl:fxl_unittests",
     ]
   }
 }

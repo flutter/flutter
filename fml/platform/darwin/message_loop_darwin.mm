@@ -13,7 +13,7 @@ static constexpr CFTimeInterval kDistantFuture = 1.0e10;
 
 MessageLoopDarwin::MessageLoopDarwin()
     : running_(false), loop_((CFRunLoopRef)CFRetain(CFRunLoopGetCurrent())) {
-  FTL_DCHECK(loop_ != nullptr);
+  FXL_DCHECK(loop_ != nullptr);
 
   // Setup the delayed wake source.
   CFRunLoopTimerContext timer_context = {
@@ -25,7 +25,7 @@ MessageLoopDarwin::MessageLoopDarwin()
                            reinterpret_cast<CFRunLoopTimerCallBack>(&MessageLoopDarwin::OnTimerFire)
                            /* callout */,
                            &timer_context /* context */));
-  FTL_DCHECK(delayed_wake_timer_ != nullptr);
+  FXL_DCHECK(delayed_wake_timer_ != nullptr);
   CFRunLoopAddTimer(loop_, delayed_wake_timer_, kCFRunLoopCommonModes);
 }
 
@@ -35,7 +35,7 @@ MessageLoopDarwin::~MessageLoopDarwin() {
 }
 
 void MessageLoopDarwin::Run() {
-  FTL_DCHECK(loop_ == CFRunLoopGetCurrent());
+  FXL_DCHECK(loop_ == CFRunLoopGetCurrent());
 
   running_ = true;
 
@@ -59,12 +59,12 @@ void MessageLoopDarwin::Terminate() {
   CFRunLoopStop(loop_);
 }
 
-void MessageLoopDarwin::WakeUp(ftl::TimePoint time_point) {
-  // Rearm the timer. The time bases used by CoreFoundation and FTL are
+void MessageLoopDarwin::WakeUp(fxl::TimePoint time_point) {
+  // Rearm the timer. The time bases used by CoreFoundation and FXL are
   // different and must be accounted for.
   CFRunLoopTimerSetNextFireDate(
       delayed_wake_timer_,
-      CFAbsoluteTimeGetCurrent() + (time_point - ftl::TimePoint::Now()).ToSecondsF());
+      CFAbsoluteTimeGetCurrent() + (time_point - fxl::TimePoint::Now()).ToSecondsF());
 }
 
 void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {

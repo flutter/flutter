@@ -47,7 +47,7 @@ source_set("flutter_channels") {
     "//flutter/shell/gpu",
     "//flutter/shell/testing",
     "//flutter/sky/engine/wtf",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//third_party/skia",
   ]
 }

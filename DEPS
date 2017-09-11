@@ -125,7 +125,7 @@ deps = {
    Var('fuchsia_git') + '/garnet' + '@' + '954225c071a8e44e83e9b0da4d3972771a5ed03a',
 
   'src/lib/tonic':
-   Var('fuchsia_git') + '/tonic' + '@' + 'fca532244483192e961cb826d9d0c05947cf288c',
+   Var('fuchsia_git') + '/tonic' + '@' + 'ce1c9992ddefb940f549e6a9f94252ef2963dd2e',
 
   'src/third_party/benchmark':
    Var('fuchsia_git') + '/third_party/benchmark' + '@' + '296537bc48d380adf21567c5d736ab79f5363d22',

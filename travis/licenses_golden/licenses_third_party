@@ -3901,7 +3901,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ====================================================================================================
 LIBRARY: freetype2
-ORIGIN: ../../../third_party/freetype2/docs/FTL.TXT
+ORIGIN: ../../../third_party/freetype2/docs/FXL.TXT
 TYPE: LicenseType.freetype
 FILE: ../../../third_party/freetype2/.mailmap
 FILE: ../../../third_party/freetype2/Jamfile
@@ -3936,9 +3936,9 @@ FILE: ../../../third_party/freetype2/include/ftgxval.h
 FILE: ../../../third_party/freetype2/include/ftgzip.h
 FILE: ../../../third_party/freetype2/include/ftimage.h
 FILE: ../../../third_party/freetype2/include/ftincrem.h
-FILE: ../../../third_party/freetype2/include/ftlcdfil.h
-FILE: ../../../third_party/freetype2/include/ftlist.h
-FILE: ../../../third_party/freetype2/include/ftlzw.h
+FILE: ../../../third_party/freetype2/include/fxlcdfil.h
+FILE: ../../../third_party/freetype2/include/fxlist.h
+FILE: ../../../third_party/freetype2/include/fxlzw.h
 FILE: ../../../third_party/freetype2/include/ftmac.h
 FILE: ../../../third_party/freetype2/include/ftmm.h
 FILE: ../../../third_party/freetype2/include/ftmodapi.h
@@ -4062,7 +4062,7 @@ FILE: ../../../third_party/freetype2/src/base/ftgloadr.c
 FILE: ../../../third_party/freetype2/src/base/ftglyph.c
 FILE: ../../../third_party/freetype2/src/base/ftgxval.c
 FILE: ../../../third_party/freetype2/src/base/ftinit.c
-FILE: ../../../third_party/freetype2/src/base/ftlcdfil.c
+FILE: ../../../third_party/freetype2/src/base/fxlcdfil.c
 FILE: ../../../third_party/freetype2/src/base/ftmac.c
 FILE: ../../../third_party/freetype2/src/base/ftmm.c
 FILE: ../../../third_party/freetype2/src/base/ftobjs.c
@@ -4194,7 +4194,7 @@ FILE: ../../../third_party/freetype2/src/gxvalid/gxvtrak.c
 FILE: ../../../third_party/freetype2/src/gzip/Jamfile
 FILE: ../../../third_party/freetype2/src/gzip/ftgzip.c
 FILE: ../../../third_party/freetype2/src/lzw/Jamfile
-FILE: ../../../third_party/freetype2/src/lzw/ftlzw.c
+FILE: ../../../third_party/freetype2/src/lzw/fxlzw.c
 FILE: ../../../third_party/freetype2/src/lzw/ftzopen.c
 FILE: ../../../third_party/freetype2/src/lzw/ftzopen.h
 FILE: ../../../third_party/freetype2/src/otvalid/Jamfile
@@ -4461,7 +4461,7 @@ Legal Terms
   herein, subject to the following conditions:
 
     o Redistribution of  source code  must retain this  license file
-      (`FTL.TXT') unaltered; any  additions, deletions or changes to
+      (`FXL.TXT') unaltered; any  additions, deletions or changes to
       the original  files must be clearly  indicated in accompanying
       documentation.   The  copyright   notices  of  the  unaltered,
       original  files must  be  preserved in  all  copies of  source
@@ -4517,7 +4517,7 @@ Legal Terms
 
     http://www.freetype.org
 
---- end of FTL.TXT ---
+--- end of FXL.TXT ---
 ====================================================================================================
 
 ====================================================================================================

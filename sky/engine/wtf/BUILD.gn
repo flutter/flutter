@@ -197,7 +197,7 @@ source_set("wtf") {
   ]
 
   public_deps = [
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//third_party/icu",
   ]
 

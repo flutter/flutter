@@ -35,7 +35,7 @@ static_library("core") {
     "//flutter/flow",
     "//flutter/glue",
     "//flutter/sky/engine/wtf",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//lib/tonic",
     "//third_party/libpng",
     "//third_party/skia",

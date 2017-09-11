@@ -9,7 +9,7 @@
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
 @interface FlutterView ()<UIInputViewAudioFeedback>
@@ -43,7 +43,7 @@
   return YES;
 }
 
-void SnapshotRasterizer(ftl::WeakPtr<shell::Rasterizer> rasterizer,
+void SnapshotRasterizer(fxl::WeakPtr<shell::Rasterizer> rasterizer,
                         CGContextRef context,
                         bool is_opaque) {
   if (!rasterizer) {
@@ -94,7 +94,7 @@ void SnapshotContents(CGContextRef context, bool is_opaque) {
   // platform view. So use that. Once we support multiple platform views, the
   // shell will need to provide a way to get the rasterizer for a specific
   // platform view.
-  std::vector<ftl::WeakPtr<shell::Rasterizer>> registered_rasterizers;
+  std::vector<fxl::WeakPtr<shell::Rasterizer>> registered_rasterizers;
   shell::Shell::Shared().GetRasterizers(&registered_rasterizers);
   for (auto& rasterizer : registered_rasterizers) {
     SnapshotRasterizer(rasterizer, context, is_opaque);
@@ -108,7 +108,7 @@ void SnapshotContentsSync(CGContextRef context, UIView* view) {
     return;
   }
 
-  ftl::AutoResetWaitableEvent latch;
+  fxl::AutoResetWaitableEvent latch;
   gpu_thread->PostTask([&latch, context, view]() {
     SnapshotContents(context, [view isOpaque]);
     latch.Signal();

@@ -14,19 +14,19 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/tracing_controller.h"
 #include "flutter/sky/engine/wtf/MakeUnique.h"
-#include "lib/ftl/command_line.h"
-#include "lib/ftl/strings/string_view.h"
+#include "lib/fxl/command_line.h"
+#include "lib/fxl/strings/string_view.h"
 
 namespace shell {
 
-static ftl::CommandLine InitializedCommandLine() {
+static fxl::CommandLine InitializedCommandLine() {
   std::vector<std::string> args_vector;
 
   for (NSString* arg in [NSProcessInfo processInfo].arguments) {
     args_vector.emplace_back(arg.UTF8String);
   }
 
-  return ftl::CommandLineFromIterators(args_vector.begin(), args_vector.end());
+  return fxl::CommandLineFromIterators(args_vector.begin(), args_vector.end());
 }
 
 class EmbedderState {
@@ -37,7 +37,7 @@ class EmbedderState {
     // See https://github.com/flutter/flutter/issues/4006
     blink::engine_main_enter_ts = Dart_TimelineGetMicros();
 #endif
-    FTL_DCHECK([NSThread isMainThread])
+    FXL_DCHECK([NSThread isMainThread])
         << "Embedder initialization must occur on the main platform thread";
 
     auto command_line = InitializedCommandLine();
@@ -52,7 +52,7 @@ class EmbedderState {
   ~EmbedderState() {}
 
  private:
-  FTL_DISALLOW_COPY_AND_ASSIGN(EmbedderState);
+  FXL_DISALLOW_COPY_AND_ASSIGN(EmbedderState);
 };
 
 void PlatformMacMain(std::string icu_data_path, std::string application_library_path) {
@@ -92,7 +92,7 @@ static bool FlagsValidForCommandLineLaunch(const std::string& bundle_path,
   return true;
 }
 
-static std::string ResolveCommandLineLaunchFlag(const ftl::StringView name) {
+static std::string ResolveCommandLineLaunchFlag(const fxl::StringView name) {
   const auto& command_line = shell::Shell::Shared().GetCommandLine();
 
   std::string command_line_option;

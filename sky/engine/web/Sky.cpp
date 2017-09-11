@@ -38,7 +38,7 @@
 #include "flutter/sky/engine/wtf/WTF.h"
 #include "flutter/sky/engine/wtf/text/AtomicString.h"
 #include "flutter/sky/engine/wtf/text/TextEncoding.h"
-#include "lib/ftl/build_config.h"
+#include "lib/fxl/build_config.h"
 #include "lib/tonic/dart_microtask_queue.h"
 
 #if defined(OS_FUCHSIA)

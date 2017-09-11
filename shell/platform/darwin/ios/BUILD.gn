@@ -75,7 +75,7 @@ shared_library("flutter_framework_dylib") {
     "//flutter/shell/platform/darwin/common",
     "//flutter/sky/engine/platform",
     "//flutter/sky/engine/wtf",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//third_party/skia",
   ]
   if (flutter_runtime_mode == "debug") {

@@ -27,7 +27,7 @@ source_set("gpu") {
     "//flutter/glue",
     "//flutter/shell/common",
     "//flutter/synchronization",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]

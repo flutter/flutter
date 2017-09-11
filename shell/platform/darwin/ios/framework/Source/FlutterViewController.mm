@@ -20,8 +20,8 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#include "lib/ftl/functional/make_copyable.h"
-#include "lib/ftl/time/time_delta.h"
+#include "lib/fxl/functional/make_copyable.h"
+#include "lib/fxl/time/time_delta.h"
 
 namespace {
 
@@ -32,17 +32,17 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 
  public:
   void Complete(std::vector<uint8_t> data) override {
-    ftl::RefPtr<PlatformMessageResponseDarwin> self(this);
+    fxl::RefPtr<PlatformMessageResponseDarwin> self(this);
     blink::Threads::Platform()->PostTask(
-        ftl::MakeCopyable([ self, data = std::move(data) ]() mutable {
+        fxl::MakeCopyable([ self, data = std::move(data) ]() mutable {
           self->callback_.get()(shell::GetNSDataFromVector(data));
         }));
   }
 
   void CompleteEmpty() override {
-    ftl::RefPtr<PlatformMessageResponseDarwin> self(this);
+    fxl::RefPtr<PlatformMessageResponseDarwin> self(this);
     blink::Threads::Platform()->PostTask(
-        ftl::MakeCopyable([self]() mutable { self->callback_.get()(nil); }));
+        fxl::MakeCopyable([self]() mutable { self->callback_.get()(nil); }));
   }
 
  private:
@@ -311,7 +311,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 #pragma mark - Surface creation and teardown updates
 
 - (void)surfaceUpdated:(BOOL)appeared {
-  FTL_CHECK(_platformView != nullptr);
+  FXL_CHECK(_platformView != nullptr);
 
   // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and GPU thread.
   if (appeared) {
@@ -459,7 +459,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
         break;
     }
 
-    FTL_DCHECK(device_id != 0);
+    FXL_DCHECK(device_id != 0);
     CGPoint windowCoordinates = [touch locationInView:nil];
 
     blink::PointerData pointer_data;
@@ -533,7 +533,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
     packet->SetPointerData(i++, pointer_data);
   }
 
-  blink::Threads::UI()->PostTask(ftl::MakeCopyable(
+  blink::Threads::UI()->PostTask(fxl::MakeCopyable(
       [ engine = _platformView->engine().GetWeakPtr(), packet = std::move(packet) ] {
         if (engine.get())
           engine->DispatchPointerDataPacket(*packet);
@@ -752,14 +752,14 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
               message:(NSData*)message
           binaryReply:(FlutterBinaryReply)callback {
   NSAssert(channel, @"The channel must not be null");
-  ftl::RefPtr<PlatformMessageResponseDarwin> response =
+  fxl::RefPtr<PlatformMessageResponseDarwin> response =
       (callback == nil) ? nullptr
-                        : ftl::MakeRefCounted<PlatformMessageResponseDarwin>(^(NSData* reply) {
+                        : fxl::MakeRefCounted<PlatformMessageResponseDarwin>(^(NSData* reply) {
                             callback(reply);
                           });
-  ftl::RefPtr<blink::PlatformMessage> platformMessage =
-      (message == nil) ? ftl::MakeRefCounted<blink::PlatformMessage>(channel.UTF8String, response)
-                       : ftl::MakeRefCounted<blink::PlatformMessage>(
+  fxl::RefPtr<blink::PlatformMessage> platformMessage =
+      (message == nil) ? fxl::MakeRefCounted<blink::PlatformMessage>(channel.UTF8String, response)
+                       : fxl::MakeRefCounted<blink::PlatformMessage>(
                              channel.UTF8String, shell::GetVectorFromNSData(message), response);
   _platformView->DispatchPlatformMessage(platformMessage);
 }

@@ -4,7 +4,7 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 @interface FlutterAppDelegate ()
 @property(readonly, nonatomic) NSMutableArray* pluginDelegates;
@@ -74,7 +74,7 @@
   _debugBackgroundTask = [application
       beginBackgroundTaskWithName:@"Flutter debug task"
                 expirationHandler:^{
-                  FTL_LOG(WARNING)
+                  FXL_LOG(WARNING)
                       << "\nThe OS has terminated the Flutter debug connection for being "
                          "inactive in the background for too long.\n\n"
                          "There are no errors with your Flutter application.\n\n"
