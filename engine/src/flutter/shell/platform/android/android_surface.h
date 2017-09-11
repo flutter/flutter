@@ -12,7 +12,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/shell/platform/android/android_native_window.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace shell {
@@ -33,7 +33,7 @@ class AndroidSurface {
 
   virtual bool ResourceContextMakeCurrent() = 0;
 
-  virtual bool SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
+  virtual bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
                                PlatformView::SurfaceConfig config = {}) = 0;
 
   virtual void SetFlutterView(

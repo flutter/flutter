@@ -16,14 +16,14 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class MaskFilter : public ftl::RefCountedThreadSafe<MaskFilter>,
+class MaskFilter : public fxl::RefCountedThreadSafe<MaskFilter>,
                    public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(MaskFilter);
 
  public:
   ~MaskFilter() override;
-  static ftl::RefPtr<MaskFilter> Create(unsigned style, double sigma);
+  static fxl::RefPtr<MaskFilter> Create(unsigned style, double sigma);
 
   const sk_sp<SkMaskFilter>& filter() { return filter_; }
 

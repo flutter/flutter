@@ -12,18 +12,18 @@
 #include <utility>
 
 #include "flutter/fml/message_loop.h"
-#include "lib/ftl/functional/closure.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/ref_counted.h"
-#include "lib/ftl/synchronization/mutex.h"
-#include "lib/ftl/synchronization/thread_annotations.h"
-#include "lib/ftl/time/time_point.h"
+#include "lib/fxl/functional/closure.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/ref_counted.h"
+#include "lib/fxl/synchronization/mutex.h"
+#include "lib/fxl/synchronization/thread_annotations.h"
+#include "lib/fxl/time/time_point.h"
 
 namespace fml {
 
-class MessageLoopImpl : public ftl::RefCountedThreadSafe<MessageLoopImpl> {
+class MessageLoopImpl : public fxl::RefCountedThreadSafe<MessageLoopImpl> {
  public:
-  static ftl::RefPtr<MessageLoopImpl> Create();
+  static fxl::RefPtr<MessageLoopImpl> Create();
 
   virtual ~MessageLoopImpl();
 
@@ -31,9 +31,9 @@ class MessageLoopImpl : public ftl::RefCountedThreadSafe<MessageLoopImpl> {
 
   virtual void Terminate() = 0;
 
-  virtual void WakeUp(ftl::TimePoint time_point) = 0;
+  virtual void WakeUp(fxl::TimePoint time_point) = 0;
 
-  void PostTask(ftl::Closure task, ftl::TimePoint target_time);
+  void PostTask(fxl::Closure task, fxl::TimePoint target_time);
 
   void AddTaskObserver(TaskObserver* observer);
 
@@ -51,12 +51,12 @@ class MessageLoopImpl : public ftl::RefCountedThreadSafe<MessageLoopImpl> {
  private:
   struct DelayedTask {
     size_t order;
-    ftl::Closure task;
-    ftl::TimePoint target_time;
+    fxl::Closure task;
+    fxl::TimePoint target_time;
 
     DelayedTask(size_t p_order,
-                ftl::Closure p_task,
-                ftl::TimePoint p_target_time)
+                fxl::Closure p_task,
+                fxl::TimePoint p_target_time)
         : order(p_order), task(std::move(p_task)), target_time(p_target_time) {}
   };
 
@@ -71,16 +71,16 @@ class MessageLoopImpl : public ftl::RefCountedThreadSafe<MessageLoopImpl> {
       priority_queue<DelayedTask, std::deque<DelayedTask>, DelayedTaskCompare>;
 
   std::set<TaskObserver*> task_observers_;
-  ftl::Mutex delayed_tasks_mutex_;
-  DelayedTaskQueue delayed_tasks_ FTL_GUARDED_BY(delayed_tasks_mutex_);
-  size_t order_ FTL_GUARDED_BY(delayed_tasks_mutex_);
+  fxl::Mutex delayed_tasks_mutex_;
+  DelayedTaskQueue delayed_tasks_ FXL_GUARDED_BY(delayed_tasks_mutex_);
+  size_t order_ FXL_GUARDED_BY(delayed_tasks_mutex_);
   std::atomic_bool terminated_;
 
-  void RegisterTask(ftl::Closure task, ftl::TimePoint target_time);
+  void RegisterTask(fxl::Closure task, fxl::TimePoint target_time);
 
   void RunExpiredTasks();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
+  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
 };
 
 }  // namespace fml

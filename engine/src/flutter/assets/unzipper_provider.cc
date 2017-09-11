@@ -4,7 +4,7 @@
 
 #include "flutter/assets/unzipper_provider.h"
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "third_party/zlib/contrib/minizip/unzip.h"
 
 namespace blink {
@@ -13,7 +13,7 @@ UnzipperProvider GetUnzipperProviderForPath(std::string zip_path) {
   return [zip_path]() {
     zip::UniqueUnzipper unzipper(unzOpen2(zip_path.c_str(), nullptr));
     if (!unzipper.is_valid())
-      FTL_LOG(ERROR) << "Unable to open zip file: " << zip_path;
+      FXL_LOG(ERROR) << "Unable to open zip file: " << zip_path;
     return unzipper;
   };
 }

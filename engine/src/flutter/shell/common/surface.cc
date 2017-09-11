@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/common/surface.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
@@ -11,7 +11,7 @@ namespace shell {
 SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
                            SubmitCallback submit_callback)
     : submitted_(false), surface_(surface), submit_callback_(submit_callback) {
-  FTL_DCHECK(submit_callback_);
+  FXL_DCHECK(submit_callback_);
 }
 
 SurfaceFrame::~SurfaceFrame() {

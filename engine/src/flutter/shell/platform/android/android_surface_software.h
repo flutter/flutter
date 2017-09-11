@@ -9,7 +9,7 @@
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/gpu/gpu_surface_software.h"
 #include "flutter/shell/platform/android/android_surface.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -36,7 +36,7 @@ class AndroidSurfaceSoftware : public AndroidSurface,
 
   bool OnScreenSurfaceResize(const SkISize& size) const override;
 
-  bool SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
+  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
                        PlatformView::SurfaceConfig config) override;
 
   void SetFlutterView(
@@ -47,10 +47,10 @@ class AndroidSurfaceSoftware : public AndroidSurface,
 
   fml::jni::JavaObjectWeakGlobalRef flutter_view_;
 
-  ftl::RefPtr<AndroidNativeWindow> native_window_;
+  fxl::RefPtr<AndroidNativeWindow> native_window_;
   SkColorType target_color_type_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceSoftware);
+  FXL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceSoftware);
 };
 
 }  // namespace shell

@@ -8,8 +8,8 @@
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/runtime/dart_service_isolate.h"
-#include "lib/ftl/arraysize.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/arraysize.h"
+#include "lib/fxl/logging.h"
 
 #define PLATFORM_VIEW (*reinterpret_cast<std::shared_ptr<PlatformViewAndroid>*>(platform_view))
 
@@ -27,7 +27,7 @@ void FlutterViewHandlePlatformMessage(JNIEnv* env,
                                       jint responseId) {
   env->CallVoidMethod(obj, g_handle_platform_message_method, channel, message,
                       responseId);
-  FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
 }
 
 static jmethodID g_handle_platform_message_response_method = nullptr;
@@ -37,7 +37,7 @@ void FlutterViewHandlePlatformMessageResponse(JNIEnv* env,
                                               jobject response) {
   env->CallVoidMethod(obj, g_handle_platform_message_response_method,
                       responseId, response);
-  FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
 }
 
 static jmethodID g_update_semantics_method = nullptr;
@@ -46,13 +46,13 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
                                 jobject buffer,
                                 jobjectArray strings) {
   env->CallVoidMethod(obj, g_update_semantics_method, buffer, strings);
-  FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
 }
 
 static jmethodID g_on_first_frame_method = nullptr;
 void FlutterViewOnFirstFrame(JNIEnv* env, jobject obj) {
   env->CallVoidMethod(obj, g_on_first_frame_method);
-  FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
 }
 
 // Called By Java

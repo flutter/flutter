@@ -16,18 +16,18 @@ class DartLibraryNatives;
 namespace blink {
 class Canvas;
 
-class Picture : public ftl::RefCountedThreadSafe<Picture>,
+class Picture : public fxl::RefCountedThreadSafe<Picture>,
                 public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Picture);
 
  public:
   ~Picture() override;
-  static ftl::RefPtr<Picture> Create(sk_sp<SkPicture> picture);
+  static fxl::RefPtr<Picture> Create(sk_sp<SkPicture> picture);
 
   const sk_sp<SkPicture>& picture() const { return picture_; }
 
-  ftl::RefPtr<CanvasImage> toImage(int width, int height);
+  fxl::RefPtr<CanvasImage> toImage(int width, int height);
 
   void dispose();
 

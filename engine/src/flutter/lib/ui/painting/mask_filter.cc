@@ -26,8 +26,8 @@ void MaskFilter::RegisterNatives(tonic::DartLibraryNatives* natives) {
   });
 }
 
-ftl::RefPtr<MaskFilter> MaskFilter::Create(unsigned style, double sigma) {
-  return ftl::MakeRefCounted<MaskFilter>(
+fxl::RefPtr<MaskFilter> MaskFilter::Create(unsigned style, double sigma) {
+  return fxl::MakeRefCounted<MaskFilter>(
       SkBlurMaskFilter::Make(static_cast<SkBlurStyle>(style), sigma));
 }
 

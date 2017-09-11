@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "flutter/fml/trace_event.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace shell {
 
@@ -137,7 +137,7 @@ bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const SkISize& size) const {
 }
 
 bool AndroidSurfaceSoftware::SetNativeWindow(
-    ftl::RefPtr<AndroidNativeWindow> window,
+    fxl::RefPtr<AndroidNativeWindow> window,
     PlatformView::SurfaceConfig config) {
   native_window_ = std::move(window);
   if (!(native_window_ && native_window_->IsValid()))

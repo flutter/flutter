@@ -11,8 +11,8 @@
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "flutter/shell/common/rasterizer.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/weak_ptr.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
 namespace blink {
@@ -31,7 +31,7 @@ class Engine : public blink::RuntimeDelegate {
 
   ~Engine() override;
 
-  ftl::WeakPtr<Engine> GetWeakPtr();
+  fxl::WeakPtr<Engine> GetWeakPtr();
 
   static void Init();
 
@@ -49,7 +49,7 @@ class Engine : public blink::RuntimeDelegate {
                           const std::string& main,
                           const std::string& packages);
 
-  void BeginFrame(ftl::TimePoint frame_time);
+  void BeginFrame(fxl::TimePoint frame_time);
   void NotifyIdle(int64_t deadline);
 
   void RunFromSource(const std::string& main,
@@ -62,10 +62,10 @@ class Engine : public blink::RuntimeDelegate {
   tonic::DartErrorHandleType GetUIIsolateLastError();
   tonic::DartErrorHandleType GetLoadScriptError();
 
-  void OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation);
-  void OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation);
+  void OnOutputSurfaceCreated(const fxl::Closure& gpu_continuation);
+  void OnOutputSurfaceDestroyed(const fxl::Closure& gpu_continuation);
   void SetViewportMetrics(const blink::ViewportMetrics& metrics);
-  void DispatchPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
+  void DispatchPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);
@@ -77,7 +77,7 @@ class Engine : public blink::RuntimeDelegate {
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
   void HandlePlatformMessage(
-      ftl::RefPtr<blink::PlatformMessage> message) override;
+      fxl::RefPtr<blink::PlatformMessage> message) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
 
@@ -90,11 +90,11 @@ class Engine : public blink::RuntimeDelegate {
 
   bool HandleLifecyclePlatformMessage(blink::PlatformMessage* message);
   bool HandleNavigationPlatformMessage(
-      ftl::RefPtr<blink::PlatformMessage> message);
+      fxl::RefPtr<blink::PlatformMessage> message);
   bool HandleLocalizationPlatformMessage(
-      ftl::RefPtr<blink::PlatformMessage> message);
+      fxl::RefPtr<blink::PlatformMessage> message);
 
-  void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
+  void HandleAssetPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 
   std::weak_ptr<PlatformView> platform_view_;
@@ -107,14 +107,14 @@ class Engine : public blink::RuntimeDelegate {
   std::string country_code_;
   bool semantics_enabled_ = false;
   // TODO(abarth): Unify these two behind a common interface.
-  ftl::RefPtr<blink::ZipAssetStore> asset_store_;
+  fxl::RefPtr<blink::ZipAssetStore> asset_store_;
   std::unique_ptr<blink::DirectoryAssetBundle> directory_asset_bundle_;
   // TODO(eseidel): This should move into an AnimatorStateMachine.
   bool activity_running_;
   bool have_surface_;
-  ftl::WeakPtrFactory<Engine> weak_factory_;
+  fxl::WeakPtrFactory<Engine> weak_factory_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(Engine);
+  FXL_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 
 }  // namespace shell

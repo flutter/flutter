@@ -16,14 +16,14 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class SemanticsUpdate : public ftl::RefCountedThreadSafe<SemanticsUpdate>,
+class SemanticsUpdate : public fxl::RefCountedThreadSafe<SemanticsUpdate>,
                         public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(SemanticsUpdate);
 
  public:
   ~SemanticsUpdate() override;
-  static ftl::RefPtr<SemanticsUpdate> create(std::vector<SemanticsNode> nodes);
+  static fxl::RefPtr<SemanticsUpdate> create(std::vector<SemanticsNode> nodes);
 
   std::vector<SemanticsNode> takeNodes();
 

@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "minikin/FontCollection.h"
 #include "minikin/FontFamily.h"
 #include "third_party/gtest/include/gtest/gtest_prod.h"
@@ -51,7 +51,7 @@ class FontCollection {
   std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>
       font_collections_cache_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
+  FXL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
 
 }  // namespace txt

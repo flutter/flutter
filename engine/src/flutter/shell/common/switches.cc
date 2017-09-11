@@ -7,7 +7,7 @@
 #include <sstream>
 #include <string>
 
-#include "lib/ftl/strings/string_view.h"
+#include "lib/fxl/strings/string_view.h"
 
 // Include once for the default enum definition.
 #include "flutter/shell/common/switches.h"
@@ -16,7 +16,7 @@
 
 struct SwitchDesc {
   shell::Switch sw;
-  const ftl::StringView flag;
+  const fxl::StringView flag;
   const char* help;
 };
 
@@ -80,13 +80,13 @@ void PrintUsage(const std::string& executable_name) {
   std::cerr << std::string(column_width, '-') << std::endl;
 }
 
-const ftl::StringView FlagForSwitch(Switch swtch) {
+const fxl::StringView FlagForSwitch(Switch swtch) {
   for (uint32_t i = 0; i < static_cast<uint32_t>(Switch::Sentinel); i++) {
     if (gSwitchDescs[i].sw == swtch) {
       return gSwitchDescs[i].flag;
     }
   }
-  return ftl::StringView();
+  return fxl::StringView();
 }
 
 }  // namespace shell

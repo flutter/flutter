@@ -16,7 +16,7 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class Vertices : public ftl::RefCountedThreadSafe<Vertices>,
+class Vertices : public fxl::RefCountedThreadSafe<Vertices>,
                  public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Vertices);
@@ -26,7 +26,7 @@ class Vertices : public ftl::RefCountedThreadSafe<Vertices>,
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-  static ftl::RefPtr<Vertices> Create();
+  static fxl::RefPtr<Vertices> Create();
 
   void init(
       SkVertices::VertexMode vertex_mode,

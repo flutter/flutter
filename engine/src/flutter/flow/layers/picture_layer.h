@@ -33,7 +33,7 @@ class PictureLayer : public Layer {
   bool will_change_ = false;
   RasterCacheResult raster_cache_result_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(PictureLayer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(PictureLayer);
 };
 
 }  // namespace flow

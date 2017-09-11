@@ -24,7 +24,7 @@ class ColorFilterLayer : public ContainerLayer {
   SkColor color_;
   SkBlendMode blend_mode_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ColorFilterLayer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ColorFilterLayer);
 };
 
 }  // namespace flow

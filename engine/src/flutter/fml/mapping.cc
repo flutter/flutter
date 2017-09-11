@@ -11,8 +11,8 @@
 
 #include <type_traits>
 
-#include "lib/ftl/build_config.h"
-#include "lib/ftl/files/eintr_wrapper.h"
+#include "lib/fxl/build_config.h"
+#include "lib/fxl/files/eintr_wrapper.h"
 
 #if OS_MACOSX
 
@@ -40,10 +40,10 @@ std::unique_ptr<Mapping> GetResourceMapping(const std::string& resource_name) {
 }
 
 FileMapping::FileMapping(const std::string& path)
-    : FileMapping(ftl::UniqueFD{HANDLE_EINTR(::open(path.c_str(), O_RDONLY))}) {
+    : FileMapping(fxl::UniqueFD{HANDLE_EINTR(::open(path.c_str(), O_RDONLY))}) {
 }
 
-FileMapping::FileMapping(const ftl::UniqueFD& handle)
+FileMapping::FileMapping(const fxl::UniqueFD& handle)
     : size_(0), mapping_(nullptr) {
   if (!handle.is_valid()) {
     return;

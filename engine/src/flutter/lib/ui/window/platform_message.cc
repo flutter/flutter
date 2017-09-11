@@ -10,13 +10,13 @@ namespace blink {
 
 PlatformMessage::PlatformMessage(std::string channel,
                                  std::vector<uint8_t> data,
-                                 ftl::RefPtr<PlatformMessageResponse> response)
+                                 fxl::RefPtr<PlatformMessageResponse> response)
     : channel_(std::move(channel)),
       data_(std::move(data)),
       hasData_(true),
       response_(std::move(response)) {}
 PlatformMessage::PlatformMessage(std::string channel,
-                                 ftl::RefPtr<PlatformMessageResponse> response)
+                                 fxl::RefPtr<PlatformMessageResponse> response)
     : channel_(std::move(channel)),
       data_(),
       hasData_(false),

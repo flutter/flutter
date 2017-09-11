@@ -26,7 +26,7 @@ class ImageShader : public Shader {
 
  public:
   ~ImageShader() override;
-  static ftl::RefPtr<ImageShader> Create();
+  static fxl::RefPtr<ImageShader> Create();
 
   void initWithImage(CanvasImage* image,
                      SkShader::TileMode tmx,

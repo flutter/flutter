@@ -7,8 +7,8 @@
 
 #include <memory>
 
-#include "lib/ftl/compiler_specific.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/compiler_specific.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 namespace shell {
@@ -37,7 +37,7 @@ class SurfaceFrame {
 
   bool PerformSubmit();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(SurfaceFrame);
+  FXL_DISALLOW_COPY_AND_ASSIGN(SurfaceFrame);
 };
 
 class Surface {

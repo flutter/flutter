@@ -10,15 +10,15 @@
 #include "flutter/shell/common/vsync_waiter.h"
 #include "flutter/synchronization/pipeline.h"
 #include "flutter/synchronization/semaphore.h"
-#include "lib/ftl/memory/ref_ptr.h"
-#include "lib/ftl/memory/weak_ptr.h"
-#include "lib/ftl/time/time_point.h"
+#include "lib/fxl/memory/ref_ptr.h"
+#include "lib/fxl/memory/weak_ptr.h"
+#include "lib/fxl/time/time_point.h"
 
 namespace shell {
 
 class Animator {
  public:
-  Animator(ftl::WeakPtr<Rasterizer> rasterizer,
+  Animator(fxl::WeakPtr<Rasterizer> rasterizer,
            VsyncWaiter* waiter,
            Engine* engine);
 
@@ -35,27 +35,27 @@ class Animator {
  private:
   using LayerTreePipeline = flutter::Pipeline<flow::LayerTree>;
 
-  void BeginFrame(ftl::TimePoint frame_start_time,
-                  ftl::TimePoint frame_target_time);
+  void BeginFrame(fxl::TimePoint frame_start_time,
+                  fxl::TimePoint frame_target_time);
 
   void AwaitVSync();
 
-  ftl::WeakPtr<Rasterizer> rasterizer_;
+  fxl::WeakPtr<Rasterizer> rasterizer_;
   VsyncWaiter* waiter_;
   Engine* engine_;
 
-  ftl::TimePoint last_begin_frame_time_;
+  fxl::TimePoint last_begin_frame_time_;
   int64_t dart_frame_deadline_;
-  ftl::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
+  fxl::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
   flutter::Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;
   int64_t frame_number_;
   bool paused_;
   bool frame_scheduled_;
 
-  ftl::WeakPtrFactory<Animator> weak_factory_;
+  fxl::WeakPtrFactory<Animator> weak_factory_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(Animator);
+  FXL_DISALLOW_COPY_AND_ASSIGN(Animator);
 };
 
 }  // namespace shell

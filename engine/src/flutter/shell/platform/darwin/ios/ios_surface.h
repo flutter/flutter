@@ -7,7 +7,7 @@
 
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 @class CALayer;
 
@@ -39,7 +39,7 @@ class IOSSurface {
   PlatformView::SurfaceConfig surface_config_;
   fml::scoped_nsobject<CALayer> layer_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
+  FXL_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
 };
 
 }  // namespace shell

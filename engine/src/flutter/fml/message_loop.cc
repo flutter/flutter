@@ -9,8 +9,8 @@
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/thread_local.h"
-#include "lib/ftl/memory/ref_counted.h"
-#include "lib/ftl/memory/ref_ptr.h"
+#include "lib/fxl/memory/ref_counted.h"
+#include "lib/fxl/memory/ref_ptr.h"
 
 namespace fml {
 
@@ -20,7 +20,7 @@ FML_THREAD_LOCAL ThreadLocal tls_message_loop([](intptr_t value) {
 
 MessageLoop& MessageLoop::GetCurrent() {
   auto loop = reinterpret_cast<MessageLoop*>(tls_message_loop.Get());
-  FTL_CHECK(loop != nullptr)
+  FXL_CHECK(loop != nullptr)
       << "MessageLoop::EnsureInitializedForCurrentThread was not called on "
          "this thread prior to message loop use.";
   return *loop;
@@ -40,9 +40,9 @@ bool MessageLoop::IsInitializedForCurrentThread() {
 
 MessageLoop::MessageLoop()
     : loop_(MessageLoopImpl::Create()),
-      task_runner_(ftl::MakeRefCounted<fml::TaskRunner>(loop_)) {
-  FTL_CHECK(loop_);
-  FTL_CHECK(task_runner_);
+      task_runner_(fxl::MakeRefCounted<fml::TaskRunner>(loop_)) {
+  FXL_CHECK(loop_);
+  FXL_CHECK(task_runner_);
 }
 
 MessageLoop::~MessageLoop() = default;
@@ -55,11 +55,11 @@ void MessageLoop::Terminate() {
   loop_->DoTerminate();
 }
 
-ftl::RefPtr<ftl::TaskRunner> MessageLoop::GetTaskRunner() const {
+fxl::RefPtr<fxl::TaskRunner> MessageLoop::GetTaskRunner() const {
   return task_runner_;
 }
 
-ftl::RefPtr<MessageLoopImpl> MessageLoop::GetLoopImpl() const {
+fxl::RefPtr<MessageLoopImpl> MessageLoop::GetLoopImpl() const {
   return loop_;
 }
 

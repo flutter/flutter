@@ -11,7 +11,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/runtime/dart_init.h"
 #include "flutter/shell/common/shell.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace shell {
 

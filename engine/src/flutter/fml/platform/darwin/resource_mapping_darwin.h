@@ -6,7 +6,7 @@
 #define FLUTTER_FML_PLATFORM_DARWIN_RESOURCE_MAPPING_DARWIN_H_
 
 #include "flutter/fml/mapping.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace fml {
 
@@ -23,7 +23,7 @@ class ResourceMappingDarwin : public Mapping {
  private:
   FileMapping actual_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ResourceMappingDarwin);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ResourceMappingDarwin);
 };
 
 }  // namespace fml

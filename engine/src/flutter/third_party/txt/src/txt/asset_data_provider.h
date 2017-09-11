@@ -19,7 +19,7 @@
 
 #include <string>
 #include <unordered_map>
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/asset_font_style_set.h"
 
@@ -43,7 +43,7 @@ class AssetDataProvider {
  private:
   std::unordered_map<std::string, AssetFontStyleSet> registered_families_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(AssetDataProvider);
+  FXL_DISALLOW_COPY_AND_ASSIGN(AssetDataProvider);
 };
 
 }  // namespace txt

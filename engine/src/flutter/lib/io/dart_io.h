@@ -5,7 +5,7 @@
 #ifndef FLUTTER_LIB_IO_DART_IO_H_
 #define FLUTTER_LIB_IO_DART_IO_H_
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace blink {
 
@@ -14,7 +14,7 @@ class DartIO {
   static void InitForIsolate();
 
  private:
-  FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartIO);
+  FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartIO);
 };
 
 }  // namespace blink

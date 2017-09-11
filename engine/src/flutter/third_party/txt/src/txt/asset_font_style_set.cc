@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "txt/asset_font_style_set.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace txt {
 
@@ -23,7 +23,7 @@ int AssetFontStyleSet::count() {
 }
 
 void AssetFontStyleSet::getStyle(int index, SkFontStyle*, SkString* style) {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
 }
 
 SkTypeface* AssetFontStyleSet::createTypeface(int index) {
@@ -35,7 +35,7 @@ SkTypeface* AssetFontStyleSet::createTypeface(int index) {
 }
 
 SkTypeface* AssetFontStyleSet::matchStyle(const SkFontStyle& pattern) {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 

@@ -23,8 +23,8 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Picture);
 
 DART_BIND_ALL(Picture, FOR_EACH_BINDING)
 
-ftl::RefPtr<Picture> Picture::Create(sk_sp<SkPicture> picture) {
-  return ftl::MakeRefCounted<Picture>(std::move(picture));
+fxl::RefPtr<Picture> Picture::Create(sk_sp<SkPicture> picture) {
+  return fxl::MakeRefCounted<Picture>(std::move(picture));
 }
 
 Picture::Picture(sk_sp<SkPicture> picture) : picture_(std::move(picture)) {}
@@ -35,8 +35,8 @@ Picture::~Picture() {
   SkiaUnrefOnIOThread(&picture_);
 }
 
-ftl::RefPtr<CanvasImage> Picture::toImage(int width, int height) {
-  ftl::RefPtr<CanvasImage> image = CanvasImage::Create();
+fxl::RefPtr<CanvasImage> Picture::toImage(int width, int height) {
+  fxl::RefPtr<CanvasImage> image = CanvasImage::Create();
   // TODO(abarth): We should pass in an SkColorSpace at some point.
   image->set_image(
       SkImage::MakeFromPicture(picture_, SkISize::Make(width, height), nullptr,

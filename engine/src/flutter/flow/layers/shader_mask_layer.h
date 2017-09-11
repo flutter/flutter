@@ -29,7 +29,7 @@ class ShaderMaskLayer : public ContainerLayer {
   SkRect mask_rect_;
   SkBlendMode blend_mode_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ShaderMaskLayer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ShaderMaskLayer);
 };
 
 }  // namespace flow

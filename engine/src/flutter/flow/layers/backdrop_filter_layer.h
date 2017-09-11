@@ -21,7 +21,7 @@ class BackdropFilterLayer : public ContainerLayer {
  private:
   sk_sp<SkImageFilter> filter_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(BackdropFilterLayer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(BackdropFilterLayer);
 };
 
 }  // namespace flow

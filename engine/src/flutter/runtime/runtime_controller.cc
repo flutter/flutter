@@ -30,7 +30,7 @@ void RuntimeController::CreateDartController(
     const std::string& script_uri, const uint8_t* isolate_snapshot_data,
     const uint8_t* isolate_snapshot_instr,
     const std::vector<uint8_t>& platform_kernel) {
-  FTL_DCHECK(!dart_controller_);
+  FXL_DCHECK(!dart_controller_);
 
   dart_controller_.reset(new DartController());
   dart_controller_->CreateIsolateFor(
@@ -72,7 +72,7 @@ void RuntimeController::SetSemanticsEnabled(bool enabled) {
   GetWindow()->UpdateSemanticsEnabled(semantics_enabled_);
 }
 
-void RuntimeController::BeginFrame(ftl::TimePoint frame_time) {
+void RuntimeController::BeginFrame(fxl::TimePoint frame_time) {
   GetWindow()->BeginFrame(frame_time);
 }
 
@@ -86,7 +86,7 @@ void RuntimeController::NotifyIdle(int64_t deadline) {
 }
 
 void RuntimeController::DispatchPlatformMessage(
-    ftl::RefPtr<PlatformMessage> message) {
+    fxl::RefPtr<PlatformMessage> message) {
   TRACE_EVENT0("flutter", "RuntimeController::DispatchPlatformMessage");
   GetWindow()->DispatchPlatformMessage(std::move(message));
 }
@@ -125,7 +125,7 @@ void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
 }
 
 void RuntimeController::HandlePlatformMessage(
-    ftl::RefPtr<PlatformMessage> message) {
+    fxl::RefPtr<PlatformMessage> message) {
   client_->HandlePlatformMessage(std::move(message));
 }
 

@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "lib/ftl/files/eintr_wrapper.h"
+#include "lib/fxl/files/eintr_wrapper.h"
 
 #if FML_TIMERFD_AVAILABLE == 0
 
@@ -33,7 +33,7 @@ namespace fml {
 #define NSEC_PER_SEC 1000000000
 #endif
 
-bool TimerRearm(int fd, ftl::TimePoint time_point) {
+bool TimerRearm(int fd, fxl::TimePoint time_point) {
   const uint64_t nano_secs = time_point.ToEpochDelta().ToNanoseconds();
 
   struct itimerspec spec = {};

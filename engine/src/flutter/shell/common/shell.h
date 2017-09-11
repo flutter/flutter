@@ -7,13 +7,13 @@
 
 #include "flutter/fml/thread.h"
 #include "flutter/shell/common/tracing_controller.h"
-#include "lib/ftl/command_line.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/ref_ptr.h"
-#include "lib/ftl/memory/weak_ptr.h"
-#include "lib/ftl/synchronization/thread_checker.h"
-#include "lib/ftl/synchronization/waitable_event.h"
-#include "lib/ftl/tasks/task_runner.h"
+#include "lib/fxl/command_line.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/ref_ptr.h"
+#include "lib/fxl/memory/weak_ptr.h"
+#include "lib/fxl/synchronization/thread_checker.h"
+#include "lib/fxl/synchronization/waitable_event.h"
+#include "lib/fxl/tasks/task_runner.h"
 
 #include <mutex>
 
@@ -26,21 +26,21 @@ class Shell {
  public:
   ~Shell();
 
-  static void InitStandalone(ftl::CommandLine command_line,
+  static void InitStandalone(fxl::CommandLine command_line,
                              std::string icu_data_path = "",
                              std::string application_library_path = "");
 
   static Shell& Shared();
 
-  const ftl::CommandLine& GetCommandLine() const;
+  const fxl::CommandLine& GetCommandLine() const;
 
   TracingController& tracing_controller();
 
   // Maintain a list of rasterizers.
   // These APIs must only be accessed on the GPU thread.
-  void AddRasterizer(const ftl::WeakPtr<Rasterizer>& rasterizer);
+  void AddRasterizer(const fxl::WeakPtr<Rasterizer>& rasterizer);
   void PurgeRasterizers();
-  void GetRasterizers(std::vector<ftl::WeakPtr<Rasterizer>>* rasterizer);
+  void GetRasterizers(std::vector<fxl::WeakPtr<Rasterizer>>* rasterizer);
 
   // List of PlatformViews.
 
@@ -71,9 +71,9 @@ class Shell {
                          std::string* isolate_name);
 
  private:
-  static void Init(ftl::CommandLine command_line);
+  static void Init(fxl::CommandLine command_line);
 
-  Shell(ftl::CommandLine command_line);
+  Shell(fxl::CommandLine command_line);
 
   void InitGpuThread();
   void InitUIThread();
@@ -85,25 +85,25 @@ class Shell {
                                  bool* view_existed,
                                  int64_t* dart_isolate_id,
                                  std::string* isolate_name,
-                                 ftl::AutoResetWaitableEvent* latch);
+                                 fxl::AutoResetWaitableEvent* latch);
 
-  ftl::CommandLine command_line_;
+  fxl::CommandLine command_line_;
 
   std::unique_ptr<fml::Thread> gpu_thread_;
   std::unique_ptr<fml::Thread> ui_thread_;
   std::unique_ptr<fml::Thread> io_thread_;
 
-  std::unique_ptr<ftl::ThreadChecker> gpu_thread_checker_;
-  std::unique_ptr<ftl::ThreadChecker> ui_thread_checker_;
+  std::unique_ptr<fxl::ThreadChecker> gpu_thread_checker_;
+  std::unique_ptr<fxl::ThreadChecker> ui_thread_checker_;
 
   TracingController tracing_controller_;
 
-  std::vector<ftl::WeakPtr<Rasterizer>> rasterizers_;
+  std::vector<fxl::WeakPtr<Rasterizer>> rasterizers_;
   std::vector<std::weak_ptr<PlatformView>> platform_views_;
 
   std::mutex platform_views_mutex_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(Shell);
+  FXL_DISALLOW_COPY_AND_ASSIGN(Shell);
 };
 
 }  // namespace shell

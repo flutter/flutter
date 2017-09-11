@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #include "flutter/fml/platform/linux/timerfd.h"
-#include "lib/ftl/files/eintr_wrapper.h"
+#include "lib/fxl/files/eintr_wrapper.h"
 
 namespace fml {
 
@@ -18,15 +18,15 @@ MessageLoopLinux::MessageLoopLinux()
     : epoll_fd_(HANDLE_EINTR(::epoll_create(1 /* unused */))),
       timer_fd_(::timerfd_create(kClockType, TFD_NONBLOCK | TFD_CLOEXEC)),
       running_(false) {
-  FTL_CHECK(epoll_fd_.is_valid());
-  FTL_CHECK(timer_fd_.is_valid());
+  FXL_CHECK(epoll_fd_.is_valid());
+  FXL_CHECK(timer_fd_.is_valid());
   bool added_source = AddOrRemoveTimerSource(true);
-  FTL_CHECK(added_source);
+  FXL_CHECK(added_source);
 }
 
 MessageLoopLinux::~MessageLoopLinux() {
   bool removed_source = AddOrRemoveTimerSource(false);
-  FTL_CHECK(removed_source);
+  FXL_CHECK(removed_source);
 }
 
 bool MessageLoopLinux::AddOrRemoveTimerSource(bool add) {
@@ -73,12 +73,12 @@ void MessageLoopLinux::Run() {
 
 void MessageLoopLinux::Terminate() {
   running_ = false;
-  WakeUp(ftl::TimePoint::Now());
+  WakeUp(fxl::TimePoint::Now());
 }
 
-void MessageLoopLinux::WakeUp(ftl::TimePoint time_point) {
+void MessageLoopLinux::WakeUp(fxl::TimePoint time_point) {
   bool result = TimerRearm(timer_fd_.get(), time_point);
-  FTL_DCHECK(result);
+  FXL_DCHECK(result);
 }
 
 void MessageLoopLinux::OnEventFired() {

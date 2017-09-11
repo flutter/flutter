@@ -38,7 +38,7 @@ class ContainerLayer : public Layer {
  private:
   std::vector<std::unique_ptr<Layer>> layers_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ContainerLayer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ContainerLayer);
 };
 
 }  // namespace flow

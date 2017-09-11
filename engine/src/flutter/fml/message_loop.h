@@ -6,8 +6,8 @@
 #define FLUTTER_FML_MESSAGE_LOOP_H_
 
 #include "flutter/fml/task_observer.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/tasks/task_runner.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/tasks/task_runner.h"
 
 namespace fml {
 
@@ -28,7 +28,7 @@ class MessageLoop {
 
   void RemoveTaskObserver(TaskObserver* observer);
 
-  ftl::RefPtr<ftl::TaskRunner> GetTaskRunner() const;
+  fxl::RefPtr<fxl::TaskRunner> GetTaskRunner() const;
 
   static void EnsureInitializedForCurrentThread();
 
@@ -40,14 +40,14 @@ class MessageLoop {
   friend class TaskRunner;
   friend class MessageLoopImpl;
 
-  ftl::RefPtr<MessageLoopImpl> loop_;
-  ftl::RefPtr<fml::TaskRunner> task_runner_;
+  fxl::RefPtr<MessageLoopImpl> loop_;
+  fxl::RefPtr<fml::TaskRunner> task_runner_;
 
   MessageLoop();
 
-  ftl::RefPtr<MessageLoopImpl> GetLoopImpl() const;
+  fxl::RefPtr<MessageLoopImpl> GetLoopImpl() const;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(MessageLoop);
+  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoop);
 };
 
 }  // namespace fml

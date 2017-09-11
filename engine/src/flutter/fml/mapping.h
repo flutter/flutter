@@ -7,8 +7,8 @@
 
 #include <string>
 
-#include "lib/ftl/files/unique_fd.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/files/unique_fd.h"
+#include "lib/fxl/macros.h"
 
 namespace fml {
 
@@ -23,7 +23,7 @@ class Mapping {
   virtual const uint8_t* GetMapping() const = 0;
 
  private:
-  FTL_DISALLOW_COPY_AND_ASSIGN(Mapping);
+  FXL_DISALLOW_COPY_AND_ASSIGN(Mapping);
 };
 
 bool PlatformHasResourcesBundle();
@@ -34,7 +34,7 @@ class FileMapping : public Mapping {
  public:
   FileMapping(const std::string& path);
 
-  FileMapping(const ftl::UniqueFD& fd);
+  FileMapping(const fxl::UniqueFD& fd);
 
   ~FileMapping() override;
 
@@ -46,7 +46,7 @@ class FileMapping : public Mapping {
   size_t size_;
   uint8_t* mapping_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(FileMapping);
+  FXL_DISALLOW_COPY_AND_ASSIGN(FileMapping);
 };
 
 }  // namespace fml

@@ -15,8 +15,8 @@
  */
 
 #include "gtest/gtest.h"
-#include "lib/ftl/command_line.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/command_line.h"
+#include "lib/fxl/logging.h"
 #include "txt/font_collection.h"
 #include "utils.h"
 

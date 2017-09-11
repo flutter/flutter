@@ -38,7 +38,7 @@ void ContainerLayer::PrerollChildren(PrerollContext* context,
 }
 
 void ContainerLayer::PaintChildren(PaintContext& context) const {
-  FTL_DCHECK(needs_painting());
+  FXL_DCHECK(needs_painting());
 
   // Intentionally not tracing here as there should be no self-time
   // and the trace event on this common function has a small overhead.
@@ -56,7 +56,7 @@ void ContainerLayer::UpdateScene(SceneUpdateContext& context) {
 }
 
 void ContainerLayer::UpdateSceneChildren(SceneUpdateContext& context) {
-  FTL_DCHECK(needs_system_composite());
+  FXL_DCHECK(needs_system_composite());
 
   // Paint all of the layers which need to be drawn into the container.
   // These may be flattened down to a containing

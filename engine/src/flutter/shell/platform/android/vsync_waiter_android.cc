@@ -10,8 +10,8 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/trace_event.h"
-#include "lib/ftl/arraysize.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/arraysize.h"
+#include "lib/fxl/logging.h"
 
 namespace shell {
 
@@ -23,10 +23,10 @@ VsyncWaiterAndroid::VsyncWaiterAndroid() : weak_factory_(this) {}
 VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
 void VsyncWaiterAndroid::AsyncWaitForVsync(Callback callback) {
-  FTL_DCHECK(!callback_);
+  FXL_DCHECK(!callback_);
   callback_ = std::move(callback);
-  ftl::WeakPtr<VsyncWaiterAndroid>* weak =
-      new ftl::WeakPtr<VsyncWaiterAndroid>();
+  fxl::WeakPtr<VsyncWaiterAndroid>* weak =
+      new fxl::WeakPtr<VsyncWaiterAndroid>();
   *weak = weak_factory_.GetWeakPtr();
 
   blink::Threads::Platform()->PostTask([weak] {
@@ -42,10 +42,10 @@ void VsyncWaiterAndroid::OnVsync(int64_t frameTimeNanos,
   Callback callback = std::move(callback_);
   callback_ = Callback();
   blink::Threads::UI()->PostTask([callback, frameTimeNanos, frameTargetTimeNanos] {
-    callback(ftl::TimePoint::FromEpochDelta(
-                 ftl::TimeDelta::FromNanoseconds(frameTimeNanos)),
-             ftl::TimePoint::FromEpochDelta(
-                 ftl::TimeDelta::FromNanoseconds(frameTargetTimeNanos)));
+    callback(fxl::TimePoint::FromEpochDelta(
+                 fxl::TimeDelta::FromNanoseconds(frameTimeNanos)),
+             fxl::TimePoint::FromEpochDelta(
+                 fxl::TimeDelta::FromNanoseconds(frameTargetTimeNanos)));
   });
 }
 
@@ -60,8 +60,8 @@ static void OnNativeVsync(JNIEnv* env,
   // 442979b6ec631305275a6/tracing/tracing/extras/vsync/vsync_auditor.html#L26
   TRACE_EVENT0("flutter", "VSYNC");
   TRACE_EVENT_INSTANT0("flutter", "VSYNC");
-  ftl::WeakPtr<VsyncWaiterAndroid>* weak =
-      reinterpret_cast<ftl::WeakPtr<VsyncWaiterAndroid>*>(cookie);
+  fxl::WeakPtr<VsyncWaiterAndroid>* weak =
+      reinterpret_cast<fxl::WeakPtr<VsyncWaiterAndroid>*>(cookie);
   VsyncWaiterAndroid* waiter = weak->get();
   delete weak;
   if (waiter) {
@@ -85,12 +85,12 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
 
   g_vsync_waiter_class = new fml::jni::ScopedJavaGlobalRef<jclass>(env, clazz);
 
-  FTL_CHECK(!g_vsync_waiter_class->is_null());
+  FXL_CHECK(!g_vsync_waiter_class->is_null());
 
   g_async_wait_for_vsync_method_ = env->GetStaticMethodID(
       g_vsync_waiter_class->obj(), "asyncWaitForVsync", "(J)V");
 
-  FTL_CHECK(g_async_wait_for_vsync_method_ != nullptr);
+  FXL_CHECK(g_async_wait_for_vsync_method_ != nullptr);
 
   return env->RegisterNatives(clazz, methods, arraysize(methods)) == 0;
 }

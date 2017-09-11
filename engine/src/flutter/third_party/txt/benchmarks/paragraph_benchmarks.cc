@@ -17,8 +17,8 @@
 #include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
 #include <minikin/Layout.h>
-#include "lib/ftl/command_line.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/command_line.h"
+#include "lib/fxl/logging.h"
 #include "minikin/LayoutUtils.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkBitmap.h"

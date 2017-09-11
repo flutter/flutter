@@ -23,7 +23,7 @@
 #include "flutter/lib/ui/text/paragraph.h"
 #include "flutter/lib/ui/text/paragraph_builder.h"
 #include "flutter/lib/ui/window/window.h"
-#include "lib/ftl/build_config.h"
+#include "lib/fxl/build_config.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/logging/dart_error.h"
 
@@ -73,7 +73,7 @@ void DartUI::InitForGlobal() {
 }
 
 void DartUI::InitForIsolate() {
-  FTL_DCHECK(g_natives);
+  FXL_DCHECK(g_natives);
   DART_CHECK_VALID(Dart_SetNativeResolver(Dart_LookupLibrary(ToDart("dart:ui")),
                                           GetNativeFunction, GetSymbol));
 }

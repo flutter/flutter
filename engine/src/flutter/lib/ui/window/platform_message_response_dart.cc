@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "flutter/common/threads.h"
-#include "lib/ftl/functional/make_copyable.h"
+#include "lib/fxl/functional/make_copyable.h"
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/logging/dart_invoke.h"
 
@@ -20,7 +20,7 @@ PlatformMessageResponseDart::PlatformMessageResponseDart(
 PlatformMessageResponseDart::~PlatformMessageResponseDart() {
   if (!callback_.is_empty()) {
     Threads::UI()->PostTask(
-        ftl::MakeCopyable([callback = std::move(callback_)]() mutable {
+        fxl::MakeCopyable([callback = std::move(callback_)]() mutable {
           callback.Clear();
         }));
   }
@@ -29,9 +29,9 @@ PlatformMessageResponseDart::~PlatformMessageResponseDart() {
 void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
   if (callback_.is_empty())
     return;
-  FTL_DCHECK(!is_complete_);
+  FXL_DCHECK(!is_complete_);
   is_complete_ = true;
-  Threads::UI()->PostTask(ftl::MakeCopyable(
+  Threads::UI()->PostTask(fxl::MakeCopyable(
       [ callback = std::move(callback_), data = std::move(data) ]() mutable {
         tonic::DartState* dart_state = callback.dart_state().get();
         if (!dart_state)
@@ -47,8 +47,8 @@ void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
         Dart_TypedData_Type type;
         DART_CHECK_VALID(
             Dart_TypedDataAcquireData(byte_buffer, &type, &buffer, &length));
-        FTL_CHECK(type == Dart_TypedData_kByteData);
-        FTL_CHECK(static_cast<size_t>(length) == data.size());
+        FXL_CHECK(type == Dart_TypedData_kByteData);
+        FXL_CHECK(static_cast<size_t>(length) == data.size());
         memcpy(buffer, data.data(), length);
         Dart_TypedDataReleaseData(byte_buffer);
         tonic::DartInvoke(callback.Release(), {byte_buffer});
@@ -58,9 +58,9 @@ void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
 void PlatformMessageResponseDart::CompleteEmpty() {
   if (callback_.is_empty())
     return;
-  FTL_DCHECK(!is_complete_);
+  FXL_DCHECK(!is_complete_);
   is_complete_ = true;
-  Threads::UI()->PostTask(ftl::MakeCopyable(
+  Threads::UI()->PostTask(fxl::MakeCopyable(
       [ callback = std::move(callback_) ]() mutable {
         tonic::DartState* dart_state = callback.dart_state().get();
         if (!dart_state)

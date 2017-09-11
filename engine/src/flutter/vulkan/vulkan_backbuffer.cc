@@ -21,17 +21,17 @@ VulkanBackbuffer::VulkanBackbuffer(const VulkanProcTable& p_vk,
       render_command_buffer_(p_vk, device, pool),
       valid_(false) {
   if (!usage_command_buffer_.IsValid() || !render_command_buffer_.IsValid()) {
-    FTL_DLOG(INFO) << "Command buffers were not valid.";
+    FXL_DLOG(INFO) << "Command buffers were not valid.";
     return;
   }
 
   if (!CreateSemaphores()) {
-    FTL_DLOG(INFO) << "Could not create semaphores.";
+    FXL_DLOG(INFO) << "Could not create semaphores.";
     return;
   }
 
   if (!CreateFences()) {
-    FTL_DLOG(INFO) << "Could not create fences.";
+    FXL_DLOG(INFO) << "Could not create fences.";
     return;
   }
 
@@ -39,7 +39,7 @@ VulkanBackbuffer::VulkanBackbuffer(const VulkanProcTable& p_vk,
 }
 
 VulkanBackbuffer::~VulkanBackbuffer() {
-  FTL_ALLOW_UNUSED_LOCAL(WaitFences());
+  FXL_ALLOW_UNUSED_LOCAL(WaitFences());
 }
 
 bool VulkanBackbuffer::IsValid() const {

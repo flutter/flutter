@@ -6,8 +6,8 @@
 #define FLUTTER_RUNTIME_DART_INIT_H_
 
 #include "dart/runtime/include/dart_api.h"
-#include "lib/ftl/functional/closure.h"
-#include "lib/ftl/build_config.h"
+#include "lib/fxl/functional/closure.h"
+#include "lib/fxl/build_config.h"
 
 #include <memory>
 #include <string>
@@ -25,7 +25,7 @@ extern const char kPlatformKernelAssetKey[];
 
 bool IsRunningPrecompiledCode();
 
-using EmbedderTracingCallback = ftl::Closure;
+using EmbedderTracingCallback = fxl::Closure;
 
 typedef void (*ServiceIsolateHook)(bool);
 typedef void (*RegisterNativeServiceProtocolExtensionHook)(bool);

@@ -7,7 +7,7 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/dart_library_natives.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace blink {
 
@@ -22,7 +22,7 @@ class DartRuntimeHooks {
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
  private:
-  FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartRuntimeHooks);
+  FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartRuntimeHooks);
 };
 
 }  // namespace blink

@@ -11,7 +11,7 @@
 
 #include "flutter/fml/message_loop_impl.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace fml {
 
@@ -29,13 +29,13 @@ class MessageLoopDarwin : public MessageLoopImpl {
 
   void Terminate() override;
 
-  void WakeUp(ftl::TimePoint time_point) override;
+  void WakeUp(fxl::TimePoint time_point) override;
 
   static void OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop);
 
   FRIEND_MAKE_REF_COUNTED(MessageLoopDarwin);
   FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopDarwin);
-  FTL_DISALLOW_COPY_AND_ASSIGN(MessageLoopDarwin);
+  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopDarwin);
 };
 
 }  // namespace fml

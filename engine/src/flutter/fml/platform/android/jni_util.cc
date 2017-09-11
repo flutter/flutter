@@ -7,26 +7,26 @@
 #include <codecvt>
 #include <string>
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace fml {
 namespace jni {
 
 static JavaVM* g_jvm = nullptr;
 
-#define ASSERT_NO_EXCEPTION() FTL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+#define ASSERT_NO_EXCEPTION() FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
 
 void InitJavaVM(JavaVM* vm) {
-  FTL_DCHECK(g_jvm == nullptr);
+  FXL_DCHECK(g_jvm == nullptr);
   g_jvm = vm;
 }
 
 JNIEnv* AttachCurrentThread() {
-  FTL_DCHECK(g_jvm != nullptr)
+  FXL_DCHECK(g_jvm != nullptr)
       << "Trying to attach to current thread without calling InitJavaVM first.";
   JNIEnv* env = nullptr;
   jint ret = g_jvm->AttachCurrentThread(&env, nullptr);
-  FTL_DCHECK(JNI_OK == ret);
+  FXL_DCHECK(JNI_OK == ret);
   return env;
 }
 
@@ -97,10 +97,10 @@ std::vector<std::string> StringArrayToVector(JNIEnv* env, jobjectArray array) {
 ScopedJavaLocalRef<jobjectArray> VectorToStringArray(
     JNIEnv* env,
     const std::vector<std::string>& vector) {
-  FTL_DCHECK(env);
+  FXL_DCHECK(env);
   ScopedJavaLocalRef<jclass> string_clazz(env,
                                           env->FindClass("java/lang/String"));
-  FTL_DCHECK(!string_clazz.is_null());
+  FXL_DCHECK(!string_clazz.is_null());
   jobjectArray joa =
       env->NewObjectArray(vector.size(), string_clazz.obj(), NULL);
   ASSERT_NO_EXCEPTION();

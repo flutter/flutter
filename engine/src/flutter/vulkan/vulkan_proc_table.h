@@ -7,15 +7,15 @@
 
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_interface.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/ref_counted.h"
-#include "lib/ftl/memory/ref_ptr.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/ref_counted.h"
+#include "lib/fxl/memory/ref_ptr.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/gpu/vk/GrVkInterface.h"
 
 namespace vulkan {
 
-class VulkanProcTable : public ftl::RefCountedThreadSafe<VulkanProcTable> {
+class VulkanProcTable : public fxl::RefCountedThreadSafe<VulkanProcTable> {
   FRIEND_REF_COUNTED_THREAD_SAFE(VulkanProcTable);
   FRIEND_MAKE_REF_COUNTED(VulkanProcTable);
 
@@ -140,7 +140,7 @@ class VulkanProcTable : public ftl::RefCountedThreadSafe<VulkanProcTable> {
   PFN_vkVoidFunction AcquireProc(const char* proc_name,
                                  const VulkanHandle<VkDevice>& device) const;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VulkanProcTable);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanProcTable);
 };
 
 }  // namespace vulkan

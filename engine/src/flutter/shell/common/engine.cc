@@ -28,11 +28,11 @@
 #include "flutter/shell/common/animator.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/sky/engine/public/web/Sky.h"
-#include "lib/ftl/files/eintr_wrapper.h"
-#include "lib/ftl/files/file.h"
-#include "lib/ftl/files/path.h"
-#include "lib/ftl/files/unique_fd.h"
-#include "lib/ftl/functional/make_copyable.h"
+#include "lib/fxl/files/eintr_wrapper.h"
+#include "lib/fxl/files/file.h"
+#include "lib/fxl/files/path.h"
+#include "lib/fxl/files/unique_fd.h"
+#include "lib/fxl/functional/make_copyable.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -80,7 +80,7 @@ Engine::Engine(PlatformView* platform_view)
 
 Engine::~Engine() {}
 
-ftl::WeakPtr<Engine> Engine::GetWeakPtr() {
+fxl::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -104,7 +104,7 @@ static const uint8_t* MemMapSnapshot(const std::string& aot_snapshot_path,
   }
   int64_t asset_size = info.st_size;
 
-  ftl::UniqueFD fd(HANDLE_EINTR(open(asset_path.c_str(), O_RDONLY)));
+  fxl::UniqueFD fd(HANDLE_EINTR(open(asset_path.c_str(), O_RDONLY)));
   if (fd.get() == -1) {
     return nullptr;
   }
@@ -145,7 +145,7 @@ void Engine::Init() {
   void* library_handle = dlopen(application_library_path, RTLD_NOW);
   const char* err = dlerror();
   if (err != nullptr) {
-    FTL_LOG(FATAL) << "dlopen failed: " << err;
+    FXL_LOG(FATAL) << "dlopen failed: " << err;
   }
   vm_snapshot_data = reinterpret_cast<const uint8_t*>(
       dlsym(library_handle, "kDartVmSnapshotData"));
@@ -158,7 +158,7 @@ void Engine::Init() {
 #elif OS(ANDROID)
   const blink::Settings& settings = blink::Settings::Get();
   const std::string& aot_snapshot_path = settings.aot_snapshot_path;
-  FTL_CHECK(!aot_snapshot_path.empty());
+  FXL_CHECK(!aot_snapshot_path.empty());
   vm_snapshot_data =
       MemMapSnapshot(aot_snapshot_path, "vm_snapshot_data",
                      settings.aot_vm_snapshot_data_filename, false);
@@ -227,7 +227,7 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
                                 const std::string& main,
                                 const std::string& packages) {
   TRACE_EVENT0("flutter", "Engine::RunBundleAndSource");
-  FTL_CHECK(!blink::IsRunningPrecompiledCode())
+  FXL_CHECK(!blink::IsRunningPrecompiledCode())
       << "Cannot run from source in a precompiled build.";
   std::string packages_path = packages;
   if (packages_path.empty())
@@ -239,7 +239,7 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
       runtime_->dart_controller()->RunFromSource(main, packages_path);
 }
 
-void Engine::BeginFrame(ftl::TimePoint frame_time) {
+void Engine::BeginFrame(fxl::TimePoint frame_time) {
   TRACE_EVENT0("flutter", "Engine::BeginFrame");
   if (runtime_)
     runtime_->BeginFrame(frame_time);
@@ -286,7 +286,7 @@ tonic::DartErrorHandleType Engine::GetLoadScriptError() {
   return load_script_error_;
 }
 
-void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {
+void Engine::OnOutputSurfaceCreated(const fxl::Closure& gpu_continuation) {
   blink::Threads::Gpu()->PostTask(gpu_continuation);
   have_surface_ = true;
   StartAnimatorIfPossible();
@@ -294,7 +294,7 @@ void Engine::OnOutputSurfaceCreated(const ftl::Closure& gpu_continuation) {
     ScheduleFrame();
 }
 
-void Engine::OnOutputSurfaceDestroyed(const ftl::Closure& gpu_continuation) {
+void Engine::OnOutputSurfaceDestroyed(const fxl::Closure& gpu_continuation) {
   have_surface_ = false;
   StopAnimator();
   blink::Threads::Gpu()->PostTask(gpu_continuation);
@@ -307,7 +307,7 @@ void Engine::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
 }
 
 void Engine::DispatchPlatformMessage(
-    ftl::RefPtr<blink::PlatformMessage> message) {
+    fxl::RefPtr<blink::PlatformMessage> message) {
   if (message->channel() == kLifecycleChannel) {
     if (HandleLifecyclePlatformMessage(message.get()))
       return;
@@ -349,8 +349,8 @@ bool Engine::HandleLifecyclePlatformMessage(blink::PlatformMessage* message) {
 }
 
 bool Engine::HandleNavigationPlatformMessage(
-    ftl::RefPtr<blink::PlatformMessage> message) {
-  FTL_DCHECK(!runtime_);
+    fxl::RefPtr<blink::PlatformMessage> message) {
+  FXL_DCHECK(!runtime_);
   const auto& data = message->data();
 
   rapidjson::Document document;
@@ -367,7 +367,7 @@ bool Engine::HandleNavigationPlatformMessage(
 }
 
 bool Engine::HandleLocalizationPlatformMessage(
-    ftl::RefPtr<blink::PlatformMessage> message) {
+    fxl::RefPtr<blink::PlatformMessage> message) {
   const auto& data = message->data();
 
   rapidjson::Document document;
@@ -420,7 +420,7 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
   // custom font loading in hot reload.
 
   if (::stat(path.c_str(), &stat_result) != 0) {
-    FTL_LOG(INFO) << "Could not configure asset bundle at path: " << path;
+    FXL_LOG(INFO) << "Could not configure asset bundle at path: " << path;
     return;
   }
 
@@ -431,7 +431,7 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
   }
 
   if (S_ISREG(stat_result.st_mode)) {
-    asset_store_ = ftl::MakeRefCounted<blink::ZipAssetStore>(
+    asset_store_ = fxl::MakeRefCounted<blink::ZipAssetStore>(
         blink::GetUnzipperProviderForPath(path));
     return;
   }
@@ -496,7 +496,7 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 }
 
 void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
-  blink::Threads::Platform()->PostTask(ftl::MakeCopyable([
+  blink::Threads::Platform()->PostTask(fxl::MakeCopyable([
     platform_view = platform_view_.lock(), update = std::move(update)
   ]() mutable {
     if (platform_view)
@@ -505,7 +505,7 @@ void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
 }
 
 void Engine::HandlePlatformMessage(
-    ftl::RefPtr<blink::PlatformMessage> message) {
+    fxl::RefPtr<blink::PlatformMessage> message) {
   if (message->channel() == kAssetChannel) {
     HandleAssetPlatformMessage(std::move(message));
     return;
@@ -519,8 +519,8 @@ void Engine::HandlePlatformMessage(
 }
 
 void Engine::HandleAssetPlatformMessage(
-    ftl::RefPtr<blink::PlatformMessage> message) {
-  ftl::RefPtr<blink::PlatformMessageResponse> response = message->response();
+    fxl::RefPtr<blink::PlatformMessage> message) {
+  fxl::RefPtr<blink::PlatformMessageResponse> response = message->response();
   if (!response)
     return;
   const auto& data = message->data();

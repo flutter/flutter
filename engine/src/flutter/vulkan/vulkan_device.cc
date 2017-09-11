@@ -43,7 +43,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
   graphics_queue_index_ = FindGraphicsQueueIndex(GetQueueFamilyProperties());
 
   if (graphics_queue_index_ == kVulkanInvalidGraphicsQueueIndex) {
-    FTL_DLOG(INFO) << "Could not find the graphics queue index.";
+    FXL_DLOG(INFO) << "Could not find the graphics queue index.";
     return;
   }
 
@@ -92,7 +92,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
 
   if (VK_CALL_LOG_ERROR(vk.CreateDevice(physical_device_, &create_info, nullptr,
                                         &device)) != VK_SUCCESS) {
-    FTL_DLOG(INFO) << "Could not create device.";
+    FXL_DLOG(INFO) << "Could not create device.";
     return;
   }
 
@@ -100,7 +100,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
              [this](VkDevice device) { vk.DestroyDevice(device, nullptr); }};
 
   if (!vk.SetupDeviceProcAddresses(device_)) {
-    FTL_DLOG(INFO) << "Could not setup device proc addresses.";
+    FXL_DLOG(INFO) << "Could not setup device proc addresses.";
     return;
   }
 
@@ -109,7 +109,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
   vk.GetDeviceQueue(device_, graphics_queue_index_, 0, &queue);
 
   if (queue == VK_NULL_HANDLE) {
-    FTL_DLOG(INFO) << "Could not get the device queue handle.";
+    FXL_DLOG(INFO) << "Could not get the device queue handle.";
     return;
   }
 
@@ -126,7 +126,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
   if (VK_CALL_LOG_ERROR(vk.CreateCommandPool(device_, &command_pool_create_info,
                                              nullptr, &command_pool)) !=
       VK_SUCCESS) {
-    FTL_DLOG(INFO) << "Could not create the command pool.";
+    FXL_DLOG(INFO) << "Could not create the command pool.";
     return;
   }
 
@@ -138,7 +138,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
 }
 
 VulkanDevice::~VulkanDevice() {
-  FTL_ALLOW_UNUSED_LOCAL(WaitIdle());
+  FXL_ALLOW_UNUSED_LOCAL(WaitIdle());
 }
 
 bool VulkanDevice::IsValid() const {

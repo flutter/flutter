@@ -14,7 +14,7 @@ BackdropFilterLayer::~BackdropFilterLayer() = default;
 
 void BackdropFilterLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
-  FTL_DCHECK(needs_painting());
+  FXL_DCHECK(needs_painting());
 
   Layer::AutoSaveLayer(context, SkCanvas::SaveLayerRec{&paint_bounds(), nullptr,
                                                        filter_.get(), 0});

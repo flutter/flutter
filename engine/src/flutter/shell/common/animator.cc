@@ -6,12 +6,12 @@
 
 #include "flutter/common/threads.h"
 #include "flutter/fml/trace_event.h"
-#include "lib/ftl/time/stopwatch.h"
+#include "lib/fxl/time/stopwatch.h"
 #include "dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
 
-Animator::Animator(ftl::WeakPtr<Rasterizer> rasterizer,
+Animator::Animator(fxl::WeakPtr<Rasterizer> rasterizer,
                    VsyncWaiter* waiter,
                    Engine* engine)
     : rasterizer_(rasterizer),
@@ -19,7 +19,7 @@ Animator::Animator(ftl::WeakPtr<Rasterizer> rasterizer,
       engine_(engine),
       last_begin_frame_time_(),
       dart_frame_deadline_(0),
-      layer_tree_pipeline_(ftl::MakeRefCounted<LayerTreePipeline>(2)),
+      layer_tree_pipeline_(fxl::MakeRefCounted<LayerTreePipeline>(2)),
       pending_frame_semaphore_(1),
       frame_number_(1),
       paused_(false),
@@ -41,14 +41,14 @@ void Animator::Start() {
   RequestFrame();
 }
 
-static int64_t FtlToDartOrEarlier(ftl::TimePoint time) {
+static int64_t FxlToDartOrEarlier(fxl::TimePoint time) {
   int64_t dart_now = Dart_TimelineGetMicros();
-  ftl::TimePoint ftl_now = ftl::TimePoint::Now();
-  return (time - ftl_now).ToMicroseconds() + dart_now;
+  fxl::TimePoint fxl_now = fxl::TimePoint::Now();
+  return (time - fxl_now).ToMicroseconds() + dart_now;
 }
 
-void Animator::BeginFrame(ftl::TimePoint frame_start_time,
-                          ftl::TimePoint frame_target_time) {
+void Animator::BeginFrame(fxl::TimePoint frame_start_time,
+                          fxl::TimePoint frame_target_time) {
   TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
 
   frame_scheduled_ = false;
@@ -72,10 +72,10 @@ void Animator::BeginFrame(ftl::TimePoint frame_start_time,
 
   // We have acquired a valid continuation from the pipeline and are ready
   // to service potential frame.
-  FTL_DCHECK(producer_continuation_);
+  FXL_DCHECK(producer_continuation_);
 
   last_begin_frame_time_ = frame_start_time;
-  dart_frame_deadline_ = FtlToDartOrEarlier(frame_target_time);
+  dart_frame_deadline_ = FxlToDartOrEarlier(frame_target_time);
   engine_->BeginFrame(last_begin_frame_time_);
 
   if (!frame_scheduled_) {
@@ -88,7 +88,7 @@ void Animator::BeginFrame(ftl::TimePoint frame_start_time,
 void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   if (layer_tree) {
     // Note the frame time for instrumentation.
-    layer_tree->set_construction_time(ftl::TimePoint::Now() -
+    layer_tree->set_construction_time(fxl::TimePoint::Now() -
                                       last_begin_frame_time_);
   }
 
@@ -135,7 +135,7 @@ void Animator::RequestFrame() {
 
 void Animator::AwaitVSync() {
   waiter_->AsyncWaitForVsync([self = weak_factory_.GetWeakPtr()](
-      ftl::TimePoint frame_start_time, ftl::TimePoint frame_target_time) {
+      fxl::TimePoint frame_start_time, fxl::TimePoint frame_target_time) {
     if (self)
       self->BeginFrame(frame_start_time, frame_target_time);
   });

@@ -58,7 +58,7 @@ void SemanticsUpdateBuilder::updateNode(int id,
   nodes_.push_back(node);
 }
 
-ftl::RefPtr<SemanticsUpdate> SemanticsUpdateBuilder::build() {
+fxl::RefPtr<SemanticsUpdate> SemanticsUpdateBuilder::build() {
   return SemanticsUpdate::create(std::move(nodes_));
 }
 

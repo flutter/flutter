@@ -23,7 +23,7 @@ class AssetFontSelector : public FontSelector {
 
   ~AssetFontSelector() override;
 
-  static void Install(ftl::RefPtr<ZipAssetStore> asset_store);
+  static void Install(fxl::RefPtr<ZipAssetStore> asset_store);
 
   PassRefPtr<FontData> getFontData(const FontDescription& font_description,
                                    const AtomicString& family_name) override;
@@ -39,14 +39,14 @@ class AssetFontSelector : public FontSelector {
  private:
   struct TypefaceAsset;
 
-  explicit AssetFontSelector(ftl::RefPtr<ZipAssetStore> asset_store);
+  explicit AssetFontSelector(fxl::RefPtr<ZipAssetStore> asset_store);
 
   void parseFontManifest();
 
   sk_sp<SkTypeface> getTypefaceAsset(const FontDescription& font_description,
                                      const AtomicString& family_name);
 
-  ftl::RefPtr<ZipAssetStore> asset_store_;
+  fxl::RefPtr<ZipAssetStore> asset_store_;
 
   HashMap<AtomicString, std::vector<FlutterFontAttributes>> font_family_map_;
 

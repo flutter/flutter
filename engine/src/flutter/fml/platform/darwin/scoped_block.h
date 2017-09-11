@@ -7,7 +7,7 @@
 
 #include <Block.h>
 
-#include "lib/ftl/compiler_specific.h"
+#include "lib/fxl/compiler_specific.h"
 
 namespace fml {
 
@@ -72,7 +72,7 @@ class ScopedBlock {
     block_ = temp;
   }
 
-  B release() FTL_WARN_UNUSED_RESULT {
+  B release() FXL_WARN_UNUSED_RESULT {
     B temp = block_;
     block_ = nullptr;
     return temp;

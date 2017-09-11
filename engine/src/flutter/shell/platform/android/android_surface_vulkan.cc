@@ -8,12 +8,12 @@
 
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
 #include "flutter/vulkan/vulkan_native_surface_android.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace shell {
 
 AndroidSurfaceVulkan::AndroidSurfaceVulkan()
-    : proc_table_(ftl::MakeRefCounted<vulkan::VulkanProcTable>()) {}
+    : proc_table_(fxl::MakeRefCounted<vulkan::VulkanProcTable>()) {}
 
 AndroidSurfaceVulkan::~AndroidSurfaceVulkan() = default;
 
@@ -68,7 +68,7 @@ void AndroidSurfaceVulkan::SetFlutterView(
     const fml::jni::JavaObjectWeakGlobalRef& flutter_view) {}
 
 bool AndroidSurfaceVulkan::SetNativeWindow(
-    ftl::RefPtr<AndroidNativeWindow> window,
+    fxl::RefPtr<AndroidNativeWindow> window,
     PlatformView::SurfaceConfig config) {
   native_window_ = std::move(window);
   return native_window_ && native_window_->IsValid();

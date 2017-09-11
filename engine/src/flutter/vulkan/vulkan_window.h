@@ -11,8 +11,8 @@
 #include <vector>
 
 #include "flutter/vulkan/vulkan_proc_table.h"
-#include "lib/ftl/compiler_specific.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/compiler_specific.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -31,7 +31,7 @@ class VulkanBackbuffer;
 
 class VulkanWindow {
  public:
-  VulkanWindow(ftl::RefPtr<VulkanProcTable> proc_table,
+  VulkanWindow(fxl::RefPtr<VulkanProcTable> proc_table,
                std::unique_ptr<VulkanNativeSurface> native_surface);
 
   ~VulkanWindow();
@@ -46,7 +46,7 @@ class VulkanWindow {
 
  private:
   bool valid_;
-  ftl::RefPtr<VulkanProcTable> vk;
+  fxl::RefPtr<VulkanProcTable> vk;
   // Note: The order of objects here is important because the
   // GrVkBackendContext assumes ownership of the device and instance handles.
   sk_sp<GrVkBackendContext> skia_vk_backend_context_;
@@ -60,10 +60,10 @@ class VulkanWindow {
 
   sk_sp<GrVkBackendContext> CreateSkiaBackendContext();
 
-  FTL_WARN_UNUSED_RESULT
+  FXL_WARN_UNUSED_RESULT
   bool RecreateSwapchain();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VulkanWindow);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanWindow);
 };
 
 }  // namespace vulkan

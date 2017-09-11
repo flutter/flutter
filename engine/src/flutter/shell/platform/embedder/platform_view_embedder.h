@@ -7,7 +7,7 @@
 
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -53,7 +53,7 @@ class PlatformViewEmbedder : public PlatformView, public GPUSurfaceGLDelegate {
  private:
   DispatchTable dispatch_table_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
+  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };
 
 }  // namespace shell

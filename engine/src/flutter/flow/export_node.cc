@@ -5,12 +5,12 @@
 #include "flutter/flow/export_node.h"
 
 #include "flutter/common/threads.h"
-#include "lib/ftl/functional/make_copyable.h"
+#include "lib/fxl/functional/make_copyable.h"
 
 namespace flow {
 
 ExportNodeHolder::ExportNodeHolder(
-    ftl::RefPtr<zircon::dart::Handle> export_token_handle)
+    fxl::RefPtr<zircon::dart::Handle> export_token_handle)
     : export_node_(std::make_unique<ExportNode>(export_token_handle)) {
   ASSERT_IS_UI_THREAD;
 }
@@ -26,18 +26,18 @@ void ExportNodeHolder::Bind(SceneUpdateContext& context,
 ExportNodeHolder::~ExportNodeHolder() {
   ASSERT_IS_UI_THREAD;
   blink::Threads::Gpu()->PostTask(
-      ftl::MakeCopyable([export_node = std::move(export_node_)]() {
+      fxl::MakeCopyable([export_node = std::move(export_node_)]() {
         export_node->Dispose(true);
       }));
 }
 
-ExportNode::ExportNode(ftl::RefPtr<zircon::dart::Handle> export_token_handle)
+ExportNode::ExportNode(fxl::RefPtr<zircon::dart::Handle> export_token_handle)
     : export_token_(export_token_handle->ReleaseHandle()) {}
 
 ExportNode::~ExportNode() {
   // Ensure that we properly released the node.
-  FTL_DCHECK(!node_);
-  FTL_DCHECK(scene_update_context_ == nullptr);
+  FXL_DCHECK(!node_);
+  FXL_DCHECK(scene_update_context_ == nullptr);
 }
 
 void ExportNode::Bind(SceneUpdateContext& context,
@@ -75,7 +75,7 @@ void ExportNode::Dispose(bool remove_from_scene_update_context) {
   // 1. A node was never created, or
   // 2. A node was created but was already dereferenced (i.e. Dispose has
   // already been called).
-  FTL_DCHECK(scene_update_context_ || !node_);
+  FXL_DCHECK(scene_update_context_ || !node_);
 
   if (remove_from_scene_update_context && scene_update_context_) {
     scene_update_context_->RemoveExportNode(this);

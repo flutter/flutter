@@ -5,7 +5,7 @@
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 
 #include "flutter/fml/platform/android/jni_util.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace fml {
 namespace jni {
@@ -20,7 +20,7 @@ JavaObjectWeakGlobalRef::JavaObjectWeakGlobalRef(
 
 JavaObjectWeakGlobalRef::JavaObjectWeakGlobalRef(JNIEnv* env, jobject obj)
     : obj_(env->NewWeakGlobalRef(obj)) {
-  FTL_DCHECK(obj_);
+  FXL_DCHECK(obj_);
 }
 
 JavaObjectWeakGlobalRef::~JavaObjectWeakGlobalRef() {
@@ -47,7 +47,7 @@ ScopedJavaLocalRef<jobject> GetRealObject(JNIEnv* env, jweak obj) {
   if (obj) {
     real = env->NewLocalRef(obj);
     if (!real)
-      FTL_DLOG(ERROR) << "The real object has been deleted!";
+      FXL_DLOG(ERROR) << "The real object has been deleted!";
   }
   return ScopedJavaLocalRef<jobject>(env, real);
 }

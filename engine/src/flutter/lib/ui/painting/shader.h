@@ -10,7 +10,7 @@
 
 namespace blink {
 
-class Shader : public ftl::RefCountedThreadSafe<Shader>,
+class Shader : public fxl::RefCountedThreadSafe<Shader>,
                public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Shader);

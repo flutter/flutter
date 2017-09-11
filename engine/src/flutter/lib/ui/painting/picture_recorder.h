@@ -16,21 +16,21 @@ namespace blink {
 class Canvas;
 class Picture;
 
-class PictureRecorder : public ftl::RefCountedThreadSafe<PictureRecorder>,
+class PictureRecorder : public fxl::RefCountedThreadSafe<PictureRecorder>,
                         public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(PictureRecorder);
 
  public:
-  static ftl::RefPtr<PictureRecorder> Create();
+  static fxl::RefPtr<PictureRecorder> Create();
 
   ~PictureRecorder();
 
   SkCanvas* BeginRecording(SkRect bounds);
-  ftl::RefPtr<Picture> endRecording();
+  fxl::RefPtr<Picture> endRecording();
   bool isRecording();
 
-  void set_canvas(ftl::RefPtr<Canvas> canvas) { canvas_ = std::move(canvas); }
+  void set_canvas(fxl::RefPtr<Canvas> canvas) { canvas_ = std::move(canvas); }
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
@@ -39,7 +39,7 @@ class PictureRecorder : public ftl::RefCountedThreadSafe<PictureRecorder>,
 
   SkRTreeFactory rtree_factory_;
   SkPictureRecorder picture_recorder_;
-  ftl::RefPtr<Canvas> canvas_;
+  fxl::RefPtr<Canvas> canvas_;
 };
 
 }  // namespace blink

@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/painting/resource_context.h"
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace blink {
 namespace {
@@ -14,7 +14,7 @@ static GrContext* g_context = nullptr;
 }  // namespace
 
 void ResourceContext::Set(GrContext* context) {
-  FTL_DCHECK(!g_context);
+  FXL_DCHECK(!g_context);
   g_context = context;
 }
 

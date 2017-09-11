@@ -6,8 +6,8 @@
 #define FLUTTER_VULKAN_VULKAN_COMMAND_BUFFER_H_
 
 #include "flutter/vulkan/vulkan_handle.h"
-#include "lib/ftl/compiler_specific.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/compiler_specific.h"
+#include "lib/fxl/macros.h"
 
 namespace vulkan {
 
@@ -25,13 +25,13 @@ class VulkanCommandBuffer {
 
   VkCommandBuffer Handle() const;
 
-  FTL_WARN_UNUSED_RESULT
+  FXL_WARN_UNUSED_RESULT
   bool Begin() const;
 
-  FTL_WARN_UNUSED_RESULT
+  FXL_WARN_UNUSED_RESULT
   bool End() const;
 
-  FTL_WARN_UNUSED_RESULT
+  FXL_WARN_UNUSED_RESULT
   bool InsertPipelineBarrier(
       VkPipelineStageFlagBits src_stage_flags,
       VkPipelineStageFlagBits dest_stage_flags,
@@ -50,7 +50,7 @@ class VulkanCommandBuffer {
   VulkanHandle<VkCommandBuffer> handle_;
   bool valid_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VulkanCommandBuffer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanCommandBuffer);
 };
 
 }  // namespace vulkan

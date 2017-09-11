@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "lib/ftl/command_line.h"
+#include "lib/fxl/command_line.h"
 
 namespace txt {
 
@@ -24,8 +24,8 @@ const std::string& GetFontDir();
 
 void SetFontDir(const std::string& dir);
 
-const ftl::CommandLine& GetCommandLineForProcess();
+const fxl::CommandLine& GetCommandLineForProcess();
 
-void SetCommandLine(ftl::CommandLine cmd);
+void SetCommandLine(fxl::CommandLine cmd);
 
 }  // namespace txt

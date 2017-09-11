@@ -15,11 +15,11 @@ void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void ChildSceneLayer::Paint(PaintContext& context) {
-  FTL_NOTREACHED() << "This layer never needs painting.";
+  FXL_NOTREACHED() << "This layer never needs painting.";
 }
 
 void ChildSceneLayer::UpdateScene(SceneUpdateContext& context) {
-  FTL_DCHECK(needs_system_composite());
+  FXL_DCHECK(needs_system_composite());
 
   // TODO(MZ-191): Set clip.
   // It's worth asking whether all children should be clipped implicitly

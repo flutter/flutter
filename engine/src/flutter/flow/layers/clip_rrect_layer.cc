@@ -22,7 +22,7 @@ void ClipRRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 #if defined(OS_FUCHSIA)
 
 void ClipRRectLayer::UpdateScene(SceneUpdateContext& context) {
-  FTL_DCHECK(needs_system_composite());
+  FXL_DCHECK(needs_system_composite());
 
   // TODO(MZ-137): Need to be able to express the radii as vectors.
   scenic_lib::RoundedRectangle shape(
@@ -44,7 +44,7 @@ void ClipRRectLayer::UpdateScene(SceneUpdateContext& context) {
 
 void ClipRRectLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ClipRRectLayer::Paint");
-  FTL_DCHECK(needs_painting());
+  FXL_DCHECK(needs_painting());
 
   Layer::AutoSaveLayer save(context, paint_bounds(), nullptr);
   context.canvas.clipRRect(clip_rrect_, true);

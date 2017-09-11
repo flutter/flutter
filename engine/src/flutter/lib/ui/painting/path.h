@@ -17,15 +17,15 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class CanvasPath : public ftl::RefCountedThreadSafe<CanvasPath>,
+class CanvasPath : public fxl::RefCountedThreadSafe<CanvasPath>,
                    public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(CanvasPath);
 
  public:
   ~CanvasPath() override;
-  static ftl::RefPtr<CanvasPath> Create() {
-    return ftl::MakeRefCounted<CanvasPath>();
+  static fxl::RefPtr<CanvasPath> Create() {
+    return fxl::MakeRefCounted<CanvasPath>();
   }
 
   int getFillType();
@@ -68,8 +68,8 @@ class CanvasPath : public ftl::RefCountedThreadSafe<CanvasPath>,
   void close();
   void reset();
   bool contains(double x, double y);
-  ftl::RefPtr<CanvasPath> shift(double dx, double dy);
-  ftl::RefPtr<CanvasPath> transform(tonic::Float64List& matrix4);
+  fxl::RefPtr<CanvasPath> shift(double dx, double dy);
+  fxl::RefPtr<CanvasPath> transform(tonic::Float64List& matrix4);
 
   const SkPath& path() const { return path_; }
 

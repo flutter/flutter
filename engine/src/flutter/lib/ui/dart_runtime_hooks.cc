@@ -12,8 +12,8 @@
 #include "dart/runtime/include/dart_api.h"
 #include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/settings.h"
-#include "lib/ftl/build_config.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/build_config.h"
+#include "lib/fxl/logging.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "lib/tonic/dart_microtask_queue.h"
@@ -100,7 +100,7 @@ static void InitDartAsync(Dart_Handle builtin_library,
     schedule_microtask =
         GetClosure(builtin_library, "_getScheduleMicrotaskClosure");
   } else {
-    FTL_CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
+    FXL_CHECK(isolate_type == DartRuntimeHooks::SecondaryIsolate);
     Dart_Handle isolate_lib = Dart_LookupLibrary(ToDart("dart:isolate"));
     Dart_Handle method_name =
         Dart_NewStringFromCString("_getIsolateScheduleImmediateClosure");

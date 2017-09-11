@@ -11,24 +11,24 @@
 
 namespace fml {
 
-TaskRunner::TaskRunner(ftl::RefPtr<MessageLoopImpl> loop)
+TaskRunner::TaskRunner(fxl::RefPtr<MessageLoopImpl> loop)
     : loop_(std::move(loop)) {
-  FTL_CHECK(loop_);
+  FXL_CHECK(loop_);
 }
 
 TaskRunner::~TaskRunner() = default;
 
-void TaskRunner::PostTask(ftl::Closure task) {
-  loop_->PostTask(std::move(task), ftl::TimePoint::Now());
+void TaskRunner::PostTask(fxl::Closure task) {
+  loop_->PostTask(std::move(task), fxl::TimePoint::Now());
 }
 
-void TaskRunner::PostTaskForTime(ftl::Closure task,
-                                 ftl::TimePoint target_time) {
+void TaskRunner::PostTaskForTime(fxl::Closure task,
+                                 fxl::TimePoint target_time) {
   loop_->PostTask(std::move(task), target_time);
 }
 
-void TaskRunner::PostDelayedTask(ftl::Closure task, ftl::TimeDelta delay) {
-  loop_->PostTask(std::move(task), ftl::TimePoint::Now() + delay);
+void TaskRunner::PostDelayedTask(fxl::Closure task, fxl::TimeDelta delay) {
+  loop_->PostTask(std::move(task), fxl::TimePoint::Now() + delay);
 }
 
 bool TaskRunner::RunsTasksOnCurrentThread() {

@@ -21,7 +21,7 @@ class ChildSceneLayer : public Layer {
   void set_size(const SkSize& size) { size_ = size; }
 
   void set_export_node_holder(
-      ftl::RefPtr<ExportNodeHolder> export_node_holder) {
+      fxl::RefPtr<ExportNodeHolder> export_node_holder) {
     export_node_holder_ = std::move(export_node_holder);
   }
 
@@ -36,10 +36,10 @@ class ChildSceneLayer : public Layer {
  private:
   SkPoint offset_;
   SkSize size_;
-  ftl::RefPtr<ExportNodeHolder> export_node_holder_;
+  fxl::RefPtr<ExportNodeHolder> export_node_holder_;
   bool hit_testable_ = true;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
 };
 
 }  // namespace flow

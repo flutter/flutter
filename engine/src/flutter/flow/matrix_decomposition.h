@@ -5,7 +5,7 @@
 #ifndef FLUTTER_FLOW_MATRIX_DECOMPOSITION_H_
 #define FLUTTER_FLOW_MATRIX_DECOMPOSITION_H_
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkMatrix.h"
 #include "third_party/skia/include/core/SkMatrix44.h"
 #include "third_party/skia/include/core/SkPoint3.h"
@@ -43,7 +43,7 @@ class MatrixDecomposition {
   SkVector4 perspective_;
   SkVector4 rotation_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(MatrixDecomposition);
+  FXL_DISALLOW_COPY_AND_ASSIGN(MatrixDecomposition);
 };
 
 }  // namespace flow

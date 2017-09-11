@@ -7,8 +7,8 @@
 
 #include <string>
 
-#include "lib/ftl/build_config.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/build_config.h"
+#include "lib/fxl/logging.h"
 
 #define VULKAN_LINK_STATICALLY OS_FUCHSIA
 
@@ -36,7 +36,7 @@
   ({                                                       \
     __typeof__(expression) _rc = (expression);             \
     if (_rc != VK_SUCCESS) {                               \
-      FTL_DLOG(INFO) << "Vulkan call '" << #expression     \
+      FXL_DLOG(INFO) << "Vulkan call '" << #expression     \
                      << "' failed with error "             \
                      << vulkan::VulkanResultToString(_rc); \
     }                                                      \

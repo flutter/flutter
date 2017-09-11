@@ -18,7 +18,7 @@
 #define TXT_ASSET_FONT_MANAGER_H_
 
 #include <memory>
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
 #include "txt/asset_data_provider.h"
 
@@ -77,7 +77,7 @@ class AssetFontManager : public SkFontMgr {
   SkTypeface* onLegacyCreateTypeface(const char familyName[],
                                      SkFontStyle) const override;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(AssetFontManager);
+  FXL_DISALLOW_COPY_AND_ASSIGN(AssetFontManager);
 };
 
 }  // namespace txt

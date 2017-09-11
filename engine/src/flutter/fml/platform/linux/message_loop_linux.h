@@ -8,15 +8,15 @@
 #include <atomic>
 
 #include "flutter/fml/message_loop_impl.h"
-#include "lib/ftl/files/unique_fd.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/files/unique_fd.h"
+#include "lib/fxl/macros.h"
 
 namespace fml {
 
 class MessageLoopLinux : public MessageLoopImpl {
  private:
-  ftl::UniqueFD epoll_fd_;
-  ftl::UniqueFD timer_fd_;
+  fxl::UniqueFD epoll_fd_;
+  fxl::UniqueFD timer_fd_;
   bool running_;
 
   MessageLoopLinux();
@@ -27,7 +27,7 @@ class MessageLoopLinux : public MessageLoopImpl {
 
   void Terminate() override;
 
-  void WakeUp(ftl::TimePoint time_point) override;
+  void WakeUp(fxl::TimePoint time_point) override;
 
   void OnEventFired();
 
@@ -35,7 +35,7 @@ class MessageLoopLinux : public MessageLoopImpl {
 
   FRIEND_MAKE_REF_COUNTED(MessageLoopLinux);
   FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopLinux);
-  FTL_DISALLOW_COPY_AND_ASSIGN(MessageLoopLinux);
+  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopLinux);
 };
 
 }  // namespace fml

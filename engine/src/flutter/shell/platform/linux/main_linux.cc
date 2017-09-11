@@ -11,7 +11,7 @@
 #include "flutter/shell/testing/test_runner.h"
 #include "flutter/shell/testing/testing.h"
 #include "flutter/sky/engine/public/web/Sky.h"
-#include "lib/ftl/command_line.h"
+#include "lib/fxl/command_line.h"
 #include "lib/tonic/dart_microtask_queue.h"
 
 namespace {
@@ -25,7 +25,7 @@ const int kErrorExitCode = 255;
 // then exit the given message loop.
 class ScriptCompletionTaskObserver : public fml::TaskObserver {
  public:
-  ScriptCompletionTaskObserver(ftl::RefPtr<ftl::TaskRunner> task_runner)
+  ScriptCompletionTaskObserver(fxl::RefPtr<fxl::TaskRunner> task_runner)
       : main_task_runner_(std::move(task_runner)),
         prev_live_(false),
         last_error_(tonic::kNoError) {}
@@ -53,7 +53,7 @@ class ScriptCompletionTaskObserver : public fml::TaskObserver {
   tonic::DartErrorHandleType last_error() { return last_error_; }
 
  private:
-  ftl::RefPtr<ftl::TaskRunner> main_task_runner_;
+  fxl::RefPtr<fxl::TaskRunner> main_task_runner_;
   bool prev_live_;
   tonic::DartErrorHandleType last_error_;
 };
@@ -71,7 +71,7 @@ int ConvertErrorTypeToExitCode(tonic::DartErrorHandleType error) {
   }
 }
 
-void RunNonInteractive(ftl::CommandLine initial_command_line,
+void RunNonInteractive(fxl::CommandLine initial_command_line,
                        bool run_forever) {
   // This is a platform thread (i.e not one created by fml::Thread), so perform
   // one time initialization.
@@ -103,7 +103,7 @@ void RunNonInteractive(ftl::CommandLine initial_command_line,
   if (error == tonic::kNoError)
     error = task_observer.last_error();
   if (error == tonic::kNoError) {
-    ftl::AutoResetWaitableEvent latch;
+    fxl::AutoResetWaitableEvent latch;
     blink::Threads::UI()->PostTask([&error, &latch] {
       error = tonic::DartMicrotaskQueue::GetForCurrentThread()->GetLastError();
       latch.Signal();
@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
   dart::bin::SetExecutableName(argv[0]);
   dart::bin::SetExecutableArguments(argc - 1, argv);
 
-  auto command_line = ftl::CommandLineFromArgcArgv(argc, argv);
+  auto command_line = fxl::CommandLineFromArgcArgv(argc, argv);
 
   if (command_line.HasOption(shell::FlagForSwitch(shell::Switch::Help))) {
     shell::PrintUsage("flutter_tester");

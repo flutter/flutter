@@ -12,9 +12,9 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/shell/common/vsync_waiter.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/weak_ptr.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/weak_ptr.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
@@ -39,14 +39,14 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
 
   virtual void Attach() = 0;
 
-  void DispatchPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
+  void DispatchPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
   void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);
 
   void NotifyCreated(std::unique_ptr<Surface> surface);
 
   void NotifyCreated(std::unique_ptr<Surface> surface,
-                     ftl::Closure continuation);
+                     fxl::Closure continuation);
 
   void NotifyDestroyed();
 
@@ -59,7 +59,7 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
 
   virtual void UpdateSemantics(std::vector<blink::SemanticsNode> update);
   virtual void HandlePlatformMessage(
-      ftl::RefPtr<blink::PlatformMessage> message);
+      fxl::RefPtr<blink::PlatformMessage> message);
 
   Rasterizer& rasterizer() { return *rasterizer_; }
   Engine& engine() { return *engine_; }
@@ -75,7 +75,7 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
   void PostAddToShellTask();
 
   void SetupResourceContextOnIOThreadPerform(
-      ftl::AutoResetWaitableEvent* event);
+      fxl::AutoResetWaitableEvent* event);
 
   SurfaceConfig surface_config_;
   std::unique_ptr<Rasterizer> rasterizer_;
@@ -85,7 +85,7 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
 
 private:
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformView);
+  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformView);
 };
 
 }  // namespace shell

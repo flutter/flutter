@@ -9,8 +9,8 @@
 #include <memory>
 #include <thread>
 
-#include "lib/ftl/macros.h"
-#include "lib/ftl/tasks/task_runner.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/tasks/task_runner.h"
 
 namespace fml {
 
@@ -20,18 +20,18 @@ class Thread {
 
   ~Thread();
 
-  ftl::RefPtr<ftl::TaskRunner> GetTaskRunner() const;
+  fxl::RefPtr<fxl::TaskRunner> GetTaskRunner() const;
 
   void Join();
 
  private:
   std::unique_ptr<std::thread> thread_;
-  ftl::RefPtr<ftl::TaskRunner> task_runner_;
+  fxl::RefPtr<fxl::TaskRunner> task_runner_;
   std::atomic_bool joined_;
 
   static void SetCurrentThreadName(const std::string& name);
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(Thread);
+  FXL_DISALLOW_COPY_AND_ASSIGN(Thread);
 };
 
 }  // namespace fml

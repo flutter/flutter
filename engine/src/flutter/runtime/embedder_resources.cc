@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace blink {
 
@@ -22,7 +22,7 @@ int EmbedderResources::ResourceLookup(const char* path, const char** resource) {
     const ResourcesEntry& entry = resources_table_[i];
     if (strcmp(path, entry.path_) == 0) {
       *resource = entry.resource_;
-      FTL_DCHECK(entry.length_ > 0);
+      FXL_DCHECK(entry.length_ > 0);
       return entry.length_;
     }
   }
@@ -30,17 +30,17 @@ int EmbedderResources::ResourceLookup(const char* path, const char** resource) {
 }
 
 const char* EmbedderResources::Path(int idx) {
-  FTL_DCHECK(idx >= 0);
+  FXL_DCHECK(idx >= 0);
   ResourcesEntry* entry = At(idx);
   if (entry == nullptr) {
     return nullptr;
   }
-  FTL_DCHECK(entry->path_ != nullptr);
+  FXL_DCHECK(entry->path_ != nullptr);
   return entry->path_;
 }
 
 ResourcesEntry* EmbedderResources::At(int idx) {
-  FTL_DCHECK(idx >= 0);
+  FXL_DCHECK(idx >= 0);
   for (int i = 0; resources_table_[i].path_ != nullptr; i++) {
     if (idx == i) {
       return &resources_table_[i];

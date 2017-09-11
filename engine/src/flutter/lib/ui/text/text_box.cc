@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/text/text_box.h"
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/logging/dart_error.h"
@@ -19,7 +19,7 @@ Dart_Handle DartConverter<TextBox>::ToDart(const TextBox& val) {
   DartClassLibrary& class_library = DartState::Current()->class_library();
   Dart_Handle type =
       Dart_HandleFromPersistent(class_library.GetClass("ui", "TextBox"));
-  FTL_DCHECK(!LogIfError(type));
+  FXL_DCHECK(!LogIfError(type));
   constexpr int argc = 5;
   Dart_Handle argv[argc] = {
       tonic::ToDart(val.sk_rect.fLeft),

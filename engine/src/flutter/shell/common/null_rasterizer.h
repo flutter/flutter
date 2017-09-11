@@ -6,8 +6,8 @@
 #define FLUTTER_SHELL_COMMON_NULL_RASTERIZER_H_
 
 #include "flutter/shell/common/rasterizer.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/weak_ptr.h"
 
 namespace shell {
 
@@ -16,27 +16,27 @@ class NullRasterizer : public Rasterizer {
   NullRasterizer();
 
   void Setup(std::unique_ptr<Surface> surface_or_null,
-             ftl::Closure rasterizer_continuation,
-             ftl::AutoResetWaitableEvent* setup_completion_event) override;
+             fxl::Closure rasterizer_continuation,
+             fxl::AutoResetWaitableEvent* setup_completion_event) override;
 
   void Teardown(
-      ftl::AutoResetWaitableEvent* teardown_completion_event) override;
+      fxl::AutoResetWaitableEvent* teardown_completion_event) override;
 
   void Clear(SkColor color, const SkISize& size) override;
 
-  ftl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
+  fxl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
 
   flow::LayerTree* GetLastLayerTree() override;
 
-  void Draw(ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
+  void Draw(fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
-  void AddNextFrameCallback(ftl::Closure nextFrameCallback) override;
+  void AddNextFrameCallback(fxl::Closure nextFrameCallback) override;
 
  private:
   std::unique_ptr<Surface> surface_;
-  ftl::WeakPtrFactory<NullRasterizer> weak_factory_;
+  fxl::WeakPtrFactory<NullRasterizer> weak_factory_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(NullRasterizer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(NullRasterizer);
 };
 
 }  // namespace shell

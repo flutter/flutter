@@ -7,14 +7,14 @@
 
 #include <functional>
 
-#include "lib/ftl/time/time_point.h"
+#include "lib/fxl/time/time_point.h"
 
 namespace shell {
 
 class VsyncWaiter {
  public:
-  using Callback = std::function<void(ftl::TimePoint frame_start_time,
-                                      ftl::TimePoint frame_target_time)>;
+  using Callback = std::function<void(fxl::TimePoint frame_start_time,
+                                      fxl::TimePoint frame_target_time)>;
 
   virtual void AsyncWaitForVsync(Callback callback) = 0;
 

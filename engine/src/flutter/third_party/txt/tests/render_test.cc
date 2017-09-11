@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkImageEncoder.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "txt/asset_font_manager.h"
@@ -68,7 +68,7 @@ bool RenderTest::Snapshot() {
   error = mkdir(snapshot_dir.c_str(), permissions);
 #endif
   if (error > 0) {
-    FTL_LOG(ERROR) << "'snapshot/' Directory not available and could not be "
+    FXL_LOG(ERROR) << "'snapshot/' Directory not available and could not be "
                       "created. Please create manually to save snapshot.";
     return false;
   }

@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "flutter/lib/ui/window/pointer_data.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace blink {
 
@@ -26,7 +26,7 @@ class PointerDataPacket {
  private:
   std::vector<uint8_t> data_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(PointerDataPacket);
+  FXL_DISALLOW_COPY_AND_ASSIGN(PointerDataPacket);
 };
 
 }  // namespace blink

@@ -10,9 +10,9 @@
 
 #include "lib/ui/scenic/client/resources.h"
 #include "flutter/flow/compositor_context.h"
-#include "lib/ftl/build_config.h"
-#include "lib/ftl/logging.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/build_config.h"
+#include "lib/fxl/logging.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -140,7 +140,7 @@ class SceneUpdateContext {
   // CPU wait. Once Vulkan semaphores are available, this method must return
   // void and the implementation must submit surfaces on its own as soon as the
   // specific canvas operations are done.
-  FTL_WARN_UNUSED_RESULT
+  FXL_WARN_UNUSED_RESULT
   std::vector<std::unique_ptr<SurfaceProducerSurface>> ExecutePaintTasks(
       CompositorContext::ScopedFrame& frame);
 
@@ -188,7 +188,7 @@ class SceneUpdateContext {
   // Save ExportNodes so we can dispose them in our destructor.
   std::set<ExportNode*> export_nodes_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(SceneUpdateContext);
+  FXL_DISALLOW_COPY_AND_ASSIGN(SceneUpdateContext);
 };
 
 }  // namespace flow

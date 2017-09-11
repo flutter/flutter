@@ -16,8 +16,8 @@
 
 #include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
-#include "lib/ftl/command_line.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/command_line.h"
+#include "lib/fxl/logging.h"
 #include "txt/paint_record.h"
 #include "txt/text_style.h"
 #include "utils.h"

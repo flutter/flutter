@@ -10,9 +10,9 @@
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/synchronization/pipeline.h"
-#include "lib/ftl/functional/closure.h"
-#include "lib/ftl/memory/weak_ptr.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/functional/closure.h"
+#include "lib/fxl/memory/weak_ptr.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
 
@@ -21,23 +21,23 @@ class Rasterizer {
   virtual ~Rasterizer();
 
   virtual void Setup(std::unique_ptr<Surface> surface_or_null,
-                     ftl::Closure rasterizer_continuation,
-                     ftl::AutoResetWaitableEvent* setup_completion_event) = 0;
+                     fxl::Closure rasterizer_continuation,
+                     fxl::AutoResetWaitableEvent* setup_completion_event) = 0;
 
   virtual void Teardown(
-      ftl::AutoResetWaitableEvent* teardown_completion_event) = 0;
+      fxl::AutoResetWaitableEvent* teardown_completion_event) = 0;
 
   virtual void Clear(SkColor color, const SkISize& size) = 0;
 
-  virtual ftl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() = 0;
+  virtual fxl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() = 0;
 
   virtual flow::LayerTree* GetLastLayerTree() = 0;
 
   virtual void Draw(
-      ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
+      fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
 
   // Set a callback to be called once when the next frame is drawn.
-  virtual void AddNextFrameCallback(ftl::Closure nextFrameCallback) = 0;
+  virtual void AddNextFrameCallback(fxl::Closure nextFrameCallback) = 0;
 };
 
 }  // namespace shell

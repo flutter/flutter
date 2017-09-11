@@ -50,7 +50,7 @@ source_set("flow") {
   ]
 
   public_deps = [
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
   ]
 
   deps = [

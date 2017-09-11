@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "dart/runtime/include/dart_api.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "lib/tonic/logging/dart_error.h"
 
 namespace blink {
@@ -47,7 +47,7 @@ class DartController {
   // incrementally build the dart objects from it.
   uint8_t* platform_kernel_bytes;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(DartController);
+  FXL_DISALLOW_COPY_AND_ASSIGN(DartController);
 };
 }
 
