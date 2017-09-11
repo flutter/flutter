@@ -1039,6 +1039,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
               fontSize: 14.0,
             ),
           ),
+          textDirection: TextDirection.rtl, // doesn't matter, it's one character
         )
         ..layout();
       return true;

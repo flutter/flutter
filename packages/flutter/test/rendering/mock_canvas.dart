@@ -260,34 +260,46 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
     final TestRecordingCanvas canvas = new TestRecordingCanvas();
     final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
-    if (object is _ContextPainterFunction) {
-      final _ContextPainterFunction function = object;
-      function(context, Offset.zero);
-    } else if (object is _CanvasPainterFunction) {
-      final _CanvasPainterFunction function = object;
-      function(canvas);
-    } else {
-      if (object is Finder) {
-        TestAsyncUtils.guardSync();
-        final Finder finder = object;
-        object = finder.evaluate().single.renderObject;
-      }
-      if (object is RenderObject) {
-        final RenderObject renderObject = object;
-        renderObject.paint(context, Offset.zero);
-      } else {
-        matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
-        return false;
-      }
-    }
     final StringBuffer description = new StringBuffer();
-    final bool result = _evaluatePredicates(canvas.invocations, description);
+    String prefixMessage = 'unexpectedly failed.';
+    bool result = false;
+    try {
+      if (object is _ContextPainterFunction) {
+        final _ContextPainterFunction function = object;
+        function(context, Offset.zero);
+      } else if (object is _CanvasPainterFunction) {
+        final _CanvasPainterFunction function = object;
+        function(canvas);
+      } else {
+        if (object is Finder) {
+          TestAsyncUtils.guardSync();
+          final Finder finder = object;
+          object = finder.evaluate().single.renderObject;
+        }
+        if (object is RenderObject) {
+          final RenderObject renderObject = object;
+          renderObject.paint(context, Offset.zero);
+        } else {
+          matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
+          return false;
+        }
+      }
+      result = _evaluatePredicates(canvas.invocations, description);
+      if (!result)
+        prefixMessage = 'did not match the pattern.';
+    } catch (error, stack) {
+      prefixMessage = 'threw the following exception:';
+      description.writeln(error.toString());
+      description.write(stack.toString());
+      result = false;
+    }
     if (!result) {
-      if (canvas.invocations.isNotEmpty)
+      if (canvas.invocations.isNotEmpty) {
         description.write('The complete display list was:');
         for (RecordedInvocation call in canvas.invocations)
           description.write('\n  * $call');
-      matchState[this] = 'did not match the pattern.\n$description';
+      }
+      matchState[this] = '$prefixMessage\n$description';
     }
     return result;
   }
