@@ -27,6 +27,12 @@ enum class SemanticsAction : int32_t {
   kDecrease = 1 << 7,
 };
 
+const int kScrollableSemanticsActions =
+    static_cast<int32_t>(SemanticsAction::kScrollLeft) |
+    static_cast<int32_t>(SemanticsAction::kScrollRight) |
+    static_cast<int32_t>(SemanticsAction::kScrollUp) |
+    static_cast<int32_t>(SemanticsAction::kScrollDown);
+
 // Must match the SemanticsFlags enum in semantics.dart.
 enum class SemanticsFlags : int32_t {
   kHasCheckedState = 1 << 0,
@@ -45,7 +51,7 @@ struct SemanticsNode {
   int32_t flags = 0;
   int32_t actions = 0;
   std::string label;
-  int32_t textDirection = 0; // 0=unknown, 1=rtl, 2=ltr
+  int32_t textDirection = 0;  // 0=unknown, 1=rtl, 2=ltr
 
   SkRect rect = SkRect::MakeEmpty();
   SkMatrix44 transform = SkMatrix44(SkMatrix44::kIdentity_Constructor);

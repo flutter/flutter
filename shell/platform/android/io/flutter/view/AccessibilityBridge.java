@@ -504,7 +504,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         }
 
         boolean isFocusable() {
-            return flags != 0 || label != null || (actions & ~SEMANTICS_ACTION_SCROLLABLE) != 0;
+            return flags != 0 || (label != null && !label.isEmpty()) || (actions & ~SEMANTICS_ACTION_SCROLLABLE) != 0;
         }
 
         void updateRecursively(float[] ancestorTransform, Set<SemanticsObject> visitedObjects, boolean forceUpdate) {
