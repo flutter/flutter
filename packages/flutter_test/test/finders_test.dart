@@ -15,7 +15,7 @@ void main() {
             new GestureDetector(
               key: const ValueKey<int>(0),
               behavior: HitTestBehavior.opaque,
-              onTap: () {},
+              onTap: () { },
               child: const SizedBox.expand(),
             ),
             new GestureDetector(
