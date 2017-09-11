@@ -211,6 +211,7 @@ void Paragraph::Layout(double width, bool force) {
   SkPaint paint;
   paint.setAntiAlias(true);
   paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+  paint.setSubpixelText(true);
 
   minikin::FontStyle font;
   minikin::MinikinPaint minikin_paint;
