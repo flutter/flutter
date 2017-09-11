@@ -547,45 +547,52 @@ typedef void RenderObjectVisitor(RenderObject child);
 typedef void LayoutCallback<T extends Constraints>(T constraints);
 
 class _SemanticsGeometry {
-  _SemanticsGeometry() : transform = new Matrix4.identity();
+  _SemanticsGeometry() : _transform = new Matrix4.identity();
+
   _SemanticsGeometry.withClipFrom(_SemanticsGeometry other) {
-    clipRect = other?.clipRect;
-    transform = new Matrix4.identity();
+    _clipRect = other?._clipRect;
+    _transform = new Matrix4.identity();
   }
+
   _SemanticsGeometry.copy(_SemanticsGeometry other) {
     if (other != null) {
-      clipRect = other.clipRect;
-      transform = new Matrix4.copy(other.transform);
+      _clipRect = other._clipRect;
+      _transform = new Matrix4.copy(other._transform);
     } else {
-      transform = new Matrix4.identity();
+      _transform = new Matrix4.identity();
     }
   }
-  Rect clipRect;
+
+  Rect _clipRect;
+
   Rect _intersectClipRect(Rect other) {
-    if (clipRect == null)
+    if (_clipRect == null)
       return other;
     if (other == null)
-      return clipRect;
-    return clipRect.intersect(other);
+      return _clipRect;
+    return _clipRect.intersect(other);
   }
-  Matrix4 transform;
+
+  Matrix4 _transform;
+
   void applyAncestorChain(List<RenderObject> ancestorChain) {
     for (int index = ancestorChain.length-1; index > 0; index -= 1) {
       final RenderObject parent = ancestorChain[index];
       final RenderObject child = ancestorChain[index-1];
-      clipRect = _intersectClipRect(parent.describeApproximatePaintClip(child));
-      if (clipRect != null) {
-        if (clipRect.isEmpty) {
-          clipRect = Rect.zero;
+      _clipRect = _intersectClipRect(parent.describeApproximatePaintClip(child));
+      if (_clipRect != null) {
+        if (_clipRect.isEmpty) {
+          _clipRect = Rect.zero;
         } else {
           final Matrix4 clipTransform = new Matrix4.identity();
           parent.applyPaintTransform(child, clipTransform);
-          clipRect = MatrixUtils.inverseTransformRect(clipTransform, clipRect);
+          _clipRect = MatrixUtils.inverseTransformRect(clipTransform, _clipRect);
         }
       }
-      parent.applyPaintTransform(child, transform);
+      parent.applyPaintTransform(child, _transform);
     }
   }
+
   void updateSemanticsNode({
     @required RenderObject rendering,
     @required SemanticsNode semantics,
@@ -595,9 +602,9 @@ class _SemanticsGeometry {
     assert(semantics != null);
     assert(parentSemantics != null);
     assert(parentSemantics.wasAffectedByClip != null);
-    semantics.transform = transform;
-    if (clipRect != null) {
-      semantics.rect = clipRect.intersect(rendering.semanticBounds);
+    semantics.transform = _transform;
+    if (_clipRect != null) {
+      semantics.rect = _clipRect.intersect(rendering.semanticBounds);
       semantics.wasAffectedByClip = true;
     } else {
       semantics.rect = rendering.semanticBounds;
