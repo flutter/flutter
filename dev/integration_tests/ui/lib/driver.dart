@@ -55,7 +55,7 @@ class DriverTestAppState extends State<DriverTestApp> {
             ),
             new Row(
               children: <Widget>[
-                new Expanded(
+                const Expanded(
                   child: const Text('hit testability'),
                 ),
                 new DropdownButton<Letter>(
@@ -67,15 +67,15 @@ class DriverTestAppState extends State<DriverTestApp> {
                     });
                   },
                   items: <DropdownMenuItem<Letter>>[
-                    new DropdownMenuItem<Letter>(
+                    const DropdownMenuItem<Letter>(
                       value: Letter.a,
                       child: const Text('Aaa', key: const ValueKey<String>('a')),
                     ),
-                    new DropdownMenuItem<Letter>(
+                    const DropdownMenuItem<Letter>(
                       value: Letter.b,
                       child: const Text('Bbb', key: const ValueKey<String>('b')),
                     ),
-                    new DropdownMenuItem<Letter>(
+                    const DropdownMenuItem<Letter>(
                       value: Letter.c,
                       child: const Text('Ccc', key: const ValueKey<String>('c')),
                     ),
