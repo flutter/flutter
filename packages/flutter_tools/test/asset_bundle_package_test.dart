@@ -133,6 +133,32 @@ $assetsSection
     }, overrides: <Type, Generator>{
       FileSystem: () => new MemoryFileSystem(),
     });
+    
+    testUsingContext('One package with one asset not specified', () async {
+      establishFlutterRoot();
+
+      final List<String> assetEntries = <String>['packages/test_package/a/foo'];
+      writePubspecFile(
+        'pubspec.yaml',
+        'test',
+        assets: assetEntries,
+      );
+      writePackagesFile('test_package:p/p/lib/');
+      writePubspecFile('p/p/pubspec.yaml', 'test_package');
+
+      final List<String> assets = <String>['a/foo'];
+      writeAssets('p/p/lib/', assets);
+
+      final String expectedAssetManifest = '{"packages/test_package/a/foo":'
+          '["packages/test_package/a/foo"]}';
+      await buildAndVerifyAssets(
+        assets,
+        <String>['test_package'],
+        expectedAssetManifest,
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => new MemoryFileSystem(),
+    });
 
     testUsingContext('One package with asset variants', () async {
       establishFlutterRoot();
@@ -147,6 +173,35 @@ $assetsSection
 
       final List<String> assets = <String>['a/foo', 'a/v/foo'];
       writeAssets('p/p/', assets);
+
+      final String expectedManifest = '{"packages/test_package/a/foo":'
+          '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
+
+      await buildAndVerifyAssets(
+        assets,
+        <String>['test_package'],
+        expectedManifest,
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => new MemoryFileSystem(),
+    });
+
+    testUsingContext('One package with asset variants not specified', () async {
+      establishFlutterRoot();
+
+      writePubspecFile(
+        'pubspec.yaml',
+        'test',
+        assets: <String>['packages/test_package/a/foo'],
+      );
+      writePackagesFile('test_package:p/p/lib/');
+      writePubspecFile(
+        'p/p/pubspec.yaml',
+        'test_package',
+      );
+
+      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      writeAssets('p/p/lib/', assets);
 
       final String expectedManifest = '{"packages/test_package/a/foo":'
           '["packages/test_package/a/foo","packages/test_package/a/v/foo"]}';
@@ -187,10 +242,47 @@ $assetsSection
       FileSystem: () => new MemoryFileSystem(),
     });
 
+    testUsingContext('One package with two assets not specified', () async {
+      establishFlutterRoot();
+
+      final List<String> assetEntries = <String>[
+        'packages/test_package/a/foo',
+        'packages/test_package/a/bar',
+      ];
+      writePubspecFile(
+        'pubspec.yaml',
+        'test',
+         assets: assetEntries,
+      );
+      writePackagesFile('test_package:p/p/lib/');
+
+      final List<String> assets = <String>['a/foo', 'a/bar'];
+      writePubspecFile(
+        'p/p/pubspec.yaml',
+        'test_package',
+      );
+
+      writeAssets('p/p/lib/', assets);
+      final String expectedAssetManifest =
+          '{"packages/test_package/a/foo":["packages/test_package/a/foo"],'
+          '"packages/test_package/a/bar":["packages/test_package/a/bar"]}';
+
+      await buildAndVerifyAssets(
+        assets,
+        <String>['test_package'],
+        expectedAssetManifest,
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => new MemoryFileSystem(),
+    });
+
     testUsingContext('Two packages with assets', () async {
       establishFlutterRoot();
 
-      writePubspecFile('pubspec.yaml', 'test');
+      writePubspecFile(
+        'pubspec.yaml',
+        'test',
+      );
       writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
       writePubspecFile(
         'p/p/pubspec.yaml',
@@ -216,6 +308,80 @@ $assetsSection
       await buildAndVerifyAssets(
         assets,
         <String>['test_package', 'test_package2'],
+        expectedAssetManifest,
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => new MemoryFileSystem(),
+    });
+    
+    testUsingContext('Two packages with assets not specified', () async {
+      establishFlutterRoot();
+
+      final List<String> assetEntries = <String>[
+        'packages/test_package/a/foo',
+        'packages/test_package2/a/foo',
+      ];
+      writePubspecFile(
+        'pubspec.yaml',
+        'test',
+        assets: assetEntries,
+      );
+      writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
+      writePubspecFile(
+        'p/p/pubspec.yaml',
+        'test_package',
+      );
+      writePubspecFile(
+        'p2/p/pubspec.yaml',
+        'test_package2',
+      );
+
+      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      writeAssets('p/p/lib/', assets);
+      writeAssets('p2/p/lib/', assets);
+
+      final String expectedAssetManifest =
+          '{"packages/test_package/a/foo":'
+          '["packages/test_package/a/foo","packages/test_package/a/v/foo"],'
+          '"packages/test_package2/a/foo":'
+          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+
+      await buildAndVerifyAssets(
+        assets,
+        <String>['test_package', 'test_package2'],
+        expectedAssetManifest,
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => new MemoryFileSystem(),
+    });
+
+    testUsingContext('Transitive asset dependency', () async {
+      establishFlutterRoot();
+      writePubspecFile(
+        'pubspec.yaml',
+        'test',
+      );
+      writePackagesFile('test_package:p/p/lib/\ntest_package2:p2/p/lib/');
+      writePubspecFile(
+        'p/p/pubspec.yaml',
+        'test_package',
+        assets: <String>['packages/test_package2/a/foo']
+      );
+      writePubspecFile(
+        'p2/p/pubspec.yaml',
+        'test_package2',
+      );
+
+      final List<String> assets = <String>['a/foo', 'a/v/foo'];
+      writeAssets('p2/p/lib/', assets);
+
+      final String expectedAssetManifest =
+          '{"packages/test_package2/a/foo":'
+          '["packages/test_package2/a/foo","packages/test_package2/a/v/foo"]}';
+
+      await buildAndVerifyAssets(
+        assets,
+        <String>['test_package2'],
         expectedAssetManifest,
       );
     }, overrides: <Type, Generator>{
