@@ -23,10 +23,12 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   // directions, which is why the following maps left to right and vice versa.
   switch (direction) {
     case UIAccessibilityScrollDirectionRight:
-    case UIAccessibilityScrollDirectionPrevious:  // TODO(abarth): Support RTL using _node.textDirection.
+    case UIAccessibilityScrollDirectionPrevious:  // TODO(abarth): Support RTL using
+                                                  // _node.textDirection.
       return blink::SemanticsAction::kScrollLeft;
     case UIAccessibilityScrollDirectionLeft:
-    case UIAccessibilityScrollDirectionNext:  // TODO(abarth): Support RTL using _node.textDirection.
+    case UIAccessibilityScrollDirectionNext:  // TODO(abarth): Support RTL using
+                                              // _node.textDirection.
       return blink::SemanticsAction::kScrollRight;
     case UIAccessibilityScrollDirectionUp:
       return blink::SemanticsAction::kScrollDown;
@@ -35,6 +37,16 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   }
   FTL_DCHECK(false);  // Unreachable
   return blink::SemanticsAction::kScrollUp;
+}
+
+bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
+  // Should a go before b?
+  CGRect rectA = [a accessibilityFrame];
+  CGRect rectB = [b accessibilityFrame];
+  CGFloat top = rectA.origin.y - rectB.origin.y;
+  if (top == 0.0)
+    return rectA.origin.x - rectB.origin.x < 0.0;
+  return top < 0.0;
 }
 
 }  // namespace
@@ -92,18 +104,13 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   // Note: hit detection will only apply to elements that report
   // -isAccessibilityElement of YES. The framework will continue scanning the
   // entire element tree looking for such a hit.
-  return _node.HasAction(blink::SemanticsAction::kTap) || _children.empty();
+  return _node.flags != 0 || !_node.label.empty() ||
+         (_node.actions & ~blink::kScrollableSemanticsActions) != 0;
 }
 
 - (NSString*)accessibilityLabel {
-  if (_node.label.empty()) {
-    NSMutableString *label = [NSMutableString string];
-    for (auto& child : _children) {
-      [label appendString: [child accessibilityLabel]];
-      [label appendString: @"\n"];
-    }
-    return label;
-  }
+  if (_node.label.empty())
+    return nil;
   return @(_node.label.data());
 }
 
@@ -230,6 +237,10 @@ AccessibilityBridge::~AccessibilityBridge() {
 }
 
 void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> nodes) {
+  // Children are received in paint order (inverse hit testing order). We need to bring them into
+  // traversal order (top left to bottom right, with hit testing order as tie breaker).
+  NSMutableSet<SemanticsObject*>* childOrdersToUpdate = [[[NSMutableSet alloc] init] autorelease];
+
   for (const blink::SemanticsNode& node : nodes) {
     SemanticsObject* object = GetOrCreateObject(node.id);
     [object setSemanticsNode:&node];
@@ -239,8 +250,19 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
     for (size_t i = 0; i < childrenCount; ++i) {
       SemanticsObject* child = GetOrCreateObject(node.children[i]);
       child.parent = object;
-      children[i] = child;
+      // Reverting to get hit testing order (as tie breaker for sorting below).
+      children[childrenCount - i - 1] = child;
     }
+
+    [childOrdersToUpdate addObject:object];
+    if (object.parent)
+      [childOrdersToUpdate addObject:object.parent];
+  }
+
+  // Bring children into traversal order.
+  for (SemanticsObject* object in childOrdersToUpdate) {
+    std::vector<SemanticsObject*>* children = [object children];
+    std::stable_sort(children->begin(), children->end(), GeometryComparator);
   }
 
   SemanticsObject* root = objects_.get()[@(kRootNodeId)];
@@ -252,9 +274,8 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
   } else {
     view_.accessibilityElements = nil;
   }
-    
-  NSMutableArray<NSNumber*>* doomed_uids =
-    [NSMutableArray arrayWithArray: [objects_.get() allKeys]];
+
+  NSMutableArray<NSNumber*>* doomed_uids = [NSMutableArray arrayWithArray:[objects_.get() allKeys]];
   if (root)
     VisitObjectsRecursivelyAndRemove(root, doomed_uids);
 
@@ -267,7 +288,7 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
     }
   }
 
-  [objects_ removeObjectsForKeys: doomed_uids];
+  [objects_ removeObjectsForKeys:doomed_uids];
 
   if (focused_object_doomed) {
     // Previously focused element is no longer in the tree.
@@ -295,8 +316,8 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid) {
 }
 
 void AccessibilityBridge::VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
-                                                  NSMutableArray<NSNumber*>* doomed_uids) {
-  [doomed_uids removeObject: @(object.uid)];
+                                                           NSMutableArray<NSNumber*>* doomed_uids) {
+  [doomed_uids removeObject:@(object.uid)];
   for (SemanticsObject* child : *[object children])
     VisitObjectsRecursivelyAndRemove(child, doomed_uids);
 }
