@@ -9,18 +9,20 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 
-/// Standard iOS 10 nav bar height without the status bar.
+/// Standard iOS nav bar height without the status bar.
 const double _kNavBarPersistentHeight = 44.0;
 
-/// Size increase from expanding the nav bar in a [CustomScrollView].
+/// Size increase from expanding the nav bar into an iOS 11 style large title
+/// form in a [CustomScrollView].
 const double _kNavBarLargeTitleHeightExtension = 56.0;
 
-/// Number of logical pixels scrolled down before the title disappears from
-/// the normal nav bar and appears as a big title below the nav bar.
+/// Number of logical pixels scrolled down before the title text is transferred
+/// from the normal nav bar to a big title below the nav bar.
 const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
 
+/// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = const Duration(milliseconds: 150);
 
 const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
@@ -46,6 +48,10 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 ///
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
+///
+/// Enabling [largeTitle] will create a scrollable second row showing the title
+/// in a larger font introduced in iOS 11. The [middle] widget must be a text
+/// and the [CupertinoNavigationBar] must be placed in a sliver group in this case.
 //
 // TODO(xster): document automatic addition of a CupertinoBackButton.
 // TODO(xster): add sample code using icons.
@@ -97,7 +103,7 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   /// When true, the navigation bar will split into 2 sections. The static
   /// top 44px section will be wrapped in a SliverPersistentHeader and a
   /// second scrollable section behind it will show and replace the `middle`
-  /// section in a larger font when scrolled down.
+  /// text in a larger font when scrolled down.
   ///
   /// Navigation bars with large titles must be used in a sliver group such
   /// as [CustomScrollView].
