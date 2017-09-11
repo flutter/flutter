@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "lib/ftl/synchronization/mutex.h"
+#include "lib/fxl/synchronization/mutex.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
 #include <queue>
@@ -22,9 +22,9 @@ class SkiaUnrefQueue {
 
   static SkiaUnrefQueue instance_;
 
-  ftl::Mutex mutex_;
-  std::deque<SkRefCnt*> objects_ FTL_GUARDED_BY(mutex_);
-  bool drain_pending_ FTL_GUARDED_BY(mutex_);
+  fxl::Mutex mutex_;
+  std::deque<SkRefCnt*> objects_ FXL_GUARDED_BY(mutex_);
+  bool drain_pending_ FXL_GUARDED_BY(mutex_);
 };
 
 template <typename T> void SkiaUnrefOnIOThread(sk_sp<T>* sp) {

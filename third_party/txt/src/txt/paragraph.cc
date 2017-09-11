@@ -26,7 +26,7 @@
 #include <minikin/Layout.h>
 #include "font_collection.h"
 #include "font_skia.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "minikin/HbFontCache.h"
 #include "minikin/LayoutUtils.h"
 #include "minikin/LineBreaker.h"
@@ -148,7 +148,7 @@ bool Paragraph::AddRunsToLineBreaker(
     auto collection = font_collection_->GetMinikinFontCollectionForFamily(
         run.style.font_family);
     if (collection == nullptr) {
-      FTL_LOG(INFO) << "Could not find font collection for family \""
+      FXL_LOG(INFO) << "Could not find font collection for family \""
                     << run.style.font_family << "\".";
       return false;
     }
@@ -841,7 +841,7 @@ std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
   std::vector<SkRect> rects;
   end = fmax(start, end);
   start = fmin(start, end);
-  FTL_DCHECK(end >= start && end >= 0 && start >= 0);
+  FXL_DCHECK(end >= start && end >= 0 && start >= 0);
   if (end == start)
     end = start + 1;
   end = fmin(end, text_.size());

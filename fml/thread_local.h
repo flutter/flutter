@@ -7,9 +7,9 @@
 
 #include <functional>
 
-#include "lib/ftl/build_config.h"
-#include "lib/ftl/logging.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/build_config.h"
+#include "lib/fxl/logging.h"
+#include "lib/fxl/macros.h"
 
 #define FML_THREAD_LOCAL_PTHREADS OS_MACOSX || OS_LINUX || OS_ANDROID
 
@@ -55,11 +55,11 @@ class ThreadLocal {
     ThreadLocalDestroyCallback destroy_;
     intptr_t value_;
 
-    FTL_DISALLOW_COPY_AND_ASSIGN(Box);
+    FXL_DISALLOW_COPY_AND_ASSIGN(Box);
   };
 
   static inline void ThreadLocalDestroy(void* value) {
-    FTL_CHECK(value != nullptr);
+    FXL_CHECK(value != nullptr);
     auto box = reinterpret_cast<Box*>(value);
     box->DestroyValue();
     delete box;
@@ -71,14 +71,14 @@ class ThreadLocal {
   ThreadLocal(ThreadLocalDestroyCallback destroy) : destroy_(destroy) {
     auto callback =
         reinterpret_cast<void (*)(void*)>(&ThreadLocal::ThreadLocalDestroy);
-    FTL_CHECK(pthread_key_create(&_key, callback) == 0);
+    FXL_CHECK(pthread_key_create(&_key, callback) == 0);
   }
 
   void Set(intptr_t value) {
     auto box = reinterpret_cast<Box*>(pthread_getspecific(_key));
     if (box == nullptr) {
       box = new Box(destroy_, value);
-      FTL_CHECK(pthread_setspecific(_key, box) == 0);
+      FXL_CHECK(pthread_setspecific(_key, box) == 0);
     } else {
       box->SetValue(value);
     }
@@ -99,14 +99,14 @@ class ThreadLocal {
     delete reinterpret_cast<Box*>(pthread_getspecific(_key));
 
     // Finally, collect the key
-    FTL_CHECK(pthread_key_delete(_key) == 0);
+    FXL_CHECK(pthread_key_delete(_key) == 0);
   }
 
  private:
   pthread_key_t _key;
   ThreadLocalDestroyCallback destroy_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ThreadLocal);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ThreadLocal);
 };
 
 #else  // FML_THREAD_LOCAL_PTHREADS
@@ -144,7 +144,7 @@ class ThreadLocal {
   ThreadLocalDestroyCallback destroy_;
   intptr_t value_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ThreadLocal);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ThreadLocal);
 };
 
 #endif  // FML_THREAD_LOCAL_PTHREADS

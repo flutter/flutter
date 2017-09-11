@@ -4,7 +4,7 @@
 
 #include "flutter/fml/thread.h"
 
-#include "lib/ftl/build_config.h"
+#include "lib/fxl/build_config.h"
 
 #if defined(OS_WIN)
 #include <windows.h>
@@ -16,13 +16,13 @@
 #include <string>
 
 #include "flutter/fml/message_loop.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace fml {
 
 Thread::Thread(const std::string& name) : joined_(false) {
-  ftl::AutoResetWaitableEvent latch;
-  ftl::RefPtr<ftl::TaskRunner> runner;
+  fxl::AutoResetWaitableEvent latch;
+  fxl::RefPtr<fxl::TaskRunner> runner;
   thread_ = std::make_unique<std::thread>([&latch, &runner, name]() -> void {
     SetCurrentThreadName(name);
     fml::MessageLoop::EnsureInitializedForCurrentThread();
@@ -39,7 +39,7 @@ Thread::~Thread() {
   Join();
 }
 
-ftl::RefPtr<ftl::TaskRunner> Thread::GetTaskRunner() const {
+fxl::RefPtr<fxl::TaskRunner> Thread::GetTaskRunner() const {
   return task_runner_;
 }
 

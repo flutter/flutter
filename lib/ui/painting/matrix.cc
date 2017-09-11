@@ -4,7 +4,7 @@
 
 #include "flutter/lib/ui/painting/matrix.h"
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace blink {
 
@@ -18,7 +18,7 @@ static const int kSkMatrixIndexToMatrix4Index[] = {
 };
 
 SkMatrix ToSkMatrix(const tonic::Float64List& matrix4) {
-  FTL_DCHECK(matrix4.data());
+  FXL_DCHECK(matrix4.data());
   SkMatrix sk_matrix;
   for (int i = 0; i < 9; ++i) {
     int matrix4_index = kSkMatrixIndexToMatrix4Index[i];

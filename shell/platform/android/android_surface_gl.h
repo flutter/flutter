@@ -12,7 +12,7 @@
 #include "flutter/shell/platform/android/android_context_gl.h"
 #include "flutter/shell/platform/android/android_environment_gl.h"
 #include "flutter/shell/platform/android/android_surface.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -36,7 +36,7 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate, public AndroidSurface {
 
   bool ResourceContextMakeCurrent() override;
 
-  bool SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
+  bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
                        PlatformView::SurfaceConfig config) override;
 
   bool GLContextMakeCurrent() override;
@@ -53,11 +53,11 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate, public AndroidSurface {
       const fml::jni::JavaObjectWeakGlobalRef& flutter_view) override;
 
  private:
-  ftl::RefPtr<AndroidContextGL> onscreen_context_;
-  ftl::RefPtr<AndroidContextGL> offscreen_context_;
+  fxl::RefPtr<AndroidContextGL> onscreen_context_;
+  fxl::RefPtr<AndroidContextGL> offscreen_context_;
   sk_sp<GrContext> gr_context_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
+  FXL_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceGL);
 };
 
 }  // namespace shell

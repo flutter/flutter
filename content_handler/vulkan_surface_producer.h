@@ -13,7 +13,7 @@
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "lib/mtl/tasks/message_loop.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 
@@ -48,7 +48,7 @@ class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer {
   // VkInstance, so it must be destroyed after the logical device and the
   // application, which own other vulkan objects associated with the device
   // and instance.
-  ftl::RefPtr<vulkan::VulkanProcTable> vk_;
+  fxl::RefPtr<vulkan::VulkanProcTable> vk_;
   sk_sp<GrVkBackendContext> backend_context_;
   std::unique_ptr<vulkan::VulkanDevice> logical_device_;
   std::unique_ptr<vulkan::VulkanApplication> application_;
@@ -58,7 +58,7 @@ class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer {
 
   bool Initialize(scenic_lib::Session* mozart_session);
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VulkanSurfaceProducer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurfaceProducer);
 };
 
 }  // namespace flutter_runner

@@ -17,7 +17,7 @@
 #include <memory>
 #include <string>
 #include "gtest/gtest.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "txt/font_collection.h"
@@ -53,7 +53,7 @@ class RenderTest : public ::testing::Test {
 
   std::string GetNextSnapshotName();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(RenderTest);
+  FXL_DISALLOW_COPY_AND_ASSIGN(RenderTest);
 };
 
 }  // namespace txt

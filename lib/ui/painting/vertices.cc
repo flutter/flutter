@@ -45,8 +45,8 @@ void Vertices::RegisterNatives(tonic::DartLibraryNatives* natives) {
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-ftl::RefPtr<Vertices> Vertices::Create() {
-  return ftl::MakeRefCounted<Vertices>();
+fxl::RefPtr<Vertices> Vertices::Create() {
+  return fxl::MakeRefCounted<Vertices>();
 }
 
 void Vertices::init(SkVertices::VertexMode vertex_mode,

@@ -19,11 +19,11 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Scene);
 
 DART_BIND_ALL(Scene, FOR_EACH_BINDING)
 
-ftl::RefPtr<Scene> Scene::create(std::unique_ptr<flow::Layer> rootLayer,
+fxl::RefPtr<Scene> Scene::create(std::unique_ptr<flow::Layer> rootLayer,
                                  uint32_t rasterizerTracingThreshold,
                                  bool checkerboardRasterCacheImages,
                                  bool checkerboardOffscreenLayers) {
-  return ftl::MakeRefCounted<Scene>(std::move(rootLayer),
+  return fxl::MakeRefCounted<Scene>(std::move(rootLayer),
                                     rasterizerTracingThreshold,
                                     checkerboardRasterCacheImages,
                                     checkerboardOffscreenLayers);

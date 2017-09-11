@@ -190,15 +190,15 @@ bool CanvasPath::contains(double x, double y) {
   return path_.contains(x, y);
 }
 
-ftl::RefPtr<CanvasPath> CanvasPath::shift(double dx, double dy) {
-  ftl::RefPtr<CanvasPath> path = CanvasPath::Create();
+fxl::RefPtr<CanvasPath> CanvasPath::shift(double dx, double dy) {
+  fxl::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.offset(dx, dy, &path->path_);
   return path;
 }
 
-ftl::RefPtr<CanvasPath> CanvasPath::transform(
+fxl::RefPtr<CanvasPath> CanvasPath::transform(
     tonic::Float64List& matrix4) {
-  ftl::RefPtr<CanvasPath> path = CanvasPath::Create();
+  fxl::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.transform(ToSkMatrix(matrix4), &path->path_);
   matrix4.Release();
   return path;

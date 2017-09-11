@@ -7,7 +7,7 @@
 
 #include <CoreFoundation/CoreFoundation.h>
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace fml {
 
@@ -40,7 +40,7 @@ class CFRef {
  private:
   T instance_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(CFRef);
+  FXL_DISALLOW_COPY_AND_ASSIGN(CFRef);
 };
 
 }  // namespace fml

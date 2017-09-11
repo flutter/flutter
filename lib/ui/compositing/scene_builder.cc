@@ -20,7 +20,7 @@
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "flutter/lib/ui/window/window.h"
-#include "lib/ftl/build_config.h"
+#include "lib/fxl/build_config.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
@@ -178,12 +178,12 @@ void SceneBuilder::pushPhysicalModel(const RRect& rrect,
 
 void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer,
                             const SkRect& cullRect) {
-  FTL_DCHECK(layer);
+  FXL_DCHECK(layer);
 
   m_cullRects.push(cullRect);
 
   if (!m_rootLayer) {
-    FTL_DCHECK(!m_currentLayer);
+    FXL_DCHECK(!m_currentLayer);
     m_rootLayer = std::move(layer);
     m_currentLayer = m_rootLayer.get();
     return;
@@ -270,11 +270,11 @@ void SceneBuilder::setCheckerboardOffscreenLayers(bool checkerboard) {
   m_checkerboardOffscreenLayers = checkerboard;
 }
 
-ftl::RefPtr<Scene> SceneBuilder::build() {
+fxl::RefPtr<Scene> SceneBuilder::build() {
   m_currentLayer = nullptr;
   int32_t threshold = m_currentRasterizerTracingThreshold;
   m_currentRasterizerTracingThreshold = 0;
-  ftl::RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold,
+  fxl::RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold,
                                            m_checkerboardRasterCacheImages,
                                            m_checkerboardOffscreenLayers);
   ClearDartWrapper();

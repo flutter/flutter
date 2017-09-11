@@ -10,8 +10,8 @@
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/tasks/task_runner.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/tasks/task_runner.h"
 #include "lib/icu_data/cpp/icu_data.h"
 #include "lib/mtl/tasks/message_loop.h"
 
@@ -43,8 +43,8 @@ App::App() {
   auto gpu_thread_success = gpu_thread_->Run();
   auto io_thread_success = io_thread_->Run();
 
-  FTL_CHECK(gpu_thread_success) << "Must be able to create the GPU thread";
-  FTL_CHECK(io_thread_success) << "Must be able to create the IO thread";
+  FXL_CHECK(gpu_thread_success) << "Must be able to create the GPU thread";
+  FXL_CHECK(io_thread_success) << "Must be able to create the IO thread";
 
   auto ui_task_runner = mtl::MessageLoop::GetCurrent()->task_runner();
   auto gpu_task_runner = gpu_thread_->TaskRunner();
@@ -58,7 +58,7 @@ App::App() {
                                      ));
 
   if (!icu_data::Initialize(context_.get())) {
-    FTL_LOG(ERROR) << "Could not initialize ICU data.";
+    FXL_LOG(ERROR) << "Could not initialize ICU data.";
   }
 
   blink::Settings settings;
@@ -83,13 +83,13 @@ App::~App() {
 }
 
 App& App::Shared() {
-  FTL_DCHECK(g_app);
+  FXL_DCHECK(g_app);
   return *g_app;
 }
 
 void App::WaitForPlatformViewIds(
     std::vector<PlatformViewInfo>* platform_view_ids) {
-  ftl::AutoResetWaitableEvent latch;
+  fxl::AutoResetWaitableEvent latch;
 
   blink::Threads::UI()->PostTask([this, platform_view_ids, &latch]() {
     WaitForPlatformViewsIdsUIThread(platform_view_ids, &latch);
@@ -100,7 +100,7 @@ void App::WaitForPlatformViewIds(
 
 void App::WaitForPlatformViewsIdsUIThread(
     std::vector<PlatformViewInfo>* platform_view_ids,
-    ftl::AutoResetWaitableEvent* latch) {
+    fxl::AutoResetWaitableEvent* latch) {
   for (auto it = controllers_.begin(); it != controllers_.end(); it++) {
     ApplicationControllerImpl* controller = it->first;
 

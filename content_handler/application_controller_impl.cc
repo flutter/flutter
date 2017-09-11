@@ -12,7 +12,7 @@
 #include "lib/app/cpp/connect.h"
 #include "flutter/content_handler/app.h"
 #include "flutter/content_handler/runtime_holder.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "lib/mtl/vmo/vector.h"
 
 namespace flutter_runner {
@@ -33,7 +33,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
 
   std::vector<char> bundle;
   if (!mtl::VectorFromVmo(std::move(application->data), &bundle)) {
-    FTL_LOG(ERROR) << "Failed to receive bundle.";
+    FXL_LOG(ERROR) << "Failed to receive bundle.";
     return;
   }
 
@@ -61,7 +61,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
 
   mxio_ns_t* mxio_ns = SetupNamespace(startup_info->flat_namespace);
   if (mxio_ns == nullptr) {
-    FTL_LOG(ERROR) << "Failed to initialize namespace";
+    FXL_LOG(ERROR) << "Failed to initialize namespace";
   }
 
   url_ = startup_info->launch_info->url;
@@ -81,7 +81,7 @@ mxio_ns_t* ApplicationControllerImpl::SetupNamespace(
   mxio_ns_t* mxio_namespc;
   mx_status_t status = mxio_ns_create(&mxio_namespc);
   if (status != MX_OK) {
-    FTL_LOG(ERROR) << "Failed to create namespace";
+    FXL_LOG(ERROR) << "Failed to create namespace";
     return nullptr;
   }
   for (size_t i = 0; i < flat->paths.size(); ++i) {
@@ -94,7 +94,7 @@ mxio_ns_t* ApplicationControllerImpl::SetupNamespace(
     const char* path = flat->paths[i].data();
     status = mxio_ns_bind(mxio_namespc, path, dir_handle);
     if (status != MX_OK) {
-      FTL_LOG(ERROR) << "Failed to bind " << flat->paths[i] << " to namespace";
+      FXL_LOG(ERROR) << "Failed to bind " << flat->paths[i] << " to namespace";
       mx_handle_close(dir_handle);
       mxio_ns_destroy(mxio_namespc);
       return nullptr;
@@ -111,7 +111,7 @@ void ApplicationControllerImpl::Kill() {
 }
 
 void ApplicationControllerImpl::Detach() {
-  binding_.set_connection_error_handler(ftl::Closure());
+  binding_.set_connection_error_handler(fxl::Closure());
 }
 
 void ApplicationControllerImpl::Wait(const WaitCallback& callback) {

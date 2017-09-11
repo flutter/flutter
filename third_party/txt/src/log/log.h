@@ -18,32 +18,32 @@
 
 #include <stdint.h>
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 #ifndef LOG_ALWAYS_FATAL_IF
 #define LOG_ALWAYS_FATAL_IF(cond, ...) \
-  ((cond) ? (FTL_LOG(FATAL) << #cond) : (void)0)
+  ((cond) ? (FXL_LOG(FATAL) << #cond) : (void)0)
 #endif
 
 #ifndef LOG_ALWAYS_FATAL
-#define LOG_ALWAYS_FATAL(...) FTL_LOG(FATAL)
+#define LOG_ALWAYS_FATAL(...) FXL_LOG(FATAL)
 #endif
 
 #ifndef LOG_ASSERT
-#define LOG_ASSERT(cond, ...) FTL_CHECK(cond)
+#define LOG_ASSERT(cond, ...) FXL_CHECK(cond)
 #define ALOG_ASSERT LOG_ASSERT
 #endif
 
 #ifndef ALOGD
-#define ALOGD(message, ...) FTL_DLOG(INFO) << (message)
+#define ALOGD(message, ...) FXL_DLOG(INFO) << (message)
 #endif
 
 #ifndef ALOGW
-#define ALOGW(message, ...) FTL_LOG(WARNING) << (message)
+#define ALOGW(message, ...) FXL_LOG(WARNING) << (message)
 #endif
 
 #ifndef ALOGE
-#define ALOGE(message, ...) FTL_LOG(ERROR) << (message)
+#define ALOGE(message, ...) FXL_LOG(ERROR) << (message)
 #endif
 
 #define android_errorWriteLog(tag, subTag) \

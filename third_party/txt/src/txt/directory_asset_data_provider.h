@@ -5,7 +5,7 @@
 #ifndef TXT_DIRECTORY_ASSET_DATA_PROVIDER_H_
 #define TXT_DIRECTORY_ASSET_DATA_PROVIDER_H_
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "txt/asset_data_provider.h"
 
 namespace txt {
@@ -17,7 +17,7 @@ class DirectoryAssetDataProvider : public AssetDataProvider {
   ~DirectoryAssetDataProvider() override;
 
  private:
-  FTL_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetDataProvider);
+  FXL_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetDataProvider);
 };
 
 }  // namespace txt

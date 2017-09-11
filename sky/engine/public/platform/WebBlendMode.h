@@ -45,7 +45,7 @@ enum WebBlendMode {
     WebBlendModeColorDodge,
     WebBlendModeColorBurn,
     WebBlendModeHardLight,
-    WebBlendModeSoftLight,
+    WebBlendModeSofxlight,
     WebBlendModeDifference,
     WebBlendModeExclusion,
     WebBlendModeHue,

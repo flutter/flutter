@@ -6,8 +6,8 @@
 #define FLUTTER_SHELL_GPU_GPU_SURFACE_SOFTWARE_H_
 
 #include "flutter/shell/common/surface.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/weak_ptr.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
 namespace shell {
@@ -35,9 +35,9 @@ class GPUSurfaceSoftware : public Surface {
  private:
   GPUSurfaceSoftwareDelegate* delegate_;
 
-  ftl::WeakPtrFactory<GPUSurfaceSoftware> weak_factory_;
+  fxl::WeakPtrFactory<GPUSurfaceSoftware> weak_factory_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceSoftware);
+  FXL_DISALLOW_COPY_AND_ASSIGN(GPUSurfaceSoftware);
 };
 
 }  // namespace shell

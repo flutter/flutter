@@ -58,7 +58,7 @@ namespace double_conversion {
         void SubtractBignum(const Bignum& other);
 
         void Square();
-        void ShiftLeft(int shift_amount);
+        void Shifxleft(int shift_amount);
         void MultiplyByUInt32(uint32_t factor);
         void MultiplyByUInt64(uint64_t factor);
         void MultiplyByPowerOfTen(int exponent);
@@ -121,7 +121,7 @@ namespace double_conversion {
         // Requires this to have enough capacity (no tests done).
         // Updates used_digits_ if necessary.
         // shift_amount must be < kBigitSize.
-        void BigitsShiftLeft(int shift_amount);
+        void BigitsShifxleft(int shift_amount);
         // BigitLength includes the "hidden" digits encoded in the exponent.
         int BigitLength() const { return used_digits_ + exponent_; }
         Chunk BigitAt(int index) const;
@@ -135,7 +135,7 @@ namespace double_conversion {
         // The Bignum's value equals value(bigits_) * 2^(exponent_ * kBigitSize).
         int exponent_;
 
-        FTL_DISALLOW_COPY_AND_ASSIGN(Bignum);
+        FXL_DISALLOW_COPY_AND_ASSIGN(Bignum);
     };
 
 }  // namespace double_conversion

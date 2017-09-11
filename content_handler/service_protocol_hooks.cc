@@ -11,7 +11,7 @@
 
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/app.h"
-#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/fxl/memory/weak_ptr.h"
 
 namespace flutter_runner {
 namespace {

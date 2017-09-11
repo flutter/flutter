@@ -9,7 +9,7 @@
 
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/sky/engine/wtf/RefPtr.h"
-#include "lib/ftl/build_config.h"
+#include "lib/fxl/build_config.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/dart_state.h"
 

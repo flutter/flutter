@@ -30,7 +30,7 @@
 
 #include <string.h>
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "flutter/sky/engine/wtf/Assertions.h"
 
 #define UNIMPLEMENTED ASSERT_NOT_REACHED
@@ -221,7 +221,7 @@ namespace double_conversion {
 
         bool is_finalized() const { return position_ < 0; }
 
-        FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(StringBuilder);
+        FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(StringBuilder);
     };
 
     // The type-based aliasing rule allows the compiler to assume that pointers of

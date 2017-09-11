@@ -409,22 +409,22 @@ namespace double_conversion {
 
         // numerator = v.
         numerator->AssignUInt64(Double(v).Significand());
-        numerator->ShiftLeft(Double(v).Exponent());
+        numerator->Shifxleft(Double(v).Exponent());
         // denominator = 10^estimated_power.
         denominator->AssignPowerUInt16(10, estimated_power);
 
         if (need_boundary_deltas) {
             // Introduce a common denominator so that the deltas to the boundaries are
             // integers.
-            denominator->ShiftLeft(1);
-            numerator->ShiftLeft(1);
+            denominator->Shifxleft(1);
+            numerator->Shifxleft(1);
             // Let v = f * 2^e, then m+ - v = 1/2 * 2^e; With the common
             // denominator (of 2) delta_plus equals 2^e.
             delta_plus->AssignUInt16(1);
-            delta_plus->ShiftLeft(Double(v).Exponent());
+            delta_plus->Shifxleft(Double(v).Exponent());
             // Same for delta_minus (with adjustments below if f == 2^p-1).
             delta_minus->AssignUInt16(1);
-            delta_minus->ShiftLeft(Double(v).Exponent());
+            delta_minus->Shifxleft(Double(v).Exponent());
 
             // If the significand (without the hidden bit) is 0, then the lower
             // boundary is closer than just half a ulp (unit in the last place).
@@ -435,9 +435,9 @@ namespace double_conversion {
             if ((v_bits & Double::kSignificandMask) == 0) {
                 // The lower boundary is closer at half the distance of "normal" numbers.
                 // Increase the common denominator and adapt all but the delta_minus.
-                denominator->ShiftLeft(1);  // *2
-                numerator->ShiftLeft(1);    // *2
-                delta_plus->ShiftLeft(1);   // *2
+                denominator->Shifxleft(1);  // *2
+                numerator->Shifxleft(1);    // *2
+                delta_plus->Shifxleft(1);   // *2
             }
         }
     }
@@ -460,13 +460,13 @@ namespace double_conversion {
         numerator->AssignUInt64(significand);
         // denominator = 10^estimated_power * 2^-exponent (with exponent < 0)
         denominator->AssignPowerUInt16(10, estimated_power);
-        denominator->ShiftLeft(-exponent);
+        denominator->Shifxleft(-exponent);
 
         if (need_boundary_deltas) {
             // Introduce a common denominator so that the deltas to the boundaries are
             // integers.
-            denominator->ShiftLeft(1);
-            numerator->ShiftLeft(1);
+            denominator->Shifxleft(1);
+            numerator->Shifxleft(1);
             // Let v = f * 2^e, then m+ - v = 1/2 * 2^e; With the common
             // denominator (of 2) delta_plus equals 2^e.
             // Given that the denominator already includes v's exponent the distance
@@ -485,9 +485,9 @@ namespace double_conversion {
             if ((v_bits & Double::kSignificandMask) == 0) {
                 // The lower boundary is closer at half the distance of "normal" numbers.
                 // Increase the denominator and adapt all but the delta_minus.
-                denominator->ShiftLeft(1);  // *2
-                numerator->ShiftLeft(1);    // *2
-                delta_plus->ShiftLeft(1);   // *2
+                denominator->Shifxleft(1);  // *2
+                numerator->Shifxleft(1);    // *2
+                delta_plus->Shifxleft(1);   // *2
             }
         }
     }
@@ -527,13 +527,13 @@ namespace double_conversion {
 
         // denominator = 2 * 2^-exponent with exponent < 0.
         denominator->AssignUInt16(1);
-        denominator->ShiftLeft(-exponent);
+        denominator->Shifxleft(-exponent);
 
         if (need_boundary_deltas) {
             // Introduce a common denominator so that the deltas to the boundaries are
             // integers.
-            numerator->ShiftLeft(1);
-            denominator->ShiftLeft(1);
+            numerator->Shifxleft(1);
+            denominator->Shifxleft(1);
             // With this shift the boundaries have their correct value, since
             // delta_plus = 10^-estimated_power, and
             // delta_minus = 10^-estimated_power.
@@ -546,9 +546,9 @@ namespace double_conversion {
                 // The only exception where a significand == 0 has its boundaries at
                 // "normal" distances:
                 (v_bits & Double::kExponentMask) != kMinimalNormalizedExponent) {
-                numerator->ShiftLeft(1);    // *2
-                denominator->ShiftLeft(1);  // *2
-                delta_plus->ShiftLeft(1);   // *2
+                numerator->Shifxleft(1);    // *2
+                denominator->Shifxleft(1);  // *2
+                delta_plus->Shifxleft(1);   // *2
             }
         }
     }

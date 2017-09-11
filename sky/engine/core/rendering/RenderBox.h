@@ -207,7 +207,7 @@ public:
     LayoutRect layoutOverflowRect() const { return m_overflow ? m_overflow->layoutOverflowRect() : paddingBoxRect(); }
     IntRect pixelSnappedLayoutOverflowRect() const { return pixelSnappedIntRect(layoutOverflowRect()); }
     LayoutSize maxLayoutOverflow() const { return LayoutSize(layoutOverflowRect().maxX(), layoutOverflowRect().maxY()); }
-    LayoutUnit logicalLeftLayoutOverflow() const { return layoutOverflowRect().x(); }
+    LayoutUnit logicalLefxlayoutOverflow() const { return layoutOverflowRect().x(); }
     LayoutUnit logicalRightLayoutOverflow() const { return layoutOverflowRect().maxX(); }
 
     virtual LayoutRect visualOverflowRect() const { return m_overflow ? m_overflow->visualOverflowRect() : borderBoxRect(); }

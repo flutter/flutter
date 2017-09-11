@@ -28,7 +28,7 @@ void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 #if defined(OS_FUCHSIA)
 
 void ClipPathLayer::UpdateScene(SceneUpdateContext& context) {
-  FTL_DCHECK(needs_system_composite());
+  FXL_DCHECK(needs_system_composite());
 
   // TODO(MZ-140): Must be able to specify paths as shapes to nodes.
   //               Treating the shape as a rectangle for now.
@@ -46,7 +46,7 @@ void ClipPathLayer::UpdateScene(SceneUpdateContext& context) {
 
 void ClipPathLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
-  FTL_DCHECK(needs_painting());
+  FXL_DCHECK(needs_painting());
 
   Layer::AutoSaveLayer save(context, paint_bounds(), nullptr);
   context.canvas.clipPath(clip_path_, true);

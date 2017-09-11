@@ -31,14 +31,14 @@ std::shared_ptr<txt::FontCollection> FontCollection::GetFontCollection() const {
 }
 
 void FontCollection::RegisterFontsFromAssetStore(
-    ftl::RefPtr<blink::ZipAssetStore> asset_store) {
+    fxl::RefPtr<blink::ZipAssetStore> asset_store) {
   if (!asset_store) {
     return;
   }
 
   std::vector<uint8_t> manifest_data;
   if (!asset_store->GetAsBuffer("FontManifest.json", &manifest_data)) {
-    FTL_DLOG(WARNING) << "Could not find the font manifest in the asset store.";
+    FXL_DLOG(WARNING) << "Could not find the font manifest in the asset store.";
     return;
   }
 
@@ -51,7 +51,7 @@ void FontCollection::RegisterFontsFromAssetStore(
       manifest_data.size());
 
   if (document.HasParseError()) {
-    FTL_DLOG(WARNING) << "Error parsing the font manifest in the asset store.";
+    FXL_DLOG(WARNING) << "Error parsing the font manifest in the asset store.";
     return;
   }
 

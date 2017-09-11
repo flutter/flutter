@@ -10,8 +10,8 @@
 #include <string>
 #include <utility>
 
-#include "lib/ftl/files/eintr_wrapper.h"
-#include "lib/ftl/files/unique_fd.h"
+#include "lib/fxl/files/eintr_wrapper.h"
+#include "lib/fxl/files/unique_fd.h"
 #include "flutter/glue/trace_event.h"
 #include "lib/zip/unique_unzipper.h"
 
@@ -43,13 +43,13 @@ bool ZipAssetStore::GetAsBuffer(const std::string& asset_name,
 
   result = unzGoToFilePos(unzipper.get(), &(found->second.file_pos));
   if (result != UNZ_OK) {
-    FTL_LOG(WARNING) << "unzGetCurrentFileInfo failed, error=" << result;
+    FXL_LOG(WARNING) << "unzGetCurrentFileInfo failed, error=" << result;
     return false;
   }
 
   result = unzOpenCurrentFile(unzipper.get());
   if (result != UNZ_OK) {
-    FTL_LOG(WARNING) << "unzOpenCurrentFile failed, error=" << result;
+    FXL_LOG(WARNING) << "unzOpenCurrentFile failed, error=" << result;
     return false;
   }
 

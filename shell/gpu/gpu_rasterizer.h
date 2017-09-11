@@ -7,8 +7,8 @@
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/shell/common/rasterizer.h"
-#include "lib/ftl/memory/weak_ptr.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/memory/weak_ptr.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
 
@@ -21,22 +21,22 @@ class GPURasterizer : public Rasterizer {
   ~GPURasterizer() override;
 
   void Setup(std::unique_ptr<Surface> surface,
-             ftl::Closure continuation,
-             ftl::AutoResetWaitableEvent* setup_completion_event) override;
+             fxl::Closure continuation,
+             fxl::AutoResetWaitableEvent* setup_completion_event) override;
 
   void Clear(SkColor color, const SkISize& size) override;
 
   void Teardown(
-      ftl::AutoResetWaitableEvent* teardown_completion_event) override;
+      fxl::AutoResetWaitableEvent* teardown_completion_event) override;
 
-  ftl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
+  fxl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
 
   flow::LayerTree* GetLastLayerTree() override;
 
-  void Draw(ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
+  void Draw(fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
   // Set a callback to be called once when the next frame is drawn.
-  void AddNextFrameCallback(ftl::Closure nextFrameCallback) override;
+  void AddNextFrameCallback(fxl::Closure nextFrameCallback) override;
 
  private:
   std::unique_ptr<Surface> surface_;
@@ -45,8 +45,8 @@ class GPURasterizer : public Rasterizer {
   // A closure to be called when the underlaying surface presents a frame the
   // next time. NULL if there is no callback or the callback was set back to
   // NULL after being called.
-  ftl::Closure nextFrameCallback_;
-  ftl::WeakPtrFactory<GPURasterizer> weak_factory_;
+  fxl::Closure nextFrameCallback_;
+  fxl::WeakPtrFactory<GPURasterizer> weak_factory_;
 
   void DoDraw(std::unique_ptr<flow::LayerTree> layer_tree);
 
@@ -54,7 +54,7 @@ class GPURasterizer : public Rasterizer {
 
   void NotifyNextFrameOnce();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(GPURasterizer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(GPURasterizer);
 };
 
 }  // namespace shell

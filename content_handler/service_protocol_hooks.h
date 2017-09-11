@@ -6,7 +6,7 @@
 #define FLUTTER_CONTENT_HANDLER_SERVICE_PROTOCOL_HOOKS_H_
 
 #include "dart/runtime/include/dart_tools_api.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace flutter_runner {
 

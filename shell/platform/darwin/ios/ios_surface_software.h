@@ -7,7 +7,7 @@
 
 #include "flutter/shell/gpu/gpu_surface_software.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -34,7 +34,7 @@ class IOSSurfaceSoftware : public IOSSurface,
  private:
   sk_sp<SkSurface> sk_surface_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceSoftware);
+  FXL_DISALLOW_COPY_AND_ASSIGN(IOSSurfaceSoftware);
 };
 
 }  // namespace shell

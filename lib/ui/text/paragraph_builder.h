@@ -21,13 +21,13 @@ namespace blink {
 
 class Paragraph;
 
-class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
+class ParagraphBuilder : public fxl::RefCountedThreadSafe<ParagraphBuilder>,
                          public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static ftl::RefPtr<ParagraphBuilder> create(tonic::Int32List& encoded,
+  static fxl::RefPtr<ParagraphBuilder> create(tonic::Int32List& encoded,
                                               const std::string& fontFamily,
                                               double fontSize,
                                               double lineHeight,
@@ -46,7 +46,7 @@ class ParagraphBuilder : public ftl::RefCountedThreadSafe<ParagraphBuilder>,
 
   void addText(const std::string& text);
 
-  ftl::RefPtr<Paragraph> build();
+  fxl::RefPtr<Paragraph> build();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 

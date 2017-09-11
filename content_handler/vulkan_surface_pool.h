@@ -7,7 +7,7 @@
 #include <list>
 #include <unordered_map>
 #include "flutter/content_handler/vulkan_surface.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace flutter_runner {
 
@@ -71,7 +71,7 @@ class VulkanSurfacePool {
 
   void TraceStats();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VulkanSurfacePool);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurfacePool);
 };
 
 }  // namespace flutter_runner

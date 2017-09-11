@@ -15,7 +15,7 @@
 
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
-#include "lib/ftl/files/unique_fd.h"
+#include "lib/fxl/files/unique_fd.h"
 
 namespace flutter_runner {
 
@@ -32,9 +32,9 @@ static mx_status_t DriverWatcher(int dirfd,
 }
 
 bool WaitForFirstDisplayDriver() {
-  ftl::UniqueFD fd(open(kDisplayDriverClass, O_DIRECTORY | O_RDONLY));
+  fxl::UniqueFD fd(open(kDisplayDriverClass, O_DIRECTORY | O_RDONLY));
   if (fd.get() < 0) {
-    FTL_DLOG(ERROR) << "Failed to open " << kDisplayDriverClass;
+    FXL_DLOG(ERROR) << "Failed to open " << kDisplayDriverClass;
     return false;
   }
 
@@ -56,9 +56,9 @@ bool VulkanRasterizer::IsValid() const {
 void VulkanRasterizer::SetScene(
     fidl::InterfaceHandle<scenic::SceneManager> scene_manager,
     mx::eventpair import_token,
-    ftl::Closure metrics_changed_callback) {
+    fxl::Closure metrics_changed_callback) {
   ASSERT_IS_GPU_THREAD;
-  FTL_DCHECK(valid_ && !session_connection_);
+  FXL_DCHECK(valid_ && !session_connection_);
   session_connection_ = std::make_unique<SessionConnection>(
       scenic::SceneManagerPtr::Create(std::move(scene_manager)),
       std::move(import_token));
@@ -67,18 +67,18 @@ void VulkanRasterizer::SetScene(
 }
 
 void VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
-                            ftl::Closure callback) {
+                            fxl::Closure callback) {
   ASSERT_IS_GPU_THREAD;
-  FTL_DCHECK(callback != nullptr);
+  FXL_DCHECK(callback != nullptr);
 
   if (layer_tree == nullptr) {
-    FTL_LOG(ERROR) << "Layer tree was not valid.";
+    FXL_LOG(ERROR) << "Layer tree was not valid.";
     callback();
     return;
   }
 
   if (!session_connection_) {
-    FTL_LOG(ERROR) << "Session was not valid.";
+    FXL_LOG(ERROR) << "Session was not valid.";
     callback();
     return;
   }

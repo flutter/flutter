@@ -8,11 +8,11 @@
 #ifndef NDEBUG
 
 #include <pthread.h>
-#include "lib/ftl/synchronization/thread_checker.h"
+#include "lib/fxl/synchronization/thread_checker.h"
 
-#define FLUTTER_THREAD_CHECKER_DECLARE(x) ::ftl::ThreadChecker x;
+#define FLUTTER_THREAD_CHECKER_DECLARE(x) ::fxl::ThreadChecker x;
 
-#define FLUTTER_THREAD_CHECKER_CHECK(x) FTL_CHECK(x.IsCreationThreadCurrent());
+#define FLUTTER_THREAD_CHECKER_CHECK(x) FXL_CHECK(x.IsCreationThreadCurrent());
 
 #else  // NDEBUG
 

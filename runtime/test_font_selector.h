@@ -7,7 +7,7 @@
 
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "flutter/sky/engine/wtf/RefPtr.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {
@@ -34,7 +34,7 @@ class TestFontSelector : public FontSelector {
 
   TestFontSelector();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(TestFontSelector);
+  FXL_DISALLOW_COPY_AND_ASSIGN(TestFontSelector);
 };
 
 }  // namespace blink

@@ -6,7 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_VSYNC_WAITER_IOS_H_
 
 #include "flutter/shell/common/vsync_waiter.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 #if __OBJC__
 @class VSyncClient;
@@ -27,7 +27,7 @@ class VsyncWaiterIOS : public VsyncWaiter {
   Callback callback_;
   VSyncClient* client_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
 };
 
 }  // namespace shell

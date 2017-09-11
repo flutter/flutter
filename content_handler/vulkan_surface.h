@@ -9,7 +9,7 @@
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "lib/mtl/tasks/message_loop.h"
 #include "lib/mtl/tasks/message_loop_handler.h"
 #include "mx/event.h"
@@ -95,7 +95,7 @@ private:
   vulkan::VulkanHandle<VkSemaphore>
   SemaphoreFromEvent(const mx::event &event) const;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
 };
 
 }  // namespace flutter_runner

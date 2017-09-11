@@ -14,7 +14,7 @@
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/graphics/GraphicsContext.h"
 #include "flutter/sky/engine/platform/text/TextBoundaries.h"
-#include "lib/ftl/tasks/task_runner.h"
+#include "lib/fxl/tasks/task_runner.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
@@ -90,7 +90,7 @@ void ParagraphImplBlink::paint(Canvas* canvas, double x, double y) {
   GraphicsContext context(skCanvas);
   Vector<RenderBox*> layers;
   LayoutRect bounds = box->absoluteBoundingBoxRect();
-  FTL_DCHECK(bounds.x() == 0 && bounds.y() == 0);
+  FXL_DCHECK(bounds.x() == 0 && bounds.y() == 0);
   PaintInfo paintInfo(&context, enclosingIntRect(bounds), box);
   box->paint(paintInfo, LayoutPoint(), layers);
   // Note we're ignoring any layers encountered.
@@ -127,7 +127,7 @@ std::vector<TextBox> ParagraphImplBlink::getRectsForRange(unsigned start,
 
 int ParagraphImplBlink::absoluteOffsetForPosition(
     const PositionWithAffinity& position) {
-  FTL_DCHECK(position.renderer());
+  FXL_DCHECK(position.renderer());
   unsigned offset = 0;
   for (RenderObject* object = m_renderView.get(); object;
        object = object->nextInPreOrder()) {
@@ -138,7 +138,7 @@ int ParagraphImplBlink::absoluteOffsetForPosition(
       offset += text->textLength();
     }
   }
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return 0;
 }
 

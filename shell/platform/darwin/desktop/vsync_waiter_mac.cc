@@ -7,7 +7,7 @@
 #include <CoreVideo/CoreVideo.h>
 
 #include "flutter/common/threads.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace shell {
 
@@ -40,10 +40,10 @@ void VsyncWaiterMac::OnDisplayLink(void* context) {
 }
 
 void VsyncWaiterMac::OnDisplayLink() {
-  ftl::TimePoint frame_start_time = ftl::TimePoint::Now();
-  ftl::TimePoint frame_target_time =
+  fxl::TimePoint frame_start_time = fxl::TimePoint::Now();
+  fxl::TimePoint frame_target_time =
       frame_start_time +
-      ftl::TimeDelta::FromSecondsF(
+      fxl::TimeDelta::FromSecondsF(
           CVDisplayLinkGetActualOutputVideoRefreshPeriod(link_));
 
   CVDisplayLinkStop(link_);
@@ -58,7 +58,7 @@ void VsyncWaiterMac::OnDisplayLink() {
 }
 
 void VsyncWaiterMac::AsyncWaitForVsync(Callback callback) {
-  FTL_DCHECK(!callback_);
+  FXL_DCHECK(!callback_);
   callback_ = std::move(callback);
   CVDisplayLinkStart(link_);
 }

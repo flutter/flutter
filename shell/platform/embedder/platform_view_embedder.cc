@@ -49,7 +49,7 @@ bool PlatformViewEmbedder::ResourceContextMakeCurrent() {
 void PlatformViewEmbedder::RunFromSource(const std::string& assets_directory,
                                          const std::string& main,
                                          const std::string& packages) {
-  FTL_LOG(INFO) << "Hot reloading is unsupported on this platform.";
+  FXL_LOG(INFO) << "Hot reloading is unsupported on this platform.";
 }
 
 }  // namespace shell

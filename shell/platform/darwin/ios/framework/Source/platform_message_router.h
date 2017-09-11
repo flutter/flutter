@@ -9,7 +9,7 @@
 
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h"
-#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/fxl/memory/weak_ptr.h"
 
 namespace shell {
 
@@ -18,14 +18,14 @@ class PlatformMessageRouter {
   PlatformMessageRouter();
   ~PlatformMessageRouter();
 
-  void HandlePlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
+  void HandlePlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
 
   void SetMessageHandler(const std::string& channel, FlutterBinaryMessageHandler handler);
 
  private:
   std::unordered_map<std::string, FlutterBinaryMessageHandler> message_handlers_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformMessageRouter);
+  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformMessageRouter);
 };
 
 }  // namespace shell

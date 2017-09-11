@@ -20,9 +20,9 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SemanticsUpdate);
 
 DART_BIND_ALL(SemanticsUpdate, FOR_EACH_BINDING)
 
-ftl::RefPtr<SemanticsUpdate> SemanticsUpdate::create(
+fxl::RefPtr<SemanticsUpdate> SemanticsUpdate::create(
     std::vector<SemanticsNode> nodes) {
-  return ftl::MakeRefCounted<SemanticsUpdate>(std::move(nodes));
+  return fxl::MakeRefCounted<SemanticsUpdate>(std::move(nodes));
 }
 
 SemanticsUpdate::SemanticsUpdate(std::vector<SemanticsNode> nodes)

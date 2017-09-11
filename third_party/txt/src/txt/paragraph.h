@@ -22,8 +22,8 @@
 #include <vector>
 
 #include "font_collection.h"
-#include "lib/ftl/compiler_specific.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/compiler_specific.h"
+#include "lib/fxl/macros.h"
 #include "minikin/LineBreaker.h"
 #include "paint_record.h"
 #include "paragraph_style.h"
@@ -220,7 +220,7 @@ class Paragraph {
 
   void SetFontCollection(std::shared_ptr<FontCollection> font_collection);
 
-  FTL_WARN_UNUSED_RESULT
+  FXL_WARN_UNUSED_RESULT
   bool AddRunsToLineBreaker(
       std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
           collection_map);
@@ -245,7 +245,7 @@ class Paragraph {
 
   void CalculateIntrinsicWidths();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
+  FXL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };
 
 }  // namespace txt

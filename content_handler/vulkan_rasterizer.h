@@ -10,7 +10,7 @@
 #include "flutter/content_handler/rasterizer.h"
 #include "flutter/content_handler/session_connection.h"
 #include "flutter/flow/compositor_context.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace flutter_runner {
 
@@ -24,17 +24,17 @@ class VulkanRasterizer : public Rasterizer {
 
   void SetScene(fidl::InterfaceHandle<scenic::SceneManager> scene_manager,
                 mx::eventpair import_token,
-                ftl::Closure metrics_changed_callback) override;
+                fxl::Closure metrics_changed_callback) override;
 
   void Draw(std::unique_ptr<flow::LayerTree> layer_tree,
-            ftl::Closure callback) override;
+            fxl::Closure callback) override;
 
  private:
   flow::CompositorContext compositor_context_;
   std::unique_ptr<SessionConnection> session_connection_;
   bool valid_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VulkanRasterizer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VulkanRasterizer);
 };
 
 }  // namespace flutter_runner

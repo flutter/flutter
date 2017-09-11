@@ -39,7 +39,7 @@ void PhysicalModelLayer::Preroll(PrerollContext* context,
 #if defined(OS_FUCHSIA)
 
 void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context) {
-  FTL_DCHECK(needs_system_composite());
+  FXL_DCHECK(needs_system_composite());
 
   SceneUpdateContext::Frame frame(context, rrect_, color_, elevation_);
   for (auto& layer : layers()) {
@@ -55,7 +55,7 @@ void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context) {
 
 void PhysicalModelLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "PhysicalModelLayer::Paint");
-  FTL_DCHECK(needs_painting());
+  FXL_DCHECK(needs_painting());
 
   SkPath path;
   path.addRRect(rrect_);

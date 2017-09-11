@@ -35,7 +35,7 @@ SessionConnection::~SessionConnection() {
 void SessionConnection::OnSessionError() {
   ASSERT_IS_GPU_THREAD;
   // TODO: Not this.
-  FTL_CHECK(false) << "Session connection was terminated.";
+  FXL_CHECK(false) << "Session connection was terminated.";
 }
 
 void SessionConnection::OnSessionEvents(fidl::Array<scenic::EventPtr> events) {
@@ -56,10 +56,10 @@ void SessionConnection::OnSessionEvents(fidl::Array<scenic::EventPtr> events) {
 }
 
 void SessionConnection::Present(flow::CompositorContext::ScopedFrame& frame,
-                                ftl::Closure on_present_callback) {
+                                fxl::Closure on_present_callback) {
   ASSERT_IS_GPU_THREAD;
-  FTL_DCHECK(pending_on_present_callback_ == nullptr);
-  FTL_DCHECK(on_present_callback != nullptr);
+  FXL_DCHECK(pending_on_present_callback_ == nullptr);
+  FXL_DCHECK(on_present_callback != nullptr);
   pending_on_present_callback_ = on_present_callback;
 
   // Flush all session ops. Paint tasks have not yet executed but those are

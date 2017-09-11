@@ -12,8 +12,8 @@
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/scene_update_context.h"
 #include "lib/fidl/cpp/bindings/interface_handle.h"
-#include "lib/ftl/functional/closure.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/functional/closure.h"
+#include "lib/fxl/macros.h"
 #include "magenta/system/ulib/mx/include/mx/eventpair.h"
 
 namespace flutter_runner {
@@ -27,7 +27,7 @@ class SessionConnection {
 
   bool has_metrics() const { return scene_update_context_.has_metrics(); }
 
-  void set_metrics_changed_callback(ftl::Closure callback) {
+  void set_metrics_changed_callback(fxl::Closure callback) {
     metrics_changed_callback_ = std::move(callback);
   }
 
@@ -41,16 +41,16 @@ class SessionConnection {
   }
 
   void Present(flow::CompositorContext::ScopedFrame& frame,
-               ftl::Closure on_present_callback);
+               fxl::Closure on_present_callback);
 
  private:
   scenic_lib::Session session_;
   scenic_lib::ImportNode root_node_;
   scenic_lib::Session::PresentCallback present_callback_;
-  ftl::Closure pending_on_present_callback_;
+  fxl::Closure pending_on_present_callback_;
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
   flow::SceneUpdateContext scene_update_context_;
-  ftl::Closure metrics_changed_callback_;
+  fxl::Closure metrics_changed_callback_;
 
   void OnSessionError();
   void OnSessionEvents(fidl::Array<scenic::EventPtr> events);
@@ -59,7 +59,7 @@ class SessionConnection {
 
   void OnPresent(scenic::PresentationInfoPtr info);
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(SessionConnection);
+  FXL_DISALLOW_COPY_AND_ASSIGN(SessionConnection);
 };
 
 }  // namespace flutter_runner

@@ -59,7 +59,7 @@ template("flutter_content_handler") {
              "//flutter/sky/engine/platform",
              "//flutter/vulkan",
              "//garnet/public/dart-pkg/fuchsia",
-             "//garnet/public/lib/ftl",
+             "//garnet/public/lib/fxl",
              "//garnet/public/lib/icu_data/cpp",
              "//garnet/public/lib/mtl",
              "//garnet/public/lib/zip",

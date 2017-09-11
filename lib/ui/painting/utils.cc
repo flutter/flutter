@@ -9,7 +9,7 @@ namespace blink {
 
 namespace {
 
-constexpr ftl::TimeDelta kDrainDelay = ftl::TimeDelta::FromMilliseconds(250);
+constexpr fxl::TimeDelta kDrainDelay = fxl::TimeDelta::FromMilliseconds(250);
 
 }  // anonymous namespace
 
@@ -23,7 +23,7 @@ SkiaUnrefQueue& SkiaUnrefQueue::Get() {
 }
 
 void SkiaUnrefQueue::Unref(SkRefCnt* object) {
-  ftl::MutexLocker lock(&mutex_);
+  fxl::MutexLocker lock(&mutex_);
   objects_.push_back(object);
   if (!drain_pending_) {
     drain_pending_ = true;
@@ -35,7 +35,7 @@ void SkiaUnrefQueue::Unref(SkRefCnt* object) {
 void SkiaUnrefQueue::Drain() {
   std::deque<SkRefCnt*> skia_objects;
   {
-    ftl::MutexLocker lock(&mutex_);
+    fxl::MutexLocker lock(&mutex_);
     objects_.swap(skia_objects);
     drain_pending_ = false;
   }

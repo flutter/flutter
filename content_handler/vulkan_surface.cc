@@ -22,21 +22,21 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProcTable& p_vk,
       session_(session) {
   ASSERT_IS_GPU_THREAD;
 
-  FTL_DCHECK(session_);
+  FXL_DCHECK(session_);
 
   mx::vmo exported_vmo;
   if (!AllocateDeviceMemory(std::move(context), size, exported_vmo)) {
-    FTL_DLOG(INFO) << "Could not allocate device memory.";
+    FXL_DLOG(INFO) << "Could not allocate device memory.";
     return;
   }
 
   if (!CreateFences()) {
-    FTL_DLOG(INFO) << "Could not create signal fences.";
+    FXL_DLOG(INFO) << "Could not create signal fences.";
     return;
   }
 
   if (!PushSessionImageSetupOps(session, std::move(exported_vmo))) {
-    FTL_DLOG(INFO) << "Could not push session image setup ops.";
+    FXL_DLOG(INFO) << "Could not push session image setup ops.";
     return;
   }
 
@@ -84,7 +84,7 @@ VulkanSurface::SemaphoreFromEvent(const mx::event &event) const {
   mx::event semaphore_event;
   mx_status_t status = event.duplicate(MX_RIGHT_SAME_RIGHTS, &semaphore_event);
   if (status != MX_OK) {
-    FTL_DLOG(ERROR) << "failed to duplicate semaphore event";
+    FXL_DLOG(ERROR) << "failed to duplicate semaphore event";
     return vulkan::VulkanHandle<VkSemaphore>();
   }
 
@@ -126,7 +126,7 @@ bool VulkanSurface::CreateFences() {
 
   acquire_semaphore_ = SemaphoreFromEvent(acquire_event_);
   if (!acquire_semaphore_) {
-    FTL_DLOG(ERROR) << "failed to create acquire semaphore";
+    FXL_DLOG(ERROR) << "failed to create acquire semaphore";
     return false;
   }
 
@@ -340,14 +340,14 @@ bool VulkanSurface::FlushSessionAcquireAndReleaseEvents() {
 void VulkanSurface::SignalWritesFinished(
     std::function<void(void)> on_writes_committed) {
   ASSERT_IS_GPU_THREAD;
-  FTL_DCHECK(on_writes_committed);
+  FXL_DCHECK(on_writes_committed);
 
   if (!valid_) {
     on_writes_committed();
     return;
   }
 
-  FTL_CHECK(pending_on_writes_committed_ == nullptr)
+  FXL_CHECK(pending_on_writes_committed_ == nullptr)
       << "Attempted to signal a write on the surface when the previous write "
          "has not yet been acknowledged by the compositor.";
 
@@ -360,7 +360,7 @@ void VulkanSurface::Reset() {
   if (acquire_event_.signal(MX_EVENT_SIGNALED, 0u) != MX_OK ||
       release_event_.signal(MX_EVENT_SIGNALED, 0u) != MX_OK) {
     valid_ = false;
-    FTL_DLOG(ERROR)
+    FXL_DLOG(ERROR)
         << "Could not reset fences. The surface is no longer valid.";
   }
 
@@ -369,7 +369,7 @@ void VulkanSurface::Reset() {
   acquire_semaphore_.Reset();
   acquire_semaphore_ = SemaphoreFromEvent(acquire_event_);
   if (!acquire_semaphore_) {
-    FTL_DLOG(ERROR) << "failed to create acquire semaphore";
+    FXL_DLOG(ERROR) << "failed to create acquire semaphore";
   }
 
   // It is safe for the caller to collect the surface in the callback.
@@ -384,8 +384,8 @@ void VulkanSurface::OnHandleReady(mx_handle_t handle,
                                   mx_signals_t pending,
                                   uint64_t count) {
   ASSERT_IS_GPU_THREAD;
-  FTL_DCHECK(pending & MX_EVENT_SIGNALED);
-  FTL_DCHECK(handle == release_event_.get());
+  FXL_DCHECK(pending & MX_EVENT_SIGNALED);
+  FXL_DCHECK(handle == release_event_.get());
   Reset();
 }
 

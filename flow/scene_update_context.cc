@@ -15,7 +15,7 @@ namespace flow {
 SceneUpdateContext::SceneUpdateContext(scenic_lib::Session* session,
                                        SurfaceProducer* surface_producer)
     : session_(session), surface_producer_(surface_producer) {
-  FTL_DCHECK(surface_producer_ != nullptr);
+  FXL_DCHECK(surface_producer_ != nullptr);
 }
 
 SceneUpdateContext::~SceneUpdateContext() {
@@ -31,7 +31,7 @@ void SceneUpdateContext::AddChildScene(ExportNode* export_node,
                                        SkPoint offset,
                                        bool hit_testable) {
   ASSERT_IS_GPU_THREAD;
-  FTL_DCHECK(top_entity_);
+  FXL_DCHECK(top_entity_);
 
   export_node->Bind(*this, top_entity_->entity_node(), offset, hit_testable);
 }
@@ -169,7 +169,7 @@ scenic_lib::Image* SceneUpdateContext::GenerateImageIfNeeded(
   auto surface = surface_producer_->ProduceSurface(physical_size);
 
   if (!surface) {
-    FTL_LOG(ERROR) << "Could not acquire a surface from the surface producer "
+    FXL_LOG(ERROR) << "Could not acquire a surface from the surface producer "
                       "of size: "
                    << physical_size.width() << "x" << physical_size.height();
     return nullptr;
@@ -193,7 +193,7 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
   TRACE_EVENT0("flutter", "SceneUpdateContext::ExecutePaintTasks");
   std::vector<std::unique_ptr<SurfaceProducerSurface>> surfaces_to_submit;
   for (auto& task : paint_tasks_) {
-    FTL_DCHECK(task.surface);
+    FXL_DCHECK(task.surface);
     SkCanvas* canvas = task.surface->GetSkiaSurface()->getCanvas();
     Layer::PaintContext context = {*canvas, frame.context().frame_time(),
                                    frame.context().engine_time(),
@@ -222,7 +222,7 @@ SceneUpdateContext::Entity::Entity(SceneUpdateContext& context)
 }
 
 SceneUpdateContext::Entity::~Entity() {
-  FTL_DCHECK(context_.top_entity_ == this);
+  FXL_DCHECK(context_.top_entity_ == this);
   context_.top_entity_ = previous_entity_;
 }
 
@@ -310,7 +310,7 @@ SceneUpdateContext::Frame::~Frame() {
 }
 
 void SceneUpdateContext::Frame::AddPaintedLayer(Layer* layer) {
-  FTL_DCHECK(layer->needs_painting());
+  FXL_DCHECK(layer->needs_painting());
   paint_layers_.push_back(layer);
   paint_bounds_.join(layer->paint_bounds());
 }

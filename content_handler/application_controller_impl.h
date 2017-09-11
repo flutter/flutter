@@ -17,8 +17,8 @@
 #include "dart/runtime/include/dart_api.h"
 #include "lib/fidl/cpp/bindings/binding.h"
 #include "lib/fidl/cpp/bindings/binding_set.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace flutter_runner {
 class App;
@@ -68,7 +68,7 @@ class ApplicationControllerImpl : public app::ApplicationController,
 
   std::vector<WaitCallback> wait_callbacks_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ApplicationControllerImpl);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ApplicationControllerImpl);
 };
 
 }  // namespace flutter_runner

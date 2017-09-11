@@ -76,29 +76,29 @@ VulkanApplication::VulkanApplication(
 
   if (VK_CALL_LOG_ERROR(vk.CreateInstance(&create_info, nullptr, &instance)) !=
       VK_SUCCESS) {
-    FTL_DLOG(INFO) << "Could not create application instance.";
+    FXL_DLOG(INFO) << "Could not create application instance.";
     return;
   }
 
   // Now that we have an instance, setup instance proc table entries.
   if (!vk.SetupInstanceProcAddresses(instance)) {
-    FTL_DLOG(INFO) << "Could not setup instance proc addresses.";
+    FXL_DLOG(INFO) << "Could not setup instance proc addresses.";
     return;
   }
 
   instance_ = {instance, [this](VkInstance i) {
-                 FTL_LOG(INFO) << "Destroying Vulkan instance";
+                 FXL_LOG(INFO) << "Destroying Vulkan instance";
                  vk.DestroyInstance(i, nullptr);
                }};
 
   if (enable_instance_debugging) {
     auto debug_report = std::make_unique<VulkanDebugReport>(vk, instance_);
     if (!debug_report->IsValid()) {
-      FTL_LOG(INFO) << "Vulkan debugging was enabled but could not be setup "
+      FXL_LOG(INFO) << "Vulkan debugging was enabled but could not be setup "
                        "for this instance.";
     } else {
       debug_report_ = std::move(debug_report);
-      FTL_DLOG(INFO) << "Debug reporting is enabled.";
+      FXL_DLOG(INFO) << "Debug reporting is enabled.";
     }
   }
 
@@ -131,13 +131,13 @@ std::vector<VkPhysicalDevice> VulkanApplication::GetPhysicalDevices() const {
   uint32_t device_count = 0;
   if (VK_CALL_LOG_ERROR(vk.EnumeratePhysicalDevices(instance_, &device_count,
                                                     nullptr)) != VK_SUCCESS) {
-    FTL_DLOG(INFO) << "Could not enumerate physical device.";
+    FXL_DLOG(INFO) << "Could not enumerate physical device.";
     return {};
   }
 
   if (device_count == 0) {
     // No available devices.
-    FTL_DLOG(INFO) << "No physical devices found.";
+    FXL_DLOG(INFO) << "No physical devices found.";
     return {};
   }
 
@@ -147,7 +147,7 @@ std::vector<VkPhysicalDevice> VulkanApplication::GetPhysicalDevices() const {
 
   if (VK_CALL_LOG_ERROR(vk.EnumeratePhysicalDevices(
           instance_, &device_count, physical_devices.data())) != VK_SUCCESS) {
-    FTL_DLOG(INFO) << "Could not enumerate physical device.";
+    FXL_DLOG(INFO) << "Could not enumerate physical device.";
     return {};
   }
 
@@ -162,7 +162,7 @@ VulkanApplication::AcquireFirstCompatibleLogicalDevice() const {
       return logical_device;
     }
   }
-  FTL_DLOG(INFO) << "Could not acquire compatible logical device.";
+  FXL_DLOG(INFO) << "Could not acquire compatible logical device.";
   return nullptr;
 }
 

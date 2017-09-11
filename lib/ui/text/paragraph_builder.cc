@@ -19,7 +19,7 @@
 #include "flutter/third_party/txt/src/txt/text_align.h"
 #include "flutter/third_party/txt/src/txt/text_decoration.h"
 #include "flutter/third_party/txt/src/txt/text_style.h"
-#include "lib/ftl/tasks/task_runner.h"
+#include "lib/fxl/tasks/task_runner.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
@@ -111,7 +111,7 @@ PassRefPtr<RenderStyle> decodeParagraphStyle(RenderStyle* parentStyle,
                                              double fontSize,
                                              double lineHeight,
                                              const std::u16string& ellipsis) {
-  FTL_DCHECK(encoded.num_elements() == 6); // also update text.dart
+  FXL_DCHECK(encoded.num_elements() == 6); // also update text.dart
 
   RefPtr<RenderStyle> style = RenderStyle::create();
   style->inheritFrom(parentStyle);
@@ -195,13 +195,13 @@ void ParagraphBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-ftl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
+fxl::RefPtr<ParagraphBuilder> ParagraphBuilder::create(
     tonic::Int32List& encoded,
     const std::string& fontFamily,
     double fontSize,
     double lineHeight,
     const std::u16string& ellipsis) {
-  return ftl::MakeRefCounted<ParagraphBuilder>(encoded, fontFamily, fontSize,
+  return fxl::MakeRefCounted<ParagraphBuilder>(encoded, fontFamily, fontSize,
                                                lineHeight, ellipsis);
 }
 
@@ -276,7 +276,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
                                  double letterSpacing,
                                  double wordSpacing,
                                  double height) {
-  FTL_DCHECK(encoded.num_elements() == 8);
+  FXL_DCHECK(encoded.num_elements() == 8);
 
   int32_t mask = encoded[0];
 
@@ -433,7 +433,7 @@ void ParagraphBuilder::addText(const std::string& text) {
   }
 }
 
-ftl::RefPtr<Paragraph> ParagraphBuilder::build() {
+fxl::RefPtr<Paragraph> ParagraphBuilder::build() {
   m_currentRenderObject = nullptr;
   if (!Settings::Get().using_blink) {
     return Paragraph::Create(m_paragraphBuilder->Build());

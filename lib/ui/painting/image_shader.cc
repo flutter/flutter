@@ -29,8 +29,8 @@ void ImageShader::RegisterNatives(tonic::DartLibraryNatives* natives) {
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-ftl::RefPtr<ImageShader> ImageShader::Create() {
-  return ftl::MakeRefCounted<ImageShader>();
+fxl::RefPtr<ImageShader> ImageShader::Create() {
+  return fxl::MakeRefCounted<ImageShader>();
 }
 
 void ImageShader::initWithImage(CanvasImage* image,

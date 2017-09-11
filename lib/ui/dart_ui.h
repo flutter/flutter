@@ -5,7 +5,7 @@
 #ifndef FLUTTER_LIB_UI_DART_UI_H_
 #define FLUTTER_LIB_UI_DART_UI_H_
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace blink {
 
@@ -15,7 +15,7 @@ class DartUI {
   static void InitForIsolate();
 
  private:
-  FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartUI);
+  FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartUI);
 };
 
 }  // namespace blink

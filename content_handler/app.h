@@ -11,8 +11,8 @@
 #include "lib/app/cpp/application_context.h"
 #include "lib/app/fidl/application_runner.fidl.h"
 #include "flutter/content_handler/application_controller_impl.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 #include "lib/mtl/threading/thread.h"
 
 namespace flutter_runner {
@@ -44,7 +44,7 @@ class App : public app::ApplicationRunner {
  private:
   void WaitForPlatformViewsIdsUIThread(
       std::vector<PlatformViewInfo>* platform_view_ids,
-      ftl::AutoResetWaitableEvent* latch);
+      fxl::AutoResetWaitableEvent* latch);
   void UpdateProcessLabel();
 
   std::unique_ptr<app::ApplicationContext> context_;
@@ -56,7 +56,7 @@ class App : public app::ApplicationRunner {
       controllers_;
   std::string base_label_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(App);
+  FXL_DISALLOW_COPY_AND_ASSIGN(App);
 };
 
 }  // namespace flutter_runner

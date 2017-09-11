@@ -5,7 +5,7 @@
 #include "flutter/lib/ui/painting/rrect.h"
 
 #include "lib/tonic/logging/dart_error.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "lib/tonic/typed_data/float32_list.h"
 
 using namespace blink;
@@ -39,7 +39,7 @@ RRect DartConverter<RRect>::FromArguments(Dart_NativeArguments args,
                                           int index,
                                           Dart_Handle& exception) {
   Dart_Handle value = Dart_GetNativeArgument(args, index);
-  FTL_DCHECK(!LogIfError(value));
+  FXL_DCHECK(!LogIfError(value));
   return FromDart(value);
 }
 

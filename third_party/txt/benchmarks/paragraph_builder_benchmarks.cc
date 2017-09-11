@@ -16,7 +16,7 @@
 
 #include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "txt/font_collection.h"

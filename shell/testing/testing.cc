@@ -9,7 +9,7 @@
 
 namespace shell {
 
-bool InitForTesting(const ftl::CommandLine& command_line) {
+bool InitForTesting(const fxl::CommandLine& command_line) {
   TestRunner::TestDescriptor test;
   test.packages = command_line.GetOptionValueWithDefault(
       FlagForSwitch(Switch::Packages), "");

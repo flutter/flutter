@@ -7,7 +7,7 @@
 
 #include <UIKit/UIKit.h>
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 #include <map>
 
@@ -32,7 +32,7 @@ class TouchMapper {
   BitSet free_spots_;
   std::map<UITouch*, int> touch_map_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(TouchMapper);
+  FXL_DISALLOW_COPY_AND_ASSIGN(TouchMapper);
 };
 
 }  // namespace shell

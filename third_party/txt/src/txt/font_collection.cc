@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include <vector>
 #include "font_skia.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "txt/platform.h"
 #include "txt/text_style.h"
 

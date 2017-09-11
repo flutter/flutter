@@ -238,12 +238,12 @@ namespace double_conversion {
     }
 
 
-    void Bignum::ShiftLeft(int shift_amount) {
+    void Bignum::Shifxleft(int shift_amount) {
         if (used_digits_ == 0) return;
         exponent_ += shift_amount / kBigitSize;
         int local_shift = shift_amount % kBigitSize;
         EnsureCapacity(used_digits_ + 1);
-        BigitsShiftLeft(local_shift);
+        BigitsShifxleft(local_shift);
     }
 
 
@@ -336,7 +336,7 @@ namespace double_conversion {
         if (remaining_exponent > 0) {
             MultiplyByUInt32(kFive1_to_12[remaining_exponent - 1]);
         }
-        ShiftLeft(exponent);
+        Shifxleft(exponent);
     }
 
 
@@ -481,7 +481,7 @@ namespace double_conversion {
         }
 
         // And finally add the saved shifts.
-        ShiftLeft(shifts * power_exponent);
+        Shifxleft(shifts * power_exponent);
     }
 
 
@@ -719,7 +719,7 @@ namespace double_conversion {
     }
 
 
-    void Bignum::BigitsShiftLeft(int shift_amount) {
+    void Bignum::BigitsShifxleft(int shift_amount) {
         ASSERT(shift_amount < kBigitSize);
         ASSERT(shift_amount >= 0);
         Chunk carry = 0;

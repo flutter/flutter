@@ -13,7 +13,7 @@
 #include "flutter/shell/common/picture_serializer.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
-#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/fxl/memory/weak_ptr.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/src/utils/SkBase64.h"
 
@@ -259,7 +259,7 @@ bool PlatformViewServiceProtocol::Screenshot(const char* method,
                                              intptr_t num_params,
                                              void* user_data,
                                              const char** json_object) {
-  ftl::AutoResetWaitableEvent latch;
+  fxl::AutoResetWaitableEvent latch;
   SkBitmap bitmap;
   blink::Threads::Gpu()->PostTask([&latch, &bitmap]() {
     ScreenshotGpuTask(&bitmap);
@@ -286,7 +286,7 @@ bool PlatformViewServiceProtocol::Screenshot(const char* method,
 }
 
 void PlatformViewServiceProtocol::ScreenshotGpuTask(SkBitmap* bitmap) {
-  std::vector<ftl::WeakPtr<Rasterizer>> rasterizers;
+  std::vector<fxl::WeakPtr<Rasterizer>> rasterizers;
   Shell::Shared().GetRasterizers(&rasterizers);
   if (rasterizers.size() != 1)
     return;
@@ -331,7 +331,7 @@ bool PlatformViewServiceProtocol::FlushUIThreadTasks(const char* method,
                                                    intptr_t num_params,
                                                    void* user_data,
                                                    const char** json_object) {
-  ftl::AutoResetWaitableEvent latch;
+  fxl::AutoResetWaitableEvent latch;
   blink::Threads::UI()->PostTask([&latch]() {
     // This task is empty because we just need to synchronize this RPC with the
     // UI Thread

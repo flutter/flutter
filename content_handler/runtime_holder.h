@@ -25,9 +25,9 @@
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
 #include "lib/fidl/cpp/bindings/binding.h"
-#include "lib/ftl/functional/closure.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/weak_ptr.h"
+#include "lib/fxl/functional/closure.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/weak_ptr.h"
 
 namespace flutter_runner {
 class Rasterizer;
@@ -61,7 +61,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
   void HandlePlatformMessage(
-      ftl::RefPtr<blink::PlatformMessage> message) override;
+      fxl::RefPtr<blink::PlatformMessage> message) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
 
   // |mozart::NativesDelegate| implementation:
@@ -81,7 +81,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
                       mozart::InputEventPtr event) override;
   void OnAction(mozart::InputMethodAction action) override;
 
-  ftl::WeakPtr<RuntimeHolder> GetWeakPtr();
+  fxl::WeakPtr<RuntimeHolder> GetWeakPtr();
 
   void InitRootBundle(std::vector<char> bundle);
   blink::UnzipperProvider GetUnzipperProviderForRootBundle();
@@ -102,7 +102,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   std::unique_ptr<app::ApplicationContext> context_;
   fidl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
   std::vector<char> root_bundle_data_;
-  ftl::RefPtr<blink::ZipAssetStore> asset_store_;
+  fxl::RefPtr<blink::ZipAssetStore> asset_store_;
   void* dylib_handle_ = nullptr;
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;
@@ -116,15 +116,15 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   mozart::InputMethodEditorPtr input_method_editor_;
   fidl::Binding<mozart::InputMethodEditorClient> text_input_binding_;
   int current_text_input_client_ = 0;
-  ftl::TimePoint last_begin_frame_time_;
+  fxl::TimePoint last_begin_frame_time_;
   bool frame_outstanding_ = false;
   bool frame_scheduled_ = false;
   bool frame_rendering_ = false;
   int32_t return_code_ = 0;
 
-  ftl::WeakPtrFactory<RuntimeHolder> weak_factory_;
+  fxl::WeakPtrFactory<RuntimeHolder> weak_factory_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(RuntimeHolder);
+  FXL_DISALLOW_COPY_AND_ASSIGN(RuntimeHolder);
 };
 
 }  // namespace flutter_runner

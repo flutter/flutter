@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "txt/asset_font_manager.h"
 
 namespace txt {
@@ -22,7 +22,7 @@ namespace txt {
 AssetFontManager::AssetFontManager(
     std::unique_ptr<AssetDataProvider> data_provider)
     : data_provider_(std::move(data_provider)) {
-  FTL_DCHECK(data_provider_ != nullptr);
+  FXL_DCHECK(data_provider_ != nullptr);
 }
 
 AssetFontManager::~AssetFontManager() = default;
@@ -32,11 +32,11 @@ int AssetFontManager::onCountFamilies() const {
 }
 
 void AssetFontManager::onGetFamilyName(int index, SkString* familyName) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
 }
 
 SkFontStyleSet* AssetFontManager::onCreateStyleSet(int index) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 
@@ -48,7 +48,7 @@ SkFontStyleSet* AssetFontManager::onMatchFamily(
 
 SkTypeface* AssetFontManager::onMatchFamilyStyle(const char familyName[],
                                                  const SkFontStyle&) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 
@@ -58,42 +58,42 @@ SkTypeface* AssetFontManager::onMatchFamilyStyleCharacter(
     const char* bcp47[],
     int bcp47Count,
     SkUnichar character) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 
 SkTypeface* AssetFontManager::onMatchFaceStyle(const SkTypeface*,
                                                const SkFontStyle&) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 
 SkTypeface* AssetFontManager::onCreateFromData(SkData*, int ttcIndex) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 
 SkTypeface* AssetFontManager::onCreateFromStream(SkStreamAsset*,
                                                  int ttcIndex) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 
 SkTypeface* AssetFontManager::onCreateFromStream(SkStreamAsset*,
                                                  const SkFontArguments&) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 
 SkTypeface* AssetFontManager::onCreateFromFile(const char path[],
                                                int ttcIndex) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 
 SkTypeface* AssetFontManager::onLegacyCreateTypeface(const char familyName[],
                                                      SkFontStyle) const {
-  FTL_DCHECK(false);
+  FXL_DCHECK(false);
   return nullptr;
 }
 

@@ -12,14 +12,14 @@
 
 namespace blink {
 
-class ImageFilter : public ftl::RefCountedThreadSafe<ImageFilter>,
+class ImageFilter : public fxl::RefCountedThreadSafe<ImageFilter>,
                     public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(ImageFilter);
 
  public:
   ~ImageFilter() override;
-  static ftl::RefPtr<ImageFilter> Create();
+  static fxl::RefPtr<ImageFilter> Create();
 
   void initImage(CanvasImage* image);
   void initPicture(Picture*);

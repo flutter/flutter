@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -26,7 +26,7 @@ class TracingController {
  private:
   bool tracing_active_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(TracingController);
+  FXL_DISALLOW_COPY_AND_ASSIGN(TracingController);
 };
 
 }  // namespace shell

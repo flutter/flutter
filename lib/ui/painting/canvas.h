@@ -25,13 +25,13 @@ class DartLibraryNatives;
 namespace blink {
 class CanvasImage;
 
-class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
+class Canvas : public fxl::RefCountedThreadSafe<Canvas>,
                public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Canvas);
 
  public:
-  static ftl::RefPtr<Canvas> Create(PictureRecorder* recorder,
+  static fxl::RefPtr<Canvas> Create(PictureRecorder* recorder,
                                     double left,
                                     double top,
                                     double right,

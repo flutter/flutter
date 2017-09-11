@@ -4,17 +4,17 @@
 
 #include "flutter/shell/common/vsync_waiter_fallback.h"
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "flutter/common/threads.h"
 
 namespace shell {
 namespace {
 
-ftl::TimePoint SnapToNextTick(ftl::TimePoint value,
-                              ftl::TimePoint tick_phase,
-                              ftl::TimeDelta tick_interval) {
-  ftl::TimeDelta offset = (tick_phase - value) % tick_interval;
-  if (offset != ftl::TimeDelta::Zero())
+fxl::TimePoint SnapToNextTick(fxl::TimePoint value,
+                              fxl::TimePoint tick_phase,
+                              fxl::TimeDelta tick_interval) {
+  fxl::TimeDelta offset = (tick_phase - value) % tick_interval;
+  if (offset != fxl::TimeDelta::Zero())
     offset = offset + tick_interval;
   return value + offset;
 }
@@ -22,24 +22,24 @@ ftl::TimePoint SnapToNextTick(ftl::TimePoint value,
 }  // namespace
 
 VsyncWaiterFallback::VsyncWaiterFallback()
-    : phase_(ftl::TimePoint::Now()), weak_factory_(this) {}
+    : phase_(fxl::TimePoint::Now()), weak_factory_(this) {}
 
 VsyncWaiterFallback::~VsyncWaiterFallback() = default;
 
-constexpr ftl::TimeDelta interval = ftl::TimeDelta::FromSecondsF(1.0 / 60.0);
+constexpr fxl::TimeDelta interval = fxl::TimeDelta::FromSecondsF(1.0 / 60.0);
 
 void VsyncWaiterFallback::AsyncWaitForVsync(Callback callback) {
-  FTL_DCHECK(!callback_);
+  FXL_DCHECK(!callback_);
   callback_ = std::move(callback);
 
-  ftl::TimePoint now = ftl::TimePoint::Now();
-  ftl::TimePoint next = SnapToNextTick(now, phase_, interval);
+  fxl::TimePoint now = fxl::TimePoint::Now();
+  fxl::TimePoint next = SnapToNextTick(now, phase_, interval);
 
   blink::Threads::UI()->PostDelayedTask(
       [self = weak_factory_.GetWeakPtr()] {
         if (!self)
           return;
-        ftl::TimePoint frame_time = ftl::TimePoint::Now();
+        fxl::TimePoint frame_time = fxl::TimePoint::Now();
         Callback callback = std::move(self->callback_);
         self->callback_ = Callback();
         callback(frame_time, frame_time + interval);

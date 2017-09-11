@@ -21,7 +21,7 @@
 #include <string>
 
 #include "font_collection.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "paragraph.h"
 #include "paragraph_style.h"
 #include "styled_runs.h"
@@ -83,7 +83,7 @@ class ParagraphBuilder {
   // Paragraph::Layout to cleanly discover and handle newlines.
   void SplitNewlineRuns();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
 };
 
 }  // namespace txt

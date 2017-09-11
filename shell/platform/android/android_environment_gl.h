@@ -5,15 +5,15 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_ENVIRONMENT_GL_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_ENVIRONMENT_GL_H_
 
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/ref_counted.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/ref_counted.h"
 
 #include <EGL/egl.h>
 
 namespace shell {
 
 class AndroidEnvironmentGL
-    : public ftl::RefCountedThreadSafe<AndroidEnvironmentGL> {
+    : public fxl::RefCountedThreadSafe<AndroidEnvironmentGL> {
  private:
   // MakeRefCounted
   AndroidEnvironmentGL();
@@ -32,7 +32,7 @@ class AndroidEnvironmentGL
 
   FRIEND_MAKE_REF_COUNTED(AndroidEnvironmentGL);
   FRIEND_REF_COUNTED_THREAD_SAFE(AndroidEnvironmentGL);
-  FTL_DISALLOW_COPY_AND_ASSIGN(AndroidEnvironmentGL);
+  FXL_DISALLOW_COPY_AND_ASSIGN(AndroidEnvironmentGL);
 };
 
 }  // namespace shell

@@ -355,7 +355,7 @@ namespace double_conversion {
         const int max_leading_padding_zeroes_in_precision_mode_;
         const int max_trailing_padding_zeroes_in_precision_mode_;
 
-        FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(DoubleToStringConverter);
+        FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(DoubleToStringConverter);
     };
 
 
@@ -367,7 +367,7 @@ namespace double_conversion {
         static double StringToDouble(const char* buffer, size_t length, size_t* processed_characters_count);
 
     private:
-        FTL_DISALLOW_IMPLICIT_CONSTRUCTORS(StringToDoubleConverter);
+        FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(StringToDoubleConverter);
     };
 
 }  // namespace double_conversion

@@ -217,7 +217,7 @@ public:
     {
         return m_overflow ? m_overflow->layoutOverflowRect() : enclosingLayoutRect(frameRectIncludingLineHeight(lineTop, lineBottom));
     }
-    LayoutUnit logicalLeftLayoutOverflow() const
+    LayoutUnit logicalLefxlayoutOverflow() const
     {
         return m_overflow ? m_overflow->layoutOverflowRect().x() : static_cast<LayoutUnit>(logicalLeft());
     }

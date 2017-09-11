@@ -5,7 +5,7 @@
 #ifndef FLUTTER_RUNTIME_PLATFORM_IMPL_H_
 #define FLUTTER_RUNTIME_PLATFORM_IMPL_H_
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
 
 namespace blink {
@@ -19,7 +19,7 @@ class PlatformImpl : public Platform {
   std::string defaultLocale() override;
 
  private:
-  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
+  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformImpl);
 };
 
 }  // namespace blink

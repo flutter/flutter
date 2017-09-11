@@ -6,9 +6,9 @@
 #define FLUTTER_SHELL_COMMON_VSYNC_WAITER_FALLBACK_H_
 
 #include "flutter/shell/common/vsync_waiter.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/weak_ptr.h"
-#include "lib/ftl/time/time_point.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/weak_ptr.h"
+#include "lib/fxl/time/time_point.h"
 
 namespace shell {
 
@@ -20,12 +20,12 @@ class VsyncWaiterFallback : public VsyncWaiter {
   void AsyncWaitForVsync(Callback callback) override;
 
  private:
-  ftl::TimePoint phase_;
+  fxl::TimePoint phase_;
   Callback callback_;
 
-  ftl::WeakPtrFactory<VsyncWaiterFallback> weak_factory_;
+  fxl::WeakPtrFactory<VsyncWaiterFallback> weak_factory_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterFallback);
+  FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterFallback);
 };
 
 }  // namespace shell

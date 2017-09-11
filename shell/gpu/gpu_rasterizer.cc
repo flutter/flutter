@@ -28,13 +28,13 @@ GPURasterizer::~GPURasterizer() {
   Shell::Shared().PurgeRasterizers();
 }
 
-ftl::WeakPtr<Rasterizer> GPURasterizer::GetWeakRasterizerPtr() {
+fxl::WeakPtr<Rasterizer> GPURasterizer::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
 void GPURasterizer::Setup(std::unique_ptr<Surface> surface,
-                          ftl::Closure continuation,
-                          ftl::AutoResetWaitableEvent* setup_completion_event) {
+                          fxl::Closure continuation,
+                          fxl::AutoResetWaitableEvent* setup_completion_event) {
   surface_ = std::move(surface);
 
   continuation();
@@ -65,7 +65,7 @@ void GPURasterizer::Clear(SkColor color, const SkISize& size) {
 }
 
 void GPURasterizer::Teardown(
-    ftl::AutoResetWaitableEvent* teardown_completion_event) {
+    fxl::AutoResetWaitableEvent* teardown_completion_event) {
   if (surface_) {
     surface_.reset();
   }
@@ -79,7 +79,7 @@ flow::LayerTree* GPURasterizer::GetLastLayerTree() {
 }
 
 void GPURasterizer::Draw(
-    ftl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
+    fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
 
   flutter::Pipeline<flow::LayerTree>::Consumer consumer =
@@ -142,7 +142,7 @@ void GPURasterizer::DrawToSurface(flow::LayerTree& layer_tree) {
   frame->Submit();
 }
 
-void GPURasterizer::AddNextFrameCallback(ftl::Closure nextFrameCallback) {
+void GPURasterizer::AddNextFrameCallback(fxl::Closure nextFrameCallback) {
   nextFrameCallback_ = nextFrameCallback;
 }
 

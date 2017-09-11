@@ -9,8 +9,8 @@
 
 #include "lib/ui/scenic/fidl/session.fidl.h"
 #include "flutter/flow/layers/layer_tree.h"
-#include "lib/ftl/functional/closure.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/functional/closure.h"
+#include "lib/fxl/macros.h"
 #include "magenta/system/ulib/mx/include/mx/eventpair.h"
 
 namespace flutter_runner {
@@ -24,10 +24,10 @@ class Rasterizer {
   virtual void SetScene(
       fidl::InterfaceHandle<scenic::SceneManager> scene_manager,
       mx::eventpair import_token,
-      ftl::Closure metrics_changed_callback) = 0;
+      fxl::Closure metrics_changed_callback) = 0;
 
   virtual void Draw(std::unique_ptr<flow::LayerTree> layer_tree,
-                    ftl::Closure callback) = 0;
+                    fxl::Closure callback) = 0;
 };
 
 }  // namespace flutter_runner

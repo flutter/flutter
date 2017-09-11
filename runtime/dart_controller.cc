@@ -16,8 +16,8 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/runtime/dart_init.h"
 #include "flutter/runtime/dart_service_isolate.h"
-#include "lib/ftl/files/directory.h"
-#include "lib/ftl/files/path.h"
+#include "lib/fxl/files/directory.h"
+#include "lib/fxl/files/path.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/dart_message_handler.h"
 #include "lib/tonic/dart_state.h"
@@ -35,7 +35,7 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
-// TODO(abarth): Consider adding this to //garnet/public/lib/ftl.
+// TODO(abarth): Consider adding this to //garnet/public/lib/fxl.
 std::string ResolvePath(std::string path) {
   if (!path.empty() && path[0] == '/')
     return path;
@@ -68,7 +68,7 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
   {
     // Temporarily exit the isolate while we make it runnable.
     Dart_Isolate isolate = dart_state()->isolate();
-    FTL_DCHECK(Dart_CurrentIsolate() == isolate);
+    FXL_DCHECK(Dart_CurrentIsolate() == isolate);
     Dart_ExitIsolate();
     Dart_IsolateMakeRunnable(isolate);
     Dart_EnterIsolate(isolate);
@@ -127,7 +127,7 @@ tonic::DartErrorHandleType DartController::RunFromKernel(
 
 tonic::DartErrorHandleType DartController::RunFromPrecompiledSnapshot() {
   TRACE_EVENT0("flutter", "DartController::RunFromPrecompiledSnapshot");
-  FTL_DCHECK(Dart_CurrentIsolate() == nullptr);
+  FXL_DCHECK(Dart_CurrentIsolate() == nullptr);
   tonic::DartState::Scope scope(dart_state());
   if (SendStartMessage(Dart_RootLibrary())) {
     return tonic::kUnknownErrorType;
@@ -152,7 +152,7 @@ tonic::DartErrorHandleType DartController::RunFromSource(
   tonic::DartState::Scope scope(dart_state());
   tonic::FileLoader& loader = dart_state()->file_loader();
   if (!packages.empty() && !loader.LoadPackagesMap(ResolvePath(packages)))
-    FTL_LOG(WARNING) << "Failed to load package map: " << packages;
+    FXL_LOG(WARNING) << "Failed to load package map: " << packages;
   Dart_Handle result = loader.LoadScript(main);
   LogIfError(result);
   tonic::DartErrorHandleType error = tonic::GetErrorHandleType(result);
@@ -187,7 +187,7 @@ void DartController::CreateIsolateFor(const std::string& script_uri,
         isolate_snapshot_instr, nullptr,
         static_cast<tonic::DartState*>(state.get()), &error);
   }
-  FTL_CHECK(isolate) << error;
+  FXL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();
   dart_state()->message_handler().Initialize(blink::Threads::UI());
 
@@ -195,7 +195,7 @@ void DartController::CreateIsolateFor(const std::string& script_uri,
 
   ui_dart_state_->set_debug_name_prefix(script_uri);
   ui_dart_state_->SetIsolate(isolate);
-  FTL_CHECK(!LogIfError(
+  FXL_CHECK(!LogIfError(
       Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag)));
 
   {

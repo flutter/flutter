@@ -21,7 +21,7 @@
 #include "flutter/shell/common/platform_view_service_protocol.h"
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 #include "flutter/shell/common/switches.h"
-#include "lib/ftl/files/unique_fd.h"
+#include "lib/fxl/files/unique_fd.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 
 namespace shell {
@@ -29,7 +29,7 @@ namespace {
 
 static Shell* g_shell = nullptr;
 
-bool IsInvalid(const ftl::WeakPtr<Rasterizer>& rasterizer) {
+bool IsInvalid(const fxl::WeakPtr<Rasterizer>& rasterizer) {
   return !rasterizer;
 }
 
@@ -38,7 +38,7 @@ bool IsViewInvalid(const std::weak_ptr<PlatformView>& platform_view) {
 }
 
 template <typename T>
-bool GetSwitchValue(const ftl::CommandLine& command_line,
+bool GetSwitchValue(const fxl::CommandLine& command_line,
                     Switch sw,
                     T* result) {
   std::string switch_string;
@@ -67,9 +67,9 @@ void ServiceIsolateHook(bool running_precompiled) {
 
 }  // namespace
 
-Shell::Shell(ftl::CommandLine command_line)
+Shell::Shell(fxl::CommandLine command_line)
     : command_line_(std::move(command_line)) {
-  FTL_DCHECK(!g_shell);
+  FXL_DCHECK(!g_shell);
 
   gpu_thread_.reset(new fml::Thread("gpu_thread"));
   ui_thread_.reset(new fml::Thread("ui_thread"));
@@ -94,7 +94,7 @@ Shell::Shell(ftl::CommandLine command_line)
 
 Shell::~Shell() {}
 
-void Shell::InitStandalone(ftl::CommandLine command_line,
+void Shell::InitStandalone(fxl::CommandLine command_line,
                            std::string icu_data_path,
                            std::string application_library_path) {
   TRACE_EVENT0("flutter", "Shell::InitStandalone");
@@ -114,7 +114,7 @@ void Shell::InitStandalone(ftl::CommandLine command_line,
   if (command_line.HasOption(FlagForSwitch(Switch::DeviceObservatoryPort))) {
     if (!GetSwitchValue(command_line, Switch::DeviceObservatoryPort,
                         &settings.observatory_port)) {
-      FTL_LOG(INFO)
+      FXL_LOG(INFO)
           << "Observatory port specified was malformed. Will default to "
           << settings.observatory_port;
     }
@@ -130,7 +130,7 @@ void Shell::InitStandalone(ftl::CommandLine command_line,
   if (command_line.HasOption(FlagForSwitch(Switch::DeviceDiagnosticPort))) {
     if (!GetSwitchValue(command_line, Switch::DeviceDiagnosticPort,
                         &settings.diagnostic_port)) {
-      FTL_LOG(INFO)
+      FXL_LOG(INFO)
           << "Diagnostic port specified was malformed. Will default to "
           << settings.diagnostic_port;
     }
@@ -194,22 +194,22 @@ void Shell::InitStandalone(ftl::CommandLine command_line,
   Init(std::move(command_line));
 }
 
-void Shell::Init(ftl::CommandLine command_line) {
+void Shell::Init(fxl::CommandLine command_line) {
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
   InitSkiaEventTracer();
 #endif
 
-  FTL_DCHECK(!g_shell);
+  FXL_DCHECK(!g_shell);
   g_shell = new Shell(std::move(command_line));
   blink::Threads::UI()->PostTask(Engine::Init);
 }
 
 Shell& Shell::Shared() {
-  FTL_DCHECK(g_shell);
+  FXL_DCHECK(g_shell);
   return *g_shell;
 }
 
-const ftl::CommandLine& Shell::GetCommandLine() const {
+const fxl::CommandLine& Shell::GetCommandLine() const {
   return command_line_;
 }
 
@@ -218,29 +218,29 @@ TracingController& Shell::tracing_controller() {
 }
 
 void Shell::InitGpuThread() {
-  gpu_thread_checker_.reset(new ftl::ThreadChecker());
+  gpu_thread_checker_.reset(new fxl::ThreadChecker());
 }
 
 void Shell::InitUIThread() {
-  ui_thread_checker_.reset(new ftl::ThreadChecker());
+  ui_thread_checker_.reset(new fxl::ThreadChecker());
 }
 
-void Shell::AddRasterizer(const ftl::WeakPtr<Rasterizer>& rasterizer) {
-  FTL_DCHECK(gpu_thread_checker_ &&
+void Shell::AddRasterizer(const fxl::WeakPtr<Rasterizer>& rasterizer) {
+  FXL_DCHECK(gpu_thread_checker_ &&
              gpu_thread_checker_->IsCreationThreadCurrent());
   rasterizers_.push_back(rasterizer);
 }
 
 void Shell::PurgeRasterizers() {
-  FTL_DCHECK(gpu_thread_checker_ &&
+  FXL_DCHECK(gpu_thread_checker_ &&
              gpu_thread_checker_->IsCreationThreadCurrent());
   rasterizers_.erase(
       std::remove_if(rasterizers_.begin(), rasterizers_.end(), IsInvalid),
       rasterizers_.end());
 }
 
-void Shell::GetRasterizers(std::vector<ftl::WeakPtr<Rasterizer>>* rasterizers) {
-  FTL_DCHECK(gpu_thread_checker_ &&
+void Shell::GetRasterizers(std::vector<fxl::WeakPtr<Rasterizer>>* rasterizers) {
+  FXL_DCHECK(gpu_thread_checker_ &&
              gpu_thread_checker_->IsCreationThreadCurrent());
   *rasterizers = rasterizers_;
 }
@@ -290,12 +290,12 @@ void Shell::RunInPlatformView(uintptr_t view_id,
                               bool* view_existed,
                               int64_t* dart_isolate_id,
                               std::string* isolate_name) {
-  ftl::AutoResetWaitableEvent latch;
-  FTL_DCHECK(view_id != 0);
-  FTL_DCHECK(main_script);
-  FTL_DCHECK(packages_file);
-  FTL_DCHECK(asset_directory);
-  FTL_DCHECK(view_existed);
+  fxl::AutoResetWaitableEvent latch;
+  FXL_DCHECK(view_id != 0);
+  FXL_DCHECK(main_script);
+  FXL_DCHECK(packages_file);
+  FXL_DCHECK(asset_directory);
+  FXL_DCHECK(view_existed);
 
   blink::Threads::UI()->PostTask([this, view_id, main_script, packages_file,
                                   asset_directory, view_existed,
@@ -314,8 +314,8 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
                                       bool* view_existed,
                                       int64_t* dart_isolate_id,
                                       std::string* isolate_name,
-                                      ftl::AutoResetWaitableEvent* latch) {
-  FTL_DCHECK(ui_thread_checker_ &&
+                                      fxl::AutoResetWaitableEvent* latch) {
+  FXL_DCHECK(ui_thread_checker_ &&
              ui_thread_checker_->IsCreationThreadCurrent());
 
   *view_existed = false;

@@ -31,8 +31,8 @@ void PictureRecorder::RegisterNatives(tonic::DartLibraryNatives* natives) {
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-ftl::RefPtr<PictureRecorder> PictureRecorder::Create() {
-  return ftl::MakeRefCounted<PictureRecorder>();
+fxl::RefPtr<PictureRecorder> PictureRecorder::Create() {
+  return fxl::MakeRefCounted<PictureRecorder>();
 }
 
 PictureRecorder::PictureRecorder() {}
@@ -47,10 +47,10 @@ SkCanvas* PictureRecorder::BeginRecording(SkRect bounds) {
   return picture_recorder_.beginRecording(bounds, &rtree_factory_);
 }
 
-ftl::RefPtr<Picture> PictureRecorder::endRecording() {
+fxl::RefPtr<Picture> PictureRecorder::endRecording() {
   if (!isRecording())
     return nullptr;
-  ftl::RefPtr<Picture> picture =
+  fxl::RefPtr<Picture> picture =
       Picture::Create(picture_recorder_.finishRecordingAsPicture());
   canvas_->Clear();
   canvas_->ClearDartWrapper();

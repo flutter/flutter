@@ -394,9 +394,9 @@ namespace double_conversion {
             boundary.MultiplyByPowerOfTen(-exponent);
         }
         if (upper_boundary.e() > 0) {
-            boundary.ShiftLeft(upper_boundary.e());
+            boundary.Shifxleft(upper_boundary.e());
         } else {
-            input.ShiftLeft(-upper_boundary.e());
+            input.Shifxleft(-upper_boundary.e());
         }
         int comparison = Bignum::Compare(input, boundary);
         if (comparison < 0) {

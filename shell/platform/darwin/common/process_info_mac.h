@@ -9,7 +9,7 @@
 #include <mach/task.h>
 #include <cstdlib>
 #include "flutter/flow/process_info.h"
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace shell {
 
@@ -28,7 +28,7 @@ class ProcessInfoMac : public flow::ProcessInfo {
  private:
   struct mach_task_basic_info last_sample_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ProcessInfoMac);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ProcessInfoMac);
 };
 
 }  // namespace shell

@@ -7,13 +7,13 @@
 
 #include <vector>
 
-#include "lib/ftl/memory/ref_counted.h"
-#include "lib/ftl/memory/ref_ptr.h"
+#include "lib/fxl/memory/ref_counted.h"
+#include "lib/fxl/memory/ref_ptr.h"
 
 namespace blink {
 
 class PlatformMessageResponse
-    : public ftl::RefCountedThreadSafe<PlatformMessageResponse> {
+    : public fxl::RefCountedThreadSafe<PlatformMessageResponse> {
   FRIEND_REF_COUNTED_THREAD_SAFE(PlatformMessageResponse);
 
  public:

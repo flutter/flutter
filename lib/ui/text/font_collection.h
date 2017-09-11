@@ -8,8 +8,8 @@
 #include <memory>
 #include <vector>
 #include "flutter/assets/zip_asset_store.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/ref_ptr.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/ref_ptr.h"
 #include "txt/asset_data_provider.h"
 #include "txt/font_collection.h"
 
@@ -22,7 +22,7 @@ class FontCollection {
   std::shared_ptr<txt::FontCollection> GetFontCollection() const;
 
   void RegisterFontsFromAssetStore(
-      ftl::RefPtr<blink::ZipAssetStore> asset_store);
+      fxl::RefPtr<blink::ZipAssetStore> asset_store);
 
  private:
   std::shared_ptr<txt::FontCollection> collection_;
@@ -31,7 +31,7 @@ class FontCollection {
 
   ~FontCollection();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
+  FXL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
 
 }  // namespace blink

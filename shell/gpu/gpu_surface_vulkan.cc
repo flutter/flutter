@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/gpu/gpu_surface_vulkan.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace shell {
 
 GPUSurfaceVulkan::GPUSurfaceVulkan(
-    ftl::RefPtr<vulkan::VulkanProcTable> proc_table,
+    fxl::RefPtr<vulkan::VulkanProcTable> proc_table,
     std::unique_ptr<vulkan::VulkanNativeSurface> native_surface)
     : window_(std::move(proc_table), std::move(native_surface)),
       weak_factory_(this) {}

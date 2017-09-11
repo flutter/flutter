@@ -34,7 +34,7 @@ UIDartState* UIDartState::CreateForChildIsolate() {
 }
 
 void UIDartState::DidSetIsolate() {
-  FTL_DCHECK(!debug_name_prefix_.empty());
+  FXL_DCHECK(!debug_name_prefix_.empty());
   main_port_ = Dart_GetMainPortId();
   std::ostringstream debug_name;
   debug_name << debug_name_prefix_ << "$main-" << main_port_;

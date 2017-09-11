@@ -6,7 +6,7 @@
 
 #include <memory>
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace blink {
 namespace {
@@ -16,12 +16,12 @@ Settings* g_settings = nullptr;
 }  // namespace
 
 const Settings& Settings::Get() {
-  FTL_CHECK(g_settings);
+  FXL_CHECK(g_settings);
   return *g_settings;
 }
 
 void Settings::Set(const Settings& settings) {
-  FTL_CHECK(!g_settings);
+  FXL_CHECK(!g_settings);
   g_settings = new Settings();
   *g_settings = settings;
 }

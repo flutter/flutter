@@ -10,8 +10,8 @@
 #include <windows.h>
 
 #include "flutter/fml/message_loop_impl.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/unique_object.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/unique_object.h"
 
 namespace fml {
 
@@ -24,7 +24,7 @@ class MessageLoopWin : public MessageLoopImpl {
   };
 
   bool running_;
-  ftl::UniqueObject<HANDLE, UniqueHandleTraits> timer_;
+  fxl::UniqueObject<HANDLE, UniqueHandleTraits> timer_;
 
   MessageLoopWin();
 
@@ -34,11 +34,11 @@ class MessageLoopWin : public MessageLoopImpl {
 
   void Terminate() override;
 
-  void WakeUp(ftl::TimePoint time_point) override;
+  void WakeUp(fxl::TimePoint time_point) override;
 
   FRIEND_MAKE_REF_COUNTED(MessageLoopWin);
   FRIEND_REF_COUNTED_THREAD_SAFE(MessageLoopWin);
-  FTL_DISALLOW_COPY_AND_ASSIGN(MessageLoopWin);
+  FXL_DISALLOW_COPY_AND_ASSIGN(MessageLoopWin);
 };
 
 }  // namespace fml

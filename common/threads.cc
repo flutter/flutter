@@ -15,10 +15,10 @@ Threads* g_threads = nullptr;
 
 Threads::Threads() {}
 
-Threads::Threads(ftl::RefPtr<ftl::TaskRunner> platform,
-                 ftl::RefPtr<ftl::TaskRunner> gpu,
-                 ftl::RefPtr<ftl::TaskRunner> ui,
-                 ftl::RefPtr<ftl::TaskRunner> io)
+Threads::Threads(fxl::RefPtr<fxl::TaskRunner> platform,
+                 fxl::RefPtr<fxl::TaskRunner> gpu,
+                 fxl::RefPtr<fxl::TaskRunner> ui,
+                 fxl::RefPtr<fxl::TaskRunner> io)
     : platform_(std::move(platform)),
       gpu_(std::move(gpu)),
       ui_(std::move(ui)),
@@ -26,29 +26,29 @@ Threads::Threads(ftl::RefPtr<ftl::TaskRunner> platform,
 
 Threads::~Threads() {}
 
-const ftl::RefPtr<ftl::TaskRunner>& Threads::Platform() {
+const fxl::RefPtr<fxl::TaskRunner>& Threads::Platform() {
   return Get().platform_;
 }
 
-const ftl::RefPtr<ftl::TaskRunner>& Threads::Gpu() {
+const fxl::RefPtr<fxl::TaskRunner>& Threads::Gpu() {
   return Get().gpu_;
 }
 
-const ftl::RefPtr<ftl::TaskRunner>& Threads::UI() {
+const fxl::RefPtr<fxl::TaskRunner>& Threads::UI() {
   return Get().ui_;
 }
 
-const ftl::RefPtr<ftl::TaskRunner>& Threads::IO() {
+const fxl::RefPtr<fxl::TaskRunner>& Threads::IO() {
   return Get().io_;
 }
 
 const Threads& Threads::Get() {
-  FTL_CHECK(g_threads);
+  FXL_CHECK(g_threads);
   return *g_threads;
 }
 
 void Threads::Set(const Threads& threads) {
-  FTL_CHECK(!g_threads);
+  FXL_CHECK(!g_threads);
   g_threads = new Threads();
   *g_threads = threads;
 }

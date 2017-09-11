@@ -9,13 +9,13 @@
 #include <vector>
 
 #include "flutter/assets/unzipper_provider.h"
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/ref_counted.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/ref_counted.h"
 #include "third_party/zlib/contrib/minizip/unzip.h"
 
 namespace blink {
 
-class ZipAssetStore : public ftl::RefCountedThreadSafe<ZipAssetStore> {
+class ZipAssetStore : public fxl::RefCountedThreadSafe<ZipAssetStore> {
  public:
   explicit ZipAssetStore(UnzipperProvider unzipper_provider);
   ~ZipAssetStore();
@@ -35,7 +35,7 @@ class ZipAssetStore : public ftl::RefCountedThreadSafe<ZipAssetStore> {
 
   void BuildStatCache();
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(ZipAssetStore);
+  FXL_DISALLOW_COPY_AND_ASSIGN(ZipAssetStore);
 };
 
 }  // namespace blink

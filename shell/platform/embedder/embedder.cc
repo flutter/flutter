@@ -8,7 +8,7 @@
 #include <type_traits>
 #include "flutter/common/threads.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
-#include "lib/ftl/functional/make_copyable.h"
+#include "lib/fxl/functional/make_copyable.h"
 
 #define SAFE_ACCESS(pointer, member, default_value)                      \
   ({                                                                     \
@@ -51,7 +51,7 @@ class PlatformViewHolder {
  private:
   std::shared_ptr<shell::PlatformViewEmbedder> platform_view_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewHolder);
+  FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewHolder);
 };
 
 FlutterResult FlutterEngineRun(size_t version,
@@ -102,9 +102,9 @@ FlutterResult FlutterEngineRun(size_t version,
 
   static std::once_flag once_shell_initialization;
   std::call_once(once_shell_initialization, [&]() {
-    ftl::CommandLine null_command_line;
+    fxl::CommandLine null_command_line;
     shell::Shell::InitStandalone(
-        ftl::CommandLine{},
+        fxl::CommandLine{},
         "",  // icu data path default lookup.
         ""   // application library not supported in JIT mode.
     );
@@ -214,7 +214,7 @@ FlutterResult FlutterEngineSendPointerEvent(FlutterEngine engine,
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);
   }
 
-  blink::Threads::UI()->PostTask(ftl::MakeCopyable([
+  blink::Threads::UI()->PostTask(fxl::MakeCopyable([
     weak_engine = reinterpret_cast<PlatformViewHolder*>(engine)
                       ->view()
                       ->engine()

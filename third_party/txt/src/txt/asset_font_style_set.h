@@ -6,7 +6,7 @@
 #define TXT_ASSET_FONT_STYLE_SET_H_
 
 #include <vector>
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkFontStyle.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
@@ -36,7 +36,7 @@ class AssetFontStyleSet : public SkFontStyleSet {
  private:
   std::vector<sk_sp<SkTypeface>> typefaces_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(AssetFontStyleSet);
+  FXL_DISALLOW_COPY_AND_ASSIGN(AssetFontStyleSet);
 };
 
 }  // namespace txt

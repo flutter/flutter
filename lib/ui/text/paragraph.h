@@ -21,19 +21,19 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class Paragraph : public ftl::RefCountedThreadSafe<Paragraph>,
+class Paragraph : public fxl::RefCountedThreadSafe<Paragraph>,
                   public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(Paragraph);
 
  public:
-  static ftl::RefPtr<Paragraph> Create(PassOwnPtr<RenderView> renderView) {
-    return ftl::MakeRefCounted<Paragraph>(renderView);
+  static fxl::RefPtr<Paragraph> Create(PassOwnPtr<RenderView> renderView) {
+    return fxl::MakeRefCounted<Paragraph>(renderView);
   }
 
-  static ftl::RefPtr<Paragraph> Create(
+  static fxl::RefPtr<Paragraph> Create(
       std::unique_ptr<txt::Paragraph> paragraph) {
-    return ftl::MakeRefCounted<Paragraph>(std::move(paragraph));
+    return fxl::MakeRefCounted<Paragraph>(std::move(paragraph));
   }
 
   ~Paragraph() override;

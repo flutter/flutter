@@ -5,8 +5,8 @@
 #include "gpu_surface_gl.h"
 
 #include "flutter/glue/trace_event.h"
-#include "lib/ftl/arraysize.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/arraysize.h"
+#include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
@@ -25,7 +25,7 @@ static const size_t kGrCacheMaxByteSize = 512 * (1 << 20);
 GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
     : delegate_(delegate), weak_factory_(this) {
   if (!delegate_->GLContextMakeCurrent()) {
-    FTL_LOG(ERROR)
+    FXL_LOG(ERROR)
         << "Could not make the context current to setup the gr context.";
     return;
   }
@@ -40,7 +40,7 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
       GrContext::Create(kOpenGL_GrBackend, backend_context, options));
 
   if (context == nullptr) {
-    FTL_LOG(ERROR) << "Failed to setup Skia Gr context.";
+    FXL_LOG(ERROR) << "Failed to setup Skia Gr context.";
     return;
   }
 
@@ -59,7 +59,7 @@ GPUSurfaceGL::~GPUSurfaceGL() {
   }
 
   if (!delegate_->GLContextMakeCurrent()) {
-    FTL_LOG(ERROR) << "Could not make the context current to destroy the "
+    FXL_LOG(ERROR) << "Could not make the context current to destroy the "
                       "GrContext resources.";
     return;
   }
@@ -159,7 +159,7 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
   offscreen_surface_ = nullptr;
 
   if (size.isEmpty()) {
-    FTL_LOG(ERROR) << "Cannot create surfaces of empty size.";
+    FXL_LOG(ERROR) << "Cannot create surfaces of empty size.";
     return false;
   }
 
@@ -173,7 +173,7 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
   if (onscreen_surface == nullptr) {
     // If the onscreen surface could not be wrapped. There is absolutely no
     // point in moving forward.
-    FTL_LOG(ERROR) << "Could not wrap onscreen surface.";
+    FXL_LOG(ERROR) << "Could not wrap onscreen surface.";
     return false;
   }
 
@@ -186,7 +186,7 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
       static bool warned_once = false;
       if (!warned_once) {
         warned_once = true;
-        FTL_LOG(ERROR) << "WARNING: Could not create offscreen surface. This "
+        FXL_LOG(ERROR) << "WARNING: Could not create offscreen surface. This "
                           "device or emulator does not support "
                           "color correct rendering. Fallbacks are in effect. "
                           "Colors on this device will differ from those "
@@ -208,7 +208,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
   }
 
   if (!delegate_->GLContextMakeCurrent()) {
-    FTL_LOG(ERROR)
+    FXL_LOG(ERROR)
         << "Could not make the context current to acquire the frame.";
     return nullptr;
   }

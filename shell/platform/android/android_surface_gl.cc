@@ -7,23 +7,23 @@
 #include <utility>
 
 #include "flutter/common/threads.h"
-#include "lib/ftl/logging.h"
-#include "lib/ftl/memory/ref_ptr.h"
+#include "lib/fxl/logging.h"
+#include "lib/fxl/memory/ref_ptr.h"
 
 namespace shell {
 
-static ftl::RefPtr<AndroidContextGL> GlobalResourceLoadingContext(
+static fxl::RefPtr<AndroidContextGL> GlobalResourceLoadingContext(
     PlatformView::SurfaceConfig offscreen_config) {
   // AndroidSurfaceGL instances are only ever created on the platform thread. So
   // there is no need to lock here.
 
-  static ftl::RefPtr<AndroidContextGL> global_context;
+  static fxl::RefPtr<AndroidContextGL> global_context;
 
   if (global_context) {
     return global_context;
   }
 
-  auto environment = ftl::MakeRefCounted<AndroidEnvironmentGL>();
+  auto environment = fxl::MakeRefCounted<AndroidEnvironmentGL>();
 
   if (!environment->IsValid()) {
     return nullptr;
@@ -33,7 +33,7 @@ static ftl::RefPtr<AndroidContextGL> GlobalResourceLoadingContext(
   // across multiple invocations.
 
   auto context =
-      ftl::MakeRefCounted<AndroidContextGL>(environment, offscreen_config);
+      fxl::MakeRefCounted<AndroidContextGL>(environment, offscreen_config);
 
   if (!context->IsValid()) {
     return nullptr;
@@ -64,7 +64,7 @@ bool AndroidSurfaceGL::IsOffscreenContextValid() const {
 }
 
 void AndroidSurfaceGL::TeardownOnScreenContext() {
-  ftl::AutoResetWaitableEvent latch;
+  fxl::AutoResetWaitableEvent latch;
   blink::Threads::Gpu()->PostTask([this, &latch]() {
     if (IsValid()) {
       GLContextClearCurrent();
@@ -89,21 +89,21 @@ std::unique_ptr<Surface> AndroidSurfaceGL::CreateGPUSurface() {
 }
 
 SkISize AndroidSurfaceGL::OnScreenSurfaceSize() const {
-  FTL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
+  FXL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
   return onscreen_context_->GetSize();
 }
 
 bool AndroidSurfaceGL::OnScreenSurfaceResize(const SkISize& size) const {
-  FTL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
+  FXL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
   return onscreen_context_->Resize(size);
 }
 
 bool AndroidSurfaceGL::ResourceContextMakeCurrent() {
-  FTL_DCHECK(offscreen_context_ && offscreen_context_->IsValid());
+  FXL_DCHECK(offscreen_context_ && offscreen_context_->IsValid());
   return offscreen_context_->MakeCurrent();
 }
 
-bool AndroidSurfaceGL::SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
+bool AndroidSurfaceGL::SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
                                        PlatformView::SurfaceConfig config) {
   // In any case, we want to get rid of our current onscreen context.
   onscreen_context_ = nullptr;
@@ -115,7 +115,7 @@ bool AndroidSurfaceGL::SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
   }
 
   // Create the onscreen context.
-  onscreen_context_ = ftl::MakeRefCounted<AndroidContextGL>(
+  onscreen_context_ = fxl::MakeRefCounted<AndroidContextGL>(
       offscreen_context_->Environment(), config,
       offscreen_context_.get() /* sharegroup */);
 
@@ -133,22 +133,22 @@ bool AndroidSurfaceGL::SetNativeWindow(ftl::RefPtr<AndroidNativeWindow> window,
 }
 
 bool AndroidSurfaceGL::GLContextMakeCurrent() {
-  FTL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
+  FXL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
   return onscreen_context_->MakeCurrent();
 }
 
 bool AndroidSurfaceGL::GLContextClearCurrent() {
-  FTL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
+  FXL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
   return onscreen_context_->ClearCurrent();
 }
 
 bool AndroidSurfaceGL::GLContextPresent() {
-  FTL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
+  FXL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
   return onscreen_context_->SwapBuffers();
 }
 
 intptr_t AndroidSurfaceGL::GLContextFBO() const {
-  FTL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
+  FXL_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
   // The default window bound framebuffer on Android.
   return 0;
 }

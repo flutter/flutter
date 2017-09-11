@@ -5,7 +5,7 @@
 #ifndef FLUTTER_FML_PLATFORM_LINUX_TIMER_FD_H_
 #define FLUTTER_FML_PLATFORM_LINUX_TIMER_FD_H_
 
-#include "lib/ftl/time/time_point.h"
+#include "lib/fxl/time/time_point.h"
 
 // clang-format off
 #if __has_include(<sys/timerfd.h>)
@@ -41,7 +41,7 @@ int timerfd_settime(int ufc,
 namespace fml {
 
 /// Rearms the timer to expire at the given time point.
-bool TimerRearm(int fd, ftl::TimePoint time_point);
+bool TimerRearm(int fd, fxl::TimePoint time_point);
 
 /// Drains the timer FD and retuns true if it has expired. This may be false in
 /// case the timer read is non-blocking and this routine was called before the

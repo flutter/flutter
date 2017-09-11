@@ -19,23 +19,23 @@ class DartLibraryNatives;
 
 namespace blink {
 
-class SceneHost : public ftl::RefCountedThreadSafe<SceneHost>,
+class SceneHost : public fxl::RefCountedThreadSafe<SceneHost>,
                   public tonic::DartWrappable {
   DEFINE_WRAPPERTYPEINFO();
   FRIEND_MAKE_REF_COUNTED(SceneHost);
 
  public:
 #if defined(OS_FUCHSIA)
-  static ftl::RefPtr<SceneHost> create(
-      ftl::RefPtr<zircon::dart::Handle> export_token_handle);
+  static fxl::RefPtr<SceneHost> create(
+      fxl::RefPtr<zircon::dart::Handle> export_token_handle);
 #else
-  static ftl::RefPtr<SceneHost> create(Dart_Handle export_token_handle);
+  static fxl::RefPtr<SceneHost> create(Dart_Handle export_token_handle);
 #endif
 
   ~SceneHost() override;
 
 #if defined(OS_FUCHSIA)
-  const ftl::RefPtr<flow::ExportNodeHolder>& export_node_holder() const {
+  const fxl::RefPtr<flow::ExportNodeHolder>& export_node_holder() const {
     return export_node_holder_;
   }
 #endif
@@ -46,11 +46,11 @@ class SceneHost : public ftl::RefCountedThreadSafe<SceneHost>,
 
  private:
 #if defined(OS_FUCHSIA)
-  ftl::RefPtr<flow::ExportNodeHolder> export_node_holder_;
+  fxl::RefPtr<flow::ExportNodeHolder> export_node_holder_;
 #endif
 
 #if defined(OS_FUCHSIA)
-  explicit SceneHost(ftl::RefPtr<zircon::dart::Handle> export_token_handle);
+  explicit SceneHost(fxl::RefPtr<zircon::dart::Handle> export_token_handle);
 #else
   explicit SceneHost(Dart_Handle export_token_handle);
 #endif

@@ -25,12 +25,12 @@ VulkanSurfacePool::AcquireSurface(const SkISize& size) {
   auto surface = GetCachedOrCreateSurface(size);
 
   if (surface == nullptr) {
-    FTL_DLOG(ERROR) << "Could not acquire surface";
+    FXL_DLOG(ERROR) << "Could not acquire surface";
     return nullptr;
   }
 
   if (!surface->FlushSessionAcquireAndReleaseEvents()) {
-    FTL_DLOG(ERROR) << "Could not flush acquir/release events for buffer.";
+    FXL_DLOG(ERROR) << "Could not flush acquir/release events for buffer.";
     return nullptr;
   }
 
@@ -44,7 +44,7 @@ VulkanSurfacePool::GetCachedOrCreateSurface(const SkISize& size) {
     return CreateSurface(size);
   }
   SurfacesSet& available_surfaces = found_in_available->second;
-  FTL_DCHECK(available_surfaces.size() > 0);
+  FXL_DCHECK(available_surfaces.size() > 0);
   auto acquired_surface = std::move(available_surfaces.back());
   available_surfaces.pop_back();
   if (available_surfaces.size() == 0) {

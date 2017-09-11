@@ -6,15 +6,15 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_NATIVE_WINDOW_H_
 
 #include <android/native_window.h>
-#include "lib/ftl/macros.h"
-#include "lib/ftl/memory/ref_counted.h"
-#include "lib/ftl/memory/ref_ptr.h"
+#include "lib/fxl/macros.h"
+#include "lib/fxl/memory/ref_counted.h"
+#include "lib/fxl/memory/ref_ptr.h"
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace shell {
 
 class AndroidNativeWindow
-    : public ftl::RefCountedThreadSafe<AndroidNativeWindow> {
+    : public fxl::RefCountedThreadSafe<AndroidNativeWindow> {
  public:
   using Handle = ANativeWindow*;
 
@@ -35,7 +35,7 @@ class AndroidNativeWindow
 
   FRIEND_MAKE_REF_COUNTED(AndroidNativeWindow);
   FRIEND_REF_COUNTED_THREAD_SAFE(AndroidNativeWindow);
-  FTL_DISALLOW_COPY_AND_ASSIGN(AndroidNativeWindow);
+  FXL_DISALLOW_COPY_AND_ASSIGN(AndroidNativeWindow);
 };
 
 }  // namespace shell

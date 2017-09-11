@@ -26,10 +26,10 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/runtime/start_up.h"
-#include "lib/ftl/arraysize.h"
-#include "lib/ftl/build_config.h"
-#include "lib/ftl/logging.h"
-#include "lib/ftl/time/time_delta.h"
+#include "lib/fxl/arraysize.h"
+#include "lib/fxl/build_config.h"
+#include "lib/fxl/logging.h"
+#include "lib/fxl/time/time_delta.h"
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_class_library.h"
 #include "lib/tonic/dart_state.h"
@@ -84,7 +84,7 @@ static const char* kDartPrecompilationArgs[] = {
     "--precompilation",
 };
 
-static const char* kDartWriteProtectCodeArgs[] FTL_ALLOW_UNUSED_TYPE = {
+static const char* kDartWriteProtectCodeArgs[] FXL_ALLOW_UNUSED_TYPE = {
     "--no_write_protect_code",
 };
 
@@ -109,7 +109,7 @@ static const char* kDartEndlessTraceBufferArgs[]{
     "--timeline_recorder=endless",
 };
 
-static const char* kDartFuchsiaTraceArgs[] FTL_ALLOW_UNUSED_TYPE = {
+static const char* kDartFuchsiaTraceArgs[] FXL_ALLOW_UNUSED_TYPE = {
    "--systrace_timeline",
    "--timeline_streams=VM,Isolate,Compiler,Dart,GC",
 };
@@ -127,10 +127,10 @@ static RegisterNativeServiceProtocolExtensionHook
 void IsolateShutdownCallback(void* callback_data) {
   if (tonic::DartStickyError::IsSet()) {
     tonic::DartApiScope api_scope;
-    FTL_LOG(ERROR) << "Isolate " << tonic::StdStringFromDart(Dart_DebugName())
+    FXL_LOG(ERROR) << "Isolate " << tonic::StdStringFromDart(Dart_DebugName())
                    << " exited with an error";
     Dart_Handle sticky_error = Dart_GetStickyError();
-    FTL_CHECK(LogIfError(sticky_error));
+    FXL_CHECK(LogIfError(sticky_error));
   }
   tonic::DartState* dart_state = static_cast<tonic::DartState*>(callback_data);
   delete dart_state;
@@ -159,8 +159,8 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
   // We add one to st_mtime because st_mtime has less precision than since_ms
   // and we want to treat the file as modified if the since time is between
   // ticks of the mtime.
-  ftl::TimeDelta mtime = ftl::TimeDelta::FromSeconds(info.st_mtime + 1);
-  ftl::TimeDelta since = ftl::TimeDelta::FromMilliseconds(since_ms);
+  fxl::TimeDelta mtime = fxl::TimeDelta::FromSeconds(info.st_mtime + 1);
+  fxl::TimeDelta since = fxl::TimeDelta::FromMilliseconds(since_ms);
 
   return mtime > since;
 }
@@ -191,10 +191,10 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, "main", g_default_isolate_snapshot_data,
       g_default_isolate_snapshot_instructions, nullptr, dart_state, error);
-  FTL_CHECK(isolate) << error;
+  FXL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
-  FTL_CHECK(Dart_IsServiceIsolate(isolate));
-  FTL_CHECK(!LogIfError(
+  FXL_CHECK(Dart_IsServiceIsolate(isolate));
+  FXL_CHECK(!LogIfError(
       Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag)));
   {
     tonic::DartApiScope dart_api_scope;
@@ -209,7 +209,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
       const bool service_isolate_booted = DartServiceIsolate::Startup(
           ip, port, tonic::DartState::HandleLibraryTag,
           IsRunningPrecompiledCode(), disable_websocket_origin_check, error);
-      FTL_CHECK(service_isolate_booted) << error;
+      FXL_CHECK(service_isolate_booted) << error;
     }
 
     if (g_service_isolate_hook)
@@ -260,8 +260,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     if (!running_from_source) {
       // Attempt to copy the snapshot from the asset bundle.
       const std::string& bundle_path = entry_path;
-      ftl::RefPtr<ZipAssetStore> zip_asset_store =
-          ftl::MakeRefCounted<ZipAssetStore>(
+      fxl::RefPtr<ZipAssetStore> zip_asset_store =
+          fxl::MakeRefCounted<ZipAssetStore>(
               GetUnzipperProviderForPath(std::move(bundle_path)));
       zip_asset_store->GetAsBuffer(kKernelAssetKey, &kernel_data);
       zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data);
@@ -271,7 +271,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       if (!platform_data.empty()) {
         kernel_platform =
             Dart_ReadKernelBinary(platform_data.data(), platform_data.size());
-        FTL_DCHECK(kernel_platform != NULL);
+        FXL_DCHECK(kernel_platform != NULL);
       }
     }
   }
@@ -284,9 +284,9 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
             nullptr /* flags */, dart_state, error)
       : Dart_CreateIsolate(script_uri, main, g_default_isolate_snapshot_data,
             g_default_isolate_snapshot_instructions, nullptr, dart_state, error);
-  FTL_CHECK(isolate) << error;
+  FXL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
-  FTL_CHECK(!LogIfError(
+  FXL_CHECK(!LogIfError(
       Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag)));
 
   {
@@ -302,11 +302,11 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
     if (!kernel_data.empty()) {
       // We are running kernel code.
-      FTL_CHECK(!LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(kernel_data.data(),
+      FXL_CHECK(!LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(kernel_data.data(),
                                                                   kernel_data.size()))));
     } else if (!snapshot_data.empty()) {
       // We are running from a script snapshot.
-      FTL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
+      FXL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
                                                         snapshot_data.size())));
     } else if (running_from_source) {
       // We are running from source.
@@ -316,10 +316,10 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       const std::string& packages = parent_loader.packages();
       tonic::FileLoader& loader = dart_state->file_loader();
       if (!packages.empty() && !loader.LoadPackagesMap(packages)) {
-        FTL_LOG(WARNING) << "Failed to load package map: " << packages;
+        FXL_LOG(WARNING) << "Failed to load package map: " << packages;
       }
       // Load the script.
-      FTL_CHECK(!LogIfError(loader.LoadScript(entry_path)));
+      FXL_CHECK(!LogIfError(loader.LoadScript(entry_path)));
     }
 
     dart_state->isolate_client()->DidCreateSecondaryIsolate(isolate);
@@ -327,7 +327,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
   Dart_ExitIsolate();
 
-  FTL_CHECK(Dart_IsolateMakeRunnable(isolate));
+  FXL_CHECK(Dart_IsolateMakeRunnable(isolate));
   return isolate;
 }
 
@@ -419,13 +419,13 @@ static std::vector<const char*> ProfilingFlags(bool enable_profiling) {
 }
 
 void SetServiceIsolateHook(ServiceIsolateHook hook) {
-  FTL_CHECK(!g_service_isolate_initialized);
+  FXL_CHECK(!g_service_isolate_initialized);
   g_service_isolate_hook = hook;
 }
 
 void SetRegisterNativeServiceProtocolExtensionHook(
     RegisterNativeServiceProtocolExtensionHook hook) {
-  FTL_CHECK(!g_service_isolate_initialized);
+  FXL_CHECK(!g_service_isolate_initialized);
   g_register_native_service_protocol_extensions_hook = hook;
 }
 
@@ -526,7 +526,7 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
   for (size_t i = 0; i < settings.dart_flags.size(); i++)
     args.push_back(settings.dart_flags[i].c_str());
 
-  FTL_CHECK(Dart_SetVMFlags(args.size(), args.data()));
+  FXL_CHECK(Dart_SetVMFlags(args.size(), args.data()));
 
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
   if (!IsRunningPrecompiledCode()) {
@@ -557,7 +557,7 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
     params.get_service_assets = GetVMServiceAssetsArchiveCallback;
     char* init_error = Dart_Initialize(&params);
     if (init_error != nullptr)
-      FTL_LOG(FATAL) << "Error while initializing the Dart VM: " << init_error;
+      FXL_LOG(FATAL) << "Error while initializing the Dart VM: " << init_error;
     free(init_error);
 
     // Send the earliest available timestamp in the application lifecycle to

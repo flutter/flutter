@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 #include "third_party/skia/include/utils/SkEventTracer.h"
 #include "third_party/skia/src/core/SkTraceEventCommon.h"
 
@@ -72,7 +72,7 @@ class FlutterEventTracer : public SkEventTracer {
   }
 
  private:
-  FTL_DISALLOW_COPY_AND_ASSIGN(FlutterEventTracer);
+  FXL_DISALLOW_COPY_AND_ASSIGN(FlutterEventTracer);
 };
 
 }  // namespace skia

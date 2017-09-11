@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "lib/ftl/macros.h"
+#include "lib/fxl/macros.h"
 
 namespace blink {
 
@@ -24,7 +24,7 @@ class DirectoryAssetBundle {
 
   const std::string directory_;
 
-  FTL_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetBundle);
+  FXL_DISALLOW_COPY_AND_ASSIGN(DirectoryAssetBundle);
 };
 
 }  // namespace blink

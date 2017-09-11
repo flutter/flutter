@@ -11,7 +11,7 @@ Rasterizer::~Rasterizer() = default;
 
 std::unique_ptr<Rasterizer> Rasterizer::Create() {
   auto vulkan_rasterizer = std::make_unique<VulkanRasterizer>();
-  FTL_CHECK(vulkan_rasterizer)
+  FXL_CHECK(vulkan_rasterizer)
       << "The vulkan rasterizer must be correctly initialized.";
   return vulkan_rasterizer;
 }

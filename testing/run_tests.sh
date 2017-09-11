@@ -2,7 +2,7 @@
 
 set -ex
 
-out/host_debug_unopt/ftl_unittests
+out/host_debug_unopt/fxl_unittests
 out/host_debug_unopt/synchronization_unittests
 out/host_debug_unopt/wtf_unittests
 
