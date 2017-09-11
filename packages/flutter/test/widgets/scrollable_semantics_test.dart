@@ -250,6 +250,8 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Item 1'));
     expect(semantics, includesNodeWith(label: 'Item 2'));
     expect(semantics, includesNodeWith(label: 'Item 3'));
+
+    semantics.dispose();
   });
 }
 
