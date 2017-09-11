@@ -669,7 +669,7 @@ public class FlutterView extends SurfaceView
     }
 
     // Called by native to send us a platform message.
-    private void handlePlatformMessage(String channel, byte[] message, final int replyId) {
+    private void handlePlatformMessage(final String channel, byte[] message, final int replyId) {
         assertAttached();
         BinaryMessageHandler handler = mMessageHandlers.get(channel);
         if (handler != null) {
@@ -680,7 +680,10 @@ public class FlutterView extends SurfaceView
                         private final AtomicBoolean done = new AtomicBoolean(false);
                         @Override
                         public void reply(ByteBuffer reply) {
-                            assertAttached();
+                            if (!isAttached()) {
+                                Log.d(TAG, "handlePlatformMessage replying to a detached view, channel=" + channel);
+                                return;
+                            }
                             if (done.getAndSet(true)) {
                                 throw new IllegalStateException("Reply already submitted");
                             }
@@ -864,7 +867,7 @@ public class FlutterView extends SurfaceView
     @Override
     public void send(String channel, ByteBuffer message, BinaryReply callback) {
         if (!isAttached()) {
-            Log.d("flutter", "FlutterView.send called on a detached view, channel=" + channel);
+            Log.d(TAG, "FlutterView.send called on a detached view, channel=" + channel);
             return;
         }
 
