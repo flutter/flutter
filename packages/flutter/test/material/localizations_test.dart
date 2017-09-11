@@ -116,4 +116,18 @@ void main() {
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$rowCount'), isFalse);
     }
   });
+
+  testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
+    MaterialLocalizations localizations = new DefaultMaterialLocalizations(const Locale('en', ''));
+    expect(localizations.selectedRowCountTitle(0), 'No items selected');
+    expect(localizations.selectedRowCountTitle(1), '1 item selected');
+    expect(localizations.selectedRowCountTitle(2), '2 items selected');
+    expect(localizations.selectedRowCountTitle(123456789), '123,456,789 items selected');
+
+    localizations = new DefaultMaterialLocalizations(const Locale('es', ''));
+    expect(localizations.selectedRowCountTitle(0), 'No se han seleccionado elementos');
+    expect(localizations.selectedRowCountTitle(1), '1 artículo seleccionado');
+    expect(localizations.selectedRowCountTitle(2), '2 artículos seleccionados');
+    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 artículos seleccionados');
+  });
 }

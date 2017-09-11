@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 import 'i18n/localizations.dart';
 
@@ -114,6 +115,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// have been translated.
   final Locale locale;
 
+  String get _localeName {
+    final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
+    return Intl.canonicalizedLocale(localeName);
+  }
+
   // TODO(hmuller): the rules for mapping from an integer value to
   // "one" or "two" etc. are locale specific and an additional "few" category
   // is needed. See http://cldr.unicode.org/index/cldr-spec/plural-rules
@@ -130,6 +136,13 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     text ??= _nameToValue['${key}Other'];
     assert(text != null);
     return text;
+  }
+
+  NumberFormat get _integerFormat {
+    String localeName = _localeName;
+    if (!NumberFormat.localeExists(localeName))
+      localeName = 'en';
+    return new NumberFormat.decimalPattern(localeName);
   }
 
   @override
@@ -161,11 +174,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     String text = rowCountIsApproximate ? _nameToValue['pageRowsInfoTitleApproximate'] : null;
     text ??= _nameToValue['pageRowsInfoTitle'];
     assert(text != null, 'A $locale localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
+    final NumberFormat integer = _integerFormat;
     // TODO(hansmuller): this could be more efficient.
     return text
-      .replaceFirst(r'$firstRow', firstRow.toString())
-      .replaceFirst(r'$lastRow', lastRow.toString())
-      .replaceFirst(r'$rowCount', rowCount.toString());
+      .replaceFirst(r'$firstRow', integer.format(firstRow))
+      .replaceFirst(r'$lastRow', integer.format(lastRow))
+      .replaceFirst(r'$rowCount', integer.format(rowCount));
   }
 
   @override
@@ -174,7 +188,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String selectedRowCountTitle(int selectedRowCount) {
     return _nameToPluralValue(selectedRowCount, 'selectedRowCountTitle') // asserts on no match
-      .replaceFirst(r'$selectedRowCount', selectedRowCount.toString());
+      .replaceFirst(r'$selectedRowCount', _integerFormat.format(selectedRowCount));
   }
 
   @override

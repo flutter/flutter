@@ -10,6 +10,8 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow de $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow de aproximadamente $rowCount",
   "rowsPerPageTitle": "Filas por página:",
+  "selectedRowCountTitleZero": "No se han seleccionado elementos",
+  "selectedRowCountTitleOne": "1 artículo seleccionado",
   "selectedRowCountTitleOther": "$selectedRowCount artículos seleccionados",
   "cancelButtonLabel": "CANCELAR",
   "closeButtonLabel": "CERRAR",

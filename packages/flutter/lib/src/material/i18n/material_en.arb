@@ -60,6 +60,7 @@
     "type": "text"
   },
 
+  "selectedRowCountTitleZero": "No items selected",
   "selectedRowCountTitleOne": "1 item selected",
   "selectedRowCountTitleOther": "$selectedRowCount items selected",
   "@selectedRowCountTitle": {
