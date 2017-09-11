@@ -487,6 +487,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       child: new IgnorePointer(
         key: _ignorePointerKey,
         ignoring: _shouldIgnorePointer,
+        ignoringSemantics: false,
         child: new _ScrollableScope(
           scrollable: this,
           position: position,
