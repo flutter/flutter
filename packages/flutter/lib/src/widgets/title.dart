@@ -14,7 +14,7 @@ class Title extends StatelessWidget {
   Title({
     Key key,
     this.title: '',
-    this.color: const Color(0xFFFFFFFF),
+    @required this.color,
     @required this.child,
   }) : assert(title != null),
        assert(color != null && color.alpha == 0xFF),

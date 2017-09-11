@@ -19,19 +19,28 @@ void main() {
   testWidgets('should handle having no title or color', (WidgetTester tester) async {
     final Title widget = new Title(
       child: new Container(),
+      color: const Color(0xFF00FF00),
     );
     expect(widget.toString, isNot(throwsException));
     expect(widget.title, equals(''));
-    expect(widget.color, equals(const Color(0xFFFFFFFF)));
+    expect(widget.color, equals(const Color(0xFF00FF00)));
   });
 
   testWidgets('should not allow null title or color', (WidgetTester tester) async {
     expect(() => new Title(
       title: null,
+      color: const Color(0xFF00FF00),
       child: new Container(),
     ), throwsAssertionError);
     expect(() => new Title(
       color: null,
+      child: new Container(),
+    ), throwsAssertionError);
+  });
+
+  testWidgets('should not allow non-opaque color', (WidgetTester tester) async {
+    expect(() => new Title(
+      color: const Color(0),
       child: new Container(),
     ), throwsAssertionError);
   });
@@ -47,11 +56,12 @@ void main() {
 
     await tester.pumpWidget(new Title(
       child: new Container(),
+      color: const Color(0xFF00FF00),
     ));
 
     expect(log, equals(<MethodCall>[new MethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
-        <String, dynamic>{"label": "", "primaryColor": 4294967295}
+        <String, dynamic>{"label": "", "primaryColor": 4278255360}
     )]));
   });
 }
