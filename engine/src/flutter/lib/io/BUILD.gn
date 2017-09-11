@@ -11,7 +11,7 @@ source_set("io") {
   deps = [
     "//dart/runtime:dart_api",
     "//dart/runtime/bin:embedded_dart_io",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//lib/tonic/converter",
   ]
 }

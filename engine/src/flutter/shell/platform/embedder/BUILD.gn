@@ -18,7 +18,7 @@ source_set("embedder") {
     "//flutter/fml",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//lib/tonic",
     "//third_party/skia",
   ]

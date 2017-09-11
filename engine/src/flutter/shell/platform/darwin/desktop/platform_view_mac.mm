@@ -14,8 +14,8 @@
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/common/process_info_mac.h"
 #include "flutter/shell/platform/darwin/desktop/vsync_waiter_mac.h"
-#include "lib/ftl/command_line.h"
-#include "lib/ftl/synchronization/waitable_event.h"
+#include "lib/fxl/command_line.h"
+#include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
 
@@ -146,7 +146,7 @@ bool PlatformViewMac::IsValid() const {
 void PlatformViewMac::RunFromSource(const std::string& assets_directory,
                                     const std::string& main,
                                     const std::string& packages) {
-  auto latch = new ftl::ManualResetWaitableEvent();
+  auto latch = new fxl::ManualResetWaitableEvent();
 
   dispatch_async(dispatch_get_main_queue(), ^{
     SetupAndLoadFromSource(assets_directory, main, packages);

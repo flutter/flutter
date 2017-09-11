@@ -14,7 +14,7 @@ source_set("assets") {
 
   deps = [
     "//flutter/glue",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//garnet/public/lib/zip",
   ]
 

@@ -44,7 +44,7 @@ shared_library("flutter_shell_native") {
     "//flutter/runtime",
     "//flutter/shell/common",
     "//flutter/shell/gpu",
-    "//garnet/public/lib/ftl",
+    "//garnet/public/lib/fxl",
     "//third_party/skia",
   ]
   if (flutter_runtime_mode == "debug") {

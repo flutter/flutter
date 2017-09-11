@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-#include "lib/ftl/logging.h"
+#include "lib/fxl/logging.h"
 
 namespace {
 
@@ -35,7 +35,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
     case UIAccessibilityScrollDirectionDown:
       return blink::SemanticsAction::kScrollUp;
   }
-  FTL_DCHECK(false);  // Unreachable
+  FXL_DCHECK(false);  // Unreachable
   return blink::SemanticsAction::kScrollUp;
 }
 
@@ -69,8 +69,8 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 #pragma mark - Designated initializers
 
 - (instancetype)initWithBridge:(shell::AccessibilityBridge*)bridge uid:(int32_t)uid {
-  FTL_DCHECK(bridge != nil) << "bridge must be set";
-  FTL_DCHECK(uid >= kRootNodeId);
+  FXL_DCHECK(bridge != nil) << "bridge must be set";
+  FXL_DCHECK(uid >= kRootNodeId);
   self = [super init];
 
   if (self) {
