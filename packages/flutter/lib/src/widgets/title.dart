@@ -13,10 +13,11 @@ class Title extends StatelessWidget {
   /// Creates a widget that describes this app to the operating system.
   Title({
     Key key,
-    this.title,
-    this.color,
+    this.title: '',
+    @required this.color,
     @required this.child,
-  }) : assert(color == null || color.alpha == 0xFF),
+  }) : assert(title != null),
+       assert(color != null && color.alpha == 0xFF),
        super(key: key);
 
   /// A one-line description of this app for use in the window manager.
@@ -42,7 +43,7 @@ class Title extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new StringProperty('title', title, defaultValue: null));
+    description.add(new StringProperty('title', title, defaultValue: ''));
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }
