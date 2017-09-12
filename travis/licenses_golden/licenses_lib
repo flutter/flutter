@@ -1,4 +1,4 @@
-Signature: c6853c1bbc8db501fa71fb05acb5f2ba
+Signature: 094cf05a80bb243b58e419e46b50190a
 
 UNUSED LICENSES:
 
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: tonic
-ORIGIN: ../../../garnet/public/lib/fidl/LICENSE
+ORIGIN: ../../../lib/tonic/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../lib/tonic/converter/dart_converter.cc
 FILE: ../../../lib/tonic/converter/dart_converter.h
@@ -102,7 +102,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: tonic
-ORIGIN: ../../../lib/tonic/typed_data/dart_byte_data.cc + ../../../garnet/public/lib/fidl/LICENSE
+ORIGIN: ../../../lib/tonic/typed_data/dart_byte_data.cc + ../../../lib/tonic/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../lib/tonic/dart_args.h
 FILE: ../../../lib/tonic/dart_binding_macros.h

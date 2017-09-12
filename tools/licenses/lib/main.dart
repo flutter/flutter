@@ -2150,6 +2150,10 @@ class RepositoryGarnetDirectory extends RepositoryDirectory {
   @override
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'bin'
+        && entry.name != 'docs'
+        && entry.name != 'examples'
+        && entry.name != 'go'
+        && entry.name != 'lib'
         && super.shouldRecurse(entry);
   }
 
