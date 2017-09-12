@@ -9,7 +9,7 @@
   "previousPageTooltip": "Предыдущая страница",
   "showMenuTooltip": "Показать меню",
   "pageRowsInfoTitle": "$firstRow–$lastRow из $rowCount",
-  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow около $rowCount",
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow из примерно $rowCount",
   "rowsPerPageTitle": "Строки на страницу:",
   "aboutListTileTitle": "O $applicationName",
   "licensesPageTitle": "Лицензии",
@@ -17,10 +17,10 @@
   "cancelButtonLabel": "ОТМЕНИТЬ",
   "closeButtonLabel": "ЗАКРЫТЬ",
   "continueButtonLabel": "ПРОДОЛЖИТЬ",
-  "copyButtonLabel": "Скопировать",
-  "cutButtonLabel": "Вырезать",
+  "copyButtonLabel": "СКОПИРОВАТЬ",
+  "cutButtonLabel": "ВЫРЕЗАТЬ",
   "okButtonLabel": "ОК",
-  "pasteButtonLabel": "Вставить",
-  "selectAllButtonLabel": "Выбрать всё",
+  "pasteButtonLabel": "ВСТАВИТЬ",
+  "selectAllButtonLabel": "ВЫБРАТЬ ВСЁ",
   "viewLicensesButtonLabel": "ПРОСМОТРЕТЬ ЛИЦЕНЗИИ"
 }
