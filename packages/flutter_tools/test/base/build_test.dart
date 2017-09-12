@@ -323,7 +323,7 @@ void main() {
     Snapshotter snapshotter;
     MockArtifacts mockArtifacts;
 
-    setUp(()  {
+    setUp(() {
       fs = new MemoryFileSystem();
       fs.file(kIsolateSnapshotData).writeAsStringSync('snapshot data');
       fs.file(kVmSnapshotData).writeAsStringSync('vm data');
