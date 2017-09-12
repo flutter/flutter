@@ -406,6 +406,9 @@ class FlutterTask extends BaseFlutterTask {
             if (snapshotter != null) {
                 sources = sources.plus(snapshotter)
             }
+            if (localEngineSrcPath != null) {
+                sources = sources.plus(project.files("$localEngineSrcPath/$localEngine"))
+            }
             // Finally, add a dependency on pubspec.yaml as well.
             return sources.plus(project.files('pubspec.yaml'))
         }
