@@ -128,7 +128,7 @@ void main() {
               return new CupertinoScaffold(
                 child: new CustomScrollView(
                   controller: scrollController,
-                  slivers: <Widget> [
+                  slivers: <Widget>[
                     const CupertinoNavigationBar(
                       middle: const Text('Title'),
                       largeTitle: true,

@@ -174,6 +174,10 @@ Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
 }
 
 /// The top part of the nav bar that's never scrolled away.
+///
+/// Consists of the entire nav bar without background and border when used
+/// without large titles. With large titles, it's the top static half that
+/// doesn't scroll.
 class _CupertinoPersistentNavigationBar extends StatelessWidget implements PreferredSizeWidget {
   const _CupertinoPersistentNavigationBar({
     Key key,
