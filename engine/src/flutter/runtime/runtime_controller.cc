@@ -27,7 +27,8 @@ RuntimeController::RuntimeController(RuntimeDelegate* client)
 RuntimeController::~RuntimeController() {}
 
 void RuntimeController::CreateDartController(
-    const std::string& script_uri, const uint8_t* isolate_snapshot_data,
+    const std::string& script_uri,
+    const uint8_t* isolate_snapshot_data,
     const uint8_t* isolate_snapshot_instr,
     const std::vector<uint8_t>& platform_kernel) {
   FXL_DCHECK(!dart_controller_);

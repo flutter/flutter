@@ -73,11 +73,8 @@ namespace {
 
 // Arguments passed to the Dart VM in all configurations.
 static const char* kDartLanguageArgs[] = {
-    "--enable_mirrors=false",
-    "--background_compilation",
-    "--await_is_keyword",
-    "--assert_initializer",
-    "--causal_async_stacks",
+    "--enable_mirrors=false", "--background_compilation", "--await_is_keyword",
+    "--assert_initializer",   "--causal_async_stacks",
 };
 
 static const char* kDartPrecompilationArgs[] = {
@@ -110,8 +107,8 @@ static const char* kDartEndlessTraceBufferArgs[]{
 };
 
 static const char* kDartFuchsiaTraceArgs[] FXL_ALLOW_UNUSED_TYPE = {
-   "--systrace_timeline",
-   "--timeline_streams=VM,Isolate,Compiler,Dart,GC",
+    "--systrace_timeline",
+    "--timeline_streams=VM,Isolate,Compiler,Dart,GC",
 };
 
 constexpr char kFileUriPrefix[] = "file://";
@@ -186,7 +183,7 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
   // No VM-service in release mode.
   return nullptr;
-#else  // FLUTTER_RUNTIME_MODE
+#else   // FLUTTER_RUNTIME_MODE
   tonic::DartState* dart_state = new tonic::DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
       script_uri, "main", g_default_isolate_snapshot_data,
@@ -226,7 +223,6 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   return isolate;
 #endif  // FLUTTER_RUNTIME_MODE
 }
-
 
 Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    const char* main,
@@ -279,11 +275,14 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   UIDartState* parent_dart_state = static_cast<UIDartState*>(callback_data);
   UIDartState* dart_state = parent_dart_state->CreateForChildIsolate();
 
-  Dart_Isolate isolate = kernel_platform != nullptr
-      ? Dart_CreateIsolateFromKernel(script_uri, main, kernel_platform,
-            nullptr /* flags */, dart_state, error)
-      : Dart_CreateIsolate(script_uri, main, g_default_isolate_snapshot_data,
-            g_default_isolate_snapshot_instructions, nullptr, dart_state, error);
+  Dart_Isolate isolate =
+      kernel_platform != nullptr
+          ? Dart_CreateIsolateFromKernel(script_uri, main, kernel_platform,
+                                         nullptr /* flags */, dart_state, error)
+          : Dart_CreateIsolate(script_uri, main,
+                               g_default_isolate_snapshot_data,
+                               g_default_isolate_snapshot_instructions, nullptr,
+                               dart_state, error);
   FXL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
   FXL_CHECK(!LogIfError(
@@ -302,8 +301,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
     if (!kernel_data.empty()) {
       // We are running kernel code.
-      FXL_CHECK(!LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(kernel_data.data(),
-                                                                  kernel_data.size()))));
+      FXL_CHECK(!LogIfError(Dart_LoadKernel(
+          Dart_ReadKernelBinary(kernel_data.data(), kernel_data.size()))));
     } else if (!snapshot_data.empty()) {
       // We are running from a script snapshot.
       FXL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
@@ -573,7 +572,7 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
                          0,                             // argument_count
                          nullptr,                       // argument_names
                          nullptr                        // argument_values
-                         );
+      );
     }
   }
 

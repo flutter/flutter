@@ -55,7 +55,8 @@ class AccessibilityBridge final {
 
  private:
   SemanticsObject* GetOrCreateObject(int32_t id);
-  void VisitObjectsRecursivelyAndRemove(SemanticsObject* object, NSMutableArray<NSNumber*>* doomed_uids);
+  void VisitObjectsRecursivelyAndRemove(SemanticsObject* object,
+                                        NSMutableArray<NSNumber*>* doomed_uids);
   void ReleaseObjects(std::unordered_map<int, SemanticsObject*>& objects);
 
   UIView* view_;

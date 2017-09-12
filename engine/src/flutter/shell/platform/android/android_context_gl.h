@@ -17,7 +17,6 @@ namespace shell {
 
 class AndroidContextGL : public fxl::RefCountedThreadSafe<AndroidContextGL> {
  public:
-
   bool CreateWindowSurface(fxl::RefPtr<AndroidNativeWindow> window);
 
   bool CreatePBufferSurface();

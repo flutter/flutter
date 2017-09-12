@@ -23,13 +23,13 @@ namespace flutter {
 namespace runtime {
 extern ResourcesEntry __sky_embedder_diagnostic_server_resources_[];
 }
-}
+}  // namespace flutter
 
 namespace shell {
 
-using tonic::DartLibraryNatives;
 using blink::EmbedderResources;
 using tonic::DartInvokeField;
+using tonic::DartLibraryNatives;
 using tonic::LogIfError;
 using tonic::ToDart;
 

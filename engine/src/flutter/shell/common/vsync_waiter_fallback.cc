@@ -4,8 +4,8 @@
 
 #include "flutter/shell/common/vsync_waiter_fallback.h"
 
-#include "lib/fxl/logging.h"
 #include "flutter/common/threads.h"
+#include "lib/fxl/logging.h"
 
 namespace shell {
 namespace {

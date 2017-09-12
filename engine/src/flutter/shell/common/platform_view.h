@@ -83,8 +83,7 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
   std::unique_ptr<VsyncWaiter> vsync_waiter_;
   SkISize size_;
 
-private:
-
+ private:
   FXL_DISALLOW_COPY_AND_ASSIGN(PlatformView);
 };
 

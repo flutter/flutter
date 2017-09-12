@@ -7,9 +7,9 @@
 #include <math.h>
 
 #include "flutter/lib/ui/painting/matrix.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 
 using tonic::ToDart;
@@ -174,7 +174,8 @@ void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
 
 void CanvasPath::extendWithPath(CanvasPath* path, double dx, double dy) {
   if (!path)
-    Dart_ThrowException(ToDart("Path.extendWithPath called with non-genuine Path."));
+    Dart_ThrowException(
+        ToDart("Path.extendWithPath called with non-genuine Path."));
   path_.addPath(path->path(), dx, dy, SkPath::kExtend_AddPathMode);
 }
 
@@ -196,8 +197,7 @@ fxl::RefPtr<CanvasPath> CanvasPath::shift(double dx, double dy) {
   return path;
 }
 
-fxl::RefPtr<CanvasPath> CanvasPath::transform(
-    tonic::Float64List& matrix4) {
+fxl::RefPtr<CanvasPath> CanvasPath::transform(tonic::Float64List& matrix4) {
   fxl::RefPtr<CanvasPath> path = CanvasPath::Create();
   path_.transform(ToSkMatrix(matrix4), &path->path_);
   matrix4.Release();

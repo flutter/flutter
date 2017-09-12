@@ -85,7 +85,8 @@ class Engine : public blink::RuntimeDelegate {
   void StartAnimatorIfPossible();
 
   void ConfigureAssetBundle(const std::string& path);
-  void ConfigureRuntime(const std::string& script_uri,
+  void ConfigureRuntime(
+      const std::string& script_uri,
       const std::vector<uint8_t>& platform_kernel = std::vector<uint8_t>());
 
   bool HandleLifecyclePlatformMessage(blink::PlatformMessage* message);

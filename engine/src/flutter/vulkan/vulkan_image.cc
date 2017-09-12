@@ -56,7 +56,7 @@ bool VulkanImage::InsertImageMemoryBarrier(
       nullptr,               // buffer_memory_barriers
       1,                     // image_memory_barrier_count
       &image_memory_barrier  // image_memory_barriers
-      );
+  );
 
   if (success) {
     access_flags_ = dest_access_flags;

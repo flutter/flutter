@@ -33,7 +33,7 @@ namespace flutter {
 namespace runtime {
 extern ResourcesEntry __flutter_embedded_service_isolate_resources_[];
 }
-}
+}  // namespace flutter
 
 namespace blink {
 namespace {
@@ -66,7 +66,8 @@ void DartServiceIsolate::TriggerResourceLoad(Dart_NativeArguments args) {
 
 void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
-  std::string uri = tonic::DartConverter<std::string>::FromArguments(args, 0, exception);
+  std::string uri =
+      tonic::DartConverter<std::string>::FromArguments(args, 0, exception);
   if (!exception) {
     observatory_uri_ = uri;
   }

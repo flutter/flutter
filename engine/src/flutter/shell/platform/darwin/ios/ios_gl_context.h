@@ -34,9 +34,7 @@ class IOSGLContext {
 
   bool ResourceMakeCurrent();
 
-  sk_sp<SkColorSpace> ColorSpace() const {
-    return color_space_;
-  }
+  sk_sp<SkColorSpace> ColorSpace() const { return color_space_; }
 
  private:
   fml::scoped_nsobject<CAEAGLLayer> layer_;

@@ -11,8 +11,7 @@ namespace blink {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Shader);
 
-Shader::Shader(sk_sp<SkShader> shader) : shader_(shader) {
-}
+Shader::Shader(sk_sp<SkShader> shader) : shader_(shader) {}
 
 Shader::~Shader() {
   // Skia objects must be deleted on the IO thread so that any associated GL
@@ -20,4 +19,4 @@ Shader::~Shader() {
   SkiaUnrefOnIOThread(&shader_);
 }
 
-} // namespace blink
+}  // namespace blink

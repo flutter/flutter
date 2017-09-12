@@ -34,9 +34,9 @@ void ClipPathLayer::UpdateScene(SceneUpdateContext& context) {
   //               Treating the shape as a rectangle for now.
   auto bounds = clip_path_.getBounds();
   scenic_lib::Rectangle shape(context.session(),  // session
-                                  bounds.width(),     //  width
-                                  bounds.height()     //  height
-                                  );
+                              bounds.width(),     //  width
+                              bounds.height()     //  height
+  );
 
   SceneUpdateContext::Clip clip(context, shape, bounds);
   UpdateSceneChildren(context);

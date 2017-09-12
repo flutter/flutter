@@ -111,7 +111,7 @@ PassRefPtr<RenderStyle> decodeParagraphStyle(RenderStyle* parentStyle,
                                              double fontSize,
                                              double lineHeight,
                                              const std::u16string& ellipsis) {
-  FXL_DCHECK(encoded.num_elements() == 6); // also update text.dart
+  FXL_DCHECK(encoded.num_elements() == 6);  // also update text.dart
 
   RefPtr<RenderStyle> style = RenderStyle::create();
   style->inheritFrom(parentStyle);
@@ -123,7 +123,8 @@ PassRefPtr<RenderStyle> decodeParagraphStyle(RenderStyle* parentStyle,
     style->setTextAlign(static_cast<ETextAlign>(encoded[psTextAlignIndex]));
 
   if (mask & psTextDirectionMask)
-    style->setDirection(static_cast<TextDirection>(encoded[psTextDirectionIndex]));
+    style->setDirection(
+        static_cast<TextDirection>(encoded[psTextDirectionIndex]));
 
   if (mask & (psFontWeightMask | psFontStyleMask | psFontFamilyMask |
               psFontSizeMask)) {

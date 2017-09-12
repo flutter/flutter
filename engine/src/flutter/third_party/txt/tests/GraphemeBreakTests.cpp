@@ -145,7 +145,7 @@ TEST(GraphemeBreak, rules) {
   EXPECT_FALSE(IsBreak("'a' | U+0301"));  // combining accent
   // TODO(jsimmons): re-enable this test when ICU has been updated in all
   // Flutter platforms.
-  //EXPECT_FALSE(IsBreak("'a' | U+200D"));  // ZWJ
+  // EXPECT_FALSE(IsBreak("'a' | U+200D"));  // ZWJ
   // Rule GB9a, x SpacingMark
   EXPECT_FALSE(IsBreak("U+0915 | U+093E"));  // KA, AA (spacing mark)
   // Rule GB9b, Prepend x

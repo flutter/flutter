@@ -57,7 +57,7 @@ class VulkanHandle {
 
   void Reset() { DisposeIfNecessary(); }
 
-private:
+ private:
   Handle handle_;
   Disposer disposer_;
 

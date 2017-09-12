@@ -127,8 +127,8 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
-  _platformView = std::make_shared<shell::PlatformViewIOS>(
-      reinterpret_cast<CAEAGLLayer*>(self.view.layer));
+  _platformView =
+      std::make_shared<shell::PlatformViewIOS>(reinterpret_cast<CAEAGLLayer*>(self.view.layer));
 
   _platformView->Attach(
       // First frame callback.
@@ -136,11 +136,13 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
         TRACE_EVENT0("flutter", "First Frame");
         if (_launchView) {
           [UIView animateWithDuration:0.2
-                           animations:^{ _launchView.get().alpha = 0; }
-                           completion:^(BOOL finished){
-                             [_launchView.get() removeFromSuperview];
-                             _launchView.reset();
-                           }];
+              animations:^{
+                _launchView.get().alpha = 0;
+              }
+              completion:^(BOOL finished) {
+                [_launchView.get() removeFromSuperview];
+                _launchView.reset();
+              }];
         }
       });
   _platformView->SetupResourceContextOnIOThread();
@@ -298,8 +300,8 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
       [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
   if (launchStoryboardName && !self.isBeingPresented && !self.isMovingToParentViewController) {
     UIViewController* launchViewController =
-        [[UIStoryboard storyboardWithName:launchStoryboardName
-                                   bundle:nil] instantiateInitialViewController];
+        [[UIStoryboard storyboardWithName:launchStoryboardName bundle:nil]
+            instantiateInitialViewController];
     _launchView.reset([launchViewController.view retain]);
     _launchView.get().frame = self.view.bounds;
     _launchView.get().autoresizingMask =

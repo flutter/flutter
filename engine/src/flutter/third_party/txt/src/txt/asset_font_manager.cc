@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#include "lib/fxl/logging.h"
 #include "txt/asset_font_manager.h"
+#include "lib/fxl/logging.h"
 
 namespace txt {
 

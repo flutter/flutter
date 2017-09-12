@@ -32,7 +32,9 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       checkerboard_raster_cache_images_);
   Layer::PrerollContext context = {
       ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
-      frame.gr_context(), color_space, SkRect::MakeEmpty(),
+      frame.gr_context(),
+      color_space,
+      SkRect::MakeEmpty(),
   };
 
   root_layer_->Preroll(&context, SkMatrix::I());

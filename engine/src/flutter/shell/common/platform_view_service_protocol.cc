@@ -326,11 +326,11 @@ const char* PlatformViewServiceProtocol::kFlushUIThreadTasksExtensionName =
 // It should be invoked from the VM Service and and blocks it until UI thread
 // tasks are processed.
 bool PlatformViewServiceProtocol::FlushUIThreadTasks(const char* method,
-                                                   const char** param_keys,
-                                                   const char** param_values,
-                                                   intptr_t num_params,
-                                                   void* user_data,
-                                                   const char** json_object) {
+                                                     const char** param_keys,
+                                                     const char** param_values,
+                                                     intptr_t num_params,
+                                                     void* user_data,
+                                                     const char** json_object) {
   fxl::AutoResetWaitableEvent latch;
   blink::Threads::UI()->PostTask([&latch]() {
     // This task is empty because we just need to synchronize this RPC with the

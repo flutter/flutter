@@ -11,14 +11,13 @@ namespace blink {
 
 namespace {
 
-void DecodePoints(const tonic::Float32List& coords,
-                  SkPoint* points) {
+void DecodePoints(const tonic::Float32List& coords, SkPoint* points) {
   for (int i = 0; i < coords.num_elements(); i += 2)
     points[i / 2] = SkPoint::Make(coords[i], coords[i + 1]);
 }
 
-template <typename T> void DecodeInts(const tonic::Int32List& ints,
-                                      T* out) {
+template <typename T>
+void DecodeInts(const tonic::Int32List& ints, T* out) {
   for (int i = 0; i < ints.num_elements(); i++)
     out[i] = ints[i];
 }
@@ -31,8 +30,7 @@ static void Vertices_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, Vertices);
 
-#define FOR_EACH_BINDING(V) \
-  V(Vertices, init)
+#define FOR_EACH_BINDING(V) V(Vertices, init)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
@@ -60,10 +58,8 @@ void Vertices::init(SkVertices::VertexMode vertex_mode,
   if (colors.data())
     builderFlags |= SkVertices::kHasColors_BuilderFlag;
 
-  SkVertices::Builder builder(vertex_mode,
-                              positions.num_elements() / 2,
-                              indices.num_elements(),
-                              builderFlags);
+  SkVertices::Builder builder(vertex_mode, positions.num_elements() / 2,
+                              indices.num_elements(), builderFlags);
   if (positions.data())
     DecodePoints(positions, builder.positions());
   if (texture_coordinates.data())

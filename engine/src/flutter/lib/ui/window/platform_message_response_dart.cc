@@ -38,8 +38,8 @@ void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
           return;
         tonic::DartState::Scope scope(dart_state);
 
-        Dart_Handle byte_buffer = Dart_NewTypedData(
-            Dart_TypedData_kByteData, data.size());
+        Dart_Handle byte_buffer =
+            Dart_NewTypedData(Dart_TypedData_kByteData, data.size());
         DART_CHECK_VALID(byte_buffer);
 
         void* buffer;
@@ -60,8 +60,8 @@ void PlatformMessageResponseDart::CompleteEmpty() {
     return;
   FXL_DCHECK(!is_complete_);
   is_complete_ = true;
-  Threads::UI()->PostTask(fxl::MakeCopyable(
-      [ callback = std::move(callback_) ]() mutable {
+  Threads::UI()->PostTask(
+      fxl::MakeCopyable([callback = std::move(callback_)]() mutable {
         tonic::DartState* dart_state = callback.dart_state().get();
         if (!dart_state)
           return;

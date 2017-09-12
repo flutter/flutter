@@ -40,7 +40,8 @@ Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
 }
 
 void DefaultRouteName(Dart_NativeArguments args) {
-  std::string routeName = UIDartState::Current()->window()->client()->DefaultRouteName();
+  std::string routeName =
+      UIDartState::Current()->window()->client()->DefaultRouteName();
   Dart_SetReturnValue(args, StdStringToDart(routeName));
 }
 
@@ -155,11 +156,11 @@ void Window::UpdateLocale(const std::string& language_code,
     return;
   tonic::DartState::Scope scope(dart_state);
 
-  DartInvokeField(
-      library_.value(), "_updateLocale",
-      {
-          StdStringToDart(language_code), StdStringToDart(country_code),
-      });
+  DartInvokeField(library_.value(), "_updateLocale",
+                  {
+                      StdStringToDart(language_code),
+                      StdStringToDart(country_code),
+                  });
 }
 
 void Window::UpdateSemanticsEnabled(bool enabled) {
@@ -177,9 +178,8 @@ void Window::DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message) {
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
-  Dart_Handle data_handle = (message->hasData())
-      ? ToByteData(message->data())
-      : Dart_Null();
+  Dart_Handle data_handle =
+      (message->hasData()) ? ToByteData(message->data()) : Dart_Null();
   if (Dart_IsError(data_handle))
     return;
 

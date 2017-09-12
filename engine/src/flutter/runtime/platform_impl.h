@@ -5,8 +5,8 @@
 #ifndef FLUTTER_RUNTIME_PLATFORM_IMPL_H_
 #define FLUTTER_RUNTIME_PLATFORM_IMPL_H_
 
-#include "lib/fxl/macros.h"
 #include "flutter/sky/engine/public/platform/Platform.h"
+#include "lib/fxl/macros.h"
 
 namespace blink {
 

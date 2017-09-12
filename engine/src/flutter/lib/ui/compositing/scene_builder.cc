@@ -16,9 +16,9 @@
 #include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/layers/shader_mask_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/window.h"
 #include "lib/fxl/build_config.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -165,7 +165,8 @@ void SceneBuilder::pushPhysicalModel(const RRect& rrect,
   if (!cullRect.intersect(rrect.sk_rrect.rect(), m_cullRects.top()))
     cullRect = SkRect::MakeEmpty();
 
-  SkScalar dpr = UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio;
+  SkScalar dpr =
+      UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio;
 
   std::unique_ptr<flow::PhysicalModelLayer> layer(
       new flow::PhysicalModelLayer());

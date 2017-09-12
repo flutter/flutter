@@ -28,12 +28,11 @@ class Vertices : public fxl::RefCountedThreadSafe<Vertices>,
 
   static fxl::RefPtr<Vertices> Create();
 
-  void init(
-      SkVertices::VertexMode vertex_mode,
-      const tonic::Float32List& positions,
-      const tonic::Float32List& texture_coordinates,
-      const tonic::Int32List& colors,
-      const tonic::Int32List& indices);
+  void init(SkVertices::VertexMode vertex_mode,
+            const tonic::Float32List& positions,
+            const tonic::Float32List& texture_coordinates,
+            const tonic::Int32List& colors,
+            const tonic::Int32List& indices);
 
   const sk_sp<SkVertices>& vertices() const { return vertices_; }
 

@@ -350,15 +350,14 @@ void Paragraph::Layout(double width, bool force) {
           (lines_ == max_lines - 1 ||
            max_lines == std::numeric_limits<size_t>::max())) {
         float ellipsis_width = layout.measureText(
-            reinterpret_cast<const uint16_t*>(ellipsis.data()),
-            0, ellipsis.length(), ellipsis.length(), bidiFlags,
-            font, minikin_paint, minikin_font_collection, nullptr);
+            reinterpret_cast<const uint16_t*>(ellipsis.data()), 0,
+            ellipsis.length(), ellipsis.length(), bidiFlags, font,
+            minikin_paint, minikin_font_collection, nullptr);
 
         std::vector<float> text_advances(text_count);
         float text_width = layout.measureText(
-            text.data() + layout_start, 0, text_count, text_count,
-            bidiFlags, font, minikin_paint, minikin_font_collection,
-            text_advances.data());
+            text.data() + layout_start, 0, text_count, text_count, bidiFlags,
+            font, minikin_paint, minikin_font_collection, text_advances.data());
 
         // Truncate characters from the text until the ellipsis fits.
         size_t truncate_count = 0;
@@ -368,12 +367,13 @@ void Paragraph::Layout(double width, bool force) {
           truncate_count++;
         }
 
-        ellipsized_text.reserve(text_count - truncate_count + ellipsis.length());
+        ellipsized_text.reserve(text_count - truncate_count +
+                                ellipsis.length());
         ellipsized_text.insert(ellipsized_text.begin(),
                                text.begin() + layout_start,
                                text.begin() + layout_end - truncate_count);
-        ellipsized_text.insert(ellipsized_text.end(),
-                               ellipsis.begin(), ellipsis.end());
+        ellipsized_text.insert(ellipsized_text.end(), ellipsis.begin(),
+                               ellipsis.end());
         text_ptr = ellipsized_text.data();
         text_count = ellipsized_text.size();
 
@@ -388,8 +388,8 @@ void Paragraph::Layout(double width, bool force) {
       // However, this is not significant for reasonably sized paragraphs. It is
       // currently recommended to break up very long paragraphs (10k+
       // characters) to ensure speedy layout.
-      layout.doLayout(text_ptr, 0, text_count, text_count,
-                      bidiFlags, font, minikin_paint, minikin_font_collection);
+      layout.doLayout(text_ptr, 0, text_count, text_count, bidiFlags, font,
+                      minikin_paint, minikin_font_collection);
       FillWhitespaceSet(layout_start, layout_end,
                         minikin::getHbFontLocked(layout.getFont(0)));
 

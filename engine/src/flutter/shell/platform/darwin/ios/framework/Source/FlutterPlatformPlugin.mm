@@ -156,7 +156,7 @@ using namespace shell;
   // in the navigation hierarchy.
   UIViewController* viewController = [UIApplication sharedApplication].keyWindow.rootViewController;
   if ([viewController isKindOfClass:[UINavigationController class]]) {
-   [((UINavigationController*)viewController) popViewControllerAnimated:NO];
+    [((UINavigationController*)viewController) popViewControllerAnimated:NO];
   }
 }
 
@@ -169,7 +169,6 @@ using namespace shell;
   }
   return nil;
 }
-
 
 - (void)setClipboardData:(NSDictionary*)data {
   UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];

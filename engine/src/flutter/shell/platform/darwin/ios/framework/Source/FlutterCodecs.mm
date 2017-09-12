@@ -63,7 +63,7 @@
   } else {
     // NSJSONSerialization does not support top-level simple values.
     // We encode as singleton array, then extract the relevant bytes.
-    encoding = [NSJSONSerialization dataWithJSONObject:@[message] options:0 error:nil];
+    encoding = [NSJSONSerialization dataWithJSONObject:@[ message ] options:0 error:nil];
     if (encoding) {
       encoding = [encoding subdataWithRange:NSMakeRange(1, encoding.length - 2)];
     }
@@ -96,7 +96,7 @@
     decoded = [NSJSONSerialization JSONObjectWithData:message options:0 error:nil];
   }
   NSAssert(decoded, @"Invalid JSON message, decoding failed");
-  return isSimpleValue ? ((NSArray*) decoded)[0] : decoded;
+  return isSimpleValue ? ((NSArray*)decoded)[0] : decoded;
 }
 @end
 
@@ -117,7 +117,7 @@
 }
 
 - (NSData*)encodeSuccessEnvelope:(id)result {
-  return [[FlutterJSONMessageCodec sharedInstance] encode:@[[self wrapNil:result]]];
+  return [[FlutterJSONMessageCodec sharedInstance] encode:@[ [self wrapNil:result] ]];
 }
 
 - (NSData*)encodeErrorEnvelope:(FlutterError*)error {

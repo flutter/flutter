@@ -115,19 +115,19 @@ static std::unique_ptr<AndroidSurface> InitializePlatformSurface() {
   }
 
   if (auto surface = InitializePlatformSurfaceSoftware()) {
-      FXL_DLOG(INFO) << "Software surface initialized.";
-      return surface;
+    FXL_DLOG(INFO) << "Software surface initialized.";
+    return surface;
   }
 
-  FXL_CHECK(false) << "Could not initialize either the Vulkan, OpenGL, or Software"
-                      "surface backends. Flutter requires a GPU to render.";
+  FXL_CHECK(false)
+      << "Could not initialize either the Vulkan, OpenGL, or Software"
+         "surface backends. Flutter requires a GPU to render.";
   return nullptr;
 }
 
 PlatformViewAndroid::PlatformViewAndroid()
     : PlatformView(std::make_unique<GPURasterizer>(nullptr)),
-      android_surface_(InitializePlatformSurface()) {
-}
+      android_surface_(InitializePlatformSurface()) {}
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
@@ -141,14 +141,13 @@ void PlatformViewAndroid::Attach() {
 
   PostAddToShellTask();
 
-  rasterizer_->AddNextFrameCallback(
-      [this]() {
-        JNIEnv* env = fml::jni::AttachCurrentThread();
-        fml::jni::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
-        if (!view.is_null()) {
-          FlutterViewOnFirstFrame(env, view.obj());
-        }
-      });
+  rasterizer_->AddNextFrameCallback([this]() {
+    JNIEnv* env = fml::jni::AttachCurrentThread();
+    fml::jni::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
+    if (!view.is_null()) {
+      FlutterViewOnFirstFrame(env, view.obj());
+    }
+  });
 }
 
 void PlatformViewAndroid::Detach() {

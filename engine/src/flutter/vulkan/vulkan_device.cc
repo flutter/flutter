@@ -58,7 +58,7 @@ VulkanDevice::VulkanDevice(VulkanProcTable& p_vk,
       .pQueuePriorities = priorities,
   };
 
-  const char *extensions[] = {
+  const char* extensions[] = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 #if OS_FUCHSIA
     VK_GOOGLE_EXTERNAL_MEMORY_MAGMA_EXTENSION_NAME,

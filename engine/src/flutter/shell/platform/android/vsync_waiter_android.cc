@@ -41,12 +41,13 @@ void VsyncWaiterAndroid::OnVsync(int64_t frameTimeNanos,
                                  int64_t frameTargetTimeNanos) {
   Callback callback = std::move(callback_);
   callback_ = Callback();
-  blink::Threads::UI()->PostTask([callback, frameTimeNanos, frameTargetTimeNanos] {
-    callback(fxl::TimePoint::FromEpochDelta(
-                 fxl::TimeDelta::FromNanoseconds(frameTimeNanos)),
-             fxl::TimePoint::FromEpochDelta(
-                 fxl::TimeDelta::FromNanoseconds(frameTargetTimeNanos)));
-  });
+  blink::Threads::UI()->PostTask(
+      [callback, frameTimeNanos, frameTargetTimeNanos] {
+        callback(fxl::TimePoint::FromEpochDelta(
+                     fxl::TimeDelta::FromNanoseconds(frameTimeNanos)),
+                 fxl::TimePoint::FromEpochDelta(
+                     fxl::TimeDelta::FromNanoseconds(frameTargetTimeNanos)));
+      });
 }
 
 static void OnNativeVsync(JNIEnv* env,

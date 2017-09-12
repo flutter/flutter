@@ -27,8 +27,8 @@
 #include <android/log.h>
 #elif defined(OS_IOS)
 extern "C" {
-  // Cannot import the syslog.h header directly because of macro collision.
-  extern void syslog(int, const char*, ...);
+// Cannot import the syslog.h header directly because of macro collision.
+extern void syslog(int, const char*, ...);
 }
 #endif
 

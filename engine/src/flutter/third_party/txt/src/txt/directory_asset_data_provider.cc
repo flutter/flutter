@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "txt/directory_asset_data_provider.h"
 #include <dirent.h>
 #include <sstream>
 #include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/core/SkTypeface.h"
-#include "txt/directory_asset_data_provider.h"
 
 namespace txt {
 

@@ -11,7 +11,8 @@
 #include "lib/fxl/arraysize.h"
 #include "lib/fxl/logging.h"
 
-#define PLATFORM_VIEW (*reinterpret_cast<std::shared_ptr<PlatformViewAndroid>*>(platform_view))
+#define PLATFORM_VIEW \
+  (*reinterpret_cast<std::shared_ptr<PlatformViewAndroid>*>(platform_view))
 
 namespace shell {
 
@@ -107,7 +108,7 @@ static void RunBundleAndSnapshot(JNIEnv* env,
   return PLATFORM_VIEW->RunBundleAndSnapshot(
       fml::jni::JavaStringToString(env, bundlePath),       //
       fml::jni::JavaStringToString(env, snapshotOverride)  //
-      );
+  );
 }
 
 void RunBundleAndSource(JNIEnv* env,
