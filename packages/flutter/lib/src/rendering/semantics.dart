@@ -158,14 +158,14 @@ class SemanticsData extends Diagnosticable {
       if ((actions & action.index) != 0)
         actionSummary.add(describeEnum(action));
     }
-    properties.add(new IterableProperty<String>('actions', actionSummary, hidden: actionSummary.isEmpty));
+    properties.add(new IterableProperty<String>('actions', actionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[];
     for (SemanticsFlags flag in SemanticsFlags.values.values) {
       if ((flags & flag.index) != 0)
         flagSummary.add(describeEnum(flag));
     }
-    properties.add(new IterableProperty<String>('flags', flagSummary, hidden: flagSummary.isEmpty));
+    properties.add(new IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(new StringProperty('label', label, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
@@ -758,7 +758,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new FlagProperty('inDirtyNodes', value: inDirtyNodes, ifTrue: 'dirty', ifFalse: 'STALE'));
       hideOwner = inDirtyNodes;
     }
-    properties.add(new DiagnosticsProperty<SemanticsOwner>('owner', owner, hidden: hideOwner));
+    properties.add(new DiagnosticsProperty<SemanticsOwner>('owner', owner, level: hideOwner ? DiagnosticLevel.hidden : DiagnosticLevel.info));
     properties.add(new FlagProperty('shouldMergeAllDescendantsIntoThisNode', value: _shouldMergeAllDescendantsIntoThisNode, ifTrue: 'leaf merge'));
     final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
     if (offset != null) {
@@ -780,8 +780,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       if ((_actions & action.index) != 0)
         actions.add(describeEnum(action));
     }
-    properties.add(new IterableProperty<String>('actions', actions, hidden: actions.isEmpty));
-    properties.add(new IterableProperty<SemanticsTag>('tags', _tags, hidden: _tags.isEmpty));
+    properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
+    properties.add(new IterableProperty<SemanticsTag>('tags', _tags, ifEmpty: null));
     if (hasCheckedState)
       properties.add(new FlagProperty('isChecked', value: isChecked, ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: isSelected, ifTrue: 'selected'));
@@ -797,10 +797,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   String toStringDeep({
     String prefixLineOne: '',
     String prefixOtherLines,
+    DiagnosticLevel minLevel: DiagnosticLevel.debug,
     DebugSemanticsDumpOrder childOrder: DebugSemanticsDumpOrder.traversal,
   }) {
     assert(childOrder != null);
-    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
+    return toDiagnosticsNode(childOrder: childOrder).toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines, minLevel: minLevel);
   }
 
   @override

@@ -1470,7 +1470,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       renderObject: this,
       informationCollector: (StringBuffer information) {
         information.writeln('The following RenderObject was being processed when the exception was fired:');
-        information.writeln('  ${toStringShallow('\n  ')}');
+        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
         final List<String> descendants = <String>[];
         const int maxDepth = 5;
         int depth = 0;
@@ -2326,7 +2326,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           'Tried to paint a RenderObject reentrantly.\n'
           'The following RenderObject was already being painted when it was '
           'painted again:\n'
-          '  ${toStringShallow("\n    ")}\n'
+          '  ${toStringShallow(joiner: "\n    ")}\n'
           'Since this typically indicates an infinite recursion, it is '
           'disallowed.'
         );
@@ -2349,7 +2349,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           'updated.\n'
           'The following RenderObject was marked as having dirty compositing '
           'bits at the time that it was painted:\n'
-          '  ${toStringShallow("\n    ")}\n'
+          '  ${toStringShallow(joiner: "\n    ")}\n'
           'A RenderObject that still has dirty compositing bits cannot be '
           'painted because this indicates that the tree has not yet been '
           'properly configured for creating the layer tree.\n'
@@ -2840,17 +2840,25 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }
 
   @override
-  String toString() => toStringShort();
+  String toString({ DiagnosticLevel minLevel }) => toStringShort();
 
   /// Returns a description of the tree rooted at this node.
   /// If the prefix argument is provided, then every line in the output
   /// will be prefixed by that string.
   @override
-  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines: '' }) {
+  String toStringDeep({
+    String prefixLineOne: '',
+    String prefixOtherLines: '',
+    DiagnosticLevel minLevel: DiagnosticLevel.debug,
+  }) {
     final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
 
-    final String result = super.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
+    final String result = super.toStringDeep(
+      prefixLineOne: prefixLineOne,
+      prefixOtherLines: prefixOtherLines,
+      minLevel: minLevel,
+    );
 
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
@@ -2862,10 +2870,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// This includes the same information for this RenderObject as given by
   /// [toStringDeep], but does not recurse to any children.
   @override
-  String toStringShallow([String joiner = '; ']) {
+  String toStringShallow({
+    String joiner: '; ',
+    DiagnosticLevel minLevel: DiagnosticLevel.debug,
+  }) {
     final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
-    final String result = super.toStringShallow(joiner);
+    final String result = super.toStringShallow(joiner: joiner, minLevel: minLevel);
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
   }
@@ -2873,9 +2884,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null));
-    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, ifNull: 'MISSING'));
-    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints, ifNull: 'MISSING'));
+    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
+    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
     description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
     description.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));

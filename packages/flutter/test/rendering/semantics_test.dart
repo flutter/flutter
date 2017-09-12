@@ -169,9 +169,15 @@ void main() {
   });
 
   test('debug properties', () {
+    final SemanticsNode minimalProperties = new SemanticsNode();
     expect(
-      new SemanticsNode().toStringDeep(),
+      minimalProperties.toStringDeep(),
       'SemanticsNode#16(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
+    );
+
+    expect(
+      minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
+      'SemanticsNode#16(owner: null, shouldMergeAllDescendantsIntoThisNode: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], tags: [], isSelected: false, label: "", textDirection: null)\n',
     );
 
     final SemanticsNode allProperties = new SemanticsNode()

@@ -713,7 +713,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       if (gestures.isEmpty)
         gestures.add('<none>');
       description.add(new IterableProperty<String>('gestures', gestures));
-      description.add(new IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, hidden: true));
+      description.add(new IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
     }
     description.add(new EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }

@@ -88,7 +88,7 @@ void main() {
     expect(flex.direction, equals(Axis.horizontal));
     expect(flex, hasAGoodToStringDeep);
     expect(
-      flex.toStringDeep(),
+      flex.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderFlex#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
         '   parentData: MISSING\n'
