@@ -84,7 +84,7 @@ class MaterialApp extends StatefulWidget {
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   MaterialApp({ // can't be const because the asserts use methods on Map :-(
     Key key,
-    this.title,
+    this.title: '',
     this.color,
     this.theme,
     this.home,
@@ -103,7 +103,8 @@ class MaterialApp extends StatefulWidget {
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
-  }) : assert(routes != null),
+  }) : assert(title != null),
+       assert(routes != null),
        assert(navigatorObservers != null),
        assert(debugShowMaterialGrid != null),
        assert(showPerformanceOverlay != null),
