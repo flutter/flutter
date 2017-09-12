@@ -585,7 +585,9 @@ abstract class SchedulerBinding extends BindingBase {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration rawTimeStamp) {
-    Timeline.startSync('Frame');
+    Timeline.startSync('Frame', arguments: const <String, String>{
+      'mode': 'basic'
+    });
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
     if (rawTimeStamp != null)
@@ -616,7 +618,9 @@ abstract class SchedulerBinding extends BindingBase {
     _hasScheduledFrame = false;
     try {
       // TRANSIENT FRAME CALLBACKS
-      Timeline.startSync('Animate');
+      Timeline.startSync('Animate', arguments: const <String, String>{
+        'mode': 'basic'
+      });
       _schedulerPhase = SchedulerPhase.transientCallbacks;
       final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
       _transientCallbacks = <int, _FrameCallbackEntry>{};
