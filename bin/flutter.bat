@@ -108,7 +108,7 @@ GOTO :after_subroutine
       :retry_pub_upgrade
       CALL "%pub%" upgrade --verbosity=error --no-packages-dir
       IF "%ERRORLEVEL%" NEQ "0" (
-        ECHO Error: Unable to 'pub upgrade' flutter tool. Retrying...
+        ECHO Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds...
         timeout /t 5 /nobreak
         GOTO :retry_pub_upgrade
       )
