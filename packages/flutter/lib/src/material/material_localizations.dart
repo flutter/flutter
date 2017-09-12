@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 
 import 'i18n/localizations.dart';
 
@@ -120,7 +120,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   String get _localeName {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
-    return Intl.canonicalizedLocale(localeName);
+    return intl.Intl.canonicalizedLocale(localeName);
   }
 
   // TODO(hmuller): the rules for mapping from an integer value to
@@ -143,9 +143,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   String _formatInteger(int n) {
     final String localeName = _localeName;
-    if (!NumberFormat.localeExists(localeName))
+    if (!intl.NumberFormat.localeExists(localeName))
       return n.toString();
-    return new NumberFormat.decimalPattern(localeName).format(n);
+    return new intl.NumberFormat.decimalPattern(localeName).format(n);
 
   }
 
