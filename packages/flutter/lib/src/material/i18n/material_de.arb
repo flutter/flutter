@@ -12,9 +12,9 @@
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow von etwa $rowCount",
   "rowsPerPageTitle": "Zeilen pro Seite:",
 
-  "selectedRowCountTitleZero": "Keine Objekte ausgewält",
-  "selectedRowCountTitleOne": "1 Objekt ausgewält",
-  "selectedRowCountTitleOther": "$selectedRowCount Objekte ausgewält",
+  "selectedRowCountTitleZero": "Keine Objekte ausgewählt",
+  "selectedRowCountTitleOne": "1 Objekt ausgewählt",
+  "selectedRowCountTitleOther": "$selectedRowCount Objekte ausgewählt",
   "cancelButtonLabel": "ABBRECHEN",
   "closeButtonLabel": "SCHLIESSEN",
   "continueButtonLabel": "FORTSETZEN",
