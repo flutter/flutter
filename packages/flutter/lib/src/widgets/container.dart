@@ -99,7 +99,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     } else {
       label = 'decoration';
     }
-    description.add(new EnumProperty<DecorationPosition>('position', position, hidden: position != null));
+    description.add(new EnumProperty<DecorationPosition>('position', position, level: position != null ? DiagnosticLevel.hidden : DiagnosticLevel.info));
     description.add(new DiagnosticsProperty<Decoration>(
       label,
       decoration,

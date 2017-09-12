@@ -234,7 +234,7 @@ class InkResponse extends StatefulWidget {
     if (gestures.isEmpty)
       gestures.add('<none>');
     description.add(new IterableProperty<String>('gestures', gestures));
-    description.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, hidden: true));
+    description.add(new DiagnosticsProperty<bool>('containedInkWell', containedInkWell, level: DiagnosticLevel.fine));
     description.add(new DiagnosticsProperty<BoxShape>(
       'highlightShape',
       highlightShape,

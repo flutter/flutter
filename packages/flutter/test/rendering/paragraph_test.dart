@@ -229,7 +229,7 @@ void main() {
     );
     expect(paragraph, hasAGoodToStringDeep);
     expect(
-      paragraph.toStringDeep(),
+      paragraph.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderParagraph#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
         ' │ parentData: MISSING\n'

@@ -541,7 +541,7 @@ void main() {
     final RenderObjectElement element = key0.currentContext;
     expect(element, hasAGoodToStringDeep);
     expect(
-      element.toStringDeep(),
+      element.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'Table-[GlobalKey#00000](renderObject: RenderTable#00000)\n'
         '├Text("A")\n'
