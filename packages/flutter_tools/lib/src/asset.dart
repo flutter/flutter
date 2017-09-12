@@ -137,7 +137,7 @@ class AssetBundle {
               packageMap,
               packageManifestDescriptor['flutter'],
               packageBasePath,
-              packageKey: packageName,
+              packageName: packageName,
             ));
           }
         }
@@ -434,7 +434,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
   Map<String, dynamic> manifestDescriptor,
   String assetBase, {
   List<String> excludeDirs: const <String>[],
-  String packageKey
+  String packageName
 }) {
   final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
@@ -444,11 +444,13 @@ Map<_Asset, List<_Asset>> _parseAssets(
   if (manifestDescriptor.containsKey('assets')) {
     final _AssetDirectoryCache cache = new _AssetDirectoryCache(excludeDirs);
     for (String assetName in manifestDescriptor['assets']) {
-      final _Asset asset = packageKey != null
-          ? _resolvePackageAsset(assetBase, packageKey, assetName)
-          : _resolveAsset(packageMap, assetBase, assetName);
+      final _Asset asset = _resolveAsset(
+        packageMap,
+        assetBase,
+        assetName,
+        packageName,
+      );
       final List<_Asset> variants = <_Asset>[];
-
       for (String path in cache.variantsFor(asset.assetFile.path)) {
         final String key = fs.path.relative(path, from: asset.base);
         String assetEntry;
@@ -473,7 +475,12 @@ Map<_Asset, List<_Asset>> _parseAssets(
         if (asset == null)
           continue;
 
-        final _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
+        final _Asset baseAsset = _resolveAsset(
+          packageMap,
+          assetBase,
+          asset,
+          packageName
+        );
         if (!baseAsset.assetFileExists) {
           printError('Error: unable to locate asset entry in pubspec.yaml: "$asset".');
           return null;
@@ -487,42 +494,46 @@ Map<_Asset, List<_Asset>> _parseAssets(
   return result;
 }
 
-_Asset _resolvePackageAsset(
-    String assetBase,
-    String packageName,
-    String asset,
-) {
-  return new _Asset(
-    base: assetBase,
-    assetEntry: 'packages/$packageName/$asset',
-    relativePath: asset,
-  );
-}
-
 _Asset _resolveAsset(
   PackageMap packageMap,
   String assetBase,
   String asset,
+  String packageName,
 ) {
   if (asset.startsWith('packages/') && !fs.isFileSync(fs.path.join(assetBase, asset))) {
-    // Convert packages/flutter_gallery_assets/clouds-0.png to clouds-0.png.
-    String packageKey = asset.substring(9);
-    String relativeAsset = asset;
-
-    final int index = packageKey.indexOf('/');
-    if (index != -1) {
-      relativeAsset = packageKey.substring(index + 1);
-      packageKey = packageKey.substring(0, index);
-    }
-
-    final Uri uri = packageMap.map[packageKey];
-    if (uri != null && uri.scheme == 'file') {
-      final File file = fs.file(uri);
-      return new _Asset(base: file.path, assetEntry: asset, relativePath: relativeAsset);
-    }
+    // The asset is referenced in the pubspec.yaml as
+    // 'packages/PACKAGE_NAME/PATH/TO/ASSET
+    final _Asset packageAsset = _resolvePackageAsset(asset, packageMap);
+    if (packageAsset != null)
+      return packageAsset;
   }
 
-  return new _Asset(base: assetBase, relativePath: asset);
+  final String assetEntry = packageName != null
+    ? 'packages/$packageName/$asset' // Asset from, and declared in $packageName
+    : null; // Asset from the current application
+  return new _Asset(base: assetBase, assetEntry: assetEntry, relativePath: asset);
+}
+
+_Asset _resolvePackageAsset(String asset, PackageMap packageMap) {
+  assert(asset.startsWith('packages/'));
+  String packageKey = asset.substring(9);
+  String relativeAsset = asset;
+
+  final int index = packageKey.indexOf('/');
+  if (index != -1) {
+    relativeAsset = packageKey.substring(index + 1);
+    packageKey = packageKey.substring(0, index);
+  }
+
+  final Uri uri = packageMap.map[packageKey];
+  if (uri != null && uri.scheme == 'file') {
+    final File file = fs.file(uri);
+    final String base = file.path.substring(0, file.path.length - 1);
+    return new _Asset(base: base, assetEntry: asset, relativePath: relativeAsset);
+  }
+  printStatus('Error detected in pubspec.yaml:', emphasis: true);
+  printError('Could not resolve $packageKey for asset $asset.\n');
+  return null;
 }
 
 dynamic _loadFlutterManifest(String manifestPath) {
