@@ -201,11 +201,13 @@ To start working on a patch:
  * Make sure you are in the `engine/src/flutter` directory.
  * `git fetch upstream`
  * `git checkout upstream/master -b name_of_your_branch`
- * Hack away. Please peruse our
-   [style guides](https://flutter.io/style-guide/) and
-   [design principles](https://flutter.io/design-principles/) before
-   working on anything non-trivial. These guidelines are intended to
-   keep the code consistent and avoid common pitfalls.
+ * Hack away.
+   * Please peruse our [style guides](https://flutter.io/style-guide/) and
+     [design principles](https://flutter.io/design-principles/) before
+     working on anything non-trivial. These guidelines are intended to
+     keep the code consistent and avoid common pitfalls.
+   * C, C++, and Objective-C code should be formatted with `clang-format` before
+     submission (use `buildtools/<OS>/clang/bin/clang-format --style=file -i`).
  * `git commit -a -m "<your brief but informative commit message>"`
  * `git push origin name_of_your_branch`
 
