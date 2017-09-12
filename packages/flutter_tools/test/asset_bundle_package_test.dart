@@ -93,8 +93,8 @@ $assetsSection
     }
   }
 
-  group('AssetBundle assets from package', () {
-    testUsingContext('One package with no assets', () async {
+  group('AssetBundle assets from packages', () {
+    testUsingContext('No assets are bundled when the package has no assets', () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -104,11 +104,35 @@ $assetsSection
       final AssetBundle bundle = new AssetBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+      final String expectedAssetManifest = '{}';
+      expect(
+        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        expectedAssetManifest,
+      );
+    }, overrides: contextOverrides);
 
-    testUsingContext('One package with one asset', () async {
+    testUsingContext('No assets are bundled when the package has an asset that is not listed', () async {
+      establishFlutterRoot();
+
+      writePubspecFile('pubspec.yaml', 'test');
+      writePackagesFile('test_package:p/p/lib/');
+      writePubspecFile('p/p/pubspec.yaml', 'test_package');
+
+      final List<String> assets = <String>['a/foo'];
+      writeAssets('p/p/', assets);
+
+      final AssetBundle bundle = new AssetBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      expect(bundle.entries.length, 2); // LICENSE, AssetManifest
+      final String expectedAssetManifest = '{}';
+      expect(
+        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        expectedAssetManifest,
+      );
+
+    }, overrides: contextOverrides);
+
+    testUsingContext('One asset is bundled when the package has and lists one asset its pubspec', () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -130,11 +154,9 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
     
-    testUsingContext('One package with one asset not specified', () async {
+    testUsingContext("One asset is bundled when the package has one asset, listed in the app's pubspec", () async {
       establishFlutterRoot();
 
       final List<String> assetEntries = <String>['packages/test_package/a/foo'];
@@ -156,11 +178,9 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
 
-    testUsingContext('One package with asset variants', () async {
+    testUsingContext("One asset and its variant are bundled when the package has an asset and a variant, and lists the asset in its pubspec", () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -182,11 +202,9 @@ $assetsSection
         <String>['test_package'],
         expectedManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
 
-    testUsingContext('One package with asset variants not specified', () async {
+    testUsingContext("One asset and its variant are bundled when the package has an asset and a variant, and the app lists the asset in its pubspec", () async {
       establishFlutterRoot();
 
       writePubspecFile(
@@ -211,11 +229,9 @@ $assetsSection
         <String>['test_package'],
         expectedManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
 
-    testUsingContext('One package with two assets', () async {
+    testUsingContext("Two assets are bundled when the package has and lists two assets in its pubspec", () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -238,11 +254,9 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
 
-    testUsingContext('One package with two assets not specified', () async {
+    testUsingContext("Two assets are bundled when the package has two assets, listed in the app's pubspec", () async {
       establishFlutterRoot();
 
       final List<String> assetEntries = <String>[
@@ -272,11 +286,9 @@ $assetsSection
         <String>['test_package'],
         expectedAssetManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
 
-    testUsingContext('Two packages with assets', () async {
+    testUsingContext("Two assets are bundled when two packages each have and list an asset their pubspec", () async {
       establishFlutterRoot();
 
       writePubspecFile(
@@ -310,11 +322,9 @@ $assetsSection
         <String>['test_package', 'test_package2'],
         expectedAssetManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
     
-    testUsingContext('Two packages with assets not specified', () async {
+    testUsingContext("Two assets are bundled when two packages each have an asset, listed in the app's pubspec", () async {
       establishFlutterRoot();
 
       final List<String> assetEntries = <String>[
@@ -351,11 +361,9 @@ $assetsSection
         <String>['test_package', 'test_package2'],
         expectedAssetManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
 
-    testUsingContext('Transitive asset dependency', () async {
+    testUsingContext("One asset is bundled when the app depends on a package, listing in its pubspec an asset from another package", () async {
       establishFlutterRoot();
       writePubspecFile(
         'pubspec.yaml',
@@ -365,7 +373,7 @@ $assetsSection
       writePubspecFile(
         'p/p/pubspec.yaml',
         'test_package',
-        assets: <String>['packages/test_package2/a/foo']
+        assets: <String>['packages/test_package2/a/foo'],
       );
       writePubspecFile(
         'p2/p/pubspec.yaml',
@@ -384,8 +392,10 @@ $assetsSection
         <String>['test_package2'],
         expectedAssetManifest,
       );
-    }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
-    });
+    }, overrides: contextOverrides);
   });
 }
+
+Map<Type, Generator> get contextOverrides => <Type, Generator>{
+  FileSystem: () => new MemoryFileSystem()
+};

@@ -479,7 +479,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
           packageMap,
           assetBase,
           asset,
-          packageName
+          packageName,
         );
         if (!baseAsset.assetFileExists) {
           printError('Error: unable to locate asset entry in pubspec.yaml: "$asset".');
@@ -502,37 +502,42 @@ _Asset _resolveAsset(
 ) {
   if (asset.startsWith('packages/') && !fs.isFileSync(fs.path.join(assetBase, asset))) {
     // The asset is referenced in the pubspec.yaml as
-    // 'packages/PACKAGE_NAME/PATH/TO/ASSET
+    // 'packages/PACKAGE_NAME/PATH/TO/ASSET .
     final _Asset packageAsset = _resolvePackageAsset(asset, packageMap);
     if (packageAsset != null)
       return packageAsset;
   }
 
   final String assetEntry = packageName != null
-    ? 'packages/$packageName/$asset' // Asset from, and declared in $packageName
-    : null; // Asset from the current application
+    ? 'packages/$packageName/$asset' // Asset from, and declared in $packageName.
+    : null; // Asset from the current application.
   return new _Asset(base: assetBase, assetEntry: assetEntry, relativePath: asset);
 }
 
 _Asset _resolvePackageAsset(String asset, PackageMap packageMap) {
   assert(asset.startsWith('packages/'));
-  String packageKey = asset.substring(9);
+  String packageKey = asset.substring('packages/'.length);
   String relativeAsset = asset;
 
   final int index = packageKey.indexOf('/');
   if (index != -1) {
     relativeAsset = packageKey.substring(index + 1);
     packageKey = packageKey.substring(0, index);
-  }
 
-  final Uri uri = packageMap.map[packageKey];
-  if (uri != null && uri.scheme == 'file') {
-    final File file = fs.file(uri);
-    final String base = file.path.substring(0, file.path.length - 1);
-    return new _Asset(base: base, assetEntry: asset, relativePath: relativeAsset);
+
+    final Uri uri = packageMap.map[packageKey];
+    if (uri != null && uri.scheme == 'file') {
+      final File file = fs.file(uri);
+      final String base = file.path.substring(0, file.path.length - 1);
+      return new _Asset(
+        base: base,
+        assetEntry: asset,
+        relativePath: relativeAsset,
+      );
+    }
   }
   printStatus('Error detected in pubspec.yaml:', emphasis: true);
-  printError('Could not resolve $packageKey for asset $asset.\n');
+  printError('Could not resolve package $packageKey for asset $asset.\n');
   return null;
 }
 
