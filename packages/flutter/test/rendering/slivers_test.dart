@@ -16,7 +16,7 @@ void main() {
     );
     expect(root, hasAGoodToStringDeep);
     expect(
-      root.toStringDeep(),
+      root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
         '   parentData: MISSING\n'
@@ -32,7 +32,7 @@ void main() {
     root.offset = new ViewportOffset.fixed(900.0);
     expect(root, hasAGoodToStringDeep);
     expect(
-      root.toStringDeep(),
+      root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
         '   parentData: <none>\n'
@@ -69,7 +69,7 @@ void main() {
 
     expect(root, hasAGoodToStringDeep);
     expect(
-      root.toStringDeep(),
+      root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-PAINT\n'
         ' │ parentData: <none>\n'

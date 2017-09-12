@@ -23,6 +23,7 @@ class DriverTestApp extends StatefulWidget {
 
 class DriverTestAppState extends State<DriverTestApp> {
   bool present = true;
+  Letter _selectedValue = Letter.a;
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +53,41 @@ class DriverTestAppState extends State<DriverTestApp> {
                 ),
               ],
             ),
+            new Row(
+              children: <Widget>[
+                const Expanded(
+                  child: const Text('hit testability'),
+                ),
+                new DropdownButton<Letter>(
+                  key: const ValueKey<String>('dropdown'),
+                  value: _selectedValue,
+                  onChanged: (Letter newValue) {
+                    setState(() {
+                      _selectedValue = newValue;
+                    });
+                  },
+                  items: <DropdownMenuItem<Letter>>[
+                    const DropdownMenuItem<Letter>(
+                      value: Letter.a,
+                      child: const Text('Aaa', key: const ValueKey<String>('a')),
+                    ),
+                    const DropdownMenuItem<Letter>(
+                      value: Letter.b,
+                      child: const Text('Bbb', key: const ValueKey<String>('b')),
+                    ),
+                    const DropdownMenuItem<Letter>(
+                      value: Letter.c,
+                      child: const Text('Ccc', key: const ValueKey<String>('c')),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+enum Letter { a, b, c }

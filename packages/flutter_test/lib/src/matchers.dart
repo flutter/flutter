@@ -507,7 +507,7 @@ class _HasGoodToStringDeep extends Matcher {
     final String prefixOtherLines = 'PREFIX_OTHER_LINES_';
     final List<String> prefixIssues = <String>[];
     String descriptionWithPrefixes =
-        object.toStringDeep(prefixLineOne, prefixOtherLines);
+        object.toStringDeep(prefixLineOne: prefixLineOne, prefixOtherLines: prefixOtherLines);
     if (descriptionWithPrefixes.endsWith('\n')) {
       // Trim off trailing \n as the remaining calculations assume
       // the description does not end with a trailing \n.
@@ -532,7 +532,7 @@ class _HasGoodToStringDeep extends Matcher {
 
     if (prefixIssues.isNotEmpty) {
       errorDescription.writeln(
-          'Bad toStringDeep("$prefixLineOne", "$prefixOtherLines"):');
+          'Bad toStringDeep(prefixLineOne: "$prefixLineOne", prefixOtherLines: "$prefixOtherLines"):');
       errorDescription.writeln(descriptionWithPrefixes);
       errorDescription.writeAll(prefixIssues, '\n');
     }

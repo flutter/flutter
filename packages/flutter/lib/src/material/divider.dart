@@ -66,7 +66,7 @@ class Divider extends StatelessWidget {
       child: new Center(
         child: new Container(
           height: 0.0,
-          margin: new EdgeInsets.only(left: indent),
+          margin: new EdgeInsetsDirectional.only(start: indent),
           decoration: new BoxDecoration(
             border: new Border(
               bottom: new BorderSide(

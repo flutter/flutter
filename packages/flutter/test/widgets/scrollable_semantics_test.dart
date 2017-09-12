@@ -226,6 +226,33 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Widget> children = <Widget>[];
+    for (int i = 0; i < 80; i++)
+      children.add(new Container(
+        child: new Text('Item $i'),
+        height: 40.0,
+      ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(children: children),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    await gesture.moveBy(const Offset(0.0, -40.0));
+    await tester.pump();
+
+    expect(semantics, includesNodeWith(label: 'Item 1'));
+    expect(semantics, includesNodeWith(label: 'Item 2'));
+    expect(semantics, includesNodeWith(label: 'Item 3'));
+
+    semantics.dispose();
+  });
 }
 
 Future<Null> flingUp(WidgetTester tester, { int repetitions: 1 }) async {

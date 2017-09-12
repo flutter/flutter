@@ -68,11 +68,9 @@ void main() {
 
     expect(box, hasAGoodToStringDeep);
     expect(
-      box.toStringDeep(),
+      box.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderDecoratedBox#00000\n'
-        ' │ creator: DecoratedBox ← Container ←\n'
-        ' │   AnimatedContainer-[GlobalKey#00000] ← [root]\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -83,8 +81,6 @@ void main() {
         ' │   android)\n'
         ' │\n'
         ' └─child: RenderLimitedBox#00000\n'
-        '   │ creator: LimitedBox ← DecoratedBox ← Container ←\n'
-        '   │   AnimatedContainer-[GlobalKey#00000] ← [root]\n'
         '   │ parentData: <none> (can use size)\n'
         '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '   │ size: Size(800.0, 600.0)\n'
@@ -92,8 +88,6 @@ void main() {
         '   │ maxHeight: 0.0\n'
         '   │\n'
         '   └─child: RenderConstrainedBox#00000\n'
-        '       creator: ConstrainedBox ← LimitedBox ← DecoratedBox ← Container ←\n'
-        '         AnimatedContainer-[GlobalKey#00000] ← [root]\n'
         '       parentData: <none> (can use size)\n'
         '       constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '       size: Size(800.0, 600.0)\n'

@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
@@ -13,5 +14,53 @@ void main() {
       child: new Container(),
     );
     expect(widget.toString, isNot(throwsException));
+  });
+
+  testWidgets('should handle having no title', (WidgetTester tester) async {
+    final Title widget = new Title(
+      child: new Container(),
+      color: const Color(0xFF00FF00),
+    );
+    expect(widget.toString, isNot(throwsException));
+    expect(widget.title, equals(''));
+    expect(widget.color, equals(const Color(0xFF00FF00)));
+  });
+
+  testWidgets('should not allow null title or color', (WidgetTester tester) async {
+    expect(() => new Title(
+      title: null,
+      color: const Color(0xFF00FF00),
+      child: new Container(),
+    ), throwsAssertionError);
+    expect(() => new Title(
+      color: null,
+      child: new Container(),
+    ), throwsAssertionError);
+  });
+
+  testWidgets('should not allow non-opaque color', (WidgetTester tester) async {
+    expect(() => new Title(
+      color: const Color(0),
+      child: new Container(),
+    ), throwsAssertionError);
+  });
+
+  testWidgets('should not pass "null" to setApplicationSwitcherDescription',
+          (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
+
+    await tester.pumpWidget(new Title(
+      child: new Container(),
+      color: const Color(0xFF00FF00),
+    ));
+
+    expect(log, equals(<MethodCall>[new MethodCall(
+        'SystemChrome.setApplicationSwitcherDescription',
+        <String, dynamic>{'label': '', 'primaryColor': 4278255360},
+    )]));
   });
 }

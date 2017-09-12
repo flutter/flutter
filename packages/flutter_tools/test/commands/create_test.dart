@@ -116,25 +116,6 @@ void main() {
       );
     }, timeout: const Timeout.factor(2.0));
 
-    testUsingContext('plugin project (legacy)', () async {
-      return _createProject(
-        projectDir,
-        <String>['--no-pub', '--plugin'],
-        <String>[
-          'android/src/main/java/com/yourcompany/flutterproject/FlutterProjectPlugin.java',
-          'ios/Classes/FlutterProjectPlugin.h',
-          'ios/Classes/FlutterProjectPlugin.m',
-          'lib/flutter_project.dart',
-          'example/android/app/src/main/java/com/yourcompany/flutterprojectexample/MainActivity.java',
-          'example/ios/Runner/AppDelegate.h',
-          'example/ios/Runner/AppDelegate.m',
-          'example/ios/Runner/main.m',
-          'example/lib/main.dart',
-        ],
-        plugin: true,
-      );
-    });
-
     testUsingContext('kotlin/swift plugin project', () async {
       return _createProject(
         projectDir,

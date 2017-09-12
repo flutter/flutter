@@ -1464,9 +1464,9 @@ class SizedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    final bool hidden = width == double.INFINITY && height == double.INFINITY;
-    description.add(new DoubleProperty('width', width, defaultValue: null, hidden: hidden));
-    description.add(new DoubleProperty('height', height, defaultValue: null, hidden: hidden));
+    final DiagnosticLevel level = (width == double.INFINITY && height == double.INFINITY) ? DiagnosticLevel.hidden : DiagnosticLevel.info;
+    description.add(new DoubleProperty('width', width, defaultValue: null, level: level));
+    description.add(new DoubleProperty('height', height, defaultValue: null, level: level));
   }
 }
 

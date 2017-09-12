@@ -67,7 +67,7 @@ void main() {
 
     expect(image, hasAGoodToStringDeep);
     expect(
-      image.toStringDeep(),
+      image.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderImage#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
         '   parentData: <none> (can use size)\n'

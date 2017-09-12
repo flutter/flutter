@@ -271,7 +271,7 @@ class TextSpan extends DiagnosticableTree {
           'TextSpan contains a null child.\n'
           'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
           'The full text in question was:\n'
-          '${toStringDeep('  ')}'
+          '${toStringDeep(prefixLineOne: '  ')}'
         );
       }
       return true;

@@ -39,7 +39,7 @@ void main() {
       maxHeight: 4.0
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
-        .where((DiagnosticsNode n) => !n.hidden)
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
         .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
       'alignment: FractionalOffset.center',
