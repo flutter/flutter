@@ -6,3 +6,4 @@ before_script:
 script:
   - ./travis/build.sh
   - ./travis/test.sh
+  - ./travis/format.sh
