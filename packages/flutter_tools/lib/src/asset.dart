@@ -530,7 +530,10 @@ _Asset _resolvePackageAsset(String asset, PackageMap packageMap) {
       final File file = fs.file(uri);
       final String base = file.path.substring(0, file.path.length - 1);
       return new _Asset(
-          base: base, assetEntry: asset, relativePath: relativeAsset);
+        base: base,
+        assetEntry: asset,
+        relativePath: relativeAsset,
+      );
     }
   }
   printStatus('Error detected in pubspec.yaml:', emphasis: true);

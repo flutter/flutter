@@ -94,7 +94,7 @@ $assetsSection
   }
 
   group('AssetBundle assets from packages', () {
-    testUsingContext('No assets are bundled in case of a package without assets', () async {
+    testUsingContext('No assets are bundled when the package has no assets', () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -104,9 +104,35 @@ $assetsSection
       final AssetBundle bundle = new AssetBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(bundle.entries.length, 2); // LICENSE, AssetManifest
+      final String expectedAssetManifest = '{}';
+      expect(
+        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        expectedAssetManifest,
+      );
     }, overrides: contextOverrides);
 
-    testUsingContext("One asset is bundled in case of a package with one asset which is listed in the package's pubspec", () async {
+    testUsingContext('No assets are bundled when the package has an asset that is not listed', () async {
+      establishFlutterRoot();
+
+      writePubspecFile('pubspec.yaml', 'test');
+      writePackagesFile('test_package:p/p/lib/');
+      writePubspecFile('p/p/pubspec.yaml', 'test_package');
+
+      final List<String> assets = <String>['a/foo'];
+      writeAssets('p/p/', assets);
+
+      final AssetBundle bundle = new AssetBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      expect(bundle.entries.length, 2); // LICENSE, AssetManifest
+      final String expectedAssetManifest = '{}';
+      expect(
+        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        expectedAssetManifest,
+      );
+
+    }, overrides: contextOverrides);
+
+    testUsingContext('One asset is bundled when the package has and lists one asset its pubspec', () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -130,7 +156,7 @@ $assetsSection
       );
     }, overrides: contextOverrides);
     
-    testUsingContext("One asset is bundled in case of a package with one asset which is listed in the app's pubspec", () async {
+    testUsingContext("One asset is bundled when the package has one asset, listed in the app's pubspec", () async {
       establishFlutterRoot();
 
       final List<String> assetEntries = <String>['packages/test_package/a/foo'];
@@ -154,7 +180,7 @@ $assetsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext("One asset and its variant are bundled in case of a package with an asset and a variant, with the asset listed in the package's pubspec", () async {
+    testUsingContext("One asset and its variant are bundled when the package has an asset and a variant, and lists the asset in its pubspec", () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -178,7 +204,7 @@ $assetsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext("One asset and its variant are bundled in case of a package with an asset and a variant, with the asset listed in the app's pubspec", () async {
+    testUsingContext("One asset and its variant are bundled when the package has an asset and a variant, and the app lists the asset in its pubspec", () async {
       establishFlutterRoot();
 
       writePubspecFile(
@@ -205,7 +231,7 @@ $assetsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext("Two asset are bundled in case of a package with two assets which are listed in the package's pubspec", () async {
+    testUsingContext("Two assets are bundled when the package has and lists two assets in its pubspec", () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -230,7 +256,7 @@ $assetsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext("Two asset are bundled in case of a package with two assets which are listed in the app's pubspec", () async {
+    testUsingContext("Two assets are bundled when the package has two assets, listed in the app's pubspec", () async {
       establishFlutterRoot();
 
       final List<String> assetEntries = <String>[
@@ -262,7 +288,7 @@ $assetsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext("Two asset are bundled in case of two packages, each containing an asset listed in its pubspec", () async {
+    testUsingContext("Two assets are bundled when two packages each have and list an asset their pubspec", () async {
       establishFlutterRoot();
 
       writePubspecFile(
@@ -298,7 +324,7 @@ $assetsSection
       );
     }, overrides: contextOverrides);
     
-    testUsingContext("Two asset are bundled in case of two packages, each containing an asset listed in the app's pubspec", () async {
+    testUsingContext("Two assets are bundled when two packages each have an asset, listed in the app's pubspec", () async {
       establishFlutterRoot();
 
       final List<String> assetEntries = <String>[
@@ -337,7 +363,7 @@ $assetsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext("One asset is bundled in case of the app depending on a package listing in its pubspec an asset from another package", () async {
+    testUsingContext("One asset is bundled when the app depends on a package, listing in its pubspec an asset from another package", () async {
       establishFlutterRoot();
       writePubspecFile(
         'pubspec.yaml',
